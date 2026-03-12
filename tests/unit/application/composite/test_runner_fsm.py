@@ -756,7 +756,9 @@ class TestFSMEnrichmentCompletedTransition:
 
         assert set(next_state.completed_enrichers) == {"crossref", "openalex"}
         assert next_state.enrichment_results["crossref"].is_success
-        assert next_state.enrichment_results["openalex"].status == EnrichmentStatus.SKIPPED
+        assert (
+            next_state.enrichment_results["openalex"].status == EnrichmentStatus.SKIPPED
+        )
         assert "pubmed" not in next_state.completed_enrichers
 
     @pytest.mark.asyncio

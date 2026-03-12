@@ -17,7 +17,7 @@
 | Naming | MEDIUM/HIGH | NAME-001...NAME-009 |
 | Types | HIGH | TYPE-001...TYPE-004 |
 | Testing | HIGH | TEST-001...TEST-005 |
-| Exceptions | INFO | EXC-001...EXC-015 |
+| Exceptions | INFO | EXC-001...EXC-016 |
 
 ---
 
@@ -891,6 +891,35 @@ logger = structlog.get_logger()  # ✅ OK — allowed in tests
 class RuntimeConfig:
     timeout: float = 30.0  # ✅ OK — configuration value object
     max_retries: int = 3
+```
+
+---
+
+### EXC-016: Layer-Internal Protocol Suffix
+
+Классы с суффиксом `*Protocol` вне `domain/ports/` **НЕ являются нарушением** ARCH-003,
+если они определяют **layer-internal structural typing contracts** (не cross-layer ports).
+
+```python
+# application/composite/protocols.py
+class JoinKeyResolverProtocol(Protocol):
+    """Layer-internal contract for join key resolution."""
+    def resolve(self, ...) -> ...: ...  # ✅ OK — local structural typing
+
+# infrastructure/adapters/semanticscholar/health_metadata_mixin.py
+class SemanticScholarHTTPClientProtocol(Protocol):
+    """Mixin-internal contract for HTTP client shape."""
+    async def get(self, url: str) -> Response: ...  # ✅ OK — private mixin typing
+```
+
+**Правило разграничения:**
+- `*Port` в `domain/ports/` — cross-layer контракт, импортируется через фасад
+- `*Protocol` вне `domain/ports/` — layer-internal контракт, не экспортируется за пределы модуля/слоя
+
+**Детекция (информационная, НЕ блокирующая):**
+```bash
+# Перечислить Protocol-классы вне domain/ports/ (для ревью, не для блокировки)
+grep -rn "class \w\+Protocol\b" src/bioetl/ --include="*.py" | grep -v "domain/ports/"
 ```
 
 ---

@@ -774,7 +774,9 @@ class TestResilienceImplementationContract:
 
     def test_token_bucket_implements_rate_limiter_port(self) -> None:
         """TokenBucketRateLimiter MUST satisfy RateLimiterPort contract."""
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
 
@@ -785,7 +787,9 @@ class TestResilienceImplementationContract:
 
     def test_circuit_breaker_implements_circuit_breaker_port(self) -> None:
         """CircuitBreakerGuard MUST satisfy CircuitBreakerPort contract."""
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(provider="test")
 
@@ -1226,7 +1230,9 @@ class TestCircuitBreakerPortErrorConditions:
     async def test_circuit_breaker_raises_when_open(self) -> None:
         """CircuitBreakerPort.call() MUST raise CircuitBreakerOpenError when open."""
         from bioetl.domain.exceptions import CircuitBreakerOpenError
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(
             provider="test", failure_threshold=2, recovery_timeout=300
@@ -1251,7 +1257,9 @@ class TestCircuitBreakerPortErrorConditions:
     @pytest.mark.asyncio
     async def test_circuit_breaker_propagates_exceptions(self) -> None:
         """CircuitBreakerPort.call() MUST propagate exceptions from wrapped func."""
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(provider="test", failure_threshold=5)
 
@@ -1267,7 +1275,9 @@ class TestCircuitBreakerPortErrorConditions:
     def test_circuit_breaker_reset_clears_failure_count(self) -> None:
         """CircuitBreakerPort.reset() MUST clear failure count."""
         from bioetl.domain.types import CircuitBreakerState
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(provider="test", failure_threshold=5)
         breaker._failure_count = 3  # Simulate failures
@@ -1294,7 +1304,9 @@ class TestRateLimiterPortErrorConditions:
     @pytest.mark.asyncio
     async def test_rate_limiter_raises_on_overcapacity_request(self) -> None:
         """RateLimiterPort.acquire() MUST raise ValueError when tokens > capacity."""
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
 
@@ -1303,7 +1315,9 @@ class TestRateLimiterPortErrorConditions:
 
     def test_rate_limiter_try_acquire_returns_false_when_insufficient(self) -> None:
         """RateLimiterPort.try_acquire() MUST return False when insufficient tokens."""
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=1.0, capacity=5)
         # Drain tokens
@@ -1317,7 +1331,9 @@ class TestRateLimiterPortErrorConditions:
 
     def test_rate_limiter_available_tokens_non_negative(self) -> None:
         """RateLimiterPort.available_tokens() MUST return non-negative value."""
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
 
@@ -1523,7 +1539,9 @@ class TestCircuitBreakerPortConcurrentAccess:
         """Concurrent failing calls MUST track failure count correctly."""
         import asyncio
 
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(
             provider="test", failure_threshold=10, recovery_timeout=300
@@ -1553,7 +1571,9 @@ class TestCircuitBreakerPortConcurrentAccess:
         """Concurrent successful calls MUST reset failure count to 0."""
         import asyncio
 
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(
             provider="test", failure_threshold=10, recovery_timeout=300
@@ -1589,7 +1609,9 @@ class TestRateLimiterPortConcurrentAccess:
         """Concurrent acquires MUST respect capacity limits."""
         import asyncio
 
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=100.0, capacity=10)
 
@@ -1613,7 +1635,9 @@ class TestRateLimiterPortConcurrentAccess:
 
     def test_token_count_never_negative(self) -> None:
         """Token count MUST never go negative after concurrent try_acquire."""
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=1.0, capacity=5)
 

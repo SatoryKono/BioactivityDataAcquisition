@@ -89,7 +89,9 @@ class TestAcquireWaitTimeout:
             await lock.release(key="key", owner_id="owner_1")
 
         task = asyncio.create_task(release_after())
-        token = await lock.acquire(key="key", owner_id="owner_2", wait=True, wait_timeout=2)
+        token = await lock.acquire(
+            key="key", owner_id="owner_2", wait=True, wait_timeout=2
+        )
         await task
 
         assert token is not None

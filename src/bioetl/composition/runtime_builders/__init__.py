@@ -1,4 +1,5 @@
 """Leaf runtime builders used by composition factories and bootstrap wrappers."""
+
 from __future__ import annotations
 
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner

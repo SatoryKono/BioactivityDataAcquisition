@@ -293,10 +293,7 @@ class TestRegisterAllTransformers:
         register_all_transformers(specs=specs, load_transformer_class_fn=loader)
 
         assert _TRANSFORMER_REGISTRY[("provider_a", "entity_a")] is MockTransformer
-        assert (
-            _TRANSFORMER_REGISTRY[("provider_b", "entity_b")]
-            is another_transformer
-        )
+        assert _TRANSFORMER_REGISTRY[("provider_b", "entity_b")] is another_transformer
         assert loader.call_count == 2
 
     def test_register_all_populates_registry(self) -> None:

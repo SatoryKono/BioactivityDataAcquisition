@@ -13,6 +13,7 @@ This package contains all port definitions organized by domain:
 - audit: AuditPort for write operation traceability
 - resilience: RateLimiterPort, CircuitBreakerPort for fault tolerance
 """
+
 from __future__ import annotations
 
 from bioetl.domain.ports.adr import (

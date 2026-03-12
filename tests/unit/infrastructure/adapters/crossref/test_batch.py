@@ -337,7 +337,9 @@ async def test_search_stops_on_empty_page(search_paginator, mock_http):
 
 
 @pytest.mark.asyncio
-async def test_search_invalid_message_body_raises_api_error(search_paginator, mock_http):
+async def test_search_invalid_message_body_raises_api_error(
+    search_paginator, mock_http
+):
     """Non-mapping message payloads should fail with a typed CrossRefApiError."""
     mock_response = MagicMock()
     mock_response.status_code = 200

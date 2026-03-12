@@ -1,4 +1,5 @@
 """Generated schema artifacts for canonical schema governance."""
+
 from __future__ import annotations
 
 from bioetl.domain.schemas.generated.registry import (

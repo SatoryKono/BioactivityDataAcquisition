@@ -135,9 +135,7 @@ class TestLockReleaseCommand:
         # Should print a warning about lock not released
         assert "not released" in result.output or "not held" in result.output
 
-    def test_release_invalid_uuid_prints_error(
-        self, cli_runner: CliRunner
-    ) -> None:
+    def test_release_invalid_uuid_prints_error(self, cli_runner: CliRunner) -> None:
         """Test that an invalid UUID prints an error message."""
         result = cli_runner.invoke(
             cli,
@@ -245,9 +243,7 @@ class TestLockCheckCommand:
         assert result.exit_code == 0
         assert "Invalid run-id" in result.output or "UUID" in result.output
 
-    def test_check_missing_run_id_exits_nonzero(
-        self, cli_runner: CliRunner
-    ) -> None:
+    def test_check_missing_run_id_exits_nonzero(self, cli_runner: CliRunner) -> None:
         """Test that missing --run-id option causes non-zero exit."""
         result = cli_runner.invoke(
             cli,

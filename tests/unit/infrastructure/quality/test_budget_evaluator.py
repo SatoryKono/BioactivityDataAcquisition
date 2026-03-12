@@ -57,7 +57,9 @@ class TestCurrentQuarterTarget:
 
     def test_returns_none_for_empty_targets(self) -> None:
         """Should return None for empty quarterly_targets."""
-        result = current_quarter_target({"quarterly_targets": []}, today=date(2025, 1, 1))
+        result = current_quarter_target(
+            {"quarterly_targets": []}, today=date(2025, 1, 1)
+        )
         assert result is None
 
     def test_skips_non_dict_items(self) -> None:
@@ -79,20 +81,14 @@ class TestIsOwnerDecompositionActive:
     def test_active_when_current_quarter_gte_start(self) -> None:
         """Decomposition should be active when current >= starts_quarter."""
         scorecard = {
-            "governance": {
-                "owner_diversification": {"starts_quarter": "2025-Q1"}
-            }
+            "governance": {"owner_diversification": {"starts_quarter": "2025-Q1"}}
         }
-        assert _is_owner_decomposition_active(
-            scorecard=scorecard, quarter="2025-Q2"
-        )
+        assert _is_owner_decomposition_active(scorecard=scorecard, quarter="2025-Q2")
 
     def test_inactive_when_before_start(self) -> None:
         """Decomposition should be inactive when current < starts_quarter."""
         scorecard = {
-            "governance": {
-                "owner_diversification": {"starts_quarter": "2025-Q3"}
-            }
+            "governance": {"owner_diversification": {"starts_quarter": "2025-Q3"}}
         }
         assert not _is_owner_decomposition_active(
             scorecard=scorecard, quarter="2025-Q1"
@@ -117,14 +113,8 @@ class TestIsOwnerDecompositionActive:
 
     def test_active_when_starts_quarter_not_string(self) -> None:
         """Should default to active when starts_quarter is not a string."""
-        scorecard = {
-            "governance": {
-                "owner_diversification": {"starts_quarter": 2025}
-            }
-        }
-        assert _is_owner_decomposition_active(
-            scorecard=scorecard, quarter="2025-Q1"
-        )
+        scorecard = {"governance": {"owner_diversification": {"starts_quarter": 2025}}}
+        assert _is_owner_decomposition_active(scorecard=scorecard, quarter="2025-Q1")
 
 
 class TestResolveGraceAllowances:

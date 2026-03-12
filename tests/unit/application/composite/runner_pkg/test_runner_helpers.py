@@ -146,7 +146,9 @@ def test_log_enrichment_summary_when_mixed_statuses_then_correct_counts() -> Non
 
 
 @pytest.mark.unit
-def test_log_enrichment_summary_when_no_failures_then_failed_enrichers_is_none() -> None:
+def test_log_enrichment_summary_when_no_failures_then_failed_enrichers_is_none() -> (
+    None
+):
     logger = _make_logger()
     results = {"enricher_a": _success_enrichment("enricher_a")}
 
@@ -281,7 +283,9 @@ def test_add_not_run_results_when_optional_already_completed_then_not_added() ->
 
 
 @pytest.mark.unit
-def test_add_not_run_results_when_optional_already_in_results_then_not_overwritten() -> None:
+def test_add_not_run_results_when_optional_already_in_results_then_not_overwritten() -> (
+    None
+):
     logger = _make_logger()
     original_result = _skipped_enrichment("opt_a")
     existing = {"opt_a": original_result}
@@ -364,7 +368,9 @@ def test_get_mergeable_enrichers_when_failed_then_included() -> None:
 
 
 @pytest.mark.unit
-def test_get_mergeable_dependencies_when_success_and_silver_table_then_included() -> None:
+def test_get_mergeable_dependencies_when_success_and_silver_table_then_included() -> (
+    None
+):
     logger = _make_logger()
     cfg = _make_dependency_cfg("dep_a", silver_table="silver/dep_a")
     results = {"dep_a": _success_dep("dep_a")}

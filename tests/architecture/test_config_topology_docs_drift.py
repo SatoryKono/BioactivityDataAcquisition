@@ -16,7 +16,9 @@ TARGET_FILES = (
     Path(".codex/agents/py-doc-bot.md"),
     Path(".codex/agents/py-plan-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
-    Path("docs/02-architecture/mmd-diagrams/views/46-yaml-config-resolution-full.mermaid"),
+    Path(
+        "docs/02-architecture/mmd-diagrams/views/46-yaml-config-resolution-full.mermaid"
+    ),
     Path("docs/02-architecture/mmd-diagrams/foundation/46-yaml-config-resolution.mmd"),
 )
 

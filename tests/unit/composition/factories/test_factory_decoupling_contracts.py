@@ -14,9 +14,9 @@ from bioetl.composition.factories.pipeline import facade as pipeline_factory
 @pytest.mark.unit
 def test_service_bundle_factory_has_no_pipeline_factory_proxy_imports() -> None:
     """service_bundle_factory must not depend on pipeline_factory module."""
-    source = Path(
-        "src/bioetl/composition/factories/services/bundle.py"
-    ).read_text(encoding="utf-8")
+    source = Path("src/bioetl/composition/factories/services/bundle.py").read_text(
+        encoding="utf-8"
+    )
     tree = ast.parse(source)
 
     forbidden_imports = {

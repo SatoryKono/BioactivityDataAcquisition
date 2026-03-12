@@ -557,6 +557,7 @@ class TestChemblAdapterHealthTransitions:
 class TestChemblAdapterRequestCollector:
     """Tests for APIRequestCollector integration."""
 
+
 @pytest.mark.unit
 class TestChemblAdapterBatchReduction:
     """Tests for batch size reduction on RetryExhaustedError."""

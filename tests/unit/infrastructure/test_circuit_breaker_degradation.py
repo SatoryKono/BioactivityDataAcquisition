@@ -336,7 +336,9 @@ class TestMultipleConsecutiveTrips:
 
         Reset() should not affect trips_total counter.
         """
-        cb = CircuitBreakerGuard(provider="test", failure_threshold=2, recovery_timeout=0)
+        cb = CircuitBreakerGuard(
+            provider="test", failure_threshold=2, recovery_timeout=0
+        )
 
         async def fail() -> None:
             raise RuntimeError("error")

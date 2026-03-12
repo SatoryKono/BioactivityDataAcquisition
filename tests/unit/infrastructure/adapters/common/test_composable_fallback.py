@@ -154,7 +154,9 @@ async def test_execute_prefers_explicit_overrides_over_strategy_hooks() -> None:
 
 
 @pytest.mark.asyncio
-async def test_execute_skips_service_for_unsupported_filter_field_when_configured() -> None:
+async def test_execute_skips_service_for_unsupported_filter_field_when_configured() -> (
+    None
+):
     logger = MagicMock()
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = MagicMock()
@@ -195,7 +197,9 @@ async def test_execute_skips_service_for_unsupported_filter_field_when_configure
 
 
 @pytest.mark.asyncio
-async def test_execute_logs_but_continues_when_unsupported_filter_is_permissive() -> None:
+async def test_execute_logs_but_continues_when_unsupported_filter_is_permissive() -> (
+    None
+):
     logger = MagicMock()
     captured_requests: list[FallbackFetchRequest] = []
 

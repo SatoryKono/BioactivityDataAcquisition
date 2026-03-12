@@ -210,11 +210,21 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
 
     assert result == "runner-instance"
     kwargs = mock_prepare_inputs.call_args.kwargs
-    assert kwargs["build_observability_bundle_fn"] is runner_builder.build_observability_bundle
-    assert kwargs["assemble_vacuum_settings_fn"] is runner_builder.assemble_vacuum_settings
-    assert kwargs["assemble_runtime_config_fn"] is runner_builder.assemble_runtime_config
+    assert (
+        kwargs["build_observability_bundle_fn"]
+        is runner_builder.build_observability_bundle
+    )
+    assert (
+        kwargs["assemble_vacuum_settings_fn"] is runner_builder.assemble_vacuum_settings
+    )
+    assert (
+        kwargs["assemble_runtime_config_fn"] is runner_builder.assemble_runtime_config
+    )
     assert kwargs["assemble_filter_config_fn"] is runner_builder.assemble_filter_config
-    assert kwargs["assemble_cached_bronze_context_fn"] is runner_builder.assemble_cached_bronze_context
+    assert (
+        kwargs["assemble_cached_bronze_context_fn"]
+        is runner_builder.assemble_cached_bronze_context
+    )
     assert kwargs["load_source_config_fn"] is runner_builder.load_source_config
 
 

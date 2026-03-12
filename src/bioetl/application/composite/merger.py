@@ -21,7 +21,6 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
-
     from bioetl.application.composite.aggregator import EnricherAggregatorService
     from bioetl.application.composite.coalesce_policy import CoalescePolicyService
     from bioetl.application.composite.column_orderer import ColumnOrdererService

@@ -120,8 +120,12 @@ class TestBootstrapLoggerPort:
             captured_run_ids.append(run_id)
             return MagicMock(spec=LoggerPort)
 
-        bootstrap_logger_port(pipeline="test", run_id=None, logger_factory=capture_factory)
-        bootstrap_logger_port(pipeline="test", run_id=None, logger_factory=capture_factory)
+        bootstrap_logger_port(
+            pipeline="test", run_id=None, logger_factory=capture_factory
+        )
+        bootstrap_logger_port(
+            pipeline="test", run_id=None, logger_factory=capture_factory
+        )
 
         assert captured_run_ids[0] != captured_run_ids[1]
 

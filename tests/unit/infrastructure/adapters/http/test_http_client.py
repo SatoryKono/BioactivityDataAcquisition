@@ -12,6 +12,7 @@ from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedErro
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
+
 @pytest.fixture
 def mock_rate_limiter():
     """Create mock rate limiter."""

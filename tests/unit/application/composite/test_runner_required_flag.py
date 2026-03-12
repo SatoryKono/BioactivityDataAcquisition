@@ -436,9 +436,7 @@ class TestRuntimeEnricherSelectionPolicy:
 
     def test_enrich_only_filters_out_non_selected_enricher(self):
         """enrich_only should select only explicitly requested enricher pipelines."""
-        runner = create_runner(
-            runtime=CompositeRuntimeConfig(enrich_only=("pubmed",))
-        )
+        runner = create_runner(runtime=CompositeRuntimeConfig(enrich_only=("pubmed",)))
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
@@ -451,9 +449,7 @@ class TestRuntimeEnricherSelectionPolicy:
 
     def test_force_enricher_overrides_completed_skip(self):
         """force_enricher should rerun a completed enricher."""
-        runner = create_runner(
-            runtime=CompositeRuntimeConfig(force_enricher="pubmed")
-        )
+        runner = create_runner(runtime=CompositeRuntimeConfig(force_enricher="pubmed"))
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id=str(uuid4()),
@@ -461,7 +457,9 @@ class TestRuntimeEnricherSelectionPolicy:
             completed_enrichers=frozenset({"pubmed"}),
         )
         pubmed_cfg = next(
-            enricher for enricher in runner._config.enrichers if enricher.pipeline == "pubmed"
+            enricher
+            for enricher in runner._config.enrichers
+            if enricher.pipeline == "pubmed"
         )
 
         assert runner._should_run_enricher(pubmed_cfg, state) is True

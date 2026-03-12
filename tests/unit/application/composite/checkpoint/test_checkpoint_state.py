@@ -26,6 +26,7 @@ from bioetl.domain.composite.state import CompositePipelineState
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_seed_result(
     pipeline_name: str = "chembl_activity",
     records_extracted: int = 100,
@@ -92,6 +93,7 @@ def _make_enrichment_result(
 # 1. Default state creation
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestDefaultStateCreation:
     """Tests for CompositeCheckpointState default values."""
@@ -149,6 +151,7 @@ class TestDefaultStateCreation:
 # ---------------------------------------------------------------------------
 # 2. with_seed_completed
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestWithSeedCompleted:
@@ -210,6 +213,7 @@ class TestWithSeedCompleted:
 # 3. with_dependency_completed
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestWithDependencyCompleted:
     """Tests for with_dependency_completed transition method."""
@@ -257,6 +261,7 @@ class TestWithDependencyCompleted:
 # 4. with_enricher_completed
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestWithEnricherCompleted:
     """Tests for with_enricher_completed transition method."""
@@ -287,9 +292,9 @@ class TestWithEnricherCompleted:
         er1 = _make_enrichment_result(enricher_name="crossref")
         er2 = _make_enrichment_result(enricher_name="pubmed")
 
-        updated = initial.with_enricher_completed("crossref", er1).with_enricher_completed(
-            "pubmed", er2
-        )
+        updated = initial.with_enricher_completed(
+            "crossref", er1
+        ).with_enricher_completed("pubmed", er2)
 
         assert updated.completed_enrichers == frozenset({"crossref", "pubmed"})
         assert len(updated.enrichment_results) == 2
@@ -312,6 +317,7 @@ class TestWithEnricherCompleted:
 # ---------------------------------------------------------------------------
 # 5. with_state
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestWithState:
@@ -360,6 +366,7 @@ class TestWithState:
 # ---------------------------------------------------------------------------
 # 6. is_resumable
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestIsResumable:
@@ -423,6 +430,7 @@ class TestIsResumable:
 # 7. to_dict serialization
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestToDict:
     """Tests for to_dict serialization."""
@@ -485,7 +493,9 @@ class TestToDict:
     def test_dependency_results_serialized(self) -> None:
         """dependency_results are included with status as string."""
         dep = _make_dependency_result(
-            pipeline_name="uniprot", status=DependencyStatus.FAILED, error_message="oops"
+            pipeline_name="uniprot",
+            status=DependencyStatus.FAILED,
+            error_message="oops",
         )
         state = CompositeCheckpointState(
             composite_name="c",
@@ -538,6 +548,7 @@ class TestToDict:
 # ---------------------------------------------------------------------------
 # 8. from_dict deserialization
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestFromDict:
@@ -690,6 +701,7 @@ class TestFromDict:
 # ---------------------------------------------------------------------------
 # 9. Immutability
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestImmutability:

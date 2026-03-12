@@ -320,7 +320,9 @@ class TestRateLimiterPortProperties:
     @settings(deadline=None)
     def test_initial_tokens_equal_capacity(self, rate: float, capacity: int) -> None:
         """Property: Initial available_tokens() MUST equal capacity."""
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=rate, capacity=capacity)
 
@@ -341,7 +343,9 @@ class TestRateLimiterPortProperties:
 
         Uses low rate to ensure tokens aren't replenished during iteration.
         """
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=rate, capacity=capacity)
 
@@ -366,7 +370,9 @@ class TestRateLimiterPortProperties:
         self, rate: float, capacity: int, tokens: int
     ) -> None:
         """Property: acquire(n) MUST work when n <= capacity."""
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         # Ensure tokens <= capacity
         tokens = min(tokens, capacity)
@@ -388,7 +394,9 @@ class TestRateLimiterPortProperties:
         """Property: available_tokens() MUST never exceed capacity."""
         import time
 
-        from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+        from bioetl.infrastructure.adapters.http.rate_limiter import (
+            TokenBucketRateLimiter,
+        )
 
         bucket = TokenBucketRateLimiter(rate=rate, capacity=capacity)
 
@@ -420,7 +428,9 @@ class TestCircuitBreakerPortProperties:
     ) -> None:
         """Property: Initial state MUST be CLOSED."""
         from bioetl.domain.types import CircuitBreakerState
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(
             provider="test",
@@ -442,7 +452,9 @@ class TestCircuitBreakerPortProperties:
     ) -> None:
         """Property: reset() MUST return state to CLOSED."""
         from bioetl.domain.types import CircuitBreakerState
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(
             provider="test",
@@ -464,7 +476,9 @@ class TestCircuitBreakerPortProperties:
     def test_opens_after_threshold_failures(self, failure_threshold: int) -> None:
         """Property: Circuit MUST open after failure_threshold consecutive failures."""
         from bioetl.domain.types import CircuitBreakerState
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         breaker = CircuitBreakerGuard(
             provider="test",

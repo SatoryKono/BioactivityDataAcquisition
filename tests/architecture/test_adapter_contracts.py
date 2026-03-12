@@ -466,15 +466,55 @@ class TestAdapterPortCompliance:
             "bioetl.infrastructure.adapters.uniprot.client": "UniProtAdapter",
         }
         allowed_files = {
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "chembl" / "__init__.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "crossref" / "__init__.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "openalex" / "__init__.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "pubchem" / "__init__.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "__init__.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "chembl"
+            / "__init__.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "crossref"
+            / "__init__.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "openalex"
+            / "__init__.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "pubchem"
+            / "__init__.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "pubmed"
+            / "__init__.py",
             src_dir / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "semanticscholar" / "__init__.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "semanticscholar" / "client.py",
-            src_dir / "bioetl" / "infrastructure" / "adapters" / "uniprot" / "__init__.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "semanticscholar"
+            / "__init__.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "semanticscholar"
+            / "client.py",
+            src_dir
+            / "bioetl"
+            / "infrastructure"
+            / "adapters"
+            / "uniprot"
+            / "__init__.py",
             src_dir.parent
             / "tests"
             / "unit"

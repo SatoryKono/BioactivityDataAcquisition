@@ -28,6 +28,7 @@ Usage:
     >>> data_normalizer.normalize_doi("10.1038/NATURE12373")
     '10.1038/nature12373'
 """
+
 from __future__ import annotations
 
 from bioetl.domain.services.activity_aggregator import ActivityAggregator

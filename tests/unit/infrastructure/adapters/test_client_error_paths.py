@@ -72,7 +72,9 @@ class TestUniProtAdapterErrorPaths:
     @pytest.fixture
     def mock_circuit_breaker(self):
         """Create a mock circuit breaker that raises an exception."""
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
         cb = MagicMock(spec=CircuitBreakerGuard)
         cb.call = AsyncMock(side_effect=ConnectionError("Network error"))

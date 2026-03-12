@@ -151,6 +151,7 @@ def mock_context() -> MagicMock:
     context.started_at = datetime.now(UTC)
     return context
 
+
 @pytest.mark.unit
 class TestPostrunServiceDQReports:
     """Tests for DQ report generation in PostrunService."""

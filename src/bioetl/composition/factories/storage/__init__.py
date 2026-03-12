@@ -1,4 +1,5 @@
 """Storage factory subpackage."""
+
 from __future__ import annotations
 
 from bioetl.composition.factories.storage.adapter import StorageAdapter

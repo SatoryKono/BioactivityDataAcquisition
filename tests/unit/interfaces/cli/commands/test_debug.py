@@ -96,7 +96,10 @@ class TestDebugCommand:
                     )
 
         assert result.exit_code == 0
-        assert "debug session" in result.output.lower() or "complete" in result.output.lower()
+        assert (
+            "debug session" in result.output.lower()
+            or "complete" in result.output.lower()
+        )
 
     def test_debug_with_limit_option(
         self,

@@ -21,7 +21,9 @@ from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
-from bioetl.application.composite.runner_pkg.runner_helpers import log_enrichment_summary
+from bioetl.application.composite.runner_pkg.runner_helpers import (
+    log_enrichment_summary,
+)
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
@@ -271,10 +273,7 @@ class TestEnrichmentFSMTransitions:
         async def save_impl(state: CompositeCheckpointState) -> None:
             nonlocal failed_once
             saved_states.append(state)
-            if (
-                state.state == CompositePipelineState.ENRICHING
-                and not failed_once
-            ):
+            if state.state == CompositePipelineState.ENRICHING and not failed_once:
                 failed_once = True
                 raise StorageError("enrichment checkpoint unavailable")
 

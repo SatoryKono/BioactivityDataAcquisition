@@ -11,6 +11,7 @@ Sub-modules:
 - enums: StrEnum classes with business logic methods
 - health: Frozen dataclasses for health reports and preflight validation
 """
+
 from __future__ import annotations
 
 from bioetl.domain.types.enums import (

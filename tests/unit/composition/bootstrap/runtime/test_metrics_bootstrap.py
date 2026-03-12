@@ -103,7 +103,9 @@ class TestMaybeStartMetricsServer:
         settings = _make_settings(metrics_enabled=False)
         mock_starter = MagicMock()
 
-        result = maybe_start_metrics_server(settings=settings, start_server=mock_starter)
+        result = maybe_start_metrics_server(
+            settings=settings, start_server=mock_starter
+        )
 
         assert result is False
         mock_starter.assert_not_called()
@@ -113,7 +115,9 @@ class TestMaybeStartMetricsServer:
         settings = _make_settings(metrics_enabled=True, metrics_server_enabled=False)
         mock_starter = MagicMock()
 
-        result = maybe_start_metrics_server(settings=settings, start_server=mock_starter)
+        result = maybe_start_metrics_server(
+            settings=settings, start_server=mock_starter
+        )
 
         assert result is False
         mock_starter.assert_not_called()
@@ -123,7 +127,9 @@ class TestMaybeStartMetricsServer:
         settings = _make_settings(metrics_enabled=True, metrics_server_enabled=True)
         mock_starter = MagicMock(return_value=True)
 
-        result = maybe_start_metrics_server(settings=settings, start_server=mock_starter)
+        result = maybe_start_metrics_server(
+            settings=settings, start_server=mock_starter
+        )
 
         assert result is True
 

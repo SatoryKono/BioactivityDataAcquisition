@@ -63,7 +63,9 @@ class TestPubChemResponseMapper:
         mapper = MagicMock()
         mapper.compound_to_dict.side_effect = lambda c: {"cid": c.cid}
         mapper.substance_to_dict.side_effect = lambda s: {"sid": s.sid}
-        mapper.assay_to_dict.side_effect = lambda a: {"aid": a.get("aid") if isinstance(a, dict) else a.aid}
+        mapper.assay_to_dict.side_effect = lambda a: {
+            "aid": a.get("aid") if isinstance(a, dict) else a.aid
+        }
         return mapper
 
     @pytest.fixture

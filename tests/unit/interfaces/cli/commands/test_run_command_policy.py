@@ -170,9 +170,12 @@ class TestPrepareRunRequest:
             error_message="bad options",
         )
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run_command_policy.echo_error"
-        ) as mock_error, pytest.raises(SystemExit):
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_command_policy.echo_error"
+            ) as mock_error,
+            pytest.raises(SystemExit),
+        ):
             prepare_run_request(
                 service=service,
                 pipeline="chembl_activity",

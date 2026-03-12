@@ -358,6 +358,7 @@ class TestHealthCheck:
         assert status == HealthStatus.DEGRADED
         mock_http_client.get_once.assert_awaited_once()
 
+
 class TestFetchMultiFiltered:
     """Tests for fetch_multi_filtered method."""
 

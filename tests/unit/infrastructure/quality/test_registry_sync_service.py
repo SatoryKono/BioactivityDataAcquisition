@@ -180,7 +180,11 @@ class TestValidateRegistrySync:
         raw_registry = {
             "registries": {
                 "reg_a": {
-                    "entry1": {"value": 100, "owner": "alice", "expires_on": "2026-01-01"}
+                    "entry1": {
+                        "value": 100,
+                        "owner": "alice",
+                        "expires_on": "2026-01-01",
+                    }
                 }
             }
         }

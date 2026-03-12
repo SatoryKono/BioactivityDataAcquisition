@@ -139,7 +139,9 @@ class TestValidateDebtScorecardStructure:
         assert isinstance(raw["quarterly_targets"], list)
         raw["quarterly_targets"][1]["max_total_exemptions"] = 25  # type: ignore[index]
         errors = validate_debt_scorecard_structure(raw)
-        assert any("max_total_exemptions" in e and "strictly decrease" in e for e in errors)
+        assert any(
+            "max_total_exemptions" in e and "strictly decrease" in e for e in errors
+        )
 
     def test_non_increasing_min_score(self) -> None:
         """Non-increasing min_integral_score should add error."""
@@ -147,7 +149,9 @@ class TestValidateDebtScorecardStructure:
         assert isinstance(raw["quarterly_targets"], list)
         raw["quarterly_targets"][1]["min_integral_score"] = 40.0  # type: ignore[index]
         errors = validate_debt_scorecard_structure(raw)
-        assert any("min_integral_score" in e and "strictly increase" in e for e in errors)
+        assert any(
+            "min_integral_score" in e and "strictly increase" in e for e in errors
+        )
 
     def test_invalid_program_done_deadline(self) -> None:
         """Invalid deadline_quarter in program_done_criteria should add error."""

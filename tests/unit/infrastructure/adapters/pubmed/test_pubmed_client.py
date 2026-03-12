@@ -183,7 +183,9 @@ async def test_health_check_returns_unhealthy_on_exception(adapter, mock_http_cl
 
 
 @pytest.mark.asyncio
-async def test_fetch_batch_uses_injected_error_handler(adapter, mock_http_client) -> None:
+async def test_fetch_batch_uses_injected_error_handler(
+    adapter, mock_http_client
+) -> None:
     """Batch fetch should delegate wrapping to the adapter-level error handler."""
     mock_http_client.get = AsyncMock(side_effect=RuntimeError("boom"))
     wrapped_error = RuntimeError("wrapped")

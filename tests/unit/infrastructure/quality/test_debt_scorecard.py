@@ -193,9 +193,7 @@ class TestValidateDebtScorecard:
         import yaml
 
         scorecard_file = tmp_path / "scorecard.yaml"
-        scorecard_file.write_text(
-            yaml.dump(_valid_scorecard()), encoding="utf-8"
-        )
+        scorecard_file.write_text(yaml.dump(_valid_scorecard()), encoding="utf-8")
         errors = validate_debt_scorecard(scorecard_file)
         assert errors == [], f"Unexpected errors: {errors}"
 

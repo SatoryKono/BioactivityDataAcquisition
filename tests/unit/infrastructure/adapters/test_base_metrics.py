@@ -17,7 +17,9 @@ class TestAdapterMetrics:
     def test_measure_request_records_histogram(self):
         """Test that measure_request records histogram metric."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="chembl")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="chembl"
+        )
 
         with adapter_metrics.measure_request("/activity"):
             pass  # Simulate successful request
@@ -32,7 +34,9 @@ class TestAdapterMetrics:
     def test_measure_request_records_counter_success(self):
         """Test that measure_request records success counter."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="uniprot")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="uniprot"
+        )
 
         with adapter_metrics.measure_request("/protein"):
             pass
@@ -51,7 +55,9 @@ class TestAdapterMetrics:
     def test_measure_request_records_counter_error(self):
         """Test that measure_request records error counter on exception."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="pubmed")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="pubmed"
+        )
 
         with pytest.raises(ValueError):
             with adapter_metrics.measure_request("/esearch"):
@@ -66,7 +72,9 @@ class TestAdapterMetrics:
     def test_measure_request_propagates_exception(self):
         """Test that exceptions are properly propagated."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="chembl")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="chembl"
+        )
 
         with pytest.raises(RuntimeError, match="Connection failed"):
             with adapter_metrics.measure_request("/compound"):
@@ -75,7 +83,9 @@ class TestAdapterMetrics:
     def test_measure_request_with_noop_metrics(self):
         """Test that NoOpMetrics works correctly."""
         noop_metrics = NoOpMetrics()
-        adapter_metrics = AdapterMetricsRecorder(metrics=noop_metrics, provider="chembl")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=noop_metrics, provider="chembl"
+        )
 
         # Should not raise any exceptions
         with adapter_metrics.measure_request("/activity"):
@@ -84,7 +94,9 @@ class TestAdapterMetrics:
     def test_record_batch_size(self):
         """Test that record_batch_size records histogram metric."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="chembl")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="chembl"
+        )
 
         adapter_metrics.record_batch_size("/activity", 500)
 
@@ -97,7 +109,9 @@ class TestAdapterMetrics:
     def test_different_endpoints_have_correct_labels(self):
         """Test that different endpoints get correct labels."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="uniprot")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="uniprot"
+        )
 
         with adapter_metrics.measure_request("/uniprotkb/search"):
             pass
@@ -119,7 +133,9 @@ class TestAdapterMetrics:
         with chembl_metrics.measure_request("/activity"):
             pass
 
-        uniprot_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="uniprot")
+        uniprot_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="uniprot"
+        )
         with uniprot_metrics.measure_request("/protein"):
             pass
 
@@ -130,7 +146,9 @@ class TestAdapterMetrics:
     def test_measure_request_updates_p95_gauge(self):
         """Rolling request p95 should be updated after request completion."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="chembl")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="chembl"
+        )
 
         with adapter_metrics.measure_request("/activity"):
             pass
@@ -144,7 +162,9 @@ class TestAdapterMetrics:
     def test_record_fallback_outcome_records_counters_and_hit_rate(self):
         """Fallback attempts/hits and hit-rate should be emitted consistently."""
         mock_metrics = MagicMock()
-        adapter_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="pubmed")
+        adapter_metrics = AdapterMetricsRecorder(
+            metrics=mock_metrics, provider="pubmed"
+        )
 
         adapter_metrics.record_fallback_outcome(
             "fetch_filtered_with_fallback",

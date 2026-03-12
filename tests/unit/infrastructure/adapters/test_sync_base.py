@@ -87,7 +87,9 @@ def rate_limiter():
 @pytest.fixture
 def circuit_breaker():
     """Create a circuit breaker for testing."""
-    return CircuitBreakerGuard(provider="test", failure_threshold=5, recovery_timeout=300)
+    return CircuitBreakerGuard(
+        provider="test", failure_threshold=5, recovery_timeout=300
+    )
 
 
 @pytest.fixture

@@ -106,8 +106,9 @@ class TestInteractiveDebugAdapter:
         adapter = InteractiveDebugAdapter()
         hit = _make_hit()
 
-        with patch("click.echo"), patch(
-            "click.prompt", return_value=DebugAction.CONTINUE.value
+        with (
+            patch("click.echo"),
+            patch("click.prompt", return_value=DebugAction.CONTINUE.value),
         ):
             action = adapter.on_breakpoint(hit)
 
@@ -119,8 +120,9 @@ class TestInteractiveDebugAdapter:
 
         for debug_action in DebugAction:
             hit = _make_hit()
-            with patch("click.echo"), patch(
-                "click.prompt", return_value=debug_action.value
+            with (
+                patch("click.echo"),
+                patch("click.prompt", return_value=debug_action.value),
             ):
                 action = adapter.on_breakpoint(hit)
             assert action == debug_action

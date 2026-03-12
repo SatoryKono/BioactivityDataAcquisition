@@ -241,6 +241,7 @@ class TestBootstrapPipeline:
             registry=mock_get_registry.return_value
         )
 
+
 @pytest.mark.unit
 class TestBootstrapVacuumConfig:
     """Tests for bootstrap_pipeline_runner vacuum configuration merging."""

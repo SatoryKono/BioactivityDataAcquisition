@@ -140,7 +140,8 @@ class TestNoTransformerFallback:
         """
         factories_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline" / "registry.py"
+            / "pipeline"
+            / "registry.py"
         )
         if not factories_file.exists():
             pytest.skip("pipeline/registry.py not found")
@@ -174,19 +175,23 @@ class TestTransformerInjectionPath:
         """
         factory_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline" / "facade.py"
+            / "pipeline"
+            / "facade.py"
         )
         assembler_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline" / "assembler.py"
+            / "pipeline"
+            / "assembler.py"
         )
         service_bundle_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "services" / "bundle.py"
+            / "services"
+            / "bundle.py"
         )
         construction_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline" / "construction.py"
+            / "pipeline"
+            / "construction.py"
         )
         if not factory_file.exists():
             pytest.skip("pipeline/facade.py not found")

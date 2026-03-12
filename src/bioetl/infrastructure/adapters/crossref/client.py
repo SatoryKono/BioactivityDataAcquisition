@@ -182,7 +182,9 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         """Return hook extracting DOI from a CrossRef record."""
         return lambda rec: str(rec.get("DOI", ""))
 
-    def _get_fallback_handler(self, enabled: bool) -> CrossRefTitleFallbackHandler | None:
+    def _get_fallback_handler(
+        self, enabled: bool
+    ) -> CrossRefTitleFallbackHandler | None:
         """Return title fallback handler when enabled."""
         return self._fallback_handler if enabled else None
 

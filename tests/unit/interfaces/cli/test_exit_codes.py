@@ -160,7 +160,9 @@ class TestExitCodeIntegration:
                 pass
             elif exc_name == "PipelineShutdownError":
                 # Application layer exception
-                from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
+                from bioetl.application.core.lifecycle.shutdown import (
+                    PipelineShutdownError,
+                )
 
                 assert PipelineShutdownError is not None
             elif exc_name == "ConfigValidationError":

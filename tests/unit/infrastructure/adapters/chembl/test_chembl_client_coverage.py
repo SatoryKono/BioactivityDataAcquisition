@@ -166,4 +166,3 @@ async def test_reset_circuit_breaker(adapter, mock_http_client):
     adapter.logger.info.assert_called_with(
         "chembl_circuit_breaker_reset", provider="chembl"
     )
-

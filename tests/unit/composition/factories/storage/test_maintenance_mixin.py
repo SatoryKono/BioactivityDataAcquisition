@@ -26,12 +26,16 @@ def _make_mixin(
         cleanup_old_files=AsyncMock(return_value={"removed": 3}),
     )  # type: ignore[assignment]
     mixin.silver = SimpleNamespace(
-        get_table_path=MagicMock(return_value=silver_get_table_path or Path("/nonexistent")),
+        get_table_path=MagicMock(
+            return_value=silver_get_table_path or Path("/nonexistent")
+        ),
         vacuum=AsyncMock(return_value=["file1", "file2"]),
         deduplicate_silver=AsyncMock(return_value=5),
     )  # type: ignore[assignment]
     mixin.gold = SimpleNamespace(
-        get_table_path=MagicMock(return_value=gold_get_table_path or Path("/nonexistent")),
+        get_table_path=MagicMock(
+            return_value=gold_get_table_path or Path("/nonexistent")
+        ),
     )  # type: ignore[assignment]
     return mixin
 
@@ -222,9 +226,7 @@ async def test_deduplicate_silver_delegates() -> None:
     mixin = _make_mixin()
     result = await mixin.deduplicate_silver("chembl.activity", ["id"])
     assert result == 5
-    mixin.silver.deduplicate_silver.assert_called_once_with(
-        "chembl.activity", ["id"]
-    )
+    mixin.silver.deduplicate_silver.assert_called_once_with("chembl.activity", ["id"])
 
 
 @pytest.mark.unit

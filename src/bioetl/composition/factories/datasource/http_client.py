@@ -156,11 +156,17 @@ class HttpClientFactory:
             http_config = ProviderRegistry.get_http_config(provider)
             if http_config is None:
                 rate, capacity = 5.0, 10
-                failure_threshold, recovery_timeout = _FALLBACK_CB_THRESHOLD, _FALLBACK_CB_RECOVERY
+                failure_threshold, recovery_timeout = (
+                    _FALLBACK_CB_THRESHOLD,
+                    _FALLBACK_CB_RECOVERY,
+                )
                 timeout, max_retries = _FALLBACK_TIMEOUT, _FALLBACK_MAX_RETRIES
             else:
                 rate, capacity = http_config.rate, http_config.capacity
-                failure_threshold, recovery_timeout = _FALLBACK_CB_THRESHOLD, _FALLBACK_CB_RECOVERY
+                failure_threshold, recovery_timeout = (
+                    _FALLBACK_CB_THRESHOLD,
+                    _FALLBACK_CB_RECOVERY,
+                )
                 timeout, max_retries = _FALLBACK_TIMEOUT, _FALLBACK_MAX_RETRIES
             base_delay, max_delay = 1.0, 60.0
             max_connections, max_keepalive = 50, 10

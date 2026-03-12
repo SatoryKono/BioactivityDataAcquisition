@@ -61,7 +61,9 @@ class TestCircuitBreaker:
     @pytest.mark.unit
     async def test_open_circuit_blocks_calls(self) -> None:
         """Open circuit should block subsequent calls."""
-        cb = CircuitBreakerGuard(provider="test", failure_threshold=2, recovery_timeout=10)
+        cb = CircuitBreakerGuard(
+            provider="test", failure_threshold=2, recovery_timeout=10
+        )
 
         async def fail() -> None:
             msg = "error"
@@ -224,7 +226,9 @@ class TestCircuitBreakerMetrics:
         self, mock_metrics: MagicMock
     ) -> None:
         """CLOSED -> OPEN transition should emit state and trip metrics."""
-        cb = CircuitBreakerGuard(provider="test", failure_threshold=3, metrics=mock_metrics)
+        cb = CircuitBreakerGuard(
+            provider="test", failure_threshold=3, metrics=mock_metrics
+        )
 
         async def fail() -> None:
             raise RuntimeError("error")
@@ -432,7 +436,9 @@ class TestCircuitBreakerMetrics:
         self, mock_metrics: MagicMock
     ) -> None:
         """Failures below threshold should not emit trip metrics."""
-        cb = CircuitBreakerGuard(provider="test", failure_threshold=3, metrics=mock_metrics)
+        cb = CircuitBreakerGuard(
+            provider="test", failure_threshold=3, metrics=mock_metrics
+        )
 
         async def fail() -> None:
             raise RuntimeError("error")

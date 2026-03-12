@@ -459,7 +459,10 @@ class TestValidateExpiryDecompositionTargetsSection:
         raw = {
             "expiry_decomposition_targets": [
                 {"quarter": "2025-Q1", "max_entries_expiring_in_quarter": 5},
-                {"quarter": "2025-Q2", "max_entries_expiring_in_quarter": 10},  # increases
+                {
+                    "quarter": "2025-Q2",
+                    "max_entries_expiring_in_quarter": 10,
+                },  # increases
             ]
         }
         errors: list[str] = []
@@ -562,9 +565,7 @@ class TestValidatePriorityRegistryBurndown:
     def test_valid_strict_decrease(self) -> None:
         """Strictly decreasing budgets should produce no errors."""
         raw = {
-            "governance": {
-                "burn_down_priorities": {"registries": ["reg_a"]}
-            },
+            "governance": {"burn_down_priorities": {"registries": ["reg_a"]}},
             "quarterly_targets": [
                 {"quarter": "2025-Q1", "registry_budgets": {"reg_a": 10}},
                 {"quarter": "2025-Q2", "registry_budgets": {"reg_a": 7}},
@@ -604,9 +605,7 @@ class TestValidatePriorityRegistryBurndown:
     def test_non_decreasing_violation(self) -> None:
         """Non-decreasing budget should add burn-down violation."""
         raw = {
-            "governance": {
-                "burn_down_priorities": {"registries": ["reg_a"]}
-            },
+            "governance": {"burn_down_priorities": {"registries": ["reg_a"]}},
             "quarterly_targets": [
                 {"quarter": "2025-Q1", "registry_budgets": {"reg_a": 5}},
                 {"quarter": "2025-Q2", "registry_budgets": {"reg_a": 8}},  # increases
@@ -623,9 +622,7 @@ class TestValidatePriorityRegistryBurndown:
     def test_missing_registry_in_quarter(self) -> None:
         """Registry budget missing in a quarter should add error."""
         raw = {
-            "governance": {
-                "burn_down_priorities": {"registries": ["reg_a"]}
-            },
+            "governance": {"burn_down_priorities": {"registries": ["reg_a"]}},
             "quarterly_targets": [
                 {"quarter": "2025-Q1", "registry_budgets": {}},  # reg_a missing
             ],

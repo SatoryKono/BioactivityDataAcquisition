@@ -7,7 +7,9 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-INVENTORY_DOC = ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
+INVENTORY_DOC = (
+    ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
+)
 COMPOSITION_DOC = ROOT / "docs" / "02-architecture" / "05-composition-layer.md"
 REGISTRY_GUIDE = ROOT / "docs" / "03-guides" / "registry-pattern.md"
 

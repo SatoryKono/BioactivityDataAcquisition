@@ -156,9 +156,7 @@ class MetricsExtractor:
                 "Runner does not expose a valid execution_metrics mapping"
             ) from error
         if not isinstance(metrics, dict):
-            raise TypeError(
-                "Runner does not expose a valid execution_metrics mapping"
-            )
+            raise TypeError("Runner does not expose a valid execution_metrics mapping")
 
         return {
             "records_fetched": int(metrics["records_fetched"]),

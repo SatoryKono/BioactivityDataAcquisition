@@ -1,5 +1,6 @@
 # src/bioetl/domain/schemas/semanticscholar/__init__.py
 """Pandera schemas for Semantic Scholar entities."""
+
 from __future__ import annotations
 
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS

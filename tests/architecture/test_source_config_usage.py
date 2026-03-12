@@ -128,7 +128,9 @@ class TestNoHardcodedRateLimits:
         """HttpClientFactory should use load_source_config for rate limits."""
         import inspect
 
-        from bioetl.composition.factories.datasource.http_client import HttpClientFactory
+        from bioetl.composition.factories.datasource.http_client import (
+            HttpClientFactory,
+        )
 
         source = inspect.getsource(HttpClientFactory)
 

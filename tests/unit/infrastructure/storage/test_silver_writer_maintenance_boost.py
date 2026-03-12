@@ -198,9 +198,7 @@ class TestDelegationMethods:
     """Tests for delegation methods that forward to _retention_manager."""
 
     @pytest.mark.asyncio
-    async def test_vacuum_delegates_to_retention_manager(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_vacuum_delegates_to_retention_manager(self, tmp_path: Path) -> None:
         """vacuum delegates to _retention_manager.vacuum."""
         mixin = _ConcreteMaintMixin(tmp_path)
         mixin._retention_manager.vacuum = AsyncMock(return_value=["file1"])

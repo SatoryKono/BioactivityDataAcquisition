@@ -153,6 +153,7 @@ def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
         error_printer=echo_error,
     )
 
+
 def _handle_destructive_confirmation(
     run_type: str, pipelines: list[str], dry_run: bool, yes: bool
 ) -> bool:
@@ -183,6 +184,7 @@ def _handle_destructive_confirmation(
         info_printer=echo_info,
         exit_func=sys.exit,
     )
+
 
 def _handle_run_all_failure(
     exc: BaseException, *, source: str, reason_code: str

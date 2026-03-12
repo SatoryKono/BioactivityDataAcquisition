@@ -1,4 +1,5 @@
 """Lifecycle subpackage: shutdown, heartbeat, locking, checkpoints, cleanup."""
+
 from __future__ import annotations
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (

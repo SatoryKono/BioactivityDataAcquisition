@@ -30,7 +30,9 @@ import pytest
 ADAPTERS_DIR = Path("src/bioetl/infrastructure/adapters")
 
 # Cross-cutting services that MUST use conditional instantiation in adapters.
-GUARDED_SERVICE_CLASSES: frozenset[str] = frozenset({"ErrorService", "AdapterMetricsRecorder"})
+GUARDED_SERVICE_CLASSES: frozenset[str] = frozenset(
+    {"ErrorService", "AdapterMetricsRecorder"}
+)
 
 # Files where unconditional instantiation is expected (class definitions).
 DEFINITION_FILES: frozenset[str] = frozenset(

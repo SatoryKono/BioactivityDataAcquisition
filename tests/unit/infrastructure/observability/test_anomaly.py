@@ -411,7 +411,9 @@ class TestDataQualityMonitor:
 
     def test_init_sets_default_thresholds(self, mock_logger: MagicMock):
         """Test that init sets default thresholds."""
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         monitor = DataQualityMonitorService(logger=mock_logger)
 
@@ -421,7 +423,9 @@ class TestDataQualityMonitor:
 
     def test_add_metric(self, mock_logger: MagicMock):
         """Test adding metric to monitor."""
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         monitor = DataQualityMonitorService(logger=mock_logger)
         monitor.add_metric("record_count", [1000, 1050, 980], min_threshold=500)
@@ -431,7 +435,9 @@ class TestDataQualityMonitor:
 
     def test_check_quality_no_anomalies(self, mock_logger: MagicMock):
         """Test check_quality returns empty list when no anomalies."""
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         monitor = DataQualityMonitorService(logger=mock_logger)
         monitor.add_metric("record_count", [1000, 1050, 980, 1020, 1010])
@@ -444,7 +450,9 @@ class TestDataQualityMonitor:
 
     def test_check_quality_with_anomaly(self, mock_logger: MagicMock):
         """Test check_quality returns anomalies when detected."""
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         monitor = DataQualityMonitorService(logger=mock_logger)
         monitor.add_metric("record_count", [1000, 1050, 980, 1020, 1010])
@@ -457,7 +465,9 @@ class TestDataQualityMonitor:
 
     def test_update_baseline_from_metrics_normal(self, mock_logger: MagicMock):
         """Test update_baseline_from_metrics with normal values."""
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         monitor = DataQualityMonitorService(logger=mock_logger)
         monitor.add_metric("record_count", [1000, 1050, 980])
@@ -473,7 +483,9 @@ class TestDataQualityMonitor:
         self, mock_logger: MagicMock
     ):
         """Test update_baseline_from_metrics skips update for critical anomalies."""
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         monitor = DataQualityMonitorService(logger=mock_logger)
         # Add a metric with threshold that will be breached

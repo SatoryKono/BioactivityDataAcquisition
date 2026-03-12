@@ -1,4 +1,5 @@
 """Observability ports facade."""
+
 from __future__ import annotations
 
 from bioetl.domain.ports.observability.dq_monitor import DQMonitorPort

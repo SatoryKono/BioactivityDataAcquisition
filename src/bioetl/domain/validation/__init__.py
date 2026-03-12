@@ -16,6 +16,7 @@ See also:
 - docs/RULES.md §1.1 (Domain — pure functions)
 - docs/RULES.md §8.1 (Pandera-schemas for structural validation)
 """
+
 from __future__ import annotations
 
 from bioetl.domain.validation.chemical import (

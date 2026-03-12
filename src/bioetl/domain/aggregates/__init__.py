@@ -13,6 +13,7 @@ All aggregates follow DDD principles:
 2. State changes only through aggregate methods
 3. Domain events for inter-aggregate coordination
 """
+
 from __future__ import annotations
 
 from bioetl.domain.aggregates.batch import (

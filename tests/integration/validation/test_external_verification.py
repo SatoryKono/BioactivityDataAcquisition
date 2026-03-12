@@ -38,7 +38,9 @@ from bioetl.infrastructure.adapters.semanticscholar.constants import (
 
 def _build_http_client(provider: str) -> UnifiedHTTPClient:
     return UnifiedHTTPClient(
-        rate_limiter=TokenBucketRateLimiter(rate=10.0, capacity=20.0, provider=provider),
+        rate_limiter=TokenBucketRateLimiter(
+            rate=10.0, capacity=20.0, provider=provider
+        ),
         circuit_breaker=CircuitBreakerGuard(provider=provider),
         timeout=15.0,
     )

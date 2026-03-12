@@ -54,7 +54,9 @@ def _make_service(
 class TestInspectQuarantine:
     """Tests for _inspect_quarantine helper."""
 
-    def test_empty_records_prints_no_records(self, capsys: pytest.CaptureFixture) -> None:
+    def test_empty_records_prints_no_records(
+        self, capsys: pytest.CaptureFixture
+    ) -> None:
         """Test that empty inspection prints a 'no records' message."""
         manager = _make_manager(records=[])
 
@@ -193,9 +195,7 @@ class TestReplayQuarantine:
         ]
         service = _make_service(replay_records=records)
 
-        with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.click.echo"
-        ):
+        with patch("bioetl.interfaces.cli.commands.quarantine_support.click.echo"):
             _replay_quarantine(
                 service,
                 pipeline="chembl_activity",
@@ -208,7 +208,9 @@ class TestReplayQuarantine:
 
     def test_non_dry_run_marks_records(self) -> None:
         """Test that dry_run=False marks records as reprocessed."""
-        records = [{"payload_hash": "abc123abc123abc1", "error_code": "VALIDATION_FAILED"}]
+        records = [
+            {"payload_hash": "abc123abc123abc1", "error_code": "VALIDATION_FAILED"}
+        ]
         service = _make_service(replay_records=records, mark_count=1)
 
         with patch("bioetl.interfaces.cli.commands.quarantine_support.click.echo"):

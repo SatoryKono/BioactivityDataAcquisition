@@ -77,6 +77,8 @@
 
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
 
+- **Суффикс `*Protocol` вне `domain/ports/`**: Классы с суффиксом `*Protocol` **MAY** определяться в любом слое для layer-internal structural typing (mixin contracts, local interface shapes). Они **НЕ являются** нарушением ARCH-003. Разграничение: `*Port` — cross-layer контракт в `domain/ports/`, `*Protocol` — layer-internal контракт, не экспортируемый за пределы модуля/слоя.
+
 ```python
 class DataSourcePort(Protocol):
     # Async generator, yields dict records per API page.

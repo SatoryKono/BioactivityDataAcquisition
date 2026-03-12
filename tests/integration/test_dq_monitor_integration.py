@@ -376,7 +376,9 @@ class TestDataQualityServiceMetricsEmission:
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
         dq_monitor = DataQualityMonitorService(logger=recording_logger)  # type: ignore
@@ -421,10 +423,14 @@ class TestDataQualityServiceMetricsEmission:
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitorService(logger=recording_logger, z_score_threshold=2.0)  # type: ignore
+        dq_monitor = DataQualityMonitorService(
+            logger=recording_logger, z_score_threshold=2.0
+        )  # type: ignore
 
         service = DataQualityService(
             dq_monitor=dq_monitor,
@@ -462,7 +468,9 @@ class TestDataQualityServiceMetricsEmission:
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
         dq_monitor = DataQualityMonitorService(logger=recording_logger)  # type: ignore
@@ -555,10 +563,14 @@ class TestDataQualityServiceMetricsEmission:
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
-        from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
+        from bioetl.infrastructure.observability.anomaly import (
+            DataQualityMonitorService,
+        )
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
-        dq_monitor = DataQualityMonitorService(logger=recording_logger, z_score_threshold=2.0)  # type: ignore
+        dq_monitor = DataQualityMonitorService(
+            logger=recording_logger, z_score_threshold=2.0
+        )  # type: ignore
 
         service = DataQualityService(
             dq_monitor=dq_monitor,

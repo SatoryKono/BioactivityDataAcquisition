@@ -479,7 +479,9 @@ class TestMergeServiceOptionalReadPolicy:
         assert enricher_dfs == {}
         assert sources == []
         mock_logger.warning.assert_called_once()
-        assert mock_logger.warning.call_args.kwargs["enricher"] == "crossref_publication"
+        assert (
+            mock_logger.warning.call_args.kwargs["enricher"] == "crossref_publication"
+        )
 
     @pytest.mark.asyncio
     async def test_load_dependency_dataframes_skips_failed_read_with_reason_code(

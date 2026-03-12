@@ -46,7 +46,9 @@ def _make_state(
 
 
 def _make_dep_cfg(pipeline: str, *, required: bool = False) -> SimpleNamespace:
-    return SimpleNamespace(pipeline=pipeline, required=required, silver_table="silver/t")
+    return SimpleNamespace(
+        pipeline=pipeline, required=required, silver_table="silver/t"
+    )
 
 
 def _success_dep(name: str) -> DependencyResult:
@@ -136,7 +138,9 @@ class _StageMixinHarness(CompositeRunnerStageMixin):
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_execute_seed_phase_when_already_completed_then_resumes_without_running() -> None:
+async def test_execute_seed_phase_when_already_completed_then_resumes_without_running() -> (
+    None
+):
     harness = _StageMixinHarness()
     state = _make_state(
         state=CompositePipelineState.SEED_COMPLETED,
@@ -193,7 +197,9 @@ async def test_execute_seed_phase_when_seed_raises_then_propagates_error() -> No
 
 
 @pytest.mark.unit
-def test_resume_seed_phase_when_state_already_seed_completed_then_no_fsm_transition() -> None:
+def test_resume_seed_phase_when_state_already_seed_completed_then_no_fsm_transition() -> (
+    None
+):
     harness = _StageMixinHarness()
     state = _make_state(state=CompositePipelineState.SEED_COMPLETED)
 
@@ -237,7 +243,9 @@ async def test_skip_dependencies_phase_when_called_then_returns_empty_dict() -> 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_execute_dependencies_phase_when_no_deps_configured_then_returns_empty() -> None:
+async def test_execute_dependencies_phase_when_no_deps_configured_then_returns_empty() -> (
+    None
+):
     harness = _StageMixinHarness()
     harness._config.dependencies = []
     state = _make_state()
@@ -257,7 +265,9 @@ async def test_execute_dependencies_phase_when_no_deps_configured_then_returns_e
 
 
 @pytest.mark.unit
-def test_validate_dependency_preconditions_when_coordinator_absent_then_raises() -> None:
+def test_validate_dependency_preconditions_when_coordinator_absent_then_raises() -> (
+    None
+):
     harness = _StageMixinHarness()
     harness._dependency_coordinator = None
     harness._dependencies_runner_factory = MagicMock()
@@ -277,14 +287,18 @@ def test_validate_dependency_preconditions_when_factory_absent_then_raises() -> 
 
 
 @pytest.mark.unit
-def test_validate_dependency_preconditions_when_both_present_then_returns_pair() -> None:
+def test_validate_dependency_preconditions_when_both_present_then_returns_pair() -> (
+    None
+):
     harness = _StageMixinHarness()
     coordinator = MagicMock()
     factory = MagicMock()
     harness._dependency_coordinator = coordinator
     harness._dependencies_runner_factory = factory
 
-    returned_coordinator, returned_factory = harness._validate_dependency_preconditions()
+    returned_coordinator, returned_factory = (
+        harness._validate_dependency_preconditions()
+    )
 
     assert returned_coordinator is coordinator
     assert returned_factory is factory

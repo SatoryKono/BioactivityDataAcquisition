@@ -2,6 +2,7 @@
 
 Contains transformer and extractors for OpenAlex Works API data.
 """
+
 from __future__ import annotations
 
 from bioetl.application.pipelines.openalex.extractors import (

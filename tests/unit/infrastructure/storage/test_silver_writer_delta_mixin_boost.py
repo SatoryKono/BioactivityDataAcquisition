@@ -11,7 +11,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pyarrow as pa
 import pytest
 
-from bioetl.domain.exceptions import DeltaTransactionError, MergeConflictError, SchemaViolationError
+from bioetl.domain.exceptions import (
+    DeltaTransactionError,
+    MergeConflictError,
+    SchemaViolationError,
+)
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
     SilverWriterDeltaMixin,
@@ -108,7 +112,9 @@ class TestWriteDeleteLines:
         mock_module = MagicMock()
         mock_module.write_deltalake = fake_write_deltalake
 
-        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
             await mixin._write_delete(request)
 
         assert len(write_calls) == 1
@@ -136,7 +142,9 @@ class TestWriteDeleteLines:
         mock_module = MagicMock()
         mock_module.write_deltalake = fake_write
 
-        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
             await mixin._write_delete(request)
 
         assert write_calls[0]["partition_by"] == ["date"]
@@ -162,7 +170,9 @@ class TestWriteDeleteLines:
         mock_module = MagicMock()
         mock_module.write_deltalake = fake_write_deltalake
 
-        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
             await mixin._write_append(request)
 
         assert len(write_calls) == 1
@@ -176,7 +186,9 @@ class TestWriteMergeRetrySuccess:
     """Tests for _write_merge retry paths (lines 130, 142-158)."""
 
     @pytest.mark.asyncio
-    async def test_merge_records_builds_predicate_and_executes_merge_chain(self) -> None:
+    async def test_merge_records_builds_predicate_and_executes_merge_chain(
+        self,
+    ) -> None:
         """Merge path should build the expected predicate and execute full chain."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
@@ -244,7 +256,9 @@ class TestWriteMergeRetrySuccess:
         mock_module.DeltaTable = fake_delta_table
         mock_module.TableNotFoundError = type("TableNotFoundError", (Exception,), {})
 
-        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
             with patch("asyncio.sleep", new_callable=AsyncMock):
                 await mixin._write_merge(request)
 
@@ -288,7 +302,9 @@ class TestWriteMergeRetrySuccess:
 
         mock_module.write_deltalake = fake_write_deltalake
 
-        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
             await mixin._write_merge(request)
 
         assert len(append_calls) == 1
@@ -324,7 +340,9 @@ class TestWriteMergeRetrySuccess:
         mock_module.DeltaTable = always_conflict_dt
         mock_module.TableNotFoundError = type("TableNotFoundError", (Exception,), {})
 
-        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
             with patch("asyncio.sleep", new_callable=AsyncMock):
                 with pytest.raises(CommitFailedError):
                     await mixin._write_merge(request)
@@ -350,7 +368,9 @@ class TestWriteMergeRetrySuccess:
         )
 
         # Directly mock _merge_records to raise _MergeExecutionTimeoutError
-        async def always_timeout(dt, records, primary_keys, table_path, *, timeout_seconds):
+        async def always_timeout(
+            dt, records, primary_keys, table_path, *, timeout_seconds
+        ):
             raise _MergeExecutionTimeoutError(timeout_seconds)
 
         mock_module = MagicMock()
@@ -361,7 +381,9 @@ class TestWriteMergeRetrySuccess:
         mock_module.DeltaTable = dt_factory
         mock_module.TableNotFoundError = type("TableNotFoundError", (Exception,), {})
 
-        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+        with patch.object(
+            mixin, "_load_silver_writer_module", return_value=mock_module
+        ):
             with patch.object(mixin, "_merge_records", side_effect=always_timeout):
                 with pytest.raises(DeltaTransactionError):
                     await mixin._write_merge(request)
@@ -657,6 +679,7 @@ class TestRaiseDomainWriteError:
     async def test_delta_error_without_merge_conflict_reraises(self) -> None:
         """Line 333: DeltaError without 'Merge-conflict' is re-raised as-is."""
         from deltalake.exceptions import DeltaError
+
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
         request = _DeltaWriteRequest(

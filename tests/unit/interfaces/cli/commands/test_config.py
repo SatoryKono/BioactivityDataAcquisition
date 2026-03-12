@@ -173,9 +173,7 @@ class TestConfigValidateCommand:
             "bioetl.interfaces.cli.commands.config.get_config_service",
             return_value=mock_config_service,
         ):
-            result = cli_runner.invoke(
-                cli, ["config", "validate", "chembl_activity"]
-            )
+            result = cli_runner.invoke(cli, ["config", "validate", "chembl_activity"])
 
         assert result.exit_code == 0
         assert "chembl" in result.output
@@ -190,9 +188,7 @@ class TestConfigValidateCommand:
             "bioetl.interfaces.cli.commands.config.get_config_service",
             return_value=mock_config_service,
         ):
-            result = cli_runner.invoke(
-                cli, ["config", "validate", "chembl_activity"]
-            )
+            result = cli_runner.invoke(cli, ["config", "validate", "chembl_activity"])
 
         assert result.exit_code == 0
         assert "gold" in result.output.lower()
@@ -209,9 +205,7 @@ class TestConfigValidateCommand:
             "bioetl.interfaces.cli.commands.config.get_config_service",
             return_value=mock_config_service,
         ):
-            result = cli_runner.invoke(
-                cli, ["config", "validate", "bad_pipeline"]
-            )
+            result = cli_runner.invoke(cli, ["config", "validate", "bad_pipeline"])
 
         assert result.exit_code == 0
         assert "invalid" in result.output.lower() or "Configuration" in result.output

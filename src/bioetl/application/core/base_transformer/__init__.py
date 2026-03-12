@@ -1,4 +1,5 @@
 """Base transformer public facade."""
+
 from __future__ import annotations
 
 from bioetl.application.core.base_transformer.base import BaseTransformer, T

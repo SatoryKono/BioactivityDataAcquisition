@@ -24,6 +24,7 @@ from bioetl.domain.exceptions import CheckpointConflictError, StorageError
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_logger() -> MagicMock:
     """Create a mock LoggerPort (accepts **kwargs via MagicMock)."""
     logger = MagicMock()
@@ -143,15 +144,14 @@ def _enriched_serialized_state(
 # 1. Filename format
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestFilenameFormat:
     """Tests that the checkpoint filename follows the expected pattern."""
 
     def test_filename_format(self) -> None:
         """Filename is composite_{name}_{run_id}.json."""
-        svc, storage, _ = _make_service(
-            composite_name="my_composite", run_id="run-001"
-        )
+        svc, storage, _ = _make_service(composite_name="my_composite", run_id="run-001")
         assert svc._checkpoint_filename == "composite_my_composite_run-001.json"
 
     def test_glob_pattern(self) -> None:
@@ -163,6 +163,7 @@ class TestFilenameFormat:
 # ---------------------------------------------------------------------------
 # 2. load – fresh start (resume=False)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestLoadFreshStart:
@@ -206,6 +207,7 @@ class TestLoadFreshStart:
 # ---------------------------------------------------------------------------
 # 3. load – resume mode (resume=True)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestLoadResume:
@@ -291,6 +293,7 @@ class TestLoadResume:
 # 4. load – warns on overwrite (resume=False, existing checkpoint with progress)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestLoadWarnOnOverwrite:
     """Tests for warning when resume=False and existing checkpoint has progress."""
@@ -334,19 +337,21 @@ class TestLoadWarnOnOverwrite:
         storage.list_glob.return_value = [latest_filename]
         storage.exists.return_value = True
         # A fresh NOT_STARTED checkpoint is not resumable
-        fresh_json = json.dumps({
-            "composite_name": "my_composite",
-            "run_id": "run-old",
-            "state": "not_started",
-            "seed_completed": False,
-            "seed_result": None,
-            "completed_dependencies": [],
-            "dependency_results": {},
-            "completed_enrichers": [],
-            "enrichment_results": {},
-            "created_at": None,
-            "updated_at": None,
-        })
+        fresh_json = json.dumps(
+            {
+                "composite_name": "my_composite",
+                "run_id": "run-old",
+                "state": "not_started",
+                "seed_completed": False,
+                "seed_result": None,
+                "completed_dependencies": [],
+                "dependency_results": {},
+                "completed_enrichers": [],
+                "enrichment_results": {},
+                "created_at": None,
+                "updated_at": None,
+            }
+        )
         storage.read.return_value = fresh_json
 
         await svc.load()
@@ -376,6 +381,7 @@ class TestLoadWarnOnOverwrite:
 # 5. save
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestSave:
     """Tests for save() atomic write behaviour."""
@@ -383,9 +389,7 @@ class TestSave:
     @pytest.mark.asyncio
     async def test_save_calls_write_atomic(self) -> None:
         """save() delegates to storage.write_atomic with the correct filename."""
-        svc, storage, _ = _make_service(
-            composite_name="my_composite", run_id="run-001"
-        )
+        svc, storage, _ = _make_service(composite_name="my_composite", run_id="run-001")
         checkpoint = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
@@ -482,6 +486,7 @@ class TestSave:
 # 6. delete
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestDelete:
     """Tests for delete() checkpoint removal."""
@@ -489,9 +494,7 @@ class TestDelete:
     @pytest.mark.asyncio
     async def test_delete_calls_storage_delete(self) -> None:
         """delete() delegates to storage.delete with the correct filename."""
-        svc, storage, _ = _make_service(
-            composite_name="my_composite", run_id="run-001"
-        )
+        svc, storage, _ = _make_service(composite_name="my_composite", run_id="run-001")
         storage.delete.return_value = True
 
         await svc.delete()
@@ -524,6 +527,7 @@ class TestDelete:
 # ---------------------------------------------------------------------------
 # 7. list_all
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestListAll:

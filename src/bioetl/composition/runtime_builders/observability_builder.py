@@ -32,7 +32,9 @@ def build_observability_bundle(
     metrics_factory: Callable[[], MetricsPort] = PrometheusMetrics,
     noop_tracing_factory: Callable[[], TracingPort] = NoOpTracing,
     noop_metrics_factory: Callable[..., MetricsPort] = NoOpMetrics,
-    dq_monitor_factory: Callable[..., DataQualityMonitorService] = DataQualityMonitorService,
+    dq_monitor_factory: Callable[
+        ..., DataQualityMonitorService
+    ] = DataQualityMonitorService,
 ) -> ObservabilityBundle:
     """Build observability bundle with optional DQ monitor wiring.
 

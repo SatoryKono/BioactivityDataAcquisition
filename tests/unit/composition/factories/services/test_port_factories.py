@@ -60,14 +60,16 @@ def test_create_metrics_with_noop() -> None:
 @pytest.mark.unit
 def test_is_metrics_port_like_true() -> None:
     """is_metrics_port_like returns True for objects with all required methods."""
-    candidate = MagicMock(spec=[
-        "observe_histogram",
-        "increment_counter",
-        "set_gauge",
-        "inc_quarantine_records",
-        "inc_dq_validation_failures",
-        "close",
-    ])
+    candidate = MagicMock(
+        spec=[
+            "observe_histogram",
+            "increment_counter",
+            "set_gauge",
+            "inc_quarantine_records",
+            "inc_dq_validation_failures",
+            "close",
+        ]
+    )
     assert is_metrics_port_like(candidate) is True
 
 

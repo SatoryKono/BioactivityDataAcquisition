@@ -57,7 +57,9 @@ class TestReplaceWithRetryLine96:
 
         with patch.object(Path, "replace", flaky_replace):
             with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
-                _replace_with_retry(temp, target, retry_policy=policy, on_retry=on_retry)
+                _replace_with_retry(
+                    temp, target, retry_policy=policy, on_retry=on_retry
+                )
 
         assert len(retry_events) == 1
         assert retry_events[0][0] == 1  # attempt 1
@@ -162,22 +164,23 @@ class TestAtomicWriteErrorHandling:
 class TestAtomicWriteGroupAddFailure:
     """Tests for AtomicWriteGroup.add write failure (lines 255-259)."""
 
-    def test_add_write_failure_cleans_up_temp_and_raises(
-        self, tmp_path: Path
-    ) -> None:
+    def test_add_write_failure_cleans_up_temp_and_raises(self, tmp_path: Path) -> None:
         """Lines 255-259: OSError during add.write cleans up temp and re-raises."""
         group = AtomicWriteGroup()
         target = tmp_path / "target.txt"
 
         # Patch os.fdopen to simulate write failure
         import os
+
         original_fdopen = os.fdopen
 
         class FakeFile:
             def write(self, data: bytes) -> int:
                 raise OSError("disk full")
+
             def __enter__(self):
                 return self
+
             def __exit__(self, *a):
                 pass
 
@@ -207,8 +210,10 @@ class TestAtomicWriteGroupAddFailure:
         class BadFile:
             def write(self, data: bytes) -> int:
                 raise TypeError("bad type")
+
             def __enter__(self):
                 return self
+
             def __exit__(self, *a):
                 pass
 

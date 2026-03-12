@@ -589,7 +589,9 @@ class TestPreflightSkipPolicy:
             test_run_id=test_run_id,
         )
 
-        assert runner._get_preflight_skip_reason() == "preflight_validator not configured"
+        assert (
+            runner._get_preflight_skip_reason() == "preflight_validator not configured"
+        )
 
     def test_empty_field_priorities_returns_skip_reason(
         self,

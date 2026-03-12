@@ -298,7 +298,8 @@ def get_builtin_transformer_specs() -> tuple[TransformerRegistrationSpec, ...]:
 def register_transformer_spec(
     spec: TransformerRegistrationSpec,
     *,
-    load_transformer_class_fn: Callable[[str, str], type[BaseTransformer]] | None = None,
+    load_transformer_class_fn: Callable[[str, str], type[BaseTransformer]]
+    | None = None,
 ) -> None:
     """Register one transformer from a declarative module/class specification."""
     loader = (
@@ -316,7 +317,8 @@ def register_transformer_spec(
 def register_all_transformers(
     specs: Iterable[TransformerRegistrationSpec] | None = None,
     *,
-    load_transformer_class_fn: Callable[[str, str], type[BaseTransformer]] | None = None,
+    load_transformer_class_fn: Callable[[str, str], type[BaseTransformer]]
+    | None = None,
 ) -> None:
     """Register all known transformers.
 

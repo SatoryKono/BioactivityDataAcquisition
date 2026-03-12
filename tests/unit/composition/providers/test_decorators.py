@@ -11,7 +11,10 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.providers.decorators import _register_provider_class, register_provider
+from bioetl.composition.providers.decorators import (
+    _register_provider_class,
+    register_provider,
+)
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
@@ -33,6 +36,7 @@ def _isolated_registry():
 # Minimal fake adapters for DI in tests
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class _FakeAdapter:
     http_client: Any = None
@@ -42,6 +46,7 @@ class _FakeAdapter:
 # ---------------------------------------------------------------------------
 # Tests for _register_provider_class
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestRegisterProviderClass:
@@ -102,6 +107,7 @@ class TestRegisterProviderClass:
 
     def test_sets_provider_name_attribute_on_class(self) -> None:
         """Should set __provider_name__ on the adapter class."""
+
         @dataclass
         class _NamedAdapter:
             http_client: Any = None
@@ -180,12 +186,14 @@ class TestRegisterProviderClass:
 # Tests for register_provider decorator
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestRegisterProviderDecorator:
     """Tests for the register_provider public decorator."""
 
     def test_decorator_registers_class(self) -> None:
         """@register_provider should register the decorated class."""
+
         @register_provider("decorated_provider", http_rate=5.0)
         @dataclass
         class _DecoratedAdapter:
@@ -196,6 +204,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_returns_original_class_unchanged(self) -> None:
         """Decorator should return the exact same class object."""
+
         @dataclass
         class _OriginalAdapter:
             http_client: Any = None
@@ -207,6 +216,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_sets_default_http_rate(self) -> None:
         """Default http_rate should be 5.0."""
+
         @register_provider("default_rate_provider")
         @dataclass
         class _DefaultRateAdapter:
@@ -219,6 +229,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_sets_custom_http_rate(self) -> None:
         """Custom http_rate should override the default."""
+
         @register_provider("custom_rate_provider", http_rate=25.0, http_capacity=50)
         @dataclass
         class _CustomRateAdapter:
@@ -232,6 +243,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_with_requires_http_client_false(self) -> None:
         """requires_http_client=False should set http_config to None."""
+
         @register_provider("no_http_provider", requires_http_client=False)
         @dataclass
         class _NoHttpAdapter:
@@ -243,6 +255,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_with_rate_overrides(self) -> None:
         """rate_overrides should be stored in http_config."""
+
         @register_provider(
             "override_provider",
             http_rate=10.0,
@@ -259,6 +272,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_with_default_kwargs(self) -> None:
         """Extra kwargs passed to @register_provider become default_kwargs."""
+
         @register_provider("kwargs_decorator_provider", batch_size=500, timeout=60)
         @dataclass
         class _KwargsDecoratorAdapter:
@@ -283,6 +297,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_sets_provider_name_on_class(self) -> None:
         """__provider_name__ attribute should be set on decorated class."""
+
         @register_provider("name_attr_provider")
         @dataclass
         class _NameAttrAdapter:
@@ -293,6 +308,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorated_class_still_instantiable(self) -> None:
         """Decorated class should still be instantiable as normal."""
+
         @register_provider("instantiable_provider")
         @dataclass
         class _InstantiableAdapter:
@@ -304,6 +320,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_with_requires_logger_false(self) -> None:
         """requires_logger=False should be stored in config."""
+
         @register_provider("no_logger_provider", requires_logger=False)
         @dataclass
         class _NoLoggerAdapter:
