@@ -10,7 +10,7 @@ import click
 
 from bioetl import __version__
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry import get_default_registry
+from bioetl.composition.registry import create_registry, get_default_registry
 from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
@@ -28,6 +28,13 @@ __all__ = [
     "cli",
     "main",
 ]
+
+
+def _build_main_registry() -> object:
+    """Build an explicit registry for the canonical process entrypoint."""
+    registry = create_registry()
+    register_all_pipelines(registry=registry)
+    return registry
 
 
 @click.group()
@@ -56,8 +63,7 @@ cli.add_command(maintenance)
 
 def main() -> None:
     """Main entry point."""
-    register_all_pipelines()
-    cli()
+    cli(obj=_build_main_registry())
 
 
 if __name__ == "__main__":

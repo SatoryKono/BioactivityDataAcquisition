@@ -66,6 +66,9 @@ def create_metrics(settings: Settings) -> MetricsPort:
     )
 
     if isinstance(metrics, MetricsPort):
+        assert isinstance(metrics, MetricsPort), (
+            f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
+        )
         return metrics
     if is_metrics_port_like(metrics):
         return cast("MetricsPort", metrics)

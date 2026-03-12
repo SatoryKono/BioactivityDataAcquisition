@@ -473,6 +473,58 @@ class TestMergeInputPolicy:
         assert [cfg.pipeline for cfg in mergeable_enrichers] == ["crossref"]
         assert [cfg.pipeline for cfg in mergeable_dependencies] == ["pubmed"]
 
+    def test_transition_to_merging_state_sets_merge_state_and_logs_transition(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Merge transition helper should return MERGING state and emit merge_start FSM log."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.ENRICHMENT_COMPLETED,
+        )
+
+        next_state = runner._transition_to_merging_state(state)
+
+        assert next_state.state == CompositePipelineState.MERGING
+        fsm_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and "FSM state transition" in str(c.args[0])
+        ]
+        assert any(c.kwargs.get("stage") == "merge_start" for c in fsm_calls)
+
 
 class TestFSMEnrichmentCompletedTransition:
     """Tests for ENRICHMENT_COMPLETED state transition."""
@@ -793,6 +845,120 @@ class TestFinalizationPolicy:
             if c.args and "FSM state transition" in str(c.args[0])
         ]
         assert not any(c.kwargs.get("stage") == "pipeline_complete" for c in fsm_calls)
+
+    @pytest.mark.asyncio
+    async def test_persist_completed_state_uses_completed_operation(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Completed-state persistence should always use the completed checkpoint op."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.COMPLETED,
+        )
+        runner._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+
+        await runner._persist_completed_state(state)
+
+        runner._save_checkpoint_safe.assert_awaited_once_with(state, "completed")
+
+    @pytest.mark.asyncio
+    async def test_handle_merge_success_orders_side_effects(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Merge success should log first, then run DQ reports and quarantine writes."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        merge_result = MergeResult(
+            records_from_seed=100,
+            records_merged=95,
+            records_enriched=80,
+            records_fully_enriched=70,
+            duration_seconds=5.0,
+        )
+        call_order: list[str] = []
+
+        def log_info(*args: object, **kwargs: object) -> None:
+            if args and args[0] == "merge_completed":
+                call_order.append("log")
+
+        async def generate_reports(result: MergeResult) -> None:
+            assert result is merge_result
+            call_order.append("dq")
+
+        async def write_quarantine(result: MergeResult) -> None:
+            assert result is merge_result
+            call_order.append("quarantine")
+
+        mock_logger.info.side_effect = log_info
+        runner._generate_dq_reports = generate_reports  # type: ignore[method-assign]
+        runner._write_cv_quarantine = write_quarantine  # type: ignore[method-assign]
+
+        await runner._handle_merge_success(merge_result)
+
+        assert call_order == ["log", "dq", "quarantine"]
 
 
 class TestFSMFailedStateIsResumable:

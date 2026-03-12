@@ -85,11 +85,11 @@ class CompositeRunnerMergeStageMixin:
         """Invoke support-layer quarantine write helper."""
         await self._write_cv_quarantine(merge_result)
 
-    async def _start_merge_phase(
+    def _transition_to_merging_state(
         self,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
-        """Transition checkpoint/FSM to MERGING and persist checkpoint."""
+        """Return MERGING state and emit the corresponding FSM transition log."""
         previous_state = state.state
         self._fsm.validate_fsm_transition(
             previous_state,
@@ -101,6 +101,14 @@ class CompositeRunnerMergeStageMixin:
             to_state=CompositePipelineState.MERGING,
             stage="merge_start",
         )
+        return merging_state
+
+    async def _start_merge_phase(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        """Transition checkpoint/FSM to MERGING and persist checkpoint."""
+        merging_state = self._transition_to_merging_state(state)
         self._logger.info(
             PipelineEvent.phase_started("merge"),
             composite=self._config.name,
@@ -212,6 +220,27 @@ class CompositeRunnerMergeStageMixin:
         )
         return completed_state
 
+    async def _persist_completed_state(
+        self,
+        state: CompositeCheckpointState,
+    ) -> None:
+        """Persist finalized checkpoint state via the shared completed-operation seam."""
+        await self._call_save_checkpoint_safe(state, "completed")
+
+    async def _handle_merge_success(
+        self,
+        merge_result: MergeResult,
+    ) -> None:
+        """Emit merge success observability and post-merge side effects."""
+        self._logger.info(
+            PipelineEvent.phase_completed("merge"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            records_merged=merge_result.records_merged,
+        )
+        await self._call_generate_dq_reports(merge_result)
+        await self._call_write_cv_quarantine(merge_result)
+
     async def _execute_merge_stage(
         self,
         state: CompositeCheckpointState,
@@ -239,16 +268,7 @@ class CompositeRunnerMergeStageMixin:
                     dependencies=mergeable_dependencies,
                     dependency_results=dependency_results,
                 )
-
-                self._logger.info(
-                    PipelineEvent.phase_completed("merge"),
-                    composite=self._config.name,
-                    run_id=self._run_id_str,
-                    records_merged=merge_result.records_merged,
-                )
-
-                await self._call_generate_dq_reports(merge_result)
-                await self._call_write_cv_quarantine(merge_result)
+                await self._handle_merge_success(merge_result)
 
             except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as merge_error:
                 await self._handle_merge_phase_exception(state, merge_error)
@@ -261,5 +281,5 @@ class CompositeRunnerMergeStageMixin:
     async def _finalize_pipeline(self, state: CompositeCheckpointState) -> None:
         """Finalize pipeline: set COMPLETED state and clean checkpoint."""
         state = self._transition_to_completed_state(state)
-        await self._call_save_checkpoint_safe(state, "completed")
+        await self._persist_completed_state(state)
         await self._delete_checkpoint_safe()

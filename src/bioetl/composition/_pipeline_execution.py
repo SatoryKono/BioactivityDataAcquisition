@@ -19,6 +19,7 @@ from bioetl.composition.bootstrap import (
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.providers.registration import register_all_providers
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,
@@ -131,13 +132,14 @@ class ArchiveOptions:
     remove_source: bool = False
 
 
-def _ensure_registrations() -> None:
+def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure all providers and pipelines are registered.
 
     This is idempotent and safe to call multiple times.
     """
     register_all_providers()
-    register_all_pipelines()
+    if registry is None or not registry.list_pipelines():
+        register_all_pipelines(registry=registry)
 
 
 def _build_input_filter_context(options: RunOptions) -> InputFilterContext:

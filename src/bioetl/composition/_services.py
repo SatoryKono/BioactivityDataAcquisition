@@ -40,6 +40,7 @@ if TYPE_CHECKING:
         VacuumService,
     )
     from bioetl.application.services.lock_service import LockService
+    from bioetl.composition.registry import PipelineRegistry
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
 
@@ -204,7 +205,9 @@ async def cleanup_bronze(
     return result
 
 
-def get_pipeline_runner_service() -> PipelineRunnerService:
+def get_pipeline_runner_service(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunnerService:
     """Get a pipeline runner service for universal pipeline execution.
 
     This is the recommended way to run pipelines programmatically from
@@ -222,8 +225,8 @@ def get_pipeline_runner_service() -> PipelineRunnerService:
         >>> if result.is_success:
         ...     logger.info("pipeline_success", records_silver=result.records_silver)
     """
-    _ensure_registrations()
-    return bootstrap_pipeline_runner_service()
+    _ensure_registrations(registry=registry)
+    return bootstrap_pipeline_runner_service(registry=registry)
 
 
 def get_config_service() -> ConfigService:
