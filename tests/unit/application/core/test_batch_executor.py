@@ -12,6 +12,11 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
+from bioetl.application.core.batch_executor_helpers import (
+    BatchExecutionStateOutcome,
+    apply_batch_execution_state_update,
+    build_batch_result_snapshot,
+)
 from bioetl.application.core.batch_executor_loop_helpers import (
     BatchExtractionLoopState,
     build_batch_progress_payload,
@@ -823,6 +828,58 @@ class TestBatchResult:
         assert result.silver_count == 95
         assert result.gold_count == 80
         assert result.quarantined_count == 5
+
+
+@pytest.mark.unit
+class TestBatchExecutorHelpers:
+    """Tests for extracted batch-executor helper functions."""
+
+    def test_apply_batch_execution_state_update_updates_counters(self) -> None:
+        """State helper should apply deltas and preserve batch-id order."""
+        state = MagicMock(
+            records_bronze=10,
+            records_silver=8,
+            records_gold=6,
+            records_quarantined=1,
+            records_filtered_out=2,
+            _source_batch_ids=["batch-001"],
+        )
+
+        apply_batch_execution_state_update(
+            state=state,
+            state_update=BatchExecutionStateOutcome(
+                bronze_count=3,
+                silver_count=2,
+                gold_count=1,
+                quarantined_count=4,
+                filtered_out_count=5,
+                source_batch_id="batch-002",
+            ),
+        )
+
+        assert state.records_bronze == 13
+        assert state.records_silver == 10
+        assert state.records_gold == 7
+        assert state.records_quarantined == 5
+        assert state.records_filtered_out == 7
+        assert state._source_batch_ids == ["batch-001", "batch-002"]
+
+    def test_build_batch_result_snapshot_uses_current_counters(self) -> None:
+        """Batch-result helper should mirror current cumulative counters."""
+        result = build_batch_result_snapshot(
+            batch_result_type=BatchResult,
+            records_bronze=12,
+            records_silver=11,
+            records_gold=9,
+            records_quarantined=2,
+        )
+
+        assert result == BatchResult(
+            bronze_count=12,
+            silver_count=11,
+            gold_count=9,
+            quarantined_count=2,
+        )
 
 
 @pytest.mark.unit

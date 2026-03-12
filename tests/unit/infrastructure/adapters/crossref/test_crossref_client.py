@@ -231,3 +231,23 @@ async def test_health_check_returns_degraded_on_slow_response(
         result = await adapter.health_check()
 
     assert result == HealthStatus.DEGRADED
+
+
+@pytest.mark.asyncio
+async def test_fetch_multi_filtered_raises_not_implemented(adapter) -> None:
+    """CrossRef adapter should keep rejecting unsupported multi-filter fetches."""
+    with pytest.raises(NotImplementedError, match="does not support multi-field"):
+        await adapter.fetch_multi_filtered(
+            entity_type="work",
+            filters={"doi": ["10.1000/test"]},
+        ).__anext__()
+
+
+@pytest.mark.asyncio
+async def test_aclose_delegates_to_http_client_exit(adapter, mock_http_client) -> None:
+    """Adapter close should delegate to the underlying HTTP client."""
+    mock_http_client.__aexit__ = AsyncMock(return_value=None)
+
+    await adapter.aclose()
+
+    mock_http_client.__aexit__.assert_awaited_once_with(None, None, None)

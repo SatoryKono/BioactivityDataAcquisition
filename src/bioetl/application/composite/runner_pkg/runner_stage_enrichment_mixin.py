@@ -106,9 +106,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             runner_factory=self._enricher_runner_factory,
         )
 
-        for name, result in enrichment_results.items():
-            if result.is_success or result.status == EnrichmentStatus.SKIPPED:
-                state = state.with_enricher_completed(name, result)
+        state = self._record_completed_enrichment_results(state, enrichment_results)
         await self._call_save_checkpoint_safe(state, "enrichment_results")
 
         log_enrichment_summary(enrichment_results, self._config.name, self._logger)
@@ -215,6 +213,17 @@ class _CompositeRunnerStageEnrichmentMixin:
             self._config.name,
             self._logger,
         )
+
+    def _record_completed_enrichment_results(
+        self,
+        state: CompositeCheckpointState,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> CompositeCheckpointState:
+        """Record successful or skipped enrichers in checkpoint state."""
+        for name, result in enrichment_results.items():
+            if result.is_success or result.status == EnrichmentStatus.SKIPPED:
+                state = state.with_enricher_completed(name, result)
+        return state
 
     async def _complete_enrichment_stage(
         self,

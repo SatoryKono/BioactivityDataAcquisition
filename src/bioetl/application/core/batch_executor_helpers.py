@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_executor import BatchResult
     from bioetl.application.core.batch_processing_service import BatchProcessingOutput
 
 
 __all__ = [
     "BatchExecutionStateOutcome",
+    "apply_batch_execution_state_update",
     "build_batch_execution_state_update",
+    "build_batch_result_snapshot",
     "build_run_statistics",
 ]
 
@@ -28,6 +31,17 @@ class BatchExecutionStateOutcome:
     source_batch_id: str
 
 
+class _BatchExecutionStatePort(Protocol):
+    """Mutable executor state required to apply batch execution deltas."""
+
+    records_bronze: int
+    records_silver: int
+    records_gold: int
+    records_quarantined: int
+    records_filtered_out: int
+    _source_batch_ids: list[str]
+
+
 def build_batch_execution_state_update(
     *,
     input_record_count: int,
@@ -41,6 +55,37 @@ def build_batch_execution_state_update(
         quarantined_count=output.quarantined_count,
         filtered_out_count=output.filtered_out_count,
         source_batch_id=str(output.batch_id),
+    )
+
+
+def apply_batch_execution_state_update(
+    *,
+    state: _BatchExecutionStatePort,
+    state_update: BatchExecutionStateOutcome,
+) -> None:
+    """Apply one batch of counter deltas to executor-level state."""
+    state.records_bronze += state_update.bronze_count
+    state.records_silver += state_update.silver_count
+    state.records_gold += state_update.gold_count
+    state.records_quarantined += state_update.quarantined_count
+    state.records_filtered_out += state_update.filtered_out_count
+    state._source_batch_ids.append(state_update.source_batch_id)
+
+
+def build_batch_result_snapshot(
+    *,
+    batch_result_type: type[BatchResult],
+    records_bronze: int,
+    records_silver: int,
+    records_gold: int,
+    records_quarantined: int,
+) -> BatchResult:
+    """Build the public batch-result snapshot from cumulative executor counters."""
+    return batch_result_type(
+        bronze_count=records_bronze,
+        silver_count=records_silver,
+        gold_count=records_gold,
+        quarantined_count=records_quarantined,
     )
 
 

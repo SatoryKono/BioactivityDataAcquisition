@@ -28,6 +28,7 @@ from bioetl.application.composite.runner_pkg import (
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,
+    EnrichmentStatus,
     MergeResult,
     SeedResult,
 )
@@ -636,6 +637,74 @@ class TestFSMEnrichmentCompletedTransition:
             c.args and c.args[0] == "enrichment_completed"
             for c in mock_logger.info.call_args_list
         )
+
+    def test_record_completed_enrichment_results_keeps_success_and_skipped_only(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Enrichment result recording helper should persist only success/skipped results."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.ENRICHING,
+        )
+
+        next_state = runner._record_completed_enrichment_results(
+            state,
+            {
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=95,
+                    records_not_found=5,
+                    duration_seconds=1.0,
+                ),
+                "openalex": EnrichmentResult.skipped(
+                    enricher_name="openalex",
+                    reason="Skipped by coordinator",
+                ),
+                "pubmed": EnrichmentResult.failed(
+                    enricher_name="pubmed",
+                    error_message="upstream failed",
+                ),
+            },
+        )
+
+        assert set(next_state.completed_enrichers) == {"crossref", "openalex"}
+        assert next_state.enrichment_results["crossref"].is_success
+        assert next_state.enrichment_results["openalex"].status == EnrichmentStatus.SKIPPED
+        assert "pubmed" not in next_state.completed_enrichers
 
     @pytest.mark.asyncio
     async def test_transitions_through_enriching_to_enrichment_completed(

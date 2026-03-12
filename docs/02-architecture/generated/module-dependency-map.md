@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1037`
-- Internal import edges (raw): `3839`
+- Scanned modules: `1038`
+- Internal import edges (raw): `3844`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `238`
@@ -20,15 +20,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|441 OK| application
+    application -->|442 OK| application
     application -->|603 OK| domain
     composition -->|183 OK| application
     composition -->|266 OK| composition
     composition -->|214 OK| domain
     composition -->|201 OK| infrastructure
     domain -->|690 OK| domain
-    infrastructure -->|472 OK| domain
-    infrastructure -->|597 OK| infrastructure
+    infrastructure -->|473 OK| domain
+    infrastructure -->|600 OK| infrastructure
     interfaces -->|17 OK| application
     interfaces -->|28 OK| composition
     interfaces -->|26 OK| domain
@@ -40,15 +40,15 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 441 | allowed |
+| `application` | `application` | 442 | allowed |
 | `application` | `domain` | 603 | allowed |
 | `composition` | `application` | 183 | allowed |
 | `composition` | `composition` | 266 | allowed |
 | `composition` | `domain` | 214 | allowed |
 | `composition` | `infrastructure` | 201 | allowed |
 | `domain` | `domain` | 690 | allowed |
-| `infrastructure` | `domain` | 472 | allowed |
-| `infrastructure` | `infrastructure` | 597 | allowed |
+| `infrastructure` | `domain` | 473 | allowed |
+| `infrastructure` | `infrastructure` | 600 | allowed |
 | `interfaces` | `application` | 17 | allowed |
 | `interfaces` | `composition` | 28 | allowed |
 | `interfaces` | `domain` | 26 | allowed |
@@ -59,7 +59,7 @@ flowchart LR
 
 | From Group | To Group | Imports |
 |---|---|---:|
-| `infrastructure.adapters` | `domain.types` | 84 |
+| `infrastructure.adapters` | `domain.types` | 85 |
 | `application.composite` | `domain.composite` | 74 |
 | `infrastructure.adapters` | `domain.ports` | 71 |
 | `application.pipelines` | `domain.types` | 70 |
