@@ -182,6 +182,7 @@ nav:
             -   "Cleanup Policy": 03-guides/cleanup-policy.md
             -   "Registry Pattern": 03-guides/registry-pattern.md
             -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
+            -   "Codex WSL2 Setup": 03-guides/development/codex-wsl2-setup.md
             -   Migration:
                     -   "Schema Artifact Migration": 03-guides/migration-schema-artifacts.md
                     -   "v5.9 → v5.14": 03-guides/migration-5.9-to-5.14.md
