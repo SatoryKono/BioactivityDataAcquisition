@@ -21,3 +21,16 @@ python -m scripts.qa <command> [args...]
 | `report-dep-map` | `generate_architecture_dependency_map.py` | Generate/check architecture dependency map |
 | `report-hotspots` | `generate_hotspot_degradation_report.py` | Generate hotspot degradation report |
 | `calibrate-hotspots` | `calibrate_hotspot_budgets.py` | Calibrate hotspot budgets |
+
+## When to Use
+
+| Command | When | Trigger |
+|---------|------|---------|
+| `check-naming` | After adding/renaming classes, functions, or modules; enforces NAME-001..009 rules | CI gate (`architecture.yml`, every PR) |
+| `check-c901` | After modifying complex functions; prevents new C901 violations above baseline | CI gate (`import-linter.yml`, every PR) |
+| `check-naming-pkg` | After restructuring packages or adding new modules; enforces factory isolation | CI gate (`architecture.yml`) |
+| `check-exemptions` | After modifying quality exemption registry | CI gate (`architecture.yml`) |
+| `check-terminology` | After adding domain terms; validates code uses canonical terminology per `glossary.md` | CI gate (`architecture.yml`) |
+| `report-dep-map` | After changing imports in `src/bioetl/`; use `--check` for drift detection, `--update` to regenerate | Pre-commit hook + CI gate |
+| `report-hotspots` | After performance benchmark runs; generates degradation report from JSONL observations | Manual, on-demand |
+| `calibrate-hotspots` | After collecting new performance observations; recalculates budget thresholds | Manual, on-demand |

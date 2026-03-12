@@ -19,6 +19,16 @@ python -m scripts.ci <command> [args...]
 | `e2e-rerun` | `check_e2e_rerun_stability.py` | Check E2E rerun stability |
 | `debt-report` | `report_quality_debt_weekly.py` | Generate weekly quality debt report |
 
+## When to Use
+
+| Command | When | Trigger |
+|---------|------|---------|
+| `run-tests` | Primary test execution in CI; wraps pytest with xdist parallelization and serial fallback on worker crashes | CI pipeline (automatic) |
+| `quality-gate` | Pre-merge quality validation; computes integral quality score, blocks PR if below quarterly target | CI gate (`architecture.yml`, every PR) |
+| `e2e-skip-rate` | After E2E test runs; validates skip rate against SLO, classifies infra_flaky vs code_regression | CI gate (`e2e-matrix-health.yml`) |
+| `e2e-rerun` | After multi-run E2E validation; detects non-deterministic test outcomes across repeated runs | CI gate (`e2e-matrix-health.yml`) |
+| `debt-report` | Weekly debt tracking; generates architecture debt snapshot (JSON + Markdown) | Scheduled weekly (Monday 4:45 UTC) |
+
 ## Other Files
 
 | File | Description |

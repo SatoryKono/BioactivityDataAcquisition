@@ -24,6 +24,21 @@ python -m scripts.ops <command> [args...]
 | `deploy` | `deploy-bioetl.sh` | Deploy BioETL (shell) |
 | `delete-branches` | `delete-stale-branches.sh` | Delete stale git branches (shell) |
 
+## When to Use
+
+| Command | When | Trigger |
+|---------|------|---------|
+| `salt-rotate` | Security rotation cycle; use `--verify` to check state, `--emergency` for immediate rotation after security incident | Manual, periodic security maintenance |
+| `fix-grafana` | After Grafana dashboard drift; injects variables and fixes PromQL queries | Manual, infrastructure maintenance |
+| `wsl-proxy` | When WSL2 networking needs proxy configuration | Manual, developer utility |
+| `setup-plugins` | After cloning repo or updating plugin configuration | Manual, initial setup |
+| `setup-skills` | After cloning repo or updating skills configuration | Manual, initial setup |
+| `check-skills` | Before PR touching `.claude/skills/`; validates layout consistency | CI gate (`skills-consistency.yml`) |
+| `check-mirror` | Before PR touching skills; validates mirror sync | CI gate (`skills-consistency.yml`) |
+| `check-mcp` | After modifying MCP server configuration | Manual, validation |
+| `deploy` | When deploying BioETL to target environment | Manual, deployment |
+| `delete-branches` | Periodic repo hygiene; removes stale remote branches | Manual, maintenance |
+
 ## Other Files
 
 | File | Description |

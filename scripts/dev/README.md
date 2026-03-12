@@ -22,6 +22,19 @@ python -m scripts.dev <command> [args...]
 | `test-changed` | `test_changed.sh` | Run tests for changed files only (shell) |
 | `setup-mcp` | `setup_copilot_codex_mcp.py` | Setup Copilot/Codex MCP integration |
 
+## When to Use
+
+| Command | When | Trigger |
+|---------|------|---------|
+| `setup` | First time cloning the repo or after major dependency changes; installs everything, runs linters and tests | Manual, initial onboarding |
+| `setup --quick` | Quick re-setup after minor changes; skips tests and linters | Manual, fast iteration |
+| `setup --ci` | CI pipeline environment setup; non-interactive mode | CI pipeline (automatic) |
+| `install-deps` | After modifying `pyproject.toml` or when dependencies are out of date | Manual, after dependency changes |
+| `run-tests` | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `cov` | Manual, during development |
+| `mock-metrics` | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data | Manual, during dashboard development |
+| `test-changed` | Quick feedback during development; runs tests only for files changed since last commit | Manual, during development |
+| `setup-mcp` | One-time AI tooling setup; configures Copilot/Codex MCP integration | Manual, initial setup |
+
 ## Other Files
 
 | File | Description |
