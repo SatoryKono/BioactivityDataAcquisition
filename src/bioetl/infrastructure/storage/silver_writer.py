@@ -34,8 +34,8 @@ from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
 )
 from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
     _SilverWriteExecutionContext,
-    build_delta_write_request,
     build_silver_write_execution_context,
+    dispatch_prepared_silver_write,
     set_silver_write_span_attributes,
 )
 from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
@@ -297,10 +297,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             partition_cols=ctx.partition_cols,
             key_nullability_rules=ctx.key_nullability_rules,
         )
-        ctx.span.set_attribute("record_count", len(payload.records))
-        await self._dispatch_write_with_domain_errors(
-            table_name=ctx.table_name,
-            request=build_delta_write_request(ctx=ctx, payload=payload),
+        await dispatch_prepared_silver_write(
+            ctx=ctx,
+            payload=payload,
+            dispatch_write=self._dispatch_write_with_domain_errors,
         )
         return await self._complete_silver_write_pipeline(
             ctx=ctx,

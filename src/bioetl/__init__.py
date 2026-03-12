@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__version__ = "6.0.0"
+__version__ = "6.1.0"
 
 # Project-wide monkeypatch for Pandera compatibility with Python 3.14.
 # Pandera uses typing_inspect.get_origin which returns None for A | B unions on Python 3.10+.

@@ -223,6 +223,7 @@ class TestBootstrapPipeline:
         mock_runner = MagicMock(spec=PipelineRunner)
         mock_factory = MagicMock()
         mock_factory.create_runner.return_value = mock_runner
+        mock_get_registry.return_value.list_pipelines.return_value = []
         mock_get_registry.return_value.get.return_value.factory = mock_factory
 
         ctx = PipelineRunContext(
@@ -236,6 +237,9 @@ class TestBootstrapPipeline:
 
         assert result is mock_runner
         mock_factory.create_runner.assert_called_once()
+        mock_register_pipelines.assert_called_once_with(
+            registry=mock_get_registry.return_value
+        )
 
 @pytest.mark.unit
 class TestBootstrapVacuumConfig:

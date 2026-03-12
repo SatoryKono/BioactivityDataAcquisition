@@ -417,8 +417,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - ADR-033: Publication Validation Strategy
 - ADR-027: Silver Layer DQ Framework (inherited `_dq_*` flags)
-- ADR-014: Medallion Architecture (Bronze → Silver → Gold layers)
-- ADR-002: Hexagonal Architecture (validation services in application layer)
+- ADR-002: Medallion Architecture (Bronze → Silver → Gold layers)
+- Hexagonal Architecture (validation services in application layer)
 
 ## [5.12.0] - 2026-02-04
 
@@ -839,8 +839,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/02-architecture/data-layers.md` (conflict with `03-infrastructure-layer.md`)
 - **Project map updated**: `docs/00-map.md` reflects cleaned structure (synced with RULES.md v5.7)
 - **Runbooks index updated**: `docs/05-operations/runbooks/index.md` now lists 4 active runbooks
-
-## [5.0.0] - 2025-12-27
 
 ### Changed
 

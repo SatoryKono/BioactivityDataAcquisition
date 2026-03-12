@@ -40,11 +40,19 @@ class TestRunnerFactory:
     """Tests for RunnerFactory class."""
 
     def test_init_with_default_registry(self):
-        """Test RunnerFactory initializes with None registry by default."""
-        factory = RunnerFactory()
+        """Test default registry is captured once when no custom registry is passed."""
+        default_registry = PipelineRegistry()
+
+        with patch(
+            "bioetl.composition.factories.pipeline.runner.get_default_registry",
+            return_value=default_registry,
+        ) as mock_get_default:
+            factory = RunnerFactory()
 
         assert factory._registry is None
+        assert factory._default_registry is default_registry
         assert factory._registrations_done is False
+        mock_get_default.assert_called_once()
 
     def test_init_with_custom_registry(self):
         """Test RunnerFactory initializes with custom registry."""
@@ -62,18 +70,16 @@ class TestRunnerFactory:
         assert factory._effective_registry is custom_registry
 
     def test_effective_registry_without_custom(self):
-        """Test _effective_registry returns default registry when not provided."""
-        factory = RunnerFactory()
-
+        """Test _effective_registry returns the captured default registry."""
+        default_registry = PipelineRegistry()
         with patch(
-            "bioetl.composition.factories.pipeline.runner.get_default_registry"
-        ) as mock_get_default:
-            default_registry = PipelineRegistry()
-            mock_get_default.return_value = default_registry
+            "bioetl.composition.factories.pipeline.runner.get_default_registry",
+            return_value=default_registry,
+        ):
+            factory = RunnerFactory()
 
             result = factory._effective_registry
 
-            mock_get_default.assert_called_once()
             assert result is default_registry
 
     def test_ensure_registrations_called_once(self):
@@ -113,6 +119,26 @@ class TestRunnerFactory:
             factory._ensure_registrations()
 
             mock_pipelines.assert_called_once_with(registry=custom_registry)
+
+    def test_ensure_registrations_passes_effective_default_registry(self):
+        """Test default registry is passed explicitly after capture."""
+        default_registry = PipelineRegistry()
+
+        with patch(
+            "bioetl.composition.factories.pipeline.runner.get_default_registry",
+            return_value=default_registry,
+        ):
+            factory = RunnerFactory()
+
+        with (
+            patch("bioetl.composition.factories.pipeline.runner.register_all_providers"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
+            ) as mock_pipelines,
+        ):
+            factory._ensure_registrations()
+
+        mock_pipelines.assert_called_once_with(registry=default_registry)
 
 
 @pytest.mark.unit
@@ -169,6 +195,29 @@ class TestRunnerFactoryCreate:
             mock_bootstrap.assert_called_once_with(
                 mock_context, registry=custom_registry
             )
+
+    def test_create_uses_effective_default_registry(self, mock_context):
+        """Test create threads the captured default registry into runner builder."""
+        default_registry = PipelineRegistry()
+        mock_runner = _make_mock_runner()
+
+        with patch(
+            "bioetl.composition.factories.pipeline.runner.get_default_registry",
+            return_value=default_registry,
+        ):
+            factory = RunnerFactory()
+
+        with (
+            patch("bioetl.composition.factories.pipeline.runner.register_all_providers"),
+            patch("bioetl.composition.factories.pipeline.runner.register_all_pipelines"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.build_pipeline_runner",
+                return_value=mock_runner,
+            ) as mock_bootstrap,
+        ):
+            factory.create(mock_context)
+
+        mock_bootstrap.assert_called_once_with(mock_context, registry=default_registry)
 
     def test_create_rejects_runner_without_metrics_contract(self, mock_context):
         """Test create fails fast for runners missing execution metrics."""
@@ -334,10 +383,17 @@ class TestFactoryFunctions:
 
     def test_create_runner_factory_returns_factory(self):
         """Test create_runner_factory returns a RunnerFactory."""
-        result = create_runner_factory()
+        default_registry = PipelineRegistry()
+
+        with patch(
+            "bioetl.composition.factories.pipeline.runner.get_default_registry",
+            return_value=default_registry,
+        ):
+            result = create_runner_factory()
 
         assert isinstance(result, RunnerFactory)
         assert result._registry is None
+        assert result._default_registry is default_registry
 
     def test_create_runner_factory_with_custom_registry(self):
         """Test create_runner_factory accepts custom registry."""

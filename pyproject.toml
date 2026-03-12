@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bioetl"
-version = "6.0.0"
+version = "6.1.0"
 description = "BioETL: Bioactivity data acquisition and processing pipeline"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -32,9 +32,8 @@ dependencies = [
     "pubchempy>=1.0.4",
     # Metrics
     "prometheus-client>=0.20",
-    # CLI
+    # CLI (EXC-008: Click chosen over Typer)
     "click>=8.1",
-    "typer>=0.12",
     # Logging
     "structlog>=24.0",
     # High-performance JSON serialization (required by batch_writer, bronze_writer, delta_writer)
@@ -96,7 +95,6 @@ dev = [
     "respx>=0.21",
     "mypy==1.19.1",
     "ruff>=0.4",
-    "black>=24.0",
     "basedpyright>=1.0",
     "pyrefly>=0.18",
     "ty>=0.0.1",
@@ -132,6 +130,9 @@ dev = [
     "vulture>=2.11",
     # Mutation testing
     "mutmut>=2.5",
+    # Auto-cleanup
+    "autoflake>=2.3.1",
+    "pre-commit>=4.5.1",
 ]
 docs = [
     "mkdocs>=1.6,<2.0",
@@ -412,20 +413,5 @@ skips = ["*/domain/*"]
 
 [dependency-groups]
 dev = [
-    # Includes pytest, pytest-cov, pytest-asyncio, pytest-xdist, pytest-timeout,
-    # hypothesis, respx, vcrpy, pytest-vcr, syrupy, psutil, otel, ruff, detect-secrets
-    "bioetl[tests]",
-    # Dev-only (not in [project.optional-dependencies]tests)
-    "pytest-benchmark>=4.0",
-    "mypy>=1.10",
-    "pip-audit>=2.7",
-    "bandit[toml]>=1.7",
-    "import-linter>=2.0",
-    "pytest-archon>=0.0.6",
-    "xenon>=0.9",
-    "radon>=6.0",
-    "vulture>=2.11",
-    "pydocstyle>=6.3",
-    "autoflake>=2.3.1",
-    "pre-commit>=4.5.1",
+    "bioetl[dev]",
 ]

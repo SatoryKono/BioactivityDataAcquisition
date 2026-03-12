@@ -14,8 +14,12 @@ import click
 from bioetl.application.services import RunOptions, RunResult
 from bioetl.application.services.pipeline_debug_service import DebugAbortError
 from bioetl.composition.entrypoints import get_pipeline_runner_service
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.ports import StageBreakpoint
-from bioetl.interfaces.cli.commands.run_helpers import validate_pipeline_name
+from bioetl.interfaces.cli.commands.run_helpers import (
+    resolve_context_registry,
+    validate_pipeline_name,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
@@ -53,7 +57,9 @@ _BREAKPOINT_CHOICES = [bp.value for bp in StageBreakpoint]
     default="incremental",
     help="Type of run",
 )
+@click.pass_context
 def debug(
+    ctx: click.Context,
     pipeline: str,
     breakpoints: str | None,
     limit: int,
@@ -92,10 +98,17 @@ def debug(
         dry_run=False,
         log_level="DEBUG",
     )
+    registry = resolve_context_registry(ctx)
 
     try:
         result = asyncio.run(
-            _run_debug_session(pipeline, options, mode, enabled_breakpoints)
+            _run_debug_session(
+                pipeline,
+                options,
+                mode,
+                enabled_breakpoints,
+                registry=registry,
+            )
         )
         echo_info(f"Debug session complete: {result.status.value}")
         echo_info(
@@ -116,6 +129,7 @@ async def _run_debug_session(
     options: RunOptions,
     mode: str,
     enabled_breakpoints: set[StageBreakpoint] | None,
+    registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Run pipeline with debug adapter attached.
 
@@ -128,5 +142,5 @@ async def _run_debug_session(
     Returns:
         RunResult from pipeline execution.
     """
-    service = get_pipeline_runner_service()
+    service = get_pipeline_runner_service(registry=registry)
     return await service.run(pipeline, options=options)

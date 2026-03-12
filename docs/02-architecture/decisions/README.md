@@ -29,13 +29,13 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-021](ADR-021-ddd-aggregates-adoption.md)           | DDD Aggregates Adoption                    | Accepted           | Domain Model    | 2025-12-29 |
 | [ADR-022](ADR-022-tracing-noop.md)                      | NoOp Tracing for Local-Only                | Accepted           | Observability   | 2025-12-30 |
 | [ADR-023](ADR-023-entity-type-patterns.md)              | Entity Type Patterns                       | Accepted           | Observability   | 2026-01-06 |
-| [ADR-024](ADR-024-entity-naming-unification.md)         | Entity Naming Unification                  | Accepted           | Architecture    | 2026-01-07 |
-| [ADR-025](ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted           | Configuration   | 2026-01-14 |
+| [ADR-024](ADR-024-entity-naming-unification.md)         | Entity Naming Unification                  | Accepted           | Architecture    | 2026-01-06 |
+| [ADR-025](ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted (partial supersede by ADR-039) | Configuration   | 2026-01-19 |
 | [ADR-026](ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline Pattern                 | Accepted           | Architecture    | 2026-01-15 |
 | [ADR-027](ADR-027-dq-rules-externalization.md)          | DQ Rules Externalization                   | Accepted           | Data Quality    | 2026-01-19 |
 | [ADR-028](ADR-028-filter-rules-externalization.md)      | Filter Rules Externalization               | Accepted           | Configuration   | 2026-01-20 |
 | [ADR-029](ADR-029-output-metadata-unification.md)       | Output Metadata Unification                | Accepted           | Data Modeling   | 2026-01-23 |
-| [ADR-030](ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy            | Accepted           | Data Fetching   | 2026-01-25 |
+| [ADR-030](ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy            | Accepted           | Data Fetching   | 2026-01-26 |
 | [ADR-031](ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization             | Accepted           | Data Loading    | 2026-01-26 |
 | [ADR-032](ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern                | Accepted           | HTTP/Networking | 2026-01-28 |
 | [ADR-033](ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Accepted           | Data Quality    | 2026-02-06 |

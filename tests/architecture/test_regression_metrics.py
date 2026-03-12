@@ -497,9 +497,13 @@ def test_silver_merge_resilience_instrumented() -> None:
     """Silver merge resilience must have retry policy and observability hooks."""
     resilience = Path("src/bioetl/infrastructure/storage/write_resilience.py")
     delta_mixin = Path("src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py")
+    delta_helpers = Path(
+        "src/bioetl/infrastructure/storage/silver_writer_delta_helpers.py"
+    )
 
     assert resilience.exists(), "write_resilience.py not found"
     assert delta_mixin.exists(), "silver_writer_delta_mixin.py not found"
+    assert delta_helpers.exists(), "silver_writer_delta_helpers.py not found"
 
     res_content = resilience.read_text(encoding="utf-8")
     assert "SilverMergeResiliencePolicy" in res_content, (
@@ -509,12 +513,16 @@ def test_silver_merge_resilience_instrumented() -> None:
         "Retry configuration missing in SilverMergeResiliencePolicy"
     )
 
-    delta_content = delta_mixin.read_text(encoding="utf-8")
+    delta_content = (
+        delta_mixin.read_text(encoding="utf-8")
+        + "\n"
+        + delta_helpers.read_text(encoding="utf-8")
+    )
     assert "silver_merge_retry" in delta_content, (
-        "silver_merge_retry observability event missing in delta mixin"
+        "silver_merge_retry observability event missing in delta write path"
     )
     assert "silver_merge_timeout" in delta_content, (
-        "silver_merge_timeout observability event missing in delta mixin"
+        "silver_merge_timeout observability event missing in delta write path"
     )
 
 

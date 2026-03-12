@@ -23,6 +23,7 @@ from bioetl.composition.entrypoints import (
     get_pipeline_runner_service,
     push_metrics_to_gateway,
 )
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -47,6 +48,7 @@ from bioetl.interfaces.cli.commands.run_command_policy import (
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
+    resolve_context_registry,
     show_cleanup_preview,
     validate_pipeline_name,
 )
@@ -120,12 +122,12 @@ def build_run_options(
         cached_bronze_path=cached_bronze_path,
     )
 
-
 def execute_run(
     pipeline: str,
     options: RunOptions,
     health_server: bool,
     health_port: int,
+    registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Execute run and always flush metrics at command boundary.
 
@@ -138,16 +140,30 @@ def execute_run(
     Returns:
         RunResult with pipeline execution status and record counts.
     """
+    async def _run_pipeline_with_registry(
+        pipeline: str,
+        options: RunOptions,
+        *,
+        health_server_enabled: bool = True,
+        health_port: int,
+    ) -> RunResult:
+        return await _run_pipeline_async(
+            pipeline,
+            options,
+            health_server_enabled=health_server_enabled,
+            health_port=health_port,
+            registry=registry,
+        )
+
     return _CLI_RUN_ORCHESTRATION_SERVICE.execute_pipeline(
         pipeline=pipeline,
         options=options,
         health_server=health_server,
         health_port=health_port,
-        run_pipeline_async=_run_pipeline_async,
+        run_pipeline_async=_run_pipeline_with_registry,
         run_coroutine=asyncio.run,
         flush_metrics=push_metrics_to_gateway,
     )
-
 
 def _map_status_to_exit_code(
     status: PipelineRunResult,
@@ -162,6 +178,7 @@ async def _run_pipeline_async(
     options: RunOptions,
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
+    registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Run pipeline asynchronously via service.
 
@@ -179,9 +196,8 @@ async def _run_pipeline_async(
         enabled=health_server_enabled,
         port=health_port,
     ):
-        service = get_pipeline_runner_service()
+        service = get_pipeline_runner_service(registry=registry)
         return await service.run(pipeline, options=options)
-
 
 def _handle_destructive_step(
     *,
@@ -205,14 +221,29 @@ def _execute_run_step(
     options: RunOptions,
     health_server: bool,
     health_port: int,
+    registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Run pipeline execution step with CLI failure mapping."""
+    def _execute_run_with_registry(
+        pipeline: str,
+        options: RunOptions,
+        health_server: bool,
+        health_port: int,
+    ) -> RunResult:
+        return execute_run(
+            pipeline=pipeline,
+            options=options,
+            health_server=health_server,
+            health_port=health_port,
+            registry=registry,
+        )
+
     return _execute_run_step_policy(
         pipeline=pipeline,
         options=options,
         health_server=health_server,
         health_port=health_port,
-        execute_run=execute_run,
+        execute_run=_execute_run_with_registry,
     )
 
 
@@ -323,7 +354,9 @@ def _finalize_run_step(result: RunResult) -> None:
     default=None,
     help="Explicit path to Bronze cache directory",
 )
+@click.pass_context
 def run(
+    ctx: click.Context,
     pipeline: str,
     run_type: str,
     resume: bool,
@@ -344,6 +377,7 @@ def run(
     cached_bronze_path: str | None,
 ) -> None:
     """Run an ETL pipeline."""
+    registry = resolve_context_registry(ctx)
     validate_options(start_offset, run_type, resume)
     if not _handle_destructive_step(
         pipeline=pipeline,
@@ -374,6 +408,7 @@ def run(
         options=options,
         health_server=health_server,
         health_port=health_port,
+        registry=registry,
     )
     _finalize_run_step(result)
 

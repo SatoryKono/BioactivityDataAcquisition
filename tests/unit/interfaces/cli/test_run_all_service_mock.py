@@ -21,6 +21,7 @@ from bioetl.application.services import (
     RunResult,
     PipelineRunResult,
 )
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.interfaces.cli.commands.run_all import (
     _run_all_pipelines_async,
 )
@@ -632,6 +633,26 @@ class TestRunAllAsyncFunction:
         assert result.succeeded == 2
         assert result.failed == 0
         assert result.all_succeeded is True
+
+    async def test_run_all_pipelines_async_passes_explicit_registry(self):
+        """Explicit registry should be passed to the runner service factory."""
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(return_value=_create_run_result("pipeline1"))
+        registry = PipelineRegistry()
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service",
+            return_value=mock_service,
+        ) as mock_get_service:
+            result = await _run_all_pipelines_async(
+                pipelines=["pipeline1"],
+                options=RunOptions(),
+                health_server_enabled=False,
+                registry=registry,
+            )
+
+        mock_get_service.assert_called_once_with(registry=registry)
+        assert result.succeeded == 1
 
     async def test_run_all_pipelines_async_partial_failure(self):
         """Test _run_all_pipelines_async with some failures."""

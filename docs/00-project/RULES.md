@@ -1013,7 +1013,7 @@ from __future__ import annotations
 
 ### 5.3. Graceful Shutdown (Штатное завершение)
 
-См. [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
+См. [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) *(Superseded — shutdown реализован в CLI и `application/core/shutdown.py`)*.
 При получении SIGTERM/SIGINT:
 
 1. Прекратить извлечение (fetch) новых записей.
@@ -1659,14 +1659,14 @@ fields:
 | [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle                | Accepted           | 2025-12-24 |
 | [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)           | Error Handling Strategy                    | Accepted           | 2025-12-26 |
 | [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md)        | Observability Architecture                 | Accepted           | 2025-12-26 |
-| [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md)            | Gold Strict Validation                     | Accepted           | 2025-12-28 |
+| [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md)            | Gold Strict Validation                     | Accepted           | 2025-12-26 |
 | [ADR-019](../02-architecture/decisions/ADR-019-observability-port-enforcement.md)    | Observability Port Enforcement             | Accepted           | 2025-12-26 |
 | [ADR-020](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md)        | BasePipeline Decomposition                 | Accepted           | 2025-12-16 |
 | [ADR-021](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md)           | DDD Aggregates Adoption                    | Accepted           | 2025-12-29 |
 | [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md)                      | NoOp Tracing for Local-Only                | Accepted           | 2025-12-30 |
 | [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md)              | Entity Type Patterns                       | Accepted           | 2026-01-06 |
 | [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md)         | Entity Naming Unification                  | Accepted           | 2026-01-06 |
-| [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted           | 2026-01-19 |
+| [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted (partial supersede by ADR-039) | 2026-01-19 |
 | [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline Pattern                 | Accepted           | 2026-01-15 |
 | [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)          | DQ Rules Externalization                   | Accepted           | 2026-01-19 |
 | [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)      | Filter Rules Externalization               | Accepted           | 2026-01-20 |
@@ -1683,11 +1683,13 @@ fields:
 | [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Configuration Format        | Accepted           | 2026-02-24 |
 | [ADR-040](../02-architecture/decisions/ADR-040-diagram-governance.md)                | Diagram Governance and Layout Policy       | Accepted           | 2026-02-25 |
 | [ADR-041](../02-architecture/decisions/ADR-041-naming-policy-skills-agents.md)       | Naming Policy for Skills, Agents, Commands | Accepted           | 2026-03-04 |
+| [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)           | Testing Strategy Matrix & Fixture Gov.     | Accepted           | 2026-03-09 |
+| [ADR-043](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md)| Documentation & Knowledge Management       | Accepted           | 2026-03-09 |
 
 ## История Изменений (Changelog)
 
 - **5.23** (2026-03-02): Dependency Policy Sync. Уточнена политика зависимостей: mixed strategy (`pyproject.toml` с диапазонами + воспроизводимость через `uv.lock`), строгие `==` оставлены как исключение для критичных инструментов.
-- **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из `configs/entities/` в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
+- **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из `configs/pipelines/` в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
 - **5.21** (2026-02-21): Deduplication Policy Implementation.
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test-`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.

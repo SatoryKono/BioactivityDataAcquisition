@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import pyarrow as pa
 
-from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
-    _DeltaWriteRequest,
-)
+from bioetl.infrastructure.storage.silver_writer_delta_helpers import _DeltaWriteRequest
 from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
     _PreparedSilverWritePayload,
 )
@@ -23,6 +22,7 @@ if TYPE_CHECKING:
 __all__ = [
     "_SilverWriteExecutionContext",
     "build_delta_write_request",
+    "dispatch_prepared_silver_write",
     "build_silver_write_execution_context",
     "set_silver_write_span_attributes",
 ]
@@ -44,6 +44,17 @@ class _SilverWriteExecutionContext:
     started_at: datetime
     start_perf: float
     span: Any  # Any: OpenTelemetry span interface is runtime-dependent
+
+
+class _PreparedSilverWriteDispatcher(Protocol):
+    """Callable contract for dispatching prepared Silver write payloads."""
+
+    def __call__(
+        self,
+        *,
+        table_name: str,
+        request: _DeltaWriteRequest,
+    ) -> Awaitable[None]: ...
 
 def set_silver_write_span_attributes(
     span: Any,  # Any: OpenTelemetry span type varies by backend
@@ -102,4 +113,21 @@ def build_delta_write_request(
         arrow_data=payload.arrow_data,
         primary_keys=ctx.primary_keys,
         partition_cols=ctx.partition_cols,
+    )
+
+
+async def dispatch_prepared_silver_write(
+    *,
+    ctx: _SilverWriteExecutionContext,
+    payload: _PreparedSilverWritePayload,
+    dispatch_write: _PreparedSilverWriteDispatcher,
+) -> None:
+    """Record payload size on the span and dispatch the prepared Delta write."""
+    ctx.span.set_attribute("record_count", len(payload.records))
+    await dispatch_write(
+        table_name=ctx.table_name,
+        request=build_delta_write_request(
+            ctx=ctx,
+            payload=payload,
+        ),
     )

@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.application.services import PipelineRunResult, RunResult
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.interfaces.cli import cli, main
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -110,6 +112,42 @@ class TestRunCommand:
         assert result.exit_code == 0, f"Command failed: {result.output}"
         mock_asyncio_run.assert_called_once()
 
+    @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
+    def test_run_command_passes_context_registry_to_service(
+        self,
+        mock_ensure_metrics,
+        mock_get_service,
+        runner,
+    ):
+        """Run command should use the explicit Click registry in runtime wiring."""
+        registry = PipelineRegistry()
+        registry.list_pipelines = MagicMock(return_value=["chembl_activity"])
+
+        mock_service = MagicMock()
+        mock_service.run = AsyncMock(
+            return_value=RunResult(
+                status=PipelineRunResult.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+        )
+        mock_get_service.return_value = mock_service
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run.asyncio.run",
+            side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
+        ):
+            result = runner.invoke(
+                cli,
+                ["run", "--pipeline", "chembl_activity", "--no-health-server"],
+                obj=registry,
+            )
+
+        assert result.exit_code == 0, f"Command failed: {result.output}"
+        mock_get_service.assert_called_once_with(registry=registry)
+
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_with_options(
         self,
@@ -190,11 +228,21 @@ class TestRunCommand:
 class TestMainFunction:
     """Tests for main entry point."""
 
+    @patch("bioetl.interfaces.cli.main._build_main_registry")
     @patch("bioetl.interfaces.cli.main.cli")
-    def test_main_calls_cli(self, mock_cli):
-        """Test main function calls cli()."""
+    def test_main_calls_cli_with_explicit_registry(
+        self,
+        mock_cli,
+        mock_build_registry,
+    ):
+        """Test main function calls cli() with an explicit prebuilt registry."""
+        registry = MagicMock()
+        mock_build_registry.return_value = registry
+
         main()
-        mock_cli.assert_called_once()
+
+        mock_build_registry.assert_called_once_with()
+        mock_cli.assert_called_once_with(obj=registry)
 
 
 class TestCliVersion:

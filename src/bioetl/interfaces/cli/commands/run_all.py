@@ -15,11 +15,13 @@ from bioetl.application.services import (
     RunResult,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
-from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.registry import (
+    get_default_registry as _legacy_get_default_registry,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
-    map_batch_run_result_to_exit_code,
 )
 from bioetl.interfaces.cli.commands.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
@@ -34,18 +36,26 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     create_run_all_options,
+    determine_batch_exit_code as _determine_exit_code,
     emit_destructive_confirmation_preview,
     emit_run_all_listing,
     emit_run_all_preview,
+    filter_pipelines_by_provider as _filter_pipelines_by_provider,
+    get_available_providers as _get_available_providers,
     record_pipeline_failure,
     record_pipeline_result,
     should_prompt_for_destructive_run,
+    validate_provider as _validate_provider,
 )
+from bioetl.interfaces.cli.commands.run_helpers import resolve_context_registry
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.services import PipelineRunnerService
+
+
+get_default_registry = _legacy_get_default_registry
 
 
 @dataclass
@@ -63,43 +73,6 @@ class BatchRunResult:
     def all_succeeded(self) -> bool:
         """Check if all pipelines succeeded."""
         return self.failed == 0 and self.total > 0
-
-
-def _get_available_providers(
-    registry: PipelineRegistry | None = None,
-) -> list[str]:
-    """Get sorted list of unique provider names from registered pipelines."""
-    reg = registry if registry is not None else get_default_registry()
-    pipelines = reg.list_pipelines()
-    providers = {p.split("_")[0] for p in pipelines if "_" in p}
-    return sorted(providers)
-
-
-def _filter_pipelines_by_provider(
-    provider: str,
-    registry: PipelineRegistry | None = None,
-) -> list[str]:
-    """Filter registered pipelines by provider prefix."""
-    reg = registry if registry is not None else get_default_registry()
-    all_pipelines = reg.list_pipelines()
-    return sorted([name for name in all_pipelines if name.startswith(f"{provider}_")])
-
-
-def _validate_provider(
-    provider: str,
-    registry: PipelineRegistry | None = None,
-) -> tuple[bool, str | None]:
-    """Validate that the provider has registered pipelines."""
-    available_providers = _get_available_providers(registry=registry)
-    if not available_providers:
-        return False, "No pipelines are registered."
-    pipelines = _filter_pipelines_by_provider(provider, registry=registry)
-    if not pipelines:
-        return False, (
-            f"No pipelines found for provider '{provider}'. "
-            f"Available providers: {', '.join(available_providers)}"
-        )
-    return True, None
 
 
 async def _run_pipeline_async(
@@ -151,6 +124,7 @@ async def _run_all_pipelines_async(
     options: RunOptions,
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
+    registry: PipelineRegistry | None = None,
 ) -> BatchRunResult:
     """Run all pipelines sequentially with optional health server.
 
@@ -169,7 +143,7 @@ async def _run_all_pipelines_async(
     ensure_metrics_server_started()
 
     async with health_server_context(enabled=health_server_enabled, port=health_port):
-        service = get_pipeline_runner_service()
+        service = get_pipeline_runner_service(registry=registry)
         return await _run_pipelines_batch(service, pipelines, options)
 
 
@@ -192,13 +166,6 @@ def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
             echo_info(f"  Skipped: {result.skipped}")
     if result.failed_pipelines:
         echo_error("Failed pipelines:", ", ".join(result.failed_pipelines))
-
-
-def _handle_list_only(source: str, pipelines: list[str]) -> None:
-    """Handle --list-only mode and exit."""
-    emit_run_all_listing(source=source, pipelines=pipelines)
-    sys.exit(ExitCode.OK)
-
 
 def _handle_destructive_confirmation(
     run_type: str, pipelines: list[str], dry_run: bool, yes: bool
@@ -232,27 +199,6 @@ def _handle_destructive_confirmation(
         sys.exit(ExitCode.OK)
     return True
 
-
-def _show_run_preview(source: str, pipelines: list[str], dry_run: bool) -> None:
-    """Show what pipelines will be run.
-
-    Args:
-        source: Provider name shown in the preview header.
-        pipelines: List of pipeline names that will be (or would be) executed.
-        dry_run: When True, prefixes the output with a dry-run indicator.
-    """
-    emit_run_all_preview(
-        source=source,
-        pipelines=pipelines,
-        dry_run=dry_run,
-    )
-
-
-def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
-    """Determine exit code from batch result."""
-    return map_batch_run_result_to_exit_code(batch_result)
-
-
 def _handle_run_all_failure(
     exc: BaseException, *, source: str, reason_code: str
 ) -> None:
@@ -282,6 +228,7 @@ def _run_batch_with_policy(
     options: RunOptions,
     health_server: bool,
     health_port: int,
+    registry: PipelineRegistry | None = None,
 ) -> BatchRunResult | None:
     """Execute async batch run with typed exception policy.
 
@@ -296,7 +243,11 @@ def _run_batch_with_policy(
         BatchRunResult on success, None if an exception was handled and process will exit.
     """
     coro = _run_all_pipelines_async(
-        pipelines, options, health_server_enabled=health_server, health_port=health_port
+        pipelines,
+        options,
+        health_server_enabled=health_server,
+        health_port=health_port,
+        registry=registry,
     )
     try:
         return asyncio.run(coro)
@@ -357,7 +308,9 @@ def _run_batch_with_policy(
     help="Port for the HTTP health server.",
     show_default=True,
 )
+@click.pass_context
 def run_all(
+    ctx: click.Context,
     source: str,
     run_type: str,
     limit: int | None,
@@ -369,8 +322,7 @@ def run_all(
     health_port: int,
 ) -> None:
     """Run all registered pipelines for one provider sequentially."""
-    ctx = click.get_current_context()
-    registry = ctx.obj if isinstance(ctx.obj, PipelineRegistry) else None
+    registry = resolve_context_registry(ctx)
     is_valid, error_msg = _validate_provider(source, registry=registry)
     if not is_valid:
         echo_error("Provider error", error_msg)
@@ -379,11 +331,16 @@ def run_all(
     pipelines = _filter_pipelines_by_provider(source, registry=registry)
 
     if list_only:
-        _handle_list_only(source, pipelines)
+        emit_run_all_listing(source=source, pipelines=pipelines)
+        sys.exit(ExitCode.OK)
 
     _handle_destructive_confirmation(run_type, pipelines, dry_run, yes)
 
-    _show_run_preview(source, pipelines, dry_run)
+    emit_run_all_preview(
+        source=source,
+        pipelines=pipelines,
+        dry_run=dry_run,
+    )
 
     echo_health_server_info(health_server, health_port)
 
@@ -399,6 +356,7 @@ def run_all(
         options=options,
         health_server=health_server,
         health_port=health_port,
+        registry=registry,
     )
     if batch_result is None:
         return
@@ -407,4 +365,11 @@ def run_all(
     sys.exit(_determine_exit_code(batch_result))
 
 
-__all__ = ["BatchRunResult", "run_all"]
+__all__ = [
+    "BatchRunResult",
+    "_determine_exit_code",
+    "_filter_pipelines_by_provider",
+    "_get_available_providers",
+    "_validate_provider",
+    "run_all",
+]

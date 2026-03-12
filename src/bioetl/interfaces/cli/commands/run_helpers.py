@@ -17,6 +17,7 @@ from bioetl.domain.exceptions import BioETLError
 __all__ = [
     "get_runner_logger",
     "handle_destructive_run_confirmation",
+    "resolve_context_registry",
     "show_cleanup_preview",
     "validate_pipeline_name",
 ]
@@ -41,6 +42,17 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+def resolve_context_registry(
+    ctx: click.Context | None = None,
+) -> PipelineRegistry | None:
+    """Return the explicit registry carried by Click context, if any."""
+    if ctx is None:
+        ctx = click.get_current_context(silent=True)
+    if ctx is None or not isinstance(ctx.obj, PipelineRegistry):
+        return None
+    return ctx.obj
+
+
 def validate_pipeline_name(
     ctx: click.Context | None, _param: click.Parameter | None, value: str
 ) -> str:
@@ -58,7 +70,7 @@ def validate_pipeline_name(
     Raises:
         click.BadParameter: If pipeline name is not in registry.
     """
-    registry = ctx.obj if ctx is not None and isinstance(ctx.obj, PipelineRegistry) else get_default_registry()
+    registry = resolve_context_registry(ctx) or get_default_registry()
     available = registry.list_pipelines()
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")

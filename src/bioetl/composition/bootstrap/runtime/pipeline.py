@@ -58,17 +58,19 @@ def bootstrap_pipeline_runner(
     """
     # Classification data must be available before transformers run.
     initialize_publication_type_classification(Path("configs"))
+    effective_registry = registry if registry is not None else get_default_registry()
 
     # Explicit registration retained for deterministic bootstrap semantics.
     register_all_providers()
-    register_all_pipelines(registry=registry)
+    if not effective_registry.list_pipelines():
+        register_all_pipelines(registry=effective_registry)
 
     return build_pipeline_runner(
         ctx=ctx,
-        registry=registry,
+        registry=effective_registry,
         get_default_registry_fn=get_default_registry,
-        register_all_providers_fn=register_all_providers,
-        register_all_pipelines_fn=register_all_pipelines,
+        register_all_providers_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings,
         load_pipeline_config_fn=load_pipeline_config,
         build_observability_bundle_fn=bootstrap_observability_bundle,

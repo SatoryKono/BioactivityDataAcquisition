@@ -67,6 +67,9 @@ class RunnerFactory:
             runner_builder: Optional runner assembly function for DI/testing.
         """
         self._registry = registry
+        self._default_registry = (
+            None if registry is not None else get_default_registry()
+        )
         self._runner_builder = runner_builder
         self._registrations_done = False
 
@@ -77,13 +80,18 @@ class RunnerFactory:
         """
         if not self._registrations_done:
             register_all_providers()
-            register_all_pipelines(registry=self._registry)
+            if not self._effective_registry.list_pipelines():
+                register_all_pipelines(registry=self._effective_registry)
             self._registrations_done = True
 
     @property
     def _effective_registry(self) -> PipelineRegistry:
         """Get the effective registry instance."""
-        return self._registry if self._registry is not None else get_default_registry()
+        if self._registry is not None:
+            return self._registry
+        if self._default_registry is None:
+            raise RuntimeError("RunnerFactory default registry was not initialized")
+        return self._default_registry
 
     def create(self, context: PipelineRunContext) -> ExecutionMetricsRunnerPort:
         """Create a configured pipeline runner.
@@ -100,7 +108,7 @@ class RunnerFactory:
         """
         self._ensure_registrations()
         runner_builder = self._runner_builder or build_pipeline_runner
-        runner = runner_builder(context, registry=self._registry)
+        runner = runner_builder(context, registry=self._effective_registry)
         return _require_execution_metrics_runner(runner)
 
     def list_pipelines(self) -> list[str]:

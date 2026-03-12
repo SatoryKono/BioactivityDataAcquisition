@@ -117,11 +117,7 @@ class TestGetAvailableProviders:
 
     def test_returns_unique_providers(self, mock_registry):
         """Test that unique providers are extracted from pipeline names."""
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
-        ):
-            providers = _get_available_providers()
+        providers = _get_available_providers(registry=mock_registry)
 
         assert "chembl" in providers
         assert "pubchem" in providers
@@ -130,11 +126,7 @@ class TestGetAvailableProviders:
 
     def test_returns_sorted_providers(self, mock_registry):
         """Test that providers are sorted alphabetically."""
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
-        ):
-            providers = _get_available_providers()
+        providers = _get_available_providers(registry=mock_registry)
 
         assert providers == sorted(providers)
 
@@ -142,12 +134,7 @@ class TestGetAvailableProviders:
         """Test that empty list is returned when no pipelines registered."""
         mock = MagicMock()
         mock.list_pipelines.return_value = []
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock,
-        ):
-            providers = _get_available_providers()
+        providers = _get_available_providers(registry=mock)
 
         assert providers == []
 
@@ -158,11 +145,7 @@ class TestFilterPipelinesByProvider:
 
     def test_filters_by_provider_prefix(self, mock_registry):
         """Test that pipelines are filtered by provider prefix."""
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
-        ):
-            pipelines = _filter_pipelines_by_provider("chembl")
+        pipelines = _filter_pipelines_by_provider("chembl", registry=mock_registry)
 
         assert "chembl_activity" in pipelines
         assert "chembl_molecule" in pipelines
@@ -171,21 +154,13 @@ class TestFilterPipelinesByProvider:
 
     def test_returns_empty_for_unknown_provider(self, mock_registry):
         """Test that empty list is returned for unknown provider."""
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
-        ):
-            pipelines = _filter_pipelines_by_provider("unknown")
+        pipelines = _filter_pipelines_by_provider("unknown", registry=mock_registry)
 
         assert pipelines == []
 
     def test_returns_sorted_pipelines(self, mock_registry):
         """Test that pipelines are sorted alphabetically."""
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
-        ):
-            pipelines = _filter_pipelines_by_provider("chembl")
+        pipelines = _filter_pipelines_by_provider("chembl", registry=mock_registry)
 
         assert pipelines == sorted(pipelines)
 
@@ -196,22 +171,14 @@ class TestValidateProvider:
 
     def test_valid_provider_returns_true(self, mock_registry):
         """Test that valid provider returns (True, None)."""
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
-        ):
-            is_valid, error_msg = _validate_provider("chembl")
+        is_valid, error_msg = _validate_provider("chembl", registry=mock_registry)
 
         assert is_valid is True
         assert error_msg is None
 
     def test_invalid_provider_returns_false(self, mock_registry):
         """Test that invalid provider returns (False, error_message)."""
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock_registry,
-        ):
-            is_valid, error_msg = _validate_provider("invalid")
+        is_valid, error_msg = _validate_provider("invalid", registry=mock_registry)
 
         assert is_valid is False
         assert "No pipelines found for provider 'invalid'" in error_msg
@@ -221,12 +188,7 @@ class TestValidateProvider:
         """Test error when no pipelines are registered."""
         mock = MagicMock()
         mock.list_pipelines.return_value = []
-
-        with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-            return_value=mock,
-        ):
-            is_valid, error_msg = _validate_provider("chembl")
+        is_valid, error_msg = _validate_provider("chembl", registry=mock)
 
         assert is_valid is False
         assert "No pipelines are registered" in error_msg

@@ -10,6 +10,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bioetl.composition.registry import PipelineRegistry
+
 
 # =============================================================================
 # Helper
@@ -299,6 +301,26 @@ class TestGetPipelineRunnerService:
 
         mock_ensure.assert_called_once()
         mock_bootstrap.assert_called_once()
+        assert result is mock_service
+
+    def test_passes_explicit_registry_to_registration_and_bootstrap(self) -> None:
+        """Explicit registry should flow through the runner service bootstrap path."""
+        mock_service = MagicMock(name="PipelineRunnerService")
+        registry = PipelineRegistry()
+
+        with (
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
+            patch(
+                "bioetl.composition._services.bootstrap_pipeline_runner_service",
+                return_value=mock_service,
+            ) as mock_bootstrap,
+        ):
+            from bioetl.composition._services import get_pipeline_runner_service
+
+            result = get_pipeline_runner_service(registry=registry)
+
+        mock_ensure.assert_called_once_with(registry=registry)
+        mock_bootstrap.assert_called_once_with(registry=registry)
         assert result is mock_service
 
 
