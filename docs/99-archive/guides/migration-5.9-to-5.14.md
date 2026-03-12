@@ -132,9 +132,9 @@ bioetl run --pipeline pubmed_publication --validation-mode fast
 - `-dq-warn`: WARN (quarantine) — record flagged for manual review
 
 **Documentation:**
-- [ADR-033: Publication Validation Strategy](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)
-- [Publication Validation Guide](publication-validation-guide.md)
-- [Operational Runbook](../05-operations/runbooks/publication-validation-runbook.md)
+- [ADR-033: Publication Validation Strategy](../../02-architecture/decisions/ADR-033-publication-validation-strategy.md)
+- [Publication Validation Guide](../../03-guides/publication-validation-guide.md)
+- [Operational Runbook](../../05-operations/runbooks/publication-validation-runbook.md)
 
 ---
 
@@ -161,7 +161,7 @@ bioetl run-composite --composite activity --seed-limit 1000
 
 **Configuration:** `configs/composites/activity.yaml`
 
-**Documentation:** [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
+**Documentation:** [ADR-026: Composite Pipeline Pattern](../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
 
 ---
 
@@ -420,8 +420,8 @@ export BIOETL_VALIDATION_MODE=fast  # Base only
 
 **Documentation:**
 - [CHANGELOG.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) — Full release notes
-- [RULES.md](../00-project/RULES.md) — Project governance
-- [ADRs](../02-architecture/decisions/README.md) — Architecture decisions
+- [RULES.md](../../00-project/RULES.md) — Project governance
+- [ADRs](../../02-architecture/decisions/README.md) — Architecture decisions
 
 **Support:** Create an issue with:
 - BioETL version

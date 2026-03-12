@@ -36,6 +36,86 @@ class _PreparedSilverWritePayload:
     arrow_data: pa.Table
 
 
+def _validate_write_mode_impl(mode: str) -> SilverWriteMode:
+    """Validate and convert write mode string to enum."""
+    try:
+        return SilverWriteMode(mode)
+    except ValueError:
+        valid_modes = [item.value for item in SilverWriteMode]
+        raise ValueError(
+            f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
+        ) from None
+
+
+def _deduplicate_by_primary_keys_impl(
+    records: list[BronzeRecord],
+    primary_keys: list[str],
+) -> list[BronzeRecord]:
+    """Deduplicate records based on primary keys in the current batch."""
+    if not primary_keys or not records:
+        return records
+
+    unique_records: dict[tuple[Any, ...], BronzeRecord] = {}
+    for record in records:
+        key = tuple(record.get(primary_key) for primary_key in primary_keys)
+        unique_records[key] = record
+    return list(unique_records.values())
+
+
+def _to_policy_write_mode_impl(mode: SilverWriteMode) -> WriteMode:
+    """Map SilverWriteMode to WriteMode for policy validation."""
+    mapping = {
+        SilverWriteMode.MERGE: WriteMode.MERGE,
+        SilverWriteMode.APPEND: WriteMode.APPEND,
+        SilverWriteMode.DELETE: WriteMode.OVERWRITE,
+    }
+    return mapping[mode]
+
+
+def _validate_key_nullability_impl(
+    records: list[BronzeRecord],
+    primary_keys: list[str],
+    partition_cols: list[str] | None,
+    key_nullability_rules: list[KeyNullabilityRule] | None,
+    table_name: str,
+) -> None:
+    """Validate nullability policy for merge and partition keys."""
+    if not records or not key_nullability_rules:
+        return
+
+    rules = {(rule.field, rule.key_type): rule for rule in key_nullability_rules}
+
+    def collect_violations(
+        field: str,
+        key_type: Literal["merge", "partition"],
+    ) -> int:
+        """Count null values for a non-nullable key field."""
+        rule = rules.get((field, key_type))
+        if rule is None or rule.nullable:
+            return 0
+        return sum(1 for record in records if record.get(field) is None)
+
+    violations: list[tuple[str, str, int]] = []
+
+    for key in primary_keys:
+        if count := collect_violations(key, "merge"):
+            violations.append((key, "merge", count))
+
+    for key in partition_cols or []:
+        if count := collect_violations(key, "partition"):
+            violations.append((key, "partition", count))
+
+    if violations:
+        details = [
+            f"{key_type}:{field} null_count={count}"
+            for field, key_type, count in violations
+        ]
+        raise ValueError(
+            "Key nullability policy violation for table "
+            f"'{table_name}': {'; '.join(details)}"
+        )
+
+
 class SilverWriterValidationMixin:
     """Mixin with write policy and schema validation logic."""
 
@@ -46,6 +126,22 @@ class SilverWriterValidationMixin:
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
     _resolve_table_path: Callable[[str], str]
     _prepare_arrow_data: Callable[..., pa.Table]
+    _validate_write_mode: Callable[[str], SilverWriteMode]
+    _deduplicate_by_primary_keys: Callable[
+        [list[BronzeRecord], list[str]],
+        list[BronzeRecord],
+    ]
+    _to_policy_write_mode: Callable[[SilverWriteMode], WriteMode]
+    _validate_key_nullability: Callable[
+        [
+            list[BronzeRecord],
+            list[str],
+            list[str] | None,
+            list[KeyNullabilityRule] | None,
+            str,
+        ],
+        None,
+    ]
 
     def _sync_validate_and_build_arrow(
         self,
@@ -79,38 +175,7 @@ class SilverWriterValidationMixin:
             column_order=column_order,
         )
         return records, validated_mode, arrow_data
-    def _validate_write_mode(self, mode: str) -> SilverWriteMode:
-        """Validate and convert write mode string to enum."""
-        try:
-            return SilverWriteMode(mode)
-        except ValueError:
-            valid_modes = [item.value for item in SilverWriteMode]
-            raise ValueError(
-                f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
-            ) from None
 
-    def _deduplicate_by_primary_keys(
-        self,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-    ) -> list[BronzeRecord]:
-        """Deduplicate records based on primary keys in the current batch."""
-        if not primary_keys or not records:
-            return records
-
-        unique_records: dict[tuple[Any, ...], BronzeRecord] = {}
-        for record in records:
-            key = tuple(record.get(primary_key) for primary_key in primary_keys)
-            unique_records[key] = record
-        return list(unique_records.values())
-    def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
-        """Map SilverWriteMode to WriteMode for policy validation."""
-        mapping = {
-            SilverWriteMode.MERGE: WriteMode.MERGE,
-            SilverWriteMode.APPEND: WriteMode.APPEND,
-            SilverWriteMode.DELETE: WriteMode.OVERWRITE,
-        }
-        return mapping[mode]
     def _enforce_write_policy(
         self,
         mode: SilverWriteMode,
@@ -161,48 +226,6 @@ class SilverWriterValidationMixin:
                     table=table_name,
                     missing=optional_missing,
                 )
-    def _validate_key_nullability(
-        self,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        partition_cols: list[str] | None,
-        key_nullability_rules: list[KeyNullabilityRule] | None,
-        table_name: str,
-    ) -> None:
-        """Validate nullability policy for merge and partition keys."""
-        if not records or not key_nullability_rules:
-            return
-
-        rules = {(rule.field, rule.key_type): rule for rule in key_nullability_rules}
-
-        def collect_violations(
-            field: str, key_type: Literal["merge", "partition"]
-        ) -> int:
-            """Count null values for a non-nullable key field."""
-            rule = rules.get((field, key_type))
-            if rule is None or rule.nullable:
-                return 0
-            return sum(1 for record in records if record.get(field) is None)
-
-        violations: list[tuple[str, str, int]] = []
-
-        for key in primary_keys:
-            if count := collect_violations(key, "merge"):
-                violations.append((key, "merge", count))
-
-        for key in partition_cols or []:
-            if count := collect_violations(key, "partition"):
-                violations.append((key, "partition", count))
-
-        if violations:
-            details = [
-                f"{key_type}:{field} null_count={count}"
-                for field, key_type, count in violations
-            ]
-            raise ValueError(
-                "Key nullability policy violation for table "
-                f"'{table_name}': {'; '.join(details)}"
-            )
 
     def _validate_silver_pandera(
         self,
@@ -336,3 +359,17 @@ class SilverWriterValidationMixin:
             table_path=table_path,
             arrow_data=arrow_data,
         )
+
+
+SilverWriterValidationMixin._validate_write_mode = staticmethod(
+    _validate_write_mode_impl
+)
+SilverWriterValidationMixin._deduplicate_by_primary_keys = staticmethod(
+    _deduplicate_by_primary_keys_impl
+)
+SilverWriterValidationMixin._to_policy_write_mode = staticmethod(
+    _to_policy_write_mode_impl
+)
+SilverWriterValidationMixin._validate_key_nullability = staticmethod(
+    _validate_key_nullability_impl
+)

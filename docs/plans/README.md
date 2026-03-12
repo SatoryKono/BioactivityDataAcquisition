@@ -28,8 +28,8 @@ Plans in this folder must not override normative documents.
 
 ## Active Plan Links
 
-- [DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md](DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md)
-- [diagram-views-improvement-plan.md](diagram-views-improvement-plan.md)
+- [DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md](../99-archive/plans/DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md)
+- [diagram-views-improvement-plan.md](../99-archive/plans/diagram-views-improvement-plan.md)
 - [mkdocs-material-migration-track-2026-03-03.md](mkdocs-material-migration-track-2026-03-03.md)
 - [wave-8-policy-decisions-2026-03-03.md](../99-archive/plans/wave-8-policy-decisions-2026-03-03.md) *(archived)*
 

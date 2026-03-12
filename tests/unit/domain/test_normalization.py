@@ -20,6 +20,7 @@ from bioetl.domain.normalization import (
     parse_authors_to_list,
     parse_date_field,
     parse_page_range,
+    strip_doi_prefix,
     strip_html_tags,
 )
 
@@ -62,6 +63,29 @@ class TestNormalizeToString:
     def test_normalize_to_string(self, value, expected: str | None) -> None:
         """Test conversion and normalization to string."""
         assert normalize_to_string(value) == expected
+
+
+class TestStripDoiPrefix:
+    """Tests for strip_doi_prefix function."""
+
+    @pytest.mark.parametrize(
+        "doi,expected",
+        [
+            ("https://doi.org/10.1038/nature12373", "10.1038/nature12373"),
+            ("http://doi.org/10.1016/j.cell.2024", "10.1016/j.cell.2024"),
+            ("doi:10.1126/science.abc1234", "10.1126/science.abc1234"),
+            ("DOI:10.1001/jama.2024.0001", "10.1001/jama.2024.0001"),
+            ("10.1038/nature12373", "10.1038/nature12373"),
+            ("not-a-doi-prefix/10.1038/test", "not-a-doi-prefix/10.1038/test"),
+        ],
+    )
+    def test_strip_doi_prefix(self, doi: str, expected: str) -> None:
+        """Test DOI prefix stripping for all supported prefix formats."""
+        assert strip_doi_prefix(doi) == expected
+
+    def test_strip_doi_prefix_preserves_case(self) -> None:
+        """Prefix stripping should NOT change DOI case."""
+        assert strip_doi_prefix("https://doi.org/10.1038/NATURE") == "10.1038/NATURE"
 
 
 class TestNormalizeDoi:

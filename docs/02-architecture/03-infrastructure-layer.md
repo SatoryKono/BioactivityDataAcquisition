@@ -67,15 +67,15 @@ PubMedAdapter                         (pubchempy)
 
 **Ключевые компоненты `UnifiedHTTPClient`:**
 
-- **Rate Limiter** (`TokenBucket`): Ограничение частоты запросов
-- **Circuit Breaker**: Защита от каскадных отказов
+- **Rate Limiter** (`TokenBucketRateLimiter`): Ограничение частоты запросов
+- **Circuit Breaker** (`CircuitBreakerGuard`): Защита от каскадных отказов
 - **Retry Logic**: Автоматические повторы с exponential backoff
 - **Metrics**: Интеграция с `MetricsPort` для наблюдаемости
 
 **Для sync-библиотек** (pubchempy, biopython) используется `BaseSyncAdapter`:
 
 - `ThreadPoolExecutor` для изоляции блокирующего I/O
-- Собственные `TokenBucket` и `CircuitBreaker`
+- Собственные `TokenBucketRateLimiter` и `CircuitBreakerGuard`
 - Async-обёртка через `_run_in_executor()`
 
 ### 2.2. `storage/` — Адаптеры Хранилищ

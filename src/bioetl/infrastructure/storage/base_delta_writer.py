@@ -19,6 +19,8 @@ __all__ = ["BaseDeltaWriter", "coerce_null_types_for_delta"]
 
 
 import asyncio
+from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import orjson
@@ -93,6 +95,37 @@ def _get_string_fields(schema: pa.Schema) -> set[str]:
         field.name
         for field in schema
         if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
+    }
+
+
+@dataclass(frozen=True, slots=True)
+class _ArrowPreparationContext:
+    """Prepared schema context for deterministic Arrow conversion."""
+
+    schema_names: tuple[str, ...]
+    schema_fields: frozenset[str]
+    string_fields: frozenset[str]
+
+
+def _build_arrow_preparation_context(schema: pa.Schema) -> _ArrowPreparationContext:
+    """Build the immutable schema context used during Arrow preparation."""
+    schema_names = tuple(schema.names)
+    return _ArrowPreparationContext(
+        schema_names=schema_names,
+        schema_fields=frozenset(schema_names),
+        string_fields=frozenset(_get_string_fields(schema)),
+    )
+
+
+def _filter_record_for_schema(
+    record: BronzeRecord,
+    context: _ArrowPreparationContext,
+) -> BronzeRecord:
+    """Filter and serialize one record against the prepared schema context."""
+    return {
+        key: _serialize_value(value, key in context.string_fields)
+        for key, value in record.items()
+        if key in context.schema_fields
     }
 
 
@@ -220,25 +253,22 @@ class BaseDeltaWriter:
         Returns:
             PyArrow Table with filtered, serialized, and sorted data.
         """
-        schema_fields = set(schema.names)
-        string_fields = _get_string_fields(schema)
-
+        preparation = _build_arrow_preparation_context(schema)
         filtered_records = [
-            {
-                k: _serialize_value(v, k in string_fields)
-                for k, v in rec.items()
-                if k in schema_fields
-            }
-            for rec in records
+            _filter_record_for_schema(record, preparation) for record in records
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
-        return self._sort_by_primary_keys(arrow_data, primary_keys, schema.names)
+        return self._sort_by_primary_keys(
+            arrow_data,
+            primary_keys,
+            preparation.schema_names,
+        )
 
     def _sort_by_primary_keys(
         self,
         table: pa.Table,
         primary_keys: list[str],
-        schema_names: list[str],
+        schema_names: Sequence[str],
     ) -> pa.Table:
         """Sort Arrow table by primary keys for deterministic writes.
 

@@ -24,6 +24,7 @@ __all__ = [
     "parse_authors_to_list",
     "parse_date_field",
     "parse_page_range",
+    "strip_doi_prefix",
     "strip_html_tags",
 ]
 
@@ -56,6 +57,32 @@ def normalize_to_string(value: object) -> str | None:
         return None
     str_value = str(value).strip()
     return str_value if str_value else None
+
+
+_DOI_URL_PREFIXES = (
+    "https://doi.org/",
+    "http://doi.org/",
+    "doi:",
+    "DOI:",
+)
+
+
+def strip_doi_prefix(doi: str) -> str:
+    """Strip known DOI URL/scheme prefixes, preserving the DOI payload.
+
+    Handles: ``https://doi.org/``, ``http://doi.org/``, ``doi:``, ``DOI:``.
+    Does NOT lowercase or strip whitespace — caller decides post-processing.
+
+    Args:
+        doi: Raw DOI string that may contain URL-style or scheme prefixes.
+
+    Returns:
+        DOI string with supported prefixes removed.
+    """
+    for prefix in _DOI_URL_PREFIXES:
+        if doi.startswith(prefix):
+            return doi[len(prefix):]
+    return doi
 
 
 def normalize_doi(doi: str | None) -> str | None:
