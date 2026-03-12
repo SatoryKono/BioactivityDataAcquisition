@@ -8,8 +8,10 @@ ProviderConfig building delegated to sibling modules (Wave 3 simplification).
 
 from __future__ import annotations
 
-from bioetl.composition.providers.provider_registry import (
+from bioetl.composition.providers._models import (
     ProviderConfig,
+)
+from bioetl.composition.providers.provider_registry import (
     ProviderRegistry,
 )
 from bioetl.composition.providers.registration_biblio import (

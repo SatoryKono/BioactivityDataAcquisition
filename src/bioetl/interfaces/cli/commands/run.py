@@ -34,9 +34,9 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
+    RunCommandInput,
     handle_cli_failure,
     map_status_to_exit_code,
-    RunCommandInput,
     run_command_flow,
 )
 from bioetl.interfaces.cli.commands.run_helpers import (

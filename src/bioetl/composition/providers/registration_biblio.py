@@ -16,7 +16,7 @@ from bioetl.composition.providers._config_helpers import (
     _get_rate_limit_from_config,
     _normalize_optional_override,
 )
-from bioetl.composition.providers.provider_registry import (
+from bioetl.composition.providers._models import (
     HttpConfig,
     ProviderConfig,
 )

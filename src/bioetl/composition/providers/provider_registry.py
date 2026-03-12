@@ -1,18 +1,32 @@
-"""Provider Registry - unified data provider registry.
+"""Provider registry facade over split metadata and creation helpers.
 
-Centralizes provider registration, eliminating the need
-to modify multiple files when adding a new provider.
-
-After unification with DataSourceRegistry, this module is also responsible for
-high-level data source creation with filtering support. Its callback protocols
-are composition-local contracts, not domain ports.
+Centralizes the public registry API while delegating provider metadata models,
+registry-store helpers, and adapter/data-source creation logic to internal
+submodules. This keeps the canonical import path stable without forcing future
+provider additions through one monolithic implementation file.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, ClassVar, Protocol
+from typing import TYPE_CHECKING, ClassVar
+
+from bioetl.composition.providers._creation import (
+    create_provider_adapter,
+    create_provider_data_source,
+    provider_has_data_source_creator,
+)
+from bioetl.composition.providers._models import (
+    AdapterCreator,
+    DataSourceCreatorProtocol,
+    HttpConfig,
+    ProviderConfig,
+)
+from bioetl.composition.providers._store import (
+    get_provider_config,
+    is_provider_registered,
+    list_provider_names,
+    register_provider_config,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
@@ -29,87 +43,6 @@ __all__ = [
     "ProviderConfig",
     "ProviderRegistry",
 ]
-
-
-@dataclass(frozen=True)
-class HttpConfig:
-    """HTTP client configuration for a provider.
-
-    Attributes:
-        rate: Base rate limit (requests/second).
-        capacity: Token bucket capacity.
-        rate_overrides: Conditional rate limit overrides.
-            Key is a Settings attribute name (e.g., "pubmed_api_key"),
-            value is the new rate when that attribute is present.
-    """
-
-    rate: float = 5.0
-    capacity: int = 10
-    rate_overrides: dict[str, float] = field(default_factory=dict)
-
-
-# Type alias for low-level adapter creator
-AdapterCreator = Callable[..., "DataSourcePort"]
-
-
-class DataSourceCreatorProtocol(Protocol):
-    """Protocol for composition-side data source creator callables.
-
-    These callables create fully configured data sources with filtering support.
-    The returned object is a domain ``DataSourcePort``, but this callback itself
-    remains a composition-layer wiring contract.
-    """
-
-    def __call__(
-        self,
-        settings: Settings,
-        pipeline_config: PipelineYamlConfig,
-        logger: LoggerPort,
-        filter_config: InputFilterConfig | None = None,
-        metrics: MetricsPort | None = None,
-        pipeline_name: str = "unknown",
-    ) -> DataSourcePort:
-        """Create a configured data source.
-
-        Args:
-            settings: Application settings
-            pipeline_config: Pipeline configuration from YAML
-            logger: LoggerPort instance for structured logging
-            filter_config: Optional filter configuration
-            metrics: Optional metrics port for recording filter statistics
-            pipeline_name: Pipeline name for metrics labels
-
-        Returns:
-            Configured DataSourcePort instance
-        """
-        ...
-
-
-@dataclass(frozen=True)
-class ProviderConfig:
-    """Complete provider configuration.
-
-    Attributes:
-        adapter_class: Adapter class implementing DataSourcePort.
-        http_config: HTTP client configuration (None if the provider
-            manages its own client independently).
-        requires_http_client: Whether an HTTP client is needed for initialization.
-        requires_logger: Whether a logger is needed for initialization.
-        default_kwargs: Additional kwargs for the adapter constructor.
-        custom_creator: Custom adapter creation function for
-            complex cases (e.g., PubMed with API key logic).
-        data_source_creator: High-level data source creation function
-            with filtering support. If specified, used instead of
-            the standard logic in create_data_source().
-    """
-
-    adapter_class: type[DataSourcePort]
-    http_config: HttpConfig | None = None
-    requires_http_client: bool = True
-    requires_logger: bool = True
-    default_kwargs: dict[str, object] = field(default_factory=dict)
-    custom_creator: AdapterCreator | None = None
-    data_source_creator: DataSourceCreatorProtocol | None = None
 
 
 # Backward-compatible alias kept during the RF-008 terminology cleanup.
@@ -147,7 +80,7 @@ class ProviderRegistry:
             name: Unique provider name (e.g., "chembl", "pubchem").
             config: Provider configuration.
         """
-        cls._providers[name] = config
+        register_provider_config(cls._providers, name, config)
 
     @classmethod
     def get(cls, name: str) -> ProviderConfig:
@@ -162,10 +95,7 @@ class ProviderRegistry:
         Raises:
             KeyError: If the provider is not registered.
         """
-        if name not in cls._providers:
-            available = ", ".join(sorted(cls._providers.keys()))
-            raise KeyError(f"Unknown provider: {name}. Available: {available}")
-        return cls._providers[name]
+        return get_provider_config(cls._providers, name)
 
     @classmethod
     def is_registered(cls, name: str) -> bool:
@@ -177,7 +107,7 @@ class ProviderRegistry:
         Returns:
             True if the provider is registered.
         """
-        return name in cls._providers
+        return is_provider_registered(cls._providers, name)
 
     @classmethod
     def create_adapter(
@@ -206,40 +136,14 @@ class ProviderRegistry:
             KeyError: If the provider is not registered.
             ValueError: If http_client or logger is required but not provided.
         """
-        config = cls.get(name)
-
-        # Use custom creator if available
-        if config.custom_creator:
-            return config.custom_creator(
-                http_client=http_client,
-                logger=logger,
-                settings=settings,
-                **kwargs,
-            )
-
-        # Standard creation logic
-        init_kwargs: dict[str, object] = {
-            **config.default_kwargs,
+        return create_provider_adapter(
+            name=name,
+            config=cls.get(name),
+            http_client=http_client,
+            logger=logger,
+            settings=settings,
             **kwargs,
-        }
-
-        if config.requires_http_client:
-            if http_client is None:
-                raise ValueError(
-                    f"Provider '{name}' requires http_client but none was provided. "
-                    "Ensure http_client is passed from Composition Root."
-                )
-            init_kwargs["http_client"] = http_client
-
-        if config.requires_logger:
-            if logger is None:
-                raise ValueError(
-                    f"Provider '{name}' requires logger but none was provided. "
-                    "Ensure logger is passed from Composition Root."
-                )
-            init_kwargs["logger"] = logger
-
-        return config.adapter_class(**init_kwargs)
+        )
 
     @classmethod
     def get_http_config(cls, name: str) -> HttpConfig | None:
@@ -251,8 +155,7 @@ class ProviderRegistry:
         Returns:
             HttpConfig or None if the provider does not use a shared HTTP client.
         """
-        config = cls.get(name)
-        return config.http_config
+        return cls.get(name).http_config
 
     @classmethod
     def create_data_source(
@@ -287,15 +190,9 @@ class ProviderRegistry:
             KeyError: If the provider is not registered.
             ValueError: If data_source_creator is not set for the provider.
         """
-        config = cls.get(name)
-
-        if config.data_source_creator is None:
-            raise ValueError(
-                f"Provider '{name}' does not have a data_source_creator configured. "
-                "Register the provider with a data_source_creator in registration.py."
-            )
-
-        return config.data_source_creator(
+        return create_provider_data_source(
+            name=name,
+            config=cls.get(name),
             settings=settings,
             pipeline_config=pipeline_config,
             logger=logger,
@@ -316,8 +213,7 @@ class ProviderRegistry:
         """
         if not cls.is_registered(name):
             return False
-        config = cls.get(name)
-        return config.data_source_creator is not None
+        return provider_has_data_source_creator(cls.get(name))
 
     @classmethod
     def list_providers(cls) -> list[str]:
@@ -326,7 +222,7 @@ class ProviderRegistry:
         Returns:
             Sorted list of provider names.
         """
-        return sorted(cls._providers.keys())
+        return list_provider_names(cls._providers)
 
     @classmethod
     def clear(cls) -> None:

@@ -31,6 +31,8 @@ from bioetl.interfaces.cli.commands.run_command_policy import (
     handle_destructive_step,
     map_status_to_exit_code,
     prepare_run_request,
+    RunCommandInput,
+    run_command_flow,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -318,6 +320,115 @@ class TestHandleDestructiveStep:
                 dry_run=True,
                 yes=True,
             )
+
+
+# ---------------------------------------------------------------------------
+# run_command_flow
+# ---------------------------------------------------------------------------
+
+
+class TestRunCommandFlow:
+    """Tests for run_command_flow orchestration helper."""
+
+    def test_returns_early_when_destructive_step_stops_execution(self) -> None:
+        service = MagicMock(spec=CliRunOrchestrationService)
+        execute_run = MagicMock()
+        health_info_presenter = MagicMock()
+        result_presenter = MagicMock()
+        exit_func = MagicMock()
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_step",
+            return_value=False,
+        ) as mock_handle_destructive:
+            run_command_flow(
+                cli_input=RunCommandInput(
+                    pipeline="chembl_activity",
+                    run_type="rebuild",
+                    resume=False,
+                    start_offset=None,
+                    limit=None,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=True,
+                    yes=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    health_server=True,
+                    health_port=8081,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                ),
+                service=service,
+                execute_run=execute_run,
+                health_info_presenter=health_info_presenter,
+                result_presenter=result_presenter,
+                exit_func=exit_func,
+            )
+
+        mock_handle_destructive.assert_called_once()
+        service.prepare_execution_request.assert_not_called()
+        execute_run.assert_not_called()
+        health_info_presenter.assert_not_called()
+        result_presenter.assert_not_called()
+        exit_func.assert_not_called()
+
+    def test_runs_prepare_execute_present_and_exit(self) -> None:
+        service = MagicMock(spec=CliRunOrchestrationService)
+        request = _make_request(health_server=True, health_port=9090)
+        result = _make_result()
+        service.prepare_execution_request.return_value = RunPreparationResult(
+            request=request
+        )
+        execute_run = MagicMock(return_value=result)
+        health_info_presenter = MagicMock()
+        result_presenter = MagicMock()
+        exit_func = MagicMock(side_effect=SystemExit(ExitCode.OK))
+
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_step",
+                return_value=True,
+            ) as mock_handle_destructive,
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            run_command_flow(
+                cli_input=RunCommandInput(
+                    pipeline="chembl_activity",
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=10,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    yes=True,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    health_server=True,
+                    health_port=9090,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                ),
+                service=service,
+                execute_run=execute_run,
+                health_info_presenter=health_info_presenter,
+                result_presenter=result_presenter,
+                exit_func=exit_func,
+            )
+
+        assert exc_info.value.code == ExitCode.OK
+        mock_handle_destructive.assert_called_once()
+        execute_run.assert_called_once_with(request)
+        health_info_presenter.assert_called_once_with(True, 9090)
+        result_presenter.assert_called_once_with(result)
+        exit_func.assert_called_once_with(ExitCode.OK)
 
 
 # ---------------------------------------------------------------------------

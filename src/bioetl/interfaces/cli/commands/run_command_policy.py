@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import NoReturn, Protocol
 
 import click
@@ -30,12 +31,14 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 __all__ = [
+    "RunCommandInput",
     "execute_run_step",
     "finalize_run_step",
     "handle_cli_failure",
     "handle_destructive_step",
     "map_status_to_exit_code",
     "prepare_run_request",
+    "run_command_flow",
 ]
 
 
@@ -55,6 +58,36 @@ class ExitCallable(Protocol):
     """Callable contract for terminating with a process exit code."""
 
     def __call__(self, code: int | str | None = None) -> NoReturn: ...
+
+
+class HealthInfoPresenterCallable(Protocol):
+    """Callable contract to render health-server runtime info."""
+
+    def __call__(self, enabled: bool, port: int) -> None: ...
+
+
+@dataclass(frozen=True, slots=True)
+class RunCommandInput:
+    """Normalized CLI inputs for the run command control flow."""
+
+    pipeline: str
+    run_type: str
+    resume: bool
+    start_offset: int | None
+    limit: int | None
+    input_csv: str | None
+    filter_column: str | None
+    filter_field: str | None
+    dry_run: bool
+    yes: bool
+    vacuum_after_run: bool | None
+    vacuum_retention_days: int | None
+    debug: bool
+    health_server: bool
+    health_port: int
+    use_cached_bronze: bool
+    cached_bronze_date: str | None
+    cached_bronze_path: str | None
 
 
 def prepare_run_request(
@@ -201,6 +234,57 @@ def handle_destructive_step(
             reason_code="CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
         )
         return False
+
+
+def run_command_flow(
+    *,
+    cli_input: RunCommandInput,
+    service: CliRunOrchestrationService,
+    execute_run: RunExecutorCallable,
+    health_info_presenter: HealthInfoPresenterCallable,
+    result_presenter: ResultPresenterCallable,
+    exit_func: ExitCallable,
+) -> None:
+    """Execute the full run-command policy flow from normalized CLI input."""
+    if not handle_destructive_step(
+        pipeline=cli_input.pipeline,
+        run_type=cli_input.run_type,
+        dry_run=cli_input.dry_run,
+        yes=cli_input.yes,
+    ):
+        return
+
+    request = prepare_run_request(
+        service=service,
+        pipeline=cli_input.pipeline,
+        run_type=cli_input.run_type,
+        resume=cli_input.resume,
+        start_offset=cli_input.start_offset,
+        limit=cli_input.limit,
+        input_csv=cli_input.input_csv,
+        filter_column=cli_input.filter_column,
+        filter_field=cli_input.filter_field,
+        dry_run=cli_input.dry_run,
+        vacuum_after_run=cli_input.vacuum_after_run,
+        vacuum_retention_days=cli_input.vacuum_retention_days,
+        debug=cli_input.debug,
+        health_server=cli_input.health_server,
+        health_port=cli_input.health_port,
+        use_cached_bronze=cli_input.use_cached_bronze,
+        cached_bronze_date=cli_input.cached_bronze_date,
+        cached_bronze_path=cli_input.cached_bronze_path,
+        exit_func=exit_func,
+    )
+    health_info_presenter(request.health_server, request.health_port)
+    result = execute_run_step(
+        request=request,
+        execute_run=execute_run,
+    )
+    finalize_run_step(
+        result=result,
+        result_presenter=result_presenter,
+        exit_func=exit_func,
+    )
 
 
 def execute_run_step(

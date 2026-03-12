@@ -1,7 +1,8 @@
-"""Canonical Semantic Scholar adapter entrypoint.
+"""Retained Semantic Scholar adapter entrypoint.
 
-Keeps backward compatibility while steering new imports away from
-``adapter``.
+This module is the stable canonical import path for first-party code. It
+remains intentionally retained in the current cycle while the implementation
+continues to live in ``adapter``.
 """
 
 from __future__ import annotations
