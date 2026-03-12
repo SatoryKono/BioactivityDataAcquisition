@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
-    DataSourceRegistry,
+    get_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.dq_helpers import (
     extract_dq_configs as _extract_dq_configs,
@@ -88,8 +88,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.gold_schema = gold_schema
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
-        # Use custom creator or look up from registry
-        self._create_data_source = data_source_creator or DataSourceRegistry.get(
+        # Use custom creator or resolve the canonical provider-bound creator.
+        self._create_data_source = data_source_creator or get_data_source_creator(
             provider
         )
 

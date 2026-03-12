@@ -1,4 +1,4 @@
-"""Tests for GenericPipelineFactory and DataSourceRegistry."""
+"""Tests for GenericPipelineFactory and datasource registry compatibility."""
 
 from __future__ import annotations
 
@@ -66,9 +66,12 @@ class TestDataSourceRegistry:
 class TestGenericPipelineFactory:
     """Tests for GenericPipelineFactory."""
 
-    def test_init_with_provider(self):
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    def test_init_with_provider(self, mock_get_data_source_creator):
         """Test factory initialization with provider name."""
         mock_pipeline_class = MagicMock()
+        mock_creator = MagicMock()
+        mock_get_data_source_creator.return_value = mock_creator
 
         factory = GenericPipelineFactory(
             pipeline_name="test_pipeline",
@@ -77,10 +80,12 @@ class TestGenericPipelineFactory:
             gold_schema=MagicMock(),
         )
 
+        mock_get_data_source_creator.assert_called_once_with("chembl")
         assert factory.pipeline_name == "test_pipeline"
         assert factory.pipeline_class is mock_pipeline_class
         assert factory.provider == "chembl"
         assert factory.silver_schema is None
+        assert factory._create_data_source is mock_creator
 
     def test_init_with_custom_creator(self):
         """Test factory initialization with custom data source creator."""

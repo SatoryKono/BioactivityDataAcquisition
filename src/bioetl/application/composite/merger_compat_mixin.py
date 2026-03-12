@@ -9,11 +9,14 @@ from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrdererService,
 )
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
+from bioetl.application.composite.join_planner_helpers import (
+    parse_pipeline_name,
+    resolve_field_aliases_from_registry,
+    table_path_to_name,
+)
 from bioetl.application.composite.merger_compat_join_planner_mixin import (
     _MergeCompatibilityJoinPlannerMixin,
 )
-from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -24,18 +27,6 @@ if TYPE_CHECKING:
         EnricherConfig,
         MergeConfig,
     )
-
-
-def _path_to_table_name_local(path: str) -> str:
-    """Convert a full path to a table name by stripping layer prefix."""
-    normalized = path.replace("\\", "/")
-
-    for layer in ("silver/", "gold/", "bronze/"):
-        if layer in normalized:
-            idx = normalized.find(layer)
-            return normalized[idx + len(layer) :]
-
-    return path
 
 
 class _MergeCompatibilityParsingMixin:
@@ -60,7 +51,7 @@ class _MergeCompatibilityParsingMixin:
         if not has_layer:
             return None
 
-        table_name = _path_to_table_name_local(table_path)
+        table_name = table_path_to_name(table_path)
         parts = table_name.split("/")
         if len(parts) == 2:
             return f"{parts[0]}_{parts[1]}"
@@ -72,12 +63,7 @@ class _MergeCompatibilityParsingMixin:
 
     def _get_field_aliases(self, pipeline: str) -> dict[str, str] | None:
         """Get provider field alias mapping for pipeline provider."""
-        try:
-            provider, _entity = self._parse_pipeline_name(pipeline)
-        except ValueError:
-            return None
-        alias_map = get_alias_map_for_provider(provider)
-        return alias_map if alias_map else None
+        return resolve_field_aliases_from_registry(pipeline)
 
     def _extract_base_column(self, column: str, prefix: str) -> str | None:
         """Extract base column name from prefixed column name."""

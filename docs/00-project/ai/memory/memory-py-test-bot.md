@@ -202,4 +202,29 @@ pytest tests/integration/ --vcr-record=none -v
 
 ---
 
+## 12. Unified Script Commands (test & CI)
+
+```bash
+# CI test execution
+python -m scripts.ci run-tests                 # Resilient pytest runner
+python -m scripts.ci quality-gate              # Quality integral gate
+python -m scripts.ci e2e-skip-rate             # E2E skip rate check
+python -m scripts.ci e2e-rerun                 # E2E rerun stability
+
+# Data integrity (pre-test validation)
+python -m scripts.data check-vcr-placement     # VCR cassette placement
+python -m scripts.data check-vcr-naming        # VCR naming conventions
+python -m scripts.data check-delta             # Delta table integrity
+
+# Schema validation (config tests)
+python -m scripts.schema validate-configs
+python -m scripts.schema check-invariants --verbose
+
+# Dev shortcuts
+python -m scripts.dev run-tests                # Local test runner
+python -m scripts.dev test-changed             # Tests for changed files only
+```
+
+---
+
 *This memory file is specific to py-test-bot. For general project context see `agent-memory.md`.*

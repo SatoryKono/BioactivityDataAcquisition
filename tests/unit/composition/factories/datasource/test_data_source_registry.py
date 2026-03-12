@@ -13,6 +13,9 @@ import pytest
 from bioetl.composition.factories.datasource.factory import (
     DataSourceRegistry,
 )
+from bioetl.composition.factories.datasource.data_source_factory import (
+    get_data_source_creator,
+)
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 
 
@@ -113,6 +116,25 @@ class TestDataSourceRegistryDelegation:
 
         # DataSourceRegistry should include all ProviderRegistry providers
         assert ds_providers == pr_providers
+
+
+class TestCanonicalDataSourceCreator:
+    """Tests for the canonical provider-bound creator helper."""
+
+    def test_get_data_source_creator_returns_callable(self):
+        """Verify the canonical helper returns a provider-bound callable."""
+        ensure_providers_loaded()
+
+        creator = get_data_source_creator("chembl")
+
+        assert callable(creator)
+
+    def test_get_data_source_creator_raises_for_unknown_provider(self):
+        """Verify the canonical helper raises KeyError for unknown providers."""
+        ensure_providers_loaded()
+
+        with pytest.raises(KeyError, match="Unknown provider"):
+            get_data_source_creator("unknown_provider")
 
 
 class TestDataSourceCreatorProtocol:

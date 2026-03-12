@@ -202,7 +202,8 @@ class DeltaReader:
 
             # Ultimate fallback: read table into memory (works for any table).
             dt_final = DeltaTable(str(resolved_path))
-            return int(dt_final.to_pyarrow_table(columns=[]).num_rows)
+            final_row_count = cast(int, dt_final.to_pyarrow_table(columns=[]).num_rows)
+            return final_row_count
 
         return await loop.run_in_executor(None, _count_rows)
 

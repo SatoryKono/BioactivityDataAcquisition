@@ -196,6 +196,25 @@ grep -n "dq_config_file\|filter_config_file" configs/entities/{provider}/{entity
 grep -n "^quality:\|^filters:" configs/entities/{provider}/{entity}.yaml
 ```
 
+### Unified Script Commands (schema/config validation)
+
+```bash
+# Schema invariants — обязательно после изменения configs
+python -m scripts.schema check-invariants --verbose
+python -m scripts.schema check-config-paths
+
+# Config validation (all pipeline configs)
+python -m scripts.schema validate-configs
+
+# Gap analysis (unified)
+python -m scripts.schema analyze-gaps
+
+# Pipeline schema generation (check mode)
+python -m scripts.schema generate-pipeline --check
+python -m scripts.schema generate-artifacts --check
+python -m scripts.schema generate-pubtype --check
+```
+
 ---
 
 ## 7. New Entity Scaffolding (Config Part)

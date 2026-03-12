@@ -47,6 +47,46 @@ def _ensure_providers_loaded() -> None:
     ensure_providers_loaded()
 
 
+def _build_data_source_creator(provider: str) -> DataSourceCreatorProtocol:
+    """Build a provider-bound data-source creator callback.
+
+    This is the shared implementation for the canonical datasource helper and
+    the legacy ``DataSourceRegistry.get()`` compatibility path.
+    """
+    _ensure_providers_loaded()
+
+    if not ProviderRegistry.is_registered(provider):
+        available = ", ".join(ProviderRegistry.list_providers())
+        raise KeyError(f"Unknown provider: {provider}. Available: {available}")
+
+    if not ProviderRegistry.has_data_source_creator(provider):
+        raise KeyError(
+            f"Provider '{provider}' does not have a data_source_creator. "
+            "Ensure it is registered with data_source_creator in registration.py."
+        )
+
+    def creator(
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
+        filter_config: InputFilterConfig | None = None,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str = "unknown",
+    ) -> DataSourcePort:
+        """Create a data source for the captured provider name."""
+        return ProviderRegistry.create_data_source(
+            name=provider,
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
+        )
+
+    return creator
+
+
 class DataSourceFactory:
     """Factory for creating data source adapters.
 
@@ -184,7 +224,7 @@ class DataSourceRegistry:
     def get(cls, provider: str) -> DataSourceCreatorProtocol:
         """Get creator function for provider.
 
-        Returns a closure that delegates to ProviderRegistry.create_data_source().
+        Returns a closure that delegates to ``ProviderRegistry.create_data_source()``.
 
         Args:
             provider: Provider name (e.g., 'chembl', 'pubchem')
@@ -195,60 +235,7 @@ class DataSourceRegistry:
         Raises:
             KeyError: If provider is not registered
         """
-        _ensure_providers_loaded()
-
-        # Check if provider exists in ProviderRegistry
-        if not ProviderRegistry.is_registered(provider):
-            available = ", ".join(ProviderRegistry.list_providers())
-            raise KeyError(f"Unknown provider: {provider}. Available: {available}")
-
-        # Check if provider has data_source_creator configured
-        if not ProviderRegistry.has_data_source_creator(provider):
-            raise KeyError(
-                f"Provider '{provider}' does not have a data_source_creator. "
-                "Ensure it is registered with data_source_creator in registration.py."
-            )
-
-        # Return a closure that delegates to ProviderRegistry
-        def creator(
-            settings: Settings,
-            pipeline_config: PipelineYamlConfig,
-            logger: LoggerPort,
-            filter_config: InputFilterConfig | None = None,
-            metrics: MetricsPort | None = None,
-            pipeline_name: str = "unknown",
-        ) -> DataSourcePort:
-            """Create a data source for the captured provider name.
-
-            This closure captures the provider name from the outer scope and
-            delegates creation to ProviderRegistry.create_data_source().
-
-            Args:
-                settings: Application settings for configuration.
-                pipeline_config: Pipeline-specific YAML configuration.
-                logger: LoggerPort for structured logging.
-                filter_config: Optional input filtering configuration.
-                metrics: Optional MetricsPort for observability.
-                pipeline_name: Pipeline identifier for logging context.
-
-            Returns:
-                DataSourcePort implementation for the provider.
-
-            Note:
-                This is a backward-compatibility wrapper. For new code, prefer
-                using ProviderRegistry.create_data_source() directly.
-            """
-            return ProviderRegistry.create_data_source(
-                name=provider,
-                settings=settings,
-                pipeline_config=pipeline_config,
-                logger=logger,
-                filter_config=filter_config,
-                metrics=metrics,
-                pipeline_name=pipeline_name,
-            )
-
-        return creator
+        return _build_data_source_creator(provider)
 
     @classmethod
     def list_providers(cls) -> list[str]:

@@ -39,4 +39,20 @@ def parse_pipeline_name(pipeline: str) -> tuple[str, str]:
     return provider, entity
 
 
-__all__ = ["parse_pipeline_name", "resolve_field_aliases_from_registry"]
+def table_path_to_name(path: str) -> str:
+    """Convert a layer-qualified table path to a storage table name."""
+    normalized = path.replace("\\", "/")
+
+    for layer in ("silver/", "gold/", "bronze/"):
+        if layer in normalized:
+            idx = normalized.find(layer)
+            return normalized[idx + len(layer) :]
+
+    return path
+
+
+__all__ = [
+    "parse_pipeline_name",
+    "resolve_field_aliases_from_registry",
+    "table_path_to_name",
+]
