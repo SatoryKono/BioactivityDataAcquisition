@@ -63,6 +63,14 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | `architecture/12-bootstrap-di-container.mmd` | `architecture/12a-bootstrap-factories.mmd`, `architecture/12b-bootstrap-wiring.mmd` |
 | `architecture/13-port-protocol-contracts.mmd` | `architecture/13a-port-contracts-data-sources.mmd`, `architecture/13b-port-contracts-storage.mmd`, `architecture/13c-port-contracts-observability.mmd`, `architecture/13d-port-contracts-services.mmd` |
 | `architecture/13-port-protocol-contracts.mmd` (alternate slices) | `architecture/13a-data-storage-ports.mmd`, `architecture/13b-operational-ports.mmd`, `architecture/13c-validation-dq-ports.mmd`, `architecture/13e-operational-ports-domain.mmd`, `architecture/13f-operational-ports-infra.mmd` |
+| `architecture/06-storage-layer.mmd` | `architecture/06a-storage-writers.mmd`, `architecture/06b-storage-support.mmd` |
+| `architecture/07-dq-system.mmd` | `architecture/07a-dq-analysis.mmd`, `architecture/07b-dq-pipeline.mmd` |
+| `architecture/08-composite-pipeline.mmd` | `architecture/08a-composite-config.mmd`, `architecture/08b-composite-execution.mmd` |
+| `architecture/09-observability-stack.mmd` | `architecture/09a-observability-app.mmd`, `architecture/09b-observability-infra.mmd` |
+| `architecture/11-configuration-system.mmd` | `architecture/11a-config-loading.mmd`, `architecture/11b-config-domain.mmd` |
+| `architecture/14-cli-interface-layer.mmd` | `architecture/14a-cli-commands.mmd`, `architecture/14b-cli-routing.mmd` |
+| `architecture/16-transformer-hierarchy.mmd` | `architecture/16a-transformer-base.mmd`, `architecture/16b-transformer-pub-other.mmd` |
+| `architecture/18-lock-checkpoint-shutdown.mmd` | `architecture/18a-lock-system.mmd`, `architecture/18b-checkpoint-shutdown.mmd` |
 
 > `13a/13b/13c` have two parallel decomposition tracks by design:
 > `port-contracts-*` = contract-centric views, `*-ports` = operational slices.
@@ -91,7 +99,7 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | 18 | Extractors | `class-diagrams/15-extractors.mmd` | BaseFieldExtractor, PubMed & UniProt extractors |
 | 19 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | DataSourceRegistry, TransformerFactory, RunnerBuilder |
 
-## Foundation Diagrams (54)
+## Foundation Diagrams (55)
 
 Historical/foundational diagrams consolidated from `docs/02-architecture/diagrams/`.
 
@@ -284,15 +292,15 @@ bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-conf
 ```
 docs/02-architecture/mmd-diagrams/
   architecture/
-    *.mmd           # source diagrams (32)
+    *.mmd           # source diagrams (52)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
   class-diagrams/
-    *.mmd           # source diagrams (16)
+    *.mmd           # source diagrams (19)
     svg/*.svg
     png/*.png
   foundation/
-    *.mmd           # source diagrams (54)
+    *.mmd           # source diagrams (55)
     svg/*.svg
     png/*.png       # default 300 DPI, auto high-res for large @nodes diagrams,
                     # plus optional per-file @png-scale/@png-dpi overrides

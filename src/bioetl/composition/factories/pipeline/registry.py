@@ -90,8 +90,9 @@ def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
     Uses double-checked locking pattern to minimize lock contention while
     ensuring thread-safe initialization.
 
-    When called with a custom registry, idempotency check is skipped
-    (each registry instance is independent).
+    When called with a custom registry, registration is still safe to repeat:
+    already-registered pipeline names are skipped and only missing factories
+    are added.
 
     Args:
         registry: Optional PipelineRegistry instance. If None, uses the
@@ -101,7 +102,8 @@ def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
     """
     global _factories_registered
 
-    # For custom registries, register directly without idempotency check
+    # For custom registries, register directly. _register_factories_to() is
+    # idempotent at the registry level and skips already-registered pipelines.
     if registry is not None:
         _register_factories_to(registry)
         return
@@ -132,7 +134,10 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
     Args:
         registry: Target registry instance.
     """
-    for factory in _factories.values():
+    registered_pipelines = set(registry.list_pipelines())
+    for pipeline_name, factory in _factories.items():
+        if pipeline_name in registered_pipelines:
+            continue
         registry.register_factory(cast("PipelineFactoryPort", factory))
 
 

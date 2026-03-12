@@ -84,7 +84,9 @@ class TestRunnerFactory:
 
     def test_ensure_registrations_called_once(self):
         """Test _ensure_registrations is idempotent."""
-        factory = RunnerFactory()
+        # Use an empty custom registry so the guard allows register_all_pipelines
+        empty_registry = PipelineRegistry()
+        factory = RunnerFactory(registry=empty_registry)
 
         with (
             patch(
@@ -261,7 +263,9 @@ class TestRunnerFactoryListPipelines:
             result = factory.list_pipelines()
 
             assert result == ["pipeline1", "pipeline2"]
-            mock_registry.list_pipelines.assert_called_once()
+            # list_pipelines is called twice: once in _ensure_registrations guard,
+            # once in the actual list_pipelines() method
+            assert mock_registry.list_pipelines.call_count == 2
 
     def test_list_pipelines_triggers_registrations(self):
         """Test list_pipelines triggers registrations."""

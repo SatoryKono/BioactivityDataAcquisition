@@ -13,8 +13,9 @@ from bioetl.application.core.batch_checkpoint_recovery_service import (
 )
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_helpers import (
-    BatchExecutionStateOutcome,
+    apply_batch_execution_state_update,
     build_batch_execution_state_update,
+    build_batch_result_snapshot,
     build_run_statistics,
 )
 from bioetl.application.core.batch_executor_loop_helpers import (
@@ -298,11 +299,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
             BatchResult with cumulative bronze, silver, gold, and quarantined counts.
         """
         await self._process_batch_and_update_state(records, start_index)
-        return BatchResult(
-            bronze_count=self.records_bronze,
-            silver_count=self.records_silver,
-            gold_count=self.records_gold,
-            quarantined_count=self.records_quarantined,
+        return build_batch_result_snapshot(
+            batch_result_type=BatchResult,
+            records_bronze=self.records_bronze,
+            records_silver=self.records_silver,
+            records_gold=self.records_gold,
+            records_quarantined=self.records_quarantined,
         )
 
     async def _process_batch_and_update_state(
@@ -316,11 +318,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
             start_index=start_index,
             query_string=self._query_string,
         )
-        self._apply_batch_state_update(
-            build_batch_execution_state_update(
+        apply_batch_execution_state_update(
+            state=self,
+            state_update=build_batch_execution_state_update(
                 input_record_count=len(records),
                 output=output,
-            )
+            ),
         )
 
         if self._should_collect_dq_data():
@@ -331,17 +334,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
                 silver_records=output.silver_records,
                 gold_records=output.gold_records,
             )
-
-    def _apply_batch_state_update(
-        self, state_update: BatchExecutionStateOutcome
-    ) -> None:
-        """Apply one batch of counter deltas to executor-level state."""
-        self.records_bronze += state_update.bronze_count
-        self.records_silver += state_update.silver_count
-        self.records_gold += state_update.gold_count
-        self.records_quarantined += state_update.quarantined_count
-        self.records_filtered_out += state_update.filtered_out_count
-        self._source_batch_ids.append(state_update.source_batch_id)
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:
         """Get aggregated statistics for the entire pipeline run.
