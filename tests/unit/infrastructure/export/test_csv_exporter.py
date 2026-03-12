@@ -510,7 +510,7 @@ class TestCsvExporterTrueAppend:
         await exporter.export("locked_test", table1)
 
         # Make the open() call raise PermissionError for the target file
-        original_open = open  # noqa: A001
+        original_open = open
 
         def _patched_open(path: object, mode: str = "r", **kwargs: object) -> object:
             if str(path).endswith("locked_test.csv") and "b" in mode and "a" in mode:
@@ -543,15 +543,11 @@ class TestCsvExporterFinalize:
 
         # Write 3 batches with duplicates
         for batch in ([3, 1], [2, 1], [3, 2]):
-            table = pa.Table.from_pydict(
-                {"id": batch, "val": [f"v{x}" for x in batch]}
-            )
+            table = pa.Table.from_pydict({"id": batch, "val": [f"v{x}" for x in batch]})
             await exporter.export("dedup", table)
 
         # Finalize with dedup + sort
-        result_path = await exporter.finalize_csv(
-            "dedup", primary_keys=["id"]
-        )
+        result_path = await exporter.finalize_csv("dedup", primary_keys=["id"])
 
         assert result_path is not None
         result = pv.read_csv(result_path)

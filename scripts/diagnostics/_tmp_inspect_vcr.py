@@ -1,6 +1,7 @@
-import yaml
 from collections import Counter
 from pathlib import Path
+
+import yaml
 
 paths = [
     Path('tests/fixtures/vcr/chembl/test_chembl_assay_full_cycle.yaml'),

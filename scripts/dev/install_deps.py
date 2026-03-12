@@ -1,6 +1,7 @@
 import subprocess
 import sys
 
+
 def install_package(package_name):
     print(f"Installing {package_name}...")
     try:

@@ -20,21 +20,21 @@ FIX_MAP = {
 def fix_all_broken_links():
     md_files = list(DOCS_DIR.rglob("*.md"))
     fixed_count = 0
-    
+
     for md_file in md_files:
         content = md_file.read_text(encoding="utf-8")
         original_content = content
-        
+
         # Apply explicit map
         for old, new in FIX_MAP.items():
             content = content.replace(f"({old})", f"({new})")
-            
+
         # Fix Mermaid links starting with diagrams/ but missing ../
         if "02-architecture" in str(md_file):
             # From docs/02-architecture/*.md, diagrams/ should be just diagrams/
             # But from subfolders it might be different.
             pass
-            
+
         # Fix ../RULES.md from 02-architecture
         if "02-architecture" in str(md_file) and md_file.parent.name == "02-architecture":
              content = content.replace("](../RULES.md)", "](../00-project/RULES.md)")

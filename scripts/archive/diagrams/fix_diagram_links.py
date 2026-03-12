@@ -1,6 +1,6 @@
 
-import re
 import os
+import re
 from pathlib import Path
 
 DOCS_DIR = Path("docs")
@@ -8,22 +8,22 @@ DOCS_DIR = Path("docs")
 def fix_links():
     md_files = list(DOCS_DIR.rglob("*.md"))
     fixed_count = 0
-    
+
     for md_file in md_files:
         content = md_file.read_text(encoding="utf-8")
         original_content = content
-        
+
         # 1. Remove 'mermaid/' from diagram paths
         # [Text](diagrams/mermaid/file.mermaid) -> [Text](diagrams/file.mermaid)
         content = content.replace("diagrams/mermaid/", "diagrams/")
-        
+
         # 2. Fix .mmd extension to .mermaid
         content = content.replace(".mmd", ".mermaid")
-        
+
         # 3. Fix common diagram names that use underscores but should use dashes
         # This is tricky, I'll only do it for known diagrams if they are still failing.
         # Let's try to find all links to .mermaid files and normalize them.
-        
+
         def mermaid_link_fix(match):
             link_text = match.group(1)
             path = match.group(2)

@@ -7,7 +7,6 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
-
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 DEFAULT_ROOTS = [
     Path("docs/02-architecture/mmd-diagrams"),

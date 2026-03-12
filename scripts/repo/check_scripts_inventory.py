@@ -19,7 +19,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Final
 
@@ -291,7 +291,7 @@ def _build_inventory(root: Path) -> dict[str, object]:
     }
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "summary": summary,
         "scripts": rows,
     }

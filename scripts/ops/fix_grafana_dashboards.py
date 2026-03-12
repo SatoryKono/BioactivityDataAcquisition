@@ -1,8 +1,8 @@
 """Script to inject Grafana variables and fix PromQL queries for BioETL pipelines."""
 
 import json
-from pathlib import Path
 import re
+from pathlib import Path
 
 PIPELINE_VAR = {
     "allValue": None,
@@ -77,26 +77,26 @@ def fix_dashboard(path):
     for panel in panels:
         targets = panel.get("targets", [])
         if not targets: continue
-        
+
         for target in targets:
             expr = target.get("expr", "")
-            if not expr or ("bioetl_" not in expr): 
+            if not expr or ("bioetl_" not in expr):
                 continue
-            
-            # Complex replacement: 
+
+            # Complex replacement:
             metrics_found = re.findall(r'bioetl_[a-z0-9_]+', expr)
             new_expr = expr
-            
+
             for m in metrics_found:
                 # If metric already has $pipeline filter, skip it
                 if '$pipeline' in new_expr:
                     continue
-                    
+
                 if f"{m}{{" in new_expr:
                     new_expr = new_expr.replace(f"{m}{{", f"{m}{{pipeline=~\"$pipeline\", run_id=~\"$run_id\", ")
                 else:
                     new_expr = new_expr.replace(m, f"{m}{{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}}")
-            
+
             new_expr = new_expr.replace(", }", "}").replace(",,", ",")
             target["expr"] = new_expr
 

@@ -420,6 +420,30 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/dev/codex-exec.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep"
+    },
+    "scripts/dev/codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep"
+    },
+    "scripts/dev/start-wsl-proxy.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep"
+    },
+    "scripts/dev/wsl_proxy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep"
     }
   }
 }

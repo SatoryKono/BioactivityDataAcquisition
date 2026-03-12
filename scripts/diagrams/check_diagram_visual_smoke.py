@@ -13,7 +13,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 DEFAULT_MANIFEST = Path(
     "docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
 )

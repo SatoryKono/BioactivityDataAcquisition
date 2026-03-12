@@ -182,7 +182,7 @@ def check_thresholds(
 
     thresholds = dict(THRESHOLDS)
     if fail_under is not None:
-        thresholds = {k: fail_under for k in thresholds}
+        thresholds = dict.fromkeys(thresholds, fail_under)
 
     for kind, threshold in thresholds.items():
         actual = getattr(stats, f"{kind}_pct")

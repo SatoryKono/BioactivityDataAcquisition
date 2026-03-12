@@ -7,7 +7,7 @@ import pandera.pandas as panpa
 try:
     import pandera.api.function_dispatch as fd
     original_call = fd.FunctionDispatch.__call__
-    
+
     def patched_call(self, *args, **kwargs):
         try:
             return original_call(self, *args, **kwargs)
@@ -16,11 +16,11 @@ try:
                 from typing import Any
                 if Any in self._function_registry:
                     # Fallback to Any handler if Series handler is missing
-                    # Note: this might raise NotImplementedError for built-ins, 
+                    # Note: this might raise NotImplementedError for built-ins,
                     # but it's better than KeyError
                     return self._function_registry[Any](*args, **kwargs)
             raise
-            
+
     fd.FunctionDispatch.__call__ = patched_call
     print("FunctionDispatch monkeypatched")
 except Exception as e:

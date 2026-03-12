@@ -238,7 +238,7 @@ def main() -> int:
                 run_bounds_check=not args.skip_bounds_check,
                 max_overflow_ratio=args.max_overflow_ratio,
             )
-        except Exception as exc:  # noqa: BLE001 - CLI boundary
+        except Exception as exc:
             print(f"[ERROR] {exc}", file=sys.stderr)
             return 1
         rendered.append(output_pdf)

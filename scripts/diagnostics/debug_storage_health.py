@@ -1,6 +1,7 @@
 import os
-from pathlib import Path
 import traceback
+from pathlib import Path
+
 
 def check_writable(dir_path):
     path = Path(dir_path)
