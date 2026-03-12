@@ -12,6 +12,10 @@ import pytest
 import bioetl.application.core.batch_transformer_helpers as batch_transformer_helpers
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+from bioetl.application.core.batch_transformer_finalization import (
+    finalize_batch_transform_result,
+    finalize_stream_transform_result,
+)
 from bioetl.application.core.batch_transformer_helpers import (
     RecordTransformOutcome,
     TransformedRecord,
@@ -19,8 +23,6 @@ from bioetl.application.core.batch_transformer_helpers import (
     apply_transform_outcome_to_state,
     build_transform_result,
     create_transform_aggregation_state,
-    finalize_batch_transform_result,
-    finalize_stream_transform_result,
 )
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
@@ -487,6 +489,8 @@ class TestBatchTransformerAggregationHelpers:
         state.dq_records.append(({"id": "bad"}, MagicMock(), "error"))
         state.filtered_out_count = 1
         state.quarantined_count = 1
+        mock_quarantine_manager.quarantine_filtered_records.return_value = 0
+        mock_quarantine_manager.quarantine_records.return_value = 0
 
         result = await finalize_batch_transform_result(
             context=mock_context,
@@ -498,10 +502,12 @@ class TestBatchTransformerAggregationHelpers:
                 gold_schema=MagicMock(),
             ),
             batch_metrics=mock_batch_metrics,
-            quarantine_manager=mock_quarantine_manager,
             state=state,
-            batch_id=BatchID(uuid4()),
             records=[{"id": "filtered"}, {"id": "bad"}],
+            flush_filtered_records=lambda: (
+                mock_quarantine_manager.quarantine_filtered_records()
+            ),
+            flush_dq_records=lambda: mock_quarantine_manager.quarantine_records(),
         )
 
         mock_quarantine_manager.quarantine_filtered_records.assert_called_once()

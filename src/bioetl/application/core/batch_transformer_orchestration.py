@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome,
@@ -19,6 +19,40 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord
 
 
+TransformLoopResult = TypeVar(
+    "TransformLoopResult",
+    RecordTransformOutcome,
+    TransformedRecord,
+)
+
+
+async def _collect_transform_state(
+    *,
+    records: list[BronzeRecord],
+    batch_id: BatchID,
+    start_index: int,
+    transform_record: Callable[
+        [BronzeRecord, BatchID, int],
+        Awaitable[TransformLoopResult],
+    ],
+    apply_result: Callable[
+        [TransformAggregationState, TransformLoopResult],
+        None,
+    ],
+    yield_control: Callable[[float], Awaitable[float]],
+) -> TransformAggregationState:
+    """Run a transform loop and accumulate state for batch or streaming mode."""
+    state = create_transform_aggregation_state()
+    last_yield_at = time.monotonic()
+
+    for index, raw_record in enumerate(records, start=start_index):
+        last_yield_at = await yield_control(last_yield_at)
+        result = await transform_record(raw_record, batch_id, index)
+        apply_result(state, result)
+
+    return state
+
+
 async def collect_batch_transform_state(
     *,
     records: list[BronzeRecord],
@@ -31,18 +65,17 @@ async def collect_batch_transform_state(
     yield_control: Callable[[float], Awaitable[float]],
 ) -> TransformAggregationState:
     """Transform all batch records and accumulate batch state."""
-    state = create_transform_aggregation_state()
-    last_yield_at = time.monotonic()
-
-    for index, raw_record in enumerate(records, start=start_index):
-        last_yield_at = await yield_control(last_yield_at)
-        attempt = await transform_attempt(raw_record, batch_id, index)
-        apply_transform_outcome_to_state(
+    return await _collect_transform_state(
+        records=records,
+        batch_id=batch_id,
+        start_index=start_index,
+        transform_record=transform_attempt,
+        apply_result=lambda state, result: apply_transform_outcome_to_state(
             state=state,
-            attempt=attempt,
-        )
-
-    return state
+            attempt=result,
+        ),
+        yield_control=yield_control,
+    )
 
 
 async def collect_stream_transform_state(
@@ -57,15 +90,14 @@ async def collect_stream_transform_state(
     yield_control: Callable[[float], Awaitable[float]],
 ) -> TransformAggregationState:
     """Transform all records in streaming mode and accumulate state."""
-    state = create_transform_aggregation_state()
-    last_yield_at = time.monotonic()
-
-    for index, raw_record in enumerate(records, start=start_index):
-        last_yield_at = await yield_control(last_yield_at)
-        result = await transform_single(raw_record, batch_id, index)
-        apply_stream_transform_result_to_state(
+    return await _collect_transform_state(
+        records=records,
+        batch_id=batch_id,
+        start_index=start_index,
+        transform_record=transform_single,
+        apply_result=lambda state, result: apply_stream_transform_result_to_state(
             state=state,
             result=result,
-        )
-
-    return state
+        ),
+        yield_control=yield_control,
+    )
