@@ -15,17 +15,19 @@ from bioetl.infrastructure.storage.silver_writer_delta_helpers import (
     _DeltaWriteRequest,
     _dispatch_request_by_mode,
     _dispatch_request_with_domain_errors,
-    _emit_merge_final_event,
-    _emit_merge_recovered_after_retry,
-    _emit_merge_retry_event,
-    _handle_commit_retry,
-    _handle_timeout_retry,
     _load_delta_table,
     _merge_records_with_timeout,
     _MergeExecutionTimeoutError,
     _raise_domain_write_error,
     _select_dispatch_handler,
     _write_plain_delta_request,
+)
+from bioetl.infrastructure.storage.silver_writer_merge_resilience_helpers import (
+    _emit_merge_final_event,
+    _emit_merge_recovered_after_retry,
+    _emit_merge_retry_event,
+    _handle_commit_retry,
+    _handle_timeout_retry,
 )
 from bioetl.infrastructure.storage.write_resilience import (
     DEFAULT_SILVER_MERGE_POLICY,

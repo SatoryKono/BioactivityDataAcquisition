@@ -13,8 +13,12 @@ import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
 from bioetl.application.core.batch_executor_loop_helpers import (
+    BatchExtractionLoopState,
     build_batch_progress_payload,
     build_periodic_checkpoint_payload,
+    ensure_extraction_not_shutdown,
+    flush_batch_if_needed,
+    report_batch_progress,
 )
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
@@ -850,3 +854,82 @@ class TestBatchExecutorLoopHelpers:
             "resume_offset": 25,
             "checkpoint_interval": 5,
         }
+
+    def test_report_batch_progress_forwards_current_counters(self) -> None:
+        """Progress helper should forward the current loop counters unchanged."""
+        progress_service = MagicMock()
+        state = MagicMock(
+            records_fetched=12,
+            records_bronze=10,
+            records_silver=8,
+            records_filtered_out=2,
+        )
+
+        report_batch_progress(
+            progress_service=progress_service,
+            state=state,
+        )
+
+        progress_service.report_progress.assert_called_once_with(
+            records_fetched=12,
+            records_bronze=10,
+            records_silver=8,
+            records_filtered_out=2,
+        )
+
+    @pytest.mark.asyncio
+    async def test_ensure_extraction_not_shutdown_is_noop_when_not_requested(
+        self,
+    ) -> None:
+        """Shutdown helper should not checkpoint or raise when shutdown is clear."""
+        checkpoint_recovery_service = AsyncMock()
+
+        await ensure_extraction_not_shutdown(
+            shutdown_requested=False,
+            checkpoint_recovery_service=checkpoint_recovery_service,
+            records_fetched=5,
+            resume_offset=11,
+        )
+
+        checkpoint_recovery_service.save_checkpoint_now.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_flush_batch_if_needed_processes_and_resets_batch(self) -> None:
+        """Flush helper should process the batch, reset it, and emit progress."""
+        process_batch = AsyncMock()
+        progress_service = MagicMock()
+        memory_manager = MagicMock()
+        memory_manager.maybe_recover.return_value = 7
+        progress_state = MagicMock(
+            records_fetched=9,
+            records_bronze=6,
+            records_silver=5,
+            records_filtered_out=1,
+        )
+        loop_state = BatchExtractionLoopState(
+            current_batch_size=2,
+            check_interval=10,
+            batch=[{"id": "1"}, {"id": "2"}],
+        )
+
+        await flush_batch_if_needed(
+            loop_state=loop_state,
+            records_fetched=9,
+            process_batch=process_batch,
+            memory_manager=memory_manager,
+            progress_service=progress_service,
+            progress_state=progress_state,
+        )
+
+        process_batch.assert_awaited_once_with(
+            [{"id": "1"}, {"id": "2"}],
+            7,
+        )
+        assert loop_state.batch == []
+        assert loop_state.current_batch_size == 7
+        progress_service.report_progress.assert_called_once_with(
+            records_fetched=9,
+            records_bronze=6,
+            records_silver=5,
+            records_filtered_out=1,
+        )

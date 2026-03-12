@@ -41,12 +41,6 @@ from bioetl.infrastructure.storage.write_resilience import AdaptiveRetryPolicy
 
 
 @pytest.fixture
-def noop_logger() -> NoOpLogger:
-    """Provide a NoOpLogger for tests."""
-    return NoOpLogger()
-
-
-@pytest.fixture
 def metadata_writer(noop_logger: NoOpLogger) -> MetadataWriter:
     """Create MetadataWriter instance."""
     return MetadataWriter(logger=noop_logger)

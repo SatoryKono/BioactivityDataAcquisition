@@ -17,6 +17,7 @@ from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.services import CheckpointService, QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_port,
+    bootstrap_composite_checkpoint_port,
     bootstrap_quarantine_port,
 )
 from bioetl.composition.bootstrap.cli.checkpoint import (
@@ -25,9 +26,16 @@ from bioetl.composition.bootstrap.cli.checkpoint import (
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
 )
-from bioetl.domain.ports import CheckpointPort, QuarantinePort
+from bioetl.domain.ports import (
+    CheckpointPort,
+    CompositeCheckpointPort,
+    QuarantinePort,
+)
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
 
 
 @pytest.mark.unit
@@ -104,6 +112,36 @@ class TestBootstrapCheckpointPort:
             result = bootstrap_checkpoint_port("test_pipeline")
 
         assert result.base_path == Path("/custom/checkpoint/path")
+
+
+@pytest.mark.unit
+class TestBootstrapCompositeCheckpointPort:
+    """Tests for bootstrap_composite_checkpoint_port function."""
+
+    def test_bootstrap_composite_checkpoint_port_returns_composite_port(self):
+        """Test that bootstrap_composite_checkpoint_port returns a composite port."""
+        with patch(
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
+        ) as mock_settings:
+            mock_settings.return_value = MagicMock(
+                checkpoint_path=Path("/tmp/checkpoints")
+            )
+            result = bootstrap_composite_checkpoint_port()
+
+        assert isinstance(result, CompositeCheckpointPort)
+        assert isinstance(result, FileCompositeCheckpointWriter)
+
+    def test_bootstrap_composite_checkpoint_port_uses_canonical_subdirectory(self):
+        """Test that composite checkpoints live under checkpoint_path/composite."""
+        with patch(
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
+        ) as mock_settings:
+            mock_settings.return_value = MagicMock(
+                checkpoint_path=Path("/custom/output/checkpoints")
+            )
+            result = bootstrap_composite_checkpoint_port()
+
+        assert result._checkpoint_dir == Path("/custom/output/checkpoints/composite")
 
 
 @pytest.mark.unit

@@ -26,12 +26,17 @@
 composition/bootstrap/
 ├── assembly/            # Сборка компонентов (checkpoint, storage)
 ├── cli/                 # CLI-специфичная сборка (health, lock, config, metrics, noop)
-└── runtime/             # Runtime assembly
-    ├── assembly.py      # Главная сборка компонентов
-    ├── composite.py     # Bootstrap для Composite Pipeline (ADR-026)
-    ├── observability.py # Сборка observability
+└── runtime/             # Runtime assembly (20 модулей)
+    ├── assembly.py      # Pure assembly functions (vacuum, filter, runtime config)
     ├── pipeline.py      # Сборка pipeline
-    └── runner.py        # Сборка runner
+    ├── runner.py         # Сборка runner
+    ├── runner_assembly.py # Runner assembly helpers
+    ├── observability.py  # Сборка observability bundle
+    ├── config_loader.py  # Загрузка конфигураций
+    ├── dq_bootstrap.py   # Bootstrap Data Quality компонентов
+    ├── composite.py      # Bootstrap для Composite Pipeline (ADR-026)
+    ├── composite_*.py    # Composite support (5 модулей)
+    └── *_bootstrap.py    # Logger, metrics, tracing bootstrap
 ```
 
 - `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна. **Deprecated** — предпочтителен прямой вызов `runtime/pipeline.py`.
@@ -39,29 +44,29 @@ composition/bootstrap/
 
 ### 2.2. `factories/` — Фабрики компонентов
 
-В v5.1+ логика создания компонентов централизована в специализированных фабриках:
+В v6.0+ логика создания компонентов централизована в специализированных фабриках, организованных в подпакеты:
 
-**Расположение:** `src/bioetl/composition/factories/` (11 файлов)
+**Расположение:** `src/bioetl/composition/factories/` (48 .py файлов в 5 подпакетах)
 
-| Файл                          | Фабрика                                                                                     | Назначение                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `pipeline_factory.py`         | `GenericPipelineFactory`                                                                    | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline_factories.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
-| `datasource/factory.py`       | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
-| `http_client_factory.py`      | `HttpClientFactory`                                                                         | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
-| `storage_factory.py`          | `StorageFactory`                                                                            | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
-| `storage_adapter.py`          | `StorageAdapter`                                                                            | Создание отдельных storage адаптеров                           |
-| `storage.py`                  | Storage helpers                                                                             | Вспомогательные функции для storage                            |
-| `bootstrap/cli/checkpoint.py` | CLI checkpoint bootstrap                                                                    | Настройка checkpoint зависимостей                              |
-| `bootstrap/cli/storage.py`    | CLI storage bootstrap                                                                       | Настройка storage зависимостей                                 |
-| `runner_factory.py`           | `RunnerFactory`                                                                             | Создание `PipelineRunner` с DI                                 |
-| `services_factory.py`         | `BaseServicesFactory / ServicesBuilder`                                                     | Создание `PipelineServices` bundle                             |
-| `transformer_factory.py`      | `transformer_factory.py — модуль с функциями register_transformer() и create_transformer()` | Создание трансформеров по провайдеру                           |
-| `dq_factory.py`               | `DQServicesFactory`                                                                         | Создание Data Quality компонентов                              |
+| Подпакет / Файл             | Ключевые компоненты                          | Назначение                                                     |
+| --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| `pipeline/assembler.py`     | `GenericPipelineFactory`                     | Универсальный конструктор пайплайнов (декларативно)            |
+| `pipeline/registry.py`      | Реестр фабрик                                | Все зарегистрированные pipeline factories                      |
+| `pipeline/runner.py`        | `RunnerFactory`                              | Создание `PipelineRunner` с DI                                 |
+| `pipeline/facade.py`        | `PipelineFacade`                             | Фасад для pipeline операций                                    |
+| `datasource/factory.py`     | `DataSourceFactory`                          | Создает `DataSourcePort` для провайдера                        |
+| `datasource/http_client.py` | `HttpClientFactory`                          | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
+| `storage/factory.py`        | `StorageFactory`                             | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
+| `storage/adapter.py`        | `StorageAdapter`                             | Создание отдельных storage адаптеров                           |
+| `services/factory.py`       | `ServicesFactory`                            | Создание core сервисов                                         |
+| `services/builder.py`       | `ServicesBuilder`                            | Создание `PipelineServices` bundle                             |
+| `services/port_factories.py`| Port factory functions                       | Boundary-validated port creation                               |
+| `dq/factory.py`             | `DQServicesFactory`                          | Создание Data Quality компонентов                              |
+| `transformer_factory.py`    | `register_transformer() / create_transformer()` | Создание трансформеров по провайдеру                        |
 
 **Root-level файлы:**
 
-Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`.
+Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`, `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
 
 Дополнительные пакеты: `runtime_builders/`, `providers/`, `services/`.
 
@@ -106,7 +111,7 @@ data_source = ProviderRegistry.create_data_source("chembl", settings, config, lo
 
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
 - **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
-- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline_factories.py` без написания шаблонного кода сборки.
+- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `factories/pipeline/registry.py` без написания шаблонного кода сборки.
 
 ### 3.1. Composite Pipeline Bootstrap (ADR-026)
 

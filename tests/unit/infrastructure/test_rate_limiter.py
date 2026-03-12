@@ -79,27 +79,33 @@ class TestTokenBucket:
             await bucket.acquire(10)
 
     @pytest.mark.unit
-    def test_refill_over_time(self) -> None:
-        """Tokens should refill over time."""
+    def test_refill_over_time(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Tokens should refill over time (deterministic via mock clock)."""
+        clock = [0.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+
         bucket = TokenBucketRateLimiter(rate=100.0, capacity=10)  # 100 tokens/sec
 
         # Consume all tokens
         bucket.try_acquire(10)
         assert bucket.available_tokens() == 0
 
-        # Wait a bit
-        time.sleep(0.05)  # 50ms = 5 tokens at 100/sec
+        # Advance clock by 50ms = 5 tokens at 100/sec
+        clock[0] += 0.05
 
-        # Should have some tokens back
-        assert bucket.available_tokens() >= 3
+        # Should have exactly 5 tokens back
+        assert bucket.available_tokens() == 5
 
     @pytest.mark.unit
-    def test_refill_capped_at_capacity(self) -> None:
-        """Refill should not exceed capacity."""
+    def test_refill_capped_at_capacity(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Refill should not exceed capacity (deterministic via mock clock)."""
+        clock = [0.0]
+        monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+
         bucket = TokenBucketRateLimiter(rate=1000.0, capacity=5)  # Fast refill
 
-        # Wait longer than needed to fill
-        time.sleep(0.1)
+        # Advance clock far beyond fill time
+        clock[0] += 1.0
 
         # Should be capped at capacity
         assert bucket.available_tokens() == 5

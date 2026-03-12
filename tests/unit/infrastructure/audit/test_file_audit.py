@@ -16,12 +16,6 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
 @pytest.fixture
-def noop_logger() -> NoOpLogger:
-    """Provide a NoOpLogger for tests."""
-    return NoOpLogger()
-
-
-@pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID."""
     return RunID(uuid4())

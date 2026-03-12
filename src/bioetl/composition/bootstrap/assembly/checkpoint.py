@@ -11,16 +11,24 @@ Note:
 
 from __future__ import annotations
 
-from bioetl.domain.ports import CheckpointPort, QuarantinePort
+from bioetl.domain.ports import (
+    CheckpointPort,
+    CompositeCheckpointPort,
+    QuarantinePort,
+)
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
 
 __all__ = [
     # Deprecated aliases (backward compatibility)
     "bootstrap_checkpoint",
     # Canonical names (use these)
     "bootstrap_checkpoint_port",
+    "bootstrap_composite_checkpoint_port",
     "bootstrap_quarantine",
     "bootstrap_quarantine_port",
 ]
@@ -77,6 +85,27 @@ def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
     )
     assert isinstance(checkpoint, CheckpointPort), (
         f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
+    )
+    return checkpoint
+
+
+def bootstrap_composite_checkpoint_port() -> CompositeCheckpointPort:
+    """Create a composite checkpoint port implementation for runtime resume state.
+
+    Composite checkpoints live under the canonical checkpoint root with a
+    dedicated ``composite/`` subdirectory so runtime and operational tooling
+    share one consistent storage layout.
+
+    Returns:
+        CompositeCheckpointPort implementation for composite checkpoint operations.
+    """
+    settings = get_settings()
+    checkpoint = FileCompositeCheckpointWriter(
+        checkpoint_dir=settings.checkpoint_path / "composite",
+    )
+    assert isinstance(checkpoint, CompositeCheckpointPort), (
+        "FileCompositeCheckpointWriter must implement CompositeCheckpointPort, "
+        f"got {type(checkpoint)}"
     )
     return checkpoint
 

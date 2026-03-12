@@ -275,14 +275,22 @@ class CompositeRunnerSupportMixin:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:
         """Check that all required enrichers succeeded."""
+        failure = self._get_required_enricher_failure(enrichment_results)
+        if failure is not None:
+            raise InvalidStateError(failure)
+
+    def _get_required_enricher_failure(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> str | None:
+        """Return failure reason for required enricher validation, if any."""
         for enricher_name in self._config.required_enrichers:
             result = enrichment_results.get(enricher_name)
             if result is None:
-                raise InvalidStateError(
-                    f"Required enricher '{enricher_name}' did not run"
-                )
+                return f"Required enricher '{enricher_name}' did not run"
             if not result.is_success:
-                raise InvalidStateError(
+                return (
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
                 )
+        return None

@@ -12,7 +12,6 @@ import pytest
 import zstandard as zstd
 
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -23,12 +22,6 @@ TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 TEST_RUN_TYPE = RunType.INCREMENTAL
 # Fixed timestamp for deterministic tests (see ADR-014)
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
-
-
-@pytest.fixture
-def noop_logger() -> NoOpLogger:
-    """Provide a NoOpLogger for storage tests."""
-    return NoOpLogger()
 
 
 @pytest.fixture

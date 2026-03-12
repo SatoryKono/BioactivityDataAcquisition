@@ -500,10 +500,16 @@ def test_silver_merge_resilience_instrumented() -> None:
     delta_helpers = Path(
         "src/bioetl/infrastructure/storage/silver_writer_delta_helpers.py"
     )
+    merge_resilience_helpers = Path(
+        "src/bioetl/infrastructure/storage/silver_writer_merge_resilience_helpers.py"
+    )
 
     assert resilience.exists(), "write_resilience.py not found"
     assert delta_mixin.exists(), "silver_writer_delta_mixin.py not found"
     assert delta_helpers.exists(), "silver_writer_delta_helpers.py not found"
+    assert merge_resilience_helpers.exists(), (
+        "silver_writer_merge_resilience_helpers.py not found"
+    )
 
     res_content = resilience.read_text(encoding="utf-8")
     assert "SilverMergeResiliencePolicy" in res_content, (
@@ -517,6 +523,8 @@ def test_silver_merge_resilience_instrumented() -> None:
         delta_mixin.read_text(encoding="utf-8")
         + "\n"
         + delta_helpers.read_text(encoding="utf-8")
+        + "\n"
+        + merge_resilience_helpers.read_text(encoding="utf-8")
     )
     assert "silver_merge_retry" in delta_content, (
         "silver_merge_retry observability event missing in delta write path"

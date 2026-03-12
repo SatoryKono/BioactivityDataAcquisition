@@ -57,12 +57,12 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 
 | Parent (canonical) | Decomposed sub-files |
 |---|---|
-| `architecture/01-high-level-hexagonal.mmd` | `architecture/01a-hexagonal-overview.mmd`, `architecture/01b-hexagonal-domain-app.mmd`, `architecture/01c-hexagonal-infra-comp.mmd` |
+| `architecture/01-high-level-hexagonal.mmd` | `architecture/01a-hexagonal-overview.mmd`, `architecture/01b-hexagonal-domain-app.mmd`, `architecture/01c-hexagonal-infra-comp.mmd`, `architecture/01d-hexagonal-overview-rounded.mmd` |
 | `architecture/03-medallion-data-flow.mmd` | `architecture/03a-medallion-layers-overview.mmd` |
 | `architecture/05-provider-adapter-hierarchy.mmd` | `architecture/05a-adapter-hierarchy-base.mmd`, `architecture/05b-adapter-hierarchy-providers.mmd` |
 | `architecture/12-bootstrap-di-container.mmd` | `architecture/12a-bootstrap-factories.mmd`, `architecture/12b-bootstrap-wiring.mmd` |
 | `architecture/13-port-protocol-contracts.mmd` | `architecture/13a-port-contracts-data-sources.mmd`, `architecture/13b-port-contracts-storage.mmd`, `architecture/13c-port-contracts-observability.mmd`, `architecture/13d-port-contracts-services.mmd` |
-| `architecture/13-port-protocol-contracts.mmd` (alternate slices) | `architecture/13a-data-storage-ports.mmd`, `architecture/13b-operational-ports.mmd`, `architecture/13c-validation-dq-ports.mmd` |
+| `architecture/13-port-protocol-contracts.mmd` (alternate slices) | `architecture/13a-data-storage-ports.mmd`, `architecture/13b-operational-ports.mmd`, `architecture/13c-validation-dq-ports.mmd`, `architecture/13e-operational-ports-domain.mmd`, `architecture/13f-operational-ports-infra.mmd` |
 
 > `13a/13b/13c` have two parallel decomposition tracks by design:
 > `port-contracts-*` = contract-centric views, `*-ports` = operational slices.
@@ -144,6 +144,7 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | 32 | `foundation/32-single-record-journey.mmd` | flowchart | Single Record Journey — API→Bronze→Transform→Silver→Gold |
 | 33 | `foundation/33-cli-run-interaction.mmd` | sequence | CLI → PipelineRunnerService interaction |
 | 34 | `foundation/34-batch-processing-flow.mmd` | sequence | Batch Processing — BatchExecutor cycle |
+| 35 | `foundation/35-bootstrap-sequence.mmd` | sequence | Bootstrap Sequence — composition root assembly |
 | 36 | `foundation/36-architecture-principles-mindmap.mmd` | mindmap | Architecture Principles Mindmap |
 | 37 | `foundation/37-cli-entry-full-chain.mmd` | sequence | CLI Entry → Exit Code full chain |
 | 38 | `foundation/38-runtime-assembly-sequence.mmd` | sequence | Runtime Assembly — phases 1–8 |
