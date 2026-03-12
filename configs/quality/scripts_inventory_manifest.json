@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-12T01:41:23.544352+00:00",
+  "generated_at": "2026-03-12T02:44:23.357363+00:00",
   "summary": {
     "total_scripts": 202,
     "status_counts": {
@@ -970,7 +970,7 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 342,
+          "line": 343,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/ci/check_e2e_matrix_skip_rate.py\")"
         }
@@ -991,7 +991,7 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 343,
+          "line": 344,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/ci/check_e2e_rerun_stability.py\")"
         }
@@ -3663,7 +3663,7 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 414,
+          "line": 415,
           "source_group": "tests",
           "text": "script_path = Path(\"scripts/qa/generate_architecture_dependency_map.py\")"
         }
