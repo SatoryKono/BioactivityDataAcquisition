@@ -32,7 +32,7 @@ description: "Создание, проверка и рендеринг Mermaid-�
 
 ### lint
 ```bash
-python scripts/diagrams/lint_diagrams.py docs
+python -m scripts.diagrams lint docs
 bash scripts/diagrams/validate_mermaid_syntax.sh
 ```
 

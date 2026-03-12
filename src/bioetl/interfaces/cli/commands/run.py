@@ -18,6 +18,7 @@ from bioetl.application.services import (
 )
 from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
+    RunExecutionRequest,
 )
 from bioetl.composition.entrypoints import (
     get_pipeline_runner_service,
@@ -44,6 +45,9 @@ from bioetl.interfaces.cli.commands.run_command_policy import (
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
     handle_destructive_step as _handle_destructive_step_policy,
+)
+from bioetl.interfaces.cli.commands.run_command_policy import (
+    prepare_run_request as _prepare_run_request_policy,
 )
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
@@ -121,49 +125,37 @@ def build_run_options(
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
     )
-
 def execute_run(
-    pipeline: str,
-    options: RunOptions,
-    health_server: bool,
-    health_port: int,
+    request: RunExecutionRequest,
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Execute run and always flush metrics at command boundary.
 
     Args:
-        pipeline: Pipeline name to execute.
-        options: RunOptions with run type, limits, and filter settings.
-        health_server: When True, enables the HTTP health server during execution.
-        health_port: TCP port the health server listens on.
+        request: Prepared run request with pipeline, options, and health config.
 
     Returns:
         RunResult with pipeline execution status and record counts.
     """
+
     async def _run_pipeline_with_registry(
-        pipeline: str,
-        options: RunOptions,
-        *,
-        health_server_enabled: bool = True,
-        health_port: int,
+        request: RunExecutionRequest,
     ) -> RunResult:
         return await _run_pipeline_async(
-            pipeline,
-            options,
-            health_server_enabled=health_server_enabled,
-            health_port=health_port,
+            request.pipeline,
+            request.options,
+            health_server_enabled=request.health_server,
+            health_port=request.health_port,
             registry=registry,
         )
 
     return _CLI_RUN_ORCHESTRATION_SERVICE.execute_pipeline(
-        pipeline=pipeline,
-        options=options,
-        health_server=health_server,
-        health_port=health_port,
+        request=request,
         run_pipeline_async=_run_pipeline_with_registry,
         run_coroutine=asyncio.run,
         flush_metrics=push_metrics_to_gateway,
     )
+
 
 def _map_status_to_exit_code(
     status: PipelineRunResult,
@@ -199,6 +191,7 @@ async def _run_pipeline_async(
         service = get_pipeline_runner_service(registry=registry)
         return await service.run(pipeline, options=options)
 
+
 def _handle_destructive_step(
     *,
     pipeline: str,
@@ -217,32 +210,16 @@ def _handle_destructive_step(
 
 def _execute_run_step(
     *,
-    pipeline: str,
-    options: RunOptions,
-    health_server: bool,
-    health_port: int,
+    request: RunExecutionRequest,
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Run pipeline execution step with CLI failure mapping."""
-    def _execute_run_with_registry(
-        pipeline: str,
-        options: RunOptions,
-        health_server: bool,
-        health_port: int,
-    ) -> RunResult:
-        return execute_run(
-            pipeline=pipeline,
-            options=options,
-            health_server=health_server,
-            health_port=health_port,
-            registry=registry,
-        )
+
+    def _execute_run_with_registry(request: RunExecutionRequest) -> RunResult:
+        return execute_run(request=request, registry=registry)
 
     return _execute_run_step_policy(
-        pipeline=pipeline,
-        options=options,
-        health_server=health_server,
-        health_port=health_port,
+        request=request,
         execute_run=_execute_run_with_registry,
     )
 
@@ -378,7 +355,6 @@ def run(
 ) -> None:
     """Run an ETL pipeline."""
     registry = resolve_context_registry(ctx)
-    validate_options(start_offset, run_type, resume)
     if not _handle_destructive_step(
         pipeline=pipeline,
         run_type=run_type,
@@ -386,7 +362,9 @@ def run(
         yes=yes,
     ):
         return
-    options = build_run_options(
+    request = _prepare_run_request_policy(
+        service=_CLI_RUN_ORCHESTRATION_SERVICE,
+        pipeline=pipeline,
         run_type=run_type,
         resume=resume,
         start_offset=start_offset,
@@ -398,16 +376,16 @@ def run(
         vacuum_after_run=vacuum_after_run,
         vacuum_retention_days=vacuum_retention_days,
         debug=debug,
+        health_server=health_server,
+        health_port=health_port,
         use_cached_bronze=use_cached_bronze,
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
+        exit_func=_exit_with_code,
     )
-    echo_health_server_info(health_server, health_port)
+    echo_health_server_info(request.health_server, request.health_port)
     result = _execute_run_step(
-        pipeline=pipeline,
-        options=options,
-        health_server=health_server,
-        health_port=health_port,
+        request=request,
         registry=registry,
     )
     _finalize_run_step(result)

@@ -16,8 +16,12 @@ import pytest
 from bioetl.application.services import (
     PipelineNotFoundError,
     PipelineRunResult,
-    RunOptions,
     RunResult,
+)
+from bioetl.application.services.cli_run_orchestration_service import (
+    CliRunOrchestrationService,
+    RunPreparationResult,
+    RunExecutionRequest,
 )
 from bioetl.domain.exceptions import NetworkError
 from bioetl.interfaces.cli.commands.run_command_policy import (
@@ -26,6 +30,7 @@ from bioetl.interfaces.cli.commands.run_command_policy import (
     handle_cli_failure,
     handle_destructive_step,
     map_status_to_exit_code,
+    prepare_run_request,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -53,8 +58,15 @@ def _make_result(**kwargs: object) -> RunResult:
     return RunResult(**defaults)  # type: ignore[arg-type]
 
 
-def _make_options(**kwargs: object) -> RunOptions:
-    return RunOptions(**kwargs)  # type: ignore[arg-type]
+def _make_request(**kwargs: object) -> RunExecutionRequest:
+    defaults: dict[str, object] = {
+        "pipeline": "chembl_activity",
+        "options": MagicMock(name="run_options"),
+        "health_server": False,
+        "health_port": 8081,
+    }
+    defaults.update(kwargs)  # type: ignore[arg-type]
+    return RunExecutionRequest(**defaults)  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------
@@ -113,6 +125,77 @@ class TestHandleCliFailure:
                 reason_code="CLI_RUN_SIGINT",
             )
         assert exc_info.value.code == ExitCode.SIGINT
+
+
+class TestPrepareRunRequest:
+    """Tests for prepare_run_request helper."""
+
+    def test_returns_prepared_request(self) -> None:
+        service = MagicMock(spec=CliRunOrchestrationService)
+        expected_request = _make_request()
+        service.prepare_execution_request.return_value = RunPreparationResult(
+            request=expected_request
+        )
+        exit_func = MagicMock()
+
+        result = prepare_run_request(
+            service=service,
+            pipeline="chembl_activity",
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=None,
+            input_csv=None,
+            filter_column=None,
+            filter_field=None,
+            dry_run=False,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            health_server=True,
+            health_port=8081,
+            use_cached_bronze=False,
+            cached_bronze_date=None,
+            cached_bronze_path=None,
+            exit_func=exit_func,
+        )
+
+        assert result is expected_request
+        exit_func.assert_not_called()
+
+    def test_invalid_request_echoes_error_and_exits(self) -> None:
+        service = MagicMock(spec=CliRunOrchestrationService)
+        service.prepare_execution_request.return_value = RunPreparationResult(
+            request=None,
+            error_message="bad options",
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.run_command_policy.echo_error"
+        ) as mock_error, pytest.raises(SystemExit):
+            prepare_run_request(
+                service=service,
+                pipeline="chembl_activity",
+                run_type="incremental",
+                resume=False,
+                start_offset=None,
+                limit=None,
+                input_csv=None,
+                filter_column=None,
+                filter_field=None,
+                dry_run=False,
+                vacuum_after_run=None,
+                vacuum_retention_days=None,
+                debug=False,
+                health_server=True,
+                health_port=8081,
+                use_cached_bronze=False,
+                cached_bronze_date=None,
+                cached_bronze_path=None,
+                exit_func=MagicMock(side_effect=SystemExit(ExitCode.CONFIG_ERROR)),
+            )
+
+        mock_error.assert_called_once_with("bad options")
 
 
 # ---------------------------------------------------------------------------
@@ -219,10 +302,13 @@ class TestHandleDestructiveStep:
         class _WeirdError(Exception):
             pass
 
-        with patch(
-            "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_run_confirmation",
-            side_effect=_WeirdError("weird"),
-        ), pytest.raises(_WeirdError, match="weird"):
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_run_confirmation",
+                side_effect=_WeirdError("weird"),
+            ),
+            pytest.raises(_WeirdError, match="weird"),
+        ):
             handle_destructive_step(
                 pipeline="chembl_activity",
                 run_type="rebuild",
@@ -239,22 +325,21 @@ class TestHandleDestructiveStep:
 class TestExecuteRunStep:
     """Tests for execute_run_step — covers lines 197-200, 211."""
 
-    def _options(self) -> RunOptions:
-        return _make_options()
+    def _request(self, **kwargs: object) -> RunExecutionRequest:
+        return _make_request(**kwargs)
 
     def test_success_returns_run_result(self) -> None:
         """Successful executor returns RunResult directly."""
         expected = _make_result()
         mock_executor = MagicMock(return_value=expected)
+        request = self._request()
 
         result = execute_run_step(
-            pipeline="chembl_activity",
-            options=self._options(),
-            health_server=False,
-            health_port=8081,
+            request=request,
             execute_run=mock_executor,
         )
         assert result is expected
+        mock_executor.assert_called_once_with(request)
 
     def test_pipeline_not_found_calls_handle_failure_and_exits(self) -> None:
         """PipelineNotFoundError triggers handle_cli_failure -> sys.exit."""
@@ -263,10 +348,7 @@ class TestExecuteRunStep:
         )
         with pytest.raises(SystemExit):
             execute_run_step(
-                pipeline="unknown_pipeline",
-                options=self._options(),
-                health_server=False,
-                health_port=8081,
+                request=self._request(pipeline="unknown_pipeline"),
                 execute_run=mock_executor,
             )
 
@@ -275,10 +357,7 @@ class TestExecuteRunStep:
         mock_executor = MagicMock(side_effect=NetworkError("timeout"))
         with pytest.raises(SystemExit):
             execute_run_step(
-                pipeline="chembl_activity",
-                options=self._options(),
-                health_server=False,
-                health_port=8081,
+                request=self._request(),
                 execute_run=mock_executor,
             )
 
@@ -287,10 +366,7 @@ class TestExecuteRunStep:
         mock_executor = MagicMock(side_effect=KeyboardInterrupt())
         with pytest.raises(SystemExit) as exc_info:
             execute_run_step(
-                pipeline="chembl_activity",
-                options=self._options(),
-                health_server=False,
-                health_port=8081,
+                request=self._request(),
                 execute_run=mock_executor,
             )
         assert exc_info.value.code == ExitCode.SIGINT
@@ -300,10 +376,7 @@ class TestExecuteRunStep:
         mock_executor = MagicMock(side_effect=OSError("I/O failure"))
         with pytest.raises(SystemExit):
             execute_run_step(
-                pipeline="chembl_activity",
-                options=self._options(),
-                health_server=False,
-                health_port=8081,
+                request=self._request(),
                 execute_run=mock_executor,
             )
 
@@ -313,10 +386,7 @@ class TestExecuteRunStep:
         mock_executor = MagicMock(return_value=expected)
         # Should not raise RuntimeError
         result = execute_run_step(
-            pipeline="chembl_activity",
-            options=self._options(),
-            health_server=False,
-            health_port=8081,
+            request=self._request(),
             execute_run=mock_executor,
         )
         assert result is expected

@@ -30,6 +30,12 @@ class SingleKeyJoinContext:
     left_pipeline: str | None
 
 
+@dataclass(frozen=True, slots=True)
+class PreparedDependencyJoinContext:
+    merged_df: pl.DataFrame
+    dep_df: pl.DataFrame
+
+
 def resolve_left_pipeline(
     dep: DependencyConfig,
     seed_pipeline: str | None,

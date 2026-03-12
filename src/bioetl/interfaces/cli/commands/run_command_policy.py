@@ -9,8 +9,11 @@ import click
 from bioetl.application.services import (
     PipelineNotFoundError,
     PipelineRunResult,
-    RunOptions,
     RunResult,
+)
+from bioetl.application.services.cli_run_orchestration_service import (
+    CliRunOrchestrationService,
+    RunExecutionRequest,
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
@@ -32,19 +35,14 @@ __all__ = [
     "handle_cli_failure",
     "handle_destructive_step",
     "map_status_to_exit_code",
+    "prepare_run_request",
 ]
 
 
 class RunExecutorCallable(Protocol):
     """Callable contract for synchronous pipeline execution from CLI."""
 
-    def __call__(
-        self,
-        pipeline: str,
-        options: RunOptions,
-        health_server: bool,
-        health_port: int,
-    ) -> RunResult: ...
+    def __call__(self, request: RunExecutionRequest) -> RunResult: ...
 
 
 class ResultPresenterCallable(Protocol):
@@ -57,6 +55,56 @@ class ExitCallable(Protocol):
     """Callable contract for terminating with a process exit code."""
 
     def __call__(self, code: int | str | None = None) -> NoReturn: ...
+
+
+def prepare_run_request(
+    *,
+    service: CliRunOrchestrationService,
+    pipeline: str,
+    run_type: str,
+    resume: bool,
+    start_offset: int | None,
+    limit: int | None,
+    input_csv: str | None,
+    filter_column: str | None,
+    filter_field: str | None,
+    dry_run: bool,
+    vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None,
+    debug: bool,
+    health_server: bool,
+    health_port: int,
+    use_cached_bronze: bool,
+    cached_bronze_date: str | None,
+    cached_bronze_path: str | None,
+    exit_func: ExitCallable,
+) -> RunExecutionRequest:
+    """Validate raw CLI inputs and build the prepared request for execution."""
+    preparation = service.prepare_execution_request(
+        pipeline=pipeline,
+        run_type=run_type,
+        resume=resume,
+        start_offset=start_offset,
+        limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        dry_run=dry_run,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
+        debug=debug,
+        health_server=health_server,
+        health_port=health_port,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_date=cached_bronze_date,
+        cached_bronze_path=cached_bronze_path,
+    )
+    if preparation.request is not None:
+        return preparation.request
+    if preparation.error_message is not None:
+        echo_error(preparation.error_message)
+    exit_func(ExitCode.CONFIG_ERROR)
+    raise RuntimeError("unreachable: exit_func is expected to terminate")
 
 
 def handle_cli_failure(
@@ -157,10 +205,7 @@ def handle_destructive_step(
 
 def execute_run_step(
     *,
-    pipeline: str,
-    options: RunOptions,
-    health_server: bool,
-    health_port: int,
+    request: RunExecutionRequest,
     execute_run: RunExecutorCallable,
 ) -> RunResult:
     """Run pipeline execution step with CLI failure mapping.
@@ -169,36 +214,36 @@ def execute_run_step(
     structured CLI failure handling (which calls sys.exit on failure).
 
     Args:
-        pipeline: Pipeline name for error context and executor call.
-        options: RunOptions with run type, limits, and filter settings.
-        health_server: Whether to enable the HTTP health server during execution.
-        health_port: Port the health server should listen on.
+        request: Prepared CLI run request.
         execute_run: Callable that synchronously runs the pipeline and returns RunResult.
 
     Returns:
         RunResult with pipeline execution status and metrics.
     """
     try:
-        return execute_run(
-            pipeline=pipeline,
-            options=options,
-            health_server=health_server,
-            health_port=health_port,
-        )
+        return execute_run(request)
     except PipelineNotFoundError as exc:
-        handle_cli_failure(exc, pipeline=pipeline, reason_code="CLI_RUN_CONFIG_ERROR")
+        handle_cli_failure(
+            exc,
+            pipeline=request.pipeline,
+            reason_code="CLI_RUN_CONFIG_ERROR",
+        )
     except BioETLError as exc:
-        handle_cli_failure(exc, pipeline=pipeline, reason_code="CLI_RUN_DOMAIN_ERROR")
+        handle_cli_failure(
+            exc,
+            pipeline=request.pipeline,
+            reason_code="CLI_RUN_DOMAIN_ERROR",
+        )
     except KeyboardInterrupt as exc:
         handle_cli_failure(
             exc,
-            pipeline=pipeline,
+            pipeline=request.pipeline,
             reason_code="CLI_RUN_SIGINT",
         )
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
         handle_cli_failure(
             exc,
-            pipeline=pipeline,
+            pipeline=request.pipeline,
             reason_code="CLI_RUN_UNEXPECTED_ERROR",
         )
     raise RuntimeError("unreachable: handle_cli_failure is expected to terminate")

@@ -17,21 +17,21 @@ __all__ = [
     "TransformedRecord",
 ]
 
-import time
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer_helpers import (
     TransformedRecord,
     TransformResult,
-    apply_stream_transform_result_to_state,
-    apply_transform_outcome_to_state,
-    create_transform_aggregation_state,
     finalize_batch_transform_result,
     finalize_stream_transform_result,
     route_single_transform_attempt,
     transform_record_attempt,
     yield_control_if_needed,
+)
+from bioetl.application.core.batch_transformer_orchestration import (
+    collect_batch_transform_state,
+    collect_stream_transform_state,
 )
 from bioetl.application.core.batch_transformer_streaming import StreamingBatchProcessor
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
@@ -44,6 +44,7 @@ if TYPE_CHECKING:
         GoldTransformCallback,
         TransformCallback,
     )
+    from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
@@ -73,6 +74,25 @@ class BatchTransformer:
         self._gold_filter = gold_filter_callback
         self._gold_transform = gold_transform_callback
 
+    async def _transform_attempt(
+        self,
+        raw_record: BronzeRecord,
+        batch_id: BatchID,
+        index: int,
+    ) -> RecordTransformOutcome:
+        """Run the shared per-record transformation flow."""
+        return await transform_record_attempt(
+            context=self._context,
+            error_classifier=self._error_classifier,
+            batch_metrics=self._batch_metrics,
+            transform=self._transform,
+            gold_filter=self._gold_filter,
+            gold_transform=self._gold_transform,
+            raw_record=raw_record,
+            batch_id=batch_id,
+            index=index,
+        )
+
     async def transform_batch(
         self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
@@ -90,27 +110,13 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
-        state = create_transform_aggregation_state()
-        last_yield_at = time.monotonic()
-
-        for index, raw_record in enumerate(records, start=start_index):
-            last_yield_at = await yield_control_if_needed(last_yield_at)
-            attempt = await transform_record_attempt(
-                context=self._context,
-                error_classifier=self._error_classifier,
-                batch_metrics=self._batch_metrics,
-                transform=self._transform,
-                gold_filter=self._gold_filter,
-                gold_transform=self._gold_transform,
-                raw_record=raw_record,
-                batch_id=batch_id,
-                index=index,
-            )
-
-            apply_transform_outcome_to_state(
-                state=state,
-                attempt=attempt,
-            )
+        state = await collect_batch_transform_state(
+            records=records,
+            batch_id=batch_id,
+            start_index=start_index,
+            transform_attempt=self._transform_attempt,
+            yield_control=yield_control_if_needed,
+        )
 
         return await finalize_batch_transform_result(
             context=self._context,
@@ -139,13 +145,7 @@ class BatchTransformer:
             TransformedRecord with silver/gold records or quarantine status.
 
         """
-        attempt = await transform_record_attempt(
-            context=self._context,
-            error_classifier=self._error_classifier,
-            batch_metrics=self._batch_metrics,
-            transform=self._transform,
-            gold_filter=self._gold_filter,
-            gold_transform=self._gold_transform,
+        attempt = await self._transform_attempt(
             raw_record=raw_record,
             batch_id=batch_id,
             index=index,
@@ -183,16 +183,13 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
-        state = create_transform_aggregation_state()
-        last_yield_at = time.monotonic()
-
-        for i, raw_record in enumerate(records):
-            last_yield_at = await yield_control_if_needed(last_yield_at)
-            result = await self.transform_single(raw_record, batch_id, start_index + i)
-            apply_stream_transform_result_to_state(
-                state=state,
-                result=result,
-            )
+        state = await collect_stream_transform_state(
+            records=records,
+            batch_id=batch_id,
+            start_index=start_index,
+            transform_single=self.transform_single,
+            yield_control=yield_control_if_needed,
+        )
 
         return finalize_stream_transform_result(
             context=self._context,
