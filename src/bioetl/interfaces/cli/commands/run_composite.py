@@ -6,9 +6,6 @@ multiple data sources (seed + enrichers) into a unified dataset.
 
 from __future__ import annotations
 
-import asyncio
-import sys
-
 import click
 
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
@@ -16,19 +13,26 @@ from bioetl.composition.bootstrap.runtime.composite import (
     bootstrap_composite_runner,
     load_composite_config,
 )
-from bioetl.composition.entrypoints import push_metrics_to_gateway
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
-    map_success_flag_to_exit_code,
-)
-from bioetl.interfaces.cli.commands.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
     health_server_context,
+)
+from bioetl.interfaces.cli.commands.run_composite_helpers import (
+    emit_composite_startup as _emit_composite_startup_impl,
+)
+from bioetl.interfaces.cli.commands.run_composite_helpers import (
+    exit_with_composite_result as _exit_with_composite_result_impl,
+)
+from bioetl.interfaces.cli.commands.run_composite_helpers import (
+    handle_run_composite_exception as _handle_run_composite_exception_impl,
+)
+from bioetl.interfaces.cli.commands.run_composite_helpers import (
+    run_composite_with_cli_policy as _run_composite_with_cli_policy_impl,
 )
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
@@ -36,8 +40,7 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
 from bioetl.interfaces.cli.commands.run_composite_runtime import (
     build_runtime_config,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
-from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
+from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
 __all__ = [
     "run_composite",
@@ -128,15 +131,10 @@ def _handle_run_composite_exception(
     composite: str,
     reason_code: str,
 ) -> None:
-    handle_cli_execution_failure(
+    _handle_run_composite_exception_impl(
         exc,
+        composite=composite,
         reason_code=reason_code,
-        subject_key="composite",
-        subject_value=composite,
-        domain_error_title="Composite execution failed with domain error",
-        unexpected_error_title="Unexpected error during composite execution",
-        interrupted_message="Composite pipeline interrupted by user (Ctrl+C)",
-        default_exit_code=ExitCode.FAIL,
     )
 
 
@@ -147,39 +145,20 @@ def _run_composite_with_cli_policy(
     health_server: bool,
     health_port: int,
 ) -> tuple[bool, str | None]:
-    coro = _run_composite_async(
-        composite,
-        runtime,
-        health_server_enabled=health_server,
+    return _run_composite_with_cli_policy_impl(
+        composite=composite,
+        runtime=runtime,
+        health_server=health_server,
         health_port=health_port,
+        run_async=_run_composite_async,
+        exception_handler=lambda exc, composite_name, code: (
+            _handle_run_composite_exception(
+                exc,
+                composite=composite_name,
+                reason_code=code,
+            )
+        ),
     )
-    success = False
-    error_message: str | None = None
-    try:
-        success, error_message = asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_run_composite_exception(
-            exc,
-            composite=composite,
-            reason_code="CLI_COMPOSITE_DOMAIN_ERROR",
-        )
-    except KeyboardInterrupt as exc:
-        _handle_run_composite_exception(
-            exc,
-            composite=composite,
-            reason_code="CLI_COMPOSITE_SIGINT",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_run_composite_exception(
-            exc,
-            composite=composite,
-            reason_code="CLI_COMPOSITE_UNEXPECTED_ERROR",
-        )
-    finally:
-        push_metrics_to_gateway(pipeline_name=f"composite_{composite}")
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
-    return success, error_message
 
 
 def _echo_composite_startup(
@@ -191,21 +170,20 @@ def _echo_composite_startup(
     health_port: int,
 ) -> None:
     """Emit startup information for composite run."""
-    echo_info(f"Starting composite pipeline: {composite}")
-    if dry_run:
-        echo_warning("Dry-run mode: no data will be written")
-    if resume:
-        echo_info("Resume mode: continuing from last checkpoint")
-    echo_health_server_info(health_server, health_port)
+    _emit_composite_startup_impl(
+        composite=composite,
+        dry_run=dry_run,
+        resume=resume,
+        health_server=health_server,
+        health_port=health_port,
+        info_printer=echo_info,
+        warning_printer=echo_warning,
+        health_info_printer=echo_health_server_info,
+    )
 
 
 def _exit_with_composite_result(success: bool, error_message: str | None) -> None:
-    exit_code = map_success_flag_to_exit_code(success)
-    if success:
-        echo_info("Composite pipeline completed successfully")
-        sys.exit(exit_code)
-    echo_error("Composite pipeline failed", error_message or "Unknown error")
-    sys.exit(exit_code)
+    _exit_with_composite_result_impl(success, error_message)
 
 
 @click.command(name="run-composite")

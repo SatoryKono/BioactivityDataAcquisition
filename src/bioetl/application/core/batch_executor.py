@@ -61,6 +61,16 @@ class BatchResult:
     quarantined_count: int
 
 
+@dataclass(frozen=True, slots=True)
+class _BatchExecutionContext:
+    """Execution-scoped inputs shared across the batch executor loop."""
+
+    limit: int | None
+    query: str | None
+    offset: int | None
+    resume_offset: int
+
+
 class _BatchProcessingServicePort(Protocol):
     """Minimal contract required by BatchExecutor for batch processing service."""
 
@@ -190,14 +200,17 @@ class BatchExecutor(_BatchExecutorDQMixin):
             query: Optional query string forwarded to the data source.
             offset: Optional starting offset for resuming a previous run.
         """
-        self._resume_offset = offset or 0
-        self._query_string = query
-        await self._progress_service.initialize_tracking(limit)
+        execution_context = self._prepare_execution_context(
+            limit=limit,
+            query=query,
+            offset=offset,
+        )
+        await self._progress_service.initialize_tracking(execution_context.limit)
 
         root_span = self._tracing.start_execution_span()
 
         try:
-            await self._run_extraction_loop(limit, query, offset=offset)
+            await self._run_extraction_loop(execution_context)
             self._tracing.set_execution_stats(
                 root_span,
                 total_fetched=self.records_fetched,
@@ -211,14 +224,14 @@ class BatchExecutor(_BatchExecutorDQMixin):
         except PipelineShutdownError:
             await self._checkpoint_recovery_service.save_checkpoint_on_shutdown(
                 records_fetched=self.records_fetched,
-                resume_offset=self._resume_offset,
+                resume_offset=execution_context.resume_offset,
             )
             self._tracing.end_span_with_shutdown(root_span)
             raise
         except self._PIPELINE_EXECUTION_ERRORS as error:
             await self._checkpoint_recovery_service.save_checkpoint_on_exception(
                 records_fetched=self.records_fetched,
-                resume_offset=self._resume_offset,
+                resume_offset=execution_context.resume_offset,
                 error=error,
             )
             self._tracing.end_span(root_span, error)
@@ -226,11 +239,27 @@ class BatchExecutor(_BatchExecutorDQMixin):
         else:
             self._tracing.end_span(root_span)
 
-    async def _run_extraction_loop(
+    def _prepare_execution_context(
         self,
+        *,
         limit: int | None,
         query: str | None,
-        offset: int | None = None,
+        offset: int | None,
+    ) -> _BatchExecutionContext:
+        """Persist execution-scoped inputs and return the explicit loop context."""
+        execution_context = _BatchExecutionContext(
+            limit=limit,
+            query=query,
+            offset=offset,
+            resume_offset=offset or 0,
+        )
+        self._resume_offset = execution_context.resume_offset
+        self._query_string = execution_context.query
+        return execution_context
+
+    async def _run_extraction_loop(
+        self,
+        execution_context: _BatchExecutionContext,
     ) -> None:
         """Run the main extraction and processing loop."""
         loop_state = create_batch_extraction_loop_state(
@@ -239,15 +268,15 @@ class BatchExecutor(_BatchExecutorDQMixin):
         )
 
         async for raw_record in self._batch_processing_service.extract_records(
-            limit=limit,
-            query=query,
-            offset=offset,
+            limit=execution_context.limit,
+            query=execution_context.query,
+            offset=execution_context.offset,
         ):
             await ensure_extraction_not_shutdown(
                 shutdown_requested=self._shutdown_signal.is_requested,
                 checkpoint_recovery_service=self._checkpoint_recovery_service,
                 records_fetched=self.records_fetched,
-                resume_offset=self._resume_offset,
+                resume_offset=execution_context.resume_offset,
             )
 
             self.records_fetched += 1
@@ -274,7 +303,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
             await save_periodic_checkpoint_for_loop(
                 checkpoint_recovery_service=self._checkpoint_recovery_service,
                 records_fetched=self.records_fetched,
-                resume_offset=self._resume_offset,
+                resume_offset=execution_context.resume_offset,
                 checkpoint_interval=self.checkpoint_interval,
             )
 

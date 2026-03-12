@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, TypeVar
@@ -24,6 +25,17 @@ TransformLoopResult = TypeVar(
     RecordTransformOutcome,
     TransformedRecord,
 )
+
+YIELD_INTERVAL_SECONDS = 0.5
+
+
+async def yield_control_if_needed(last_yield_at: float) -> float:
+    """Cooperatively yield to the event loop during CPU-heavy transforms."""
+    now = time.monotonic()
+    if now - last_yield_at < YIELD_INTERVAL_SECONDS:
+        return last_yield_at
+    await asyncio.sleep(0)
+    return time.monotonic()
 
 
 async def _collect_transform_state(

@@ -10,6 +10,7 @@ from uuid import uuid4
 import pytest
 
 import bioetl.application.core.batch_transformer_helpers as batch_transformer_helpers
+import bioetl.application.core.batch_transformer_orchestration as batch_transformer_orchestration
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import (
     BatchTransformer,
@@ -282,7 +283,7 @@ class TestTransformStream:
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         monkeypatch.setattr(
-            batch_transformer_helpers,
+            batch_transformer_orchestration,
             "YIELD_INTERVAL_SECONDS",
             0.001,
         )

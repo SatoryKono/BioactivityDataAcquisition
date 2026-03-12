@@ -34,20 +34,16 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
-    execute_run_step as _execute_run_step_policy,
+    execute_run_step,
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
-    finalize_run_step as _finalize_run_step_policy,
+    finalize_run_step,
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
+    handle_destructive_step,
     handle_cli_failure,
     map_status_to_exit_code,
-)
-from bioetl.interfaces.cli.commands.run_command_policy import (
-    handle_destructive_step as _handle_destructive_step_policy,
-)
-from bioetl.interfaces.cli.commands.run_command_policy import (
-    prepare_run_request as _prepare_run_request_policy,
+    prepare_run_request,
 )
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
@@ -191,48 +187,6 @@ async def _run_pipeline_async(
         service = get_pipeline_runner_service(registry=registry)
         return await service.run(pipeline, options=options)
 
-
-def _handle_destructive_step(
-    *,
-    pipeline: str,
-    run_type: str,
-    dry_run: bool,
-    yes: bool,
-) -> bool:
-    """Run destructive confirmation/preview step with CLI error policy."""
-    return _handle_destructive_step_policy(
-        pipeline=pipeline,
-        run_type=run_type,
-        dry_run=dry_run,
-        yes=yes,
-    )
-
-
-def _execute_run_step(
-    *,
-    request: RunExecutionRequest,
-    registry: PipelineRegistry | None = None,
-) -> RunResult:
-    """Run pipeline execution step with CLI failure mapping."""
-
-    def _execute_run_with_registry(request: RunExecutionRequest) -> RunResult:
-        return execute_run(request=request, registry=registry)
-
-    return _execute_run_step_policy(
-        request=request,
-        execute_run=_execute_run_with_registry,
-    )
-
-
-def _finalize_run_step(result: RunResult) -> None:
-    """Echo result and terminate command with mapped exit code."""
-    _finalize_run_step_policy(
-        result=result,
-        result_presenter=_echo_run_result,
-        exit_func=_exit_with_code,
-    )
-
-
 @click.command()
 @click.option(
     "--pipeline",
@@ -355,14 +309,14 @@ def run(
 ) -> None:
     """Run an ETL pipeline."""
     registry = resolve_context_registry(ctx)
-    if not _handle_destructive_step(
+    if not handle_destructive_step(
         pipeline=pipeline,
         run_type=run_type,
         dry_run=dry_run,
         yes=yes,
     ):
         return
-    request = _prepare_run_request_policy(
+    request = prepare_run_request(
         service=_CLI_RUN_ORCHESTRATION_SERVICE,
         pipeline=pipeline,
         run_type=run_type,
@@ -384,11 +338,18 @@ def run(
         exit_func=_exit_with_code,
     )
     echo_health_server_info(request.health_server, request.health_port)
-    result = _execute_run_step(
+    result = execute_run_step(
         request=request,
-        registry=registry,
+        execute_run=lambda prepared_request: execute_run(
+            request=prepared_request,
+            registry=registry,
+        ),
     )
-    _finalize_run_step(result)
+    finalize_run_step(
+        result=result,
+        result_presenter=_echo_run_result,
+        exit_func=_exit_with_code,
+    )
 
 
 # Re-export helpers for backward compatibility with tests

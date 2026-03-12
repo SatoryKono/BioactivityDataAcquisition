@@ -14,6 +14,7 @@ from __future__ import annotations
 __all__ = ["METADATA_FILENAME", "MetadataWriter"]
 
 import asyncio
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -37,6 +38,15 @@ if TYPE_CHECKING:
 METADATA_FILENAME = "_metadata.yaml"
 
 
+@dataclass(frozen=True, slots=True)
+class _PreparedMetadataWrite:
+    """Prepared metadata sidecar write request."""
+
+    metadata_path: Path
+    yaml_content: str
+    pipeline_label: str
+
+
 def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
     """Generate metadata filename based on provider and entity.
 
@@ -51,6 +61,42 @@ def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
     if provider and entity:
         return f"{provider}_{entity}_metadata.yaml"
     return METADATA_FILENAME
+
+
+def _prepare_metadata_write(
+    *,
+    base_path: str | Path,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    layer: str,
+    table_name: str | None,
+    flat_structure: bool,
+    provider: str | None,
+    entity: str | None,
+) -> _PreparedMetadataWrite:
+    """Build the file target, serialized payload, and telemetry label."""
+    path = Path(base_path)
+    if provider and entity:
+        metadata_path = path / _get_metadata_filename(provider, entity)
+    elif flat_structure and table_name:
+        metadata_path = path / f"{table_name}_metadata.yaml"
+    else:
+        metadata_path = path / METADATA_FILENAME
+
+    metadata_dict = metadata.model_dump(mode="json", by_alias=True)
+    yaml_content = yaml.safe_dump(
+        metadata_dict,
+        default_flow_style=False,
+        allow_unicode=True,
+        sort_keys=False,
+    )
+    pipeline_label = table_name or (
+        f"{provider}.{entity}" if provider and entity else f"{layer}_metadata"
+    )
+    return _PreparedMetadataWrite(
+        metadata_path=metadata_path,
+        yaml_content=yaml_content,
+        pipeline_label=pipeline_label,
+    )
 
 
 class MetadataWriter:
@@ -252,31 +298,14 @@ class MetadataWriter:
         entity: str | None = None,
     ) -> str:
         """Write sidecar metadata for Bronze/Silver/Gold layers and return file path."""
-        path = Path(base_path)
-
-        # Use provider/entity naming if both are provided
-        if provider and entity:
-            filename = _get_metadata_filename(provider, entity)
-            metadata_path = path / filename
-        elif flat_structure and table_name:
-            # Backward compatibility: use table_name if flat_structure is True
-            metadata_path = path / f"{table_name}_metadata.yaml"
-        else:
-            metadata_path = path / METADATA_FILENAME
-
-        # Serialize to dict with JSON mode for datetime handling
-        metadata_dict = metadata.model_dump(mode="json", by_alias=True)
-
-        # Convert to YAML
-        yaml_content = yaml.safe_dump(
-            metadata_dict,
-            default_flow_style=False,
-            allow_unicode=True,
-            sort_keys=False,
-        )
-
-        pipeline_label = table_name or (
-            f"{provider}.{entity}" if provider and entity else f"{layer}_metadata"
+        prepared_write = _prepare_metadata_write(
+            base_path=base_path,
+            metadata=metadata,
+            layer=layer,
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
         )
         retry_state = {"count": 0}
 
@@ -285,7 +314,7 @@ class MetadataWriter:
             self._emit_retry_telemetry(
                 layer=layer,
                 provider=provider,
-                pipeline=pipeline_label,
+                pipeline=prepared_write.pipeline_label,
                 attempt=attempt,
                 delay_seconds=delay_seconds,
                 reason=str(getattr(error, "errno", "os_error")),
@@ -297,8 +326,8 @@ class MetadataWriter:
             await loop.run_in_executor(
                 None,
                 lambda: atomic_write_text(
-                    metadata_path,
-                    yaml_content,
+                    prepared_write.metadata_path,
+                    prepared_write.yaml_content,
                     retry_policy=self._atomic_replace_retry_policy,
                     on_retry=on_retry,
                 ),
@@ -307,7 +336,7 @@ class MetadataWriter:
             self._emit_final_telemetry(
                 layer=layer,
                 provider=provider,
-                pipeline=pipeline_label,
+                pipeline=prepared_write.pipeline_label,
                 retry_count=retry_state["count"],
                 status="failed",
                 final_reason=exc.reason or "atomic_write_error",
@@ -316,7 +345,7 @@ class MetadataWriter:
         self._emit_final_telemetry(
             layer=layer,
             provider=provider,
-            pipeline=pipeline_label,
+            pipeline=prepared_write.pipeline_label,
             retry_count=retry_state["count"],
             status="succeeded",
             final_reason=(
@@ -329,11 +358,11 @@ class MetadataWriter:
         self._logger.info(
             "metadata_written",
             layer=layer,
-            path=str(metadata_path),
+            path=str(prepared_write.metadata_path),
             run_id=metadata.runtime.run_id,
         )
 
-        return str(metadata_path.resolve())
+        return str(prepared_write.metadata_path.resolve())
 
     async def aclose(self) -> None:
         """Release any resources held by the metadata writer.

@@ -178,6 +178,46 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
     assert fake_factory.kwargs["runtime"] == "runtime"
 
 
+def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -> None:
+    """Builder should resolve canonical subservices when no overrides are passed."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    expected_inputs = SimpleNamespace(
+        settings="settings",
+        yaml_config="yaml-config",
+        observability="observability",
+        runtime_config="runtime",
+        filter_config=None,
+        cached_bronze=SimpleNamespace(enabled=False),
+    )
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+    )
+
+    with patch.object(
+        runner_builder, "prepare_runner_inputs", return_value=expected_inputs
+    ) as mock_prepare_inputs:
+        result = runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            register_all_providers_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: MagicMock(),
+            load_pipeline_config_fn=lambda _: MagicMock(),
+        )
+
+    assert result == "runner-instance"
+    kwargs = mock_prepare_inputs.call_args.kwargs
+    assert kwargs["build_observability_bundle_fn"] is runner_builder.build_observability_bundle
+    assert kwargs["assemble_vacuum_settings_fn"] is runner_builder.assemble_vacuum_settings
+    assert kwargs["assemble_runtime_config_fn"] is runner_builder.assemble_runtime_config
+    assert kwargs["assemble_filter_config_fn"] is runner_builder.assemble_filter_config
+    assert kwargs["assemble_cached_bronze_context_fn"] is runner_builder.assemble_cached_bronze_context
+    assert kwargs["load_source_config_fn"] is runner_builder.load_source_config
+
+
 def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
     """Builder must pass probe health mode when settings.test_mode is enabled."""
     fake_factory = _FakeFactory()

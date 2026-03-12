@@ -51,7 +51,40 @@ def table_path_to_name(path: str) -> str:
     return path
 
 
+def infer_silver_table(pipeline_name: str) -> str:
+    """Infer Silver table path from a ``provider_entity`` pipeline name."""
+    parts = pipeline_name.split("_", 1)
+    if len(parts) == 2:
+        provider, entity = parts
+        return f"silver/{provider}/{entity}"
+    return f"silver/{pipeline_name}"
+
+
+def infer_pipeline_from_table(table_path: str) -> str | None:
+    """Infer ``provider_entity`` pipeline name from a layer-qualified table path."""
+    normalized = table_path.replace("\\", "/")
+    has_layer = any(layer in normalized for layer in ("silver/", "gold/", "bronze/"))
+    if not has_layer:
+        return None
+
+    table_name = table_path_to_name(table_path)
+    parts = table_name.split("/")
+    if len(parts) == 2:
+        return f"{parts[0]}_{parts[1]}"
+    return None
+
+
+def extract_base_column(column: str, prefix: str) -> str | None:
+    """Extract base column name from a prefixed column reference."""
+    if column.startswith(prefix):
+        return column[len(prefix) :]
+    return None
+
+
 __all__ = [
+    "extract_base_column",
+    "infer_pipeline_from_table",
+    "infer_silver_table",
     "parse_pipeline_name",
     "resolve_field_aliases_from_registry",
     "table_path_to_name",

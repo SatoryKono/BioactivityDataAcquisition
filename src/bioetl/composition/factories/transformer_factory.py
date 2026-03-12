@@ -11,6 +11,8 @@ Usage:
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING, Final
 
@@ -27,8 +29,20 @@ if TYPE_CHECKING:
 
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
-_TransformerSpec = tuple[str, str, str, str]
-_TRANSFORMER_SPECS: Final[tuple[_TransformerSpec, ...]] = (
+
+
+@dataclass(frozen=True, slots=True)
+class TransformerRegistrationSpec:
+    """Declarative transformer registration entry."""
+
+    provider: str
+    entity_type: str
+    module_path: str
+    class_name: str
+
+
+_TransformerSpecRow = tuple[str, str, str, str]
+_TRANSFORMER_SPECS: Final[tuple[_TransformerSpecRow, ...]] = (
     (
         "chembl",
         "activity",
@@ -149,6 +163,9 @@ _TRANSFORMER_SPECS: Final[tuple[_TransformerSpec, ...]] = (
         "bioetl.application.pipelines.semanticscholar.transformer",
         "SemanticScholarPublicationTransformer",
     ),
+)
+_BUILTIN_TRANSFORMER_SPECS: Final[tuple[TransformerRegistrationSpec, ...]] = tuple(
+    TransformerRegistrationSpec(*spec) for spec in _TRANSFORMER_SPECS
 )
 
 
@@ -273,23 +290,53 @@ def _load_transformer_class(module_path: str, class_name: str) -> type:
     return transformer_class
 
 
-def register_all_transformers() -> None:
+def get_builtin_transformer_specs() -> tuple[TransformerRegistrationSpec, ...]:
+    """Return declarative specs for built-in transformer registrations."""
+    return _BUILTIN_TRANSFORMER_SPECS
+
+
+def register_transformer_spec(
+    spec: TransformerRegistrationSpec,
+    *,
+    load_transformer_class_fn: Callable[[str, str], type[BaseTransformer]] | None = None,
+) -> None:
+    """Register one transformer from a declarative module/class specification."""
+    loader = (
+        _load_transformer_class
+        if load_transformer_class_fn is None
+        else load_transformer_class_fn
+    )
+    register_transformer(
+        spec.provider,
+        spec.entity_type,
+        loader(spec.module_path, spec.class_name),
+    )
+
+
+def register_all_transformers(
+    specs: Iterable[TransformerRegistrationSpec] | None = None,
+    *,
+    load_transformer_class_fn: Callable[[str, str], type[BaseTransformer]] | None = None,
+) -> None:
     """Register all known transformers.
 
     Called during application startup to populate the registry.
     Idempotent - safe to call multiple times.
     """
-    for provider, entity_type, module_path, class_name in _TRANSFORMER_SPECS:
-        register_transformer(
-            provider,
-            entity_type,
-            _load_transformer_class(module_path, class_name),
+    spec_iter = get_builtin_transformer_specs() if specs is None else specs
+    for spec in spec_iter:
+        register_transformer_spec(
+            spec,
+            load_transformer_class_fn=load_transformer_class_fn,
         )
 
 
 __all__ = [
+    "TransformerRegistrationSpec",
     "create_transformer",
+    "get_builtin_transformer_specs",
     "get_transformer_class",
     "register_all_transformers",
     "register_transformer",
+    "register_transformer_spec",
 ]

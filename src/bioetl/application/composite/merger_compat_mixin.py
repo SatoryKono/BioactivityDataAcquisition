@@ -10,9 +10,11 @@ from bioetl.application.composite.column_priority_orderer import (
 )
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.join_planner_helpers import (
+    extract_base_column,
+    infer_pipeline_from_table,
+    infer_silver_table,
     parse_pipeline_name,
     resolve_field_aliases_from_registry,
-    table_path_to_name,
 )
 from bioetl.application.composite.merger_compat_join_planner_mixin import (
     _MergeCompatibilityJoinPlannerMixin,
@@ -36,26 +38,11 @@ class _MergeCompatibilityParsingMixin:
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""
-        parts = pipeline_name.split("_", 1)
-        if len(parts) == 2:
-            provider, entity = parts
-            return f"silver/{provider}/{entity}"
-        return f"silver/{pipeline_name}"
+        return infer_silver_table(pipeline_name)
 
     def _infer_pipeline_from_table(self, table_path: str) -> str | None:
         """Infer pipeline name from table path (silver/provider/entity)."""
-        normalized = table_path.replace("\\", "/")
-        has_layer = any(
-            layer in normalized for layer in ("silver/", "gold/", "bronze/")
-        )
-        if not has_layer:
-            return None
-
-        table_name = table_path_to_name(table_path)
-        parts = table_name.split("/")
-        if len(parts) == 2:
-            return f"{parts[0]}_{parts[1]}"
-        return None
+        return infer_pipeline_from_table(table_path)
 
     def _parse_pipeline_name(self, pipeline: str) -> tuple[str, str]:
         """Parse 'provider_entity' into (provider, entity)."""
@@ -67,9 +54,7 @@ class _MergeCompatibilityParsingMixin:
 
     def _extract_base_column(self, column: str, prefix: str) -> str | None:
         """Extract base column name from prefixed column name."""
-        if column.startswith(prefix):
-            return column[len(prefix) :]
-        return None
+        return extract_base_column(column, prefix)
 
 
 class _MergeCompatibilityConflictPolicyMixin:
@@ -79,6 +64,23 @@ class _MergeCompatibilityConflictPolicyMixin:
     _conflict_resolver: ConflictResolverService
     _coalesce_policy: CoalescePolicyService
     _priority_orderer: ColumnPriorityOrdererService
+
+    def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
+        """Compatibility wrapper for suffix allocation."""
+        return self._conflict_resolver.find_next_suffix(base_col, existing_cols)
+
+    def _detect_and_resolve_conflicts(
+        self,
+        seed_df: pl.DataFrame,
+        enricher_df: pl.DataFrame,
+        join_keys: set[str],
+    ) -> tuple[pl.DataFrame, pl.DataFrame]:
+        """Compatibility wrapper for conflict detection and renaming."""
+        return self._conflict_resolver.detect_and_resolve_conflicts(
+            seed_df,
+            enricher_df,
+            join_keys,
+        )
 
     def _extract_field_from_qualified(self, column: str) -> str:
         """Extract field name from qualified column (x.y.z -> z)."""
