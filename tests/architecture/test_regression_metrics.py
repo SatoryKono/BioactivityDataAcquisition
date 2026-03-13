@@ -256,7 +256,8 @@ def _find_adapter_instantiations(
 
 
 def test_inline_adapter_construction_budget(
-    src_dir: Path, source_ast_cache: dict,
+    src_dir: Path,
+    source_ast_cache: dict,
 ) -> None:
     """Adapter classes must only be instantiated in composition layer."""
     violations = _find_adapter_instantiations(src_dir, source_ast_cache)

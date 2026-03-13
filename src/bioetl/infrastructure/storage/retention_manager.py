@@ -228,8 +228,7 @@ class RetentionManager:
             else:
                 # Concatenate PKs into a single string key
                 pk_cols = [
-                    pc.cast(sorted_table.column(pk), pa.string())
-                    for pk in primary_keys
+                    pc.cast(sorted_table.column(pk), pa.string()) for pk in primary_keys
                 ]
                 sep = pa.scalar("|")
                 key_arrays = pk_cols[0]

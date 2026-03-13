@@ -3,6 +3,7 @@
 .dockerignore
 .editorconfig
 .setup_wsl_codex.sh
+.wsl_proxy_env.sh
 .env.example
 .wsl-vpn-fix.ps1
 .gitattributes
