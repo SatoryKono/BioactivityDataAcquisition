@@ -7,8 +7,9 @@ import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
-from bioetl.application.core.base_transformer.contract_policy import (
-    _DefaultContractPolicy,
+from bioetl.application.core.base_transformer.dependencies import (
+    TransformerDependencyContext,
+    resolve_transformer_dependencies,
 )
 from bioetl.application.core.base_transformer.errors import (
     FilteredOutError,
@@ -22,13 +23,10 @@ from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
     MetricsPort,
-    NoOpMetrics,
-    NoOpPiiHasher,
-    NoOpTracing,
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.services import IdentityService
 from bioetl.domain.types import ContentHash, EntityID, GoldRecord
 
 if TYPE_CHECKING:
@@ -79,29 +77,28 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize transformer with provider context and overridable services."""
         self.provider = provider
         self.entity_type = entity_type or "unknown"
-        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
-        self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+        resolved_dependencies = resolve_transformer_dependencies(
+            dependencies=dependencies,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
+        )
+        self._tracer = resolved_dependencies.tracer
+        self._metrics = resolved_dependencies.metrics
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
-        self._identity: IdentityService = (
-            identity_service if identity_service is not None else IdentityService()
-        )
-        self._pii_hasher: PiiHasherPort = (
-            pii_hasher if pii_hasher is not None else NoOpPiiHasher()
-        )
-        self._data_normalizer: DataNormalizationPort = (
-            data_normalizer
-            if data_normalizer is not None
-            else DataNormalizationService()
-        )
-        resolved_contract_policy: ContractPolicyPort = (
-            contract_policy if contract_policy is not None else _DefaultContractPolicy()
-        )
-        self._contract_policy = resolved_contract_policy
+        self._identity = resolved_dependencies.identity_service
+        self._pii_hasher = resolved_dependencies.pii_hasher
+        self._data_normalizer = resolved_dependencies.data_normalizer
+        self._contract_policy = resolved_dependencies.contract_policy
 
     def hash_pii_value(self, value: str | None) -> str | None:
         """Hash a single PII value."""

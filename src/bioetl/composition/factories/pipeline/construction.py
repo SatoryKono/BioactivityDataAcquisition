@@ -12,12 +12,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.composition.factories.pipeline.transformer_dependencies import (
+    ContractPolicyLoader,
+    build_transformer_dependencies,
+)
 from bioetl.composition.services.versioning import (
     compute_config_hash,
     get_git_commit,
     get_pipeline_version,
 )
-from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import (
     load_pipeline_contract_policy,
@@ -28,7 +31,7 @@ from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLo
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
-    from bioetl.domain.ports import ContractPolicyPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import MetricsPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -50,14 +53,6 @@ class DomainConfigMapper(Protocol):
         resolved_dq_config: DQConfig | None = None,
     ) -> PipelineConfig:
         """Map YAML config to domain PipelineConfig."""
-        ...
-
-
-class ContractPolicyLoader(Protocol):
-    """Callable contract for loading pipeline contract policy."""
-
-    def __call__(self, provider: str, entity: str) -> ContractPolicyPort:
-        """Load contract policy for provider/entity."""
         ...
 
 
@@ -164,38 +159,20 @@ class TransformerBuilder:
         if transformer_class is None:
             return None
 
-        identity_service = IdentityService(
-            content_hash_include_fields=set(yaml_config.content_hash.include) or None,
-            content_hash_exclude_fields=set(yaml_config.content_hash.exclude),
-        )
         entity_type = self.entity_type_extractor(self.pipeline_name)
-        contract_policy = self._load_contract_policy(entity_type)
-        return transformer_class(
+        dependencies = build_transformer_dependencies(
             provider=self.provider,
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            content_hash_include_fields=yaml_config.content_hash.include,
+            content_hash_exclude_fields=yaml_config.content_hash.exclude,
+            contract_policy_loader=self.contract_policy_loader,
+        )
+        return transformer_class(
+            provider=self.provider,
+            entity_type=entity_type,
             silver_filters=domain_config.silver_filters,
             gold_filters=domain_config.gold_filters,
-            identity_service=identity_service,
-            contract_policy=contract_policy,
+            dependencies=dependencies,
         )
-
-    def _load_contract_policy(
-        self, entity_type: str | None
-    ) -> ContractPolicyPort | None:
-        """Load policy for provider/entity and degrade gracefully when missing.
-
-        Args:
-            entity_type: Entity type string used with self.provider to locate the
-                contract policy; returns None if entity_type is None.
-
-        Returns:
-            ContractPolicyPort for the provider/entity, or None if not found.
-        """
-        if entity_type is None:
-            return None
-        try:
-            return self.contract_policy_loader(self.provider, entity_type)
-        except ValueError:
-            return None

@@ -17,7 +17,10 @@ __all__ = ["PublicationTransformer"]
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import TransformationError
+from bioetl.application.core.base_transformer import (
+    TransformationError,
+    TransformerDependencyContext,
+)
 from bioetl.application.core.field_specs import (
     INT,
     PMID,
@@ -129,6 +132,7 @@ class PublicationTransformer(BaseChemblTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize ChEMBL Publication transformer.
 
@@ -157,6 +161,7 @@ class PublicationTransformer(BaseChemblTransformer):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     async def _transform_impl(
