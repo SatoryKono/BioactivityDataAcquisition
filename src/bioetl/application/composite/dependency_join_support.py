@@ -75,6 +75,7 @@ def resolve_left_pipeline(
         return dep.key_source
     return seed_pipeline
 
+
 def build_composite_join_metadata(
     *,
     dep: DependencyConfig,

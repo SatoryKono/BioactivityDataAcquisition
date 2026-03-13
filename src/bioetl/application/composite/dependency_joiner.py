@@ -185,13 +185,12 @@ class DependencyJoinerService:
         dep: DependencyConfig,
         metadata: CompositeJoinContext,
     ) -> ResolvedCompositeJoinContext | None:
-        join_keys_list = metadata.join_keys_list
         prepared_context = self._prepare_dependency_join_context(
             merged_df=merged_df,
             dep_df=dep_df,
             dep=dep,
-            left_join_keys=join_keys_list,
-            right_join_keys=join_keys_list,
+            left_join_keys=metadata.join_keys_list,
+            right_join_keys=metadata.join_keys_list,
             seed_pipeline=metadata.left_pipeline,
         )
         return resolve_composite_join_context(
@@ -212,23 +211,21 @@ class DependencyJoinerService:
         right_join_keys: list[str],
         seed_pipeline: str | None,
     ) -> PreparedDependencyJoinContext:
-        prepared_merged_df, prepared_dep_df = prepare_dependency_join_frames(
-            deduplicator=self._deduplicator,
-            join_key_resolver=self._join_key_resolver,
-            renamer=self._renamer,
-            logger=self._logger,
-            field_alias_resolver=self._field_alias_resolver,
-            drop_system_columns=self.drop_system_columns,
-            merged_df=merged_df,
-            dep_df=dep_df,
-            dep=dep,
-            left_join_keys=left_join_keys,
-            right_join_keys=right_join_keys,
-            seed_pipeline=seed_pipeline,
-        )
         return PreparedDependencyJoinContext(
-            merged_df=prepared_merged_df,
-            dep_df=prepared_dep_df,
+            *prepare_dependency_join_frames(
+                deduplicator=self._deduplicator,
+                join_key_resolver=self._join_key_resolver,
+                renamer=self._renamer,
+                logger=self._logger,
+                field_alias_resolver=self._field_alias_resolver,
+                drop_system_columns=self.drop_system_columns,
+                merged_df=merged_df,
+                dep_df=dep_df,
+                dep=dep,
+                left_join_keys=left_join_keys,
+                right_join_keys=right_join_keys,
+                seed_pipeline=seed_pipeline,
+            )
         )
 
     def _execute_prepared_dependency_join(
