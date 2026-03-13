@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-__all__ = ["MergeService"]
+__all__ = ["MergeCollaborators", "MergeService"]
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.composite.join_planner_helpers import table_path_to_name
@@ -48,6 +49,74 @@ def _path_to_table_name(path: str) -> str:
     return table_path_to_name(path)
 
 
+@dataclass(frozen=True, slots=True)
+class MergeCollaborators:
+    """Bundle of merge-time collaborators wired in composition."""
+
+    deduplicator: EnricherDeduplicatorService
+    aggregator: EnricherAggregatorService
+    renamer: ColumnRenamerService
+    orderer: ColumnOrdererService
+    priority_orderer: ColumnPriorityOrdererService
+    coalesce_policy: CoalescePolicyService
+    conflict_resolver: ConflictResolverService
+    join_planner: JoinPlannerService
+
+
+_LEGACY_COLLABORATOR_KEYS = frozenset(
+    {
+        "deduplicator",
+        "aggregator",
+        "renamer",
+        "orderer",
+        "priority_orderer",
+        "coalesce_policy",
+        "conflict_resolver",
+        "join_planner",
+    }
+)
+
+
+def _build_merge_collaborators(
+    *,
+    collaborators: MergeCollaborators | None,
+    legacy_collaborators: dict[str, Any],  # Any: phased compatibility bridge
+) -> MergeCollaborators:
+    """Normalize new bundle-style wiring and legacy keyword collaborators."""
+    if collaborators is not None:
+        if legacy_collaborators:
+            unexpected = sorted(legacy_collaborators)
+            raise TypeError(
+                "MergeService received both collaborators bundle and legacy "
+                f"keyword collaborators: {unexpected}"
+            )
+        return collaborators
+
+    missing = sorted(_LEGACY_COLLABORATOR_KEYS.difference(legacy_collaborators))
+    unexpected = sorted(set(legacy_collaborators).difference(_LEGACY_COLLABORATOR_KEYS))
+    if missing or unexpected:
+        details: list[str] = []
+        if missing:
+            details.append(f"missing={missing}")
+        if unexpected:
+            details.append(f"unexpected={unexpected}")
+        raise TypeError(
+            "MergeService requires collaborators=MergeCollaborators(...) or the "
+            f"full legacy collaborator keyword set ({', '.join(details)})"
+        )
+
+    return MergeCollaborators(
+        deduplicator=legacy_collaborators["deduplicator"],
+        aggregator=legacy_collaborators["aggregator"],
+        renamer=legacy_collaborators["renamer"],
+        orderer=legacy_collaborators["orderer"],
+        priority_orderer=legacy_collaborators["priority_orderer"],
+        coalesce_policy=legacy_collaborators["coalesce_policy"],
+        conflict_resolver=legacy_collaborators["conflict_resolver"],
+        join_planner=legacy_collaborators["join_planner"],
+    )
+
+
 class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMixin):
     """Facade/orchestrator for seed+dependency+enricher merge workflow."""
 
@@ -61,14 +130,8 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
         cross_validator: EnrichmentCrossValidationService | None = None,
         gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
         *,
-        deduplicator: EnricherDeduplicatorService,
-        aggregator: EnricherAggregatorService,
-        renamer: ColumnRenamerService,
-        orderer: ColumnOrdererService,
-        priority_orderer: ColumnPriorityOrdererService,
-        coalesce_policy: CoalescePolicyService,
-        conflict_resolver: ConflictResolverService,
-        join_planner: JoinPlannerService,
+        collaborators: MergeCollaborators | None = None,
+        **legacy_collaborators: Any,  # Any: phased legacy keyword bridge
     ) -> None:
         """Initialise the MergeService with all required and optional collaborators.
 
@@ -92,23 +155,14 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
             gold_schema: Optional Pandera ``DataFrameModel`` class used to validate
                 the Gold-layer output schema; type is ``Any`` because it is a class
                 reference rather than an instance.
-            deduplicator: Service that removes duplicate rows from enricher DataFrames
-                keyed on join fields.
-            aggregator: Service that aggregates many-to-one enricher DataFrames before
-                joining.
-            renamer: Service that qualifies column names to the
-                ``{provider}.{entity}.{field}`` convention.
-            orderer: Service that applies semantic group-based column ordering to the
-                merged output.
-            priority_orderer: Service that resolves provider priority ordering for
-                coalesced columns.
-            coalesce_policy: Service that selects the winning value for columns
-                present in multiple enrichers.
-            conflict_resolver: Service that detects and resolves column-name conflicts
-                between the seed frame and enricher frames.
-            join_planner: Pre-wired service that executes enricher and dependency
-                joins against the seed DataFrame.
+            collaborators: Optional dependency bundle containing the merge-time
+                collaborator services. When omitted, the legacy keyword-only
+                collaborators remain accepted for phased migration.
         """
+        collaborator_bundle = _build_merge_collaborators(
+            collaborators=collaborators,
+            legacy_collaborators=legacy_collaborators,
+        )
         self._config = merge_config
         self._storage = storage
         self._logger = logger
@@ -117,14 +171,14 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema
 
-        self._deduplicator = deduplicator
-        self._aggregator = aggregator
-        self._renamer = renamer
-        self._orderer = orderer
-        self._priority_orderer = priority_orderer
-        self._coalesce_policy = coalesce_policy
-        self._conflict_resolver = conflict_resolver
-        self._join_planner = join_planner
+        self._deduplicator = collaborator_bundle.deduplicator
+        self._aggregator = collaborator_bundle.aggregator
+        self._renamer = collaborator_bundle.renamer
+        self._orderer = collaborator_bundle.orderer
+        self._priority_orderer = collaborator_bundle.priority_orderer
+        self._coalesce_policy = collaborator_bundle.coalesce_policy
+        self._conflict_resolver = collaborator_bundle.conflict_resolver
+        self._join_planner = collaborator_bundle.join_planner
 
     async def merge(
         self,

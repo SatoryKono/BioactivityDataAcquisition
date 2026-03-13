@@ -11,7 +11,7 @@ from bioetl.application.composite.cross_validator import (
     EnrichmentCrossValidationService,
 )
 from bioetl.application.composite.join_execution import JoinHow
-from bioetl.application.composite.merger import MergeService
+from bioetl.application.composite.merger import MergeCollaborators, MergeService
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
     build_execution_support_services,
@@ -212,14 +212,16 @@ class CompositeSupportServicesFactory:
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
             gold_schema=self._resolve_gold_schema(self._config.name),
-            deduplicator=merge_dependencies.deduplicator,
-            aggregator=merge_dependencies.aggregator,
-            renamer=merge_dependencies.renamer,
-            orderer=merge_dependencies.orderer,
-            priority_orderer=merge_dependencies.priority_orderer,
-            coalesce_policy=merge_dependencies.coalesce_policy,
-            conflict_resolver=merge_dependencies.conflict_resolver,
-            join_planner=merge_dependencies.join_planner,
+            collaborators=MergeCollaborators(
+                deduplicator=merge_dependencies.deduplicator,
+                aggregator=merge_dependencies.aggregator,
+                renamer=merge_dependencies.renamer,
+                orderer=merge_dependencies.orderer,
+                priority_orderer=merge_dependencies.priority_orderer,
+                coalesce_policy=merge_dependencies.coalesce_policy,
+                conflict_resolver=merge_dependencies.conflict_resolver,
+                join_planner=merge_dependencies.join_planner,
+            ),
         )
 
     @staticmethod

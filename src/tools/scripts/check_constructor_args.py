@@ -74,10 +74,10 @@ def main() -> None:
             )
             sys.exit(0)
         else:
-            print(f"\n❌ {len(all_violations)} violation(s) found")
+            print(f"\n[FAIL] {len(all_violations)} violation(s) found")
             sys.exit(1)
     else:
-        print(f"✅ All constructors have <= {MAX_CONSTRUCTOR_ARGS} arguments")
+        print(f"[OK] All constructors have <= {MAX_CONSTRUCTOR_ARGS} arguments")
         sys.exit(0)
 
 
