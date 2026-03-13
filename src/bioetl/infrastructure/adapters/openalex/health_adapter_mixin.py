@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.openalex._constants import OPENALEX_API_BASE
 from bioetl.infrastructure.adapters.openalex.health_probe import probe_openalex_health
 
 if TYPE_CHECKING:
@@ -38,7 +39,7 @@ class OpenAlexAdapterHealthMixin:
             HealthStatus reflecting the current OpenAlex API availability.
         """
         return await probe_openalex_health(
-            api_base="https://api.openalex.org",
+            api_base=OPENALEX_API_BASE,
             mailto=self.mailto,
             http_client=self._http_client,
             logger=self._logger,

@@ -150,13 +150,13 @@ class BronzeWriterIOMixin:
             if line.strip():
                 yield orjson.loads(line)
 
-    async def list_batches(
+    def _list_batches_sync(
         self,
         provider: str,
         entity: str,
         date: datetime | None = None,
     ) -> list[str]:
-        """List all batch files for a given provider/entity."""
+        """Sync body for list_batches — blocking Path I/O."""
         if self._flat_structure and not provider and not entity:
             search_path = (
                 self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
@@ -172,7 +172,18 @@ class BronzeWriterIOMixin:
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
         files = list(search_path.glob(pattern))
-        result = sorted(str(p.relative_to(self.base_path)) for p in files)
+        return sorted(str(p.relative_to(self.base_path)) for p in files)
+
+    async def list_batches(
+        self,
+        provider: str,
+        entity: str,
+        date: datetime | None = None,
+    ) -> list[str]:
+        """List all batch files for a given provider/entity."""
+        result = await asyncio.to_thread(
+            self._list_batches_sync, provider, entity, date
+        )
         self._logger.debug(
             "bronze_list_batches",
             provider=provider,
@@ -208,15 +219,14 @@ class BronzeWriterIOMixin:
         """Check if path is a date directory older than cutoff."""
         return path.is_dir() and len(path.name) == 10 and path.name < cutoff_str
 
-    async def cleanup_old_files(
+    def _cleanup_old_files_sync(
         self,
-        cutoff_date: datetime,
-        dry_run: bool = False,
-        provider: str | None = None,
-        entity: str | None = None,
-    ) -> dict[str, int]:
-        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention)."""
-        cutoff_str = cutoff_date.strftime("%Y-%m-%d")
+        cutoff_str: str,
+        dry_run: bool,
+        provider: str | None,
+        entity: str | None,
+    ) -> tuple[int, int, int]:
+        """Sync body for cleanup_old_files — blocking Path I/O."""
         files, bytes_total, dirs = 0, 0, 0
 
         for date_dir in self._find_old_date_dirs(cutoff_str, provider, entity):
@@ -230,6 +240,21 @@ class BronzeWriterIOMixin:
                 dirs += 1
                 if not dry_run:
                     date_dir.rmdir()
+
+        return files, bytes_total, dirs
+
+    async def cleanup_old_files(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> dict[str, int]:
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention)."""
+        cutoff_str = cutoff_date.strftime("%Y-%m-%d")
+        files, bytes_total, dirs = await asyncio.to_thread(
+            self._cleanup_old_files_sync, cutoff_str, dry_run, provider, entity
+        )
 
         self._logger.info(
             "bronze_cleanup_complete",

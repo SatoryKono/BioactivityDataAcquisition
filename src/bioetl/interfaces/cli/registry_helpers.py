@@ -7,17 +7,31 @@ fresh, explicitly populated ``PipelineRegistry`` instance.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry, create_registry
 
 __all__ = ["build_cli_registry", "get_default_registry"]
 
 
+def _build_registered_registry(
+    *,
+    create_registry_fn: Callable[[], PipelineRegistry],
+    register_all_pipelines_fn: Callable[..., None],
+) -> PipelineRegistry:
+    """Build and populate a fresh registry using explicit collaborators."""
+    registry = create_registry_fn()
+    register_all_pipelines_fn(registry=registry)
+    return registry
+
+
 def build_cli_registry() -> PipelineRegistry:
     """Build a fresh explicit registry for one CLI invocation."""
-    registry = create_registry()
-    register_all_pipelines(registry=registry)
-    return registry
+    return _build_registered_registry(
+        create_registry_fn=create_registry,
+        register_all_pipelines_fn=register_all_pipelines,
+    )
 
 
 def get_default_registry() -> PipelineRegistry:

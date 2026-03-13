@@ -38,7 +38,7 @@ from bioetl.infrastructure.adapters.crossref._defaults import (
 )
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
-    SearchPaginatorHelper,
+    SearchPaginator,
 )
 from bioetl.infrastructure.adapters.crossref.client_fetch_helpers import (
     aclose_crossref_http_client,
@@ -107,7 +107,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
     query_builder: CrossRefQueryBuilder | None = None
     response_mapper: CrossRefResponseMapper | None = None
     batch_fetcher: DoiBatchProcessor | None = None
-    search_paginator: SearchPaginatorHelper | None = None
+    search_paginator: SearchPaginator | None = None
     title_fallback_handler: CrossRefTitleFallbackHandler | None = None
     fetch_flow: CrossRefFetchFlow | None = None
 

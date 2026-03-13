@@ -24,6 +24,7 @@ from bioetl.interfaces.cli.commands.run import run
 from bioetl.interfaces.cli.commands.run_all import run_all
 from bioetl.interfaces.cli.commands.run_composite import run_composite
 from bioetl.interfaces.cli.registry_helpers import (
+    _build_registered_registry,
     get_default_registry,
 )
 
@@ -35,9 +36,10 @@ __all__ = [
 
 def _build_main_registry() -> object:
     """Build an explicit registry for the canonical process entrypoint."""
-    registry = create_registry()
-    register_all_pipelines(registry=registry)
-    return registry
+    return _build_registered_registry(
+        create_registry_fn=create_registry,
+        register_all_pipelines_fn=register_all_pipelines,
+    )
 
 
 @click.group()

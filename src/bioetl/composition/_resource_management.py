@@ -7,7 +7,8 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
@@ -45,6 +46,20 @@ __all__ = [
     "vacuum_table",
 ]
 
+_P = ParamSpec("_P")
+_T = TypeVar("_T")
+
+
+def _bootstrap_registered_resource(
+    bootstrap_fn: Callable[_P, _T],
+    /,
+    *args: _P.args,
+    **kwargs: _P.kwargs,
+) -> _T:
+    """Run registration bootstrap before delegating to a resource builder."""
+    _ensure_registrations()
+    return bootstrap_fn(*args, **kwargs)
+
 
 def get_quarantine_manager(pipeline: str) -> QuarantineManagerService:
     """Get a quarantine manager for the given pipeline.
@@ -61,8 +76,7 @@ def get_quarantine_manager(pipeline: str) -> QuarantineManagerService:
         >>> manager = get_quarantine_manager("chembl_activity")
         >>> records = await manager.inspect(limit=100)
     """
-    _ensure_registrations()
-    return bootstrap_quarantine_manager(pipeline)
+    return _bootstrap_registered_resource(bootstrap_quarantine_manager, pipeline)
 
 
 def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
@@ -80,8 +94,7 @@ def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
         >>> manager = get_checkpoint_manager("chembl_activity")
         >>> checkpoints = await manager.list_all()
     """
-    _ensure_registrations()
-    return bootstrap_checkpoint_manager(pipeline)
+    return _bootstrap_registered_resource(bootstrap_checkpoint_manager, pipeline)
 
 
 def get_lifecycle_service() -> MedallionLifecycleService:
@@ -96,8 +109,7 @@ def get_lifecycle_service() -> MedallionLifecycleService:
         >>> service = get_lifecycle_service()
         >>> removed = await service.vacuum("chembl.activity", retention_days=7)
     """
-    _ensure_registrations()
-    return bootstrap_lifecycle_service()
+    return _bootstrap_registered_resource(bootstrap_lifecycle_service)
 
 
 async def vacuum_table(table: str, options: VacuumOptions) -> int:

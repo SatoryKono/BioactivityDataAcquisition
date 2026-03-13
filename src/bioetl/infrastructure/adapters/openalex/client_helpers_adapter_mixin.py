@@ -20,7 +20,7 @@ from bioetl.infrastructure.adapters.common.source_metadata_capability import (
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
 
-_OPENALEX_BASE_URL = "https://api.openalex.org"
+from bioetl.infrastructure.adapters.openalex._constants import OPENALEX_API_BASE
 
 
 class OpenAlexAdapterHelpersMixin:
@@ -126,7 +126,7 @@ class OpenAlexAdapterHelpersMixin:
         """
         return consume_source_metadata(
             collector=self._request_collector,
-            url=_OPENALEX_BASE_URL,
+            url=OPENALEX_API_BASE,
             api_version=api_version,
         )
 

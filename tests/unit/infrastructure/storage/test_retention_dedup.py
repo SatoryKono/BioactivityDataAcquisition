@@ -1,4 +1,4 @@
-"""Tests for RetentionManager.deduplicate_silver."""
+"""Tests for RetentionPolicy.deduplicate_silver."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import pyarrow as pa
 import pytest
 from deltalake import write_deltalake
 
-from bioetl.infrastructure.storage.retention_manager import RetentionManager
+from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
 
 
 @pytest.fixture
@@ -80,7 +80,7 @@ async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
         mode="append",
     )
 
-    mgr = RetentionManager(base_path=str(tmp_delta_dir))
+    mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
     removed = await mgr.deduplicate_silver("test_entity", primary_keys=["activity_id"])
 
     assert removed == 1  # One duplicate for activity_id=1
@@ -119,7 +119,7 @@ async def test_deduplicate_no_duplicates(tmp_delta_dir: Path) -> None:
         ],
     )
 
-    mgr = RetentionManager(base_path=str(tmp_delta_dir))
+    mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
     removed = await mgr.deduplicate_silver("test_entity", primary_keys=["activity_id"])
 
     assert removed == 0
@@ -148,7 +148,7 @@ async def test_deduplicate_empty_table(tmp_delta_dir: Path) -> None:
     )
     write_deltalake(str(table_path), empty)
 
-    mgr = RetentionManager(base_path=str(tmp_delta_dir))
+    mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
     removed = await mgr.deduplicate_silver("test_entity", primary_keys=["activity_id"])
 
     assert removed == 0
@@ -159,7 +159,7 @@ async def test_deduplicate_missing_table(tmp_delta_dir: Path) -> None:
     """Dedup should raise TableNotFoundError for missing table."""
     from bioetl.domain.exceptions import TableNotFoundError
 
-    mgr = RetentionManager(base_path=str(tmp_delta_dir))
+    mgr = RetentionPolicy(base_path=str(tmp_delta_dir))
 
     with pytest.raises(TableNotFoundError):
         await mgr.deduplicate_silver("nonexistent", primary_keys=["activity_id"])

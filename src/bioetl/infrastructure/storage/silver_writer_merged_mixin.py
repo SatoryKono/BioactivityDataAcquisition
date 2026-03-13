@@ -4,22 +4,56 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 import pyarrow as pa
 from deltalake import write_deltalake
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.storage.base_delta_writer import coerce_null_types_for_delta
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
+class _MergedArrowConverterProtocol(Protocol):
+    """Minimal converter contract needed by merged Silver writes."""
+
+    def convert_records_to_arrow(
+        self,
+        records: list[BronzeRecord],
+        primary_keys: list[str] | None = None,
+        column_order: list[str] | None = None,
+        apply_column_order: bool = True,
+    ) -> pa.Table: ...
+
+
+@dataclass(frozen=True, slots=True)
+class _MergedSilverWriteRequest:
+    """Normalized request carried through one merged Silver write flow."""
+
+    table_name: str
+    records: list[BronzeRecord]
+    primary_keys: list[str] | None = None
+    run_id: str | None = None
+    sources_used: list[str] | None = None
+    preserve_column_order: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedMergedSilverWrite:
+    """Prepared merged Silver payload shared across write stages."""
+
+    request: _MergedSilverWriteRequest
+    table_path: str
+    arrow_table: pa.Table
+
+
 class _SilverWriterMergedContext(Protocol):
     """Structural type for mixin self dependencies."""
 
+    _arrow_converter: _MergedArrowConverterProtocol
     logger: LoggerPort
     csv_exporter: CsvExporter | None
 
@@ -40,41 +74,27 @@ class _SilverWriterMergedContext(Protocol):
 class SilverWriterMergedMixin:
     """Merged write path extracted from ``SilverWriter`` class body."""
 
-    def _prepare_merged_arrow_table(
+    def _prepare_merged_silver_write(
         self: _SilverWriterMergedContext,
-        records: list[BronzeRecord],
-        *,
-        primary_keys: list[str] | None,
-        preserve_column_order: bool,
-    ) -> pa.Table:
-        """Prepare normalized Arrow table for merged silver writes.
+        request: _MergedSilverWriteRequest,
+    ) -> _PreparedMergedSilverWrite:
+        """Prepare normalized Arrow payload and resolved table path for merged writes.
 
         Args:
-            records: List of Bronze record dicts to convert to Arrow format.
-            primary_keys: Optional list of column names used for sorting; no sort applied if None or empty.
-            preserve_column_order: If True, skip canonical column reordering.
+            request: Normalized merged write request.
 
         Returns:
-            PyArrow Table with coerced null types, canonical column order, and primary key sorting applied.
+            Prepared write payload with resolved table path and normalized Arrow table.
         """
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
-        arrow_table = pa.Table.from_pylist(records)
-        arrow_table = coerce_null_types_for_delta(arrow_table)
-
-        if not preserve_column_order:
-            ordered_columns = canonical_column_order(list(arrow_table.column_names))
-            arrow_table = arrow_table.select(ordered_columns)
-
-        if primary_keys:
-            valid_keys = [
-                key for key in primary_keys if key in arrow_table.schema.names
-            ]
-            if valid_keys:
-                arrow_table = arrow_table.sort_by(
-                    [(key, "ascending") for key in valid_keys]
-                )
-        return arrow_table
+        return _PreparedMergedSilverWrite(
+            request=request,
+            table_path=self._resolve_table_path(request.table_name),
+            arrow_table=self._arrow_converter.convert_records_to_arrow(
+                request.records,
+                primary_keys=request.primary_keys,
+                apply_column_order=not request.preserve_column_order,
+            ),
+        )
 
     async def _write_silver_merged_delta(
         self: _SilverWriterMergedContext,
@@ -142,31 +162,35 @@ class SilverWriterMergedMixin:
             )
             return
 
-        arrow_table = self._prepare_merged_arrow_table(
-            records,
-            primary_keys=primary_keys,
-            preserve_column_order=preserve_column_order,
+        prepared = self._prepare_merged_silver_write(
+            _MergedSilverWriteRequest(
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                run_id=run_id,
+                sources_used=sources_used,
+                preserve_column_order=preserve_column_order,
+            )
         )
-        table_path = self._resolve_table_path(table_name)
         self.logger.info(
             "Writing merged Silver records",
-            table_name=table_name,
-            path=table_path,
+            table_name=prepared.request.table_name,
+            path=prepared.table_path,
             records=len(records),
         )
         await self._write_silver_merged_delta(
-            table_path=table_path,
-            arrow_table=arrow_table,
+            table_path=prepared.table_path,
+            arrow_table=prepared.arrow_table,
         )
         await self._export_silver_merged_csv(
-            table_name=table_name,
-            arrow_table=arrow_table,
+            table_name=prepared.request.table_name,
+            arrow_table=prepared.arrow_table,
         )
         await self._write_silver_merged_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys or [],
-            run_id=run_id,
-            sources_used=sources_used,
+            table_path=prepared.table_path,
+            table_name=prepared.request.table_name,
+            records=prepared.request.records,
+            primary_keys=prepared.request.primary_keys or [],
+            run_id=prepared.request.run_id,
+            sources_used=prepared.request.sources_used,
         )

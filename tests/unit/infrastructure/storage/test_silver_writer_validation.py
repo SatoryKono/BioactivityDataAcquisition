@@ -411,6 +411,9 @@ class TestSilverWriterPreparePayloadExecutor:
         import pyarrow as pa
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
+        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+            _ValidatedSilverWriteContext,
+        )
 
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         records = [
@@ -438,7 +441,11 @@ class TestSilverWriterPreparePayloadExecutor:
             patch.object(
                 writer,
                 "_sync_validate_and_build_arrow",
-                return_value=(records, SilverWriteMode.APPEND, expected_table),
+                return_value=_ValidatedSilverWriteContext(
+                    records=records,
+                    validated_mode=SilverWriteMode.APPEND,
+                    arrow_data=expected_table,
+                ),
             ) as mock_sync,
             patch(
                 "bioetl.infrastructure.storage.silver_writer_validation_mixin.asyncio.to_thread",
@@ -477,6 +484,9 @@ class TestSilverWriterPreparePayloadExecutor:
         import pyarrow as pa
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
+        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+            _ValidatedSilverWriteContext,
+        )
 
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         records = [
@@ -503,9 +513,13 @@ class TestSilverWriterPreparePayloadExecutor:
         def sync_stage(
             *_: object,
             **__: object,
-        ) -> tuple[list[dict[str, str]], SilverWriteMode, pa.Table]:
+        ) -> _ValidatedSilverWriteContext:
             call_order.append("sync")
-            return records, SilverWriteMode.APPEND, expected_table
+            return _ValidatedSilverWriteContext(
+                records=records,
+                validated_mode=SilverWriteMode.APPEND,
+                arrow_data=expected_table,
+            )
 
         async def schema_stage(*_: object) -> None:
             call_order.append("schema")
