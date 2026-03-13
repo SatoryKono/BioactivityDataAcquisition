@@ -79,10 +79,17 @@ The domain layer implements Domain-Driven Design patterns:
 | [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
 | [Architecture Decisions](docs/02-architecture/decisions/) | 43 ADRs explaining design choices           |
 | [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
-| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.23) |
-| [Project Map](docs/00-project/00-map.md)                  | Documentation navigator and code map        |
+| [RULES.md](docs/00-project/RULES.md)                      | Canonical active governance and requirements |
+| [Project Map](docs/00-project/00-map.md)                  | Primary navigator for active project docs   |
+| [Tools Hub](docs/00-project/TOOLS.md)                     | Current tool entry points and placement rules |
 | [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
 | [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
+| [Archive Index](docs/99-archive/README.md)                | Historical context only; not normative      |
+
+Start with [Project Map](docs/00-project/00-map.md), [RULES.md](docs/00-project/RULES.md),
+and [Tools Hub](docs/00-project/TOOLS.md) for current guidance. Materials under
+[`docs/99-archive/`](docs/99-archive/README.md) are preserved for traceability,
+but active docs in `docs/00-05` remain the source of truth.
 
 ## Quick Start
 
@@ -91,7 +98,8 @@ The domain layer implements Domain-Driven Design patterns:
 - **Python**: Version 3.11 or higher.
 - **Make**: For running automation commands.
 - **uv**: Recommended package manager ([install](https://docs.astral.sh/uv/getting-started/installation/)).
-- **Docker**: Optional, for Neo4j and monitoring stack only.
+- **Docker**: Optional, only for `docker-compose` extras such as Neo4j and monitoring; not required for the Local-Only runtime.
+- **Node.js**: Optional, for Mermaid diagram rendering and related docs tooling.
 
 ### Installation
 
@@ -107,7 +115,7 @@ cd BioactivityDataAcquisition2
 
 The script will:
 
-- Check prerequisites (Python 3.11+, Git, Make, uv, Docker, Node.js)
+- Check required prerequisites (Python 3.11+, Git, Make, uv) and optional extras (Docker, Node.js)
 - Create virtual environment and install dependencies
 - Set up pre-commit hooks
 - Configure environment variables and create data directories

@@ -329,3 +329,64 @@ def test_collect_successful_dependencies_when_failed_then_not_marked() -> None:
     harness._collect_successful_dependencies(state, results)
 
     state.with_dependency_completed.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_postprocess_dependency_results_when_mixed_then_finalizes_with_counts() -> (
+    None
+):
+    harness = _StageMixinHarness(
+        config=SimpleNamespace(
+            name="test_composite",
+            seed=SimpleNamespace(pipeline="seed_pipeline", silver_table="silver/seed"),
+            enrichers=[],
+            required_enrichers=[],
+            dependencies=[_make_dep_cfg("dep_a"), _make_dep_cfg("dep_b")],
+            get_dependency=lambda name: {
+                "dep_a": _make_dep_cfg("dep_a"),
+                "dep_b": _make_dep_cfg("dep_b"),
+            }.get(name),
+        )
+    )
+    state = _make_state()
+    completed_state = _make_state(state=CompositePipelineState.DEPENDENCIES_COMPLETED)
+    harness._complete_dependencies_phase = AsyncMock(return_value=completed_state)
+    results = {"dep_a": _success_dep("dep_a"), "dep_b": _failed_dep("dep_b")}
+
+    new_state, dep_results = await harness._postprocess_dependency_results(state, results)
+
+    assert dep_results is results
+    assert new_state is completed_state
+    state.with_dependency_completed.assert_called_once_with("dep_a", results["dep_a"])
+    harness._complete_dependencies_phase.assert_awaited_once_with(
+        state,
+        succeeded=1,
+        failed=1,
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_finalize_dependencies_phase_when_required_failure_then_raises() -> None:
+    dep_cfg = _make_dep_cfg("dep_a", required=True)
+    harness = _StageMixinHarness(
+        config=SimpleNamespace(
+            name="test_composite",
+            seed=SimpleNamespace(pipeline="seed_pipeline", silver_table="silver/seed"),
+            enrichers=[],
+            required_enrichers=[],
+            dependencies=[dep_cfg],
+            get_dependency=lambda name: dep_cfg if name == "dep_a" else None,
+        )
+    )
+    state = _make_state()
+    harness._persist_failed_state = AsyncMock(return_value=state)
+    harness._complete_dependencies_phase = AsyncMock()
+    outcome = harness._build_dependency_phase_outcome({"dep_a": _failed_dep("dep_a")})
+
+    with pytest.raises(InvalidStateError, match="Required dependencies failed"):
+        await harness._finalize_dependencies_phase(state, outcome)
+
+    harness._persist_failed_state.assert_awaited_once()
+    harness._complete_dependencies_phase.assert_not_awaited()

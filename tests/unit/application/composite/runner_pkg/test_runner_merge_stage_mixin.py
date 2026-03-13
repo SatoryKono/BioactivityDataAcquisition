@@ -193,6 +193,24 @@ def test_build_merge_inputs_when_success_enricher_then_included() -> None:
     assert prepared_inputs.dependencies == []
 
 
+@pytest.mark.unit
+def test_prepare_merge_request_when_called_then_binds_seed_and_inputs() -> None:
+    dependency_cfg = _make_dependency_cfg("dep_a")
+    harness = _MergeHarness()
+    harness._config.enrichers = [_make_enricher_cfg("enricher_a")]
+    harness._config.dependencies = [dependency_cfg]
+    enrichment_results = {"enricher_a": _success_enrichment("enricher_a")}
+
+    request = harness._prepare_merge_request(enrichment_results, {})
+
+    assert request.seed_table == "silver/seed"
+    assert request.seed_pipeline == "seed_pipeline"
+    assert request.run_id == "run-merge-test"
+    assert request.enrichment_results is enrichment_results
+    assert request.enrichers[0].pipeline == "enricher_a"
+    assert request.dependencies == []
+
+
 # ---------------------------------------------------------------------------
 # _delete_checkpoint_safe
 # ---------------------------------------------------------------------------
@@ -309,6 +327,7 @@ async def test_execute_merge_stage_when_merge_succeeds_then_returns_merge_result
 
     assert merge_result is not None
     assert merge_result.records_merged == 10
+    harness._merger.merge.assert_awaited_once()
     assert harness._dq_reports_called is True
     assert harness._quarantine_called is True
 

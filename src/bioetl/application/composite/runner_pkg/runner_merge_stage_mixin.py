@@ -94,6 +94,17 @@ if TYPE_CHECKING:
             dependency_results: dict[str, DependencyResult] | None,
         ) -> _PreparedMergeInputs: ...
 
+        def _prepare_merge_request(
+            self,
+            enrichment_results: dict[str, EnrichmentResult],
+            dependency_results: dict[str, DependencyResult] | None,
+        ) -> _PreparedMergeRequest: ...
+
+        async def _run_prepared_merge_request(
+            self,
+            request: _PreparedMergeRequest,
+        ) -> MergeResult: ...
+
         def _handle_dry_run_merge_skip(
             self,
             state: CompositeCheckpointState,
@@ -125,6 +136,19 @@ class _PreparedMergeInputs:
 
     enrichers: list[EnricherConfig]
     dependencies: list[DependencyConfig]
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedMergeRequest:
+    """Normalized merge request passed into the merger runtime seam."""
+
+    seed_table: str
+    seed_pipeline: str
+    enrichers: list[EnricherConfig]
+    enrichment_results: dict[str, EnrichmentResult]
+    run_id: str
+    dependencies: list[DependencyConfig]
+    dependency_results: dict[str, DependencyResult] | None
 
 
 class CompositeRunnerMergeStageMixin:
@@ -256,6 +280,41 @@ class CompositeRunnerMergeStageMixin:
             dependencies=mergeable_dependencies,
         )
 
+    def _prepare_merge_request(
+        self: _CompositeRunnerMergeStageHostProtocol,
+        enrichment_results: dict[str, EnrichmentResult],
+        dependency_results: dict[str, DependencyResult] | None,
+    ) -> _PreparedMergeRequest:
+        """Build the canonical merge request for the merger seam."""
+        prepared_inputs = self._build_merge_inputs(
+            enrichment_results,
+            dependency_results,
+        )
+        return _PreparedMergeRequest(
+            seed_table=self._config.seed.silver_table,
+            seed_pipeline=self._config.seed.pipeline,
+            enrichers=prepared_inputs.enrichers,
+            enrichment_results=enrichment_results,
+            run_id=self._run_id_str,
+            dependencies=prepared_inputs.dependencies,
+            dependency_results=dependency_results,
+        )
+
+    async def _run_prepared_merge_request(
+        self: _CompositeRunnerMergeStageHostProtocol,
+        request: _PreparedMergeRequest,
+    ) -> MergeResult:
+        """Run merger through a normalized request context."""
+        return await self._merger.merge(
+            seed_table=request.seed_table,
+            enrichers=request.enrichers,
+            enrichment_results=request.enrichment_results,
+            run_id=request.run_id,
+            seed_pipeline=request.seed_pipeline,
+            dependencies=request.dependencies,
+            dependency_results=request.dependency_results,
+        )
+
     def _handle_dry_run_merge_skip(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
@@ -353,19 +412,13 @@ class CompositeRunnerMergeStageMixin:
             state = await self._start_merge_phase(state)
 
             try:
-                prepared_inputs = self._build_merge_inputs(
+                prepared_request = self._prepare_merge_request(
                     enrichment_results,
                     dependency_results,
                 )
 
-                merge_result = await self._merger.merge(
-                    seed_table=self._config.seed.silver_table,
-                    enrichers=prepared_inputs.enrichers,
-                    enrichment_results=enrichment_results,
-                    run_id=self._run_id_str,
-                    seed_pipeline=self._config.seed.pipeline,
-                    dependencies=prepared_inputs.dependencies,
-                    dependency_results=dependency_results,
+                merge_result = await self._run_prepared_merge_request(
+                    prepared_request,
                 )
                 await self._handle_merge_success(merge_result)
 

@@ -110,6 +110,11 @@ class _CompositeRunnerStageHostProtocol(Protocol):
         dependency_results: dict[str, DependencyResult],
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
 
+    def _build_dependency_phase_outcome(
+        self,
+        dependency_results: dict[str, DependencyResult],
+    ) -> _DependencyPhaseOutcome: ...
+
     def _collect_successful_dependencies(
         self,
         state: CompositeCheckpointState,
@@ -119,7 +124,7 @@ class _CompositeRunnerStageHostProtocol(Protocol):
     async def _finalize_dependencies_phase(
         self,
         state: CompositeCheckpointState,
-        dependency_results: dict[str, DependencyResult],
+        outcome: _DependencyPhaseOutcome,
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
 
     def _validate_dependency_preconditions(
@@ -185,6 +190,16 @@ class _PreparedDependenciesRunContext:
     coordinator: DependencyCoordinatorService
     runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
     dependency_pipeline_names: list[str]
+
+
+@dataclass(frozen=True, slots=True)
+class _DependencyPhaseOutcome:
+    """Normalized dependency-phase outcome used during finalization."""
+
+    dependency_results: dict[str, DependencyResult]
+    required_failed: list[str]
+    succeeded: int
+    failed: int
 
 
 __all__ = ["CompositeRunnerStageMixin"]
@@ -339,7 +354,22 @@ class CompositeRunnerStageMixin(
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
         """Record successful dependencies and finalize the dependency phase."""
         state = self._collect_successful_dependencies(state, dependency_results)
-        return await self._finalize_dependencies_phase(state, dependency_results)
+        outcome = self._build_dependency_phase_outcome(dependency_results)
+        return await self._finalize_dependencies_phase(state, outcome)
+
+    def _build_dependency_phase_outcome(
+        self: _CompositeRunnerStageHostProtocol,
+        dependency_results: dict[str, DependencyResult],
+    ) -> _DependencyPhaseOutcome:
+        """Normalize dependency results into a reusable finalization context."""
+        required_failed = self._find_required_failures(dependency_results)
+        succeeded, failed = self._summarize_dependency_outcomes(dependency_results)
+        return _DependencyPhaseOutcome(
+            dependency_results=dependency_results,
+            required_failed=required_failed,
+            succeeded=succeeded,
+            failed=failed,
+        )
 
     def _validate_dependency_preconditions(
         self: _CompositeRunnerStageHostProtocol,
@@ -386,7 +416,7 @@ class CompositeRunnerStageMixin(
     async def _finalize_dependencies_phase(
         self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
-        dependency_results: dict[str, DependencyResult],
+        outcome: _DependencyPhaseOutcome,
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
         """Check for required failures and complete the dependencies phase.
 
@@ -395,7 +425,7 @@ class CompositeRunnerStageMixin(
 
         Args:
             state: Current checkpoint state (with successful deps recorded).
-            dependency_results: Mapping of pipeline name to DependencyResult.
+            outcome: Normalized dependency-phase outcome.
 
         Returns:
             Updated checkpoint state and the dependency results mapping.
@@ -403,17 +433,15 @@ class CompositeRunnerStageMixin(
         Raises:
             InvalidStateError: If one or more required dependencies failed.
         """
-        required_failed = self._find_required_failures(dependency_results)
-        if required_failed:
-            await self._fail_required_dependencies(state, required_failed)
+        if outcome.required_failed:
+            await self._fail_required_dependencies(state, outcome.required_failed)
 
-        succeeded, failed = self._summarize_dependency_outcomes(dependency_results)
         completed_state = await self._complete_dependencies_phase(
             state,
-            succeeded=succeeded,
-            failed=failed,
+            succeeded=outcome.succeeded,
+            failed=outcome.failed,
         )
-        return completed_state, dependency_results
+        return completed_state, outcome.dependency_results
 
     async def _complete_dependencies_phase(
         self: _CompositeRunnerStageHostProtocol,

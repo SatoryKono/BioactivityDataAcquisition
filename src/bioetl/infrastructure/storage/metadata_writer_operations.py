@@ -84,36 +84,6 @@ def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
     return METADATA_FILENAME
 
 
-def _prepare_metadata_write(
-    *,
-    base_path: str | Path,
-    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
-    layer: str,
-    table_name: str | None,
-    flat_structure: bool,
-    provider: str | None,
-    entity: str | None,
-) -> _PreparedMetadataWrite:
-    """Build the file target, serialized payload, and telemetry label."""
-
-    target = _resolve_metadata_target(
-        _MetadataWriteRequest(
-            base_path=base_path,
-            metadata=metadata,
-            layer=layer,
-            table_name=table_name,
-            flat_structure=flat_structure,
-            provider=provider,
-            entity=entity,
-        )
-    )
-    return _PreparedMetadataWrite(
-        metadata_path=target.metadata_path,
-        yaml_content=_serialize_metadata_yaml(metadata),
-        pipeline_label=target.pipeline_label,
-    )
-
-
 def _resolve_metadata_target(request: _MetadataWriteRequest) -> _ResolvedMetadataTarget:
     """Resolve the file path and pipeline label for a metadata write."""
 
@@ -156,14 +126,11 @@ def _prepare_metadata_write_operation(
 ) -> _PreparedMetadataWriteOperation:
     """Resolve the prepared write payload and shared telemetry context."""
 
-    prepared_write = _prepare_metadata_write(
-        base_path=request.base_path,
-        metadata=request.metadata,
-        layer=request.layer,
-        table_name=request.table_name,
-        flat_structure=request.flat_structure,
-        provider=request.provider,
-        entity=request.entity,
+    target = _resolve_metadata_target(request)
+    prepared_write = _PreparedMetadataWrite(
+        metadata_path=target.metadata_path,
+        yaml_content=_serialize_metadata_yaml(request.metadata),
+        pipeline_label=target.pipeline_label,
     )
     return _PreparedMetadataWriteOperation(
         prepared_write=prepared_write,

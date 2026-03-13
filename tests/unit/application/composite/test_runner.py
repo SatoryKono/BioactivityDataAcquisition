@@ -18,7 +18,15 @@ from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
-from bioetl.domain.composite.result import SeedResult
+from bioetl.application.composite.runner_pkg.runner import CompositeExecutionContext
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
+    EnrichmentResult,
+    EnrichmentStatus,
+    MergeResult,
+    SeedResult,
+)
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.locking import FencingToken
@@ -506,6 +514,120 @@ class TestFSMSeedResume:
             c for c in logger.info.call_args_list if "FSM state transition" in str(c)
         ]
         assert any("seed_resume" in str(c) for c in transition_calls)
+
+    @pytest.mark.asyncio
+    async def test_prepare_run_state_when_resume_failed_then_normalizes_and_logs(
+        self,
+    ) -> None:
+        """Run-state preparation should apply resume semantics before stage execution."""
+        config = MockCompositeConfig()
+        config.enrichers = (MagicMock(),)
+        failed_state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            state=CompositePipelineState.FAILED,
+            seed_completed=True,
+            seed_result=SeedResult(
+                pipeline_name="chembl_activity",
+                records_extracted=100,
+                records_silver=95,
+                keys_generated=90,
+                duration_seconds=10.0,
+            ),
+            completed_enrichers=frozenset({"crossref"}),
+            created_at=datetime.now(tz=UTC),
+        )
+        checkpoint_manager = create_mock_checkpoint_manager(failed_state)
+        logger = create_mock_logger()
+        run_id = str(uuid4())
+        runner = CompositePipelineRunner(
+            config=config,
+            runtime=CompositeRuntimeConfig(resume=True),
+            seed_runner_factory=lambda: MockPipelineRunner(),
+            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            key_extractor=create_mock_key_extractor(),
+            coordinator=create_mock_coordinator(),
+            merger=create_mock_merger(),
+            checkpoint_manager=checkpoint_manager,
+            logger=logger,
+            lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(
+                logger=logger,
+                config=config,
+                run_id=run_id,
+            ),
+            run_id=run_id,
+        )
+
+        prepared_state = await runner._prepare_run_state()
+
+        assert prepared_state.state == CompositePipelineState.ENRICHMENT_COMPLETED
+        info_calls = [str(c) for c in logger.info.call_args_list]
+        assert any("Resuming from checkpoint" in c for c in info_calls)
+
+    @pytest.mark.asyncio
+    async def test_run_with_lock_when_successful_then_hands_off_named_execution_context(
+        self,
+    ) -> None:
+        """Runner shell should hand final stage outputs to result assembly via one context."""
+        runner = create_runner()
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            created_at=datetime.now(tz=UTC),
+        )
+        keys_df = MagicMock(name="keys_df")
+        seed_result = SeedResult(
+            pipeline_name="chembl_activity",
+            records_extracted=100,
+            records_silver=95,
+            keys_generated=95,
+            duration_seconds=1.0,
+        )
+        dependency_results = {
+            "dep_a": DependencyResult(
+                pipeline_name="dep_a",
+                status=DependencyStatus.SUCCESS,
+            )
+        }
+        enrichment_results = {
+            "enricher_a": EnrichmentResult(
+                enricher_name="enricher_a",
+                status=EnrichmentStatus.SUCCESS,
+            )
+        }
+        merge_result = MergeResult(
+            records_merged=95,
+            records_from_seed=100,
+            records_enriched=10,
+        )
+        expected_result = MagicMock(name="composite_result")
+
+        runner._prepare_run_state = AsyncMock(return_value=state)
+        runner._execute_seed_phase = AsyncMock(return_value=(state, seed_result))
+        runner._key_extractor.extract = AsyncMock(return_value=keys_df)
+        runner._execute_dependencies_phase = AsyncMock(
+            return_value=(state, dependency_results)
+        )
+        runner._execute_enrichment_phase = AsyncMock(
+            return_value=(state, enrichment_results)
+        )
+        runner._transition_to_enrichment_completed = AsyncMock(return_value=state)
+        runner._execute_merge_stage = AsyncMock(return_value=(state, merge_result))
+        runner._finalize_pipeline = AsyncMock()
+        runner._build_composite_result = MagicMock(return_value=expected_result)
+
+        result = await runner._run_with_lock()
+
+        assert result is expected_result
+        runner._build_composite_result.assert_called_once()
+        execution_context = runner._build_composite_result.call_args.args[0]
+        assert isinstance(execution_context, CompositeExecutionContext)
+        assert execution_context.seed_result is seed_result
+        assert execution_context.dependency_results is dependency_results
+        assert execution_context.enrichment_results is enrichment_results
+        assert execution_context.merge_result is merge_result
+        runner._finalize_pipeline.assert_awaited_once_with(state)
 
 
 class TestFSMTransitionLogging:

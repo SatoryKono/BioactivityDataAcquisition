@@ -391,6 +391,7 @@ class TestPIIHandling:
             "client_builders.py",  # CrossRef mailto for polite pool (EXC-010)
             "health_probe.py",  # OpenAlex mailto for API identification (EXC-010)
             "query_builder.py",  # OpenAlex mailto for API identification (EXC-010)
+            "constants.py",  # NCBI API docstring mentions Email requirement (EXC-010)
         }
     )
 
@@ -573,6 +574,13 @@ class TestPathTraversal:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents
 
+    # Files where Path(request.*) is a typed internal dataclass, not user input
+    KNOWN_SAFE_PATH_FILES = frozenset(
+        {
+            "metadata_writer_operations.py",  # Path(request.base_path) — internal _MetadataWriteRequest dataclass
+        }
+    )
+
     def test_no_unsanitized_path_joins(
         self, source_contents: list[tuple[Path, str]]
     ) -> None:
@@ -587,6 +595,8 @@ class TestPathTraversal:
         ]
 
         for py_file, content in source_contents:
+            if py_file.name in self.KNOWN_SAFE_PATH_FILES:
+                continue
             for dangerous_pattern in dangerous_patterns:
                 if re.search(dangerous_pattern, content):
                     rel_path = py_file.relative_to(PROJECT_ROOT)

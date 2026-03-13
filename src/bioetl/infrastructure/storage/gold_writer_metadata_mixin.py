@@ -100,6 +100,23 @@ class _GoldMergedMetadataWriteHostProtocol(_GoldMetadataWriteHostProtocol, Proto
     logger: LoggerPort
 
 
+def _normalize_delta_version_value(version_value: object) -> int | None:
+    """Normalize a DeltaTable.version() result to an integer version."""
+    if isinstance(version_value, int):
+        return version_value
+    if isinstance(version_value, str) and version_value.strip().isdigit():
+        return int(version_value.strip())
+    return None
+
+
+def _extract_delta_table_version(table: object) -> int | None:
+    """Extract a normalized version from a DeltaTable-like object."""
+    version_fn = getattr(table, "version", None)
+    if not callable(version_fn):
+        return None
+    return _normalize_delta_version_value(version_fn())
+
+
 def _prepare_gold_metadata_write(
     host: _GoldMetadataWriteHostProtocol,
     request: _GoldMetadataWriteRequest,
@@ -371,15 +388,7 @@ class GoldWriterMetadataMixin(
 
         try:
             dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
-            version_fn = getattr(dt, "version", None)
-            if not callable(version_fn):
-                return None
-            version_value = version_fn()
-            if isinstance(version_value, int):
-                return version_value
-            if isinstance(version_value, str) and version_value.strip().isdigit():
-                return int(version_value.strip())
-            return None
+            return _extract_delta_table_version(dt)
         except module.TableNotFoundError:
             return None
 

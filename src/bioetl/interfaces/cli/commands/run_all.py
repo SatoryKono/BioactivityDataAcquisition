@@ -4,21 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING
 
 import click
 
 from bioetl.application.services import (
-    PipelineNotFoundError,
     RunOptions,
-    RunResult,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import PipelineRegistry
-from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
-)
 from bioetl.interfaces.cli.commands.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
@@ -30,13 +23,21 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
+from bioetl.interfaces.cli.commands.run_all_execution import (
+    RunAllBatchExecutionRequest,
+    RunAllPolicyRequest,
+)
+from bioetl.interfaces.cli.commands.run_all_execution import (
+    run_all_pipelines_async as _run_all_pipelines_async_impl,
+)
+from bioetl.interfaces.cli.commands.run_all_execution import (
+    run_batch_with_policy as _run_batch_with_policy_impl,
+)
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     BatchRunResult,
     create_run_all_execution_plan,
     emit_run_all_listing,
     emit_run_all_preview,
-    record_pipeline_failure,
-    record_pipeline_result,
     should_prompt_for_destructive_run,
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
@@ -64,55 +65,7 @@ from bioetl.interfaces.cli.registry_helpers import (
     get_default_registry as _legacy_get_default_registry,
 )
 
-if TYPE_CHECKING:
-    from bioetl.application.services import PipelineRunnerService
-
-
 get_default_registry = _legacy_get_default_registry
-
-
-async def _run_pipeline_async(
-    service: PipelineRunnerService, pipeline: str, options: RunOptions
-) -> RunResult:
-    """Run a single pipeline asynchronously."""
-    return await service.run(pipeline, options=options)
-
-
-async def _run_pipelines_batch(
-    service: PipelineRunnerService, pipelines: list[str], options: RunOptions
-) -> BatchRunResult:
-    """Run pipelines sequentially within a service context."""
-    batch_result = BatchRunResult(total=len(pipelines))
-
-    for pipeline in pipelines:
-        try:
-            result = await _run_pipeline_async(service, pipeline, options)
-            if record_pipeline_result(
-                batch_result=batch_result,
-                pipeline=pipeline,
-                result=result,
-            ):
-                break  # Stop processing remaining pipelines on shutdown
-        except PipelineNotFoundError as e:
-            record_pipeline_failure(
-                batch_result=batch_result,
-                pipeline=pipeline,
-                title=f"[FAIL] {pipeline}: not found",
-                detail=str(e),
-            )
-        except (BioETLError, OSError, RuntimeError, ValueError) as exc:
-            error_msg = (
-                f"{exc} (reason_code=CLI_RUN_ALL_PIPELINE_ERROR, "
-                f"pipeline={pipeline}, error_type={type(exc).__name__})"
-            )
-            record_pipeline_failure(
-                batch_result=batch_result,
-                pipeline=pipeline,
-                title=f"[FAIL] {pipeline}: unexpected error",
-                detail=error_msg,
-            )
-
-    return batch_result
 
 
 async def _run_all_pipelines_async(
@@ -135,12 +88,18 @@ async def _run_all_pipelines_async(
     Returns:
         BatchRunResult aggregating results from all pipeline runs.
     """
-    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
-    ensure_metrics_server_started()
-
-    async with health_server_context(enabled=health_server_enabled, port=health_port):
-        service = get_pipeline_runner_service(registry=registry)
-        return await _run_pipelines_batch(service, pipelines, options)
+    return await _run_all_pipelines_async_impl(
+        RunAllBatchExecutionRequest(
+            pipelines=pipelines,
+            options=options,
+            health_server_enabled=health_server_enabled,
+            health_port=health_port,
+            registry=registry,
+        ),
+        get_pipeline_runner_service_fn=get_pipeline_runner_service,
+        ensure_metrics_server_started_fn=ensure_metrics_server_started,
+        health_server_context_factory=health_server_context,
+    )
 
 
 def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
@@ -233,33 +192,27 @@ def _run_batch_with_policy(
     Returns:
         BatchRunResult on success, None if an exception was handled and process will exit.
     """
-    coro = _run_all_pipelines_async(
-        pipelines,
-        options,
-        health_server_enabled=health_server,
-        health_port=health_port,
-        registry=registry,
+    return _run_batch_with_policy_impl(
+        RunAllPolicyRequest(
+            source=source,
+            execution=RunAllBatchExecutionRequest(
+                pipelines=pipelines,
+                options=options,
+                health_server_enabled=health_server,
+                health_port=health_port,
+                registry=registry,
+            ),
+        ),
+        get_pipeline_runner_service_fn=get_pipeline_runner_service,
+        ensure_metrics_server_started_fn=ensure_metrics_server_started,
+        health_server_context_factory=health_server_context,
+        run_coro=asyncio.run,
+        handle_failure=lambda exc, source, reason_code: _handle_run_all_failure(
+            exc,
+            source=source,
+            reason_code=reason_code,
+        ),
     )
-    try:
-        return asyncio.run(coro)
-    except PipelineNotFoundError as exc:
-        _handle_run_all_failure(
-            exc, source=source, reason_code="CLI_RUN_ALL_CONFIG_ERROR"
-        )
-    except BioETLError as exc:
-        _handle_run_all_failure(
-            exc, source=source, reason_code="CLI_RUN_ALL_DOMAIN_ERROR"
-        )
-    except KeyboardInterrupt as exc:
-        _handle_run_all_failure(exc, source=source, reason_code="CLI_RUN_ALL_SIGINT")
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_run_all_failure(
-            exc, source=source, reason_code="CLI_RUN_ALL_UNEXPECTED_ERROR"
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
-    return None
 
 
 @click.command("run-all")

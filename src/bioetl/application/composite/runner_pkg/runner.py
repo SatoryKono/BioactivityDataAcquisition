@@ -36,7 +36,10 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import CompositeCheckpointManager
+    from bioetl.application.composite.checkpoint import (
+        CompositeCheckpointManager,
+        CompositeCheckpointState,
+    )
     from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
     from bioetl.application.composite.dependency_coordinator import (
         DependencyCoordinatorService,
@@ -49,6 +52,12 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite.result import (
+        DependencyResult,
+        EnrichmentResult,
+        MergeResult,
+        SeedResult,
+    )
     from bioetl.domain.ports import (
         ExecutionMetricsRunnerPort,
         LockPort,
@@ -59,6 +68,7 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "CompositeExecutionContext",
     "CompositePipelineRunner",
     "CompositePipelineRunnerService",
     "CompositeRuntimeConfig",
@@ -85,6 +95,16 @@ class CompositeRuntimeConfig:
         """Normalize mutable values into immutable runtime fields."""
         if isinstance(self.enrich_only, list):
             object.__setattr__(self, "enrich_only", tuple(self.enrich_only))
+
+
+@dataclass(frozen=True, slots=True)
+class CompositeExecutionContext:
+    """Named stage outputs passed into final result assembly."""
+
+    seed_result: SeedResult
+    dependency_results: dict[str, DependencyResult]
+    enrichment_results: dict[str, EnrichmentResult]
+    merge_result: MergeResult | None
 
 
 class CompositePipelineRunner(
@@ -242,14 +262,20 @@ class CompositePipelineRunner(
             self._log_failed_run(error, reason_code="unexpected_bioetl_error")
             raise
 
-    async def _run_with_lock(self) -> CompositeResult:
-        """Execute pipeline stages while lock is held."""
+    async def _prepare_run_state(self) -> CompositeCheckpointState:
+        """Load checkpoint state and apply resume semantics when configured."""
         state = await self._checkpoint_manager.load()
 
         if self._runtime.resume and state.state == CompositePipelineState.FAILED:
             state = self._fsm.handle_resume_from_failed(state)
         if self._runtime.resume and state.is_resumable:
             self._fsm.log_resume_context(state)
+
+        return state
+
+    async def _run_with_lock(self) -> CompositeResult:
+        """Execute pipeline stages while lock is held."""
+        state = await self._prepare_run_state()
 
         state, seed_result = await self._execute_seed_phase(state)
 
@@ -275,10 +301,12 @@ class CompositePipelineRunner(
         )
         await self._finalize_pipeline(state)
         return self._build_composite_result(
-            seed_result,
-            dependency_results,
-            enrichment_results,
-            merge_result,
+            CompositeExecutionContext(
+                seed_result=seed_result,
+                dependency_results=dependency_results,
+                enrichment_results=enrichment_results,
+                merge_result=merge_result,
+            )
         )
 
 
