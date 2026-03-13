@@ -5,10 +5,19 @@ Tests the Arrow table conversion utilities extracted from GoldWriter.
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import pyarrow as pa
 import pytest
 
-from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+from bioetl.infrastructure.storage.arrow_converter import (
+    ArrowDataConverter,
+    build_arrow_schema_preparation_context,
+    filter_record_for_schema,
+    get_string_fields,
+    serialize_value_for_arrow_schema,
+    sort_arrow_table_by_primary_keys,
+)
 
 
 class TestArrowDataConverterSanitizeType:
@@ -135,6 +144,134 @@ class TestArrowDataConverterConvertRecords:
         )
         ids = result.column("id").to_pylist()
         assert ids == [1, 2], "Should still sort by valid primary key 'id'"
+
+    def test_convert_records_with_schema_filters_unknown_fields(self) -> None:
+        """Schema-aware conversion should drop fields absent from the target schema."""
+        converter = ArrowDataConverter()
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("payload", pa.string()),
+            ]
+        )
+        result = converter.convert_records_to_arrow_with_schema(
+            [
+                {
+                    "id": "1",
+                    "payload": {"a": 1},
+                    "ignored": "drop-me",
+                }
+            ],
+            schema,
+        )
+
+        assert result.column_names == ["id", "payload"]
+        assert "ignored" not in result.column_names
+        assert result.column("payload").to_pylist() == ['{"a":1}']
+
+    def test_convert_records_with_schema_sorts_by_primary_keys(self) -> None:
+        """Schema-aware conversion should preserve deterministic primary-key sort."""
+        converter = ArrowDataConverter()
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("payload", pa.string()),
+            ]
+        )
+
+        result = converter.convert_records_to_arrow_with_schema(
+            [
+                {"id": 3, "payload": {"name": "c"}},
+                {"id": 1, "payload": {"name": "a"}},
+                {"id": 2, "payload": {"name": "b"}},
+            ],
+            schema,
+            primary_keys=["id"],
+        )
+
+        assert result.column("id").to_pylist() == [1, 2, 3]
+
+    def test_convert_records_with_schema_logs_warning_when_keys_missing(self) -> None:
+        """Schema-aware conversion should preserve missing-key warning behavior."""
+        logger = MagicMock()
+        converter = ArrowDataConverter(logger=logger)
+        schema = pa.schema([pa.field("id", pa.int64())])
+
+        result = converter.convert_records_to_arrow_with_schema(
+            [{"id": 2}, {"id": 1}],
+            schema,
+            primary_keys=["missing"],
+        )
+
+        assert result.column("id").to_pylist() == [2, 1]
+        logger.warning.assert_called_once()
+
+
+class TestArrowSchemaPreparationHelpers:
+    """Tests for reusable schema-aware Arrow preparation helpers."""
+
+    def test_get_string_fields_supports_string_and_large_string(self) -> None:
+        """String helper should include both string and large_string fields."""
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("payload", pa.large_string()),
+                pa.field("count", pa.int64()),
+            ]
+        )
+
+        assert get_string_fields(schema) == {"id", "payload"}
+
+    def test_build_arrow_schema_preparation_context_tracks_schema_names(self) -> None:
+        """Preparation context should preserve schema names and lookup sets."""
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("count", pa.int64()),
+            ]
+        )
+
+        context = build_arrow_schema_preparation_context(schema)
+
+        assert context.schema_names == ("id", "count")
+        assert context.schema_fields == frozenset({"id", "count"})
+        assert context.string_fields == frozenset({"id"})
+
+    def test_filter_record_for_schema_serializes_string_backed_complex_values(self) -> None:
+        """Schema filter should serialize complex values only for string-backed fields."""
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("payload", pa.string()),
+            ]
+        )
+        context = build_arrow_schema_preparation_context(schema)
+
+        result = filter_record_for_schema(
+            {
+                "id": "1",
+                "payload": {"b": 2, "a": 1},
+                "ignored": "drop-me",
+            },
+            context,
+        )
+
+        assert result == {"id": "1", "payload": '{"a":1,"b":2}'}
+
+    def test_serialize_value_for_arrow_schema_keeps_non_string_complex_values(self) -> None:
+        """Complex values should only serialize when the schema field is string-like."""
+        value = {"a": 1}
+
+        assert serialize_value_for_arrow_schema(value, is_string_field=True) == '{"a":1}'
+        assert serialize_value_for_arrow_schema(value, is_string_field=False) == value
+
+    def test_sort_arrow_table_by_primary_keys_returns_sorted_table(self) -> None:
+        """Primary-key sort helper should order rows deterministically."""
+        table = pa.table({"id": ["c", "a", "b"], "value": [3, 1, 2]})
+
+        result = sort_arrow_table_by_primary_keys(table, ["id"])
+
+        assert result.column("id").to_pylist() == ["a", "b", "c"]
 
 
 class TestArrowDataConverterNullColumnSanitization:

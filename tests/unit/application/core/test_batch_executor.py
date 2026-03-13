@@ -23,6 +23,7 @@ from bioetl.application.core.batch_executor_loop_helpers import (
     build_periodic_checkpoint_payload,
     ensure_extraction_not_shutdown,
     flush_batch_if_needed,
+    process_extracted_record_iteration,
     report_batch_progress,
 )
 from bioetl.application.core.batch_checkpoint_recovery_service import (
@@ -356,6 +357,23 @@ class TestBatchExecutorInit:
 @pytest.mark.unit
 class TestBatchExecutorExecute:
     """Tests for execute method."""
+
+    def test_prepare_execution_context_persists_resume_offset_and_query(
+        self, batch_executor
+    ):
+        """Prepared execution context should mirror and persist run inputs."""
+        execution_context = batch_executor._prepare_execution_context(
+            limit=25,
+            query="kinase",
+            offset=8,
+        )
+
+        assert execution_context.limit == 25
+        assert execution_context.query == "kinase"
+        assert execution_context.offset == 8
+        assert execution_context.resume_offset == 8
+        assert batch_executor._resume_offset == 8
+        assert batch_executor._query_string == "kinase"
 
     async def test_execute_processes_records(
         self, batch_executor, mock_services, mock_storage
@@ -993,3 +1011,63 @@ class TestBatchExecutorLoopHelpers:
             records_silver=5,
             records_filtered_out=1,
         )
+
+    @pytest.mark.asyncio
+    async def test_process_extracted_record_iteration_preserves_step_order(
+        self,
+    ) -> None:
+        """One extracted-record iteration should keep the canonical loop order."""
+        call_order: list[str] = []
+        process_batch = AsyncMock(
+            side_effect=lambda *_args, **_kwargs: call_order.append("process_batch")
+        )
+        progress_service = MagicMock()
+        progress_service.report_progress.side_effect = (
+            lambda **kwargs: call_order.append(f"progress:{kwargs['records_fetched']}")
+        )
+        memory_manager = MagicMock()
+        memory_manager.check_pressure.side_effect = (
+            lambda *_args: call_order.append("check_pressure") or 1
+        )
+        memory_manager.maybe_recover.side_effect = (
+            lambda *_args: call_order.append("maybe_recover") or 3
+        )
+        checkpoint_recovery_service = AsyncMock()
+        checkpoint_recovery_service.save_periodic_checkpoint.side_effect = (
+            lambda **_kwargs: call_order.append("save_periodic_checkpoint")
+        )
+        progress_state = MagicMock(
+            records_fetched=1,
+            records_bronze=0,
+            records_silver=0,
+            records_filtered_out=0,
+        )
+        loop_state = BatchExtractionLoopState(
+            current_batch_size=1,
+            check_interval=10,
+        )
+
+        next_records_fetched = await process_extracted_record_iteration(
+            loop_state=loop_state,
+            raw_record={"id": "1"},
+            shutdown_requested=False,
+            checkpoint_recovery_service=checkpoint_recovery_service,
+            records_fetched=0,
+            resume_offset=4,
+            process_batch=process_batch,
+            memory_manager=memory_manager,
+            progress_service=progress_service,
+            progress_state=progress_state,
+            checkpoint_interval=5,
+        )
+
+        assert next_records_fetched == 1
+        assert call_order == [
+            "check_pressure",
+            "progress:1",
+            "process_batch",
+            "maybe_recover",
+            "progress:1",
+            "save_periodic_checkpoint",
+        ]
+        checkpoint_recovery_service.save_checkpoint_now.assert_not_awaited()
