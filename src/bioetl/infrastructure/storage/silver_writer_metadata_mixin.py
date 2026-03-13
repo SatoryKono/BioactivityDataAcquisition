@@ -84,6 +84,15 @@ class _ResolvedSilverMetadataContext:
     version_after: int | None
 
 
+@dataclass(frozen=True, slots=True)
+class _PreparedSilverWriteFinalizationContext:
+    """Prepared metadata/result context for one completed Silver write."""
+
+    dq_metrics: BatchDQMetrics
+    version_after: int | None
+    completed_at: datetime
+
+
 class _SilverMetadataWriteHostProtocol(Protocol):
     """Typed host contract for Silver metadata sidecar stages."""
 
@@ -407,9 +416,13 @@ class SilverWriterMetadataMixin:
         start_perf: float,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result."""
-        dq_metrics = await self._compute_dq_metrics(table_name, records)
-        version_after = await self._get_delta_version(table_path)
-        completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
+        context = await self._prepare_silver_write_finalization_context(
+            table_name=table_name,
+            records=records,
+            table_path=table_path,
+            started_at=started_at,
+            start_perf=start_perf,
+        )
 
         await self._write_silver_metadata(
             table_path=table_path,
@@ -418,18 +431,37 @@ class SilverWriterMetadataMixin:
             primary_keys=primary_keys,
             mode=validated_mode,
             bronze_refs=bronze_refs,
-            dq_metrics=dq_metrics,
+            dq_metrics=context.dq_metrics,
             partition_by=partition_cols,
             started_at=started_at,
-            completed_at=completed_at,
-            version_after=version_after,
+            completed_at=context.completed_at,
+            version_after=context.version_after,
         )
-        if version_after is None:
+        if context.version_after is None:
             return None
 
         return SilverWriteResult(
             table_name=table_name,
             table_path=table_path,
-            delta_version=version_after,
+            delta_version=context.version_after,
             record_count=len(records),
+        )
+
+    async def _prepare_silver_write_finalization_context(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        table_path: str,
+        started_at: datetime,
+        start_perf: float,
+    ) -> _PreparedSilverWriteFinalizationContext:
+        """Prepare DQ/version/timing context before Silver metadata persistence."""
+        dq_metrics = await self._compute_dq_metrics(table_name, records)
+        version_after = await self._get_delta_version(table_path)
+        completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
+        return _PreparedSilverWriteFinalizationContext(
+            dq_metrics=dq_metrics,
+            version_after=version_after,
+            completed_at=completed_at,
         )

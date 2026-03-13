@@ -475,3 +475,40 @@ class TestSilverWriterDQMetrics:
         assert writer._get_delta_version.await_count == 1
         writer._write_silver_metadata.assert_awaited_once()
         assert writer._write_silver_metadata.await_args.kwargs["version_after"] == 7
+
+    @pytest.mark.asyncio
+    async def test_prepare_silver_write_finalization_context_returns_named_context(
+        self, noop_logger, valid_records
+    ):
+        """Finalization helper should resolve DQ/version/timing as one context."""
+        from datetime import UTC, datetime, timedelta
+
+        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        dq_metrics = BatchDQMetrics(
+            total_records=2,
+            valid_records=2,
+            error_records=0,
+            warning_records=0,
+        )
+        writer._compute_dq_metrics = AsyncMock(return_value=dq_metrics)
+        writer._get_delta_version = AsyncMock(return_value=11)
+        started_at = datetime(2026, 3, 11, 12, 0, tzinfo=UTC)
+
+        with patch(
+            "bioetl.infrastructure.storage.silver_writer_metadata_mixin.time.perf_counter",
+            return_value=5.5,
+        ):
+            context = await writer._prepare_silver_write_finalization_context(
+                table_name="test.table",
+                records=valid_records,
+                table_path="/tmp/silver/test/table",
+                started_at=started_at,
+                start_perf=4.0,
+            )
+
+        assert context.dq_metrics is dq_metrics
+        assert context.version_after == 11
+        assert context.completed_at == started_at + timedelta(seconds=1.5)

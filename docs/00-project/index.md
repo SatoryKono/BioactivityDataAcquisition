@@ -27,7 +27,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 - [**Project Rules**](RULES.md): The constitution of our project (SSOT). All contributions **MUST** adhere to these rules.
 - [**Tools Hub**](TOOLS.md): Current script entry points, placement rules, and docs toolchain.
 - [**Quick Start Guide**](../03-guides/quick-start.md): Get your local development environment up and running in minutes.
-- [**Architecture Overview**](../02-architecture/system-context.md): Understand the high-level design and data flow.
+- [**Architecture Overview**](../02-architecture/00-overview.md): Understand the high-level design and data flow.
 - [**How-To Guides**](../03-guides/getting-started.md): Guides for common tasks (adding sources, pipelines, troubleshooting).
 - [**99-Archive Index**](../99-archive/README.md): Historical and superseded materials for traceability only.
 
@@ -48,13 +48,13 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 
 | Provider            | Entities                                                                    | Status     | Rate Limit   |
 | ------------------- | --------------------------------------------------------------------------- | ---------- | ------------ |
-| **ChEMBL**          | Activity, Assay, Molecule, Target, Target Component, Document (13 entities) | Production | None         |
+| **ChEMBL**          | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity, Subcellular Fraction, Tissue | Production | 3 req/sec    |
 | **PubChem**         | Compound                                                                    | Production | 5 req/sec    |
-| **UniProt**         | Protein                                                                     | Production | 100 req/sec  |
+| **UniProt**         | Protein, ID Mapping                                                         | Production | 10 req/sec (100 req/sec with API key) |
 | **PubMed**          | Publication                                                                 | Production | 3 req/sec    |
 | **CrossRef**        | Publication                                                                 | Production | Polite pool  |
-| **OpenAlex**        | Publication                                                                 | Production | 10 req/sec   |
-| **SemanticScholar** | Publication                                                                 | Production | 100 req/5min |
+| **OpenAlex**        | Publication                                                                 | Production | ~10 req/sec  |
+| **Semantic Scholar** | Publication                                                                | Production | 0.1 req/sec (1 req/sec with API key) |
 
 ### Composite Pipeline (ADR-026)
 
