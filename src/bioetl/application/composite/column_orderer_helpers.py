@@ -3,19 +3,15 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
+from collections.abc import Callable
 
 from bioetl.application.core.publication_aliases import (
     PUBLICATION_SCHEMA_FIELD_ALIASES,
 )
+from bioetl.domain.composite.config import ColumnGroupConfig
+from bioetl.domain.ports import LoggerPort
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from bioetl.domain.composite.config import ColumnGroupConfig
-    from bioetl.domain.ports import LoggerPort
-
-    _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
+_SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
 
 __all__ = [
     "collect_explicit_group_columns",

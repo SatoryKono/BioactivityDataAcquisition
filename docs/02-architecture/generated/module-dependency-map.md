@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Scanned modules: `1076`
-- Internal import edges (raw): `4056`
+- Scanned modules: `1077`
+- Internal import edges (raw): `4063`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `238`
+- Cross-layer module-group edges (total): `239`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -29,10 +29,10 @@ flowchart LR
     domain -->|692 OK| domain
     infrastructure -->|487 OK| domain
     infrastructure -->|622 OK| infrastructure
-    interfaces -->|28 OK| application
-    interfaces -->|32 OK| composition
-    interfaces -->|30 OK| domain
-    interfaces -->|124 OK| interfaces
+    interfaces -->|30 OK| application
+    interfaces -->|33 OK| composition
+    interfaces -->|31 OK| domain
+    interfaces -->|127 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -48,10 +48,10 @@ flowchart LR
 | `domain` | `domain` | 692 | allowed |
 | `infrastructure` | `domain` | 487 | allowed |
 | `infrastructure` | `infrastructure` | 622 | allowed |
-| `interfaces` | `application` | 28 | allowed |
-| `interfaces` | `composition` | 32 | allowed |
-| `interfaces` | `domain` | 30 | allowed |
-| `interfaces` | `interfaces` | 124 | allowed |
+| `interfaces` | `application` | 30 | allowed |
+| `interfaces` | `composition` | 33 | allowed |
+| `interfaces` | `domain` | 31 | allowed |
+| `interfaces` | `interfaces` | 127 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -75,10 +75,10 @@ flowchart LR
 | `composition.factories` | `infrastructure.config` | 25 |
 | `application.pipelines` | `domain.entities` | 24 |
 | `infrastructure.storage` | `domain.models` | 24 |
+| `interfaces.cli` | `application.services` | 24 |
 | `composition.bootstrap` | `domain.ports` | 23 |
 | `composition.factories` | `application.pipelines` | 23 |
 | `application.services` | `domain.types` | 22 |
-| `interfaces.cli` | `application.services` | 22 |
 | `interfaces.cli` | `composition.entrypoints` | 22 |
 | `composition.bootstrap` | `infrastructure.config` | 21 |
 | `application.core` | `domain.context` | 19 |

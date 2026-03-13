@@ -1,10 +1,10 @@
 {
   "summary": {
-    "scanned_modules": 1076,
-    "total_internal_imports": 4056,
+    "scanned_modules": 1077,
+    "total_internal_imports": 4063,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 238,
+    "cross_layer_group_edges_total": 239,
     "violations": 0
   },
   "layer_edges": [
@@ -65,25 +65,25 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 28,
-      "allowed": true
-    },
-    {
-      "source": "interfaces",
-      "target": "composition",
-      "imports": 32,
-      "allowed": true
-    },
-    {
-      "source": "interfaces",
-      "target": "domain",
       "imports": 30,
       "allowed": true
     },
     {
       "source": "interfaces",
+      "target": "composition",
+      "imports": 33,
+      "allowed": true
+    },
+    {
+      "source": "interfaces",
+      "target": "domain",
+      "imports": 31,
+      "allowed": true
+    },
+    {
+      "source": "interfaces",
       "target": "interfaces",
-      "imports": 124,
+      "imports": 127,
       "allowed": true
     }
   ],
@@ -179,6 +179,11 @@
       "imports": 24
     },
     {
+      "source": "interfaces.cli",
+      "target": "application.services",
+      "imports": 24
+    },
+    {
       "source": "composition.bootstrap",
       "target": "domain.ports",
       "imports": 23
@@ -191,11 +196,6 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 22
-    },
-    {
-      "source": "interfaces.cli",
-      "target": "application.services",
       "imports": 22
     },
     {
