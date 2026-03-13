@@ -1,13 +1,4 @@
-# src/bioetl/composition/factories/transformer_factory.py
-"""Transformer Factory for DI-based transformer creation.
-
-This module provides factory functions for creating transformers,
-enabling Dependency Injection instead of creating transformers inside pipelines.
-
-Usage:
-    >>> from bioetl.composition.factories.transformer_factory import create_transformer
-    >>> transformer = create_transformer("chembl", "activity")
-"""
+"""Transformer factory helpers for composition-driven DI."""
 
 from __future__ import annotations
 
@@ -16,10 +7,15 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING, Final
 
+from bioetl.composition.factories.pipeline.transformer_dependencies import (
+    build_transformer_dependencies,
+)
+
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
+        ContractPolicyPort,
         DataNormalizationPort,
         MetricsPort,
         PiiHasherPort,
@@ -195,6 +191,7 @@ def create_transformer(
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
+    contract_policy: ContractPolicyPort | None = None,
 ) -> BaseTransformer:
     """Create a transformer instance for the given provider and entity type.
 
@@ -209,22 +206,16 @@ def create_transformer(
         silver_filters: Optional domain-level filter configuration for Silver layer.
         gold_filters: Optional filter configuration for Gold layer.
         identity_service: Service for computing entity IDs and content hashes.
-            Defaults to a new IdentityService instance in BaseTransformer.
         pii_hasher: Optional PII hasher for hashing author names and other PII.
-            Defaults to NoOpPiiHasher (no hashing) in BaseTransformer.
         data_normalizer: Optional data normalization service for text normalization
-            (DOI, PMID, authors, HTML). Defaults to DataNormalizationService.
+            (DOI, PMID, authors, HTML).
+        contract_policy: Optional explicit contract policy override.
 
     Returns:
         Configured transformer instance with observability.
 
     Raises:
         KeyError: If no transformer is registered for the provider/entity combination.
-
-    Example:
-        >>> transformer = create_transformer("chembl", "activity")
-        >>> isinstance(transformer, ActivityTransformer)
-        True
 
     """
     key = (provider, entity_type)
@@ -236,16 +227,22 @@ def create_transformer(
         )
 
     transformer_class = _TRANSFORMER_REGISTRY[key]
-    return transformer_class(
+    dependencies = build_transformer_dependencies(
         provider=provider,
         entity_type=entity_type,
         tracer=tracer,
         metrics=metrics,
-        silver_filters=silver_filters,
-        gold_filters=gold_filters,
         identity_service=identity_service,
         pii_hasher=pii_hasher,
         data_normalizer=data_normalizer,
+        contract_policy=contract_policy,
+    )
+    return transformer_class(
+        provider=provider,
+        entity_type=entity_type,
+        silver_filters=silver_filters,
+        gold_filters=gold_filters,
+        dependencies=dependencies,
     )
 
 

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformationError,
+    TransformerDependencyContext,
 )
 from bioetl.application.pipelines.uniprot.transformer_business_data_mixin import (
     UniProtBusinessDataMixin,
@@ -48,6 +49,7 @@ class UniProtProteinTransformer(BaseTransformer, UniProtBusinessDataMixin):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize UniProt protein transformer."""
         super().__init__(
@@ -61,6 +63,7 @@ class UniProtProteinTransformer(BaseTransformer, UniProtBusinessDataMixin):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     async def _transform_impl(

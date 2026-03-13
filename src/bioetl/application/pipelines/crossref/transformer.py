@@ -21,6 +21,7 @@ __all__ = ["CrossRefPublicationTransformer"]
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref._business_data_builder import (
     build_crossref_business_data,
@@ -73,6 +74,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize CrossRef transformer.
 
@@ -100,6 +102,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:

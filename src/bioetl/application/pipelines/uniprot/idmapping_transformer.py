@@ -11,7 +11,10 @@ __all__ = ["IDMappingTransformer"]
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.base_transformer import (
+    BaseTransformer,
+    TransformerDependencyContext,
+)
 from bioetl.domain.entities.uniprot import IDMappingResult
 from bioetl.domain.services import IdentityService
 
@@ -53,6 +56,7 @@ class IDMappingTransformer(BaseTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ):
         """Initialize ID Mapping transformer.
 
@@ -79,6 +83,7 @@ class IDMappingTransformer(BaseTransformer):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     async def _transform_impl(
