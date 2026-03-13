@@ -77,6 +77,21 @@ class _BatchExecutionLifecycleContext:
     root_span: Span | None
 
 
+@dataclass(frozen=True, slots=True)
+class _BatchExecutionFinalizationContext:
+    """Execution snapshot used by success, shutdown, and error finalization."""
+
+    root_span: Span | None
+    resume_offset: int
+    total_fetched: int
+    total_bronze: int
+    total_silver: int
+    total_gold: int
+    total_quarantined: int
+    batch_size_reductions: int
+    min_batch_size_used: int
+
+
 class _BatchProcessingServicePort(Protocol):
     """Minimal contract required by BatchExecutor for batch processing service."""
 
@@ -111,13 +126,14 @@ class _BatchProcessingServicePort(Protocol):
         """
 
 
-def _finalize_successful_execution(
+def _build_execution_finalization_context(
     executor: BatchExecutor,
     lifecycle_context: _BatchExecutionLifecycleContext,
-) -> None:
-    """Record success stats and close the execution span cleanly."""
-    executor._tracing.set_execution_stats(
-        lifecycle_context.root_span,
+) -> _BatchExecutionFinalizationContext:
+    """Capture one immutable snapshot for execution finalization paths."""
+    return _BatchExecutionFinalizationContext(
+        root_span=lifecycle_context.root_span,
+        resume_offset=lifecycle_context.execution_context.resume_offset,
         total_fetched=executor.records_fetched,
         total_bronze=executor.records_bronze,
         total_silver=executor.records_silver,
@@ -126,33 +142,42 @@ def _finalize_successful_execution(
         batch_size_reductions=executor._memory.batch_size_reductions,
         min_batch_size_used=executor._memory.min_batch_size_used,
     )
-    executor._tracing.end_span(lifecycle_context.root_span)
 
 
-async def _handle_shutdown_during_execution(
+async def _finalize_execution(
     executor: BatchExecutor,
-    lifecycle_context: _BatchExecutionLifecycleContext,
+    finalization_context: _BatchExecutionFinalizationContext,
+    *,
+    error: Exception | None = None,
+    shutdown: bool = False,
 ) -> None:
-    """Persist shutdown checkpoint and mark the execution span accordingly."""
-    await executor._checkpoint_recovery_service.save_checkpoint_on_shutdown(
-        records_fetched=executor.records_fetched,
-        resume_offset=lifecycle_context.execution_context.resume_offset,
+    """Finalize execution for success, shutdown, or runtime failure."""
+    if shutdown:
+        await executor._checkpoint_recovery_service.save_checkpoint_on_shutdown(
+            records_fetched=finalization_context.total_fetched,
+            resume_offset=finalization_context.resume_offset,
+        )
+        executor._tracing.end_span_with_shutdown(finalization_context.root_span)
+        return
+    if error is not None:
+        await executor._checkpoint_recovery_service.save_checkpoint_on_exception(
+            records_fetched=finalization_context.total_fetched,
+            resume_offset=finalization_context.resume_offset,
+            error=error,
+        )
+        executor._tracing.end_span(finalization_context.root_span, error)
+        return
+    executor._tracing.set_execution_stats(
+        finalization_context.root_span,
+        total_fetched=finalization_context.total_fetched,
+        total_bronze=finalization_context.total_bronze,
+        total_silver=finalization_context.total_silver,
+        total_gold=finalization_context.total_gold,
+        total_quarantined=finalization_context.total_quarantined,
+        batch_size_reductions=finalization_context.batch_size_reductions,
+        min_batch_size_used=finalization_context.min_batch_size_used,
     )
-    executor._tracing.end_span_with_shutdown(lifecycle_context.root_span)
-
-
-async def _handle_failed_execution(
-    executor: BatchExecutor,
-    lifecycle_context: _BatchExecutionLifecycleContext,
-    error: Exception,
-) -> None:
-    """Persist recovery checkpoint and close the execution span with error."""
-    await executor._checkpoint_recovery_service.save_checkpoint_on_exception(
-        records_fetched=executor.records_fetched,
-        resume_offset=lifecycle_context.execution_context.resume_offset,
-        error=error,
-    )
-    executor._tracing.end_span(lifecycle_context.root_span, error)
+    executor._tracing.end_span(finalization_context.root_span)
 
 
 class BatchExecutor(_BatchExecutorDQMixin):
@@ -248,13 +273,24 @@ class BatchExecutor(_BatchExecutorDQMixin):
         try:
             await self._run_extraction_loop(lifecycle_context.execution_context)
         except PipelineShutdownError:
-            await _handle_shutdown_during_execution(self, lifecycle_context)
+            await _finalize_execution(
+                self,
+                _build_execution_finalization_context(self, lifecycle_context),
+                shutdown=True,
+            )
             raise
         except self._PIPELINE_EXECUTION_ERRORS as error:
-            await _handle_failed_execution(self, lifecycle_context, error)
+            await _finalize_execution(
+                self,
+                _build_execution_finalization_context(self, lifecycle_context),
+                error=error,
+            )
             raise
         else:
-            _finalize_successful_execution(self, lifecycle_context)
+            await _finalize_execution(
+                self,
+                _build_execution_finalization_context(self, lifecycle_context),
+            )
 
     async def _start_execution(
         self, *, limit: int | None, query: str | None, offset: int | None

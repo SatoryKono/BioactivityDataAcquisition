@@ -34,13 +34,13 @@ class TokenBucketRateLimiter:
         >>> await bucket.acquire()  # Wait for token
         >>> await bucket.acquire(tokens=2)  # Acquire multiple tokens
 
-    Provider rate limits (from RULES.md Appendix A):
+    Provider rate limits (configurable via source YAML):
         - PubChem: 5 req/sec
-        - UniProt: 100 req/sec (with API key)
-        - OpenAlex: 10 req/sec (polite)
-        - Crossref: 50 req/sec (polite)
-        - Semantic Scholar: 100 req/5min = ~0.33 req/sec
-        - PubMed: 3 req/sec (10 with API key)
+        - UniProt: fair-use throttling (configurable)
+        - OpenAlex: 10 req/sec (polite pool, with mailto)
+        - Crossref: 50 req/sec (polite pool, with mailto)
+        - Semantic Scholar: 1 req/sec (no key) / 10 req/sec (with API key)
+        - PubMed: 3 req/sec (10 with API key via NCBI E-utilities)
 
     """
 

@@ -11,22 +11,11 @@ import pyarrow as pa
 from deltalake import write_deltalake
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
-
-
-class _MergedArrowConverterProtocol(Protocol):
-    """Minimal converter contract needed by merged Silver writes."""
-
-    def convert_records_to_arrow(
-        self,
-        records: list[BronzeRecord],
-        primary_keys: list[str] | None = None,
-        column_order: list[str] | None = None,
-        apply_column_order: bool = True,
-    ) -> pa.Table: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,7 +42,6 @@ class _PreparedMergedSilverWrite:
 class _SilverWriterMergedContext(Protocol):
     """Structural type for mixin self dependencies."""
 
-    _arrow_converter: _MergedArrowConverterProtocol
     logger: LoggerPort
     csv_exporter: CsvExporter | None
 
@@ -89,7 +77,7 @@ class SilverWriterMergedMixin:
         return _PreparedMergedSilverWrite(
             request=request,
             table_path=self._resolve_table_path(request.table_name),
-            arrow_table=self._arrow_converter.convert_records_to_arrow(
+            arrow_table=ArrowDataConverter(logger=self.logger).convert_records_to_arrow(
                 request.records,
                 primary_keys=request.primary_keys,
                 apply_column_order=not request.preserve_column_order,
