@@ -70,13 +70,6 @@ class ConflictResolution(StrEnum):
 
         When the same field is populated by multiple sources (e.g., 'title'
         from both ChEMBL and CrossRef), this strategy determines which
-
-    __all__ = [
-        "ConflictResolution",
-        "FallbackStrategy",
-        "MergeStrategy",
-    ]
-
         value to use.
 
         Attributes:
@@ -85,7 +78,7 @@ class ConflictResolution(StrEnum):
             ENRICHER_PRIORITY: Most recent enricher value wins. Use when
                 enrichers have more up-to-date information.
             LATEST_TIMESTAMP: Value from source with latest extraction timestamp.
-                Requires timestamp tracking in lineage.
+                Not yet implemented; currently falls back to SEED_PRIORITY.
             EXPLICIT_RULES: Use field_priorities mapping in config. Allows
                 field-by-field control over priority order.
             COALESCE: First non-null value in order: seed, then enrichers.

@@ -150,6 +150,8 @@ class ConflictResolverService:
                     seed_pipeline,
                 )
             case ConflictResolution.LATEST_TIMESTAMP:
+                # Timestamp-based coalescing not yet implemented;
+                # falls back to seed-priority (see ADR-026).
                 return self._coalesce_policy.coalesce_prefer_seed(
                     df,
                     enrichers,

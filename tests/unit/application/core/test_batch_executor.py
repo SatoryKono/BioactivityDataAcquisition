@@ -809,6 +809,28 @@ class TestBatchExecutorTracing:
         span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
         span.set_attribute.assert_any_call("bioetl.shutdown", True)
 
+    async def test_root_span_records_exception_and_saves_recovery_checkpoint(
+        self,
+        batch_executor_with_tracer,
+        mock_checkpoint_manager,
+        mock_tracer,
+    ):
+        """Runtime failures should save a recovery checkpoint and mark the span."""
+
+        async def boom(*_args, **_kwargs):
+            batch_executor_with_tracer.records_fetched = 3
+            raise RuntimeError("boom")
+
+        batch_executor_with_tracer._run_extraction_loop = AsyncMock(side_effect=boom)
+
+        with pytest.raises(RuntimeError, match="boom"):
+            await batch_executor_with_tracer.execute(limit=None, offset=4)
+
+        mock_checkpoint_manager.save_checkpoint.assert_awaited_once_with(7)
+        span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        span.record_exception.assert_called_once()
+        span.set_attribute.assert_any_call("error", True)
+
     async def test_no_span_without_tracer(self, batch_executor, mock_services):
         """Test that no span is created when tracer is None."""
 

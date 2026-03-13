@@ -162,7 +162,7 @@ class ChemblHealthMixin:
         Returns:
             Health check endpoint path string for ChEMBL.
         """
-        return "/chembl/api/data/status.json"
+        return "/chembl/api/data/status"
 
     def _handle_health_response(self, response: Response) -> HealthStatus:
         """Process health check response.
