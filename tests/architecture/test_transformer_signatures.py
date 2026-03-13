@@ -93,6 +93,7 @@ def get_all_transformers() -> list[type[BaseTransformer]]:
 
 # Standard parameters that all transformers SHOULD have
 STANDARD_OPTIONAL_PARAMS = {
+    "dependencies",
     "tracer",
     "metrics",
     "gold_filters",
@@ -343,8 +344,8 @@ class TestTransformerObservability:
     ) -> None:
         """Tracer parameter SHOULD default to None.
 
-        None triggers NoOpTracing fallback in BaseTransformer,
-        allowing transformers to work without explicit tracing setup.
+        Compatibility-only dependency resolution fills the tracer when omitted,
+        while canonical first-party wiring should pass explicit dependencies.
         """
         sig = inspect.signature(transformer_class.__init__)
         tracer_param = sig.parameters.get("tracer")
@@ -359,8 +360,8 @@ class TestTransformerObservability:
     ) -> None:
         """Metrics parameter SHOULD default to None.
 
-        None triggers NoOpMetrics fallback in BaseTransformer,
-        allowing transformers to work without explicit metrics setup.
+        Compatibility-only dependency resolution fills metrics when omitted,
+        while canonical first-party wiring should pass explicit dependencies.
         """
         sig = inspect.signature(transformer_class.__init__)
         metrics_param = sig.parameters.get("metrics")
@@ -515,14 +516,25 @@ class TestTransformerPiiHashing:
     ) -> None:
         """pii_hasher parameter SHOULD default to None.
 
-        None triggers NoOpPiiHasher fallback in BaseTransformer,
-        providing backward compatibility (no hashing by default).
+        Compatibility-only dependency resolution fills the PII hasher when omitted.
         """
         sig = inspect.signature(transformer_class.__init__)
         pii_hasher_param = sig.parameters.get("pii_hasher")
         if pii_hasher_param is not None:
             assert pii_hasher_param.default is None, (
                 f"{transformer_class.__name__}.pii_hasher should default to None"
+            )
+
+    @pytest.mark.parametrize("transformer_class", get_all_transformers())
+    def test_dependencies_has_none_default(
+        self, transformer_class: type[BaseTransformer]
+    ) -> None:
+        """dependencies parameter SHOULD remain optional for compatibility."""
+        sig = inspect.signature(transformer_class.__init__)
+        dependencies_param = sig.parameters.get("dependencies")
+        if dependencies_param is not None:
+            assert dependencies_param.default is None, (
+                f"{transformer_class.__name__}.dependencies should default to None"
             )
 
 

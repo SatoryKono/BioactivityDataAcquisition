@@ -20,7 +20,10 @@ __all__ = ["BaseChemblTransformer"]
 from abc import abstractmethod
 from typing import TYPE_CHECKING, ClassVar, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.base_transformer import (
+    BaseTransformer,
+    TransformerDependencyContext,
+)
 from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
@@ -76,6 +79,7 @@ class BaseChemblTransformer(BaseTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize ChEMBL transformer.
 
@@ -111,6 +115,7 @@ class BaseChemblTransformer(BaseTransformer):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     async def _transform_impl(

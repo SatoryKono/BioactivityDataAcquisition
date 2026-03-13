@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypeVar, cast
 
+from bioetl.composition.factories.pipeline.transformer_dependencies import (
+    build_transformer_dependencies,
+)
 from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
     create_pipeline_with_services,
@@ -32,6 +35,8 @@ if TYPE_CHECKING:
         SilverFilterConfig,
     )
     from bioetl.domain.ports import (
+        ContractPolicyPort,
+        DataNormalizationPort,
         DataSourcePort,
         DQMonitorPort,
         LoggerPort,
@@ -58,19 +63,29 @@ def create_transformer_instance(
     gold_filters: GoldFilterConfig | None = None,
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
+    data_normalizer: DataNormalizationPort | None = None,
+    contract_policy: ContractPolicyPort | None = None,
 ) -> BaseTransformer | None:
     """Create transformer when a transformer class is configured."""
     if transformer_class is None:
         return None
-    return transformer_class(
+    entity_type = extract_entity_type(pipeline_name)
+    dependencies = build_transformer_dependencies(
         provider=provider,
-        entity_type=extract_entity_type(pipeline_name),
+        entity_type=entity_type,
         tracer=tracer,
         metrics=metrics,
-        silver_filters=silver_filters,
-        gold_filters=gold_filters,
         identity_service=identity_service,
         pii_hasher=pii_hasher,
+        data_normalizer=data_normalizer,
+        contract_policy=contract_policy,
+    )
+    return transformer_class(
+        provider=provider,
+        entity_type=entity_type,
+        silver_filters=silver_filters,
+        gold_filters=gold_filters,
+        dependencies=dependencies,
     )
 
 

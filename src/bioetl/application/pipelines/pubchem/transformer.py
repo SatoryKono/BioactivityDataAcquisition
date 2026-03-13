@@ -14,7 +14,10 @@ __all__ = ["PubChemCompoundTransformer"]
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.base_transformer import (
+    BaseTransformer,
+    TransformerDependencyContext,
+)
 from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.services import IdentityService
 from bioetl.domain.transformations import safe_float, safe_int
@@ -54,6 +57,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ):
         """Initialize PubChem compound transformer.
 
@@ -82,6 +86,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     def _extract_computed_descriptors(

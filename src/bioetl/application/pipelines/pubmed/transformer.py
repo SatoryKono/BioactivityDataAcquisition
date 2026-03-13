@@ -14,6 +14,7 @@ import re
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
+from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.pubmed.extractors import (
     AuthorExtractor,
@@ -112,6 +113,7 @@ class PubMedPublicationTransformer(
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
         author_extractor: AuthorExtractor | None = None,
         date_extractor: DateExtractor | None = None,
     ):
@@ -145,6 +147,7 @@ class PubMedPublicationTransformer(
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
         self._cached_xml_root = None
         self._author_extractor = author_extractor or AuthorExtractor()

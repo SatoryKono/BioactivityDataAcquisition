@@ -40,6 +40,8 @@ if TYPE_CHECKING:
         SilverFilterConfig,
     )
     from bioetl.domain.ports import (
+        ContractPolicyPort,
+        DataNormalizationPort,
         DataSourcePort,
         DQMonitorPort,
         LoggerPort,
@@ -101,6 +103,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: ContractPolicyPort | None = None,
     ) -> BaseTransformer | None:
         """Create transformer when a transformer class is configured."""
         return create_transformer_instance(
@@ -114,6 +118,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     def create_data_source(
