@@ -25,22 +25,66 @@
 ```
 composition/bootstrap/
 ├── assembly/            # Сборка компонентов (checkpoint, storage)
-├── cli/                 # CLI-специфичная сборка (health, lock, config, metrics, noop)
-└── runtime/             # Runtime assembly (20 модулей)
-    ├── assembly.py      # Pure assembly functions (vacuum, filter, runtime config)
-    ├── pipeline.py      # Сборка pipeline
-    ├── runner.py         # Сборка runner
-    ├── runner_assembly.py # Runner assembly helpers
-    ├── observability.py  # Сборка observability bundle
-    ├── config_loader.py  # Загрузка конфигураций
-    ├── dq_bootstrap.py   # Bootstrap Data Quality компонентов
-    ├── composite.py      # Bootstrap для Composite Pipeline (ADR-026)
-    ├── composite_*.py    # Composite support (5 модулей)
-    └── *_bootstrap.py    # Logger, metrics, tracing bootstrap
+│   ├── checkpoint.py    # Checkpoint assembly
+│   └── storage.py       # Storage assembly
+├── cli/                 # CLI-специфичная сборка
+│   ├── health.py        # Health check CLI bootstrap
+│   ├── lock.py          # Lock CLI bootstrap
+│   ├── config.py        # Config CLI bootstrap
+│   ├── metrics.py       # Metrics CLI bootstrap
+│   ├── noop.py          # NoOp implementations для CLI
+│   ├── storage.py       # Storage CLI bootstrap
+│   ├── checkpoint.py    # Checkpoint CLI bootstrap
+│   └── adr.py           # ADR-related CLI bootstrap
+└── runtime/             # Runtime assembly (23 модуля)
 ```
 
 - `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна. **Deprecated** — предпочтителен прямой вызов `runtime/pipeline.py`.
 - `bootstrap/runtime/composite.py`: Bootstrap для Composite Pipeline (ADR-026).
+
+#### 2.1.1. `runtime/` — Runtime Assembly (23 модуля)
+
+**Core assembly:**
+
+| Файл                 | Назначение                                                |
+| -------------------- | --------------------------------------------------------- |
+| `assembly.py`        | Pure assembly functions (vacuum, filter, runtime config)  |
+| `pipeline.py`        | Сборка pipeline (main entry point)                        |
+| `runner.py`          | Сборка `PipelineRunner`                                   |
+| `runner_assembly.py` | Runner assembly helpers                                   |
+| `config_loader.py`   | Загрузка и валидация YAML-конфигураций                    |
+| `runtime_basics.py`  | Базовые runtime утилиты                                   |
+
+**Composite pipeline bootstrap:**
+
+| Файл                                   | Назначение                                        |
+| --------------------------------------- | ------------------------------------------------- |
+| `composite.py`                          | Bootstrap `CompositePipelineRunner` (ADR-026)     |
+| `composite_bootstrap_builders.py`       | Builders для composite компонентов                |
+| `composite_dq_loader.py`               | Загрузка DQ конфигурации для composite            |
+| `composite_filter_extraction_service.py`| Bootstrap filter extraction для composite         |
+| `composite_support_helpers.py`          | Вспомогательные функции composite bootstrap       |
+| `composite_support_service_builders.py` | Builders для composite support services           |
+| `composite_support_services_factory.py` | Фабрика composite support services               |
+
+**Observability bootstrap:**
+
+| Файл                    | Назначение                                       |
+| ----------------------- | ------------------------------------------------ |
+| `observability.py`      | Сборка полного observability bundle              |
+| `observability_bundle.py`| ObservabilityBundle dataclass                   |
+| `logger_bootstrap.py`   | Bootstrap structured logger (structlog)          |
+| `metrics_bootstrap.py`  | Bootstrap metrics (Prometheus)                   |
+| `tracing_bootstrap.py`  | Bootstrap tracing (OpenTelemetry)                |
+
+**Service bootstrap:**
+
+| Файл                                  | Назначение                                    |
+| -------------------------------------- | --------------------------------------------- |
+| `dq_bootstrap.py`                     | Bootstrap Data Quality компонентов            |
+| `pipeline_runner_service_bootstrap.py` | Bootstrap `PipelineRunnerService`             |
+| `runner_factory_builder_service.py`    | Builder для runner factory                    |
+| `classification_init.py`              | Инициализация error classification            |
 
 ### 2.2. `factories/` — Фабрики компонентов
 
@@ -78,7 +122,13 @@ composition/bootstrap/
 
 Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`, `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
 
-Дополнительные пакеты: `runtime_builders/`, `providers/`, `services/`.
+**Дополнительные пакеты:**
+
+| Пакет              | Ключевые модули                                         | Назначение                                           |
+| ------------------ | ------------------------------------------------------- | ---------------------------------------------------- |
+| `providers/`       | `provider_registry.py`, `registration.py`, `registration_biblio.py`, `registration_bio.py`, `factory_loader.py`, `loader.py` | Реестр провайдеров, авто-регистрация, загрузка фабрик |
+| `services/`        | `metadata_coordinator.py`, `metadata_assemblers.py`, `versioning.py` | Composition-level сервисы (metadata, versioning)     |
+| `runtime_builders/`| `runner_builder.py`, `observability_builder.py`, `inputs_resolver.py` | Builders для runtime assembly                        |
 
 ### 2.3. Реестр провайдеров и DataSourceRegistry
 
@@ -116,7 +166,7 @@ data_source = ProviderRegistry.create_data_source("chembl", settings, config, lo
 | openalex          | OpenAlexAdapter        | publication                                                                                                                                                                                                | 10 req/sec   |
 | semanticscholar   | SemanticScholarAdapter | publication                                                                                                                                                                                                | 100 req/5min |
 
-### 2.3. `registry.py` — Реестр пайплайнов
+### 2.4. `registry.py` — Реестр пайплайнов
 
 Предоставляет механизмы для динамического поиска и регистрации пайплайнов. Это позволяет CLI находить доступные пайплайны по их именам (например, `chembl_activity`).
 

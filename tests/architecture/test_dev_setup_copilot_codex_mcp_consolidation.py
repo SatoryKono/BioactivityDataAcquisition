@@ -13,7 +13,7 @@ def _project_root() -> Path:
 
 
 def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None:
-    """Canonical backend should generate .vscode/mcp.json with GitHub MCP server."""
+    """Canonical backend should generate the full MCP workspace config."""
     root = _project_root()
     result = subprocess.run(
         [
@@ -33,8 +33,17 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert mcp_path.exists()
 
     payload = json.loads(mcp_path.read_text(encoding="utf-8"))
-    assert payload["servers"]["github"]["command"] == "npx"
-    assert payload["servers"]["github"]["args"][0] == "-y"
+    servers = payload["servers"]
+    assert set(servers) == {"memory", "filesystem", "sequential-thinking", "github"}
+    assert servers["memory"]["command"] == "npx"
+    assert servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
+        tmp_path / "docs/00-project/ai/memory/mcp-memory.json"
+    )
+    assert servers["filesystem"]["args"][-1] == str(tmp_path)
+    assert servers["sequential-thinking"]["args"][1] == (
+        "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
+    )
+    assert servers["github"]["args"][1] == "@modelcontextprotocol/server-github@2025.4.8"
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:

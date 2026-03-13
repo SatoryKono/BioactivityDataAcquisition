@@ -5,11 +5,13 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+
+import polars as pl
 
 from bioetl.application.composite.coordinator_result_mixin import (
     EnrichmentCoordinatorResultMixin,
 )
+from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -18,12 +20,7 @@ from bioetl.domain.exceptions import (
     NetworkError,
     StorageError,
 )
-
-if TYPE_CHECKING:
-    import polars as pl
-
-    from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
 _FILTER_CONDITION_ERRORS = (
     ValueError,
