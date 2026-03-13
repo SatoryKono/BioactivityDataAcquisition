@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.join_planner import JoinPlannerService
+    from bioetl.application.composite.merger_input_mixin import _PreparedSeedDataframe
     from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
     from bioetl.domain.composite.result import (
         DependencyResult,
@@ -47,7 +48,7 @@ class MergeWorkflowContext(MergePostJoinWorkflowContext, Protocol):
         self,
         seed_table: str,
         seed_pipeline: str | None,
-    ) -> tuple[pl.DataFrame, int, str | None]: ...
+    ) -> _PreparedSeedDataframe: ...
 
     async def _load_enricher_dataframes(
         self,
@@ -81,11 +82,7 @@ async def load_merge_inputs(
     dependency_results: dict[str, DependencyResult] | None,
 ) -> MergeInputContext:
     """Load seed, dependency, and enricher frames for merge orchestration."""
-    (
-        seed_df,
-        records_from_seed,
-        effective_seed_pipeline,
-    ) = await host._prepare_seed_dataframe(seed_table, seed_pipeline)
+    prepared_seed = await host._prepare_seed_dataframe(seed_table, seed_pipeline)
     sources_used = ["seed"]
 
     enricher_dfs, enricher_sources = await host._load_enricher_dataframes(
@@ -101,9 +98,9 @@ async def load_merge_inputs(
     sources_used.extend(dependency_sources)
 
     return MergeInputContext(
-        seed_df=seed_df,
-        records_from_seed=records_from_seed,
-        effective_seed_pipeline=effective_seed_pipeline,
+        seed_df=prepared_seed.seed_df,
+        records_from_seed=prepared_seed.records_from_seed,
+        effective_seed_pipeline=prepared_seed.effective_seed_pipeline,
         sources_used=sources_used,
         enricher_dfs=enricher_dfs,
         dependency_dfs=dependency_dfs,

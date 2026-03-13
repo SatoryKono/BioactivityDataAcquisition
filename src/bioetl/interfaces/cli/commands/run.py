@@ -202,6 +202,22 @@ def _finalize_run_result(result: RunResult) -> None:
     _exit_with_code(_map_status_to_exit_code(result.status, result.error_type))
 
 
+def _run_command_with_cli_policy(
+    ctx: click.Context,
+    cli_input: RunCommandInput,
+) -> None:
+    """Execute the prepared run command through the canonical CLI policy path."""
+    registry = resolve_context_registry(ctx)
+    run_command_flow(
+        cli_input=cli_input,
+        service=_CLI_RUN_ORCHESTRATION_SERVICE,
+        execute_run=partial(execute_run, registry=registry),
+        health_info_presenter=_present_run_health_info,
+        result_finalizer=_finalize_run_result,
+        exit_func=_exit_with_code,
+    )
+
+
 async def _run_pipeline_async(
     pipeline: str,
     options: RunOptions,
@@ -364,7 +380,6 @@ def run(
     cached_bronze_path: str | None,
 ) -> None:
     """Run an ETL pipeline."""
-    registry = resolve_context_registry(ctx)
     cli_input = _build_run_command_input(
         pipeline=pipeline,
         run_type=run_type,
@@ -385,14 +400,7 @@ def run(
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
     )
-    run_command_flow(
-        cli_input=cli_input,
-        service=_CLI_RUN_ORCHESTRATION_SERVICE,
-        execute_run=partial(execute_run, registry=registry),
-        health_info_presenter=_present_run_health_info,
-        result_finalizer=_finalize_run_result,
-        exit_func=_exit_with_code,
-    )
+    _run_command_with_cli_policy(ctx, cli_input)
 
 
 # Re-export helpers for backward compatibility with tests

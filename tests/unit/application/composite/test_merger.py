@@ -138,6 +138,25 @@ class TestMergeServiceReadsSilverViaStorage:
     """Tests for MergeService reading Silver via StoragePort."""
 
     @pytest.mark.asyncio
+    async def test_prepare_seed_dataframe_returns_named_context(
+        self, merge_service, mock_storage
+    ) -> None:
+        """Seed preparation should return an explicit prepared context."""
+        mock_storage.read_silver.return_value = [
+            {"id": "1", "val": "A"},
+            {"id": "2", "val": "B"},
+        ]
+
+        prepared = await merge_service._prepare_seed_dataframe(
+            "silver/test/table",
+            "test_publication",
+        )
+
+        assert prepared.records_from_seed == 2
+        assert prepared.effective_seed_pipeline == "test_publication"
+        assert prepared.seed_df.height == 2
+
+    @pytest.mark.asyncio
     async def test_read_silver_uses_storage_port(self, merge_service, mock_storage):
         """Test _read_silver_table uses StoragePort.read_silver."""
         mock_storage.read_silver.return_value = [

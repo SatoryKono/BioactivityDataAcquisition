@@ -13,9 +13,9 @@ from bioetl.application.core.batch_checkpoint_recovery_service import (
 )
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_helpers import (
-    apply_batch_execution_state_update,
-    build_batch_execution_state_update,
+    apply_processed_batch_outcome,
     build_batch_result_snapshot,
+    build_processed_batch_outcome,
     build_run_statistics,
 )
 from bioetl.application.core.batch_executor_loop_helpers import (
@@ -392,22 +392,13 @@ class BatchExecutor(_BatchExecutorDQMixin):
             start_index=start_index,
             query_string=self._query_string,
         )
-        apply_batch_execution_state_update(
+        apply_processed_batch_outcome(
             state=self,
-            state_update=build_batch_execution_state_update(
-                input_record_count=len(records),
-                output=output,
-            ),
-        )
-
-        if self._should_collect_dq_data():
-            self._collect_dq_data(
+            outcome=build_processed_batch_outcome(
                 records=records,
-                batch_id=output.batch_id,
-                bronze_result=output.bronze_result,
-                silver_records=output.silver_records,
-                gold_records=output.gold_records,
+                output=output,
             )
+        )
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:
         """Get aggregated statistics for the entire pipeline run.

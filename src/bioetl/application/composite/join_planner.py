@@ -13,8 +13,8 @@ from bioetl.application.composite.join_planner_compat_mixin import (
 from bioetl.application.composite.join_planner_helpers import (
     EnricherJoinMetadataContext,
     build_enricher_join_metadata,
-    count_qualified_columns,
     parse_pipeline_name,
+    prepare_qualified_right_join_dataframe,
 )
 from bioetl.application.composite.protocols import (
     DependencyJoinerProtocol,
@@ -41,6 +41,7 @@ __all__ = ["JoinHow", "JoinPlannerService"]
 
 @dataclass(frozen=True, slots=True)
 class _PreparedEnricherJoinContext:
+    enricher_pipeline: str
     metadata: EnricherJoinMetadataContext
     merged_df: pl.DataFrame
     enricher_df: pl.DataFrame
@@ -165,7 +166,6 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         )
         return self._execute_prepared_enricher_join(
             prepared_context=prepared_context,
-            enricher_pipeline=enricher.pipeline,
         )
 
     def _prepare_enricher_join_context(
@@ -195,6 +195,7 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
             join_keys_list=metadata.join_keys_list,
         )
         return _PreparedEnricherJoinContext(
+            enricher_pipeline=enricher.pipeline,
             metadata=metadata,
             merged_df=merged_df,
             enricher_df=prepared_enricher_df,
@@ -204,7 +205,6 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         self,
         *,
         prepared_context: _PreparedEnricherJoinContext,
-        enricher_pipeline: str,
     ) -> pl.DataFrame:
         resolved_merged_df, resolved_enricher_df = (
             self._conflict_resolver.detect_and_resolve_conflicts(
@@ -218,7 +218,7 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
             resolved_enricher_df,
             prepared_context.metadata.seed_join_key,
             prepared_context.metadata.enricher_join_key,
-            enricher_pipeline,
+            prepared_context.enricher_pipeline,
         )
 
     def _prepare_enricher_dataframe(
@@ -235,28 +235,19 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
                 enricher.aggregation,
                 enricher.pipeline,
             )
-        prepared_df = self._deduplicator.deduplicate(
-            enricher_df=prepared_df,
+        return prepare_qualified_right_join_dataframe(
+            source_df=prepared_df,
+            pipeline=enricher.pipeline,
             join_keys=join_keys_list,
-            enricher_name=enricher.pipeline,
+            deduplicator=self._deduplicator,
+            join_key_resolver=self._join_key_resolver,
+            renamer=self._renamer,
+            logger=self._logger,
+            field_alias_resolver=self._field_alias_resolver,
+            drop_system_columns=self.drop_system_columns,
+            log_message="Renamed enricher columns to qualified format",
+            log_field_name="enricher",
         )
-        prepared_df = self.normalize_join_key_columns(
-            prepared_df,
-            join_keys_list,
-            pipeline=None,
-        )
-        prepared_df = self._renamer.rename_dataframe(
-            prepared_df,
-            enricher.pipeline,
-            exclude_join_keys=False,
-            field_aliases=self._field_alias_resolver(enricher.pipeline),
-        )
-        self._logger.debug(
-            "Renamed enricher columns to qualified format",
-            enricher=enricher.pipeline,
-            qualified_count=count_qualified_columns(prepared_df.columns),
-        )
-        return self.drop_system_columns(prepared_df)
 
     async def apply_dependency_joins(
         self,
