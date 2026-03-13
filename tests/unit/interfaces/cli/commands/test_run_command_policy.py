@@ -334,7 +334,7 @@ class TestRunCommandFlow:
         service = MagicMock(spec=CliRunOrchestrationService)
         execute_run = MagicMock()
         health_info_presenter = MagicMock()
-        result_presenter = MagicMock()
+        result_finalizer = MagicMock()
         exit_func = MagicMock()
 
         with patch(
@@ -365,7 +365,7 @@ class TestRunCommandFlow:
                 service=service,
                 execute_run=execute_run,
                 health_info_presenter=health_info_presenter,
-                result_presenter=result_presenter,
+                result_finalizer=result_finalizer,
                 exit_func=exit_func,
             )
 
@@ -373,7 +373,7 @@ class TestRunCommandFlow:
         service.prepare_execution_request.assert_not_called()
         execute_run.assert_not_called()
         health_info_presenter.assert_not_called()
-        result_presenter.assert_not_called()
+        result_finalizer.assert_not_called()
         exit_func.assert_not_called()
 
     def test_runs_prepare_execute_present_and_exit(self) -> None:
@@ -385,7 +385,7 @@ class TestRunCommandFlow:
         )
         execute_run = MagicMock(return_value=result)
         health_info_presenter = MagicMock()
-        result_presenter = MagicMock()
+        result_finalizer = MagicMock(side_effect=SystemExit(ExitCode.OK))
         exit_func = MagicMock(side_effect=SystemExit(ExitCode.OK))
 
         with (
@@ -419,7 +419,7 @@ class TestRunCommandFlow:
                 service=service,
                 execute_run=execute_run,
                 health_info_presenter=health_info_presenter,
-                result_presenter=result_presenter,
+                result_finalizer=result_finalizer,
                 exit_func=exit_func,
             )
 
@@ -427,8 +427,8 @@ class TestRunCommandFlow:
         mock_handle_destructive.assert_called_once()
         execute_run.assert_called_once_with(request)
         health_info_presenter.assert_called_once_with(request)
-        result_presenter.assert_called_once_with(result)
-        exit_func.assert_called_once_with(ExitCode.OK)
+        result_finalizer.assert_called_once_with(result)
+        exit_func.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -515,47 +515,40 @@ class TestFinalizeRunStep:
     """Tests for finalize_run_step."""
 
     def test_calls_presenter_and_exit_func(self) -> None:
-        """Presenter and exit_func are called with correct arguments."""
+        """Finalizer is called with the completed result."""
         result = _make_result(status=PipelineRunResult.SUCCESS)
-        presenter = MagicMock()
-        exit_func: MagicMock = MagicMock()
+        finalizer = MagicMock()
 
         finalize_run_step(
             result=result,
-            result_presenter=presenter,
-            exit_func=exit_func,
+            result_finalizer=finalizer,
         )
 
-        presenter.assert_called_once_with(result)
-        exit_func.assert_called_once_with(ExitCode.OK)
+        finalizer.assert_called_once_with(result)
 
     def test_failed_status_maps_to_pipeline_error_exit(self) -> None:
-        """FAILED status maps to PIPELINE_ERROR exit code."""
+        """FAILED result is still delegated to the injected finalizer."""
         result = _make_result(
             status=PipelineRunResult.FAILED,
             error_type="UnknownError",
         )
-        presenter = MagicMock()
-        exit_func: MagicMock = MagicMock()
+        finalizer = MagicMock()
 
         finalize_run_step(
             result=result,
-            result_presenter=presenter,
-            exit_func=exit_func,
+            result_finalizer=finalizer,
         )
 
-        exit_func.assert_called_once_with(ExitCode.PIPELINE_ERROR)
+        finalizer.assert_called_once_with(result)
 
     def test_shutdown_status_maps_to_sigint_exit(self) -> None:
-        """SHUTDOWN status maps to SIGINT exit code."""
+        """SHUTDOWN result is delegated to the injected finalizer."""
         result = _make_result(status=PipelineRunResult.SHUTDOWN)
-        presenter = MagicMock()
-        exit_func: MagicMock = MagicMock()
+        finalizer = MagicMock()
 
         finalize_run_step(
             result=result,
-            result_presenter=presenter,
-            exit_func=exit_func,
+            result_finalizer=finalizer,
         )
 
-        exit_func.assert_called_once_with(ExitCode.SIGINT)
+        finalizer.assert_called_once_with(result)

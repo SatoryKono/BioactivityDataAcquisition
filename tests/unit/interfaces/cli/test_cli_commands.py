@@ -1386,6 +1386,36 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
     )
 
 
+@pytest.mark.unit
+def test_finalize_run_result_presents_and_exits() -> None:
+    """CLI finalizer should render output before terminating with mapped exit code."""
+    from bioetl.application.services import PipelineRunResult, RunResult
+    from bioetl.interfaces.cli.commands import run as run_module
+    from bioetl.interfaces.cli.exit_codes import ExitCode
+
+    result = RunResult(
+        status=PipelineRunResult.SUCCESS,
+        pipeline_name="chembl_activity",
+        run_id="test-run-id",
+        run_type="incremental",
+    )
+
+    with (
+        patch.object(run_module, "_echo_run_result") as mock_presenter,
+        patch.object(run_module, "_exit_with_code") as mock_exit,
+        patch.object(
+            run_module,
+            "_map_status_to_exit_code",
+            return_value=ExitCode.OK,
+        ) as mock_map_status,
+    ):
+        run_module._finalize_run_result(result)
+
+    mock_presenter.assert_called_once_with(result)
+    mock_map_status.assert_called_once_with(PipelineRunResult.SUCCESS, None)
+    mock_exit.assert_called_once_with(ExitCode.OK)
+
+
 # =============================================================================
 # run.py Tests - Exception handlers in run command
 # =============================================================================

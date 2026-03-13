@@ -196,6 +196,12 @@ def _present_run_health_info(request: RunExecutionRequest) -> None:
     echo_health_server_info(request.health_server, request.health_port)
 
 
+def _finalize_run_result(result: RunResult) -> None:
+    """Render CLI run result and terminate with the canonical exit code."""
+    _echo_run_result(result)
+    _exit_with_code(_map_status_to_exit_code(result.status, result.error_type))
+
+
 async def _run_pipeline_async(
     pipeline: str,
     options: RunOptions,
@@ -384,7 +390,7 @@ def run(
         service=_CLI_RUN_ORCHESTRATION_SERVICE,
         execute_run=partial(execute_run, registry=registry),
         health_info_presenter=_present_run_health_info,
-        result_presenter=_echo_run_result,
+        result_finalizer=_finalize_run_result,
         exit_func=_exit_with_code,
     )
 
