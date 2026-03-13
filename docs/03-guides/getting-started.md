@@ -27,13 +27,16 @@ cd BioactivityDataAcquisition2
 
 ## 2. Environment Setup
 
-We use `make` to automate the setup process. This command will create a Python virtual environment (`.venv`) and install all production and development dependencies.
+The recommended setup path is `scripts/dev/dev_setup.sh`. It checks required
+prerequisites, creates the virtual environment, installs dependencies, and
+runs the standard project bootstrap flow.
 
 ```bash
-make install
+./scripts/dev/dev_setup.sh
 ```
 
-*Note: If you are on Windows and don't have `make`, you can manually run:*
+*Manual fallback: if you need a lower-level path, you can still use `make install`
+or create the virtual environment explicitly. On Windows without `make`:*
 
 ```powershell
 python -m venv .venv

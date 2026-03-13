@@ -6,10 +6,10 @@ Implements vacuum operations for Delta tables storage reclamation.
 from __future__ import annotations
 
 import asyncio
+from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition.entrypoints import get_lifecycle_service, get_vacuum_service
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -25,10 +25,30 @@ from bioetl.interfaces.cli.formatters import (
     echo_vacuum_result,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
+    from bioetl.application.services.vacuum_service import VacuumService
+
 __all__ = [
     "vacuum_all_command",
     "vacuum_command",
 ]
+
+
+def get_lifecycle_service() -> MedallionLifecycleService:
+    """Load the lifecycle service through composition on demand."""
+    from bioetl.composition.entrypoints import get_lifecycle_service as _impl
+
+    return _impl()
+
+
+def get_vacuum_service() -> VacuumService:
+    """Load the vacuum service through composition on demand."""
+    from bioetl.composition.entrypoints import get_vacuum_service as _impl
+
+    return _impl()
 
 
 def _handle_maintenance_failure(

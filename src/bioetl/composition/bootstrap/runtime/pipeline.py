@@ -20,8 +20,8 @@ from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.providers.registration import register_all_providers
-from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.providers.loader import ensure_providers_loaded
+from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 
@@ -50,7 +50,7 @@ def bootstrap_pipeline_runner(
     Args:
         ctx: Pipeline run context containing launch parameters such as pipeline
             name, run type, limit, filter settings, and observability options.
-        registry: Optional PipelineRegistry to use instead of the default global
+        registry: Optional PipelineRegistry to use instead of a fresh runtime
             registry; useful for test isolation.
 
     Returns:
@@ -58,18 +58,17 @@ def bootstrap_pipeline_runner(
     """
     # Classification data must be available before transformers run.
     initialize_publication_type_classification(Path("configs"))
-    effective_registry = registry if registry is not None else get_default_registry()
+    effective_registry = registry if registry is not None else create_registry()
 
-    # Explicit registration retained for deterministic bootstrap semantics.
-    register_all_providers()
+    # Explicit provider loading retained for deterministic bootstrap semantics.
+    ensure_providers_loaded()
     if not effective_registry.list_pipelines():
         register_all_pipelines(registry=effective_registry)
 
     return build_pipeline_runner(
         ctx=ctx,
         registry=effective_registry,
-        get_default_registry_fn=get_default_registry,
-        register_all_providers_fn=lambda: None,
+        ensure_providers_loaded_fn=lambda: None,
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings,
         load_pipeline_config_fn=load_pipeline_config,

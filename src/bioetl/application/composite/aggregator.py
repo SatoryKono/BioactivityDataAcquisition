@@ -6,19 +6,14 @@ row before joining with seed data. See ADR-026.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import polars as pl
 
-from bioetl.domain.composite.aggregation import AggregationFunction
-
-if TYPE_CHECKING:
-    import polars as pl
-
-    from bioetl.domain.composite.aggregation import (
-        AggregationConfig,
-        AggregationFieldSpec,
-    )
-    from bioetl.domain.ports import LoggerPort
-
+from bioetl.domain.composite.aggregation import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
+)
+from bioetl.domain.ports import LoggerPort
 
 __all__ = ["EnricherAggregatorService"]
 

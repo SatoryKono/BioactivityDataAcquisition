@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bioetl.application.composite._preflight_types import FieldInfo, SchemaFields
+from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.exceptions import BioETLError, DataQualityError
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import LoggerPort
 
 
 class PreflightSchemaOrchestrationMixin:

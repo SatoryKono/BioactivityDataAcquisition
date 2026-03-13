@@ -624,6 +624,44 @@ class TestSilverWriterLineage:
         )
 
     @pytest.mark.asyncio
+    async def test_write_silver_merged_metadata_uses_canonical_file_handoff(
+        self, noop_logger, valid_records
+    ):
+        """Merged metadata flow should converge on the same canonical file handoff."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        metadata = MagicMock()
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=noop_logger,
+            metadata_writer=MagicMock(),
+            metadata_coordinator=MagicMock(),
+        )
+        writer._get_delta_version = AsyncMock(return_value=11)  # type: ignore[method-assign]
+        writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
+
+        with patch(
+            "bioetl.infrastructure.storage.metadata_builder.SilverMetadataBuilder.build_merged_metadata",
+            return_value=metadata,
+        ):
+            await writer._write_silver_merged_metadata(
+                table_path="/tmp/silver/composite/publication",
+                table_name="composite.publication",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                run_id="run-1",
+                sources_used=["chembl"],
+            )
+
+        writer._write_silver_metadata_file.assert_awaited_once_with(
+            table_path="/tmp/silver/composite/publication",
+            metadata=metadata,
+            table_name="composite.publication",
+            provider_name="composite",
+            entity_name="publication",
+        )
+
+    @pytest.mark.asyncio
     async def test_metadata_write_paths_preserve_skip_logging_levels(self, valid_records):
         """Standard and merged metadata writes should share preflight guard semantics."""
         from bioetl.domain.medallion import SilverWriteMode

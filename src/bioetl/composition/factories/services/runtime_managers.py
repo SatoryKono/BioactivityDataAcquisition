@@ -5,8 +5,7 @@ Extracted from pipeline_builder.py to keep it within LOC limits.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
@@ -14,20 +13,17 @@ from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
+from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointManagerService,
+)
 from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
-
-if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
-    )
-    from bioetl.domain.config import MemoryConfig
-    from bioetl.domain.ports import (
-        BatchIdGeneratorPort,
-        MemoryMonitorPort,
-        TracingPort,
-    )
+from bioetl.domain.config import MemoryConfig
+from bioetl.domain.ports import (
+    BatchIdGeneratorPort,
+    MemoryMonitorPort,
+    TracingPort,
+)
 
 __all__ = ["build_runtime_managers"]
 

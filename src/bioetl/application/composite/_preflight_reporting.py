@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bioetl.application.composite._preflight_types import (
     PreflightValidationResult,
     SchemaFields,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.ports import LoggerPort
 
 
 class PreflightValidationReportingMixin:

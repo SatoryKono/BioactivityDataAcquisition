@@ -93,7 +93,7 @@ class TestBootstrapPipeline:
         with pytest.raises(ValueError, match="Configuration file not found"):
             bootstrap_pipeline_runner(ctx)
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
     @patch(
@@ -106,7 +106,7 @@ class TestBootstrapPipeline:
         mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
         mock_assemble_filter: MagicMock,
-        mock_get_registry: MagicMock,
+        mock_create_registry: MagicMock,
         mock_logger: MagicMock,
     ) -> None:
         """Test that bootstrap_pipeline_runner creates runner without starting metrics server.
@@ -158,7 +158,7 @@ class TestBootstrapPipeline:
         mock_factory.create_runner.return_value = mock_runner
         mock_registry = MagicMock()
         mock_registry.get.return_value.factory = mock_factory
-        mock_get_registry.return_value = mock_registry
+        mock_create_registry.return_value = mock_registry
 
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
@@ -176,20 +176,20 @@ class TestBootstrapPipeline:
         mock_bootstrap_observability_bundle.assert_called_once()
 
     @patch("bioetl.infrastructure.config.get_settings")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_providers")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
     def test_bootstrap_pipeline_chembl_activity(
         self,
         mock_load_config,
         mock_register_pipelines,
-        mock_register_providers,
+        mock_ensure_providers_loaded,
         mock_observability_bundle,
-        mock_get_registry,
+        mock_create_registry,
         mock_get_settings,
         mock_settings,
         mock_logger,
@@ -223,8 +223,8 @@ class TestBootstrapPipeline:
         mock_runner = MagicMock(spec=PipelineRunner)
         mock_factory = MagicMock()
         mock_factory.create_runner.return_value = mock_runner
-        mock_get_registry.return_value.list_pipelines.return_value = []
-        mock_get_registry.return_value.get.return_value.factory = mock_factory
+        mock_create_registry.return_value.list_pipelines.return_value = []
+        mock_create_registry.return_value.get.return_value.factory = mock_factory
 
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
@@ -237,8 +237,9 @@ class TestBootstrapPipeline:
 
         assert result is mock_runner
         mock_factory.create_runner.assert_called_once()
+        mock_ensure_providers_loaded.assert_called_once_with()
         mock_register_pipelines.assert_called_once_with(
-            registry=mock_get_registry.return_value
+            registry=mock_create_registry.return_value
         )
 
 
@@ -246,7 +247,7 @@ class TestBootstrapPipeline:
 class TestBootstrapVacuumConfig:
     """Tests for bootstrap_pipeline_runner vacuum configuration merging."""
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
     @patch(
@@ -259,7 +260,7 @@ class TestBootstrapVacuumConfig:
         mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
         mock_assemble_filter: MagicMock,
-        mock_get_registry: MagicMock,
+        mock_create_registry: MagicMock,
     ) -> None:
         """Test that YAML auto_vacuum config is used when CLI doesn't override."""
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
@@ -298,7 +299,7 @@ class TestBootstrapVacuumConfig:
         mock_factory.create_runner.return_value = mock_runner
         mock_registry = MagicMock()
         mock_registry.get.return_value.factory = mock_factory
-        mock_get_registry.return_value = mock_registry
+        mock_create_registry.return_value = mock_registry
 
         # Context without CLI vacuum options (disabled VacuumSettings)
         ctx = PipelineRunContext(
@@ -316,7 +317,7 @@ class TestBootstrapVacuumConfig:
         assert runtime.vacuum_after_run is True
         assert runtime.vacuum_retention_days == 14
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
     @patch(
@@ -329,7 +330,7 @@ class TestBootstrapVacuumConfig:
         mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
         mock_assemble_filter: MagicMock,
-        mock_get_registry: MagicMock,
+        mock_create_registry: MagicMock,
     ) -> None:
         """Test that CLI vacuum options override YAML config."""
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
@@ -368,7 +369,7 @@ class TestBootstrapVacuumConfig:
         mock_factory.create_runner.return_value = mock_runner
         mock_registry = MagicMock()
         mock_registry.get.return_value.factory = mock_factory
-        mock_get_registry.return_value = mock_registry
+        mock_create_registry.return_value = mock_registry
 
         # Context with CLI overrides (explicit enabled=True and 30 days)
         # Note: enabled=True means CLI is overriding, so its retention_days is used

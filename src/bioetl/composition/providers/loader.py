@@ -19,6 +19,11 @@ __all__ = [
 _loaded = False
 
 
+def _has_registered_providers() -> bool:
+    """Return whether the provider registry currently contains providers."""
+    return bool(ProviderRegistry.list_providers())
+
+
 def load_providers(force: bool = False) -> None:
     """Load and register all providers.
 
@@ -41,7 +46,11 @@ def load_providers(force: bool = False) -> None:
     """
     global _loaded
 
-    if _loaded and not force:
+    if get_loaded_status() and not force:
+        return
+
+    if _has_registered_providers() and not force:
+        _loaded = True
         return
 
     if force:
@@ -51,7 +60,7 @@ def load_providers(force: bool = False) -> None:
     # Explicit registration of all providers
     register_all_providers()
 
-    _loaded = True
+    _loaded = _has_registered_providers()
 
 
 def ensure_providers_loaded() -> None:
@@ -60,7 +69,7 @@ def ensure_providers_loaded() -> None:
     Convenience function for use in places where ProviderRegistry
     must be initialized.
     """
-    if not _loaded:
+    if not get_loaded_status():
         load_providers()
 
 
@@ -70,7 +79,7 @@ def get_loaded_status() -> bool:
     Returns:
         Loaded status.
     """
-    return _loaded
+    return _loaded and _has_registered_providers()
 
 
 def reset_loader() -> None:

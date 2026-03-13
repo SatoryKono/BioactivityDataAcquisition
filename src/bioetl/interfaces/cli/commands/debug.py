@@ -8,13 +8,12 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from typing import TYPE_CHECKING
 
 import click
 
 from bioetl.application.services import RunOptions, RunResult
 from bioetl.application.services.pipeline_debug_service import DebugAbortError
-from bioetl.composition.entrypoints import get_pipeline_runner_service
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.ports import StageBreakpoint
 from bioetl.interfaces.cli.commands.run_helpers import (
     resolve_context_registry,
@@ -23,9 +22,24 @@ from bioetl.interfaces.cli.commands.run_helpers import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
+if TYPE_CHECKING:
+    from bioetl.application.services.pipeline_runner_service import (
+        PipelineRunnerService,
+    )
+    from bioetl.composition.registry import PipelineRegistry
+
 __all__ = ["debug"]
 
 _BREAKPOINT_CHOICES = [bp.value for bp in StageBreakpoint]
+
+
+def get_pipeline_runner_service(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunnerService:
+    """Load the pipeline runner service through composition on demand."""
+    from bioetl.composition.entrypoints import get_pipeline_runner_service as _impl
+
+    return _impl(registry=registry)
 
 
 @click.command()

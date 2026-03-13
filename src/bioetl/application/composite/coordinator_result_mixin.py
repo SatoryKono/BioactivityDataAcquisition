@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
+from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
-    from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
-    from bioetl.domain.types import JsonDict
+from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
+from bioetl.domain.types import JsonDict
 
 
 class EnrichmentCoordinatorResultMixin:

@@ -7,14 +7,16 @@ Note: Uses in-memory locking - operations only affect current process.
 from __future__ import annotations
 
 import asyncio
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 import click
 
-from bioetl.composition.entrypoints import get_lock_service
 from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
+
+if TYPE_CHECKING:
+    from bioetl.application.services.lock_service import LockService
 
 __all__ = [
     "COMMANDS",
@@ -27,6 +29,13 @@ __all__ = [
 @click.group()
 def lock() -> None:
     """Manage pipeline locks."""
+
+
+def get_lock_service() -> LockService:
+    """Load the lock service through composition on demand."""
+    from bioetl.composition.entrypoints import get_lock_service as _impl
+
+    return _impl()
 
 
 @lock.command("release")

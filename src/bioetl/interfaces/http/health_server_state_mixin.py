@@ -2,12 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from bioetl.domain.ports import HealthMonitorPort
 from bioetl.domain.types import HealthStatus, JsonDict
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import HealthMonitorPort
 
 
 class HealthServerStateMixin:
