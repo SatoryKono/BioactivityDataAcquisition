@@ -250,7 +250,7 @@ async def test_transition_to_enrichment_completed_when_enriching_then_calls_comp
     state = _make_state(state=CompositePipelineState.ENRICHING)
     harness._call_save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
 
-    result_state = await harness._transition_to_enrichment_completed(state)
+    await harness._transition_to_enrichment_completed(state)
 
     # _complete_enrichment_stage logs and saves checkpoint
     harness._logger.info.assert_called()

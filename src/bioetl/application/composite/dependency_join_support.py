@@ -17,12 +17,16 @@ from bioetl.domain.ports import LoggerPort
 
 @dataclass(frozen=True, slots=True)
 class CompositeJoinContext:
+    """Join context for composite (multi-key) dependency joins."""
+
     join_keys_list: list[str]
     left_pipeline: str | None
 
 
 @dataclass(frozen=True, slots=True)
 class SingleKeyJoinContext:
+    """Join context for single-key dependency joins."""
+
     join_keys_list: list[str]
     primary_key: str
     right_key: str
@@ -32,12 +36,16 @@ class SingleKeyJoinContext:
 
 @dataclass(frozen=True, slots=True)
 class PreparedDependencyJoinContext:
+    """Prepared DataFrames ready for dependency join execution."""
+
     merged_df: pl.DataFrame
     dep_df: pl.DataFrame
 
 
 @dataclass(frozen=True, slots=True)
 class ResolvedCompositeJoinContext:
+    """Resolved join keys and frames for composite dependency joins."""
+
     prepared_context: PreparedDependencyJoinContext
     left_keys: list[str]
     right_keys: list[str]
@@ -46,6 +54,8 @@ class ResolvedCompositeJoinContext:
 
 @dataclass(frozen=True, slots=True)
 class ResolvedSingleKeyJoinContext:
+    """Resolved join keys and frames for single-key dependency joins."""
+
     prepared_context: PreparedDependencyJoinContext
     seed_join_key: str
     dep_join_key: str

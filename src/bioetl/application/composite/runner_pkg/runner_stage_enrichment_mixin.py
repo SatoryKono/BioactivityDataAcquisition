@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.runner_pkg.runner_helpers import (
     add_not_run_results,
@@ -17,22 +18,20 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
-    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.runner_pkg.runner import CompositeRuntimeConfig
+    from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
-
-class _CompositeRunnerStageEnrichmentMixin:
-    """Host mixin for enrichment phase execution and final transition."""
-
-    _config: Any  # Any: concrete host provides composite runtime config object.
-    _coordinator: Any  # Any: concrete host injects coordinator service.
-    _enricher_runner_factory: Any  # Any: factory protocol varies by composition root.
-    _checkpoint_manager: Any  # Any: checkpoint manager type varies by runtime wiring.
-    _fsm: Any  # Any: FSM helper provided by host runner implementation.
-    _logger: Any  # Any: logger-like object provided by host.
-    _runtime: Any  # Any: runtime options container from host.
-    _run_id_str: str
-
-    if TYPE_CHECKING:
+    class _CompositeRunnerStageEnrichmentHostProtocol(Protocol):
+        _config: CompositeConfig
+        _coordinator: EnrichmentCoordinatorService
+        _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
+        _fsm: FSMStateHelperService
+        _logger: LoggerPort
+        _runtime: CompositeRuntimeConfig
+        _run_id_str: str
 
         def _call_get_enrichers_to_run(
             self,
@@ -68,8 +67,65 @@ class _CompositeRunnerStageEnrichmentMixin:
             error: str,
         ) -> CompositeCheckpointState: ...
 
+        async def _start_enrichment_stage(
+            self,
+            state: CompositeCheckpointState,
+            enrichers_to_run: list[EnricherConfig],
+        ) -> CompositeCheckpointState: ...
+
+        async def _run_enrichers_and_update_state(
+            self,
+            state: CompositeCheckpointState,
+            keys_df: pl.DataFrame,
+            enrichers_to_run: list[EnricherConfig],
+        ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]: ...
+
+        async def _skip_enrichment_stage(
+            self,
+            state: CompositeCheckpointState,
+        ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]: ...
+
+        def _finalize_enrichment_results(
+            self,
+            state: CompositeCheckpointState,
+            enrichers_to_run: list[EnricherConfig],
+            enrichment_results: dict[str, EnrichmentResult],
+        ) -> dict[str, EnrichmentResult]: ...
+
+        def _record_completed_enrichment_results(
+            self,
+            state: CompositeCheckpointState,
+            enrichment_results: dict[str, EnrichmentResult],
+        ) -> CompositeCheckpointState: ...
+
+        async def _validate_required_enrichment_results(
+            self,
+            state: CompositeCheckpointState,
+            enrichment_results: dict[str, EnrichmentResult],
+        ) -> None: ...
+
+        def _transition_to_empty_enrichment_start(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _complete_enrichment_stage(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _save_failed_enrichment_state(
+            self,
+            state: CompositeCheckpointState,
+            error: InvalidStateError,
+        ) -> None: ...
+
+
+class _CompositeRunnerStageEnrichmentMixin:
+    """Host mixin for enrichment phase execution and final transition."""
+
     async def _start_enrichment_stage(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         enrichers_to_run: list[EnricherConfig],
     ) -> CompositeCheckpointState:
@@ -93,7 +149,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         return state
 
     async def _run_enrichers_and_update_state(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         keys_df: pl.DataFrame,
         enrichers_to_run: list[EnricherConfig],
@@ -113,7 +169,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         return state, enrichment_results
 
     async def _save_failed_enrichment_state(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         error: InvalidStateError,
     ) -> None:
@@ -131,7 +187,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         )
 
     async def _skip_enrichment_stage(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
         """Log skipped enrichment stage and keep checkpoint state unchanged."""
@@ -143,7 +199,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         return state, {}
 
     async def _execute_enrichment_phase(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         keys_df: pl.DataFrame,
     ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
@@ -174,7 +230,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         return state, enrichment_results
 
     async def _transition_to_enrichment_completed(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Transition FSM state to ENRICHMENT_COMPLETED."""
@@ -189,7 +245,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         return state
 
     def _transition_to_empty_enrichment_start(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Emit ENRICHING transition for the no-enrichers path."""
@@ -201,7 +257,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         )
 
     def _finalize_enrichment_results(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         enrichers_to_run: list[EnricherConfig],
         enrichment_results: dict[str, EnrichmentResult],
@@ -221,7 +277,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         )
 
     def _record_completed_enrichment_results(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> CompositeCheckpointState:
@@ -232,7 +288,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         return state
 
     async def _validate_required_enrichment_results(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:
@@ -244,7 +300,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             raise
 
     async def _complete_enrichment_stage(
-        self,
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Transition to ENRICHMENT_COMPLETED, persist checkpoint, and emit phase log."""

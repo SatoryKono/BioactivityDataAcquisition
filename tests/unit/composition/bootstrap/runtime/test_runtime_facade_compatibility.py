@@ -55,6 +55,20 @@ def test_composite_runtime_patch_points_remain_available() -> None:
 
 
 @pytest.mark.unit
+def test_composite_runtime_does_not_expose_helper_only_symbols() -> None:
+    """Helper-only wiring symbols should not leak through the runtime facade."""
+    unexpected_attrs = {
+        "CompositeFilterExtractionService",
+        "resolve_bronze_opts",
+        "bootstrap_pipeline_runner",
+    }
+    leaked = [
+        name for name in sorted(unexpected_attrs) if hasattr(composite_runtime, name)
+    ]
+    assert not leaked, f"Unexpected helper symbols leaked via composite runtime: {leaked}"
+
+
+@pytest.mark.unit
 def test_composite_runtime_signatures_stable() -> None:
     """Public composite bootstrap function signatures should remain stable."""
     runner_sig = inspect.signature(composite_runtime.bootstrap_composite_runner)

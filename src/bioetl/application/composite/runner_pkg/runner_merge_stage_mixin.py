@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
@@ -36,6 +36,85 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
+    class _CompositeRunnerMergeStageHostProtocol(Protocol):
+        _runtime: CompositeRuntimeConfig
+        _fsm: FSMStateHelperService
+        _logger: LoggerPort
+        _config: CompositeConfig
+        _run_id_str: str
+        _merger: MergeService
+        _checkpoint_manager: CompositeCheckpointService
+
+        async def _save_checkpoint_safe(
+            self,
+            state: CompositeCheckpointState,
+            operation: str,
+        ) -> bool: ...
+
+        async def _generate_dq_reports(
+            self,
+            merge_result: MergeResult,
+        ) -> None: ...
+
+        async def _write_cv_quarantine(
+            self,
+            merge_result: MergeResult,
+        ) -> None: ...
+
+        async def _call_save_checkpoint_safe(
+            self,
+            state: CompositeCheckpointState,
+            operation: str,
+        ) -> bool: ...
+
+        async def _call_generate_dq_reports(self, merge_result: MergeResult) -> None: ...
+
+        async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None: ...
+
+        def _transition_to_merging_state(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _start_merge_phase(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _handle_merge_phase_exception(
+            self,
+            state: CompositeCheckpointState,
+            error: Exception,
+        ) -> None: ...
+
+        def _build_merge_inputs(
+            self,
+            enrichment_results: dict[str, EnrichmentResult],
+            dependency_results: dict[str, DependencyResult] | None,
+        ) -> tuple[list[EnricherConfig], list[DependencyConfig]]: ...
+
+        def _handle_dry_run_merge_skip(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _delete_checkpoint_safe(self) -> None: ...
+
+        def _transition_to_completed_state(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _persist_completed_state(
+            self,
+            state: CompositeCheckpointState,
+        ) -> None: ...
+
+        async def _handle_merge_success(
+            self,
+            merge_result: MergeResult,
+        ) -> None: ...
+
 __all__ = ["CompositeRunnerMergeStageMixin"]
 
 
@@ -51,42 +130,48 @@ class CompositeRunnerMergeStageMixin:
     _checkpoint_manager: CompositeCheckpointService
 
     async def _save_checkpoint_safe(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:  # pragma: no cover - implemented by support mixin
         raise NotImplementedError
 
     async def _generate_dq_reports(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
     ) -> None:  # pragma: no cover - implemented by support mixin
         raise NotImplementedError
 
     async def _write_cv_quarantine(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
     ) -> None:  # pragma: no cover - implemented by support mixin
         raise NotImplementedError
 
     async def _call_save_checkpoint_safe(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:
         """Invoke support-layer checkpoint save helper."""
         return await self._save_checkpoint_safe(state, operation)
 
-    async def _call_generate_dq_reports(self, merge_result: MergeResult) -> None:
+    async def _call_generate_dq_reports(
+        self: _CompositeRunnerMergeStageHostProtocol,
+        merge_result: MergeResult,
+    ) -> None:
         """Invoke support-layer DQ report generation helper."""
         await self._generate_dq_reports(merge_result)
 
-    async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None:
+    async def _call_write_cv_quarantine(
+        self: _CompositeRunnerMergeStageHostProtocol,
+        merge_result: MergeResult,
+    ) -> None:
         """Invoke support-layer quarantine write helper."""
         await self._write_cv_quarantine(merge_result)
 
     def _transition_to_merging_state(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Return MERGING state and emit the corresponding FSM transition log."""
@@ -104,7 +189,7 @@ class CompositeRunnerMergeStageMixin:
         return merging_state
 
     async def _start_merge_phase(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Transition checkpoint/FSM to MERGING and persist checkpoint."""
@@ -118,7 +203,7 @@ class CompositeRunnerMergeStageMixin:
         return merging_state
 
     async def _handle_merge_phase_exception(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
         error: Exception,
     ) -> None:
@@ -142,7 +227,7 @@ class CompositeRunnerMergeStageMixin:
         await self._call_save_checkpoint_safe(failed_state, "merge_failed")
 
     def _build_merge_inputs(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         enrichment_results: dict[str, EnrichmentResult],
         dependency_results: dict[str, DependencyResult] | None,
     ) -> tuple[list[EnricherConfig], list[DependencyConfig]]:
@@ -160,7 +245,7 @@ class CompositeRunnerMergeStageMixin:
         return mergeable_enrichers, mergeable_dependencies
 
     def _handle_dry_run_merge_skip(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Log dry-run merge skip and leave checkpoint state unchanged."""
@@ -177,7 +262,9 @@ class CompositeRunnerMergeStageMixin:
         )
         return state
 
-    async def _delete_checkpoint_safe(self) -> None:
+    async def _delete_checkpoint_safe(
+        self: _CompositeRunnerMergeStageHostProtocol,
+    ) -> None:
         """Delete checkpoint with graceful warning-only error handling."""
         try:
             await self._checkpoint_manager.delete()
@@ -200,7 +287,7 @@ class CompositeRunnerMergeStageMixin:
             )
 
     def _transition_to_completed_state(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Return finalized COMPLETED state, logging FSM transition only when needed."""
@@ -221,14 +308,14 @@ class CompositeRunnerMergeStageMixin:
         return completed_state
 
     async def _persist_completed_state(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> None:
         """Persist finalized checkpoint state via the shared completed-operation seam."""
         await self._call_save_checkpoint_safe(state, "completed")
 
     async def _handle_merge_success(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
     ) -> None:
         """Emit merge success observability and post-merge side effects."""
@@ -242,7 +329,7 @@ class CompositeRunnerMergeStageMixin:
         await self._call_write_cv_quarantine(merge_result)
 
     async def _execute_merge_stage(
-        self,
+        self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
         enrichment_results: dict[str, EnrichmentResult],
         dependency_results: dict[str, DependencyResult] | None = None,
@@ -278,7 +365,10 @@ class CompositeRunnerMergeStageMixin:
 
         return state, merge_result
 
-    async def _finalize_pipeline(self, state: CompositeCheckpointState) -> None:
+    async def _finalize_pipeline(
+        self: _CompositeRunnerMergeStageHostProtocol,
+        state: CompositeCheckpointState,
+    ) -> None:
         """Finalize pipeline: set COMPLETED state and clean checkpoint."""
         state = self._transition_to_completed_state(state)
         await self._persist_completed_state(state)

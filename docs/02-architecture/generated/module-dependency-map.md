@@ -5,7 +5,7 @@
 ## Summary
 
 - Scanned modules: `1069`
-- Internal import edges (raw): `3986`
+- Internal import edges (raw): `3994`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `237`
@@ -20,15 +20,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|469 OK| application
-    application -->|620 OK| domain
+    application -->|472 OK| application
+    application -->|621 OK| domain
     composition -->|200 OK| application
-    composition -->|274 OK| composition
+    composition -->|275 OK| composition
     composition -->|226 OK| domain
     composition -->|211 OK| infrastructure
     domain -->|692 OK| domain
     infrastructure -->|484 OK| domain
-    infrastructure -->|616 OK| infrastructure
+    infrastructure -->|619 OK| infrastructure
     interfaces -->|18 OK| application
     interfaces -->|29 OK| composition
     interfaces -->|28 OK| domain
@@ -39,15 +39,15 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 469 | allowed |
-| `application` | `domain` | 620 | allowed |
+| `application` | `application` | 472 | allowed |
+| `application` | `domain` | 621 | allowed |
 | `composition` | `application` | 200 | allowed |
-| `composition` | `composition` | 274 | allowed |
+| `composition` | `composition` | 275 | allowed |
 | `composition` | `domain` | 226 | allowed |
 | `composition` | `infrastructure` | 211 | allowed |
 | `domain` | `domain` | 692 | allowed |
 | `infrastructure` | `domain` | 484 | allowed |
-| `infrastructure` | `infrastructure` | 616 | allowed |
+| `infrastructure` | `infrastructure` | 619 | allowed |
 | `interfaces` | `application` | 18 | allowed |
 | `interfaces` | `composition` | 29 | allowed |
 | `interfaces` | `domain` | 28 | allowed |
@@ -65,7 +65,7 @@ flowchart LR
 | `application.core` | `domain.types` | 52 |
 | `application.core` | `domain.ports` | 45 |
 | `composition.bootstrap` | `application.composite` | 44 |
-| `application.composite` | `domain.ports` | 39 |
+| `application.composite` | `domain.ports` | 40 |
 | `composition.factories` | `domain.ports` | 38 |
 | `infrastructure.storage` | `domain.ports` | 36 |
 | `composition.factories` | `infrastructure.storage` | 35 |
