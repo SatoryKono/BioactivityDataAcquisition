@@ -11,7 +11,9 @@ from bioetl.application.composite.column_renamer import ColumnRenamerService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.join_planner_helpers import (
-    prepare_qualified_right_join_dataframe,
+    build_join_key_set,
+    find_missing_keys,
+    prepare_join_frames,
 )
 from bioetl.application.composite.protocols import JoinKeyResolverProtocol
 from bioetl.domain.composite.config import DependencyConfig
@@ -73,22 +75,6 @@ def resolve_left_pipeline(
         return dep.key_source
     return seed_pipeline
 
-
-def build_asymmetric_join_key_set(
-    *,
-    left_join_key: str,
-    right_join_key: str,
-    left_join_key_qualified: str | None,
-) -> set[str]:
-    join_key_set = {left_join_key, right_join_key}
-    if left_join_key_qualified and left_join_key_qualified != left_join_key:
-        join_key_set.add(left_join_key_qualified)
-    return join_key_set
-
-def find_missing_keys(columns: list[str], keys: list[str]) -> list[str]:
-    return [key for key in keys if key not in columns]
-
-
 def build_composite_join_metadata(
     *,
     dep: DependencyConfig,
@@ -133,20 +119,6 @@ def log_missing_composite_key_columns(
     )
 
 
-def normalize_dependency_join_inputs(
-    *,
-    join_key_resolver: JoinKeyResolverProtocol,
-    merged_df: pl.DataFrame,
-    left_join_keys: list[str],
-    seed_pipeline: str | None,
-) -> pl.DataFrame:
-    return join_key_resolver.normalize_join_key_columns(
-        merged_df,
-        left_join_keys,
-        pipeline=seed_pipeline,
-    )
-
-
 def prepare_dependency_join_frames(
     *,
     deduplicator: EnricherDeduplicatorService,
@@ -162,16 +134,13 @@ def prepare_dependency_join_frames(
     right_join_keys: list[str],
     seed_pipeline: str | None,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
-    normalized_merged = normalize_dependency_join_inputs(
-        join_key_resolver=join_key_resolver,
+    return prepare_join_frames(
         merged_df=merged_df,
+        right_df=dep_df,
         left_join_keys=left_join_keys,
+        right_join_keys=right_join_keys,
+        right_pipeline=dep.pipeline,
         seed_pipeline=seed_pipeline,
-    )
-    prepared_dep = prepare_qualified_right_join_dataframe(
-        source_df=dep_df,
-        pipeline=dep.pipeline,
-        join_keys=right_join_keys,
         deduplicator=deduplicator,
         join_key_resolver=join_key_resolver,
         renamer=renamer,
@@ -181,7 +150,6 @@ def prepare_dependency_join_frames(
         log_message="Renamed dependency columns to qualified format",
         log_field_name="dependency",
     )
-    return normalized_merged, prepared_dep
 
 
 def resolve_composite_join_context(
@@ -237,7 +205,7 @@ def resolve_single_key_join_context(
         prepared_context=prepared_context,
         seed_join_key=seed_join_key,
         dep_join_key=dep_join_key,
-        join_key_set=build_asymmetric_join_key_set(
+        join_key_set=build_join_key_set(
             left_join_key=seed_join_key,
             right_join_key=dep_join_key,
             left_join_key_qualified=seed_join_key_qualified,

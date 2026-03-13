@@ -174,10 +174,10 @@ def test_transition_to_completed_state_when_not_completed_then_transitions() -> 
 def test_build_merge_inputs_when_no_results_then_returns_empty_lists() -> None:
     harness = _MergeHarness()
 
-    enrichers, deps = harness._build_merge_inputs({}, {})
+    prepared_inputs = harness._build_merge_inputs({}, {})
 
-    assert enrichers == []
-    assert deps == []
+    assert prepared_inputs.enrichers == []
+    assert prepared_inputs.dependencies == []
 
 
 @pytest.mark.unit
@@ -187,10 +187,10 @@ def test_build_merge_inputs_when_success_enricher_then_included() -> None:
     harness._config.enrichers = [cfg]
     results = {"enricher_a": _success_enrichment("enricher_a")}
 
-    enrichers, deps = harness._build_merge_inputs(results, {})
+    prepared_inputs = harness._build_merge_inputs(results, {})
 
-    assert cfg in enrichers
-    assert deps == []
+    assert cfg in prepared_inputs.enrichers
+    assert prepared_inputs.dependencies == []
 
 
 # ---------------------------------------------------------------------------

@@ -9,6 +9,7 @@ from bioetl.application.composite.dependency_join_support import (
     CompositeJoinContext,
     PreparedDependencyJoinContext,
     ResolvedCompositeJoinContext,
+    ResolvedSingleKeyJoinContext,
     build_composite_join_metadata,
     build_single_key_join_metadata,
     execute_dependency_join,
@@ -99,24 +100,9 @@ class DependencyJoinerService:
         if resolved_context is None:
             return merged_df
 
-        return self._execute_prepared_dependency_join(
-            prepared_context=resolved_context.prepared_context,
-            join_key_set=resolved_context.join_key_set,
+        return self._execute_composite_dependency_join(
+            resolved_context=resolved_context,
             dep=dep,
-            execute_join=lambda resolved_merged, resolved_dep: (
-                self._join_executor.execute_composite_key_join(
-                    resolved_merged,
-                    resolved_dep,
-                    resolved_context.left_keys,
-                    resolved_context.right_keys,
-                    dep.pipeline,
-                )
-            ),
-            log_message="Joined dependency with composite key",
-            log_fields={
-                "left_keys": resolved_context.left_keys,
-                "right_keys": resolved_context.right_keys,
-            },
         )
 
     def drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -159,24 +145,9 @@ class DependencyJoinerService:
             dependency=dep.pipeline,
             prepared_context=prepared_context,
         )
-        return self._execute_prepared_dependency_join(
-            prepared_context=resolved_context.prepared_context,
-            join_key_set=resolved_context.join_key_set,
+        return self._execute_single_key_dependency_join(
+            resolved_context=resolved_context,
             dep=dep,
-            execute_join=lambda resolved_merged, resolved_dep: (
-                self._join_executor.execute_polars_join(
-                    resolved_merged,
-                    resolved_dep,
-                    resolved_context.seed_join_key,
-                    resolved_context.dep_join_key,
-                    dep.pipeline,
-                )
-            ),
-            log_message="Joined dependency",
-            log_fields={
-                "seed_join_key": resolved_context.seed_join_key,
-                "dep_join_key": resolved_context.dep_join_key,
-            },
         )
 
     def _apply_dependency_join_if_loaded(
@@ -280,4 +251,56 @@ class DependencyJoinerService:
             log_message=log_message,
             dependency=dep.pipeline,
             log_fields=log_fields,
+        )
+
+    def _execute_composite_dependency_join(
+        self,
+        *,
+        resolved_context: ResolvedCompositeJoinContext,
+        dep: DependencyConfig,
+    ) -> pl.DataFrame:
+        return self._execute_prepared_dependency_join(
+            prepared_context=resolved_context.prepared_context,
+            join_key_set=resolved_context.join_key_set,
+            dep=dep,
+            execute_join=lambda resolved_merged, resolved_dep: (
+                self._join_executor.execute_composite_key_join(
+                    resolved_merged,
+                    resolved_dep,
+                    resolved_context.left_keys,
+                    resolved_context.right_keys,
+                    dep.pipeline,
+                )
+            ),
+            log_message="Joined dependency with composite key",
+            log_fields={
+                "left_keys": resolved_context.left_keys,
+                "right_keys": resolved_context.right_keys,
+            },
+        )
+
+    def _execute_single_key_dependency_join(
+        self,
+        *,
+        resolved_context: ResolvedSingleKeyJoinContext,
+        dep: DependencyConfig,
+    ) -> pl.DataFrame:
+        return self._execute_prepared_dependency_join(
+            prepared_context=resolved_context.prepared_context,
+            join_key_set=resolved_context.join_key_set,
+            dep=dep,
+            execute_join=lambda resolved_merged, resolved_dep: (
+                self._join_executor.execute_polars_join(
+                    resolved_merged,
+                    resolved_dep,
+                    resolved_context.seed_join_key,
+                    resolved_context.dep_join_key,
+                    dep.pipeline,
+                )
+            ),
+            log_message="Joined dependency",
+            log_fields={
+                "seed_join_key": resolved_context.seed_join_key,
+                "dep_join_key": resolved_context.dep_join_key,
+            },
         )

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
@@ -91,7 +92,7 @@ if TYPE_CHECKING:
             self,
             enrichment_results: dict[str, EnrichmentResult],
             dependency_results: dict[str, DependencyResult] | None,
-        ) -> tuple[list[EnricherConfig], list[DependencyConfig]]: ...
+        ) -> _PreparedMergeInputs: ...
 
         def _handle_dry_run_merge_skip(
             self,
@@ -116,6 +117,14 @@ if TYPE_CHECKING:
         ) -> None: ...
 
 __all__ = ["CompositeRunnerMergeStageMixin"]
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedMergeInputs:
+    """Mergeable enricher/dependency inputs resolved for the merge stage."""
+
+    enrichers: list[EnricherConfig]
+    dependencies: list[DependencyConfig]
 
 
 class CompositeRunnerMergeStageMixin:
@@ -230,7 +239,7 @@ class CompositeRunnerMergeStageMixin:
         self: _CompositeRunnerMergeStageHostProtocol,
         enrichment_results: dict[str, EnrichmentResult],
         dependency_results: dict[str, DependencyResult] | None,
-    ) -> tuple[list[EnricherConfig], list[DependencyConfig]]:
+    ) -> _PreparedMergeInputs:
         """Build mergeable enrichers and dependencies for the merge stage."""
         mergeable_enrichers = get_mergeable_enrichers(
             enrichment_results,
@@ -242,7 +251,10 @@ class CompositeRunnerMergeStageMixin:
             self._config.dependencies,
             self._logger,
         )
-        return mergeable_enrichers, mergeable_dependencies
+        return _PreparedMergeInputs(
+            enrichers=mergeable_enrichers,
+            dependencies=mergeable_dependencies,
+        )
 
     def _handle_dry_run_merge_skip(
         self: _CompositeRunnerMergeStageHostProtocol,
@@ -341,18 +353,18 @@ class CompositeRunnerMergeStageMixin:
             state = await self._start_merge_phase(state)
 
             try:
-                mergeable_enrichers, mergeable_dependencies = self._build_merge_inputs(
+                prepared_inputs = self._build_merge_inputs(
                     enrichment_results,
                     dependency_results,
                 )
 
                 merge_result = await self._merger.merge(
                     seed_table=self._config.seed.silver_table,
-                    enrichers=mergeable_enrichers,
+                    enrichers=prepared_inputs.enrichers,
                     enrichment_results=enrichment_results,
                     run_id=self._run_id_str,
                     seed_pipeline=self._config.seed.pipeline,
-                    dependencies=mergeable_dependencies,
+                    dependencies=prepared_inputs.dependencies,
                     dependency_results=dependency_results,
                 )
                 await self._handle_merge_success(merge_result)

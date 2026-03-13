@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.runner_pkg.runner_helpers import (
@@ -38,6 +39,11 @@ if TYPE_CHECKING:
             state: CompositeCheckpointState,
         ) -> list[EnricherConfig]: ...
 
+        def _prepare_enrichment_run_context(
+            self,
+            state: CompositeCheckpointState,
+        ) -> _PreparedEnrichmentRunContext: ...
+
         def _call_check_required_enrichers(
             self,
             enrichment_results: dict[str, EnrichmentResult],
@@ -70,14 +76,14 @@ if TYPE_CHECKING:
         async def _start_enrichment_stage(
             self,
             state: CompositeCheckpointState,
-            enrichers_to_run: list[EnricherConfig],
+            context: _PreparedEnrichmentRunContext,
         ) -> CompositeCheckpointState: ...
 
         async def _run_enrichers_and_update_state(
             self,
             state: CompositeCheckpointState,
             keys_df: pl.DataFrame,
-            enrichers_to_run: list[EnricherConfig],
+            context: _PreparedEnrichmentRunContext,
         ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]: ...
 
         async def _skip_enrichment_stage(
@@ -88,7 +94,7 @@ if TYPE_CHECKING:
         def _finalize_enrichment_results(
             self,
             state: CompositeCheckpointState,
-            enrichers_to_run: list[EnricherConfig],
+            context: _PreparedEnrichmentRunContext,
             enrichment_results: dict[str, EnrichmentResult],
         ) -> dict[str, EnrichmentResult]: ...
 
@@ -121,30 +127,48 @@ if TYPE_CHECKING:
         ) -> None: ...
 
 
+@dataclass(frozen=True, slots=True)
+class _PreparedEnrichmentRunContext:
+    """Selected enrichers and derived names for one enrichment-stage run."""
+
+    enrichers_to_run: list[EnricherConfig]
+    enricher_names: list[str]
+
+
 class _CompositeRunnerStageEnrichmentMixin:
     """Host mixin for enrichment phase execution and final transition."""
+
+    def _prepare_enrichment_run_context(
+        self: _CompositeRunnerStageEnrichmentHostProtocol,
+        state: CompositeCheckpointState,
+    ) -> _PreparedEnrichmentRunContext:
+        """Resolve the enrichers selected for the current stage execution."""
+        enrichers_to_run = self._call_get_enrichers_to_run(state)
+        return _PreparedEnrichmentRunContext(
+            enrichers_to_run=enrichers_to_run,
+            enricher_names=[enricher.pipeline for enricher in enrichers_to_run],
+        )
 
     async def _start_enrichment_stage(
         self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
-        enrichers_to_run: list[EnricherConfig],
+        context: _PreparedEnrichmentRunContext,
     ) -> CompositeCheckpointState:
         """Transition FSM to ENRICHING, persist checkpoint, log phase start."""
-        enricher_names = [enricher.pipeline for enricher in enrichers_to_run]
         state = self._transition_state_with_fsm_log(
             state,
             CompositePipelineState.ENRICHING,
             stage="enrichment_start",
-            enrichers=enricher_names,
-            count=len(enrichers_to_run),
+            enrichers=context.enricher_names,
+            count=len(context.enrichers_to_run),
         )
         await self._call_save_checkpoint_safe(state, "enrichment_running")
         self._logger.info(
             PipelineEvent.phase_started("enrichment"),
             composite=self._config.name,
             run_id=self._run_id_str,
-            enrichers=enricher_names,
-            count=len(enrichers_to_run),
+            enrichers=context.enricher_names,
+            count=len(context.enrichers_to_run),
         )
         return state
 
@@ -152,12 +176,12 @@ class _CompositeRunnerStageEnrichmentMixin:
         self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
         keys_df: pl.DataFrame,
-        enrichers_to_run: list[EnricherConfig],
+        context: _PreparedEnrichmentRunContext,
     ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
         """Run enrichers, update state with results, persist checkpoint."""
         enrichment_results = await self._coordinator.run_enrichers(
             keys=keys_df,
-            enrichers=enrichers_to_run,
+            enrichers=context.enrichers_to_run,
             completed=state.completed_enrichers,
             runner_factory=self._enricher_runner_factory,
         )
@@ -204,15 +228,15 @@ class _CompositeRunnerStageEnrichmentMixin:
         keys_df: pl.DataFrame,
     ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
         """Execute the enrichment phase."""
-        enrichers_to_run = self._call_get_enrichers_to_run(state)
+        context = self._prepare_enrichment_run_context(state)
         enrichment_results: dict[str, EnrichmentResult] = {}
 
-        if enrichers_to_run:
-            state = await self._start_enrichment_stage(state, enrichers_to_run)
+        if context.enrichers_to_run:
+            state = await self._start_enrichment_stage(state, context)
             state, enrichment_results = await self._run_enrichers_and_update_state(
                 state,
                 keys_df,
-                enrichers_to_run,
+                context,
             )
         else:
             state, enrichment_results = await self._skip_enrichment_stage(
@@ -221,7 +245,7 @@ class _CompositeRunnerStageEnrichmentMixin:
 
         enrichment_results = self._finalize_enrichment_results(
             state=state,
-            enrichers_to_run=enrichers_to_run,
+            context=context,
             enrichment_results=enrichment_results,
         )
 
@@ -259,7 +283,7 @@ class _CompositeRunnerStageEnrichmentMixin:
     def _finalize_enrichment_results(
         self: _CompositeRunnerStageEnrichmentHostProtocol,
         state: CompositeCheckpointState,
-        enrichers_to_run: list[EnricherConfig],
+        context: _PreparedEnrichmentRunContext,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> dict[str, EnrichmentResult]:
         """Merge checkpoint results and add NOT_RUN entries when runtime policy skips optional enrichers."""
@@ -268,7 +292,7 @@ class _CompositeRunnerStageEnrichmentMixin:
 
         return add_not_run_results(
             enrichment_results,
-            enrichers_to_run,
+            context.enrichers_to_run,
             self._config.enrichers,
             state.completed_enrichers,
             self._runtime.required_only,

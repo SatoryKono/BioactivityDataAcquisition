@@ -14,6 +14,8 @@
 - **Зависимости:** Здесь находятся все "грязные" детали: HTTP-клиенты, коннекторы к БД, специфичные SDK.
 - **Изменчивость:** Этот слой наиболее подвержен изменениям при смене технологий (например, переход с локальной ФС на объектное хранилище в будущем).
 
+**Центральные реализации:** `BronzeWriter`, `SilverWriter`, `GoldWriter` (medallion storage), `TokenBucketRateLimiter` и `CircuitBreakerGuard` (HTTP resilience), `MemoryLock` (local-only locking).
+
 ## 2. Ключевые Компоненты
 
 ### 2.1. `adapters/` — Адаптеры к Внешним API
@@ -96,7 +98,7 @@ PubMedAdapter                         (pubchempy)
 - **`DeltaReader`** (`delta_reader.py`): Чтение Delta Lake таблиц.
 - **`ArrowDataConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
 - **`MetadataBuilder`** / **`MetadataWriter`**: Генерация и запись метаданных.
-- **`RetentionManager`** (`retention_manager.py`): Управление политиками хранения данных.
+- **`RetentionPolicy`** (`retention_manager.py`): Управление политиками хранения данных, VACUUM и операциями обслуживания Delta Lake.
 
 ### 2.3. `locking/` — Реализация Блокировок
 

@@ -4,8 +4,17 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.application.composite.column_renamer import ColumnRenamerService
+    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+    from bioetl.application.composite.protocols import JoinKeyResolverProtocol
+    from bioetl.domain.ports import LoggerPort
 
 
 def resolve_field_aliases_from_registry(pipeline: str) -> dict[str, str] | None:
@@ -100,6 +109,104 @@ def count_qualified_columns(columns: list[str]) -> int:
     return len([col for col in columns if "." in col and not col.startswith("_")])
 
 
+def build_join_key_set(
+    *,
+    left_join_key: str,
+    right_join_key: str,
+    left_join_key_qualified: str | None,
+) -> set[str]:
+    """Build a join-key set for symmetric or asymmetric join-key resolution."""
+    join_key_set = {left_join_key, right_join_key}
+    if left_join_key_qualified and left_join_key_qualified != left_join_key:
+        join_key_set.add(left_join_key_qualified)
+    return join_key_set
+
+
+def find_missing_keys(columns: list[str], keys: list[str]) -> list[str]:
+    """Return keys that are absent from the given column list."""
+    return [key for key in keys if key not in columns]
+
+
+def prepare_qualified_right_join_dataframe(
+    *,
+    source_df: pl.DataFrame,
+    pipeline: str,
+    join_keys: list[str],
+    deduplicator: EnricherDeduplicatorService,
+    join_key_resolver: JoinKeyResolverProtocol,
+    renamer: ColumnRenamerService,
+    logger: LoggerPort,
+    field_alias_resolver: Callable[[str], dict[str, str] | None],
+    drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],
+    log_message: str,
+    log_field_name: str,
+) -> pl.DataFrame:
+    """Prepare a right-side join DataFrame for qualified join execution."""
+    prepared_df = deduplicator.deduplicate(
+        enricher_df=source_df,
+        join_keys=join_keys,
+        enricher_name=pipeline,
+    )
+    prepared_df = join_key_resolver.normalize_join_key_columns(
+        prepared_df,
+        join_keys,
+        pipeline=None,
+    )
+    prepared_df = renamer.rename_dataframe(
+        prepared_df,
+        pipeline,
+        exclude_join_keys=False,
+        field_aliases=field_alias_resolver(pipeline),
+    )
+    logger.debug(
+        log_message,
+        **{
+            log_field_name: pipeline,
+            "qualified_count": count_qualified_columns(prepared_df.columns),
+        },
+    )
+    return drop_system_columns(prepared_df)
+
+
+def prepare_join_frames(
+    *,
+    merged_df: pl.DataFrame,
+    right_df: pl.DataFrame,
+    left_join_keys: list[str],
+    right_join_keys: list[str],
+    right_pipeline: str,
+    seed_pipeline: str | None,
+    deduplicator: EnricherDeduplicatorService,
+    join_key_resolver: JoinKeyResolverProtocol,
+    renamer: ColumnRenamerService,
+    logger: LoggerPort,
+    field_alias_resolver: Callable[[str], dict[str, str] | None],
+    drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],
+    log_message: str,
+    log_field_name: str,
+) -> tuple[pl.DataFrame, pl.DataFrame]:
+    """Prepare left and right DataFrames for a qualified join."""
+    normalized_merged = join_key_resolver.normalize_join_key_columns(
+        merged_df,
+        left_join_keys,
+        pipeline=seed_pipeline,
+    )
+    prepared_right = prepare_qualified_right_join_dataframe(
+        source_df=right_df,
+        pipeline=right_pipeline,
+        join_keys=right_join_keys,
+        deduplicator=deduplicator,
+        join_key_resolver=join_key_resolver,
+        renamer=renamer,
+        logger=logger,
+        field_alias_resolver=field_alias_resolver,
+        drop_system_columns=drop_system_columns,
+        log_message=log_message,
+        log_field_name=log_field_name,
+    )
+    return normalized_merged, prepared_right
+
+
 def build_enricher_join_key_set(
     *,
     primary_key: str,
@@ -131,9 +238,11 @@ def build_enricher_join_key_set(
             merged_columns,
         )
     )
-    join_key_set = {seed_join_key, enricher_join_key}
-    if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
-        join_key_set.add(seed_join_key_qualified)
+    join_key_set = build_join_key_set(
+        left_join_key=seed_join_key,
+        right_join_key=enricher_join_key,
+        left_join_key_qualified=seed_join_key_qualified,
+    )
     return seed_join_key, enricher_join_key, join_key_set
 
 
@@ -182,11 +291,15 @@ __all__ = [
     "EnricherJoinMetadataContext",
     "build_enricher_join_key_set",
     "build_enricher_join_metadata",
+    "build_join_key_set",
     "count_qualified_columns",
     "extract_base_column",
+    "find_missing_keys",
     "infer_pipeline_from_table",
     "infer_silver_table",
     "parse_pipeline_name",
+    "prepare_join_frames",
+    "prepare_qualified_right_join_dataframe",
     "resolve_field_aliases_from_registry",
     "table_path_to_name",
 ]

@@ -22,7 +22,7 @@
 %% @uniform width=712 height=184 max_title_len=71 max_desc_lines=8
 flowchart TB
     subgraph CLI["Interfaces Layer (Click)"]
-        CMD["bioetl run<br/>pipeline=chembl_activity<br/>run_type=incremental<br/>resume=true"]
+        CMD["bioetl run<br/>--pipeline chembl_activity<br/>--run-type incremental<br/>--resume"]
         PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• resume flag"]
         OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• resume: bool"]
     end

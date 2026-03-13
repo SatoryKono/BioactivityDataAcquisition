@@ -60,7 +60,7 @@ classDiagram
         +convert(records, schema)
     }
 
-    class RetentionManager {
+    class RetentionPolicy {
         +manage_retention(table_path, hours)
     }
 
@@ -108,8 +108,8 @@ classDiagram
 
     SilverWriter o-- ArrowDataConverter
     GoldWriter o-- ArrowDataConverter
-    SilverWriter o-- RetentionManager
-    GoldWriter o-- RetentionManager
+    SilverWriter o-- RetentionPolicy
+    GoldWriter o-- RetentionPolicy
     SilverWriter o-- MetadataWriter
     GoldWriter o-- MetadataWriter
     SilverWriter o-- CsvExporter
@@ -129,7 +129,7 @@ classDiagram
     style GoldWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
     style DeltaReader fill:#fff1f2,stroke:#dc2626,stroke-width:2px
     style ArrowDataConverter fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style RetentionManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style RetentionPolicy fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style MetadataWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
     style BronzeMetadataBuilder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style SilverMetadataBuilder fill:#eff6ff,stroke:#2563eb,stroke-width:2px

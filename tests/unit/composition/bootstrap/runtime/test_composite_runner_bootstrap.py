@@ -66,43 +66,16 @@ def _make_config(*, cross_validation_enabled: bool) -> SimpleNamespace:
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.bootstrap.runtime.composite.CompositePipelineRunner")
-@patch("bioetl.composition.bootstrap.runtime.composite.CompositeSupportServicesFactory")
-@patch("bioetl.composition.bootstrap.runtime.composite.RunnerFactoryBuilderService")
-@patch("bioetl.composition.bootstrap.runtime.composite.MemoryLock")
-@patch("bioetl.composition.bootstrap.runtime.composite.bootstrap_storage_adapter")
-@patch("bioetl.composition.bootstrap.runtime.composite.bootstrap_logger_port")
-@patch("bioetl.composition.bootstrap.runtime.composite.get_settings")
 def test_bootstrap_composite_runner_orchestrates_builders(
-    mock_get_settings: MagicMock,
-    mock_bootstrap_logger: MagicMock,
-    mock_bootstrap_storage: MagicMock,
-    mock_memory_lock: MagicMock,
-    mock_runner_builder_cls: MagicMock,
-    mock_support_factory_cls: MagicMock,
-    mock_runner_cls: MagicMock,
 ) -> None:
     config = _make_config(cross_validation_enabled=True)
     runtime = _make_runtime()
     logger = MagicMock()
-    storage = MagicMock()
     lock = MagicMock()
-
-    mock_get_settings.return_value = SimpleNamespace(data_dir="data")
-    mock_bootstrap_logger.return_value = logger
-    mock_bootstrap_storage.return_value = storage
-    mock_memory_lock.return_value = lock
 
     seed_runner_factory = MagicMock(name="seed_runner_factory")
     enricher_runner_factory = MagicMock(name="enricher_runner_factory")
     dependency_runner_factory = MagicMock(name="dependency_runner_factory")
-
-    runner_builder = MagicMock()
-    runner_builder.build_seed_factory.return_value = seed_runner_factory
-    runner_builder.build_enricher_factory.return_value = enricher_runner_factory
-    runner_builder.build_dependency_factory.return_value = dependency_runner_factory
-    mock_runner_builder_cls.return_value = runner_builder
-
     support_bundle = SimpleNamespace(
         key_extractor=MagicMock(),
         dependency_coordinator=MagicMock(),
@@ -113,47 +86,59 @@ def test_bootstrap_composite_runner_orchestrates_builders(
         fsm_state_helper=MagicMock(),
         quarantine_port=MagicMock(),
     )
-    support_factory = MagicMock()
-    support_factory.build.return_value = support_bundle
-    mock_support_factory_cls.return_value = support_factory
-
     composite_runner = MagicMock(name="composite_runner")
-    mock_runner_cls.return_value = composite_runner
 
-    result = composite_runtime.bootstrap_composite_runner(
-        config=config,
-        runtime=runtime,
+    runtime_basics = SimpleNamespace(
         run_id="00000000-0000-0000-0000-000000000001",
+        settings=MagicMock(),
+        logger=logger,
+        storage=MagicMock(),
+        lock=lock,
     )
+
+    with (
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._bootstrap_runtime_basics"
+        ) as mock_runtime_basics,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._build_runner_factories"
+        ) as mock_build_runner_factories,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._build_support_services"
+        ) as mock_build_support_services,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite.CompositePipelineRunner"
+        ) as mock_runner_cls,
+    ):
+        mock_runtime_basics.return_value = runtime_basics
+        mock_build_runner_factories.return_value = (
+            seed_runner_factory,
+            dependency_runner_factory,
+            enricher_runner_factory,
+        )
+        mock_build_support_services.return_value = support_bundle
+        mock_runner_cls.return_value = composite_runner
+
+        result = composite_runtime.bootstrap_composite_runner(
+            config=config,
+            runtime=runtime,
+            run_id="00000000-0000-0000-0000-000000000001",
+        )
 
     assert result is composite_runner
-    mock_runner_builder_cls.assert_called_once()
-    mock_support_factory_cls.assert_called_once()
-
-    runner_builder.build_seed_factory.assert_called_once_with(
-        seed_pipeline="chembl_publication",
-        seed_limit=100,
-        bronze_opts={
-            "use_cached_bronze": True,
-            "cached_bronze_path": "data/bronze",
-            "cached_bronze_date": "2026-01-01",
-        },
+    mock_runtime_basics.assert_called_once_with(
+        config=config,
+        run_id="00000000-0000-0000-0000-000000000001",
     )
-    runner_builder.build_enricher_factory.assert_called_once_with(
-        enrichers=list(config.enrichers),
-        bronze_opts={
-            "use_cached_bronze": True,
-            "cached_bronze_path": "data/bronze",
-            "cached_bronze_date": "2026-01-01",
-        },
+    mock_build_runner_factories.assert_called_once_with(
+        config=config,
+        runtime=runtime,
+        logger=runtime_basics.logger,
     )
-    runner_builder.build_dependency_factory.assert_called_once_with(
-        dependencies=list(config.dependencies),
-        bronze_opts={
-            "use_cached_bronze": True,
-            "cached_bronze_path": "data/bronze",
-            "cached_bronze_date": "2026-01-01",
-        },
+    mock_build_support_services.assert_called_once_with(
+        config=config,
+        runtime=runtime,
+        runtime_basics=runtime_basics,
     )
 
     call_kwargs = mock_runner_cls.call_args.kwargs
@@ -163,43 +148,21 @@ def test_bootstrap_composite_runner_orchestrates_builders(
     assert call_kwargs["logger"] is logger
     assert call_kwargs["lock"] is lock
     assert call_kwargs["run_id"] == "00000000-0000-0000-0000-000000000001"
+    assert call_kwargs["key_extractor"] is support_bundle.key_extractor
+    assert call_kwargs["coordinator"] is support_bundle.coordinator
+    assert call_kwargs["merger"] is support_bundle.merger
+    assert call_kwargs["checkpoint_manager"] is support_bundle.checkpoint_manager
+    assert call_kwargs["dq_report_service"] is support_bundle.dq_report_service
+    assert call_kwargs["fsm_state_helper"] is support_bundle.fsm_state_helper
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.bootstrap.runtime.composite.CompositePipelineRunner")
-@patch("bioetl.composition.bootstrap.runtime.composite.CompositeSupportServicesFactory")
-@patch("bioetl.composition.bootstrap.runtime.composite.RunnerFactoryBuilderService")
-@patch("bioetl.composition.bootstrap.runtime.composite.MemoryLock")
-@patch("bioetl.composition.bootstrap.runtime.composite.bootstrap_storage_adapter")
-@patch("bioetl.composition.bootstrap.runtime.composite.bootstrap_logger_port")
-@patch("bioetl.composition.bootstrap.runtime.composite.get_settings")
-@patch("bioetl.composition.bootstrap.runtime.composite.uuid4")
 def test_bootstrap_composite_runner_generates_run_id(
-    mock_uuid4: MagicMock,
-    mock_get_settings: MagicMock,
-    mock_bootstrap_logger: MagicMock,
-    mock_bootstrap_storage: MagicMock,
-    mock_memory_lock: MagicMock,
-    mock_runner_builder_cls: MagicMock,
-    mock_support_factory_cls: MagicMock,
-    mock_runner_cls: MagicMock,
 ) -> None:
     config = _make_config(cross_validation_enabled=False)
     runtime = _make_runtime(use_cached_bronze=False)
 
     generated_run_id = UUID("00000000-0000-0000-0000-000000000002")
-    mock_uuid4.return_value = generated_run_id
-    mock_get_settings.return_value = SimpleNamespace(data_dir="data")
-    mock_bootstrap_logger.return_value = MagicMock()
-    mock_bootstrap_storage.return_value = MagicMock()
-    mock_memory_lock.return_value = MagicMock()
-
-    runner_builder = MagicMock()
-    runner_builder.build_seed_factory.return_value = MagicMock()
-    runner_builder.build_enricher_factory.return_value = MagicMock()
-    runner_builder.build_dependency_factory.return_value = MagicMock()
-    mock_runner_builder_cls.return_value = runner_builder
-
     support_bundle = SimpleNamespace(
         key_extractor=MagicMock(),
         dependency_coordinator=MagicMock(),
@@ -210,19 +173,43 @@ def test_bootstrap_composite_runner_generates_run_id(
         fsm_state_helper=MagicMock(),
         quarantine_port=None,
     )
-    support_factory = MagicMock()
-    support_factory.build.return_value = support_bundle
-    mock_support_factory_cls.return_value = support_factory
-    mock_runner_cls.return_value = MagicMock()
-
-    composite_runtime.bootstrap_composite_runner(
-        config=config,
-        runtime=runtime,
-        run_id=None,
+    runtime_basics = SimpleNamespace(
+        run_id=str(generated_run_id),
+        settings=MagicMock(),
+        logger=MagicMock(),
+        storage=MagicMock(),
+        lock=MagicMock(),
     )
 
-    support_factory_call = mock_support_factory_cls.call_args.kwargs
-    assert support_factory_call["run_id"] == str(generated_run_id)
+    with (
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._bootstrap_runtime_basics"
+        ) as mock_runtime_basics,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._build_runner_factories"
+        ) as mock_build_runner_factories,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._build_support_services"
+        ) as mock_build_support_services,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite.CompositePipelineRunner"
+        ) as mock_runner_cls,
+    ):
+        mock_runtime_basics.return_value = runtime_basics
+        mock_build_runner_factories.return_value = (
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+        mock_build_support_services.return_value = support_bundle
+        mock_runner_cls.return_value = MagicMock()
+
+        composite_runtime.bootstrap_composite_runner(
+            config=config,
+            runtime=runtime,
+            run_id=None,
+        )
+
     runner_call = mock_runner_cls.call_args.kwargs
     assert runner_call["run_id"] == str(generated_run_id)
 

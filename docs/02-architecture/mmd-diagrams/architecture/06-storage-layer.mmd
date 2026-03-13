@@ -47,7 +47,7 @@ graph LR
 
     subgraph Support["Support Components"]
         AC["ArrowDataConverter<br/>(records → PyArrow)"]:::size-lg
-        RM["RetentionManager<br/>(vacuum/retention)"]:::size-lg
+        RM["RetentionPolicy<br/>(vacuum/retention)"]:::size-lg
         MW["MetadataWriter<br/>(_metadata.yaml)"]:::size-lg
         CSV["CsvExporter<br/>(Delta → CSV export)"]:::size-lg
         DQW["DQReportWriter<br/>(DQ reports JSON)"]:::size-lg

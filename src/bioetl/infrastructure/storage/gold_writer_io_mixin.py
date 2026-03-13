@@ -42,9 +42,6 @@ class _GoldMergedMetadataWriterProtocol(Protocol):
         table_path: str,
         table_name: str,
         records: list[GoldRecord],
-        primary_keys: list[str],
-        run_id: str | None = None,
-        sources_used: list[str] | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None: ...
 
@@ -205,9 +202,6 @@ async def _write_gold_merged_sidecar(
         table_path=prepared.table_path,
         table_name=prepared.request.table_name,
         records=prepared.request.records,
-        primary_keys=prepared.request.primary_keys or [],
-        run_id=prepared.request.run_id,
-        sources_used=prepared.request.sources_used,
         schema=prepared.request.schema,
     )
 

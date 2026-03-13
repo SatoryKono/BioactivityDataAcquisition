@@ -9,8 +9,9 @@ import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING, ClassVar, Protocol
+from typing import ClassVar, Protocol
 
+import pyarrow as pa
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
@@ -20,24 +21,18 @@ from bioetl.domain.ports import (
     AuditEntry,
     AuditLayer,
     AuditOperation,
+    AuditPort,
+    LoggerPort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
     SilverMetadataInput,
 )
+from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+from bioetl.domain.types import BronzeRecord
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
-
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.domain.ports import (
-        AuditPort,
-        LoggerPort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-    )
-    from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
-    from bioetl.domain.types import BronzeRecord
-    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-    from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
-    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 @dataclass(frozen=True, slots=True)
@@ -399,8 +394,6 @@ class SilverWriterMetadataMixin:
         )
         if version_after is None:
             return None
-
-        from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
         return SilverWriteResult(
             table_name=table_name,

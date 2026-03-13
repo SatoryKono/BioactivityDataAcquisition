@@ -5,10 +5,10 @@
 ## Summary
 
 - Scanned modules: `1075`
-- Internal import edges (raw): `4040`
+- Internal import edges (raw): `4038`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `237`
+- Cross-layer module-group edges (total): `238`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -27,7 +27,7 @@ flowchart LR
     composition -->|230 OK| domain
     composition -->|210 OK| infrastructure
     domain -->|692 OK| domain
-    infrastructure -->|489 OK| domain
+    infrastructure -->|487 OK| domain
     infrastructure -->|622 OK| infrastructure
     interfaces -->|18 OK| application
     interfaces -->|29 OK| composition
@@ -46,7 +46,7 @@ flowchart LR
 | `composition` | `domain` | 230 | allowed |
 | `composition` | `infrastructure` | 210 | allowed |
 | `domain` | `domain` | 692 | allowed |
-| `infrastructure` | `domain` | 489 | allowed |
+| `infrastructure` | `domain` | 487 | allowed |
 | `infrastructure` | `infrastructure` | 622 | allowed |
 | `interfaces` | `application` | 18 | allowed |
 | `interfaces` | `composition` | 29 | allowed |
@@ -65,9 +65,9 @@ flowchart LR
 | `application.core` | `domain.types` | 54 |
 | `application.core` | `domain.ports` | 49 |
 | `composition.bootstrap` | `application.composite` | 44 |
-| `application.composite` | `domain.ports` | 41 |
+| `application.composite` | `domain.ports` | 40 |
 | `composition.factories` | `domain.ports` | 40 |
-| `infrastructure.storage` | `domain.ports` | 37 |
+| `infrastructure.storage` | `domain.ports` | 36 |
 | `composition.factories` | `infrastructure.storage` | 35 |
 | `infrastructure.storage` | `domain.types` | 32 |
 | `application.services` | `domain.ports` | 29 |
@@ -87,8 +87,8 @@ flowchart LR
 | `composition.bootstrap` | `application.services` | 18 |
 | `composition.factories` | `domain.types` | 18 |
 | `composition.providers` | `infrastructure.adapters` | 18 |
-| `infrastructure.storage` | `domain.value_objects` | 18 |
 | `infrastructure.storage` | `domain.medallion` | 17 |
+| `infrastructure.storage` | `domain.value_objects` | 17 |
 | `composition.factories` | `application.services` | 16 |
 | `application.core` | `domain.exceptions` | 15 |
 | `application.pipelines` | `domain.context` | 15 |

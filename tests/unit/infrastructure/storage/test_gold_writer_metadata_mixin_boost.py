@@ -435,7 +435,6 @@ class TestWriteGoldMergedMetadata:
             table_path="gold/t",
             table_name="composite.publication",
             records=[],
-            primary_keys=["id"],
         )
         mixin._metadata_writer.write_gold_metadata.assert_not_called()
 
@@ -449,7 +448,6 @@ class TestWriteGoldMergedMetadata:
             table_path="gold/t",
             table_name="composite.publication",
             records=records,
-            primary_keys=["id"],
         )
 
         mixin._metadata_writer.write_gold_metadata.assert_not_called()
@@ -470,7 +468,6 @@ class TestWriteGoldMergedMetadata:
             table_path="gold/composite/publication",
             table_name="composite.publication",
             records=records,
-            primary_keys=["id"],
         )
 
         coordinator.create_gold_metadata.assert_called_once()
@@ -492,7 +489,6 @@ class TestWriteGoldMergedMetadata:
             table_path="gold/composite/publication",
             table_name="composite.publication",
             records=[{"id": 1}],
-            primary_keys=["id"],
         )
 
         mixin._build_gold_merged_metadata_input.assert_called_once_with(

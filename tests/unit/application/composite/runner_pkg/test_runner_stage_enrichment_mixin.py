@@ -120,6 +120,26 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
 
 
 # ---------------------------------------------------------------------------
+# _prepare_enrichment_run_context
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_prepare_enrichment_run_context_when_enrichers_selected_then_returns_names() -> (
+    None
+):
+    enrichers = [_make_enricher_cfg("crossref"), _make_enricher_cfg("pubmed")]
+    harness = _EnrichmentHarness()
+    harness._seam_enrichers_to_run = enrichers
+    state = _make_state()
+
+    context = harness._prepare_enrichment_run_context(state)
+
+    assert context.enrichers_to_run == enrichers
+    assert context.enricher_names == ["crossref", "pubmed"]
+
+
+# ---------------------------------------------------------------------------
 # _record_completed_enrichment_results
 # ---------------------------------------------------------------------------
 
@@ -201,11 +221,12 @@ def test_finalize_enrichment_results_when_required_only_false_then_no_not_run_ad
     harness = _EnrichmentHarness(config=config)
     harness._runtime.required_only = False
     state = _make_state(enrichment_results={})
-    enrichers_to_run = enrichers
+    harness._seam_enrichers_to_run = enrichers
+    context = harness._prepare_enrichment_run_context(state)
 
     result = harness._finalize_enrichment_results(
         state=state,
-        enrichers_to_run=enrichers_to_run,
+        context=context,
         enrichment_results={},
     )
 
@@ -226,10 +247,11 @@ def test_finalize_enrichment_results_when_checkpoint_has_results_then_merged() -
     state = _make_state(
         enrichment_results={"enricher_a": completed_result},
     )
+    context = harness._prepare_enrichment_run_context(state)
 
     result = harness._finalize_enrichment_results(
         state=state,
-        enrichers_to_run=[],
+        context=context,
         enrichment_results={},
     )
 

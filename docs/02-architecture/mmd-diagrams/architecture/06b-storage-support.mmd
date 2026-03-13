@@ -13,7 +13,7 @@ graph TB
 %% keep-orphan: DQW, NOV
     subgraph Support["Support Components"]
         AC["ArrowDataConverter<br/>records → PyArrow"]:::size-sm
-        RM["RetentionManager<br/>vacuum / retention"]:::size-sm
+        RM["RetentionPolicy<br/>vacuum / retention"]:::size-sm
         MW["MetadataWriter<br/>_metadata.yaml"]:::size-sm
         CSV["CsvExporter<br/>Delta → CSV export"]:::size-sm
         DQW["DQReportWriter<br/>DQ reports JSON"]:::size-sm
