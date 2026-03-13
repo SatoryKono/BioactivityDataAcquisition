@@ -54,6 +54,12 @@ class ResultPresenterCallable(Protocol):
     def __call__(self, result: RunResult) -> None: ...
 
 
+class ResultFinalizerCallable(Protocol):
+    """Callable contract to present a run result and terminate accordingly."""
+
+    def __call__(self, result: RunResult) -> None: ...
+
+
 class ExitCallable(Protocol):
     """Callable contract for terminating with a process exit code."""
 
@@ -61,9 +67,9 @@ class ExitCallable(Protocol):
 
 
 class HealthInfoPresenterCallable(Protocol):
-    """Callable contract to render health-server runtime info."""
+    """Callable contract to render health-server info for a prepared request."""
 
-    def __call__(self, enabled: bool, port: int) -> None: ...
+    def __call__(self, request: RunExecutionRequest) -> None: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -242,7 +248,7 @@ def run_command_flow(
     service: CliRunOrchestrationService,
     execute_run: RunExecutorCallable,
     health_info_presenter: HealthInfoPresenterCallable,
-    result_presenter: ResultPresenterCallable,
+    result_finalizer: ResultFinalizerCallable,
     exit_func: ExitCallable,
 ) -> None:
     """Execute the full run-command policy flow from normalized CLI input."""
@@ -275,15 +281,14 @@ def run_command_flow(
         cached_bronze_path=cli_input.cached_bronze_path,
         exit_func=exit_func,
     )
-    health_info_presenter(request.health_server, request.health_port)
+    health_info_presenter(request)
     result = execute_run_step(
         request=request,
         execute_run=execute_run,
     )
     finalize_run_step(
         result=result,
-        result_presenter=result_presenter,
-        exit_func=exit_func,
+        result_finalizer=result_finalizer,
     )
 
 
@@ -336,16 +341,12 @@ def execute_run_step(
 def finalize_run_step(
     *,
     result: RunResult,
-    result_presenter: ResultPresenterCallable,
-    exit_func: ExitCallable,
+    result_finalizer: ResultFinalizerCallable,
 ) -> None:
-    """Render result and terminate process with mapped exit code.
+    """Finalize CLI execution for a completed run result.
 
     Args:
         result: RunResult from the completed pipeline execution.
-        result_presenter: Callable that formats and prints the result to the terminal.
-        exit_func: Callable that terminates the process with the given exit code.
+        result_finalizer: Callable that renders the result and terminates the CLI.
     """
-    exit_code = map_status_to_exit_code(result.status, result.error_type)
-    result_presenter(result)
-    exit_func(exit_code)
+    result_finalizer(result)

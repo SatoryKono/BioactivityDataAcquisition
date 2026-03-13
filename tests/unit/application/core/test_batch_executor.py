@@ -18,6 +18,7 @@ from bioetl.application.core.batch_executor_helpers import (
     build_batch_result_snapshot,
 )
 from bioetl.application.core.batch_executor_loop_helpers import (
+    BatchExtractionIterationContext,
     BatchExtractionLoopState,
     build_batch_progress_payload,
     build_periodic_checkpoint_payload,
@@ -1068,19 +1069,22 @@ class TestBatchExecutorLoopHelpers:
             current_batch_size=1,
             check_interval=10,
         )
-
-        next_records_fetched = await process_extracted_record_iteration(
-            loop_state=loop_state,
-            raw_record={"id": "1"},
-            shutdown_requested=False,
+        iteration_context = BatchExtractionIterationContext(
             checkpoint_recovery_service=checkpoint_recovery_service,
-            records_fetched=0,
             resume_offset=4,
             process_batch=process_batch,
             memory_manager=memory_manager,
             progress_service=progress_service,
             progress_state=progress_state,
             checkpoint_interval=5,
+        )
+
+        next_records_fetched = await process_extracted_record_iteration(
+            loop_state=loop_state,
+            raw_record={"id": "1"},
+            shutdown_requested=False,
+            records_fetched=0,
+            iteration_context=iteration_context,
         )
 
         assert next_records_fetched == 1

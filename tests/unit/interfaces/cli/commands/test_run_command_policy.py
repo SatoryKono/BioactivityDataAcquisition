@@ -426,7 +426,7 @@ class TestRunCommandFlow:
         assert exc_info.value.code == ExitCode.OK
         mock_handle_destructive.assert_called_once()
         execute_run.assert_called_once_with(request)
-        health_info_presenter.assert_called_once_with(True, 9090)
+        health_info_presenter.assert_called_once_with(request)
         result_presenter.assert_called_once_with(result)
         exit_func.assert_called_once_with(ExitCode.OK)
 

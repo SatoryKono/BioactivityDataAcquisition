@@ -155,6 +155,48 @@ class CompositePipelineRunner(
         """Return composite configuration."""
         return self._config
 
+    def _mark_finished(self, final_state: CompositePipelineState) -> None:
+        """Persist terminal runner state for re-entry guards and diagnostics."""
+        self._finished = True
+        self._final_state = final_state
+
+    def _log_failed_run(
+        self,
+        error: Exception,
+        *,
+        reason_code: str,
+        stage: str | None = None,
+    ) -> None:
+        """Emit the canonical runner failure log payload."""
+        log_kwargs: dict[str, object] = {
+            "composite": self._config.name,
+            "run_id": self._run_id_str,
+            "error": str(error),
+            "error_type": type(error).__name__,
+            "reason_code": reason_code,
+        }
+        if stage is not None:
+            log_kwargs["stage"] = stage
+        self._logger.error(PipelineEvent.FAILED, **log_kwargs)
+
+    async def _run_with_managed_lock(self) -> CompositeResult:
+        """Acquire/release the distributed lock around the canonical run body."""
+        lock_key = self._config.lock_key
+        acquired = await self._lock.acquire(
+            key=lock_key,
+            owner_id=self._run_id,
+            ttl=3600,
+        )
+        if not acquired:
+            raise LockAcquisitionError(key=lock_key)
+
+        try:
+            result = await self._run_with_lock()
+            self._mark_finished(CompositePipelineState.COMPLETED)
+            return result
+        finally:
+            await self._lock.release(key=lock_key, owner_id=self._run_id)
+
     async def run(self) -> CompositeResult:
         """Execute full composite pipeline under distributed lock.
 
@@ -186,46 +228,18 @@ class CompositePipelineRunner(
         )
 
         try:
-            lock_key = self._config.lock_key
-            acquired = await self._lock.acquire(
-                key=lock_key,
-                owner_id=self._run_id,
-                ttl=3600,
-            )
-            if not acquired:
-                raise LockAcquisitionError(key=lock_key)
-
-            try:
-                result = await self._run_with_lock()
-                self._finished = True
-                self._final_state = CompositePipelineState.COMPLETED
-                return result
-            finally:
-                await self._lock.release(key=lock_key, owner_id=self._run_id)
+            return await self._run_with_managed_lock()
         except pipeline_execution_errors as error:
-            self._finished = True
-            self._final_state = CompositePipelineState.FAILED
-            self._logger.error(
-                PipelineEvent.FAILED,
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(error),
-                error_type=type(error).__name__,
+            self._mark_finished(CompositePipelineState.FAILED)
+            self._log_failed_run(
+                error,
                 reason_code="composite_pipeline_execution_failed",
                 stage="run_with_lock",
             )
             raise
         except BioETLError as error:
-            self._finished = True
-            self._final_state = CompositePipelineState.FAILED
-            self._logger.error(
-                PipelineEvent.FAILED,
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(error),
-                error_type=type(error).__name__,
-                reason_code="unexpected_bioetl_error",
-            )
+            self._mark_finished(CompositePipelineState.FAILED)
+            self._log_failed_run(error, reason_code="unexpected_bioetl_error")
             raise
 
     async def _run_with_lock(self) -> CompositeResult:
