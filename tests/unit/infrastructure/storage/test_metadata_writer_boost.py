@@ -217,6 +217,52 @@ class TestEmitRetryTelemetry:
 class TestEmitFinalTelemetry:
     """Tests for _emit_final_telemetry (lines 118, 136)."""
 
+    def test_build_final_telemetry_outcome_keeps_status_mapping(self) -> None:
+        """Outcome builder should keep canonical status->event/severity mapping."""
+        from bioetl.infrastructure.storage.metadata_writer_operations import (
+            _build_metadata_write_final_telemetry,
+        )
+
+        failed = _build_metadata_write_final_telemetry(
+            status="failed",
+            retry_count=2,
+            final_reason="atomic_write_error",
+        )
+        succeeded = _build_metadata_write_final_telemetry(
+            status="succeeded",
+            retry_count=0,
+            final_reason="success_without_retry",
+        )
+
+        assert failed.event_name == "metadata_write_failed"
+        assert failed.severity == "error"
+        assert succeeded.event_name == "metadata_write_completed"
+        assert succeeded.severity == "info"
+
+    def test_final_telemetry_outcome_encodes_event_name_and_severity(self) -> None:
+        """Final telemetry outcome should keep canonical event/severity pairing."""
+        from bioetl.infrastructure.storage.metadata_writer_operations import (
+            _MetadataWriteFinalTelemetry,
+        )
+
+        failed = _MetadataWriteFinalTelemetry(
+            event_name="metadata_write_failed",
+            severity="error",
+            retry_count=2,
+            final_reason="atomic_write_error",
+        )
+        succeeded = _MetadataWriteFinalTelemetry(
+            event_name="metadata_write_completed",
+            severity="info",
+            retry_count=0,
+            final_reason="success_without_retry",
+        )
+
+        assert failed.event_name == "metadata_write_failed"
+        assert failed.severity == "error"
+        assert succeeded.event_name == "metadata_write_completed"
+        assert succeeded.severity == "info"
+
     @pytest.mark.asyncio
     async def test_final_telemetry_failed_path_uses_error(self, tmp_path: Path) -> None:
         """Line 118: status='failed' calls logger.error."""

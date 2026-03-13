@@ -84,6 +84,16 @@ class _MetadataWriteRetryState:
     count: int = 0
 
 
+@dataclass(frozen=True, slots=True)
+class _MetadataWriteFinalTelemetry:
+    """Resolved final telemetry labels for one metadata write outcome."""
+
+    event_name: str
+    severity: str
+    retry_count: int
+    final_reason: str
+
+
 def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
     """Return `{provider}_{entity}_metadata.yaml` or the default filename."""
 
@@ -153,15 +163,26 @@ def _build_metadata_write_telemetry_context(
     )
 
 
+def _build_prepared_metadata_write_operation(
+    *,
+    artifacts: _PreparedMetadataWriteArtifacts,
+    run_id: str,
+) -> _PreparedMetadataWriteOperation:
+    """Wrap prepared payload artifacts with runtime-specific operation state."""
+
+    return _PreparedMetadataWriteOperation(
+        prepared_write=artifacts.prepared_write,
+        telemetry_context=artifacts.telemetry_context,
+        run_id=run_id,
+    )
+
+
 def _prepare_metadata_write_operation(
     request: _MetadataWriteRequest,
 ) -> _PreparedMetadataWriteOperation:
     """Resolve the prepared write payload and shared telemetry context."""
-
-    artifacts = _prepare_metadata_write_artifacts(request)
-    return _PreparedMetadataWriteOperation(
-        prepared_write=artifacts.prepared_write,
-        telemetry_context=artifacts.telemetry_context,
+    return _build_prepared_metadata_write_operation(
+        artifacts=_prepare_metadata_write_artifacts(request),
         run_id=request.metadata.runtime.run_id,
     )
 
@@ -221,29 +242,27 @@ def _emit_final_telemetry(
     logger: LoggerPort,
     metrics: MetricsPort | None,
     context: _MetadataWriteTelemetryContext,
-    retry_count: int,
-    status: str,
-    final_reason: str,
+    outcome: _MetadataWriteFinalTelemetry,
 ) -> None:
     """Emit telemetry for final metadata write outcome."""
 
-    if status == "failed":
+    if outcome.severity == "error":
         logger.error(
-            "metadata_write_failed",
+            outcome.event_name,
             layer=context.layer,
             provider=context.provider,
             pipeline=context.pipeline,
-            retry_count=retry_count,
-            final_reason=final_reason,
+            retry_count=outcome.retry_count,
+            final_reason=outcome.final_reason,
         )
     else:
         logger.info(
-            "metadata_write_completed",
+            outcome.event_name,
             layer=context.layer,
             provider=context.provider,
             pipeline=context.pipeline,
-            retry_count=retry_count,
-            final_reason=final_reason,
+            retry_count=outcome.retry_count,
+            final_reason=outcome.final_reason,
         )
     if metrics is not None:
         metrics.increment_counter(
@@ -253,10 +272,28 @@ def _emit_final_telemetry(
                 "event": "metadata_write_final",
                 "provider": context.provider or "storage",
                 "pipeline": context.pipeline,
-                "severity": "error" if status == "failed" else "info",
-                "error_type": final_reason,
+                "severity": outcome.severity,
+                "error_type": outcome.final_reason,
             },
         )
+
+
+def _build_metadata_write_final_telemetry(
+    *,
+    status: str,
+    retry_count: int,
+    final_reason: str,
+) -> _MetadataWriteFinalTelemetry:
+    """Resolve the canonical final telemetry outcome for one metadata write."""
+
+    return _MetadataWriteFinalTelemetry(
+        event_name="metadata_write_failed"
+        if status == "failed"
+        else "metadata_write_completed",
+        severity="error" if status == "failed" else "info",
+        retry_count=retry_count,
+        final_reason=final_reason,
+    )
 
 
 def _build_retry_callback(
@@ -293,11 +330,14 @@ def _emit_atomic_write_final_telemetry(
 ) -> None:
     """Emit the final metadata-write event from the accumulated retry state."""
 
+    outcome = _build_metadata_write_final_telemetry(
+        status=status,
+        retry_count=retry_state.count,
+        final_reason=final_reason,
+    )
     _emit_final_telemetry(
         logger=logger,
         metrics=metrics,
         context=context,
-        retry_count=retry_state.count,
-        status=status,
-        final_reason=final_reason,
+        outcome=outcome,
     )

@@ -5,7 +5,7 @@
 ## Summary
 
 - Scanned modules: `1076`
-- Internal import edges (raw): `4045`
+- Internal import edges (raw): `4049`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `237`
@@ -29,9 +29,9 @@ flowchart LR
     domain -->|692 OK| domain
     infrastructure -->|487 OK| domain
     infrastructure -->|622 OK| infrastructure
-    interfaces -->|19 OK| application
-    interfaces -->|28 OK| composition
-    interfaces -->|29 OK| domain
+    interfaces -->|21 OK| application
+    interfaces -->|29 OK| composition
+    interfaces -->|30 OK| domain
     interfaces -->|124 OK| interfaces
 ```
 
@@ -48,9 +48,9 @@ flowchart LR
 | `domain` | `domain` | 692 | allowed |
 | `infrastructure` | `domain` | 487 | allowed |
 | `infrastructure` | `infrastructure` | 622 | allowed |
-| `interfaces` | `application` | 19 | allowed |
-| `interfaces` | `composition` | 28 | allowed |
-| `interfaces` | `domain` | 29 | allowed |
+| `interfaces` | `application` | 21 | allowed |
+| `interfaces` | `composition` | 29 | allowed |
+| `interfaces` | `domain` | 30 | allowed |
 | `interfaces` | `interfaces` | 124 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
@@ -93,10 +93,10 @@ flowchart LR
 | `application.core` | `domain.exceptions` | 15 |
 | `application.pipelines` | `domain.context` | 15 |
 | `composition.bootstrap` | `domain.composite` | 15 |
+| `interfaces.cli` | `application.services` | 15 |
 | `application.composite` | `domain.exceptions` | 14 |
 | `application.pipelines` | `domain.value_objects` | 14 |
 | `infrastructure.schemas` | `domain.config` | 14 |
-| `interfaces.cli` | `application.services` | 14 |
 | `application.pipelines` | `domain.ports` | 13 |
 | `infrastructure.config` | `domain.types` | 13 |
 | `infrastructure.quality` | `domain.types` | 13 |

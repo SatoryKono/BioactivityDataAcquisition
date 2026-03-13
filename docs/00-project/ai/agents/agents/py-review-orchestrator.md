@@ -6,7 +6,7 @@ model: sonnet
 *Статус: internal*
 
 # py-review-orchestrator — Hierarchical Code Review Agent
-*Версия: 1.0.0 | Совместимо с RULES.md v5.24 (2026-02-24)*
+*Версия: 1.0.0 | Совместимо с RULES.md v5.24 (2026-03-13)*
 
 ---
 

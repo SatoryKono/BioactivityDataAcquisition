@@ -138,6 +138,39 @@ LEGACY_PATH_FRAGMENTS: list[tuple[str, str]] = [
     ("../../filter/", "../../filters/"),
 ]
 
+SCD2_CANDIDATE_CONFIGS: tuple[Path, ...] = tuple(
+    PROJECT_ROOT / relative_path
+    for relative_path in (
+        "configs/entities/chembl/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+        "configs/entities/chembl/assay.yaml",
+        "configs/entities/chembl/assay_parameters.yaml",
+        "configs/entities/chembl/cell_line.yaml",
+        "configs/entities/chembl/tissue.yaml",
+        "configs/entities/chembl/protein_class.yaml",
+        "configs/entities/chembl/subcellular_fraction.yaml",
+        "configs/entities/chembl/target.yaml",
+        "configs/entities/chembl/target_component.yaml",
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/chembl/compound_record.yaml",
+        "configs/entities/uniprot/protein.yaml",
+        "configs/entities/uniprot/idmapping.yaml",
+        "configs/entities/pubchem/compound.yaml",
+    )
+)
+
+REQUIRED_SCD_CONFIG_KEYS: set[str] = {
+    "valid_from_col",
+    "valid_to_col",
+    "current_flag_col",
+    "version_col",
+}
+
+LEGACY_SCD_CONFIG_KEYS: set[str] = {"valid_from", "valid_to", "is_current", "version"}
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -457,10 +490,68 @@ class TestPipelineNameConvention:
 
 
 # ---------------------------------------------------------------------------
-# INV-CFG-007: Contract hash_exclude alignment with META_FIELDS
+# INV-CFG-007: SCD2 candidates must declare explicit Gold SCD2 policy
+# ---------------------------------------------------------------------------
+class TestExplicitGoldScd2Policy:
+    """INV-CFG-007: SCD2 candidates must declare explicit canonical Gold policy."""
+
+    @pytest.mark.parametrize("config_path", SCD2_CANDIDATE_CONFIGS, ids=_rel)
+    def test_scd2_candidates_use_explicit_gold_scd2_policy(
+        self, config_path: Path
+    ) -> None:
+        data = _load_yaml(config_path)
+        pipeline_cfg = data.get("pipeline")
+        if not isinstance(pipeline_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing pipeline section")
+
+        sink_cfg = pipeline_cfg.get("sink")
+        if not isinstance(sink_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing pipeline.sink section")
+
+        gold_cfg = sink_cfg.get("gold")
+        if not isinstance(gold_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing pipeline.sink.gold section")
+
+        mode = gold_cfg.get("mode")
+        assert mode == "scd2", (
+            f"{_rel(config_path)}: SCD2 candidate must declare "
+            f"pipeline.sink.gold.mode='scd2', found {mode!r}"
+        )
+
+        scd_config = gold_cfg.get("scd_config")
+        assert isinstance(scd_config, dict), (
+            f"{_rel(config_path)}: SCD2 candidate must declare "
+            "pipeline.sink.gold.scd_config"
+        )
+
+        missing = REQUIRED_SCD_CONFIG_KEYS - set(scd_config)
+        assert not missing, (
+            f"{_rel(config_path)}: scd_config missing canonical keys "
+            f"{sorted(missing)}"
+        )
+
+        legacy = LEGACY_SCD_CONFIG_KEYS & set(scd_config)
+        assert not legacy, (
+            f"{_rel(config_path)}: scd_config uses legacy alias keys "
+            f"{sorted(legacy)}"
+        )
+
+        blank_values = [
+            key
+            for key in REQUIRED_SCD_CONFIG_KEYS
+            if not isinstance(scd_config.get(key), str) or not scd_config[key].strip()
+        ]
+        assert not blank_values, (
+            f"{_rel(config_path)}: scd_config keys must be non-empty strings: "
+            f"{sorted(blank_values)}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# INV-CFG-008: Contract hash_exclude alignment with META_FIELDS
 # ---------------------------------------------------------------------------
 class TestContractHashExcludeInvariants:
-    """INV-CFG-007: contracts.hash_exclude must use canonical metadata fields."""
+    """INV-CFG-008: contracts.hash_exclude must use canonical metadata fields."""
 
     _REQUIRED_EXCLUDES: set[str] = {
         "_ingestion_ts",

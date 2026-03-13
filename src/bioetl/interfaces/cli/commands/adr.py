@@ -6,12 +6,15 @@ Provides commands to list, show, and validate ADR documents.
 from __future__ import annotations
 
 import json
+from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition.entrypoints import get_adr_service
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import AdrServicePort
 
 __all__ = [
     "COMMANDS",
@@ -25,6 +28,13 @@ __all__ = [
 @click.group()
 def adr() -> None:
     """ADR (Architecture Decision Records) utilities."""
+
+
+def get_adr_service() -> AdrServicePort:
+    """Load the ADR service through composition on demand."""
+    from bioetl.composition.entrypoints import get_adr_service as _impl
+
+    return _impl()
 
 
 @adr.command("list")

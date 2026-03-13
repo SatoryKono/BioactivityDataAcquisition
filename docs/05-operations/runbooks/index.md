@@ -1,5 +1,5 @@
 # Operations Runbooks (Playbooks)
-*Synced with RULES.md v5.24 (2026-02-21)*
+*Synced with RULES.md v5.24 (2026-03-13)*
 
 This section contains playbooks for handling common alerts and operational tasks.
 
@@ -44,4 +44,4 @@ This section contains playbooks for handling common alerts and operational tasks
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
 ---
-*Last updated: 2026-03-02*
+*Last updated: 2026-03-13*

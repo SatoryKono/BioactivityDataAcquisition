@@ -46,7 +46,7 @@
 
 - **VACUUM**: Еженедельно, `retention-period=7 days` (MUST)
 - **Forensic Retention**: 7 дней (default), 30 дней для Critical tables
-- Для `mode: scd2` обязателен явный `scd-config` в entity config.
+- Для `mode: scd2` обязателен явный `scd_config` в entity config.
 
 ## 3. Обработка Ошибок
 

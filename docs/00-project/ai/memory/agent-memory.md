@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.5 | Дата: 2026-03-10 | Синхронизировано с ORCHESTRATION.md v4.1, RULES.md v5.24*
+*Версия: 1.0.5 | Дата: 2026-03-13 | Синхронизировано с ORCHESTRATION.md v4.1, RULES.md v5.24*
 
 > **Назначение**: Полный контекст для быстрого онбординга новой AI-сессии в BioETL.
 > При старте новой сессии — попроси агент прочитать этот файл:
@@ -21,7 +21,7 @@
 | Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
 | ADR | 43 файла (ADR-001..ADR-043), исторически superseded: ADR-008 |
 | Coverage target | ≥85% overall, ≥90% domain |
-| RULES.md | v5.23 (2026-03-02) |
+| RULES.md | v5.24 (2026-03-13) |
 
 ### Ключевые файлы
 

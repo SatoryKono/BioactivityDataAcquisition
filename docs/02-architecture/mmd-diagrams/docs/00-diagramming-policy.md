@@ -1,6 +1,6 @@
 # Diagramming Policy
 
-*Synced with RULES.md v5.24 (2026-02-24)*
+*Synced with RULES.md v5.24 (2026-03-13)*
 
 > **Canonical policy:** [`docs/02-architecture/06-diagram-policy.md`](../../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
 > **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../README.md).

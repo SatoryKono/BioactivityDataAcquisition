@@ -512,3 +512,27 @@ class TestSilverWriterDQMetrics:
         assert context.dq_metrics is dq_metrics
         assert context.version_after == 11
         assert context.completed_at == started_at + timedelta(seconds=1.5)
+
+    def test_build_silver_write_result_uses_version_after(self):
+        """Final result helper should return None or a SilverWriteResult by version."""
+        from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
+            _build_silver_write_result,
+        )
+
+        assert (
+            _build_silver_write_result(
+                table_name="test.table",
+                table_path="/tmp/silver/test/table",
+                version_after=None,
+                records_count=2,
+            )
+            is None
+        )
+        result = _build_silver_write_result(
+            table_name="test.table",
+            table_path="/tmp/silver/test/table",
+            version_after=7,
+            records_count=2,
+        )
+        assert result is not None
+        assert result.delta_version == 7
