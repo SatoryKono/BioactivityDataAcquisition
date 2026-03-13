@@ -115,7 +115,6 @@ class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
                 primary_keys=primary_keys if mode != "overwrite" else None,
             )
 
-
     async def finalize_csv_export(
         self,
         table_name: str,
