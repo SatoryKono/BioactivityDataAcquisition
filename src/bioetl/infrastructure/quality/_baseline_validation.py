@@ -80,6 +80,26 @@ def _validate_registry_group_entry(
     return tuple(clean)
 
 
+def _validate_grouped_registry_coverage(
+    grouped_registries: list[str],
+    baseline_registry_names: set[str],
+    errors: list[str],
+) -> None:
+    """Validate no duplicates, no missing, no extras in grouped registries."""
+    grouped_counter = Counter(grouped_registries)
+    duplicates = sorted(name for name, count in grouped_counter.items() if count > 1)
+    if duplicates:
+        errors.append(f"registry_groups: registries listed in multiple groups: {duplicates}")
+
+    grouped_names = set(grouped_counter)
+    missing = sorted(baseline_registry_names - grouped_names)
+    extra = sorted(grouped_names - baseline_registry_names)
+    if missing:
+        errors.append(f"registry_groups: missing baseline registries {missing}")
+    if extra:
+        errors.append(f"registry_groups: unknown registries {extra}")
+
+
 def _validate_registry_groups_section(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
@@ -98,29 +118,14 @@ def _validate_registry_groups_section(
             errors.append("registry_groups: group name must be non-empty string")
             continue
         parsed = _validate_registry_group_entry(
-            group_name=group_name,
-            group_data=group_data,
-            errors=errors,
+            group_name=group_name, group_data=group_data, errors=errors,
         )
         if parsed is None:
             continue
         normalized_groups[group_name] = parsed
         grouped_registries.extend(parsed)
 
-    grouped_counter = Counter(grouped_registries)
-    duplicates = sorted(name for name, count in grouped_counter.items() if count > 1)
-    if duplicates:
-        errors.append(
-            f"registry_groups: registries listed in multiple groups: {duplicates}"
-        )
-
-    grouped_registry_names = set(grouped_counter)
-    missing_groups = sorted(baseline_registry_names - grouped_registry_names)
-    extra_groups = sorted(grouped_registry_names - baseline_registry_names)
-    if missing_groups:
-        errors.append(f"registry_groups: missing baseline registries {missing_groups}")
-    if extra_groups:
-        errors.append(f"registry_groups: unknown registries {extra_groups}")
+    _validate_grouped_registry_coverage(grouped_registries, baseline_registry_names, errors)
     return normalized_groups
 
 

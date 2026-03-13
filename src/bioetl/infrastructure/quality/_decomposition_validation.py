@@ -148,6 +148,36 @@ def _parse_owner_allocations(
     return parsed
 
 
+def _validate_allocation_constraints(
+    *,
+    prefix: str,
+    parsed_quarter: tuple[int, int],
+    parsed_allocations: dict[str, int],
+    quarter: str,
+    quarter_budget_map: dict[str, int],
+    owner_diversification_start: tuple[int, int] | None,
+    min_distinct_owners: int,
+    errors: list[str],
+) -> None:
+    """Validate allocation sum and owner diversification for a single quarter."""
+    if sum(parsed_allocations.values()) != quarter_budget_map[quarter]:
+        errors.append(
+            f"{prefix}.allocations: sum {sum(parsed_allocations.values())} "
+            f"must equal quarterly_targets[{quarter}].max_total_exemptions "
+            f"{quarter_budget_map[quarter]}"
+        )
+    if (
+        owner_diversification_start is not None
+        and parsed_quarter >= owner_diversification_start
+        and len(parsed_allocations) < min_distinct_owners
+    ):
+        errors.append(
+            f"{prefix}.allocations: expected at least {min_distinct_owners} owners "
+            f"starting from quarter "
+            f"{owner_diversification_start[0]}-Q{owner_diversification_start[1]}"
+        )
+
+
 def _validate_owner_decomposition_targets_section(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
@@ -180,23 +210,16 @@ def _validate_owner_decomposition_targets_section(
         if parsed_allocations is None:
             continue
 
-        if sum(parsed_allocations.values()) != quarter_budget_map[quarter]:
-            errors.append(
-                f"{prefix}.allocations: sum {sum(parsed_allocations.values())} "
-                f"must equal quarterly_targets[{quarter}].max_total_exemptions "
-                f"{quarter_budget_map[quarter]}"
-            )
-
-        if (
-            owner_diversification_start is not None
-            and parsed_quarter >= owner_diversification_start
-            and len(parsed_allocations) < min_distinct_owners
-        ):
-            errors.append(
-                f"{prefix}.allocations: expected at least {min_distinct_owners} owners "
-                f"starting from quarter "
-                f"{owner_diversification_start[0]}-Q{owner_diversification_start[1]}"
-            )
+        _validate_allocation_constraints(
+            prefix=prefix,
+            parsed_quarter=parsed_quarter,
+            parsed_allocations=parsed_allocations,
+            quarter=quarter,
+            quarter_budget_map=quarter_budget_map,
+            owner_diversification_start=owner_diversification_start,
+            min_distinct_owners=min_distinct_owners,
+            errors=errors,
+        )
 
 
 def _validate_expiry_target_quarter(
@@ -301,6 +324,29 @@ def _validate_burndown_registries(
     return result
 
 
+def _validate_single_registry_burndown(
+    registry_name: str,
+    ordered_quarters: list[str],
+    by_quarter_budgets: dict[str, dict[str, int]],
+    errors: list[str],
+) -> None:
+    """Validate strict quarter-over-quarter decrease for one registry."""
+    previous: int | None = None
+    for quarter in ordered_quarters:
+        current = by_quarter_budgets[quarter].get(registry_name)
+        if current is None:
+            errors.append(
+                f"quarterly_targets[{quarter}].registry_budgets missing '{registry_name}'"
+            )
+            continue
+        if previous is not None and current >= previous:
+            errors.append(
+                "quarterly_targets registry burn-down violation: "
+                f"'{registry_name}' budget must strictly decrease ({current} >= {previous})"
+            )
+        previous = current
+
+
 def _validate_priority_registry_burndown(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
@@ -330,20 +376,9 @@ def _validate_priority_registry_burndown(
     ordered_quarter_names = [quarter for quarter, _ in ordered_quarters]
 
     for registry_name in priority_registries:
-        previous: int | None = None
-        for quarter in ordered_quarter_names:
-            current = by_quarter_registry_budgets[quarter].get(registry_name)
-            if current is None:
-                errors.append(
-                    f"quarterly_targets[{quarter}].registry_budgets missing '{registry_name}'"
-                )
-                continue
-            if previous is not None and current >= previous:
-                errors.append(
-                    "quarterly_targets registry burn-down violation: "
-                    f"'{registry_name}' budget must strictly decrease ({current} >= {previous})"
-                )
-            previous = current
+        _validate_single_registry_burndown(
+            registry_name, ordered_quarter_names, by_quarter_registry_budgets, errors,
+        )
 
 
 def _validate_program_done_criteria_section(

@@ -69,6 +69,33 @@ def _extract_with_patterns(
     return None
 
 
+def _first_content_line(lines: list[str], start: int) -> str | None:
+    """Return first non-empty content line after a heading (up to 7 lines ahead)."""
+    for candidate in lines[start + 1 : start + 8]:
+        value = candidate.strip()
+        if not value:
+            continue
+        if value.startswith("#") or value.startswith("|"):
+            return None
+        return value
+    return None
+
+
+def _match_heading_to_section(
+    heading: str, normalized_names: set[str],
+) -> tuple[str | None, bool]:
+    """Check heading against section names. Returns (inline_value, is_exact_match)."""
+    heading_lower = heading.lower()
+    for name in normalized_names:
+        if heading_lower == name:
+            return None, True
+        prefix = f"{name}:"
+        if heading_lower.startswith(prefix):
+            value = heading[len(prefix) :].strip()
+            return (value if value else None), False
+    return None, False
+
+
 def _extract_from_section(
     text: str,
     section_names: tuple[str, ...],
@@ -82,22 +109,14 @@ def _extract_from_section(
             continue
 
         heading = stripped.lstrip("#").strip()
-        heading_lower = heading.lower()
+        inline_value, is_exact = _match_heading_to_section(heading, normalized_names)
 
-        for name in normalized_names:
-            if heading_lower == name:
-                for candidate in lines[index + 1 : index + 8]:
-                    value = candidate.strip()
-                    if not value:
-                        continue
-                    if value.startswith("#") or value.startswith("|"):
-                        break
-                    return value
-            prefix = f"{name}:"
-            if heading_lower.startswith(prefix):
-                value = heading[len(prefix) :].strip()
-                if value:
-                    return value
+        if is_exact:
+            result = _first_content_line(lines, index)
+            if result is not None:
+                return result
+        elif inline_value is not None:
+            return inline_value
     return None
 
 

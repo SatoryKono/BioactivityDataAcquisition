@@ -13,12 +13,17 @@ from __future__ import annotations
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from bioetl.composition.entrypoints import ensure_metrics_server_started
-
 __all__ = [
     "ensure_metrics_server_started",
     "metrics_server_context",
 ]
+
+
+def ensure_metrics_server_started() -> bool:
+    """Start the metrics server through composition on demand."""
+    from bioetl.composition.entrypoints import ensure_metrics_server_started as _impl
+
+    return _impl()
 
 
 @contextmanager

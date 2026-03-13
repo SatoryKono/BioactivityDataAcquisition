@@ -37,6 +37,31 @@ def _deep_merge_dicts(
     return merged
 
 
+def _load_external_dq_payload(
+    dq_config_file: str,
+    config_path: Path,
+) -> JsonDict:  # Any: YAML config has heterogeneous values
+    """Load and validate external DQ config, returning the dq_overrides section."""
+    dq_path = config_path.parent / dq_config_file
+    if not dq_path.exists():
+        raise FileNotFoundError(
+            f"Composite DQ config not found: {dq_path} (referenced from {config_path})"
+        )
+
+    with dq_path.open(encoding="utf-8") as f:
+        external_raw = yaml.safe_load(f) or {}
+
+    if not isinstance(external_raw, dict):
+        raise ValueError(f"Composite DQ config must be a mapping: {dq_path}")
+
+    external_dq = external_raw.get("dq_overrides", external_raw)
+    if not isinstance(external_dq, dict):
+        raise ValueError(
+            f"Composite DQ payload must be a mapping under 'dq_overrides': {dq_path}"
+        )
+    return external_dq
+
+
 def merge_external_dq_overrides(
     raw: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: Path,
@@ -79,24 +104,7 @@ def merge_external_dq_overrides(
     if not isinstance(dq_config_file, str) or not dq_config_file.strip():
         return
 
-    dq_path = config_path.parent / dq_config_file
-    if not dq_path.exists():
-        raise FileNotFoundError(
-            f"Composite DQ config not found: {dq_path} (referenced from {config_path})"
-        )
-
-    with dq_path.open(encoding="utf-8") as f:
-        external_raw = yaml.safe_load(f) or {}
-
-    if not isinstance(external_raw, dict):
-        raise ValueError(f"Composite DQ config must be a mapping: {dq_path}")
-
-    external_dq = external_raw.get("dq_overrides", external_raw)
-    if not isinstance(external_dq, dict):
-        raise ValueError(
-            f"Composite DQ payload must be a mapping under 'dq_overrides': {dq_path}"
-        )
-
+    external_dq = _load_external_dq_payload(dq_config_file, config_path)
     inline_dq = {
         key: value for key, value in dq_overrides.items() if key != "dq_config_file"
     }

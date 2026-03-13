@@ -25,7 +25,7 @@ sequenceDiagram
     %% Bootstrap Phase
     CLI->>Boot: run(pipeline_name, run_type)
     activate Boot
-    Boot->>Boot: register_all_providers()
+    Boot->>Boot: ensure_providers_loaded()
     Boot->>Boot: load_pipeline_config()
     Boot->>Boot: bootstrap_observability()
     Boot->>Boot: create_runner()

@@ -59,6 +59,24 @@ class SemanticScholarFetchAdapterMixin:
             return
 
         self._validate_entity_type(entity_type)
+        async for record in self._paginate_search(query=query, limit=limit):
+            yield record
+
+    async def _paginate_search(
+        self,
+        *,
+        query: str | None,
+        limit: int | None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Paginate through search results with optional limit.
+
+        Args:
+            query: Optional search query string.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord entries from successive search pages.
+        """
         current_offset = 0
         page_size = min(100, limit or 100)
         fetched = 0

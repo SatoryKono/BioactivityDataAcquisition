@@ -126,6 +126,56 @@ class ChemblFetchPagingMixin:
                 break
             offset += len(records)
 
+    def _is_duplicate_composite(
+        self,
+        record: BronzeRecord,
+        pk_fields: tuple[str, ...],
+        seen_ids: set[str],
+        entity_type: str,
+        filter_field: str,
+    ) -> bool:
+        """Check composite-key duplicate, returning True if record should be skipped."""
+        composite_key = self._compute_composite_key(record, pk_fields)
+        if not composite_key or composite_key == "|".join([""] * len(pk_fields)):
+            return False
+        if composite_key not in seen_ids:
+            seen_ids.add(composite_key)
+            return False
+        self._logger.debug(
+            "skipping_duplicate_record",
+            entity_type=entity_type,
+            pk_fields=pk_fields,
+            composite_key=composite_key,
+            filter_field=filter_field,
+        )
+        self._adapter_metrics.record_dropped_duplicates(entity_type)
+        return True
+
+    def _is_duplicate_simple(
+        self,
+        record: BronzeRecord,
+        pk_field: str,
+        seen_ids: set[str],
+        entity_type: str,
+        filter_field: str,
+    ) -> bool:
+        """Check simple-key duplicate, returning True if record should be skipped."""
+        record_id = str(record.get(pk_field, ""))
+        if not record_id:
+            return False
+        if record_id not in seen_ids:
+            seen_ids.add(record_id)
+            return False
+        self._logger.debug(
+            "skipping_duplicate_record",
+            entity_type=entity_type,
+            pk_field=pk_field,
+            record_id=record_id,
+            filter_field=filter_field,
+        )
+        self._adapter_metrics.record_dropped_duplicates(entity_type)
+        return True
+
     def _yield_deduplicated(
         self,
         records: list[BronzeRecord],
@@ -155,37 +205,14 @@ class ChemblFetchPagingMixin:
         for record in records:
             if use_composite:
                 assert pk_fields is not None
-                composite_key = self._compute_composite_key(record, pk_fields)
-                if not composite_key or composite_key == "|".join(
-                    [""] * len(pk_fields)
+                if self._is_duplicate_composite(
+                    record, pk_fields, seen_ids, entity_type, filter_field,
                 ):
-                    yield record
                     continue
-                if composite_key in seen_ids:
-                    self._logger.debug(
-                        "skipping_duplicate_record",
-                        entity_type=entity_type,
-                        pk_fields=pk_fields,
-                        composite_key=composite_key,
-                        filter_field=filter_field,
-                    )
-                    self._adapter_metrics.record_dropped_duplicates(entity_type)
-                    continue
-                seen_ids.add(composite_key)
-            else:
-                record_id = str(record.get(pk_field, ""))
-                if record_id and record_id in seen_ids:
-                    self._logger.debug(
-                        "skipping_duplicate_record",
-                        entity_type=entity_type,
-                        pk_field=pk_field,
-                        record_id=record_id,
-                        filter_field=filter_field,
-                    )
-                    self._adapter_metrics.record_dropped_duplicates(entity_type)
-                    continue
-                if record_id:
-                    seen_ids.add(record_id)
+            elif self._is_duplicate_simple(
+                record, pk_field, seen_ids, entity_type, filter_field,
+            ):
+                continue
             yield record
 
     async def _paginate_filter_results(

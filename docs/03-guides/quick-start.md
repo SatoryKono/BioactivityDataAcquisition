@@ -24,14 +24,14 @@ cd BioactivityDataAcquisition2
 # ./scripts/dev/dev_setup.sh --ci
 ```
 
-### Option B: Manual
+### Option B: Manual Fallback
 
 ```bash
 # Clone and enter directory
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
 cd BioactivityDataAcquisition2
 
-# Install dependencies (creates venv, installs packages)
+# Install dependencies manually (fallback path)
 make install
 
 # Optional: Configure environment
@@ -69,7 +69,7 @@ make lint
 
 | Task                   | Command                                           |
 | ---------------------- | ------------------------------------------------- |
-| Install dependencies   | `make install`                                    |
+| Install dependencies   | `./scripts/dev/dev_setup.sh`                      |
 | Verify dependencies    | `make test-deps`                                  |
 | Run all tests          | `make test`                                       |
 | Run linting            | `make lint`                                       |
