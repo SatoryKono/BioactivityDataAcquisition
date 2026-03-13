@@ -12,7 +12,12 @@ from collections.abc import Callable
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.registry import PipelineRegistry, create_registry
 
-__all__ = ["build_cli_registry", "get_default_registry"]
+__all__ = [
+    "build_cli_registry",
+    "create_registry",
+    "get_default_registry",
+    "register_all_pipelines",
+]
 
 
 def _build_registered_registry(
