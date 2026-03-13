@@ -8,13 +8,17 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchResult
     from bioetl.application.core.batch_processing_service import BatchProcessingOutput
+    from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 
 __all__ = [
     "BatchExecutionStateOutcome",
+    "BatchProcessedOutcome",
     "apply_batch_execution_state_update",
+    "apply_processed_batch_outcome",
     "build_batch_execution_state_update",
     "build_batch_result_snapshot",
+    "build_processed_batch_outcome",
     "build_run_statistics",
 ]
 
@@ -31,6 +35,18 @@ class BatchExecutionStateOutcome:
     source_batch_id: str
 
 
+@dataclass(frozen=True, slots=True)
+class BatchProcessedOutcome:
+    """One processed batch projected into state-update and DQ payloads."""
+
+    records: list[BronzeRecord]
+    state_update: BatchExecutionStateOutcome
+    batch_id: BatchID
+    bronze_result: object
+    silver_records: list[BronzeRecord]
+    gold_records: list[GoldRecord]
+
+
 class _BatchExecutionStatePort(Protocol):
     """Mutable executor state required to apply batch execution deltas."""
 
@@ -40,6 +56,22 @@ class _BatchExecutionStatePort(Protocol):
     records_quarantined: int
     records_filtered_out: int
     _source_batch_ids: list[str]
+
+
+class _BatchProcessedOutcomePort(_BatchExecutionStatePort, Protocol):
+    """Executor state plus DQ hooks required to apply one processed outcome."""
+
+    def _should_collect_dq_data(self) -> bool: ...
+
+    def _collect_dq_data(
+        self,
+        *,
+        records: list[BronzeRecord],
+        batch_id: BatchID,
+        bronze_result: object,
+        silver_records: list[BronzeRecord],
+        gold_records: list[GoldRecord],
+    ) -> None: ...
 
 
 def build_batch_execution_state_update(
@@ -58,6 +90,25 @@ def build_batch_execution_state_update(
     )
 
 
+def build_processed_batch_outcome(
+    *,
+    records: list[BronzeRecord],
+    output: BatchProcessingOutput,
+) -> BatchProcessedOutcome:
+    """Project one processed batch into explicit state and DQ outcome payloads."""
+    return BatchProcessedOutcome(
+        records=records,
+        state_update=build_batch_execution_state_update(
+            input_record_count=len(records),
+            output=output,
+        ),
+        batch_id=output.batch_id,
+        bronze_result=output.bronze_result,
+        silver_records=output.silver_records,
+        gold_records=output.gold_records,
+    )
+
+
 def apply_batch_execution_state_update(
     *,
     state: _BatchExecutionStatePort,
@@ -70,6 +121,27 @@ def apply_batch_execution_state_update(
     state.records_quarantined += state_update.quarantined_count
     state.records_filtered_out += state_update.filtered_out_count
     state._source_batch_ids.append(state_update.source_batch_id)
+
+
+def apply_processed_batch_outcome(
+    *,
+    state: _BatchProcessedOutcomePort,
+    outcome: BatchProcessedOutcome,
+) -> None:
+    """Apply one processed-batch outcome to executor counters and DQ buffers."""
+    apply_batch_execution_state_update(
+        state=state,
+        state_update=outcome.state_update,
+    )
+    if not state._should_collect_dq_data():
+        return
+    state._collect_dq_data(
+        records=outcome.records,
+        batch_id=outcome.batch_id,
+        bronze_result=outcome.bronze_result,
+        silver_records=outcome.silver_records,
+        gold_records=outcome.gold_records,
+    )
 
 
 def build_batch_result_snapshot(

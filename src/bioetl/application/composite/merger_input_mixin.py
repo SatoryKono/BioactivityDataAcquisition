@@ -61,6 +61,15 @@ class _LoadedMergeInputsResult:
     sources: list[str]
 
 
+@dataclass(frozen=True, slots=True)
+class _PreparedSeedDataframe:
+    """Prepared seed dataframe plus derived merge context."""
+
+    seed_df: pl.DataFrame
+    records_from_seed: int
+    effective_seed_pipeline: str | None
+
+
 class _MergeInputLoaderMixin:
     """Mixin for loading seed, enricher, and dependency DataFrames."""
 
@@ -111,14 +120,18 @@ class _MergeInputLoaderMixin:
         self,
         seed_table: str,
         seed_pipeline: str | None,
-    ) -> tuple[pl.DataFrame, int, str | None]:
+    ) -> _PreparedSeedDataframe:
         """Read and optionally qualify seed DataFrame."""
         self._logger.info("Reading seed table", table=seed_table)
         seed_df = await self._read_silver_table(seed_table)
         records_from_seed = len(seed_df)
         effective_seed_pipeline = seed_pipeline or infer_pipeline_from_table(seed_table)
         if not effective_seed_pipeline:
-            return seed_df, records_from_seed, None
+            return _PreparedSeedDataframe(
+                seed_df=seed_df,
+                records_from_seed=records_from_seed,
+                effective_seed_pipeline=None,
+            )
         self._logger.debug(
             "Using seed pipeline for column renaming",
             seed_pipeline=effective_seed_pipeline,
@@ -136,7 +149,11 @@ class _MergeInputLoaderMixin:
             pipeline=effective_seed_pipeline,
             qualified_count=count_qualified_columns(seed_df.columns),
         )
-        return seed_df, records_from_seed, effective_seed_pipeline
+        return _PreparedSeedDataframe(
+            seed_df=seed_df,
+            records_from_seed=records_from_seed,
+            effective_seed_pipeline=effective_seed_pipeline,
+        )
 
     async def _load_enricher_dataframes(
         self,
@@ -224,4 +241,4 @@ class _MergeInputLoaderMixin:
         return pl.DataFrame(records)
 
 
-__all__ = ["_MergeInputLoaderMixin"]
+__all__ = ["_MergeInputLoaderMixin", "_PreparedSeedDataframe"]

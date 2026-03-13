@@ -9,8 +9,11 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.storage.gold_writer_metadata_audit import (
+    _build_gold_audit_entry,
+    _GoldAuditWriteRequest,
+)
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -93,6 +96,9 @@ class _GoldMetadataWriteHostProtocol(Protocol):
         entity_name: str,
     ) -> None: ...
 
+class _GoldMergedMetadataWriteHostProtocol(_GoldMetadataWriteHostProtocol, Protocol):
+    logger: LoggerPort
+
 
 def _prepare_gold_metadata_write(
     host: _GoldMetadataWriteHostProtocol,
@@ -116,7 +122,6 @@ def _prepare_gold_metadata_write(
         entity_name=entity_name,
         metadata=metadata,
     )
-
 
 async def _persist_gold_metadata_write(
     host: _GoldMetadataWriteHostProtocol,
@@ -153,6 +158,22 @@ def _prepare_gold_merged_metadata_write(
         entity_name=entity_name,
         metadata=metadata,
     )
+
+
+def _maybe_prepare_gold_merged_metadata_write(
+    host: _GoldMergedMetadataWriteHostProtocol,
+    request: _GoldMergedMetadataWriteRequest,
+) -> _PreparedGoldMetadataWrite | None:
+    if not request.records:
+        return None
+    if host._metadata_coordinator is None:
+        host.logger.debug(
+            "gold_merged_metadata_skipped",
+            reason="MetadataCoordinator not configured",
+            table_path=request.table_path,
+        )
+        return None
+    return _prepare_gold_merged_metadata_write(host, request)
 
 
 class _GoldWriterMergedMetadataInputMixin:
@@ -330,40 +351,15 @@ class GoldWriterMetadataMixin(
         ingestion_ts: datetime | None,
         run_id: RunID | None,
     ) -> None:
-        from uuid import uuid4
-
-        if ingestion_ts is not None:
-            timestamp = ingestion_ts
-        else:
-            self.logger.warning(
-                "audit_missing_ingestion_ts",
-                table=table_name,
-                mode=mode.value,
-            )
-            raise ValueError("ingestion_ts is required for audit logging")
-        if run_id is not None:
-            audit_run_id = run_id
-        else:
-            self.logger.warning(
-                "audit_missing_run_id",
-                table=table_name,
-                mode=mode.value,
-            )
-            audit_run_id = RunID(uuid4())
-        operation_map = {
-            GoldWriteMode.OVERWRITE: AuditOperation.OVERWRITE,
-            GoldWriteMode.APPEND: AuditOperation.APPEND,
-            GoldWriteMode.SCD2: AuditOperation.MERGE,
-        }
-        operation = operation_map[mode]
-        audit_entry = AuditEntry(
-            run_id=audit_run_id,
-            timestamp=timestamp,
-            layer=AuditLayer.GOLD,
-            table_name=table_name,
-            operation=operation,
-            records_count=len(records),
-            metadata={"write_mode": mode.value},
+        audit_entry = _build_gold_audit_entry(
+            self,
+            _GoldAuditWriteRequest(
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                ingestion_ts=ingestion_ts,
+                run_id=run_id,
+            ),
         )
         assert self._audit is not None, (
             "_log_gold_audit called without audit configured"
@@ -445,16 +441,7 @@ class GoldWriterMetadataMixin(
         sources_used: list[str] | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None:
-        if not records:
-            return
-        if self._metadata_coordinator is None:
-            self.logger.debug(
-                "gold_merged_metadata_skipped",
-                reason="MetadataCoordinator not configured",
-                table_path=table_path,
-            )
-            return
-        prepared = _prepare_gold_merged_metadata_write(
+        prepared = _maybe_prepare_gold_merged_metadata_write(
             self,
             _GoldMergedMetadataWriteRequest(
                 table_path=table_path,
@@ -463,6 +450,8 @@ class GoldWriterMetadataMixin(
                 schema=schema,
             ),
         )
+        if prepared is None:
+            return
         await _persist_gold_metadata_write(self, prepared)
 
 

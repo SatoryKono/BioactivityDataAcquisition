@@ -10,6 +10,9 @@ import polars as pl
 from bioetl.application.composite.column_renamer import ColumnRenamerService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+from bioetl.application.composite.join_planner_helpers import (
+    prepare_qualified_right_join_dataframe,
+)
 from bioetl.application.composite.protocols import JoinKeyResolverProtocol
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.ports import LoggerPort
@@ -82,11 +85,6 @@ def build_asymmetric_join_key_set(
         join_key_set.add(left_join_key_qualified)
     return join_key_set
 
-
-def count_qualified_columns(columns: list[str]) -> int:
-    return len([col for col in columns if "." in col and not col.startswith("_")])
-
-
 def find_missing_keys(columns: list[str], keys: list[str]) -> list[str]:
     return [key for key in keys if key not in columns]
 
@@ -135,63 +133,18 @@ def log_missing_composite_key_columns(
     )
 
 
-def prepare_dependency_dataframe(
-    *,
-    deduplicator: EnricherDeduplicatorService,
-    dep_df: pl.DataFrame,
-    dep: DependencyConfig,
-    deduplicate_keys: list[str],
-) -> pl.DataFrame:
-    return deduplicator.deduplicate(
-        enricher_df=dep_df,
-        join_keys=deduplicate_keys,
-        enricher_name=dep.pipeline,
-    )
-
-
 def normalize_dependency_join_inputs(
     *,
     join_key_resolver: JoinKeyResolverProtocol,
     merged_df: pl.DataFrame,
-    dep_df: pl.DataFrame,
     left_join_keys: list[str],
-    right_join_keys: list[str],
     seed_pipeline: str | None,
-) -> tuple[pl.DataFrame, pl.DataFrame]:
-    normalized_merged = join_key_resolver.normalize_join_key_columns(
+) -> pl.DataFrame:
+    return join_key_resolver.normalize_join_key_columns(
         merged_df,
         left_join_keys,
         pipeline=seed_pipeline,
     )
-    normalized_dep = join_key_resolver.normalize_join_key_columns(
-        dep_df,
-        right_join_keys,
-        pipeline=None,
-    )
-    return normalized_merged, normalized_dep
-
-
-def rename_dependency_dataframe(
-    *,
-    renamer: ColumnRenamerService,
-    logger: LoggerPort,
-    field_alias_resolver: Callable[[str], dict[str, str] | None],
-    drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],
-    dep_df: pl.DataFrame,
-    dependency: str,
-) -> pl.DataFrame:
-    renamed = renamer.rename_dataframe(
-        dep_df,
-        dependency,
-        exclude_join_keys=False,
-        field_aliases=field_alias_resolver(dependency),
-    )
-    logger.debug(
-        "Renamed dependency columns to qualified format",
-        dependency=dependency,
-        qualified_count=count_qualified_columns(renamed.columns),
-    )
-    return drop_system_columns(renamed)
 
 
 def prepare_dependency_join_frames(
@@ -209,29 +162,26 @@ def prepare_dependency_join_frames(
     right_join_keys: list[str],
     seed_pipeline: str | None,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
-    prepared_dep = prepare_dependency_dataframe(
-        deduplicator=deduplicator,
-        dep_df=dep_df,
-        dep=dep,
-        deduplicate_keys=right_join_keys,
-    )
-    normalized_merged, normalized_dep = normalize_dependency_join_inputs(
+    normalized_merged = normalize_dependency_join_inputs(
         join_key_resolver=join_key_resolver,
         merged_df=merged_df,
-        dep_df=prepared_dep,
         left_join_keys=left_join_keys,
-        right_join_keys=right_join_keys,
         seed_pipeline=seed_pipeline,
     )
-    renamed_dep = rename_dependency_dataframe(
+    prepared_dep = prepare_qualified_right_join_dataframe(
+        source_df=dep_df,
+        pipeline=dep.pipeline,
+        join_keys=right_join_keys,
+        deduplicator=deduplicator,
+        join_key_resolver=join_key_resolver,
         renamer=renamer,
         logger=logger,
         field_alias_resolver=field_alias_resolver,
         drop_system_columns=drop_system_columns,
-        dep_df=normalized_dep,
-        dependency=dep.pipeline,
+        log_message="Renamed dependency columns to qualified format",
+        log_field_name="dependency",
     )
-    return normalized_merged, renamed_dep
+    return normalized_merged, prepared_dep
 
 
 def resolve_composite_join_context(

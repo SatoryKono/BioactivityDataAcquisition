@@ -1416,6 +1416,122 @@ def test_finalize_run_result_presents_and_exits() -> None:
     mock_exit.assert_called_once_with(ExitCode.OK)
 
 
+@pytest.mark.unit
+def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
+    """CLI policy helper should resolve registry and inject canonical run seams."""
+    from bioetl.interfaces.cli.commands import run as run_module
+    from bioetl.interfaces.cli.commands.run_command_policy import RunCommandInput
+
+    ctx = MagicMock(name="click_context")
+    registry = MagicMock(name="registry")
+    cli_input = RunCommandInput(
+        pipeline="chembl_activity",
+        run_type="incremental",
+        resume=False,
+        start_offset=None,
+        limit=None,
+        input_csv=None,
+        filter_column=None,
+        filter_field=None,
+        dry_run=False,
+        yes=True,
+        vacuum_after_run=None,
+        vacuum_retention_days=None,
+        debug=False,
+        health_server=True,
+        health_port=8081,
+        use_cached_bronze=False,
+        cached_bronze_date=None,
+        cached_bronze_path=None,
+    )
+
+    with (
+        patch.object(
+            run_module,
+            "resolve_context_registry",
+            return_value=registry,
+        ) as mock_resolve_registry,
+        patch.object(run_module, "run_command_flow") as mock_run_command_flow,
+    ):
+        run_module._run_command_with_cli_policy(ctx, cli_input)
+
+    mock_resolve_registry.assert_called_once_with(ctx)
+    assert mock_run_command_flow.call_count == 1
+    kwargs = mock_run_command_flow.call_args.kwargs
+    assert kwargs["cli_input"] is cli_input
+    assert kwargs["service"] is run_module._CLI_RUN_ORCHESTRATION_SERVICE
+    assert kwargs["health_info_presenter"] is run_module._present_run_health_info
+    assert kwargs["result_finalizer"] is run_module._finalize_run_result
+    assert kwargs["exit_func"] is run_module._exit_with_code
+    execute_run_callable = kwargs["execute_run"]
+    assert execute_run_callable.func is run_module.execute_run
+    assert execute_run_callable.keywords == {"registry": registry}
+
+
+@pytest.mark.unit
+def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
+    """Click callback should stay a thin entrypoint over the run-policy seams."""
+    from bioetl.interfaces.cli.commands import run as run_module
+
+    ctx = MagicMock(name="click_context")
+    cli_input = MagicMock(name="cli_input")
+
+    with (
+        patch.object(
+            run_module,
+            "_build_run_command_input",
+            return_value=cli_input,
+        ) as mock_build_input,
+        patch.object(
+            run_module,
+            "_run_command_with_cli_policy",
+        ) as mock_run_with_policy,
+    ):
+        run_module.run.callback.__wrapped__(
+            ctx,
+            pipeline="chembl_activity",
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=10,
+            input_csv=None,
+            filter_column="compound_id",
+            filter_field="compound_id",
+            dry_run=False,
+            yes=True,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            health_server=True,
+            health_port=8081,
+            use_cached_bronze=False,
+            cached_bronze_date=None,
+            cached_bronze_path=None,
+        )
+
+    mock_build_input.assert_called_once_with(
+        pipeline="chembl_activity",
+        run_type="incremental",
+        resume=False,
+        start_offset=None,
+        limit=10,
+        input_csv=None,
+        filter_column="compound_id",
+        filter_field="compound_id",
+        dry_run=False,
+        yes=True,
+        vacuum_after_run=None,
+        vacuum_retention_days=None,
+        debug=False,
+        health_server=True,
+        health_port=8081,
+        use_cached_bronze=False,
+        cached_bronze_date=None,
+        cached_bronze_path=None,
+    )
+    mock_run_with_policy.assert_called_once_with(ctx, cli_input)
+
+
 # =============================================================================
 # run.py Tests - Exception handlers in run command
 # =============================================================================

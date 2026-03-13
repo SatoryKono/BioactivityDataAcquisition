@@ -395,7 +395,7 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (40 decisions)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (43 decisions)
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
 │   │   └── RULES.md          # Project governance (v5.23)

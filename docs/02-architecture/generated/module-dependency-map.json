@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1073,
-    "total_internal_imports": 4026,
+    "scanned_modules": 1075,
+    "total_internal_imports": 4040,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 237,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 479,
+      "imports": 484,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 631,
+      "imports": 633,
       "allowed": true
     },
     {
@@ -53,13 +53,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 485,
+      "imports": 489,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 619,
+      "imports": 622,
       "allowed": true
     },
     {
@@ -116,7 +116,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 53
+      "imports": 54
     },
     {
       "source": "application.core",
@@ -131,7 +131,7 @@
     {
       "source": "application.composite",
       "target": "domain.ports",
-      "imports": 40
+      "imports": 41
     },
     {
       "source": "composition.factories",
@@ -141,7 +141,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 36
+      "imports": 37
     },
     {
       "source": "composition.factories",
@@ -151,7 +151,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 31
+      "imports": 32
     },
     {
       "source": "application.services",
@@ -174,6 +174,11 @@
       "imports": 24
     },
     {
+      "source": "infrastructure.storage",
+      "target": "domain.models",
+      "imports": 24
+    },
+    {
       "source": "composition.bootstrap",
       "target": "domain.ports",
       "imports": 23
@@ -181,11 +186,6 @@
     {
       "source": "composition.factories",
       "target": "application.pipelines",
-      "imports": 23
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.models",
       "imports": 23
     },
     {
@@ -244,13 +244,13 @@
       "imports": 18
     },
     {
-      "source": "composition.factories",
-      "target": "application.services",
-      "imports": 16
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.medallion",
+      "imports": 17
+    },
+    {
+      "source": "composition.factories",
+      "target": "application.services",
       "imports": 16
     },
     {

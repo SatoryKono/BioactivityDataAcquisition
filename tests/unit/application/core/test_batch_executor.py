@@ -14,8 +14,10 @@ import pytest
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
 from bioetl.application.core.batch_executor_helpers import (
     BatchExecutionStateOutcome,
+    apply_processed_batch_outcome,
     apply_batch_execution_state_update,
     build_batch_result_snapshot,
+    build_processed_batch_outcome,
 )
 from bioetl.application.core.batch_executor_loop_helpers import (
     BatchExtractionIterationContext,
@@ -31,7 +33,10 @@ from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-from bioetl.application.core.batch_processing_service import BatchProcessingService
+from bioetl.application.core.batch_processing_service import (
+    BatchProcessingOutput,
+    BatchProcessingService,
+)
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
@@ -878,6 +883,35 @@ class TestBatchResult:
 class TestBatchExecutorHelpers:
     """Tests for extracted batch-executor helper functions."""
 
+    def test_build_processed_batch_outcome_projects_state_and_dq_payloads(self) -> None:
+        """Processed-outcome helper should preserve both state deltas and DQ inputs."""
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        records = [{"id": "1", "value": 10}]
+        output = BatchProcessingOutput(
+            batch_id=batch_id,
+            bronze_result=MagicMock(path="bronze/file.jsonl"),
+            silver_records=[{"id": "1", "value": 10}],
+            gold_records=[{"id": "1", "score": 0.9}],
+            quarantined_count=2,
+            filtered_out_count=3,
+        )
+
+        outcome = build_processed_batch_outcome(records=records, output=output)
+
+        assert outcome.records == records
+        assert outcome.batch_id == batch_id
+        assert outcome.bronze_result is output.bronze_result
+        assert outcome.silver_records == output.silver_records
+        assert outcome.gold_records == output.gold_records
+        assert outcome.state_update == BatchExecutionStateOutcome(
+            bronze_count=1,
+            silver_count=1,
+            gold_count=1,
+            quarantined_count=2,
+            filtered_out_count=3,
+            source_batch_id=str(batch_id),
+        )
+
     def test_apply_batch_execution_state_update_updates_counters(self) -> None:
         """State helper should apply deltas and preserve batch-id order."""
         state = MagicMock(
@@ -907,6 +941,75 @@ class TestBatchExecutorHelpers:
         assert state.records_quarantined == 5
         assert state.records_filtered_out == 7
         assert state._source_batch_ids == ["batch-001", "batch-002"]
+
+    def test_apply_processed_batch_outcome_updates_state_and_collects_dq(self) -> None:
+        """Processed-outcome helper should update counters and invoke DQ hook."""
+        state = MagicMock(
+            records_bronze=10,
+            records_silver=8,
+            records_gold=6,
+            records_quarantined=1,
+            records_filtered_out=2,
+            _source_batch_ids=["batch-001"],
+        )
+        state._should_collect_dq_data.return_value = True
+        outcome = build_processed_batch_outcome(
+            records=[{"id": "1"}],
+            output=BatchProcessingOutput(
+                batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+                bronze_result=MagicMock(path="bronze/file.jsonl"),
+                silver_records=[{"id": "1"}],
+                gold_records=[],
+                quarantined_count=4,
+                filtered_out_count=5,
+            ),
+        )
+
+        apply_processed_batch_outcome(state=state, outcome=outcome)
+
+        assert state.records_bronze == 11
+        assert state.records_silver == 9
+        assert state.records_gold == 6
+        assert state.records_quarantined == 5
+        assert state.records_filtered_out == 7
+        assert state._source_batch_ids == [
+            "batch-001",
+            "12345678-1234-5678-1234-567812345678",
+        ]
+        state._collect_dq_data.assert_called_once_with(
+            records=[{"id": "1"}],
+            batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+            bronze_result=outcome.bronze_result,
+            silver_records=[{"id": "1"}],
+            gold_records=[],
+        )
+
+    def test_apply_processed_batch_outcome_skips_dq_hook_when_disabled(self) -> None:
+        """Processed-outcome helper should not call DQ collection when disabled."""
+        state = MagicMock(
+            records_bronze=0,
+            records_silver=0,
+            records_gold=0,
+            records_quarantined=0,
+            records_filtered_out=0,
+            _source_batch_ids=[],
+        )
+        state._should_collect_dq_data.return_value = False
+        outcome = build_processed_batch_outcome(
+            records=[{"id": "1"}],
+            output=BatchProcessingOutput(
+                batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+                bronze_result=None,
+                silver_records=[],
+                gold_records=[],
+                quarantined_count=0,
+                filtered_out_count=0,
+            ),
+        )
+
+        apply_processed_batch_outcome(state=state, outcome=outcome)
+
+        state._collect_dq_data.assert_not_called()
 
     def test_build_batch_result_snapshot_uses_current_counters(self) -> None:
         """Batch-result helper should mirror current cumulative counters."""
