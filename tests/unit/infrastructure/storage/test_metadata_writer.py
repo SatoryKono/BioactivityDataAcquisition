@@ -460,6 +460,56 @@ class TestMetadataWriter:
 
 
 @pytest.mark.unit
+class TestMetadataWriterOperationPreparation:
+    """Tests for prepared metadata operation handoff."""
+
+    def test_prepare_metadata_write_operation_keeps_run_id_and_pipeline(
+        self,
+        bronze_metadata: BronzeMetadata,
+    ) -> None:
+        """Prepared operation should preserve runtime run_id and telemetry pipeline."""
+        from bioetl.infrastructure.storage.metadata_writer_operations import (
+            _MetadataWriteRequest,
+            _prepare_metadata_write_operation,
+        )
+
+        operation = _prepare_metadata_write_operation(
+            _MetadataWriteRequest(
+                base_path="/tmp/bronze",
+                metadata=bronze_metadata,
+                layer="bronze",
+                provider="chembl",
+                entity="activity",
+            )
+        )
+
+        assert operation.run_id == bronze_metadata.runtime.run_id
+        assert operation.telemetry_context.pipeline == "chembl.activity"
+
+    def test_build_metadata_write_request_keeps_layer_and_identifiers(
+        self,
+        metadata_writer: MetadataWriter,
+        silver_metadata: SilverMetadata,
+    ) -> None:
+        """Public metadata methods should share one normalized request builder."""
+        request = metadata_writer._build_metadata_write_request(
+            base_path="/tmp/silver/test/table",
+            metadata=silver_metadata,
+            layer="silver",
+            table_name="chembl_activity",
+            flat_structure=True,
+            provider="chembl",
+            entity="activity",
+        )
+
+        assert request.layer == "silver"
+        assert request.table_name == "chembl_activity"
+        assert request.flat_structure is True
+        assert request.provider == "chembl"
+        assert request.entity == "activity"
+
+
+@pytest.mark.unit
 class TestNoOpMetadataWriter:
     """Tests for NoOpMetadataWriter."""
 

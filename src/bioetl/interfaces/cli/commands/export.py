@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition.entrypoints import get_export_service
 from bioetl.interfaces.cli.commands.export_support import (
     ExportFormat,
     _build_export_options,
@@ -16,7 +16,17 @@ from bioetl.interfaces.cli.commands.export_support import (
     _run_preview,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services import ExportService
+
 __all__ = ["ExportFormat", "export_command"]
+
+
+def get_export_service() -> ExportService:
+    """Load the export service through composition on demand."""
+    from bioetl.composition.entrypoints import get_export_service as _impl
+
+    return _impl()
 
 
 @click.command("export")

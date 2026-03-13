@@ -167,24 +167,24 @@ class MyAdapter:
 Для SCD2-кандидатов Gold mode **MUST** быть задан явно в каждом `configs/entities/{provider}/{entity}.yaml` (секция `pipeline:`).
 Не допускается опора на implicit baseline из `-base.yaml`.
 
-`scd-config` для `mode: scd2` **MUST** содержать все обязательные поля:
+`scd_config` для `mode: scd2` **MUST** содержать все обязательные поля:
 
 ```yaml
 sink:
   gold:
     mode: scd2
-    scd-config:
-      valid-from: -valid-from
-      valid-to: -valid-to
-      is-current: -is-current
-      version: -version
+    scd_config:
+      valid_from_col: _valid_from
+      valid_to_col: _valid_to
+      current_flag_col: _is_current
+      version_col: _version
 ```
 
 **Migration matrix (обязательно для планирования изменений):**
 
 | Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ------------------------------------------------------------------------------------ |
-| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить SCD2 и backfill интервалов валидности             |
+| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить `mode: scd2` + `scd_config` и backfill интервалов валидности             |
 | reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                   |
 | slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии |
 | high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно зафиксировать append в pipeline YAML                                            |

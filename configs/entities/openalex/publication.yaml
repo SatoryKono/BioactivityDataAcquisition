@@ -11,6 +11,14 @@ pipeline:
   - openalex_id
   source:
     email: ${BIOETL_OPENALEX_EMAIL}
+  sink:
+    gold:
+      mode: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
 schema:
   column_groups:
   - name: system

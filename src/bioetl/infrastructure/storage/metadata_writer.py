@@ -142,6 +142,28 @@ class MetadataWriter:
             atomic_replace_retry_policy or DEFAULT_ATOMIC_REPLACE_RETRY_POLICY
         )
 
+    def _build_metadata_write_request(
+        self,
+        *,
+        base_path: str | Path,
+        metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+        layer: str,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> _MetadataWriteRequest:
+        """Build a normalized metadata sidecar request for the canonical write path."""
+        return _MetadataWriteRequest(
+            base_path=base_path,
+            metadata=metadata,
+            layer=layer,
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
+        )
+
     async def write_bronze_metadata(
         self,
         base_path: str | Path,
@@ -164,7 +186,7 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            _MetadataWriteRequest(
+            self._build_metadata_write_request(
                 base_path=base_path,
                 metadata=metadata,
                 layer="bronze",
@@ -199,7 +221,7 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            _MetadataWriteRequest(
+            self._build_metadata_write_request(
                 base_path=base_path,
                 metadata=metadata,
                 layer="silver",
@@ -236,7 +258,7 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            _MetadataWriteRequest(
+            self._build_metadata_write_request(
                 base_path=base_path,
                 metadata=metadata,
                 layer="gold",

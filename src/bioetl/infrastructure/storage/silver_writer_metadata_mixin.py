@@ -93,6 +93,14 @@ class _PreparedSilverWriteFinalizationContext:
     completed_at: datetime
 
 
+def _build_silver_write_result(
+    *, table_name: str, table_path: str, version_after: int | None, records_count: int
+) -> SilverWriteResult | None:
+    return None if version_after is None else SilverWriteResult(
+        table_name, table_path, version_after, records_count
+    )
+
+
 class _SilverMetadataWriteHostProtocol(Protocol):
     """Typed host contract for Silver metadata sidecar stages."""
 
@@ -130,13 +138,8 @@ async def _resolve_silver_metadata_context(
 ) -> _ResolvedSilverMetadataContext:
     """Resolve shared provider/entity/version context for Silver metadata writes."""
     provider_name, entity_name = _parse_table_name(table_name)
-    return _ResolvedSilverMetadataContext(
-        provider_name=provider_name,
-        entity_name=entity_name,
-        version_after=version_after
-        if version_after is not None
-        else await host._get_delta_version(table_path),
-    )
+    version = version_after if version_after is not None else await host._get_delta_version(table_path)
+    return _ResolvedSilverMetadataContext(provider_name, entity_name, version)
 
 
 async def _prepare_silver_metadata_write(
@@ -167,9 +170,7 @@ async def _prepare_silver_metadata_write(
         completed_at=request.completed_at,
     )
     metadata = host._metadata_coordinator.create_silver_metadata(silver_input)
-    return _PreparedSilverMetadataWriteOperation(
-        request, context.provider_name, context.entity_name, metadata
-    )
+    return _PreparedSilverMetadataWriteOperation(request, context.provider_name, context.entity_name, metadata)
 
 
 async def _prepare_silver_merged_metadata_write(
@@ -185,8 +186,7 @@ async def _prepare_silver_merged_metadata_write(
         table_name=request.table_name,
     )
     builder = SilverMetadataBuilder(
-        transform_version=host._transform_version,
-        transform_steps=host._transform_steps,
+        transform_version=host._transform_version, transform_steps=host._transform_steps
     )
     metadata = builder.build_merged_metadata(
         table_path=request.table_path,
@@ -197,12 +197,7 @@ async def _prepare_silver_merged_metadata_write(
         sources_used=request.sources_used,
         version_after=context.version_after,
     )
-    return _PreparedSilverMetadataWriteOperation(
-        request,
-        context.provider_name,
-        context.entity_name,
-        metadata,
-    )
+    return _PreparedSilverMetadataWriteOperation(request, context.provider_name, context.entity_name, metadata)
 
 
 async def _execute_prepared_silver_metadata_write_operation(
@@ -211,8 +206,10 @@ async def _execute_prepared_silver_metadata_write_operation(
 ) -> None:
     """Execute one prepared Silver metadata operation via the canonical writer handoff."""
     await host._write_silver_metadata_file(
-        table_path=prepared.request.table_path, metadata=prepared.metadata,
-        table_name=prepared.request.table_name, provider_name=prepared.provider_name,
+        table_path=prepared.request.table_path,
+        metadata=prepared.metadata,
+        table_name=prepared.request.table_name,
+        provider_name=prepared.provider_name,
         entity_name=prepared.entity_name,
     )
 
@@ -426,8 +423,12 @@ class SilverWriterMetadataMixin:
     ) -> None:
         """Persist one Silver metadata sidecar via the canonical writer handoff."""
         await self._metadata_writer.write_silver_metadata(
-            table_path, metadata, table_name=table_name, flat_structure=self._flat_structure,
-            provider=provider_name, entity=entity_name,
+            table_path,
+            metadata,
+            table_name=table_name,
+            flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
 
     async def _maybe_log_silver_audit(
@@ -476,9 +477,12 @@ class SilverWriterMetadataMixin:
             completed_at=context.completed_at,
             version_after=context.version_after,
         )
-        if context.version_after is None:
-            return None
-        return SilverWriteResult(table_name, table_path, context.version_after, len(records))
+        return _build_silver_write_result(
+            table_name=table_name,
+            table_path=table_path,
+            version_after=context.version_after,
+            records_count=len(records),
+        )
 
     async def _prepare_silver_write_finalization_context(
         self,
@@ -493,6 +497,4 @@ class SilverWriterMetadataMixin:
         dq_metrics = await self._compute_dq_metrics(table_name, records)
         version_after = await self._get_delta_version(table_path)
         completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
-        return _PreparedSilverWriteFinalizationContext(
-            dq_metrics, version_after, completed_at
-        )
+        return _PreparedSilverWriteFinalizationContext(dq_metrics, version_after, completed_at)

@@ -45,7 +45,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v5.23)
+│   ├── RULES.md                 # Canonical rules document (v5.24)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Active tools hub & unified entry points
 │   ├── rules-summary.md         # TL;DR of RULES.md
@@ -480,11 +480,11 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-03-02   | v5.23 (Latest)               |
+| RULES.md                 | 2026-03-13   | v5.24 (Latest)               |
 | REQUIREMENTS.md          | 2026-03-13   | v1.8 (docs governance sync)  |
 | glossary.md              | 2026-02-25   | v2.6 (Ubiquitous Language)   |
 | 00-map.md                | 2026-03-13   | v8.1 Legacy index synced |
-| rules-summary.md         | 2026-02-24   | v5.23 Synced                 |
+| rules-summary.md         | 2026-03-13   | v5.24 Synced                 |
 | TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-guides/development/   | 2026-01-26   | Config schema guidelines     |

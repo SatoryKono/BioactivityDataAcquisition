@@ -168,26 +168,26 @@ class SchemaValidationError(BioETLError):
 
 Для всех SCD2-кандидатов Gold mode **MUST** задаваться явно в pipeline YAML (не полагаться на базовый дефолт).
 
-**Шаблон `scd-config` (обязательные поля):**
+**Шаблон `scd_config` (обязательные поля):**
 
 ```yaml
 sink:
   gold:
     mode: scd2
-    scd-config:
-      valid-from: -valid-from
-      valid-to: -valid-to
-      is-current: -is-current
-      version: -version
+    scd_config:
+      valid_from_col: _valid_from
+      valid_to_col: _valid_to
+      current_flag_col: _is_current
+      version_col: _version
 ````
 
-Обязательные ключи `scd-config`: `valid-from`, `valid-to`, `is-current`, `version`.
+Обязательные ключи `scd_config`: `valid_from_col`, `valid_to_col`, `current_flag_col`, `version_col`.
 
 ### 8. Migration table (Gold write mode)
 
 | Entity                                                                                                                                | Current Mode                            | Recommended Mode       | Breaking                                 | Migration                                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ---------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
-| publication (chembl, pubmed, crossref, openalex, semanticscholar)                                                                     | `overwrite` (implicit via base/default) | `scd2`                 | Yes (new SCD2 columns/history semantics) | Full snapshot bootstrap -> enable `mode: scd2` + `scd-config` -> backfill valid intervals |
+| publication (chembl, pubmed, crossref, openalex, semanticscholar)                                                                     | `overwrite` (implicit via base/default) | `scd2`                 | Yes (new SCD2 columns/history semantics) | Full snapshot bootstrap -> enable `mode: scd2` + `scd_config` -> backfill valid intervals |
 | reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | `overwrite` (implicit)                  | `scd2`                 | Yes                                      | Rebuild Gold once, then switch to SCD2 with versioned updates                             |
 | slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | `overwrite` (implicit)                  | `scd2`                 | Yes                                      | Initialize current snapshot as version=1, future changes produce new versions             |
 | high-volume facts (chembl: activity)                                                                                                  | `overwrite` (implicit)                  | `append`               | No (if consumers read latest partitions) | Set explicit `mode: append`, keep Silver merge for idempotency                            |

@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `AGENT.md`, `CLAUDE.md`, `GEMINI.md` | Дата: 2026-02-24*
+*Версия: 1.0 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `AGENT.md`, `CLAUDE.md`, `GEMINI.md` | Дата: 2026-03-13*
 
 ## 1) Роль и цель
 
