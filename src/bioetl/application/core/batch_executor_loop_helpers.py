@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "BatchExtractionIterationContext",
     "BatchExtractionLoopState",
     "append_record_and_update_batch_size",
     "build_batch_progress_payload",
@@ -39,6 +40,19 @@ class BatchExtractionLoopState:
     current_batch_size: int
     check_interval: int
     batch: list[BronzeRecord] = field(default_factory=list)
+
+
+@dataclass(frozen=True, slots=True)
+class BatchExtractionIterationContext:
+    """Shared collaborators and counters for one extraction-loop iteration."""
+
+    checkpoint_recovery_service: _BatchCheckpointRecoveryPort
+    resume_offset: int
+    process_batch: _BatchStateUpdater
+    memory_manager: BatchMemoryManagerService
+    progress_service: _BatchProgressReporterPort
+    progress_state: _BatchProgressSnapshot
+    checkpoint_interval: int
 
 
 class _BatchProgressReporterPort(Protocol):
@@ -288,45 +302,39 @@ async def process_extracted_record_iteration(
     loop_state: BatchExtractionLoopState,
     raw_record: BronzeRecord,
     shutdown_requested: bool,
-    checkpoint_recovery_service: _BatchCheckpointRecoveryPort,
     records_fetched: int,
-    resume_offset: int,
-    process_batch: _BatchStateUpdater,
-    memory_manager: BatchMemoryManagerService,
-    progress_service: _BatchProgressReporterPort,
-    progress_state: _BatchProgressSnapshot,
-    checkpoint_interval: int,
+    iteration_context: BatchExtractionIterationContext,
 ) -> int:
     """Run one extraction-loop iteration in the canonical execution order."""
     await ensure_extraction_not_shutdown(
         shutdown_requested=shutdown_requested,
-        checkpoint_recovery_service=checkpoint_recovery_service,
+        checkpoint_recovery_service=iteration_context.checkpoint_recovery_service,
         records_fetched=records_fetched,
-        resume_offset=resume_offset,
+        resume_offset=iteration_context.resume_offset,
     )
     next_records_fetched = records_fetched + 1
     append_record_and_update_batch_size(
         loop_state=loop_state,
         raw_record=raw_record,
-        memory_manager=memory_manager,
+        memory_manager=iteration_context.memory_manager,
         records_fetched=next_records_fetched,
     )
     report_batch_progress(
-        progress_service=progress_service,
-        state=progress_state,
+        progress_service=iteration_context.progress_service,
+        state=iteration_context.progress_state,
     )
     await flush_batch_if_needed(
         loop_state=loop_state,
         records_fetched=next_records_fetched,
-        process_batch=process_batch,
-        memory_manager=memory_manager,
-        progress_service=progress_service,
-        progress_state=progress_state,
+        process_batch=iteration_context.process_batch,
+        memory_manager=iteration_context.memory_manager,
+        progress_service=iteration_context.progress_service,
+        progress_state=iteration_context.progress_state,
     )
     await save_periodic_checkpoint_for_loop(
-        checkpoint_recovery_service=checkpoint_recovery_service,
+        checkpoint_recovery_service=iteration_context.checkpoint_recovery_service,
         records_fetched=next_records_fetched,
-        resume_offset=resume_offset,
-        checkpoint_interval=checkpoint_interval,
+        resume_offset=iteration_context.resume_offset,
+        checkpoint_interval=iteration_context.checkpoint_interval,
     )
     return next_records_fetched

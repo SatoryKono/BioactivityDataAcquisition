@@ -19,6 +19,7 @@ from bioetl.application.core.batch_executor_helpers import (
     build_run_statistics,
 )
 from bioetl.application.core.batch_executor_loop_helpers import (
+    BatchExtractionIterationContext,
     create_batch_extraction_loop_state,
     flush_remaining_batch,
     process_extracted_record_iteration,
@@ -328,6 +329,15 @@ class BatchExecutor(_BatchExecutorDQMixin):
             batch_size=self.batch_size,
             check_interval=self._memory.get_check_interval(),
         )
+        iteration_context = BatchExtractionIterationContext(
+            checkpoint_recovery_service=self._checkpoint_recovery_service,
+            resume_offset=execution_context.resume_offset,
+            process_batch=self._process_batch_and_update_state,
+            memory_manager=self._memory,
+            progress_service=self._progress_service,
+            progress_state=self,
+            checkpoint_interval=self.checkpoint_interval,
+        )
 
         async for raw_record in self._batch_processing_service.extract_records(
             limit=execution_context.limit,
@@ -338,14 +348,8 @@ class BatchExecutor(_BatchExecutorDQMixin):
                 loop_state=loop_state,
                 raw_record=raw_record,
                 shutdown_requested=self._shutdown_signal.is_requested,
-                checkpoint_recovery_service=self._checkpoint_recovery_service,
                 records_fetched=self.records_fetched,
-                resume_offset=execution_context.resume_offset,
-                memory_manager=self._memory,
-                process_batch=self._process_batch_and_update_state,
-                progress_service=self._progress_service,
-                progress_state=self,
-                checkpoint_interval=self.checkpoint_interval,
+                iteration_context=iteration_context,
             )
 
         await flush_remaining_batch(
