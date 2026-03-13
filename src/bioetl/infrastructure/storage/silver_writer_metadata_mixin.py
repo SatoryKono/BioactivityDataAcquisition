@@ -75,6 +75,15 @@ class _PreparedSilverMetadataWrite:
     metadata: SilverMetadata
 
 
+@dataclass(frozen=True, slots=True)
+class _ResolvedSilverMetadataContext:
+    """Shared provider/entity/version context for Silver metadata preparation."""
+
+    provider_name: str
+    entity_name: str
+    version_after: int | None
+
+
 class _SilverMetadataWriteHostProtocol(Protocol):
     """Typed host contract for Silver metadata sidecar stages."""
 
@@ -93,16 +102,36 @@ def _read_delta_version(table_path: str) -> int:
     return DeltaTable(table_path).version()
 
 
+async def _resolve_silver_metadata_context(
+    host: _SilverMetadataWriteHostProtocol,
+    *,
+    table_path: str,
+    table_name: str,
+    version_after: int | None = None,
+) -> _ResolvedSilverMetadataContext:
+    """Resolve shared provider/entity/version context for Silver metadata writes."""
+    provider_name, entity_name = _parse_table_name(table_name)
+    return _ResolvedSilverMetadataContext(
+        provider_name=provider_name,
+        entity_name=entity_name,
+        version_after=(
+            version_after
+            if version_after is not None
+            else await host._get_delta_version(table_path)
+        ),
+    )
+
+
 async def _prepare_silver_metadata_write(
     host: _SilverMetadataWriteHostProtocol,
     request: _SilverMetadataWriteRequest,
 ) -> _PreparedSilverMetadataWrite:
     """Resolve provider/entity and build standard Silver metadata payload."""
-    provider_name, entity_name = _parse_table_name(request.table_name)
-    resolved_version = (
-        request.version_after
-        if request.version_after is not None
-        else await host._get_delta_version(request.table_path)
+    context = await _resolve_silver_metadata_context(
+        host,
+        table_path=request.table_path,
+        table_name=request.table_name,
+        version_after=request.version_after,
     )
     assert host._metadata_coordinator is not None
     silver_input = SilverMetadataInput(
@@ -112,7 +141,7 @@ async def _prepare_silver_metadata_write(
         mode=request.mode,
         bronze_refs=request.bronze_refs,
         dq_metrics=request.dq_metrics,
-        version_after=resolved_version,
+        version_after=context.version_after,
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,
         dq_report_path=request.dq_report_path,
@@ -123,8 +152,8 @@ async def _prepare_silver_metadata_write(
     metadata = host._metadata_coordinator.create_silver_metadata(silver_input)
     return _PreparedSilverMetadataWrite(
         request=request,
-        provider_name=provider_name,
-        entity_name=entity_name,
+        provider_name=context.provider_name,
+        entity_name=context.entity_name,
         metadata=metadata,
     )
 
@@ -136,8 +165,11 @@ async def _prepare_silver_merged_metadata_write(
     """Resolve provider/entity and build merged Silver metadata payload."""
     from bioetl.infrastructure.storage.metadata_builder import SilverMetadataBuilder
 
-    provider_name, entity_name = _parse_table_name(request.table_name)
-    version_after = await host._get_delta_version(request.table_path)
+    context = await _resolve_silver_metadata_context(
+        host,
+        table_path=request.table_path,
+        table_name=request.table_name,
+    )
     builder = SilverMetadataBuilder(
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,
@@ -149,12 +181,12 @@ async def _prepare_silver_merged_metadata_write(
         primary_keys=request.primary_keys,
         run_id=request.run_id,
         sources_used=request.sources_used,
-        version_after=version_after,
+        version_after=context.version_after,
     )
     return _PreparedSilverMetadataWrite(
         request=request,
-        provider_name=provider_name,
-        entity_name=entity_name,
+        provider_name=context.provider_name,
+        entity_name=context.entity_name,
         metadata=metadata,
     )
 

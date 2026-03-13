@@ -178,6 +178,9 @@ def _build_runner_factories(
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractionService,
     )
+    from bioetl.composition.bootstrap.runtime.pipeline import (
+        bootstrap_pipeline_runner as bootstrap_pipeline_runner_impl,
+    )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
         RunnerFactoryBuilderService,
         resolve_bronze_opts,
@@ -189,7 +192,7 @@ def _build_runner_factories(
         logger=logger,
         runner_factory_builder_cls=RunnerFactoryBuilderService,
         filter_extraction_service_cls=CompositeFilterExtractionService,
-        pipeline_runner_builder=_bootstrap_pipeline_runner_impl,
+        pipeline_runner_builder=bootstrap_pipeline_runner_impl,
         resolve_bronze_opts_fn=resolve_bronze_opts,
     )
 
@@ -213,33 +216,6 @@ def _build_support_services(
         resolve_gold_schema_fn=_resolve_composite_gold_schema,
         load_field_group_registry_fn=_load_field_group_registry,
         create_dq_report_service_fn=_create_dq_report_service,
-    )
-
-
-def _create_composite_runner(
-    *,
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    run_id: str,
-    logger: LoggerPort,
-    lock: LockPort,
-    seed_runner_factory: Callable[[], PipelineRunner],
-    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
-    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
-    support_services: CompositeSupportServices,
-) -> CompositePipelineRunnerService:
-    """Create fully wired CompositePipelineRunner service."""
-    return _create_composite_runner_builder_impl(
-        config=config,
-        runtime=runtime,
-        run_id=run_id,
-        logger=logger,
-        lock=lock,
-        seed_runner_factory=seed_runner_factory,
-        dependencies_runner_factory=dependencies_runner_factory,
-        enricher_runner_factory=enricher_runner_factory,
-        support_services=support_services,
-        runner_factory=CompositePipelineRunner,
     )
 
 
@@ -281,7 +257,7 @@ def _create_composite_runner_from_plan(
     plan: _CompositeBootstrapPlan,
 ) -> CompositePipelineRunnerService:
     """Create the final composite runner from the resolved bootstrap plan."""
-    return _create_composite_runner(
+    return _create_composite_runner_builder_impl(
         config=config,
         runtime=runtime,
         run_id=plan.run_id,
@@ -291,6 +267,7 @@ def _create_composite_runner_from_plan(
         dependencies_runner_factory=plan.dependencies_runner_factory,
         enricher_runner_factory=plan.enricher_runner_factory,
         support_services=plan.support_services,
+        runner_factory=CompositePipelineRunner,
     )
 
 
@@ -332,9 +309,3 @@ def bootstrap_composite_pipeline(
         Fully wired CompositePipelineRunnerService ready for execution.
     """
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
-
-
-# CIRCULAR-DEPENDENCY: kept local to avoid entrypoints bootstrap cycle.
-from bioetl.composition.bootstrap.runtime.pipeline import (
-    bootstrap_pipeline_runner as _bootstrap_pipeline_runner_impl,
-)
