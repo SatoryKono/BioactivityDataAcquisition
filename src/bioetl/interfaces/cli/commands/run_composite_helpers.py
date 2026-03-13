@@ -8,7 +8,6 @@ from collections.abc import Callable, Coroutine
 from typing import Any
 
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
-from bioetl.composition.entrypoints import push_metrics_to_gateway
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -30,6 +29,16 @@ __all__ = [
     "handle_run_composite_exception",
     "run_composite_with_cli_policy",
 ]
+
+
+def push_metrics_to_gateway(
+    run_label: str = "bioetl",
+    pipeline_name: str | None = None,
+) -> bool:
+    """Push metrics through composition on demand."""
+    from bioetl.composition.entrypoints import push_metrics_to_gateway as _impl
+
+    return _impl(run_label=run_label, pipeline_name=pipeline_name)
 
 
 def emit_composite_startup(

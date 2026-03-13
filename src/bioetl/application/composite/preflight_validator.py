@@ -9,8 +9,6 @@ See ADR-026 for composite pipeline architectural decisions.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
 )
@@ -25,10 +23,8 @@ from bioetl.application.composite._preflight_types import (
     SchemaFields,
     ValidationIssue,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.ports import LoggerPort
 
 __all__ = [
     "CompositePreflightValidationService",

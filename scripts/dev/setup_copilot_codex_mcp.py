@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical setup backend for Copilot/Codex GitHub MCP configuration."""
+"""Canonical setup backend for Copilot/Codex MCP configuration."""
 
 from __future__ import annotations
 
@@ -10,12 +10,43 @@ import subprocess
 import sys
 from pathlib import Path
 
-GITHUB_MCP_PACKAGE = "@modelcontextprotocol/server-github@2025.4.8"
+NPM_CONFIG_CACHE = "/tmp/npm-cache"
+MEMORY_FILE_RELATIVE_PATH = Path("docs/00-project/ai/memory/mcp-memory.json")
+
+
+def _core_servers(root: Path) -> dict[str, dict[str, object]]:
+    memory_file_path = str((root / MEMORY_FILE_RELATIVE_PATH).resolve())
+    root_path = str(root)
+    return {
+        "memory": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-memory@2026.1.26"],
+            "env": {
+                "MEMORY_FILE_PATH": memory_file_path,
+                "NPM_CONFIG_CACHE": NPM_CONFIG_CACHE,
+            },
+        },
+        "filesystem": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem@2026.1.14", root_path],
+            "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
+        },
+        "sequential-thinking": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"],
+            "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
+        },
+        "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github@2025.4.8"],
+            "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
+        },
+    }
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Configure GitHub MCP for VS Code and Codex CLI."
+        description="Configure core MCP servers for VS Code and Codex CLI."
     )
     parser.add_argument(
         "--root",
@@ -35,18 +66,11 @@ def _write_vscode_mcp(root: Path) -> None:
     vscode_mcp_path = root / ".vscode" / "mcp.json"
     print(f"[1/3] Writing VS Code MCP config: {vscode_mcp_path}")
     vscode_mcp_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "servers": {
-            "github": {
-                "command": "npx",
-                "args": ["-y", GITHUB_MCP_PACKAGE],
-            }
-        }
-    }
+    payload = {"servers": _core_servers(root)}
     vscode_mcp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def _codex_registration() -> int:
+def _codex_registration(root: Path) -> int:
     codex_bin = shutil.which("codex")
     if codex_bin is None:
         print("[2/3] Codex CLI not found. Skipping Codex MCP registration.")
@@ -54,25 +78,38 @@ def _codex_registration() -> int:
         print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
         return 0
 
-    print("[2/3] Checking Codex MCP server registration: github")
-    get_result = subprocess.run(
-        [codex_bin, "mcp", "get", "github"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        check=False,
-    )
+    print("[2/3] Refreshing Codex MCP registrations")
+    for server_name, server_config in _core_servers(root).items():
+        subprocess.run(
+            [codex_bin, "mcp", "remove", server_name],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
 
-    if get_result.returncode == 0:
-        print("      github MCP already registered in Codex.")
-    else:
+        add_command = [
+            codex_bin,
+            "mcp",
+            "add",
+            server_name,
+            "--env",
+            f"NPM_CONFIG_CACHE={NPM_CONFIG_CACHE}",
+        ]
+        env = server_config.get("env", {})
+        memory_file_path = env.get("MEMORY_FILE_PATH")
+        if isinstance(memory_file_path, str):
+            add_command.extend(["--env", f"MEMORY_FILE_PATH={memory_file_path}"])
+
+        command = server_config["command"]
+        args = server_config["args"]
         add_result = subprocess.run(
-            [codex_bin, "mcp", "add", "github", "--", "npx", "-y", GITHUB_MCP_PACKAGE],
+            [*add_command, "--", command, *args],
             check=False,
         )
         if add_result.returncode != 0:
-            print("[FAIL] Unable to register github MCP in Codex.")
+            print(f"[FAIL] Unable to register {server_name} MCP in Codex.")
             return add_result.returncode
-        print("      github MCP registered in Codex.")
+        print(f"      {server_name} MCP registered in Codex.")
 
     print("[3/3] Done.")
     print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
@@ -90,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
         print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
         return 0
 
-    return _codex_registration()
+    return _codex_registration(root)
 
 
 if __name__ == "__main__":

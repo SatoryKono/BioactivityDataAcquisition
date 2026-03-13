@@ -4,17 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
+import polars as pl
+
+from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+from bioetl.application.composite.protocols import JoinKeyResolverProtocol
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
-
-if TYPE_CHECKING:
-    import polars as pl
-
-    from bioetl.application.composite.column_renamer import ColumnRenamerService
-    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-    from bioetl.application.composite.protocols import JoinKeyResolverProtocol
-    from bioetl.domain.ports import LoggerPort
 
 
 def resolve_field_aliases_from_registry(pipeline: str) -> dict[str, str] | None:
