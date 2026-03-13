@@ -129,6 +129,9 @@ class TestSilverWriterValidation:
             SilverWriteMode,
             SilverWriter,
         )
+        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+            _SilverWritePreparationRequest,
+        )
 
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         schema = pa.schema(
@@ -143,14 +146,16 @@ class TestSilverWriterValidation:
         )
 
         validated = writer._sync_validate_and_build_arrow(
-            table_name="test.table",
-            records=valid_records,
-            primary_keys=["entity_id"],
-            schema=schema,
-            mode="merge",
-            column_order=None,
-            partition_cols=["entity_id"],
-            key_nullability_rules=None,
+            _SilverWritePreparationRequest(
+                table_name="test.table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="merge",
+                column_order=None,
+                partition_cols=["entity_id"],
+                key_nullability_rules=None,
+            )
         )
 
         assert validated.records == valid_records

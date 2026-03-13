@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
     DQ_REPORT_NON_FATAL_ERRORS,
@@ -18,6 +18,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
     from bioetl.domain.types import RunID
 
+    class _CompositeRunnerObservabilityHostProtocol(Protocol):
+        _config: CompositeConfig
+        _logger: LoggerPort
+        _run_id_str: str
+        _run_id: RunID
+        _dq_report_service: DQReportService | None
+        _quarantine_port: QuarantinePort | None
+        _metrics: MetricsPort | None
+
 
 class CompositeRunnerObservabilityMixin:
     """Mixin with optional DQ reporting and quarantine side effects."""
@@ -30,7 +39,10 @@ class CompositeRunnerObservabilityMixin:
     _quarantine_port: QuarantinePort | None
     _metrics: MetricsPort | None
 
-    async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
+    async def _generate_dq_reports(
+        self: _CompositeRunnerObservabilityHostProtocol,
+        merge_result: MergeResult,
+    ) -> None:
         """Generate DQ reports for composite pipeline.
 
         Args:
@@ -82,7 +94,10 @@ class CompositeRunnerObservabilityMixin:
                 reason_code="unexpected_bioetl_error",
             )
 
-    async def _write_cv_quarantine(self, merge_result: MergeResult) -> None:
+    async def _write_cv_quarantine(
+        self: _CompositeRunnerObservabilityHostProtocol,
+        merge_result: MergeResult,
+    ) -> None:
         """Write cross-validation quarantine records if any exist.
 
         Args:

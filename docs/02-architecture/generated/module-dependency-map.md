@@ -25,9 +25,9 @@ flowchart LR
     composition -->|202 OK| application
     composition -->|279 OK| composition
     composition -->|227 OK| domain
-    composition -->|211 OK| infrastructure
+    composition -->|210 OK| infrastructure
     domain -->|692 OK| domain
-    infrastructure -->|484 OK| domain
+    infrastructure -->|485 OK| domain
     infrastructure -->|619 OK| infrastructure
     interfaces -->|18 OK| application
     interfaces -->|29 OK| composition
@@ -44,9 +44,9 @@ flowchart LR
 | `composition` | `application` | 202 | allowed |
 | `composition` | `composition` | 279 | allowed |
 | `composition` | `domain` | 227 | allowed |
-| `composition` | `infrastructure` | 211 | allowed |
+| `composition` | `infrastructure` | 210 | allowed |
 | `domain` | `domain` | 692 | allowed |
-| `infrastructure` | `domain` | 484 | allowed |
+| `infrastructure` | `domain` | 485 | allowed |
 | `infrastructure` | `infrastructure` | 619 | allowed |
 | `interfaces` | `application` | 18 | allowed |
 | `interfaces` | `composition` | 29 | allowed |
@@ -76,9 +76,9 @@ flowchart LR
 | `application.pipelines` | `domain.entities` | 24 |
 | `composition.bootstrap` | `domain.ports` | 23 |
 | `composition.factories` | `application.pipelines` | 23 |
+| `infrastructure.storage` | `domain.models` | 23 |
 | `application.services` | `domain.types` | 22 |
-| `composition.bootstrap` | `infrastructure.config` | 22 |
-| `infrastructure.storage` | `domain.models` | 22 |
+| `composition.bootstrap` | `infrastructure.config` | 21 |
 | `composition.factories` | `domain.schemas` | 19 |
 | `composition.factories` | `infrastructure.schemas` | 19 |
 | `interfaces.cli` | `composition.entrypoints` | 19 |

@@ -67,8 +67,10 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        CompositeRuntimeBasics,
+    )
     from bioetl.domain.ports import LockPort, LoggerPort
-    from bioetl.infrastructure.config import Settings
 
 __all__ = [
     "CompositeRuntimeConfig",
@@ -143,7 +145,7 @@ def _bootstrap_runtime_basics(
     *,
     config: CompositeConfig,
     run_id: str | None,
-) -> tuple[str, Settings, LoggerPort, object, LockPort]:
+) -> CompositeRuntimeBasics:
     """Build base runtime dependencies shared across composite bootstrap."""
     return _bootstrap_runtime_basics_builder_impl(
         config=config,
@@ -195,19 +197,13 @@ def _build_support_services(
     *,
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
-    settings: Settings,
-    logger: LoggerPort,
-    storage: object,
-    run_id: str,
+    runtime_basics: CompositeRuntimeBasics,
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade."""
     return _build_support_services_builder_impl(
         config=config,
         runtime=runtime,
-        settings=settings,
-        logger=logger,
-        storage=storage,
-        run_id=run_id,
+        runtime_basics=runtime_basics,
         support_services_factory_cls=CompositeSupportServicesFactory,
         resolve_gold_schema_fn=_resolve_composite_gold_schema,
         load_field_group_registry_fn=_load_field_group_registry,
@@ -249,29 +245,23 @@ def _build_composite_bootstrap_plan(
     run_id: str | None,
 ) -> _CompositeBootstrapPlan:
     """Resolve declarative bootstrap plan for the composite runner."""
-    effective_run_id, settings, logger, storage, lock = _bootstrap_runtime_basics(
-        config=config,
-        run_id=run_id,
-    )
+    runtime_basics = _bootstrap_runtime_basics(config=config, run_id=run_id)
     seed_runner_factory, dependencies_runner_factory, enricher_runner_factory = (
         _build_runner_factories(
             config=config,
             runtime=runtime,
-            logger=logger,
+            logger=runtime_basics.logger,
         )
     )
     support_services = _build_support_services(
         config=config,
         runtime=runtime,
-        settings=settings,
-        logger=logger,
-        storage=storage,
-        run_id=effective_run_id,
+        runtime_basics=runtime_basics,
     )
     return _CompositeBootstrapPlan(
-        run_id=effective_run_id,
-        logger=logger,
-        lock=lock,
+        run_id=runtime_basics.run_id,
+        logger=runtime_basics.logger,
+        lock=runtime_basics.lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
@@ -317,16 +307,8 @@ def bootstrap_composite_runner(
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
-    plan = _build_composite_bootstrap_plan(
-        config=config,
-        runtime=runtime,
-        run_id=run_id,
-    )
-    return _create_composite_runner_from_plan(
-        config=config,
-        runtime=runtime,
-        plan=plan,
-    )
+    plan = _build_composite_bootstrap_plan(config=config, runtime=runtime, run_id=run_id)
+    return _create_composite_runner_from_plan(config=config, runtime=runtime, plan=plan)
 
 
 def bootstrap_composite_pipeline(

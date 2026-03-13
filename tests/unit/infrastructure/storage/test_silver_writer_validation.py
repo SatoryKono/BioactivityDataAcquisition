@@ -544,3 +544,76 @@ class TestSilverWriterPreparePayloadExecutor:
             )
 
         assert call_order == ["sync", "schema"]
+
+    @pytest.mark.asyncio
+    async def test_prepare_payload_builds_named_request_for_sync_stage(
+        self, noop_logger
+    ) -> None:
+        """Silver payload preparation should pass one named request into sync stage."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+            _SilverWritePreparationRequest,
+            _ValidatedSilverWriteContext,
+        )
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_run_id": "uuid-123",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+        expected_table = pa.Table.from_pylist(records, schema=schema)
+        captured_request: _SilverWritePreparationRequest | None = None
+
+        def sync_stage(
+            request: _SilverWritePreparationRequest,
+        ) -> _ValidatedSilverWriteContext:
+            nonlocal captured_request
+            captured_request = request
+            return _ValidatedSilverWriteContext(
+                records=records,
+                validated_mode=SilverWriteMode.APPEND,
+                arrow_data=expected_table,
+            )
+
+        writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
+
+        with patch.object(
+            writer,
+            "_sync_validate_and_build_arrow",
+            side_effect=sync_stage,
+        ):
+            await writer._prepare_silver_write_payload(
+                table_name="test.table",
+                records=records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="append",
+                on_schema_mismatch="ignore",
+                column_order=None,
+                partition_cols=["entity_id"],
+                key_nullability_rules=None,
+            )
+
+        assert captured_request is not None
+        assert captured_request.table_name == "test.table"
+        assert captured_request.records == records
+        assert captured_request.primary_keys == ["entity_id"]
+        assert captured_request.schema == schema
+        assert captured_request.mode == "append"
+        assert captured_request.partition_cols == ["entity_id"]

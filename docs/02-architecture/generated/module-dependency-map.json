@@ -41,7 +41,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 211,
+      "imports": 210,
       "allowed": true
     },
     {
@@ -53,7 +53,7 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 484,
+      "imports": 485,
       "allowed": true
     },
     {
@@ -184,6 +184,11 @@
       "imports": 23
     },
     {
+      "source": "infrastructure.storage",
+      "target": "domain.models",
+      "imports": 23
+    },
+    {
       "source": "application.services",
       "target": "domain.types",
       "imports": 22
@@ -191,12 +196,7 @@
     {
       "source": "composition.bootstrap",
       "target": "infrastructure.config",
-      "imports": 22
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.models",
-      "imports": 22
+      "imports": 21
     },
     {
       "source": "composition.factories",

@@ -29,8 +29,6 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True, slots=True)
 class _GoldMetadataWriteRequest:
-    """Normalized request payload for one standard Gold metadata write."""
-
     table_path: str
     table_name: str
     records: list[GoldRecord]
@@ -44,17 +42,22 @@ class _GoldMetadataWriteRequest:
 
 @dataclass(frozen=True, slots=True)
 class _PreparedGoldMetadataWrite:
-    """Prepared metadata context carried into metadata sidecar persistence."""
-
-    request: _GoldMetadataWriteRequest
+    request: _GoldMetadataWriteRequest | _GoldMergedMetadataWriteRequest
     provider_name: str
     entity_name: str
     metadata: GoldMetadata
 
 
-class _GoldMetadataWriteHostProtocol(Protocol):
-    """Typed host contract for standard Gold metadata write stages."""
+@dataclass(frozen=True, slots=True)
+class _GoldMergedMetadataWriteRequest:
+    table_path: str
+    table_name: str
+    records: list[GoldRecord]
+    schema: DataFrameSchema | None = None
 
+
+class _GoldMetadataWriteHostProtocol(Protocol):
+    _metadata_coordinator: MetadataCoordinatorPort | None
     def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]: ...
 
     def _create_gold_metadata_payload(
@@ -71,6 +74,15 @@ class _GoldMetadataWriteHostProtocol(Protocol):
         gold_schema: object | None = None,
     ) -> GoldMetadata: ...
 
+    def _build_gold_merged_metadata_input(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        schema: DataFrameSchema | None,
+    ) -> GoldMetadataInput: ...
+
     async def _write_gold_metadata_file(
         self,
         *,
@@ -86,7 +98,6 @@ def _prepare_gold_metadata_write(
     host: _GoldMetadataWriteHostProtocol,
     request: _GoldMetadataWriteRequest,
 ) -> _PreparedGoldMetadataWrite:
-    """Resolve provider/entity and build metadata payload before sidecar write."""
     provider_name, entity_name = host._resolve_provider_entity(request.table_name)
     metadata = host._create_gold_metadata_payload(
         table_path=request.table_path,
@@ -111,7 +122,6 @@ async def _persist_gold_metadata_write(
     host: _GoldMetadataWriteHostProtocol,
     prepared: _PreparedGoldMetadataWrite,
 ) -> None:
-    """Persist one prepared Gold metadata write."""
     await host._write_gold_metadata_file(
         table_path=prepared.request.table_path,
         metadata=prepared.metadata,
@@ -121,9 +131,31 @@ async def _persist_gold_metadata_write(
     )
 
 
-class _GoldWriterMergedMetadataInputMixin:
-    """Helpers for constructing merged Gold metadata input payloads."""
+def _prepare_gold_merged_metadata_write(
+    host: _GoldMetadataWriteHostProtocol,
+    request: _GoldMergedMetadataWriteRequest,
+) -> _PreparedGoldMetadataWrite:
+    from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
+    provider_name, entity_name = _parse_table_name(request.table_name)
+    assert host._metadata_coordinator is not None
+    metadata = host._metadata_coordinator.create_gold_metadata(
+        host._build_gold_merged_metadata_input(
+            table_path=request.table_path,
+            table_name=request.table_name,
+            records=request.records,
+            schema=request.schema,
+        )
+    )
+    return _PreparedGoldMetadataWrite(
+        request=request,
+        provider_name=provider_name,
+        entity_name=entity_name,
+        metadata=metadata,
+    )
+
+
+class _GoldWriterMergedMetadataInputMixin:
     _transform_version: str | None
     _transform_steps: tuple[str, ...]
 
@@ -135,11 +167,6 @@ class _GoldWriterMergedMetadataInputMixin:
         records: list[GoldRecord],
         schema: DataFrameSchema | None,
     ) -> GoldMetadataInput:
-        """Build metadata input payload for merged Gold writes.
-
-        Returns:
-            GoldMetadataInput instance configured for overwrite mode with composite lineage fields.
-        """
         from bioetl.domain.ports import GoldMetadataInput
 
         return GoldMetadataInput(
@@ -158,11 +185,6 @@ class _GoldWriterMergedMetadataInputMixin:
 
     @staticmethod
     def _extract_completed_at(first_record: GoldRecord) -> datetime | None:
-        """Extract completed-at timestamp from merged lineage metadata.
-
-        Returns:
-            Datetime parsed from lineage or ingestion timestamp fields, or None if absent.
-        """
         completed_at_raw = first_record.get("_lineage_created_at") or first_record.get(
             "_ingestion_ts"
         )
@@ -174,18 +196,11 @@ class _GoldWriterMergedMetadataInputMixin:
 
 
 class _GoldWriterMetadataPayloadMixin:
-    """Helpers for building Gold metadata payloads from write inputs."""
-
     _metadata_coordinator: MetadataCoordinatorPort | None
     _transform_version: str | None
     _transform_steps: tuple[str, ...]
 
     def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]:
-        """Parse provider/entity pair from physical Gold table name.
-
-        Returns:
-            Tuple of (provider name, entity name) parsed from the table name.
-        """
         from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
         return _parse_table_name(table_name)
@@ -203,11 +218,6 @@ class _GoldWriterMetadataPayloadMixin:
         silver_refs: list[SilverWriteResult] | None = None,
         gold_schema: object | None = None,
     ) -> GoldMetadata:
-        """Create metadata via coordinator when configured, else fallback builder.
-
-        Returns:
-            GoldMetadata instance built via coordinator or fallback builder.
-        """
         if self._metadata_coordinator is not None:
             return self._create_gold_metadata_via_coordinator(
                 table_path=table_path,
@@ -241,11 +251,6 @@ class _GoldWriterMetadataPayloadMixin:
         silver_refs: list[SilverWriteResult] | None,
         gold_schema: object | None,
     ) -> GoldMetadata:
-        """Build Gold metadata using MetadataCoordinator.
-
-        Returns:
-            GoldMetadata instance created via the configured MetadataCoordinator.
-        """
         from bioetl.domain.ports import GoldMetadataInput, SilverRef
 
         converted_refs = (
@@ -286,11 +291,6 @@ class _GoldWriterMetadataPayloadMixin:
         run_id: RunID | None,
         gold_schema: object | None,
     ) -> GoldMetadata:
-        """Build Gold metadata through fallback builder.
-
-        Returns:
-            GoldMetadata instance created via the GoldMetadataBuilder fallback.
-        """
         from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
 
         builder = GoldMetadataBuilder(
@@ -312,8 +312,6 @@ class GoldWriterMetadataMixin(
     _GoldWriterMetadataPayloadMixin,
     _GoldWriterMergedMetadataInputMixin,
 ):
-    """Mixin containing audit and metadata sidecar write helpers."""
-
     logger: LoggerPort
     _audit: AuditPort | None
     _metadata_coordinator: MetadataCoordinatorPort | None
@@ -332,7 +330,6 @@ class GoldWriterMetadataMixin(
         ingestion_ts: datetime | None,
         run_id: RunID | None,
     ) -> None:
-        """Log audit entry for Gold write operation."""
         from uuid import uuid4
 
         if ingestion_ts is not None:
@@ -374,11 +371,6 @@ class GoldWriterMetadataMixin(
         await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:
-        """Get current Delta table version.
-
-        Returns:
-            Integer Delta table version if the table exists, None otherwise.
-        """
         module = self._load_gold_writer_module()
 
         try:
@@ -407,7 +399,6 @@ class GoldWriterMetadataMixin(
         silver_refs: list[SilverWriteResult] | None = None,
         gold_schema: object | None = None,
     ) -> None:
-        """Write Gold layer metadata sidecar file."""
         if not records:
             return
         prepared = _prepare_gold_metadata_write(
@@ -435,7 +426,6 @@ class GoldWriterMetadataMixin(
         provider_name: str,
         entity_name: str,
     ) -> None:
-        """Persist metadata sidecar using configured writer."""
         await self._metadata_writer.write_gold_metadata(
             table_path,
             metadata,
@@ -455,12 +445,8 @@ class GoldWriterMetadataMixin(
         sources_used: list[str] | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None:
-        """Write Gold layer metadata sidecar for merged composite data."""
         if not records:
             return
-        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
-
-        provider_name, entity_name = _parse_table_name(table_name)
         if self._metadata_coordinator is None:
             self.logger.debug(
                 "gold_merged_metadata_skipped",
@@ -468,22 +454,16 @@ class GoldWriterMetadataMixin(
                 table_path=table_path,
             )
             return
-        metadata = self._metadata_coordinator.create_gold_metadata(
-            self._build_gold_merged_metadata_input(
+        prepared = _prepare_gold_merged_metadata_write(
+            self,
+            _GoldMergedMetadataWriteRequest(
                 table_path=table_path,
                 table_name=table_name,
                 records=records,
                 schema=schema,
-            )
+            ),
         )
-        await self._metadata_writer.write_gold_metadata(
-            table_path,
-            metadata,
-            table_name=table_name,
-            flat_structure=self._flat_structure,
-            provider=provider_name,
-            entity=entity_name,
-        )
+        await _persist_gold_metadata_write(self, prepared)
 
 
 __all__ = ["GoldWriterMetadataMixin"]

@@ -298,7 +298,7 @@ async def test_persist_failed_state_when_called_then_transitions_to_failed_and_s
     harness._save_checkpoint_safe = save_mock  # type: ignore[method-assign]
     state = _make_checkpoint_state(CompositePipelineState.SEED_RUNNING)
 
-    result = await harness._persist_failed_state(
+    await harness._persist_failed_state(
         state,
         stage="seed_failed",
         error="test error",

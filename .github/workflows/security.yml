@@ -55,5 +55,4 @@ jobs:
 
       - name: Run pip-audit
         run: uv run pip-audit --require-hashes --disable-pip --strict
-        continue-on-error: true
 
