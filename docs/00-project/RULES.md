@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.23 (Dependency Policy Sync), 2026-03-02*
+*Версия: 5.24 (Docs Governance Sync), 2026-03-13*
 
 ## Введение (Quick Reference)
 
@@ -1117,6 +1117,9 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 ## 6. Документация (Автоматизация — приоритет)
 
+- **Source of Truth**: Для текущего project guidance нормативными остаются активные docs в `docs/00-05`.
+- **Archive Boundary**: Материалы в `docs/99-archive/` сохраняются для traceability и historical context, но не являются нормативными для текущего поведения проекта.
+- **Guardrails**: Активная документация и generated docs **MUST** проходить автоматические docs-проверки (`check_doc_links` и выделенные generated-doc checks в CI).
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs).
 - **Именование**: Зеркальное (`src/bioetl/.../{provider}/` \<-> `docs/04-reference/providers/{provider}/`).
 
@@ -1691,6 +1694,7 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **5.24** (2026-03-13): Docs Governance Sync. В §6 явно закреплена active-docs модель: `docs/00-05` как source of truth, `docs/99-archive/` как non-normative historical context, и docs guardrails как обязательная проверка для active/generated docs.
 - **5.23** (2026-03-02): Dependency Policy Sync. Уточнена политика зависимостей: mixed strategy (`pyproject.toml` с диапазонами + воспроизводимость через `uv.lock`), строгие `==` оставлены как исключение для критичных инструментов.
 - **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из legacy pipeline config directory в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
 - **5.21** (2026-02-21): Deduplication Policy Implementation.

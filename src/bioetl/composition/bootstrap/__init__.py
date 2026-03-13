@@ -56,6 +56,7 @@ from bioetl.composition.bootstrap.cli import (
 # Runtime services (full observability, pipeline execution)
 # =============================================================================
 from bioetl.composition.bootstrap.runtime import (
+    bootstrap_composite_runner,
     bootstrap_logger_port,
     bootstrap_metrics_port,
     bootstrap_pipeline_runner,
@@ -77,6 +78,7 @@ __all__ = [
     "bootstrap_checkpoint_service",
     "bootstrap_cleanup_service",
     "bootstrap_composite_checkpoint_port",
+    "bootstrap_composite_runner",
     "bootstrap_config_service",
     "bootstrap_export_service",
     "bootstrap_health_server_dependencies",

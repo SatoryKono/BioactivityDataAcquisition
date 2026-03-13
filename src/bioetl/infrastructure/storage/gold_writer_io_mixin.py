@@ -216,6 +216,16 @@ async def _complete_gold_merged_write(
     await _write_gold_merged_sidecar(host, prepared)
 
 
+async def _execute_gold_merged_write(
+    host: _GoldMergedWriteHostProtocol,
+    request: _GoldMergedWriteRequest,
+) -> None:
+    """Prepare, log, and execute one merged Gold write request."""
+    prepared = await _prepare_gold_merged_write(host, request)
+    _log_prepared_gold_merged_write(host, prepared)
+    await _complete_gold_merged_write(host, prepared)
+
+
 class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
     """Merged-write orchestration and mode dispatch."""
 
@@ -254,9 +264,7 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,
         )
-        prepared = await _prepare_gold_merged_write(self, request)
-        _log_prepared_gold_merged_write(self, prepared)
-        await _complete_gold_merged_write(self, prepared)
+        await _execute_gold_merged_write(self, request)
 
     async def _dispatch_write(
         self,

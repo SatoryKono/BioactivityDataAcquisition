@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 import pyarrow as pa
@@ -145,6 +146,33 @@ def _write_prepared_simple_delta(
     )
 
 
+async def _execute_prepared_simple_gold_write(
+    host: _GoldWriterSimpleDeltaHostProtocol,
+    module: _GoldWriterDeltaModuleProtocol,
+    prepared: _PreparedSimpleGoldWrite,
+) -> None:
+    """Run retry-wrapped simple Delta write and optional CSV export."""
+    await _run_gold_write_with_retry(
+        module,
+        lambda: host._run_in_executor(
+            _write_prepared_simple_delta,
+            module,
+            prepared,
+        ),
+    )
+    if host.csv_exporter:
+        await host.csv_exporter.export(
+            prepared.request.table_name,
+            prepared.arrow_data,
+            append=prepared.request.mode != "overwrite",
+            primary_keys=(
+                prepared.request.primary_keys
+                if prepared.request.mode != "overwrite"
+                else None
+            ),
+        )
+
+
 def _prepare_scd2_gold_write(
     *,
     table_path: str,
@@ -191,6 +219,28 @@ async def _run_gold_write_with_retry(
             if attempt == 2:
                 raise error
             await module.asyncio.sleep(_gold_write_retry_delay(attempt))
+
+
+async def _execute_prepared_scd2_gold_write(
+    host: _GoldWriterScd2MergeMixin,
+    module: ModuleType,
+    prepared: _PreparedScd2GoldWrite,
+) -> None:
+    """Run retry-wrapped SCD2 Gold write for one prepared request."""
+    await _run_gold_write_with_retry(
+        module,
+        lambda: _write_scd2_once(
+            host,
+            module=module,
+            table_path=prepared.table_path,
+            records=prepared.records,
+            business_key=prepared.business_key,
+            scd_config=prepared.scd_config,
+            ingestion_ts=prepared.ingestion_ts,
+            partition_cols=prepared.partition_cols,
+            column_order=prepared.column_order,
+        ),
+    )
 
 
 class _GoldWriterExecutorArrowMixin:
@@ -250,21 +300,7 @@ class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
             ),
         )
         module = cast(_GoldWriterDeltaModuleProtocol, _load_gold_writer_module())
-        await _run_gold_write_with_retry(
-            module,
-            lambda: self._run_in_executor(
-                _write_prepared_simple_delta,
-                module,
-                prepared,
-            ),
-        )
-        if self.csv_exporter:
-            await self.csv_exporter.export(
-                table_name,
-                prepared.arrow_data,
-                append=mode != "overwrite",
-                primary_keys=primary_keys if mode != "overwrite" else None,
-            )
+        await _execute_prepared_simple_gold_write(self, module, prepared)
 
     async def finalize_csv_export(
         self,
@@ -306,20 +342,7 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
             column_order=column_order,
         )
         module = _load_gold_writer_module()
-        await _run_gold_write_with_retry(
-            cast(_GoldWriteRetryModuleProtocol, module),
-            lambda: _write_scd2_once(
-                self,
-                module=module,
-                table_path=prepared.table_path,
-                records=prepared.records,
-                business_key=prepared.business_key,
-                scd_config=prepared.scd_config,
-                ingestion_ts=prepared.ingestion_ts,
-                partition_cols=prepared.partition_cols,
-                column_order=prepared.column_order,
-            ),
-        )
+        await _execute_prepared_scd2_gold_write(self, module, prepared)
 
     async def _merge_scd2(
         self,

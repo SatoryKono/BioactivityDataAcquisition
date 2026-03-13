@@ -1,6 +1,6 @@
 # Documentation Publication Policy
 
-*Версия: 1.2 (2026-03-02)*
+*Версия: 1.3 (2026-03-13)*
 
 ## Цель
 
@@ -49,26 +49,28 @@
 ## Правила поддержки
 
 1. Документы класса `published` являются нормативными и должны отражать текущее состояние репозитория.
+   Для текущего project guidance источником истины остаются активные docs в `docs/00-05`.
 2. Документы класса `internal-published` публикуются для удобства команды, но не являются нормативным источником требований.
 3. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published` и `internal`.
 4. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
-5. Для активных docs использовать автоматические проверки (`python -m scripts.docs check-links`) в CI.
+5. Для активных docs использовать автоматические проверки `check_doc_links` и nav/strict-build guardrails в CI.
 6. Документы по runtime, который не является стандартным (например Kubernetes при ADR-010 Local-Only), публикуются только как `internal-published` в разделе `Internal / Extended` и должны содержать явный experimental/disclaimer баннер.
 7. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
+8. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.
 
 ## Минимальный чек-лист перед merge
 
-1. Проверить ссылки:
+1. Прогнать базовую docs-проверку:
 ```bash
-python scripts/docs/check_doc_links.py --links
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py
 ```
-2. Проверить legacy-токены в активных docs:
+2. При изменениях вокруг nav/non-nav проверить рост вне навигации:
 ```bash
-python scripts/docs/check_doc_links.py --legacy-paths
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --not-in-nav-growth
 ```
-3. Проверить, что изменения не сломали nav:
+3. Проверить, что docs-site всё ещё собирается в strict-режиме:
 ```bash
-rg -o "[A-Za-z0-9-./-]+\\.md" mkdocs.yml | sort -u
+bash scripts/docs/build_docs_site.sh --strict
 ```
 
 ## Связанный документ

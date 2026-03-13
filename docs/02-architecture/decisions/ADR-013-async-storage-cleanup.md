@@ -6,7 +6,15 @@
 
 ## Context
 
-Метод `_clear_exports()` в `PipelineRunner` вызывает асинхронные методы `StoragePort.clear_silver()` и `StoragePort.clear_gold()`. Изначально метод был определён как синхронный (`def`), что приводило к синтаксической ошибке при использовании `await`.
+На момент принятия ADR путь очистки в `PipelineRunner` был представлен через
+приватный метод `_clear_exports()`, который вызывал асинхронные методы
+`StoragePort.clear_silver()` и `StoragePort.clear_gold()`. Изначально этот путь
+был определён как синхронный (`def`), что приводило к синтаксической ошибке при
+использовании `await`.
+
+В текущей архитектуре тот же инвариант реализован через
+`MedallionLifecycleService.prepare_for_run()`, который делегирует
+policy-driven очистку в `MedallionLifecycleService.clear()`.
 
 Также требовалось формализовать политику очистки данных в зависимости от типа запуска (RunType).
 
@@ -14,18 +22,25 @@
 
 ### 1. Асинхронная сигнатура
 
-`_clear_exports()` объявляется как `async def`:
+Исторически `_clear_exports()` был переведён в асинхронный путь очистки.
+В текущем коде канонический pre-run вызов выглядит так:
 
 ```python
-async def _clear_exports(self) -> None:
-    """Clear export files and Delta tables at the start of a pipeline run."""
-    ...
+await self._lifecycle_service.prepare_for_run(
+    config=self._config,
+    runtime=self._runtime,
+)
 ```
 
-Вызов из `run()` использует `await`:
+Внутри lifecycle service очистка остаётся асинхронной:
 
 ```python
-await self._clear_exports()
+result = await self.clear(
+    policy=policy,
+    silver_table=silver_table,
+    gold_table=gold_table,
+    dry_run=runtime.dry_run,
+)
 ```
 
 ### 2. Политика очистки по RunType
@@ -38,15 +53,14 @@ await self._clear_exports()
 | `BACKFILL` | ✅ | Заполнение исторических данных |
 | `REBUILD` | ✅ | Полная перестройка таблицы |
 
-Для `INCREMENTAL` метод возвращает сразу (early return):
+Для `INCREMENTAL` effective policy не очищает слои:
 
 ```python
-from bioetl.domain.types import RunType
+from bioetl.domain.medallion import MedallionPolicy
 
-should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
-if not should_clear:
-    self._logger.debug("Skipping clear for incremental run")
-    return
+policy = MedallionPolicy.for_run_type(runtime.run_type)
+assert policy.should_clear_silver is False
+assert policy.should_clear_gold is False
 ```
 
 ### 3. Порядок операций в run()
@@ -54,12 +68,14 @@ if not should_clear:
 ```
 1. services.__aenter__()           # Инициализация сервисов
 2. lock_manager.__aenter__()       # Захват блокировки
-3. await _clear_exports()          # Очистка (только REBUILD/BACKFILL)
-4. await checkpoint_manager.load() # Загрузка чекпоинта
-5. await executor.execute()        # Выполнение пайплайна
-6. await checkpoint_manager.delete()# Удаление чекпоинта
-7. lock_manager.__aexit__()        # Освобождение блокировки
-8. services.__aexit__()            # Закрытие сервисов
+3. await preflight.validate_infrastructure()
+4. await lifecycle_service.prepare_for_run()
+5. await checkpoint_manager.load() # Если start_offset не задан вручную
+6. await executor.execute()        # Выполнение пайплайна
+7. await postrun.run()             # DQ + post-run maintenance
+8. await checkpoint_manager.delete()
+9. lock_manager.__aexit__()        # Освобождение блокировки
+10. services.__aexit__()           # Закрытие сервисов
 ```
 
 ### 4. Dry-run поддержка
@@ -67,8 +83,8 @@ if not should_clear:
 Параметр `dry-run` передаётся в методы очистки:
 
 ```python
-silver_cleared = await storage.clear_silver(silver_table, dry_run=self._runtime.dry_run)
-gold_cleared = await storage.clear_gold(gold_table, dry_run=self._runtime.dry_run)
+silver_cleared = await self.storage.clear_silver(silver_table, dry_run=dry_run)
+gold_cleared = await self.storage.clear_gold(gold_table, dry_run=dry_run)
 ```
 
 ## Consequences
@@ -82,24 +98,26 @@ gold_cleared = await storage.clear_gold(gold_table, dry_run=self._runtime.dry_ru
 
 ### Negative
 
-- **Breaking change** для тестов, вызывающих `_clear_exports()` напрямую
+- **Breaking change** на момент внедрения для тестов, вызывавших старый cleanup path напрямую
 - Требуется `AsyncMock` для `storage.clear_silver/clear_gold` в тестах
 
 ### Migration
 
-Тесты необходимо обновить:
+Историческая миграция требовала перевести cleanup path на async seam.
+В текущем коде тесты обычно мокают `lifecycle_service.prepare_for_run()` или
+проверяют вызовы `storage.clear_silver/clear_gold` через lifecycle service:
 
 ```python
 # До:
 def test_clear_exports(...):
-    runner._clear_exports()
+    runner._clear_exports()  # historical seam
     services.storage.clear_silver = MagicMock(return_value=0)
 
 # После:
 @pytest.mark.asyncio
 async def test_clear_exports(...):
-    await runner._clear_exports()
     services.storage.clear_silver = AsyncMock(return_value=0)
+    await lifecycle_service.prepare_for_run(config, runtime)
 ```
 
 ## Related ADRs

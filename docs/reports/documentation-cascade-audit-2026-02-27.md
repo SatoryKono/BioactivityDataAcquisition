@@ -3,7 +3,7 @@
 **Date:** 2026-02-27
 **Scope:** Full exhaustive audit (550 Python files, ~294 active docs)
 **Auditor:** Claude Code — 8 parallel audit agents
-**Project Version:** v6.0.0 | RULES.md v5.23
+**Project Version:** v6.0.0 | RULES.md v5.24
 
 ---
 

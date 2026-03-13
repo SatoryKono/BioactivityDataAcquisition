@@ -1,5 +1,5 @@
 # Operations Runbooks (Playbooks)
-*Synced with RULES.md v5.23 (2026-02-21)*
+*Synced with RULES.md v5.24 (2026-02-21)*
 
 This section contains playbooks for handling common alerts and operational tasks.
 

@@ -1,6 +1,6 @@
 # GitHub Interaction Policy
 
-*Synced with RULES.md v5.23 | Last updated: 2026-02-23*
+*Synced with RULES.md v5.24 | Last updated: 2026-02-23*
 
 ----------------------------------------------------------------------
 

@@ -10,7 +10,11 @@
 
 ### Проблема 1: Дублирование run-id
 
-`BasePipeline` генерировал новый `run-id` в конструкторе (`base.py:60`), игнорируя `run-id`, переданный из CLI через `PipelineRunContext`. Это приводило к рассинхронизации:
+На момент принятия ADR `BasePipeline` создавал собственный `run_id` внутри
+pipeline-конструктора, игнорируя идентификатор, уже созданный на входной
+границе оркестрации. В пользовательском CLI-потоке это проявлялось через
+`PipelineRunContext`, но проблема была общей для любого entrypoint. Это
+приводило к рассинхронизации:
 
 - CLI логировал один `run-id`
 - Записи в Silver содержали другой `run-id` в метаполе `_run_id`
@@ -18,14 +22,19 @@
 
 ### Проблема 2: Reflection для очистки хранилища
 
-`PipelineRunner._clear_exports()` использовал `hasattr()` для проверки наличия методов `clear-csv()` и `clear-delta()`:
+Исторически cleanup path в `PipelineRunner` проверял доступность операций
+очистки через reflection вместо явного port-контракта. Упрощённо это выглядело
+так:
 
 ```python
-if hasattr(storage, "clear-csv"):
-    storage.clear-csv(table-name)
+if hasattr(storage, "clear_csv"):
+    await storage.clear_csv(table_name)
+if hasattr(storage, "clear_delta"):
+    await storage.clear_delta(table_name)
 ```
 
-Это нарушало принцип явных контрактов и затрудняло статический анализ.
+Это нарушало принцип явных контрактов, затрудняло статический анализ и
+смешивало cross-layer maintenance API с pre-run Medallion cleanup.
 
 ### Проблема 3: Нарушение Medallion-инвариантов
 
@@ -33,47 +42,88 @@ if hasattr(storage, "clear-csv"):
 
 ## Decision
 
-### 1. Единый run-id от CLI до метаполей
+### 1. Единый run-id от orchestration boundary до метаполей
 
-- `BasePipeline.__init__()` принимает `run-id` как обязательный параметр
-- `run-id` генерируется **только** в CLI (`cli.py:86`)
-- Все компоненты (logger, context, checkpoints, locks) используют один `run-id`
+- `BasePipeline.__init__()` принимает `run_id` как обязательный параметр
+- `run_id` создаётся или принимается на orchestration boundary, а затем
+  прокидывается неизменным вниз по стеку
+- Все компоненты (logger, context, checkpoints, locks) используют один `run_id`
 
-**Изменённая сигнатура:**
+**Изменённая сигнатура (исторический фокус ADR: `run_id` стал обязательным):**
 
 ```python
 class BasePipeline(ABC):
+    @classmethod
+    def create(
+        cls,
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        services: PipelineService,
+        config: PipelineConfig,
+        shutdown_signal: ShutdownSignal,
+        transformer: BaseTransformer | None = None,
+    ) -> Self:
+        ...
+
     def __init__(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
-        services: PipelineServices,
-        run_id: RunID,  # NEW: обязательный параметр
+        services: PipelineService,
+        run_id: RunID,
+        shutdown_signal: ShutdownSignal,
+        transformer: BaseTransformer | None = None,
     ) -> None:
+```
+
+В текущем standard pipeline flow каноническая генерация/принятие `run_id`
+происходит в `PipelineRunnerService.run()`: сервис принимает внешний `run_id`
+или создаёт `effective_run_id`, затем передаёт его в `PipelineRunContext`,
+`BasePipeline`, lock/checkpoint services и записи в storage без повторной
+локальной генерации внутри pipeline:
+
+```python
+effective_run_id: RunID = cast(RunID, run_id or uuid4())
+context = self._build_context(
+    pipeline_name=pipeline_name,
+    run_id=effective_run_id,
+    options=effective_options,
+)
 ```
 
 ### 2. Формализация API очистки в StoragePort
 
-Добавлены методы в `StoragePort` (`domain/ports/storage.py`, импорт из фасада `domain/ports/`):
+Cleanup был переведён на явный async port-контракт. В текущем коде
+канонические методы объявлены в узких storage ports и доступны через
+aggregate-facade `StoragePort`:
 
 ```python
-def clear_silver(self, table_name: str) -> int:
+async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
     """Clear Silver layer data for a specific table."""
     ...
 
-def clear_gold(self, table_name: str) -> int:
+async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
     """Clear Gold layer data for a specific table."""
     ...
 ```
 
-Удалён `hasattr()` из `runner.py` — теперь используются явные вызовы методов порта.
+`preview_cleanup()` остаётся синхронной maintenance-операцией, а
+`clear_csv()` / `clear_delta()` остаются отдельными async helper-методами для
+cross-layer обслуживания. При этом основной pre-run lifecycle больше не
+выбирает cleanup path через `hasattr()`: текущий application-level seam идёт
+через `MedallionLifecycleService.clear()`, который вызывает
+`storage.clear_silver()` и `storage.clear_gold()` напрямую. На уровне
+реализации storage adapter оборачивает синхронный writer cleanup через
+`run_in_executor`, но для application-layer контракт остаётся async.
 
 ### 3. Medallion-инварианты по run-type
 
 Очистка выполняется **только** для destructive run types:
 
 ```python
-should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
+policy = MedallionPolicy.for_run_type(runtime.run_type)
+assert policy.should_clear_silver == (runtime.run_type is not RunType.INCREMENTAL)
+assert policy.should_clear_gold == (runtime.run_type is not RunType.INCREMENTAL)
 ```
 
 | Run Type | Очистка | Обоснование |
@@ -81,6 +131,12 @@ should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
 | `incremental` | НЕТ | Merge/upsert по content-hash |
 | `backfill` | ДА | Заполнение исторических данных |
 | `rebuild` | ДА | Полная перестройка таблицы |
+
+В текущем runner flow эти инварианты применяются через pre-run вызов
+`PipelineRunner.run()` -> `MedallionLifecycleService.prepare_for_run()`.
+Post-run maintenance идёт отдельным путём:
+`PostrunService.run_vacuum_if_enabled()` ->
+`MedallionLifecycleService.finalize_run()`.
 
 ## Consequences
 
@@ -93,8 +149,10 @@ should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
 
 ### Negative
 
-- **Breaking Change**: Сигнатура `BasePipeline.__init__()` изменилась (4 параметра вместо 3)
-- **Миграция тестов**: Все тесты, создающие pipeline напрямую, требуют обновления
+- **Breaking change на момент принятия ADR**: pipeline constructors начали
+  требовать явный `run_id`; позднее сигнатуры эволюционировали дальше
+- **Миграция тестов**: тесты и bootstrap helpers должны были перестать
+  полагаться на локальную генерацию `run_id` внутри pipeline
 
 ### Risks
 

@@ -2,7 +2,18 @@
 
 This page exists to satisfy legacy references to `INDEX.md`.
 
-Use the primary documentation entry points:
+Use the primary active documentation entry points:
+
+- [Project Map](00-project/00-map.md) — primary navigator for current project docs
+- [Project Rules](00-project/RULES.md) — canonical governance rules and workflow policy
+- [Requirements](01-requirements/REQUIREMENTS.md) — current testable project requirements
+- [Tools Hub](00-project/TOOLS.md) — current script entry points and placement rules
+
+Active guidance lives under `docs/00-05`. Materials in `docs/99-archive/`
+remain useful for traceability, but they are not normative for current
+project behavior.
+
+Then use section entry points as needed:
 
 - [Project Overview](00-project/index.md)
 - [Requirements](01-requirements/REQUIREMENTS.md)
@@ -10,3 +21,4 @@ Use the primary documentation entry points:
 - [Guides](03-guides/getting-started.md)
 - [Reference](04-reference/cli.md)
 - [Operations](05-operations/README.md)
+- [Archive Index](99-archive/README.md) — historical context only; not normative

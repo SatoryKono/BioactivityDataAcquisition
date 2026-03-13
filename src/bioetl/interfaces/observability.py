@@ -5,13 +5,13 @@ Re-exports observability components for external consumers.
 Note:
     MetricsServerError is defined in domain.exceptions (value object,
     can be imported by all layers). start_metrics_server is exposed via
-    the composition runtime entrypoint so interfaces do not wire directly
-    to infrastructure.
+    the composition facade so interfaces do not wire directly to bootstrap
+    runtime internals or infrastructure.
 """
 
 from __future__ import annotations
 
-from bioetl.composition.bootstrap.runtime.observability import start_metrics_server
+from bioetl.composition.entrypoints import start_metrics_server
 from bioetl.domain.exceptions import MetricsServerError
 
 __all__ = [

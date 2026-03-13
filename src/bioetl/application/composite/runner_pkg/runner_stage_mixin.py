@@ -98,6 +98,14 @@ class _CompositeRunnerStageHostProtocol(Protocol):
         state: CompositeCheckpointState,
     ) -> dict[str, DependencyResult]: ...
 
+    async def _execute_started_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        *,
+        context: _PreparedDependenciesRunContext,
+        keys_df: pl.DataFrame,
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
+
     async def _handle_dependencies_phase_exception(
         self,
         state: CompositeCheckpointState,
@@ -274,9 +282,23 @@ class CompositeRunnerStageMixin(
             context=prepared_context,
         )
 
+        return await self._execute_started_dependencies_phase(
+            state,
+            context=prepared_context,
+            keys_df=keys_df,
+        )
+
+    async def _execute_started_dependencies_phase(
+        self: _CompositeRunnerStageHostProtocol,
+        state: CompositeCheckpointState,
+        *,
+        context: _PreparedDependenciesRunContext,
+        keys_df: pl.DataFrame,
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
+        """Run and postprocess dependencies after the phase has been started."""
         try:
             dependency_results = await self._run_dependencies(
-                context=prepared_context,
+                context=context,
                 keys_df=keys_df,
                 state=state,
             )
@@ -377,14 +399,7 @@ class CompositeRunnerStageMixin(
         DependencyCoordinatorService,
         Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ]:
-        """Validate that coordinator and runner factory are available.
-
-        Returns:
-            Tuple of (coordinator, runner_factory) guaranteed to be non-None.
-
-        Raises:
-            InvalidStateError: If coordinator or runner factory is None.
-        """
+        """Validate that dependency coordinator and runner factory are available."""
         coordinator = self._dependency_coordinator
         runner_factory = self._dependencies_runner_factory
         if coordinator is None or runner_factory is None:
@@ -399,15 +414,7 @@ class CompositeRunnerStageMixin(
         state: CompositeCheckpointState,
         dependency_results: dict[str, DependencyResult],
     ) -> CompositeCheckpointState:
-        """Mark each successful dependency as completed on checkpoint state.
-
-        Args:
-            state: Current immutable checkpoint state.
-            dependency_results: Mapping of pipeline name to DependencyResult.
-
-        Returns:
-            Updated checkpoint state with successful dependencies recorded.
-        """
+        """Mark each successful dependency as completed on checkpoint state."""
         for dep_name, dep_result in dependency_results.items():
             if dep_result.is_success:
                 state = state.with_dependency_completed(dep_name, dep_result)
@@ -418,21 +425,7 @@ class CompositeRunnerStageMixin(
         state: CompositeCheckpointState,
         outcome: _DependencyPhaseOutcome,
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
-        """Check for required failures and complete the dependencies phase.
-
-        Validates that no required dependencies failed, transitions FSM to
-        DEPENDENCIES_COMPLETED, logs summary, and persists checkpoint.
-
-        Args:
-            state: Current checkpoint state (with successful deps recorded).
-            outcome: Normalized dependency-phase outcome.
-
-        Returns:
-            Updated checkpoint state and the dependency results mapping.
-
-        Raises:
-            InvalidStateError: If one or more required dependencies failed.
-        """
+        """Check for required failures and complete the dependencies phase."""
         if outcome.required_failed:
             await self._fail_required_dependencies(state, outcome.required_failed)
 

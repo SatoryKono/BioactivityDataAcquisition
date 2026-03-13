@@ -4,9 +4,8 @@ from unittest import mock
 
 import pytest
 
-from bioetl.composition.bootstrap.runtime import (
-    observability as composition_observability,
-)
+from bioetl.composition import entrypoints as composition_entrypoints
+from bioetl.composition.bootstrap.runtime import observability as composition_observability
 from bioetl.domain import exceptions as domain_exceptions
 from bioetl.infrastructure import observability as infra_observability
 from bioetl.infrastructure.observability import server as obs_server
@@ -14,7 +13,7 @@ from bioetl.interfaces import observability
 
 # This module tests the observability interface.
 # MetricsServerError is now defined in domain.exceptions and re-exported by all layers.
-# interfaces.observability exposes start_metrics_server via composition runtime.
+# interfaces.observability exposes start_metrics_server via composition entrypoints.
 
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.
@@ -50,21 +49,21 @@ def test_start_metrics_server_failure():
         assert result is False
 
 
-def test_interface_re_exports_from_composition_runtime():
-    """Verify interface re-exports start_metrics_server via composition runtime.
+def test_interface_re_exports_from_composition_entrypoints():
+    """Verify interface re-exports start_metrics_server via composition entrypoints.
 
     interfaces/observability.py imports start_metrics_server from
-    composition.bootstrap.runtime.observability, which preserves the canonical
-    implementation object from infrastructure.observability.
+    composition.entrypoints, which preserves the canonical implementation
+    object from infrastructure.observability.
     """
     # The function should be the same object since it's a re-export
     assert (
         observability.start_metrics_server is infra_observability.start_metrics_server
     )
-    # Composition layer also imports from infrastructure, so all should be the same
+    # Composition facade also re-exports the same implementation object.
     assert (
         observability.start_metrics_server
-        is composition_observability.start_metrics_server
+        is composition_entrypoints.start_metrics_server
     )
 
 

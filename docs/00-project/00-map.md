@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.23 | Last updated: 2026-03-13*
+*Synced with RULES.md v5.24 | Last updated: 2026-03-13*
 
 > **Documentation Update:** 2026-03-10
 > - ADR inventory refreshed to ADR-043
@@ -8,6 +8,7 @@
 > - Quick-start and pipeline command references aligned with current CLI
 > - Inventory-style counts trimmed to avoid stale snapshot drift
 > - Active entry points clarified: `RULES.md`, `TOOLS.md`, and `99-archive/README.md`
+> - Legacy `docs/INDEX.md` entry point aligned with the active rules/requirements split
 
 ## Quick Links
 
@@ -480,9 +481,9 @@ graph TD
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
 | RULES.md                 | 2026-03-02   | v5.23 (Latest)               |
-| REQUIREMENTS.md          | 2026-03-02   | v1.7 (RULES v5.23 sync)      |
+| REQUIREMENTS.md          | 2026-03-13   | v1.8 (docs governance sync)  |
 | glossary.md              | 2026-02-25   | v2.6 (Ubiquitous Language)   |
-| 00-map.md                | 2026-03-02   | v8.0 Source Code Map rewritten |
+| 00-map.md                | 2026-03-13   | v8.1 Legacy index synced |
 | rules-summary.md         | 2026-02-24   | v5.23 Synced                 |
 | TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |

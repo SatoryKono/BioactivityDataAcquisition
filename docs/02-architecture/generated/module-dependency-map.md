@@ -5,10 +5,10 @@
 ## Summary
 
 - Scanned modules: `1076`
-- Internal import edges (raw): `4044`
+- Internal import edges (raw): `4045`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `238`
+- Cross-layer module-group edges (total): `237`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -23,7 +23,7 @@ flowchart LR
     application -->|484 OK| application
     application -->|633 OK| domain
     composition -->|207 OK| application
-    composition -->|279 OK| composition
+    composition -->|280 OK| composition
     composition -->|230 OK| domain
     composition -->|210 OK| infrastructure
     domain -->|692 OK| domain
@@ -42,7 +42,7 @@ flowchart LR
 | `application` | `application` | 484 | allowed |
 | `application` | `domain` | 633 | allowed |
 | `composition` | `application` | 207 | allowed |
-| `composition` | `composition` | 279 | allowed |
+| `composition` | `composition` | 280 | allowed |
 | `composition` | `domain` | 230 | allowed |
 | `composition` | `infrastructure` | 210 | allowed |
 | `domain` | `domain` | 692 | allowed |
@@ -79,10 +79,10 @@ flowchart LR
 | `composition.factories` | `application.pipelines` | 23 |
 | `application.services` | `domain.types` | 22 |
 | `composition.bootstrap` | `infrastructure.config` | 21 |
+| `interfaces.cli` | `composition.entrypoints` | 20 |
 | `application.core` | `domain.context` | 19 |
 | `composition.factories` | `domain.schemas` | 19 |
 | `composition.factories` | `infrastructure.schemas` | 19 |
-| `interfaces.cli` | `composition.entrypoints` | 19 |
 | `application.services` | `domain.value_objects` | 18 |
 | `composition.bootstrap` | `application.services` | 18 |
 | `composition.factories` | `domain.types` | 18 |

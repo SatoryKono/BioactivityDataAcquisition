@@ -274,6 +274,25 @@ class TestBuildPipelineContext:
 
 
 @pytest.mark.unit
+class TestCompositeBootstrapFacade:
+    """Tests for composite bootstrap helpers exposed via entrypoints."""
+
+    def test_entrypoints_reexport_composite_bootstrap_helpers(self) -> None:
+        """Composite CLI should use entrypoints instead of runtime bootstrap module."""
+        from bioetl.composition import entrypoints as composition_entrypoints
+        from bioetl.composition.bootstrap import (
+            bootstrap_composite_runner as bootstrap_composite_runner_impl,
+            load_composite_config as load_composite_config_impl,
+        )
+
+        assert (
+            composition_entrypoints.bootstrap_composite_runner
+            is bootstrap_composite_runner_impl
+        )
+        assert composition_entrypoints.load_composite_config is load_composite_config_impl
+
+
+@pytest.mark.unit
 class TestRunPipelineIntegration:
     """Integration-style tests for run_pipeline function.
 

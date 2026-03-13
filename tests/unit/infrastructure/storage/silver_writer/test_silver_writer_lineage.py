@@ -535,6 +535,45 @@ class TestSilverWriterLineage:
         )
 
     @pytest.mark.asyncio
+    async def test_write_silver_metadata_uses_canonical_file_handoff(
+        self, noop_logger, valid_records, mock_metadata_coordinator
+    ):
+        """Standard and merged metadata flows should converge on one file handoff."""
+        from bioetl.infrastructure.storage.silver_writer import (
+            SilverWriteMode,
+            SilverWriter,
+        )
+
+        metadata = MagicMock()
+        mock_metadata_coordinator.create_silver_metadata = MagicMock(
+            return_value=metadata
+        )
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=noop_logger,
+            metadata_writer=MagicMock(),
+            metadata_coordinator=mock_metadata_coordinator,
+        )
+        writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
+
+        await writer._write_silver_metadata(
+            table_path="/tmp/silver/chembl/activity",
+            table_name="chembl.activity",
+            records=valid_records,
+            primary_keys=["entity_id"],
+            mode=SilverWriteMode.MERGE,
+            version_after=7,
+        )
+
+        writer._write_silver_metadata_file.assert_awaited_once_with(
+            table_path="/tmp/silver/chembl/activity",
+            metadata=metadata,
+            table_name="chembl.activity",
+            provider_name="chembl",
+            entity_name="activity",
+        )
+
+    @pytest.mark.asyncio
     async def test_write_silver_merged_metadata_resolves_provider_entity(
         self, noop_logger, valid_records
     ):
@@ -582,4 +621,42 @@ class TestSilverWriterLineage:
             flat_structure=False,
             provider="composite",
             entity="publication",
+        )
+
+    @pytest.mark.asyncio
+    async def test_metadata_write_paths_preserve_skip_logging_levels(self, valid_records):
+        """Standard and merged metadata writes should share preflight guard semantics."""
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        logger = MagicMock()
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=logger,
+            metadata_coordinator=None,
+        )
+
+        await writer._write_silver_metadata(
+            table_path="/tmp/silver/chembl/activity",
+            table_name="chembl.activity",
+            records=valid_records,
+            primary_keys=["entity_id"],
+            mode=SilverWriteMode.MERGE,
+        )
+        await writer._write_silver_merged_metadata(
+            table_path="/tmp/silver/composite/publication",
+            table_name="composite.publication",
+            records=valid_records,
+            primary_keys=["entity_id"],
+        )
+
+        logger.warning.assert_called_once_with(
+            "silver_metadata_skipped",
+            reason="MetadataCoordinator not configured",
+            table_path="/tmp/silver/chembl/activity",
+        )
+        logger.debug.assert_called_once_with(
+            "silver_merged_metadata_skipped",
+            reason="MetadataCoordinator not configured",
+            table_path="/tmp/silver/composite/publication",
         )

@@ -17,7 +17,7 @@ from bioetl.application.composite.deduplication import EnricherDeduplicatorServi
 from bioetl.application.composite.join_execution import JoinExecutorService
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import JoinPlannerService
-from bioetl.application.composite.merger import MergeService
+from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.domain.composite.config import MergeConfig
 
 
@@ -73,12 +73,14 @@ def build_merge_service(
         merge_config=merge_config,
         storage=storage,
         logger=logger,
-        deduplicator=deduplicator,
-        aggregator=aggregator,
-        renamer=renamer,
-        orderer=orderer,
-        priority_orderer=priority_orderer,
-        coalesce_policy=coalesce_policy,
-        conflict_resolver=conflict_resolver,
-        join_planner=join_planner,
+        collaborators=MergeCollaboratorGroup(
+            deduplicator=deduplicator,
+            aggregator=aggregator,
+            renamer=renamer,
+            orderer=orderer,
+            priority_orderer=priority_orderer,
+            coalesce_policy=coalesce_policy,
+            conflict_resolver=conflict_resolver,
+            join_planner=join_planner,
+        ),
     )

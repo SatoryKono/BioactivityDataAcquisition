@@ -9,7 +9,7 @@ from __future__ import annotations
 import click
 
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
-from bioetl.composition.bootstrap.runtime.composite import (
+from bioetl.composition.entrypoints import (
     bootstrap_composite_runner,
     load_composite_config,
 )

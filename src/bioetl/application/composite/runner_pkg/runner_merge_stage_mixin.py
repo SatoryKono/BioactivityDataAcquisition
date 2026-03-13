@@ -105,6 +105,14 @@ if TYPE_CHECKING:
             request: _PreparedMergeRequest,
         ) -> MergeResult: ...
 
+        async def _execute_started_merge_phase(
+            self,
+            state: CompositeCheckpointState,
+            *,
+            enrichment_results: dict[str, EnrichmentResult],
+            dependency_results: dict[str, DependencyResult] | None,
+        ) -> MergeResult: ...
+
         def _handle_dry_run_merge_skip(
             self,
             state: CompositeCheckpointState,
@@ -315,6 +323,26 @@ class CompositeRunnerMergeStageMixin:
             dependency_results=request.dependency_results,
         )
 
+    async def _execute_started_merge_phase(
+        self: _CompositeRunnerMergeStageHostProtocol,
+        state: CompositeCheckpointState,
+        *,
+        enrichment_results: dict[str, EnrichmentResult],
+        dependency_results: dict[str, DependencyResult] | None,
+    ) -> MergeResult:
+        """Run merge after the phase has been started and handle success/errors."""
+        try:
+            prepared_request = self._prepare_merge_request(
+                enrichment_results,
+                dependency_results,
+            )
+            merge_result = await self._run_prepared_merge_request(prepared_request)
+            await self._handle_merge_success(merge_result)
+        except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as merge_error:
+            await self._handle_merge_phase_exception(state, merge_error)
+            raise
+        return merge_result
+
     def _handle_dry_run_merge_skip(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
@@ -410,21 +438,11 @@ class CompositeRunnerMergeStageMixin:
 
         if not self._runtime.dry_run:
             state = await self._start_merge_phase(state)
-
-            try:
-                prepared_request = self._prepare_merge_request(
-                    enrichment_results,
-                    dependency_results,
-                )
-
-                merge_result = await self._run_prepared_merge_request(
-                    prepared_request,
-                )
-                await self._handle_merge_success(merge_result)
-
-            except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as merge_error:
-                await self._handle_merge_phase_exception(state, merge_error)
-                raise
+            merge_result = await self._execute_started_merge_phase(
+                state,
+                enrichment_results=enrichment_results,
+                dependency_results=dependency_results,
+            )
         else:
             state = self._handle_dry_run_merge_skip(state)
 

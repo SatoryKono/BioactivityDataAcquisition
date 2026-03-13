@@ -19,6 +19,7 @@ from bioetl.infrastructure.storage.metadata_writer_operations import (
     _MetadataWriteTelemetryContext,
     _prepare_metadata_write_operation,
     _PreparedMetadataWrite,
+    _PreparedMetadataWriteOperation,
 )
 from bioetl.infrastructure.storage.write_resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
@@ -89,6 +90,39 @@ async def _execute_atomic_metadata_write(
         ),
     )
     return retry_state.count
+
+
+def _finalize_metadata_write_operation(
+    *,
+    logger: LoggerPort,
+    operation: _PreparedMetadataWriteOperation,
+) -> str:
+    """Emit final write log and return the resolved metadata sidecar path."""
+    logger.info(
+        "metadata_written",
+        layer=operation.telemetry_context.layer,
+        path=str(operation.prepared_write.metadata_path),
+        run_id=operation.run_id,
+    )
+    return str(operation.prepared_write.metadata_path.resolve())
+
+
+async def _execute_prepared_metadata_write_operation(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+    retry_policy: AdaptiveRetryPolicy,
+    operation: _PreparedMetadataWriteOperation,
+) -> str:
+    """Execute one prepared metadata write operation end-to-end."""
+    await _execute_atomic_metadata_write(
+        logger=logger,
+        metrics=metrics,
+        prepared_write=operation.prepared_write,
+        retry_policy=retry_policy,
+        context=operation.telemetry_context,
+    )
+    return _finalize_metadata_write_operation(logger=logger, operation=operation)
 
 
 class MetadataWriter:
@@ -216,22 +250,12 @@ class MetadataWriter:
     async def _write_metadata(self, request: _MetadataWriteRequest) -> str:
         """Write sidecar metadata for Bronze/Silver/Gold layers and return file path."""
         operation = _prepare_metadata_write_operation(request)
-        await _execute_atomic_metadata_write(
+        return await _execute_prepared_metadata_write_operation(
             logger=self._logger,
             metrics=self._metrics,
-            prepared_write=operation.prepared_write,
             retry_policy=self._atomic_replace_retry_policy,
-            context=operation.telemetry_context,
+            operation=operation,
         )
-
-        self._logger.info(
-            "metadata_written",
-            layer=request.layer,
-            path=str(operation.prepared_write.metadata_path),
-            run_id=operation.run_id,
-        )
-
-        return str(operation.prepared_write.metadata_path.resolve())
 
     async def aclose(self) -> None:
         """Release any resources held by the metadata writer."""
