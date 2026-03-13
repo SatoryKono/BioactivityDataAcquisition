@@ -24,6 +24,7 @@ ALLOWED_STATUSES = frozenset(
 
 REQUIRED_PATHS = frozenset(
     {
+        "src/bioetl/composition/entrypoints.py",
         "src/bioetl/composition/factories/pipeline/facade.py",
         "src/bioetl/composition/factories/storage/facade.py",
         "src/bioetl/composition/factories/datasource/factory.py",
@@ -102,3 +103,35 @@ def test_inventory_doc_is_linked_from_discovery_docs() -> None:
         assert inventory_name in text, (
             f"{doc_path.relative_to(ROOT)} must link to {inventory_name}"
         )
+
+
+@pytest.mark.architecture
+def test_src_outside_composition_avoids_internal_composition_entrypoint_modules() -> None:
+    """First-party source outside composition should use composition.entrypoints."""
+    internal_modules = frozenset(
+        {
+            "bioetl.composition._pipeline_execution",
+            "bioetl.composition._resource_management",
+        }
+    )
+    violations: list[str] = []
+
+    for path in (ROOT / "src" / "bioetl").rglob("*.py"):
+        rel_path = path.relative_to(ROOT)
+        rel_text = rel_path.as_posix()
+        if rel_text.startswith("src/bioetl/composition/"):
+            continue
+
+        text = path.read_text(encoding="utf-8")
+        for module in internal_modules:
+            token = f"from {module} import"
+            import_token = f"import {module}"
+            if token in text or import_token in text:
+                violations.append(rel_text)
+                break
+
+    assert not violations, (
+        "First-party src outside composition must use bioetl.composition.entrypoints "
+        "instead of internal composition entrypoint modules:\n"
+        + "\n".join(sorted(violations))
+    )

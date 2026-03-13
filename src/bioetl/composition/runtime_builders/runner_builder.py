@@ -162,7 +162,7 @@ def _initialize_registry(
     """Initialize provider/pipeline registry with optional explicit registry."""
     effective_registry = registry if registry is not None else get_default_registry_fn()
     register_all_providers_fn()
-    register_all_pipelines_fn(registry=registry)
+    register_all_pipelines_fn(registry=effective_registry)
     return effective_registry
 
 

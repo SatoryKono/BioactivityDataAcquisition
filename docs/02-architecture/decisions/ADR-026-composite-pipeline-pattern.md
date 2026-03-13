@@ -257,11 +257,13 @@ src/bioetl/
 ├── application/
 │   ├── composite/
 │   │   ├── __init__.py
-│   │   ├── runner.py           # CompositePipelineRunner
+│   │   ├── runner_pkg/         # Decomposed runner package (refactored)
+│   │   │   └── runner.py       # CompositePipelineRunner
 │   │   ├── coordinator.py      # EnrichmentCoordinator (fan-out logic)
 │   │   ├── merger.py           # MergeService (join + conflict resolution)
 │   │   ├── key_extractor.py    # KeyExtractorService
-│   │   └── checkpoint.py       # CompositeCheckpointManager
+│   │   └── checkpoint/         # CompositeCheckpointManager (package)
+│   │       └── service.py
 │   └── core/
 │       └── runner.py           # Existing PipelineRunner (unchanged)
 │
@@ -374,7 +376,7 @@ class CompositePipelineState(str, Enum):
         ...
 ```
 
-#### FSM in Application Layer (`application/composite/runner.py`)
+#### FSM in Application Layer (`application/composite/runner_pkg/runner.py`)
 
 ```python
 class CompositePipelineRunner:

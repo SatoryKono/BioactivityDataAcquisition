@@ -222,8 +222,26 @@ def _create_pubmed_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,  # Any: forward arbitrary adap...
+    **kwargs: Any,  # Any: forward arbitrary adapter kwargs
 ) -> PubMedAdapter:
+    """Create a PubMed adapter with resolved credentials.
+
+    Email precedence: kwargs['email'] > settings.default_email.
+    API key precedence: kwargs['api_key'] > settings.pubmed_api_key.
+
+    Args:
+        http_client: HTTP client (required).
+        logger: Logger (required).
+        settings: Application settings for fallback email/api_key resolution.
+        **kwargs: email, api_key, batch_size, metrics, error_handler,
+            adapter_metrics, request_collector, fallback_fetch_service.
+
+    Returns:
+        Initialized PubMedAdapter.
+
+    Raises:
+        ValueError: If email, http_client, or logger not provided.
+    """
     email = kwargs.get("email")
     if not email and settings:
         email = getattr(settings, "default_email", None)

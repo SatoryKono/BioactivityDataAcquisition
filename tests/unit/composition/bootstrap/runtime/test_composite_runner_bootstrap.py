@@ -282,3 +282,48 @@ def test_bootstrap_composite_pipeline_alias_calls_runner() -> None:
         runtime=runtime,
         run_id="00000000-0000-0000-0000-000000000003",
     )
+
+
+@pytest.mark.unit
+def test_bootstrap_composite_runner_delegates_final_assembly_to_plan_helper() -> None:
+    config = _make_config(cross_validation_enabled=False)
+    runtime = _make_runtime()
+    plan = SimpleNamespace(
+        run_id="00000000-0000-0000-0000-000000000004",
+        logger=MagicMock(),
+        lock=MagicMock(),
+        seed_runner_factory=MagicMock(),
+        dependencies_runner_factory=MagicMock(),
+        enricher_runner_factory=MagicMock(),
+        support_services=MagicMock(),
+    )
+
+    with (
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._build_composite_bootstrap_plan"
+        ) as mock_build_plan,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._create_composite_runner_from_plan"
+        ) as mock_create_from_plan,
+    ):
+        mock_build_plan.return_value = plan
+        runner = MagicMock()
+        mock_create_from_plan.return_value = runner
+
+        result = composite_runtime.bootstrap_composite_runner(
+            config=config,
+            runtime=runtime,
+            run_id="00000000-0000-0000-0000-000000000004",
+        )
+
+    assert result is runner
+    mock_build_plan.assert_called_once_with(
+        config=config,
+        runtime=runtime,
+        run_id="00000000-0000-0000-0000-000000000004",
+    )
+    mock_create_from_plan.assert_called_once_with(
+        config=config,
+        runtime=runtime,
+        plan=plan,
+    )

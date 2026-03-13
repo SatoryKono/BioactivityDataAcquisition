@@ -198,6 +198,26 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 
 См. [ADR-026: Composite Pipeline Pattern](decisions/ADR-026-composite-pipeline-pattern.md) для деталей.
 
+### 2.6. `services/` — Сервисы Уровня Приложения
+
+**Расположение:** `src/bioetl/application/services/`
+
+Содержит переиспользуемые сервисы уровня приложения (29 файлов). В отличие от `core/`, компоненты `services/` предоставляют законченные бизнес-операции, не зависящие от конкретного пайплайна.
+
+**Ключевые сервисы:**
+
+| Компонент | Назначение |
+| --------- | ---------- |
+| `MedallionLifecycleService` | Управление очисткой Silver/Gold слоёв по политике (REBUILD/BACKFILL/INCREMENTAL) |
+| `PipelineRunnerService` | Координация запуска пайплайна (оркестрация preflight, execution, postrun) |
+| `ExportService` | Экспорт Gold-данных в CSV/Parquet по запросу |
+| `DQReportService` | Формирование и запись DQ-отчётов |
+| `VacuumService` | VACUUM Delta Lake таблиц после записи |
+| `HealthService` | Агрегация health-статусов адаптеров и сервисов |
+| `DataQualityService` | Оркестрация DQ-анализа Bronze/Silver/Gold слоёв |
+
+Сервисы инжектируются через DI в `PipelineRunner` и `CompositeRunner` из слоя `composition/`.
+
 ## 3. Принципы Работы
 
 - **Dependency Injection:** Пайплайны никогда не создают зависимости сами (`LocalStorage()`). Они получают уже созданные экземпляры адаптеров в конструкторе. Это делает их легко тестируемыми и гибкими.

@@ -46,6 +46,13 @@ __all__ = [
 ]
 
 
+def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
+    """Ensure providers and pipelines are registered for shared entrypoints."""
+    register_all_providers()
+    if registry is None or not registry.list_pipelines():
+        register_all_pipelines(registry=registry)
+
+
 def _require_execution_metrics_runner(
     runner: object,
 ) -> ExecutionMetricsRunnerPort:
@@ -130,16 +137,6 @@ class ArchiveOptions:
 
     target_path: str
     remove_source: bool = False
-
-
-def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
-    """Ensure all providers and pipelines are registered.
-
-    This is idempotent and safe to call multiple times.
-    """
-    register_all_providers()
-    if registry is None or not registry.list_pipelines():
-        register_all_pipelines(registry=registry)
 
 
 def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
@@ -257,7 +254,6 @@ def create_pipeline_runner(
         >>> runner = create_pipeline_runner("chembl_activity", options)
         >>> await runner.run()
     """
-    _ensure_registrations()
     ctx = build_pipeline_context(name, options)
     return _require_execution_metrics_runner(bootstrap_pipeline_runner(ctx))
 

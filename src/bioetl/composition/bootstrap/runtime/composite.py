@@ -96,9 +96,7 @@ class _CompositeBootstrapPlan:
     """Resolved bootstrap plan passed to the final runner factory."""
 
     run_id: str
-    settings: Settings
     logger: LoggerPort
-    storage: object
     lock: LockPort
     seed_runner_factory: Callable[[], PipelineRunner]
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
@@ -273,14 +271,32 @@ def _build_composite_bootstrap_plan(
     )
     return _CompositeBootstrapPlan(
         run_id=effective_run_id,
-        settings=settings,
         logger=logger,
-        storage=storage,
         lock=lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
         support_services=support_services,
+    )
+
+
+def _create_composite_runner_from_plan(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    plan: _CompositeBootstrapPlan,
+) -> CompositePipelineRunnerService:
+    """Create the final composite runner from the resolved bootstrap plan."""
+    return _create_composite_runner(
+        config=config,
+        runtime=runtime,
+        run_id=plan.run_id,
+        logger=plan.logger,
+        lock=plan.lock,
+        seed_runner_factory=plan.seed_runner_factory,
+        dependencies_runner_factory=plan.dependencies_runner_factory,
+        enricher_runner_factory=plan.enricher_runner_factory,
+        support_services=plan.support_services,
     )
 
 
@@ -307,16 +323,10 @@ def bootstrap_composite_runner(
         runtime=runtime,
         run_id=run_id,
     )
-    return _create_composite_runner(
+    return _create_composite_runner_from_plan(
         config=config,
         runtime=runtime,
-        run_id=plan.run_id,
-        logger=plan.logger,
-        lock=plan.lock,
-        seed_runner_factory=plan.seed_runner_factory,
-        dependencies_runner_factory=plan.dependencies_runner_factory,
-        enricher_runner_factory=plan.enricher_runner_factory,
-        support_services=plan.support_services,
+        plan=plan,
     )
 
 

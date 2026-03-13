@@ -1,8 +1,8 @@
-"""Retained Semantic Scholar adapter entrypoint.
+"""Semantic Scholar adapter entrypoint.
 
-This module is the stable canonical import path for first-party code. It
-remains intentionally retained in the current cycle while the implementation
-continues to live in ``adapter``.
+Stable canonical import path — use this module (or the package
+``bioetl.infrastructure.adapters.semanticscholar``) for all imports.
+Implementation lives in ``adapter``.
 """
 
 from __future__ import annotations

@@ -178,6 +178,58 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
     assert fake_factory.kwargs["runtime"] == "runtime"
 
 
+def test_build_pipeline_runner_registers_pipelines_into_effective_default_registry() -> None:
+    """Builder should register pipelines against the resolved default registry."""
+    fake_factory = _FakeFactory()
+    default_registry = _FakeRegistry(factory=fake_factory)
+    calls: dict[str, object] = {}
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=None,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    result = runner_builder.build_pipeline_runner(
+        context,
+        get_default_registry_fn=lambda: default_registry,
+        register_all_providers_fn=lambda: calls.setdefault("providers", True),
+        register_all_pipelines_fn=lambda registry=None: calls.setdefault(
+            "pipelines_registry", registry
+        ),
+        get_settings_fn=lambda: SimpleNamespace(
+            pipeline=SimpleNamespace(heartbeat_interval=15),
+            test_mode=True,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            maintenance=None,
+            input_filter=None,
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None),
+        ),
+        assemble_vacuum_settings_fn=lambda **_: None,
+        assemble_runtime_config_fn=lambda **_: "runtime",
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert result == "runner-instance"
+    assert calls["providers"] is True
+    assert calls["pipelines_registry"] is default_registry
+
+
 def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -> None:
     """Builder should resolve canonical subservices when no overrides are passed."""
     fake_factory = _FakeFactory()

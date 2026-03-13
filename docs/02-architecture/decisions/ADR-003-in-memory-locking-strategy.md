@@ -1,6 +1,6 @@
 # ADR-003: In-Memory Locking Strategy (MemoryLock)
 
-**Status:** Accepted (Revised 2025-12-23)
+**Status:** Accepted (Revised 2025-12-23, see also ADR-010)
 **Date:** 2025-05-20
 **Last Updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
