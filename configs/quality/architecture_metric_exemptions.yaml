@@ -26,3 +26,10 @@ registries:
             reason: "Legacy postrun logic requires consolidation"
             expires_on: '2026-06-30'
             removal_step: "Extract quarantine processing to separate service"
+    class_size:
+        src/bioetl/application/core/postrun_service.py::PostrunService:
+            value: 306
+            owner: "Team Core"
+            reason: "Legacy postrun logic requires consolidation"
+            expires_on: '2026-06-30'
+            removal_step: "Extract quarantine processing to separate service"
