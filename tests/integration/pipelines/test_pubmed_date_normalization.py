@@ -23,6 +23,7 @@ import pytest
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 # YYYY-MM-DD pattern
@@ -42,7 +43,10 @@ PUBMED_DATE_FIELDS = [
 @pytest.fixture
 def transformer() -> PubMedPublicationTransformer:
     """Create PubMed transformer with minimal dependencies."""
-    return PubMedPublicationTransformer(provider="pubmed")
+    return instantiate_test_transformer(
+        PubMedPublicationTransformer,
+        provider="pubmed",
+    )
 
 
 @pytest.fixture
@@ -241,7 +245,10 @@ class TestPubMedDateEdgeCases:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMed transformer."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.parametrize(
         "epub_date,pub_date,year,expected_pattern",

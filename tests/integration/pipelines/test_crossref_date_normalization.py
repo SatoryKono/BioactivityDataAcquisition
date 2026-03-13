@@ -27,6 +27,7 @@ from bioetl.application.pipelines.crossref.transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 # YYYY-MM-DD pattern
@@ -43,7 +44,10 @@ CROSSREF_DATE_FIELDS = [
 @pytest.fixture
 def transformer() -> CrossRefPublicationTransformer:
     """Create CrossRef transformer with minimal dependencies."""
-    return CrossRefPublicationTransformer(provider="crossref")
+    return instantiate_test_transformer(
+        CrossRefPublicationTransformer,
+        provider="crossref",
+    )
 
 
 @pytest.fixture
@@ -227,7 +231,10 @@ class TestCrossRefDateEdgeCases:
     @pytest.fixture
     def transformer(self) -> CrossRefPublicationTransformer:
         """Create CrossRef transformer."""
-        return CrossRefPublicationTransformer(provider="crossref")
+        return instantiate_test_transformer(
+            CrossRefPublicationTransformer,
+            provider="crossref",
+        )
 
     @pytest.mark.parametrize(
         "published_print,published_online,expected",
@@ -301,7 +308,10 @@ class TestCrossRefVCRIntegration:
     @pytest.fixture
     def transformer(self) -> CrossRefPublicationTransformer:
         """Create CrossRef transformer."""
-        return CrossRefPublicationTransformer(provider="crossref")
+        return instantiate_test_transformer(
+            CrossRefPublicationTransformer,
+            provider="crossref",
+        )
 
     @pytest.fixture
     def pipeline_context(self) -> PipelineContext:

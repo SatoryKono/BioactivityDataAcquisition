@@ -1,4 +1,5 @@
-"""Transformer factory helpers for composition-driven DI."""
+# src/bioetl/composition/factories/transformer_factory.py
+"""Factory functions for DI-based transformer creation."""
 
 from __future__ import annotations
 
@@ -7,12 +8,11 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING, Final
 
-from bioetl.composition.factories.pipeline.transformer_dependencies import (
-    build_transformer_dependencies,
-)
-
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.base_transformer.types import (
+        TransformerDependencyContext,
+    )
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         ContractPolicyPort,
@@ -22,6 +22,10 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.services import IdentityService
+
+from bioetl.composition.factories.transformer_dependencies import (
+    build_transformer_dependencies,
+)
 
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
@@ -192,11 +196,9 @@ def create_transformer(
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
     contract_policy: ContractPolicyPort | None = None,
+    dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer:
     """Create a transformer instance for the given provider and entity type.
-
-    This is the main factory function for creating transformers via DI.
-    Uses the transformer registry to find the appropriate class.
 
     Args:
         provider: Provider name (e.g., 'chembl', 'pubchem').
@@ -209,7 +211,10 @@ def create_transformer(
         pii_hasher: Optional PII hasher for hashing author names and other PII.
         data_normalizer: Optional data normalization service for text normalization
             (DOI, PMID, authors, HTML).
-        contract_policy: Optional explicit contract policy override.
+        contract_policy: Optional pipeline contract policy.
+        dependencies: Optional explicit dependency bundle. When omitted,
+            composition builds explicit defaults instead of relying on
+            BaseTransformer fallbacks.
 
     Returns:
         Configured transformer instance with observability.
@@ -227,22 +232,24 @@ def create_transformer(
         )
 
     transformer_class = _TRANSFORMER_REGISTRY[key]
-    dependencies = build_transformer_dependencies(
-        provider=provider,
-        entity_type=entity_type,
-        tracer=tracer,
-        metrics=metrics,
-        identity_service=identity_service,
-        pii_hasher=pii_hasher,
-        data_normalizer=data_normalizer,
-        contract_policy=contract_policy,
+    resolved_dependencies = (
+        dependencies
+        if dependencies is not None
+        else build_transformer_dependencies(
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
+        )
     )
     return transformer_class(
         provider=provider,
         entity_type=entity_type,
         silver_filters=silver_filters,
         gold_filters=gold_filters,
-        dependencies=dependencies,
+        dependencies=resolved_dependencies,
     )
 
 

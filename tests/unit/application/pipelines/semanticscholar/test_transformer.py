@@ -15,12 +15,13 @@ from bioetl.application.pipelines.semanticscholar.transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
 def transformer() -> SemanticScholarPublicationTransformer:
     """Create a transformer instance."""
-    return SemanticScholarPublicationTransformer()
+    return instantiate_test_transformer(SemanticScholarPublicationTransformer)
 
 
 @pytest.fixture
@@ -388,7 +389,10 @@ class TestTransformerWithPiiHasher:
         mock_pii_hasher = MagicMock()
         mock_pii_hasher.hash_list = MagicMock(return_value=["hash1", "hash2"])
 
-        transformer = SemanticScholarPublicationTransformer(pii_hasher=mock_pii_hasher)
+        transformer = instantiate_test_transformer(
+            SemanticScholarPublicationTransformer,
+            pii_hasher=mock_pii_hasher,
+        )
 
         result = await transformer.transform(mock_context, sample_record, 0)
 
@@ -402,7 +406,7 @@ class TestSemanticScholarDoiNormalization:
     @pytest.fixture
     def transformer(self) -> SemanticScholarPublicationTransformer:
         """Create a transformer instance."""
-        return SemanticScholarPublicationTransformer()
+        return instantiate_test_transformer(SemanticScholarPublicationTransformer)
 
     @staticmethod
     def _make_record_with_doi(doi: str | None) -> dict[str, Any]:
@@ -486,7 +490,7 @@ class TestSemanticScholarPmidNormalization:
     @pytest.fixture
     def transformer(self) -> SemanticScholarPublicationTransformer:
         """Create a transformer instance."""
-        return SemanticScholarPublicationTransformer()
+        return instantiate_test_transformer(SemanticScholarPublicationTransformer)
 
     @staticmethod
     def _make_record_with_pmid(pmid: str | None) -> dict[str, Any]:
@@ -565,7 +569,7 @@ class TestSemanticScholarDateNormalization:
     @pytest.fixture
     def transformer(self) -> SemanticScholarPublicationTransformer:
         """Create a transformer instance."""
-        return SemanticScholarPublicationTransformer()
+        return instantiate_test_transformer(SemanticScholarPublicationTransformer)
 
     @staticmethod
     def _make_record_with_date(date_str: str | None) -> dict[str, Any]:
@@ -704,7 +708,7 @@ class TestSemanticScholarUnifiedPageFields:
     @pytest.fixture
     def transformer(self) -> SemanticScholarPublicationTransformer:
         """Create a transformer instance."""
-        return SemanticScholarPublicationTransformer()
+        return instantiate_test_transformer(SemanticScholarPublicationTransformer)
 
     @pytest.mark.asyncio
     async def test_unified_page_fields_in_transform(
@@ -749,7 +753,7 @@ class TestSemanticScholarNewFields:
     @pytest.fixture
     def transformer(self) -> SemanticScholarPublicationTransformer:
         """Create a transformer instance."""
-        return SemanticScholarPublicationTransformer()
+        return instantiate_test_transformer(SemanticScholarPublicationTransformer)
 
     @pytest.fixture
     def mock_context(self) -> PipelineContext:

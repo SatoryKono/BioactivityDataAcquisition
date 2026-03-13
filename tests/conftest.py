@@ -6,6 +6,8 @@ from urllib.parse import parse_qsl, urlparse
 
 import pytest
 
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
+
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     """Register global test options."""
@@ -79,6 +81,19 @@ def _init_publication_type_classification() -> None:
     )
 
     initialize_publication_type_classification(Path("configs"))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _enable_transformer_test_dependency_builder() -> None:
+    """Allow legacy tests to use composition-built transformer defaults."""
+    from bioetl.application.core.base_transformer import base as base_module
+
+    previous_builder = base_module._COMPAT_DEPENDENCY_BUILDER
+    base_module._COMPAT_DEPENDENCY_BUILDER = build_test_transformer_dependencies
+    try:
+        yield
+    finally:
+        base_module._COMPAT_DEPENDENCY_BUILDER = previous_builder
 
 
 @pytest.fixture(scope="session", autouse=True)

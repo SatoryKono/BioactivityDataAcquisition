@@ -24,12 +24,13 @@ from bioetl.domain.mapping.publication_type_classification import (
 )
 from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
 def transformer():
     """Create a CrossRefPublicationTransformer instance."""
-    return CrossRefPublicationTransformer()
+    return instantiate_test_transformer(CrossRefPublicationTransformer)
 
 
 @pytest.fixture
@@ -317,7 +318,10 @@ def test_hash_author_details_hashes_pii():
         def get_salt_id(self) -> str:
             return "test"
 
-    transformer = CrossRefPublicationTransformer(pii_hasher=_TestHasher())
+    transformer = instantiate_test_transformer(
+        CrossRefPublicationTransformer,
+        pii_hasher=_TestHasher(),
+    )
     author_details = [
         {
             "given": "John",

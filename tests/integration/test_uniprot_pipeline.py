@@ -18,6 +18,7 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 _MOCK_TOKEN = FencingToken(
     sequence=1,
@@ -130,7 +131,10 @@ class TestUniProtProteinPipelineTransform:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(
@@ -187,7 +191,10 @@ class TestUniProtProteinPipelineTransform:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(
@@ -232,7 +239,10 @@ class TestUniProtProteinPipelineTransform:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(
@@ -267,7 +277,10 @@ class TestUniProtProteinPipelineTransform:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(
@@ -310,7 +323,10 @@ class TestUniProtProteinPipelineTransform:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(
@@ -350,7 +366,10 @@ class TestUniProtProteinPipelineTransform:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(
@@ -571,7 +590,10 @@ class TestUniProtProteinPipelineEdgeCases:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(
@@ -617,7 +639,10 @@ class TestUniProtProteinPipelineEdgeCases:
             services=mock_uniprot_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=UniProtProteinTransformer(provider="uniprot"),
+            transformer=instantiate_test_transformer(
+                UniProtProteinTransformer,
+                provider="uniprot",
+            ),
         )
 
         context = PipelineContext(

@@ -1,4 +1,4 @@
-"""Shared record conversion and extraction helpers for BaseTransformer."""
+"""Record conversion and extraction helpers for BaseTransformer."""
 
 from __future__ import annotations
 

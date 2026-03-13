@@ -30,6 +30,9 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.base_transformer.types import (
+        TransformerDependencyContext,
+    )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
@@ -105,6 +108,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> BaseTransformer | None:
         """Create transformer when a transformer class is configured."""
         return create_transformer_instance(
@@ -120,6 +124,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     def create_data_source(

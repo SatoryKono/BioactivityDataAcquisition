@@ -10,6 +10,7 @@ import pytest
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
@@ -32,7 +33,10 @@ class TestUniProtProteinTransformer:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -241,7 +245,10 @@ class TestUniProtProteinTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = UniProtProteinTransformer(provider="custom_uniprot")
+        transformer = instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="custom_uniprot",
+        )
         record = {
             "primaryAccession": "Q11111",
             "uniProtkbId": "CUST_HUMAN",
@@ -369,17 +376,23 @@ class TestUniProtProteinTransformer:
 
     def test_transformer_accepts_entity_type(self):
         """Transformer MUST accept entity_type parameter."""
-        transformer = UniProtProteinTransformer(entity_type="protein")
+        transformer = instantiate_test_transformer(
+            UniProtProteinTransformer,
+            entity_type="protein",
+        )
         assert transformer.entity_type == "protein"
 
     def test_transformer_default_entity_type(self):
         """Transformer SHOULD default entity_type to 'protein'."""
-        transformer = UniProtProteinTransformer()
+        transformer = instantiate_test_transformer(UniProtProteinTransformer)
         assert transformer.entity_type == "protein"
 
     def test_transformer_custom_entity_type(self):
         """Transformer MUST accept custom entity_type."""
-        transformer = UniProtProteinTransformer(entity_type="custom_entity")
+        transformer = instantiate_test_transformer(
+            UniProtProteinTransformer,
+            entity_type="custom_entity",
+        )
         assert transformer.entity_type == "custom_entity"
 
     def test_transformer_accepts_pii_hasher(self):
@@ -387,14 +400,17 @@ class TestUniProtProteinTransformer:
         from bioetl.domain.ports import NoOpPiiHasher
 
         hasher = NoOpPiiHasher()
-        transformer = UniProtProteinTransformer(pii_hasher=hasher)
+        transformer = instantiate_test_transformer(
+            UniProtProteinTransformer,
+            pii_hasher=hasher,
+        )
         assert transformer._pii_hasher is hasher
 
     def test_transformer_default_pii_hasher(self):
         """Transformer SHOULD default pii_hasher to NoOpPiiHasher."""
         from bioetl.domain.ports import NoOpPiiHasher
 
-        transformer = UniProtProteinTransformer()
+        transformer = instantiate_test_transformer(UniProtProteinTransformer)
         assert isinstance(transformer._pii_hasher, NoOpPiiHasher)
 
 
@@ -405,7 +421,10 @@ class TestUniProtProteinTransformerExtendedFields:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.mark.asyncio
     async def test_extract_entry_type_reviewed(self, transformer, mock_context):
@@ -969,7 +988,10 @@ class TestUniProtTransformerAuditDates:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.mark.asyncio
     async def test_extract_entry_audit_dates(self, transformer, mock_context):
@@ -1120,7 +1142,10 @@ class TestUniProtCofactorsExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.mark.asyncio
     async def test_extract_cofactors_with_chebi(self, transformer, mock_context):
@@ -1209,7 +1234,10 @@ class TestUniProtBiophysicochemicalExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.mark.asyncio
     async def test_extract_ph_dependence(self, transformer, mock_context):
@@ -1350,7 +1378,10 @@ class TestUniProtInductionExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.mark.asyncio
     async def test_extract_induction(self, transformer, mock_context):
@@ -1399,7 +1430,10 @@ class TestUniProtPDBExtraction:
     @pytest.fixture
     def transformer(self):
         """Create UniProtProteinTransformer instance."""
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.mark.asyncio
     async def test_extract_pdb_xrefs(self, transformer, mock_context):

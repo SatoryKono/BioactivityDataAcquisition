@@ -1342,6 +1342,50 @@ class TestMapStatusToExitCode:
         assert result == ExitCode.PIPELINE_ERROR
 
 
+@pytest.mark.unit
+def test_run_prepared_request_async_uses_compat_runtime_path():
+    """Prepared CLI request should still delegate through _run_pipeline_async."""
+    import asyncio
+
+    from bioetl.application.services import PipelineRunResult, RunResult
+    from bioetl.application.services.cli_run_orchestration_service import (
+        RunExecutionRequest,
+    )
+    from bioetl.interfaces.cli.commands import run as run_module
+
+    options = MagicMock(name="run_options")
+    request = RunExecutionRequest(
+        pipeline="chembl_activity",
+        options=options,
+        health_server=False,
+        health_port=8081,
+    )
+    expected = RunResult(
+        status=PipelineRunResult.SUCCESS,
+        pipeline_name="chembl_activity",
+        run_id="test-run-id",
+        run_type="incremental",
+    )
+    registry = MagicMock(name="registry")
+
+    with patch(
+        "bioetl.interfaces.cli.commands.run._run_pipeline_async",
+        new=AsyncMock(return_value=expected),
+    ) as mock_run_pipeline_async:
+        result = asyncio.run(
+            run_module._run_prepared_request_async(request, registry=registry)
+        )
+
+    assert result is expected
+    mock_run_pipeline_async.assert_awaited_once_with(
+        "chembl_activity",
+        options,
+        health_server_enabled=False,
+        health_port=8081,
+        registry=registry,
+    )
+
+
 # =============================================================================
 # run.py Tests - Exception handlers in run command
 # =============================================================================

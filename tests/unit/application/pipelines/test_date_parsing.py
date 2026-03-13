@@ -14,6 +14,7 @@ from bioetl.application.pipelines.crossref.transformer import (
 from bioetl.application.pipelines.pubmed.transformer import (
     PubMedPublicationTransformer,
 )
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.mark.unit
@@ -23,7 +24,10 @@ class TestPubMedDateBuilding:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMed transformer with minimal dependencies."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.parametrize(
         "epub_date,pub_date,year,expected",
@@ -109,7 +113,10 @@ class TestCrossRefDateBuilding:
     @pytest.fixture
     def transformer(self) -> CrossRefPublicationTransformer:
         """Create CrossRef transformer with minimal dependencies."""
-        return CrossRefPublicationTransformer(provider="crossref")
+        return instantiate_test_transformer(
+            CrossRefPublicationTransformer,
+            provider="crossref",
+        )
 
     @pytest.mark.parametrize(
         "published_print,published_online,expected",
@@ -192,12 +199,18 @@ class TestDateParsingEdgeCases:
     @pytest.fixture
     def pubmed_transformer(self) -> PubMedPublicationTransformer:
         """Create PubMed transformer."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.fixture
     def crossref_transformer(self) -> CrossRefPublicationTransformer:
         """Create CrossRef transformer."""
-        return CrossRefPublicationTransformer(provider="crossref")
+        return instantiate_test_transformer(
+            CrossRefPublicationTransformer,
+            provider="crossref",
+        )
 
     def test_pubmed_handles_empty_strings(
         self,

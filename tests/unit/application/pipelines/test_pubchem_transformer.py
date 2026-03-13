@@ -11,6 +11,7 @@ from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTran
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.transformations import safe_float
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
@@ -33,7 +34,10 @@ class TestPubChemCompoundTransformer:
     @pytest.fixture
     def transformer(self):
         """Create PubChemCompoundTransformer instance."""
-        return PubChemCompoundTransformer(provider="pubchem")
+        return instantiate_test_transformer(
+            PubChemCompoundTransformer,
+            provider="pubchem",
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -210,7 +214,10 @@ class TestPubChemCompoundTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = PubChemCompoundTransformer(provider="custom_pubchem")
+        transformer = instantiate_test_transformer(
+            PubChemCompoundTransformer,
+            provider="custom_pubchem",
+        )
         record = {
             "molecule_id": 123,
             "canonical_smiles": "C",

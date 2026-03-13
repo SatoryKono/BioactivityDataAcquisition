@@ -14,6 +14,7 @@ from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 # Mock context object for tests
@@ -56,7 +57,10 @@ class TestPubChemCompoundPipeline:
         # Arrange
         config = MagicMock()
         config.provider = "pubchem"
-        transformer = PubChemCompoundTransformer(provider="pubchem")
+        transformer = instantiate_test_transformer(
+            PubChemCompoundTransformer,
+            provider="pubchem",
+        )
         pipeline = PubChemCompoundPipeline(
             config=config,
             runtime=MagicMock(),
@@ -91,7 +95,10 @@ class TestPubChemCompoundPipeline:
         self, mock_context, mock_pipeline_base, mock_run_id
     ):
         # Arrange
-        transformer = PubChemCompoundTransformer(provider="pubchem")
+        transformer = instantiate_test_transformer(
+            PubChemCompoundTransformer,
+            provider="pubchem",
+        )
         pipeline = PubChemCompoundPipeline(
             config=MagicMock(),
             runtime=MagicMock(),
@@ -117,7 +124,10 @@ class TestUniProtProteinPipeline:
         # Arrange
         config = MagicMock()
         config.provider = "uniprot"
-        transformer = UniProtProteinTransformer(provider="uniprot")
+        transformer = instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
         pipeline = UniProtProteinPipeline(
             config=config,
             runtime=MagicMock(),
@@ -156,7 +166,10 @@ class TestUniProtProteinPipeline:
         self, mock_context, mock_pipeline_base, mock_run_id
     ):
         # Arrange
-        transformer = UniProtProteinTransformer(provider="uniprot")
+        transformer = instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
         pipeline = UniProtProteinPipeline(
             config=MagicMock(),
             runtime=MagicMock(),
