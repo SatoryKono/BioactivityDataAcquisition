@@ -224,6 +224,14 @@ class DoiBatchProcessor:
 
         return response
 
+    @staticmethod
+    def _parse_batch_items(response: Response) -> list[BronzeRecord]:
+        """Extract publication items from a CrossRef batch response."""
+        data = response.json()
+        message = data.get("message", {})
+        items = message.get("items", []) if isinstance(message, dict) else []
+        return [cast(BronzeRecord, item) for item in items if isinstance(item, dict)]
+
     async def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Fetch multiple publications by DOI batch.
 
@@ -261,12 +269,8 @@ class DoiBatchProcessor:
                     yield publication
                 return
 
-            data = response.json()
-            message = data.get("message", {})
-            items = message.get("items", []) if isinstance(message, dict) else []
-            for item in items:
-                if isinstance(item, dict):
-                    yield cast(BronzeRecord, item)
+            for item in self._parse_batch_items(response):
+                yield item
 
         except CROSSREF_RUNTIME_ERRORS as e:
             self._logger.warning(

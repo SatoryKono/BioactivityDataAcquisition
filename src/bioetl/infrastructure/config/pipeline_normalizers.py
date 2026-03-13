@@ -151,6 +151,23 @@ def _validate_schema_config(
         _validate_layer_include_groups(data_schema, layer, schema_file)
 
 
+def _try_load_and_merge_schema(
+    config: JsonDict,
+    config_path: Path,
+    file_key: str,
+) -> bool:
+    """Try loading a schema file from config[file_key] and merge into config."""
+    schema_file = config.get(file_key)
+    if not isinstance(schema_file, str) or not schema_file.strip():
+        return False
+    data_schema = _load_data_schema_config(config_path, schema_file)
+    if not data_schema:
+        return False
+    _validate_schema_config(data_schema, schema_file)
+    _merge_data_schema_into_config(config, data_schema)
+    return True
+
+
 def apply_pipeline_schema_normalization(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     *,
@@ -167,23 +184,8 @@ def apply_pipeline_schema_normalization(
         _merge_data_schema_into_config(config, unified_schema)
         return
 
-    deprecated_data_schema_file = config.get("data_schema_file")
-    if (
-        isinstance(deprecated_data_schema_file, str)
-        and deprecated_data_schema_file.strip()
-    ):
-        data_schema = _load_data_schema_config(config_path, deprecated_data_schema_file)
-        if data_schema:
-            _validate_schema_config(data_schema, deprecated_data_schema_file)
-            _merge_data_schema_into_config(config, data_schema)
-            return
-
-    schema_file = config.get("schema_file")
-    if isinstance(schema_file, str) and schema_file.strip():
-        data_schema = _load_data_schema_config(config_path, schema_file)
-        if data_schema:
-            _validate_schema_config(data_schema, schema_file)
-            _merge_data_schema_into_config(config, data_schema)
+    for key in ("data_schema_file", "schema_file"):
+        if _try_load_and_merge_schema(config, config_path, key):
             return
 
     column_groups_file = config.get("column_groups_file")

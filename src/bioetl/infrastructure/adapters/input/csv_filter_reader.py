@@ -157,6 +157,31 @@ class CsvFilterReader:
             duplicates=duplicates,
         )
 
+    @staticmethod
+    def _build_fallback_rows(
+        df: pl.DataFrame,
+        primary_column: str,
+        fallback_column: str,
+        all_ids: list[str],
+        fallback_mapping: dict[str, str],
+    ) -> int:
+        """Process rows building ID list and fallback mapping. Returns title_only_count."""
+        title_only_count = 0
+        for row in df.iter_rows(named=True):
+            primary_str = str(row.get(primary_column, "")).strip() if row.get(primary_column) else ""
+            fallback_str = str(row.get(fallback_column, "")).strip() if row.get(fallback_column) else ""
+
+            if primary_str:
+                all_ids.append(primary_str)
+                if fallback_str:
+                    fallback_mapping[primary_str] = fallback_str
+            elif fallback_str:
+                marker = f"__title_only_{title_only_count}__"
+                all_ids.append(marker)
+                fallback_mapping[marker] = fallback_str
+                title_only_count += 1
+        return title_only_count
+
     async def load_filter_with_fallback(
         self,
         source_path: str,
@@ -198,30 +223,11 @@ class CsvFilterReader:
                     fallback_column=fallback_column,
                     available_columns=df.columns,
                 )
-            # Fall back to standard extraction without fallback support
             all_ids = self._extract_column_ids(df, primary_column)
         else:
-            # Process all rows, handling empty primary values
-            for row in df.iter_rows(named=True):
-                primary_val = row.get(primary_column)
-                fallback_val = row.get(fallback_column)
-
-                primary_str = str(primary_val).strip() if primary_val else ""
-                fallback_str = str(fallback_val).strip() if fallback_val else ""
-
-                if primary_str:
-                    # Case 1 & 2: Record has DOI
-                    all_ids.append(primary_str)
-                    if fallback_str:
-                        fallback_mapping[primary_str] = fallback_str
-                elif fallback_str:
-                    # Case 3: Record has title only (empty DOI)
-                    # Use indexed marker for title-only lookup (Phase 3)
-                    marker = f"__title_only_{title_only_count}__"
-                    all_ids.append(marker)
-                    fallback_mapping[marker] = fallback_str
-                    title_only_count += 1
-
+            title_only_count = self._build_fallback_rows(
+                df, primary_column, fallback_column, all_ids, fallback_mapping,
+            )
             if self._logger:
                 self._logger.info(
                     "fallback_mapping_loaded",

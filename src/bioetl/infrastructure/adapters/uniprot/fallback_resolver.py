@@ -37,6 +37,18 @@ def resolve_uniprot_missing_ids(
     return missing_ids
 
 
+def _reached_limit(fetched: int, limit: int | None) -> bool:
+    return limit is not None and fetched >= limit
+
+
+async def _fetch_first_record(
+    strategy: _FetchStrategy, fallback_value: str,
+) -> BronzeRecord | None:
+    async for record in strategy(query=fallback_value, limit=1):
+        return dict(record)
+    return None
+
+
 async def iter_uniprot_fallback_records(
     *,
     strategy: _FetchStrategy,
@@ -47,36 +59,22 @@ async def iter_uniprot_fallback_records(
 ) -> AsyncIterator[BronzeRecord]:
     """Iterate fallback records with per-value cache reuse."""
     fetched = already_fetched
-    fallback_result_cache: dict[str, BronzeRecord | None] = {}
+    cache: dict[str, BronzeRecord | None] = {}
     for missing_id in missing_ids:
-        if limit and fetched >= limit:
-            break
+        if _reached_limit(fetched, limit):
+            return
 
         fallback_value = fallback_mapping.get(missing_id)
         if not fallback_value:
             continue
 
-        if fallback_value in fallback_result_cache:
-            cached_record = fallback_result_cache[fallback_value]
-            if cached_record is None:
-                continue
-            yield dict(cached_record)
-            fetched += 1
-            if limit and fetched >= limit:
-                return
-            continue
+        if fallback_value not in cache:
+            cache[fallback_value] = await _fetch_first_record(strategy, fallback_value)
 
-        first_record: BronzeRecord | None = None
-        async for record in strategy(query=fallback_value, limit=1):
-            first_record = dict(record)
-            break
-
-        fallback_result_cache[fallback_value] = first_record
-        if first_record is not None:
-            yield dict(first_record)
+        record = cache[fallback_value]
+        if record is not None:
+            yield dict(record)
             fetched += 1
-            if limit and fetched >= limit:
-                return
 
 
 __all__ = [

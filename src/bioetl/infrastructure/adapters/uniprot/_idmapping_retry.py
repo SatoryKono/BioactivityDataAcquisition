@@ -46,6 +46,23 @@ class IDMappingRetryMixin:
         """
         return cast("IDMappingRetryDependencies", self)
 
+    @staticmethod
+    def _check_redirect_to_results(response: object) -> str | None:
+        """Return results URL if response redirected to a results endpoint."""
+        response_url = str(response.url) if hasattr(response, "url") else ""
+        if "/results/" in response_url or "/uniprotkb/results/" in response_url:
+            return response_url
+        return None
+
+    @staticmethod
+    def _resolve_job_status(response: object, result: dict[str, object]) -> str:
+        """Determine effective job status from response code and payload."""
+        if "results" in result:
+            return "HAS_RESULTS"
+        if getattr(response, "status_code", 0) == 303:
+            return "FINISHED"
+        return str(result.get("jobStatus", "UNKNOWN"))
+
     async def _poll_until_ready(self, job_id: str) -> str | None:
         """Poll job status until complete.
 
@@ -59,16 +76,16 @@ class IDMappingRetryMixin:
             with deps._adapter_metrics.measure_request("/idmapping/status"):
                 response = await deps.http_client.get(url)
 
-            response_url = str(response.url) if hasattr(response, "url") else ""
-            if "/results/" in response_url or "/uniprotkb/results/" in response_url:
+            redirect_url = self._check_redirect_to_results(response)
+            if redirect_url is not None:
                 deps.logger.debug(
                     "idmapping_job_finished",
                     job_id=job_id,
                     attempts=attempt + 1,
                     detected_by="redirect_to_results",
-                    results_url=response_url,
+                    results_url=redirect_url,
                 )
-                return response_url
+                return redirect_url
 
             if response.status_code not in (200, 303):
                 deps.logger.warning(
@@ -80,18 +97,17 @@ class IDMappingRetryMixin:
                 continue
 
             result = response.json()
-            if "results" in result:
+            status = self._resolve_job_status(response, result)
+
+            if status == "HAS_RESULTS":
                 deps.logger.debug(
                     "idmapping_job_finished",
                     job_id=job_id,
                     attempts=attempt + 1,
                     detected_by="results_in_response",
                 )
+                response_url = str(response.url) if hasattr(response, "url") else ""
                 return response_url or None
-
-            status = result.get("jobStatus", "UNKNOWN")
-            if response.status_code == 303:
-                status = "FINISHED"
 
             if status == "FINISHED":
                 deps.logger.debug(
@@ -103,7 +119,7 @@ class IDMappingRetryMixin:
                 return None
 
             if status == "ERROR":
-                error_msg = result.get("errorMessage", "Unknown error")
+                error_msg = str(result.get("errorMessage", "Unknown error"))
                 deps.logger.error(
                     "idmapping_job_error",
                     job_id=job_id,

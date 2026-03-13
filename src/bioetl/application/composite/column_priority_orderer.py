@@ -3,15 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING
+
+import polars as pl
 
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
-
-if TYPE_CHECKING:
-    import polars as pl
-
-    from bioetl.domain.composite.config import EnricherConfig
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.composite.config import EnricherConfig
+from bioetl.domain.ports import LoggerPort
 
 
 __all__ = ["ColumnPriorityOrdererService"]

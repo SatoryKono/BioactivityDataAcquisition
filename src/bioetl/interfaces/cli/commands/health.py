@@ -8,13 +8,10 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition.entrypoints import (
-    get_health_server_dependencies,
-    get_health_service,
-)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -29,6 +26,26 @@ from bioetl.interfaces.cli.commands.health_rendering import (
     render_health_results_json,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
+
+if TYPE_CHECKING:
+    from bioetl.application.services.health_service import HealthService
+    from bioetl.composition.bootstrap.cli.health import HealthServerDependencies
+
+
+def get_health_service() -> HealthService:
+    """Load the health service through composition on demand."""
+    from bioetl.composition.entrypoints import get_health_service as _impl
+
+    return _impl()
+
+
+def get_health_server_dependencies() -> HealthServerDependencies:
+    """Load health server dependencies through composition on demand."""
+    from bioetl.composition.entrypoints import (
+        get_health_server_dependencies as _impl,
+    )
+
+    return _impl()
 
 
 def _handle_health_failure(

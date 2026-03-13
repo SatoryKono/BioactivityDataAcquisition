@@ -3,17 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+
+import polars as pl
 
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+from bioetl.domain.composite.config import EnricherConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution
-
-if TYPE_CHECKING:
-    import polars as pl
-
-    from bioetl.domain.composite.config import EnricherConfig, MergeConfig
-    from bioetl.domain.ports import LoggerPort
-
+from bioetl.domain.ports import LoggerPort
 
 __all__ = ["ConflictResolverService"]
 

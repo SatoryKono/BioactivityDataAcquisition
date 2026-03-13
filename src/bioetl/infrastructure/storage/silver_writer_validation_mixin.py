@@ -114,6 +114,36 @@ def _to_policy_write_mode_impl(mode: SilverWriteMode) -> WriteMode:
     return mapping[mode]
 
 
+def _count_null_violations(
+    records: list[BronzeRecord],
+    rules: dict[tuple[str, Literal["merge", "partition"]], KeyNullabilityRule],
+    field: str,
+    key_type: Literal["merge", "partition"],
+) -> int:
+    """Count null values for a non-nullable key field."""
+    rule = rules.get((field, key_type))
+    if rule is None or rule.nullable:
+        return 0
+    return sum(1 for record in records if record.get(field) is None)
+
+
+def _collect_key_violations(
+    records: list[BronzeRecord],
+    rules: dict[tuple[str, Literal["merge", "partition"]], KeyNullabilityRule],
+    primary_keys: list[str],
+    partition_cols: list[str] | None,
+) -> list[tuple[str, str, int]]:
+    """Collect all nullability violations across merge and partition keys."""
+    violations: list[tuple[str, str, int]] = []
+    for key in primary_keys:
+        if count := _count_null_violations(records, rules, key, "merge"):
+            violations.append((key, "merge", count))
+    for key in partition_cols or []:
+        if count := _count_null_violations(records, rules, key, "partition"):
+            violations.append((key, "partition", count))
+    return violations
+
+
 def _validate_key_nullability_impl(
     records: list[BronzeRecord],
     primary_keys: list[str],
@@ -126,26 +156,7 @@ def _validate_key_nullability_impl(
         return
 
     rules = {(rule.field, rule.key_type): rule for rule in key_nullability_rules}
-
-    def collect_violations(
-        field: str,
-        key_type: Literal["merge", "partition"],
-    ) -> int:
-        """Count null values for a non-nullable key field."""
-        rule = rules.get((field, key_type))
-        if rule is None or rule.nullable:
-            return 0
-        return sum(1 for record in records if record.get(field) is None)
-
-    violations: list[tuple[str, str, int]] = []
-
-    for key in primary_keys:
-        if count := collect_violations(key, "merge"):
-            violations.append((key, "merge", count))
-
-    for key in partition_cols or []:
-        if count := collect_violations(key, "partition"):
-            violations.append((key, "partition", count))
+    violations = _collect_key_violations(records, rules, primary_keys, partition_cols)
 
     if violations:
         details = [

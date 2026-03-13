@@ -205,6 +205,26 @@ def validate_exemption_key_normalization(
     return errors
 
 
+def _validate_required_registries(
+    registries: dict[str, object],
+    errors: list[str],
+) -> None:
+    """Check that all required registries exist and have valid types."""
+    missing = sorted(set(REQUIRED_EXEMPTION_REGISTRIES) - set(registries))
+    if missing:
+        errors.append("Missing required exemption registries: " + ", ".join(missing))
+
+    for name in REQUIRED_EXEMPTION_REGISTRIES:
+        if name in missing:
+            continue
+        entries = registries.get(name)
+        if not isinstance(entries, dict):
+            errors.append(f"{name}: expected mapping of exemptions, got {type(entries).__name__}")
+            continue
+        if not entries and name not in EXEMPTION_REGISTRIES_ALLOW_EMPTY:
+            errors.append(f"{name}: registry must not be empty")
+
+
 def validate_exemptions_registry(
     path: Path | str | None = None,
     *,
@@ -225,23 +245,7 @@ def validate_exemptions_registry(
     if not isinstance(registries, dict):
         return (["Missing or invalid top-level 'registries' mapping"], [])
 
-    missing_required = sorted(set(REQUIRED_EXEMPTION_REGISTRIES) - set(registries))
-    if missing_required:
-        metadata_errors.append(
-            "Missing required exemption registries: " + ", ".join(missing_required)
-        )
-
-    for registry_name in REQUIRED_EXEMPTION_REGISTRIES:
-        if registry_name in missing_required:
-            continue
-        entries = registries.get(registry_name)
-        if not isinstance(entries, dict):
-            metadata_errors.append(
-                f"{registry_name}: expected mapping of exemptions, got {type(entries).__name__}"
-            )
-            continue
-        if not entries and registry_name not in EXEMPTION_REGISTRIES_ALLOW_EMPTY:
-            metadata_errors.append(f"{registry_name}: registry must not be empty")
+    _validate_required_registries(registries, metadata_errors)
 
     for registry_name, entries in sorted(registries.items()):
         if not isinstance(entries, dict):
@@ -249,16 +253,10 @@ def validate_exemptions_registry(
                 f"{registry_name}: expected mapping of exemptions, got {type(entries).__name__}"
             )
             continue
-
         for exemption_name, entry in sorted(entries.items()):
             _validate_exemption_entry(
-                registry_name,
-                exemption_name,
-                entry,
-                required_fields,
-                now,
-                metadata_errors,
-                expired_entries,
+                registry_name, exemption_name, entry,
+                required_fields, now, metadata_errors, expired_entries,
             )
 
     metadata_errors.extend(validate_exemption_key_normalization(path))

@@ -50,6 +50,29 @@ class ChemblFetchMultiFilterMixin:
             )
         return batch_size
 
+    async def _fetch_multi_filter_page_loop(
+        self,
+        url: str,
+        filter_params: dict[str, str],
+        entity_type: str,
+        pk_field: str,
+        seen_ids: set[str],
+    ) -> AsyncIterator[BronzeRecord]:
+        """Paginate through a single filter combination, deduplicating records."""
+        offset = 0
+        while True:
+            params = self._build_params(offset, entity_type)
+            params.update(filter_params)
+            records, has_next = await self._fetch_page(url, params, entity_type)
+            if not records:
+                break
+            for record in records:
+                if not self._is_duplicate_record(record, pk_field, seen_ids, entity_type):
+                    yield record
+            if not has_next:
+                break
+            offset += len(records)
+
     async def fetch_multi_filtered(
         self,
         entity_type: str,
@@ -84,26 +107,10 @@ class ChemblFetchMultiFilterMixin:
         for batch_combination in itertools.product(*filter_batches):
             current_filters = dict(zip(api_filter_keys, batch_combination, strict=True))
             filter_params = self._build_filter_in_params(current_filters)
-
-            offset = 0
-            while True:
-                params = self._build_params(offset, entity_type)
-                params.update(filter_params)
-
-                records, has_next = await self._fetch_page(url, params, entity_type)
-                if not records:
-                    break
-
-                for record in records:
-                    if self._is_duplicate_record(
-                        record, pk_field, seen_ids, entity_type
-                    ):
-                        continue
-                    yield record
-                    total_fetched += 1
-                    if limit and total_fetched >= limit:
-                        return
-
-                if not has_next:
-                    break
-                offset += len(records)
+            async for record in self._fetch_multi_filter_page_loop(
+                url, filter_params, entity_type, pk_field, seen_ids,
+            ):
+                yield record
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
