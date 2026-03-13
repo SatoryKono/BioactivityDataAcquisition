@@ -8,16 +8,13 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-__all__ = ["KeyExtractorService"]
-
-
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import polars as pl
+import polars as pl
 
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+
+__all__ = ["KeyExtractorService"]
 
 
 class KeyExtractorService:

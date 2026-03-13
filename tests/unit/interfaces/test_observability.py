@@ -50,20 +50,36 @@ def test_start_metrics_server_failure():
 
 
 def test_interface_re_exports_from_composition_entrypoints():
-    """Verify interface re-exports start_metrics_server via composition entrypoints.
+    """Verify interface delegates start_metrics_server via composition entrypoints.
 
-    interfaces/observability.py imports start_metrics_server from
-    composition.entrypoints, which preserves the canonical implementation
-    object from infrastructure.observability.
+    interfaces/observability.py now exposes a thin wrapper over
+    composition.entrypoints.start_metrics_server, preserving the public API
+    while removing the direct module-level composition import.
     """
-    # The function should be the same object since it's a re-export
-    assert (
-        observability.start_metrics_server is infra_observability.start_metrics_server
-    )
-    # Composition facade also re-exports the same implementation object.
-    assert (
-        observability.start_metrics_server
-        is composition_entrypoints.start_metrics_server
+    logger = mock.Mock()
+
+    with mock.patch.object(
+        composition_entrypoints,
+        "start_metrics_server",
+        return_value=True,
+    ) as mock_start_metrics_server:
+        result = observability.start_metrics_server(
+            port=9100,
+            addr="127.0.0.1",
+            fail_fast=True,
+            retry_count=5,
+            retry_delay=0.5,
+            logger=logger,
+        )
+
+    assert result is True
+    mock_start_metrics_server.assert_called_once_with(
+        port=9100,
+        addr="127.0.0.1",
+        fail_fast=True,
+        retry_count=5,
+        retry_delay=0.5,
+        logger=logger,
     )
 
 

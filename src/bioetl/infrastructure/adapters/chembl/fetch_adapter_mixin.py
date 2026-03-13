@@ -75,7 +75,7 @@ class ChemblFetchAdapterMixin(
     ) -> bool:
         """Check if record is a duplicate and track its key. Returns True if duplicate."""
         key = (
-            self._compute_composite_key(record, pk_fields)
+            self._compute_composite_key(record, tuple(pk_fields))
             if len(pk_fields) > 1
             else str(record.get(pk_field, ""))
         )

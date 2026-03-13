@@ -3,17 +3,12 @@
 from __future__ import annotations
 
 import asyncio
-import sys
+from typing import TYPE_CHECKING
 
 import click
 
 from bioetl.application.services import (
     RunOptions,
-)
-from bioetl.composition.entrypoints import get_pipeline_runner_service
-from bioetl.composition.registry import PipelineRegistry
-from bioetl.interfaces.cli.commands.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
@@ -22,6 +17,12 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
 )
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
+)
+from bioetl.interfaces.cli.commands.run_all_command_policy import (
+    build_run_all_command_input,
+    exit_with_code,
+    handle_run_all_cli_failure,
+    run_all_command_flow,
 )
 from bioetl.interfaces.cli.commands.run_all_execution import (
     RunAllBatchExecutionRequest,
@@ -35,7 +36,6 @@ from bioetl.interfaces.cli.commands.run_all_execution import (
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     BatchRunResult,
-    create_run_all_execution_plan,
     emit_run_all_listing,
     emit_run_all_preview,
     should_prompt_for_destructive_run,
@@ -59,13 +59,27 @@ from bioetl.interfaces.cli.commands.run_all_helpers import (
     validate_provider as _validate_provider,
 )
 from bioetl.interfaces.cli.commands.run_helpers import resolve_context_registry
-from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 from bioetl.interfaces.cli.registry_helpers import (
     get_default_registry as _legacy_get_default_registry,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.pipeline_runner_service import (
+        PipelineRunnerService,
+    )
+    from bioetl.composition.registry import PipelineRegistry
+
 get_default_registry = _legacy_get_default_registry
+
+
+def get_pipeline_runner_service(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunnerService:
+    """Load the pipeline runner service through composition on demand."""
+    from bioetl.composition.entrypoints import get_pipeline_runner_service as _impl
+
+    return _impl(registry=registry)
 
 
 async def _run_all_pipelines_async(
@@ -145,29 +159,7 @@ def _handle_destructive_confirmation(
         yes=yes,
         confirm_fn=click.confirm,
         info_printer=echo_info,
-        exit_func=sys.exit,
-    )
-
-
-def _handle_run_all_failure(
-    exc: BaseException, *, source: str, reason_code: str
-) -> None:
-    """Handle run-all CLI failures with consistent error policy.
-
-    Args:
-        exc: Exception caught at the CLI command boundary.
-        source: Provider name used as subject value in the structured error context.
-        reason_code: Machine-readable code for the failure (e.g., 'CLI_RUN_ALL_DOMAIN_ERROR').
-    """
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
-        subject_key="source",
-        subject_value=source,
-        domain_error_title="Batch execution failed with domain error",
-        unexpected_error_title="Unexpected error during batch execution",
-        interrupted_message="Batch run interrupted by user (Ctrl+C)",
-        default_exit_code=ExitCode.FAIL,
+        exit_func=exit_with_code,
     )
 
 
@@ -207,7 +199,7 @@ def _run_batch_with_policy(
         ensure_metrics_server_started_fn=ensure_metrics_server_started,
         health_server_context_factory=health_server_context,
         run_coro=asyncio.run,
-        handle_failure=lambda exc, source, reason_code: _handle_run_all_failure(
+        handle_failure=lambda exc, source, reason_code: handle_run_all_cli_failure(
             exc,
             source=source,
             reason_code=reason_code,
@@ -267,47 +259,29 @@ def run_all(
 ) -> None:
     """Run all registered pipelines for one provider sequentially."""
     registry = resolve_context_registry(ctx)
-    execution_plan, error_msg = create_run_all_execution_plan(
+    cli_input = build_run_all_command_input(
         source=source,
         run_type=run_type,
         limit=limit,
         dry_run=dry_run,
+        yes=yes,
+        list_only=list_only,
         debug=debug,
-        registry=registry,
-    )
-    if execution_plan is None:
-        echo_error("Provider error", error_msg)
-        sys.exit(ExitCode.FAIL)
-
-    pipelines = execution_plan.pipelines
-
-    if list_only:
-        emit_run_all_listing(source=source, pipelines=pipelines)
-        sys.exit(ExitCode.OK)
-
-    _handle_destructive_confirmation(run_type, pipelines, dry_run, yes)
-
-    emit_run_all_preview(
-        source=source,
-        pipelines=pipelines,
-        dry_run=dry_run,
-    )
-
-    echo_health_server_info(health_server, health_port)
-
-    batch_result = _run_batch_with_policy(
-        source=source,
-        pipelines=pipelines,
-        options=execution_plan.options,
         health_server=health_server,
         health_port=health_port,
-        registry=registry,
     )
-    if batch_result is None:
-        return
-
-    _echo_batch_summary(batch_result, dry_run)
-    sys.exit(_determine_exit_code(batch_result))
+    run_all_command_flow(
+        cli_input=cli_input,
+        registry=registry,
+        destructive_confirmation=_handle_destructive_confirmation,
+        listing_emitter=emit_run_all_listing,
+        preview_emitter=emit_run_all_preview,
+        health_info_presenter=echo_health_server_info,
+        execute_batch=_run_batch_with_policy,
+        summary_presenter=_echo_batch_summary,
+        determine_exit_code=_determine_exit_code,
+        exit_func=exit_with_code,
+    )
 
 
 __all__ = [

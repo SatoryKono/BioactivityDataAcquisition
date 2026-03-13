@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import polars as pl
 
+from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.exceptions import (
     BioETLError,
     CheckpointConflictError,
@@ -13,10 +12,7 @@ from bioetl.domain.exceptions import (
     NetworkError,
     StorageError,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 
 _KEY_FILTER_ERRORS = (ValueError, TypeError, RuntimeError)
 _DEPENDENCY_KEY_READ_ERRORS = (
