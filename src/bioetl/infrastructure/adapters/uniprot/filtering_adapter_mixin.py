@@ -10,7 +10,7 @@ from collections.abc import AsyncIterator, Callable
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.uniprot.fallback_policy import (
-    UniProtFallbackPolicyHandler,
+    UniProtFallbackPolicy,
 )
 from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
@@ -208,7 +208,7 @@ class UniProtFilteringAdapterMixin:
             return
 
         requested_ids = self._deduplicate_filter_ids(filter_ids)
-        fallback_handler = UniProtFallbackPolicyHandler(
+        fallback_handler = UniProtFallbackPolicy(
             entity_type=entity_type,
             resolve_missing_ids=self._should_do_fallback,
             search_fallback=self._do_fallback_search,

@@ -197,6 +197,7 @@ class ArrowDataConverter:
         records: list[JsonDict],  # Any: record/metadata values are heterogeneous
         primary_keys: list[str] | None = None,
         column_order: list[str] | None = None,
+        apply_column_order: bool = True,
     ) -> pa.Table:
         """Convert records to PyArrow table with null type handling.
 
@@ -210,12 +211,14 @@ class ArrowDataConverter:
             records: List of record dictionaries.
             primary_keys: Optional list of columns for sorting.
             column_order: Optional explicit column order to apply.
+            apply_column_order: If False, preserve the original Arrow column order.
 
         Returns:
             PyArrow Table ready for Delta Lake write.
         """
         arrow_data = pa.Table.from_pylist(records)
-        arrow_data = self._apply_column_order(arrow_data, column_order)
+        if column_order is not None or apply_column_order:
+            arrow_data = self._apply_column_order(arrow_data, column_order)
 
         # Check if schema needs sanitization (contains null types)
         if "null" in str(arrow_data.schema).lower():
@@ -228,6 +231,8 @@ class ArrowDataConverter:
         records: list[JsonDict],  # Any: record/metadata values are heterogeneous
         schema: pa.Schema,
         primary_keys: list[str] | None = None,
+        column_order: list[str] | None = None,
+        apply_column_order: bool = False,
     ) -> pa.Table:
         """Convert records to Arrow using schema filtering, serialization, and sorting."""
         context = build_arrow_schema_preparation_context(schema)
@@ -235,6 +240,8 @@ class ArrowDataConverter:
             filter_record_for_schema(record, context) for record in records
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+        if column_order is not None or apply_column_order:
+            arrow_data = self._apply_column_order(arrow_data, column_order)
         return sort_arrow_table_by_primary_keys(
             arrow_data,
             primary_keys,

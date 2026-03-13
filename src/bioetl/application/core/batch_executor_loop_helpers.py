@@ -24,6 +24,7 @@ __all__ = [
     "ensure_extraction_not_shutdown",
     "flush_batch_if_needed",
     "flush_remaining_batch",
+    "process_extracted_record_iteration",
     "report_batch_progress",
     "reset_batch_after_flush",
     "save_periodic_checkpoint_for_loop",
@@ -280,3 +281,52 @@ async def flush_remaining_batch(
             batch=loop_state.batch,
         ),
     )
+
+
+async def process_extracted_record_iteration(
+    *,
+    loop_state: BatchExtractionLoopState,
+    raw_record: BronzeRecord,
+    shutdown_requested: bool,
+    checkpoint_recovery_service: _BatchCheckpointRecoveryPort,
+    records_fetched: int,
+    resume_offset: int,
+    process_batch: _BatchStateUpdater,
+    memory_manager: BatchMemoryManagerService,
+    progress_service: _BatchProgressReporterPort,
+    progress_state: _BatchProgressSnapshot,
+    checkpoint_interval: int,
+) -> int:
+    """Run one extraction-loop iteration in the canonical execution order."""
+    await ensure_extraction_not_shutdown(
+        shutdown_requested=shutdown_requested,
+        checkpoint_recovery_service=checkpoint_recovery_service,
+        records_fetched=records_fetched,
+        resume_offset=resume_offset,
+    )
+    next_records_fetched = records_fetched + 1
+    append_record_and_update_batch_size(
+        loop_state=loop_state,
+        raw_record=raw_record,
+        memory_manager=memory_manager,
+        records_fetched=next_records_fetched,
+    )
+    report_batch_progress(
+        progress_service=progress_service,
+        state=progress_state,
+    )
+    await flush_batch_if_needed(
+        loop_state=loop_state,
+        records_fetched=next_records_fetched,
+        process_batch=process_batch,
+        memory_manager=memory_manager,
+        progress_service=progress_service,
+        progress_state=progress_state,
+    )
+    await save_periodic_checkpoint_for_loop(
+        checkpoint_recovery_service=checkpoint_recovery_service,
+        records_fetched=next_records_fetched,
+        resume_offset=resume_offset,
+        checkpoint_interval=checkpoint_interval,
+    )
+    return next_records_fetched

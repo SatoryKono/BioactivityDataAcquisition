@@ -1,4 +1,4 @@
-"""Unit tests for UniProtFallbackPolicyHandler.
+"""Unit tests for UniProtFallbackPolicy.
 
 Tests policy evaluation, missing-ID resolution, title-only entry processing,
 deduplication logic, and edge-case/error paths.
@@ -15,7 +15,7 @@ import pytest
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.uniprot.fallback_policy import (
-    UniProtFallbackPolicyHandler,
+    UniProtFallbackPolicy,
 )
 
 
@@ -35,8 +35,8 @@ def _make_handler(
     entity_type: str = "protein",
     resolve_missing_ids: Any = None,
     search_fallback: Any = None,
-) -> UniProtFallbackPolicyHandler:
-    """Build a UniProtFallbackPolicyHandler with injectable callbacks."""
+) -> UniProtFallbackPolicy:
+    """Build a UniProtFallbackPolicy with injectable callbacks."""
 
     def _default_resolve(
         ids: list[str], found: set[str], mapping: dict[str, str]
@@ -53,7 +53,7 @@ def _make_handler(
         for uid in ids:
             yield {"accession": uid}
 
-    return UniProtFallbackPolicyHandler(
+    return UniProtFallbackPolicy(
         entity_type=entity_type,
         resolve_missing_ids=resolve_missing_ids or _default_resolve,
         search_fallback=search_fallback or _default_search,
@@ -350,7 +350,7 @@ async def test_process_title_only_entries_with_empty_entries_list() -> None:
 
 def test_collect_title_only_fallback_ids_returns_mapped_entries() -> None:
     """Entries that are present in fallback_mapping must be included in output."""
-    result = UniProtFallbackPolicyHandler._collect_title_only_fallback_ids(
+    result = UniProtFallbackPolicy._collect_title_only_fallback_ids(
         entries=["accession_A", "accession_B"],
         fallback_mapping={"accession_A": "Title A", "accession_B": "Title B"},
     )
@@ -360,7 +360,7 @@ def test_collect_title_only_fallback_ids_returns_mapped_entries() -> None:
 
 def test_collect_title_only_fallback_ids_excludes_unmapped_entries() -> None:
     """Entries absent from fallback_mapping must not appear in the output."""
-    result = UniProtFallbackPolicyHandler._collect_title_only_fallback_ids(
+    result = UniProtFallbackPolicy._collect_title_only_fallback_ids(
         entries=["not_in_mapping"],
         fallback_mapping={"different_key": "Title"},
     )
@@ -369,7 +369,7 @@ def test_collect_title_only_fallback_ids_excludes_unmapped_entries() -> None:
 
 def test_collect_title_only_fallback_ids_deduplicates_results() -> None:
     """Duplicate entries must appear only once in the output."""
-    result = UniProtFallbackPolicyHandler._collect_title_only_fallback_ids(
+    result = UniProtFallbackPolicy._collect_title_only_fallback_ids(
         entries=["acc_X", "acc_X", "acc_X"],
         fallback_mapping={"acc_X": "Title X"},
     )
@@ -378,7 +378,7 @@ def test_collect_title_only_fallback_ids_deduplicates_results() -> None:
 
 def test_collect_title_only_fallback_ids_preserves_insertion_order() -> None:
     """Output order must follow the first occurrence in the entries list."""
-    result = UniProtFallbackPolicyHandler._collect_title_only_fallback_ids(
+    result = UniProtFallbackPolicy._collect_title_only_fallback_ids(
         entries=["acc_B", "acc_A", "acc_B"],
         fallback_mapping={"acc_A": "Title A", "acc_B": "Title B"},
     )
@@ -387,7 +387,7 @@ def test_collect_title_only_fallback_ids_preserves_insertion_order() -> None:
 
 def test_collect_title_only_fallback_ids_with_empty_entries() -> None:
     """Empty entries list must return an empty list."""
-    result = UniProtFallbackPolicyHandler._collect_title_only_fallback_ids(
+    result = UniProtFallbackPolicy._collect_title_only_fallback_ids(
         entries=[],
         fallback_mapping={"acc_X": "Title X"},
     )
@@ -396,7 +396,7 @@ def test_collect_title_only_fallback_ids_with_empty_entries() -> None:
 
 def test_collect_title_only_fallback_ids_with_empty_mapping() -> None:
     """When fallback_mapping is empty, all entries are excluded."""
-    result = UniProtFallbackPolicyHandler._collect_title_only_fallback_ids(
+    result = UniProtFallbackPolicy._collect_title_only_fallback_ids(
         entries=["acc_A", "acc_B"],
         fallback_mapping={},
     )
@@ -409,7 +409,7 @@ def test_collect_title_only_fallback_ids_with_empty_mapping() -> None:
 
 
 def test_handler_satisfies_fallback_policy_port_protocol() -> None:
-    """UniProtFallbackPolicyHandler must satisfy the FallbackPolicyPort protocol."""
+    """UniProtFallbackPolicy must satisfy the FallbackPolicyPort protocol."""
     from bioetl.domain.ports import FallbackPolicyPort
 
     handler = _make_handler()

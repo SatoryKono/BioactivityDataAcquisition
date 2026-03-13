@@ -15,7 +15,7 @@ separation of concerns:
 
 from __future__ import annotations
 
-__all__ = ["RetentionManager"]
+__all__ = ["RetentionPolicy"]
 
 import asyncio
 from typing import TYPE_CHECKING, Any
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-class RetentionManager:
+class RetentionPolicy:
     """Manager for Delta table retention and maintenance operations.
 
     Handles VACUUM, optimize, time travel, and table metadata retrieval.

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import BronzeRecord, MetaDict
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
-    from bioetl.infrastructure.storage.retention_manager import RetentionManager
+    from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
 
 
 class SilverWriterMaintenanceMixin:
@@ -28,7 +28,7 @@ class SilverWriterMaintenanceMixin:
 
     logger: LoggerPort
     csv_exporter: CsvExporter | None
-    _retention_manager: RetentionManager
+    _retention_manager: RetentionPolicy
     get_table_path: Callable[[str], Path]
     read_table: Callable[..., Awaitable[list[BronzeRecord]]]
 

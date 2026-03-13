@@ -72,7 +72,7 @@ __all__ = [
     "build_pipeline_context",
     "create_pipeline_runner",
     "run_pipeline",
-    # Resource management (managers - legacy)
+    # Resource management (retained manager surface for compatibility)
     "get_quarantine_manager",
     "get_checkpoint_manager",
     "get_lifecycle_service",

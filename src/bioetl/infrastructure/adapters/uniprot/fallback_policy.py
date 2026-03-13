@@ -6,10 +6,10 @@ from collections.abc import AsyncIterator, Callable
 
 from bioetl.domain.types import BronzeRecord
 
-__all__ = ["UniProtFallbackPolicyHandler"]
+__all__ = ["UniProtFallbackPolicy"]
 
 
-class UniProtFallbackPolicyHandler:
+class UniProtFallbackPolicy:
     """Adapter-specific fallback hooks for UniProt fetch orchestration."""
 
     def __init__(

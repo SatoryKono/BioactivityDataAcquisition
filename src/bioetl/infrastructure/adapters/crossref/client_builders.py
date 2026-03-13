@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
-    SearchPaginatorHelper,
+    SearchPaginator,
 )
 from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
@@ -98,7 +98,7 @@ def _create_default_crossref_search_paginator(
     api_base: str,
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
-) -> SearchPaginatorHelper:
+) -> SearchPaginator:
     """Create default search paginator for non-DI call sites.
 
     Args:
@@ -111,9 +111,9 @@ def _create_default_crossref_search_paginator(
         request_collector: Collector for API request metadata.
 
     Returns:
-        SearchPaginatorHelper instance configured with the given transport and logging components.
+        SearchPaginator instance configured with the given transport and logging components.
     """
-    return SearchPaginatorHelper(
+    return SearchPaginator(
         http=http,
         logger=logger,
         metrics=metrics,
@@ -143,7 +143,7 @@ def _create_default_crossref_fetch_flow(
     *,
     logger: LoggerPort,
     batch_fetcher: DoiBatchProcessor,
-    search_paginator: SearchPaginatorHelper,
+    search_paginator: SearchPaginator,
     fallback_decorator: ComposableFallbackDecorator,
     batch_size: int,
     response_mapper: CrossRefResponseMapper,

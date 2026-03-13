@@ -43,7 +43,7 @@ FORBIDDEN_HELPER_CONSTRUCTORS = {
     "CrossRefQueryBuilder",
     "CrossRefResponseMapper",
     "DoiBatchProcessor",
-    "SearchPaginatorHelper",
+    "SearchPaginator",
     "CrossRefFetchFlow",
     # SemanticScholar provider-specific helpers
     "SemanticScholarTitleFallbackHandler",

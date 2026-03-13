@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio  # noqa: F401 - compatibility monkeypatch target in tests
 from collections.abc import Mapping
-from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
@@ -22,13 +22,26 @@ from bioetl.infrastructure.storage.gold_writer_io_mixin import GoldWriterIOMixin
 from bioetl.infrastructure.storage.gold_writer_metadata_mixin import (
     GoldWriterMetadataMixin,
 )
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    GoldWritePostwriteContext as _GoldWritePostwriteContext,
+)
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    PreparedGoldWriteContext as _PreparedGoldWriteContext,
+)
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    post_write_gold as _post_write_gold_impl,
+)
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    prepare_gold_write as _prepare_write_gold_impl,
+)
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    set_gold_write_span_attributes as _set_write_span_attributes_impl,
+)
 from bioetl.infrastructure.storage.gold_writer_validation_mixin import (
     GoldWriterValidationMixin,
 )
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from pandera.polars import DataFrameSchema
 
     from bioetl.domain.ports import (
@@ -53,43 +66,16 @@ GOLD_WRITE_RETRY_ERRORS = (
 )
 
 
-@dataclass(frozen=True, slots=True)
-class _PreparedGoldWriteContext:
-    """Prepared pre-write state shared by Gold write phases."""
-
-    table_name: str
-    table_path: str
-    validated_mode: GoldWriteMode
-
-
-@dataclass(frozen=True, slots=True)
-class _GoldWritePostwriteContext:
-    """Post-write data passed through Gold audit and metadata stages."""
-
-    prepared: _PreparedGoldWriteContext
-    records: list[GoldRecord]
-    ingestion_ts: datetime | None
-    run_id: RunID | None
-    scd_config: ScdConfig | None
-    silver_refs: list[SilverWriteResult] | None
-    schema: DataFrameSchema
-
-
 def _normalize_scd_config(
     scd_config: ScdConfig,
     primary_keys: list[str] | None,
 ) -> ScdConfig:
-    """Return the already-normalized domain SCD config.
+    """Compatibility wrapper preserving canonical monkeypatch/import path."""
+    from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+        normalize_scd_config,
+    )
 
-    Args:
-        scd_config: Typed SCD configuration from the domain/application layers.
-        primary_keys: Unused compatibility parameter.
-
-    Returns:
-        The same typed ScdConfig instance.
-    """
-    del primary_keys
-    return scd_config
+    return normalize_scd_config(scd_config, primary_keys)
 
 
 class GoldWriter(
@@ -250,15 +236,14 @@ class GoldWriter(
         Returns:
             Prepared write context with validated mode and resolved target path.
         """
-        validated_mode = self._validate_write_mode(mode)
-        self._validate_records(records)
-        self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
-        self._validate_schema_strict(schema)
-        await self._validate_records_against_schema(records, schema)
-        return _PreparedGoldWriteContext(
+        return await _prepare_write_gold_impl(
+            self,
             table_name=table_name,
-            table_path=self._resolve_table_path(table_name),
-            validated_mode=validated_mode,
+            records=records,
+            mode=mode,
+            schema=schema,
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
         )
 
     async def _post_write_gold(
@@ -271,27 +256,7 @@ class GoldWriter(
             context: Named post-write context containing prepared path/mode,
                 records, lineage inputs, and schema for metadata emission.
         """
-        prepared = context.prepared
-        if self._audit:
-            await self._log_gold_audit(
-                table_name=prepared.table_name,
-                records=context.records,
-                mode=prepared.validated_mode,
-                ingestion_ts=context.ingestion_ts,
-                run_id=context.run_id,
-            )
-
-        await self._write_gold_metadata(
-            table_path=prepared.table_path,
-            table_name=prepared.table_name,
-            records=context.records,
-            mode=prepared.validated_mode,
-            scd_config=context.scd_config,
-            ingestion_ts=context.ingestion_ts,
-            run_id=context.run_id,
-            silver_refs=context.silver_refs,
-            gold_schema=context.schema,
-        )
+        await _post_write_gold_impl(self, context)
 
     @staticmethod
     def _set_write_span_attributes(
@@ -308,6 +273,4 @@ class GoldWriter(
             mode: Write mode string set as span attribute.
             record_count: Number of records being written set as span attribute.
         """
-        span.set_attribute("table_name", table_name)
-        span.set_attribute("mode", mode)
-        span.set_attribute("record_count", record_count)
+        _set_write_span_attributes_impl(span, table_name, mode, record_count)

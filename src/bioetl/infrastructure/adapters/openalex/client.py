@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
-OPENALEX_API_BASE = "https://api.openalex.org"
+from bioetl.infrastructure.adapters.openalex._constants import OPENALEX_API_BASE
 
 OPENALEX_RUNTIME_ERRORS = (
     BioETLError,

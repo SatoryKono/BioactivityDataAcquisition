@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
-    SearchPaginatorHelper,
+    SearchPaginator,
 )
 from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_batch_fetcher,
@@ -51,7 +51,7 @@ class CrossRefRuntimeServices:
     query_builder: CrossRefQueryBuilder
     response_mapper: CrossRefResponseMapper
     batch_fetcher: DoiBatchProcessor
-    search_paginator: SearchPaginatorHelper
+    search_paginator: SearchPaginator
     fallback_handler: CrossRefTitleFallbackHandler
 
 
@@ -60,7 +60,7 @@ def build_crossref_runtime_services(
     query_builder: CrossRefQueryBuilder | None,
     response_mapper: CrossRefResponseMapper | None,
     batch_fetcher: DoiBatchProcessor | None,
-    search_paginator: SearchPaginatorHelper | None,
+    search_paginator: SearchPaginator | None,
     title_fallback_handler: CrossRefTitleFallbackHandler | None,
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
@@ -132,7 +132,7 @@ def build_crossref_fetch_flow(
     fetch_flow: CrossRefFetchFlow | None,
     logger: LoggerPort,
     batch_fetcher: DoiBatchProcessor,
-    search_paginator: SearchPaginatorHelper,
+    search_paginator: SearchPaginator,
     fallback_decorator: ComposableFallbackDecorator,
     batch_size: int,
     response_mapper: CrossRefResponseMapper,

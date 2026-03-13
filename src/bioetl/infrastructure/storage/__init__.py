@@ -4,7 +4,7 @@ Implements RULES.md §2.1 - Medallion Architecture.
 
 This package provides:
 - Writers: BronzeWriter, SilverWriter, GoldWriter
-- Utilities: RetentionManager (VACUUM, optimize, time travel)
+- Utilities: RetentionPolicy (VACUUM, optimize, time travel)
 
 Naming Convention (unified with Medallion layers):
 - BronzeWriter - writes to Bronze layer (JSONL + zstd)
@@ -33,7 +33,7 @@ from bioetl.infrastructure.storage.bronze_write_result_helpers import (
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.storage.retention_manager import RetentionManager
+from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = [
@@ -42,7 +42,7 @@ __all__ = [
     "DeltaReader",
     "GoldWriter",
     "MergeConflictError",
-    "RetentionManager",
+    "RetentionPolicy",
     "SchemaViolationError",
     "SilverWriter",
     "StorageError",

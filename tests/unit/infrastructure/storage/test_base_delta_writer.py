@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pyarrow as pa
 import pytest
+from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
@@ -346,3 +347,38 @@ class TestBaseDeltaWriterAsync:
         """Test _get_table_schema returns None for nonexistent table."""
         result = await writer._get_table_schema("nonexistent_table")
         assert result is None
+
+    async def test_read_table_raises_file_not_found_for_missing_table(
+        self,
+        writer: BaseDeltaWriter,
+    ) -> None:
+        """Test read_table raises FileNotFoundError when table is missing."""
+        with patch(
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+            side_effect=DeltaTableNotFoundError("Not found"),
+        ):
+            with pytest.raises(FileNotFoundError, match="missing_table"):
+                await writer.read_table("missing_table")
+
+    async def test_read_table_returns_pylist_records(
+        self,
+        writer: BaseDeltaWriter,
+    ) -> None:
+        """Test read_table returns record dictionaries from the shared loader path."""
+        expected_records = [{"id": "1", "name": "test"}]
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = expected_records
+
+        mock_delta_table = MagicMock()
+        mock_delta_table.to_pyarrow_table.return_value = mock_arrow_table
+
+        with patch(
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+            return_value=mock_delta_table,
+        ):
+            result = await writer.read_table("existing_table", columns=["id", "name"])
+
+        assert result == expected_records
+        mock_delta_table.to_pyarrow_table.assert_called_once_with(
+            columns=["id", "name"]
+        )

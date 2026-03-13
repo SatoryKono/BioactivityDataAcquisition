@@ -69,7 +69,7 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
             metadata: Optional key-value metadata to attach to the batch.
 
         Returns:
-            New Batch instance with generated BatchID and CREATED status.
+            New Batch instance with generated BatchID and OPEN status.
         """
         from uuid import uuid4
 

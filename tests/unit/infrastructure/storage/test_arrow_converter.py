@@ -123,6 +123,18 @@ class TestArrowDataConverterConvertRecords:
         assert emails[0] is None
         assert emails[1] == "bob@example.com"
 
+    def test_convert_records_can_preserve_original_column_order(self) -> None:
+        """Raw conversion should skip canonical ordering when explicitly requested."""
+        converter = ArrowDataConverter()
+        records = [{"name": "Alice", "_run_id": "run-1", "id": 1}]
+
+        result = converter.convert_records_to_arrow(
+            records,
+            apply_column_order=False,
+        )
+
+        assert result.column_names == ["name", "_run_id", "id"]
+
     def test_convert_empty_records(self) -> None:
         """Should handle empty record list."""
         converter = ArrowDataConverter()
@@ -190,6 +202,65 @@ class TestArrowDataConverterConvertRecords:
         )
 
         assert result.column("id").to_pylist() == [1, 2, 3]
+
+    def test_convert_records_with_schema_preserves_schema_order_by_default(self) -> None:
+        """Schema-aware conversion should keep schema order unless ordering is requested."""
+        converter = ArrowDataConverter()
+        schema = pa.schema(
+            [
+                pa.field("payload", pa.string()),
+                pa.field("id", pa.int64()),
+            ]
+        )
+
+        result = converter.convert_records_to_arrow_with_schema(
+            [{"id": 1, "payload": {"name": "a"}}],
+            schema,
+        )
+
+        assert result.column_names == ["payload", "id"]
+
+    def test_convert_records_with_schema_applies_canonical_order_when_requested(
+        self,
+    ) -> None:
+        """Schema-aware conversion should support Silver-style canonical ordering."""
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
+        converter = ArrowDataConverter()
+        schema = pa.schema(
+            [
+                pa.field("name", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("id", pa.int64()),
+            ]
+        )
+
+        result = converter.convert_records_to_arrow_with_schema(
+            [{"id": 1, "name": "Alice", "_run_id": "run-1"}],
+            schema,
+            apply_column_order=True,
+        )
+
+        assert result.column_names == canonical_column_order(["name", "_run_id", "id"])
+
+    def test_convert_records_with_schema_applies_explicit_column_order(self) -> None:
+        """Schema-aware conversion should honor explicit column ordering."""
+        converter = ArrowDataConverter()
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("name", pa.string()),
+                pa.field("_run_id", pa.string()),
+            ]
+        )
+
+        result = converter.convert_records_to_arrow_with_schema(
+            [{"id": 1, "name": "Alice", "_run_id": "run-1"}],
+            schema,
+            column_order=["name", "id"],
+        )
+
+        assert result.column_names == ["name", "id", "_run_id"]
 
     def test_convert_records_with_schema_logs_warning_when_keys_missing(self) -> None:
         """Schema-aware conversion should preserve missing-key warning behavior."""

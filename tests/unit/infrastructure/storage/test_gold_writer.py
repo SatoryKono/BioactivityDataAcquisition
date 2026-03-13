@@ -10,8 +10,11 @@ import pytest
 from deltalake.exceptions import TableNotFoundError
 from pandera.pandas import Column, DataFrameSchema
 
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    normalize_scd_config,
+    set_gold_write_span_attributes,
+)
 
 
 @pytest.fixture
@@ -117,6 +120,29 @@ class TestGoldWriterInit:
         """Test initialization without CSV exporter."""
         writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger)
         assert writer.csv_exporter is None
+
+
+@pytest.mark.unit
+class TestGoldWriterPipelineHelpers:
+    """Tests for extracted Gold write pipeline helpers."""
+
+    def test_normalize_scd_config_returns_same_instance(self):
+        """Normalization helper should preserve typed ScdConfig instances."""
+        scd_config = MagicMock()
+
+        assert normalize_scd_config(scd_config, primary_keys=["entity_id"]) is scd_config
+
+    def test_set_gold_write_span_attributes_sets_standard_fields(self):
+        """Span helper should write the standard Gold observability attributes."""
+        span = MagicMock()
+
+        set_gold_write_span_attributes(span, "test.table", "append", 2)
+
+        assert span.set_attribute.call_args_list == [
+            (("table_name", "test.table"), {}),
+            (("mode", "append"), {}),
+            (("record_count", 2), {}),
+        ]
 
 
 @pytest.mark.unit
