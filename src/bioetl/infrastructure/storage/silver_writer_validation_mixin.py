@@ -45,6 +45,20 @@ class _ValidatedSilverWriteContext:
     arrow_data: pa.Table
 
 
+@dataclass(frozen=True, slots=True)
+class _SilverWritePreparationRequest:
+    """Normalized request payload for Silver validation and Arrow preparation."""
+
+    table_name: str
+    records: list[BronzeRecord]
+    primary_keys: list[str]
+    schema: pa.Schema
+    mode: str
+    column_order: list[str] | None
+    partition_cols: list[str] | None
+    key_nullability_rules: list[KeyNullabilityRule] | None
+
+
 def _validate_write_mode_impl(mode: str) -> SilverWriteMode:
     """Validate and convert write mode string to enum."""
     try:
@@ -154,34 +168,29 @@ class SilverWriterValidationMixin:
 
     def _sync_validate_and_build_arrow(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        schema: pa.Schema,
-        mode: str,
-        column_order: list[str] | None,
-        partition_cols: list[str] | None,
-        key_nullability_rules: list[KeyNullabilityRule] | None,
+        request: _SilverWritePreparationRequest,
     ) -> _ValidatedSilverWriteContext:
         """Run synchronous Silver validation steps and build Arrow payload."""
-        records = self._deduplicate_by_primary_keys(records, primary_keys)
-        validated_mode = self._validate_write_mode(mode)
-        self._enforce_write_policy(validated_mode, table_name)
-        self._validate_records(records, table_name, schema)
+        records = self._deduplicate_by_primary_keys(
+            request.records,
+            request.primary_keys,
+        )
+        validated_mode = self._validate_write_mode(request.mode)
+        self._enforce_write_policy(validated_mode, request.table_name)
+        self._validate_records(records, request.table_name, request.schema)
         self._validate_key_nullability(
             records,
-            primary_keys,
-            partition_cols,
-            key_nullability_rules,
-            table_name,
+            request.primary_keys,
+            request.partition_cols,
+            request.key_nullability_rules,
+            request.table_name,
         )
-        self._validate_silver_pandera(records, table_name)
+        self._validate_silver_pandera(records, request.table_name)
         arrow_data = self._prepare_arrow_data(
             records,
-            schema,
-            primary_keys,
-            column_order=column_order,
+            request.schema,
+            request.primary_keys,
+            column_order=request.column_order,
         )
         return _ValidatedSilverWriteContext(
             records=records,
@@ -353,8 +362,7 @@ class SilverWriterValidationMixin:
         key_nullability_rules: list[KeyNullabilityRule] | None,
     ) -> _PreparedSilverWritePayload:
         """Run full validation chain and prepare Arrow data for write."""
-        validated = await asyncio.to_thread(
-            self._sync_validate_and_build_arrow,
+        request = _SilverWritePreparationRequest(
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
@@ -363,6 +371,10 @@ class SilverWriterValidationMixin:
             column_order=column_order,
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
+        )
+        validated = await asyncio.to_thread(
+            self._sync_validate_and_build_arrow,
+            request,
         )
         await self._check_schema_drift(
             table_name,

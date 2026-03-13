@@ -18,7 +18,7 @@ import json
 from typing import TYPE_CHECKING
 
 import pandas as pd
-import pandera as pa
+import pandera.pandas as pa
 from pandera.extensions import register_check_method  # type: ignore[attr-defined]
 
 if TYPE_CHECKING:

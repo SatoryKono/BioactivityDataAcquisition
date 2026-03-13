@@ -476,6 +476,39 @@ class TestWriteGoldMergedMetadata:
         coordinator.create_gold_metadata.assert_called_once()
         mixin._metadata_writer.write_gold_metadata.assert_called_once()
 
+    @pytest.mark.asyncio
+    async def test_prepares_merged_metadata_context_before_write(self) -> None:
+        """Merged Gold metadata path should resolve provider/entity before persist."""
+        metadata = MagicMock()
+        coordinator = MagicMock()
+        coordinator.create_gold_metadata = MagicMock(return_value=metadata)
+        mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
+        mixin._build_gold_merged_metadata_input = MagicMock(  # type: ignore[method-assign]
+            return_value=MagicMock()
+        )
+        mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
+
+        await mixin._write_gold_merged_metadata(
+            table_path="gold/composite/publication",
+            table_name="composite.publication",
+            records=[{"id": 1}],
+            primary_keys=["id"],
+        )
+
+        mixin._build_gold_merged_metadata_input.assert_called_once_with(
+            table_path="gold/composite/publication",
+            table_name="composite.publication",
+            records=[{"id": 1}],
+            schema=None,
+        )
+        mixin._write_gold_metadata_file.assert_awaited_once_with(
+            table_path="gold/composite/publication",
+            metadata=metadata,
+            table_name="composite.publication",
+            provider_name="composite",
+            entity_name="publication",
+        )
+
 
 @pytest.mark.unit
 class TestCreateGoldMetadataPayload:

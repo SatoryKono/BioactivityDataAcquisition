@@ -7,13 +7,15 @@ __all__ = ["SilverWriterMetadataMixin"]
 import asyncio
 import time
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Protocol
 
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     AuditEntry,
     AuditLayer,
@@ -38,9 +40,143 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
+@dataclass(frozen=True, slots=True)
+class _SilverMetadataWriteRequest:
+    """Normalized request payload for one standard Silver metadata write."""
+
+    table_path: str
+    table_name: str
+    records: list[BronzeRecord]
+    primary_keys: list[str]
+    mode: SilverWriteMode
+    bronze_refs: list[BronzeWriteResult] | None = None
+    dq_metrics: BatchDQMetrics | None = None
+    dq_report_path: str | None = None
+    partition_by: list[str] | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    version_after: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _SilverMergedMetadataWriteRequest:
+    """Normalized request payload for one merged Silver metadata write."""
+
+    table_path: str
+    table_name: str
+    records: list[BronzeRecord]
+    primary_keys: list[str]
+    run_id: str | None = None
+    sources_used: list[str] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedSilverMetadataWrite:
+    """Prepared Silver metadata context carried into sidecar persistence."""
+
+    request: _SilverMetadataWriteRequest | _SilverMergedMetadataWriteRequest
+    provider_name: str
+    entity_name: str
+    metadata: SilverMetadata
+
+
+class _SilverMetadataWriteHostProtocol(Protocol):
+    """Typed host contract for Silver metadata sidecar stages."""
+
+    logger: LoggerPort
+    _metadata_coordinator: MetadataCoordinatorPort | None
+    _metadata_writer: MetadataWriterPort
+    _flat_structure: bool
+    _transform_version: str | None
+    _transform_steps: tuple[str, ...]
+
+    async def _get_delta_version(self, table_path: str) -> int | None: ...
+
+
 def _read_delta_version(table_path: str) -> int:
     """Read the current Delta table version synchronously."""
     return DeltaTable(table_path).version()
+
+
+async def _prepare_silver_metadata_write(
+    host: _SilverMetadataWriteHostProtocol,
+    request: _SilverMetadataWriteRequest,
+) -> _PreparedSilverMetadataWrite:
+    """Resolve provider/entity and build standard Silver metadata payload."""
+    provider_name, entity_name = _parse_table_name(request.table_name)
+    resolved_version = (
+        request.version_after
+        if request.version_after is not None
+        else await host._get_delta_version(request.table_path)
+    )
+    assert host._metadata_coordinator is not None
+    silver_input = SilverMetadataInput(
+        table_path=request.table_path,
+        records=request.records,
+        primary_keys=request.primary_keys,
+        mode=request.mode,
+        bronze_refs=request.bronze_refs,
+        dq_metrics=request.dq_metrics,
+        version_after=resolved_version,
+        transform_version=host._transform_version,
+        transform_steps=host._transform_steps,
+        dq_report_path=request.dq_report_path,
+        partition_by=request.partition_by,
+        started_at=request.started_at,
+        completed_at=request.completed_at,
+    )
+    metadata = host._metadata_coordinator.create_silver_metadata(silver_input)
+    return _PreparedSilverMetadataWrite(
+        request=request,
+        provider_name=provider_name,
+        entity_name=entity_name,
+        metadata=metadata,
+    )
+
+
+async def _prepare_silver_merged_metadata_write(
+    host: _SilverMetadataWriteHostProtocol,
+    request: _SilverMergedMetadataWriteRequest,
+) -> _PreparedSilverMetadataWrite:
+    """Resolve provider/entity and build merged Silver metadata payload."""
+    from bioetl.infrastructure.storage.metadata_builder import SilverMetadataBuilder
+
+    provider_name, entity_name = _parse_table_name(request.table_name)
+    version_after = await host._get_delta_version(request.table_path)
+    builder = SilverMetadataBuilder(
+        transform_version=host._transform_version,
+        transform_steps=host._transform_steps,
+    )
+    metadata = builder.build_merged_metadata(
+        table_path=request.table_path,
+        table_name=request.table_name,
+        records=request.records,
+        primary_keys=request.primary_keys,
+        run_id=request.run_id,
+        sources_used=request.sources_used,
+        version_after=version_after,
+    )
+    return _PreparedSilverMetadataWrite(
+        request=request,
+        provider_name=provider_name,
+        entity_name=entity_name,
+        metadata=metadata,
+    )
+
+
+async def _persist_silver_metadata_write(
+    host: _SilverMetadataWriteHostProtocol,
+    prepared: _PreparedSilverMetadataWrite,
+) -> None:
+    """Persist one prepared Silver metadata sidecar."""
+    await host._metadata_writer.write_silver_metadata(
+        prepared.request.table_path,
+        prepared.metadata,
+        table_name=prepared.request.table_name,
+        flat_structure=host._flat_structure,
+        provider=prepared.provider_name,
+        entity=prepared.entity_name,
+    )
 
 
 class SilverWriterMetadataMixin:
@@ -157,7 +293,6 @@ class SilverWriterMetadataMixin:
         """Write Silver layer metadata sidecar file."""
         if not records:
             return
-        provider_name, entity_name = _parse_table_name(table_name)
         if self._metadata_coordinator is None:
             self.logger.warning(
                 "silver_metadata_skipped",
@@ -165,35 +300,24 @@ class SilverWriterMetadataMixin:
                 table_path=table_path,
             )
             return
-        resolved_version = (
-            version_after
-            if version_after is not None
-            else await self._get_delta_version(table_path)
+        prepared = await _prepare_silver_metadata_write(
+            self,
+            _SilverMetadataWriteRequest(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                mode=mode,
+                bronze_refs=bronze_refs,
+                dq_metrics=dq_metrics,
+                dq_report_path=dq_report_path,
+                partition_by=partition_by,
+                started_at=started_at,
+                completed_at=completed_at,
+                version_after=version_after,
+            ),
         )
-        silver_input = SilverMetadataInput(
-            table_path=table_path,
-            records=records,
-            primary_keys=primary_keys,
-            mode=mode,
-            bronze_refs=bronze_refs,
-            dq_metrics=dq_metrics,
-            version_after=resolved_version,
-            transform_version=self._transform_version,
-            transform_steps=self._transform_steps,
-            dq_report_path=dq_report_path,
-            partition_by=partition_by,
-            started_at=started_at,
-            completed_at=completed_at,
-        )
-        metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
-        await self._metadata_writer.write_silver_metadata(
-            table_path,
-            metadata,
-            table_name=table_name,
-            flat_structure=self._flat_structure,
-            provider=provider_name,
-            entity=entity_name,
-        )
+        await _persist_silver_metadata_write(self, prepared)
 
     async def _write_silver_merged_metadata(
         self,
@@ -207,11 +331,6 @@ class SilverWriterMetadataMixin:
         """Write Silver metadata sidecar for merged composite data."""
         if not records:
             return
-        from bioetl.infrastructure.storage.metadata_builder import (
-            SilverMetadataBuilder,
-        )
-
-        provider_name, entity_name = _parse_table_name(table_name)
         if self._metadata_coordinator is None:
             self.logger.debug(
                 "silver_merged_metadata_skipped",
@@ -219,28 +338,18 @@ class SilverWriterMetadataMixin:
                 table_path=table_path,
             )
             return
-        version_after = await self._get_delta_version(table_path)
-        builder = SilverMetadataBuilder(
-            transform_version=self._transform_version,
-            transform_steps=self._transform_steps,
+        prepared = await _prepare_silver_merged_metadata_write(
+            self,
+            _SilverMergedMetadataWriteRequest(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                run_id=run_id,
+                sources_used=sources_used,
+            ),
         )
-        metadata = builder.build_merged_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            run_id=run_id,
-            sources_used=sources_used,
-            version_after=version_after,
-        )
-        await self._metadata_writer.write_silver_metadata(
-            table_path,
-            metadata,
-            table_name=table_name,
-            flat_structure=self._flat_structure,
-            provider=provider_name,
-            entity=entity_name,
-        )
+        await _persist_silver_metadata_write(self, prepared)
 
     async def _maybe_log_silver_audit(
         self,

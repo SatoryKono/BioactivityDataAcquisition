@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -15,7 +15,6 @@ from bioetl.application.composite.runner_pkg.runner_support_mixin import (
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
-    SeedResult,
 )
 from bioetl.domain.exceptions import (
     BioETLError,

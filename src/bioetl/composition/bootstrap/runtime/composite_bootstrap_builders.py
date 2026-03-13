@@ -6,6 +6,7 @@ as a thin compatibility facade with stable patch points.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
@@ -59,6 +60,17 @@ __all__ = [
 ]
 
 
+@dataclass(frozen=True, slots=True)
+class CompositeRuntimeBasics:
+    """Named runtime-basics handoff used by the composite bootstrap facade."""
+
+    run_id: str
+    settings: Settings
+    logger: LoggerPort
+    storage: object
+    lock: LockPort
+
+
 def bootstrap_runtime_basics(
     *,
     config: CompositeConfig,
@@ -68,7 +80,7 @@ def bootstrap_runtime_basics(
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
-) -> tuple[str, Settings, LoggerPort, object, LockPort]:
+ ) -> CompositeRuntimeBasics:
     """Build base runtime dependencies shared across composite bootstrap.
 
     Args:
@@ -82,9 +94,9 @@ def bootstrap_runtime_basics(
         uuid_factory: Callable returning a new UUID (injectable for testing).
 
     Returns:
-        Tuple of (run_id, settings, logger, storage, lock) for the composite run.
+        Named runtime-basics handoff for the composite run.
     """
-    return _bootstrap_runtime_basics_impl(
+    run_id_value, settings, logger, storage, lock = _bootstrap_runtime_basics_impl(
         config=config,
         run_id=run_id,
         settings_provider=settings_provider,
@@ -92,6 +104,13 @@ def bootstrap_runtime_basics(
         storage_bootstrapper=storage_bootstrapper,
         lock_factory=lock_factory,
         uuid_factory=uuid_factory,
+    )
+    return CompositeRuntimeBasics(
+        run_id=run_id_value,
+        settings=settings,
+        logger=logger,
+        storage=storage,
+        lock=lock,
     )
 
 
@@ -142,10 +161,7 @@ def build_support_services(
     *,
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
-    settings: Settings,
-    logger: LoggerPort,
-    storage: object,
-    run_id: str,
+    runtime_basics: CompositeRuntimeBasics,
     support_services_factory_cls: type[CompositeSupportServicesFactory],
     resolve_gold_schema_fn: Callable[[str], type | None],
     load_field_group_registry_fn: Callable[
@@ -158,10 +174,8 @@ def build_support_services(
     Args:
         config: CompositeConfig for this composite run.
         runtime: Runtime options (resume, concurrency, etc.).
-        settings: Global settings supplying data_dir and feature flags.
-        logger: Structured logger forwarded to all support services.
-        storage: Storage adapter injected from the composition root.
-        run_id: UUID string identifying this run for checkpoints.
+        runtime_basics: Named runtime-basics handoff containing settings, logger,
+            storage, and run_id for this bootstrap cycle.
         support_services_factory_cls: Factory class used to build the bundle.
         resolve_gold_schema_fn: Callable returning the Gold Pandera schema for
             a composite pipeline name, or None.
@@ -175,10 +189,10 @@ def build_support_services(
     return _build_support_services_impl(
         config=config,
         runtime=runtime,
-        settings=settings,
-        logger=logger,
-        storage=storage,
-        run_id=run_id,
+        settings=runtime_basics.settings,
+        logger=runtime_basics.logger,
+        storage=runtime_basics.storage,
+        run_id=runtime_basics.run_id,
         support_services_factory_cls=support_services_factory_cls,
         resolve_gold_schema_fn=resolve_gold_schema_fn,
         load_field_group_registry_fn=load_field_group_registry_fn,

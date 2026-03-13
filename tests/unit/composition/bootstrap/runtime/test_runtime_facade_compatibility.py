@@ -80,6 +80,18 @@ def test_composite_runtime_signatures_stable() -> None:
 
 
 @pytest.mark.unit
+def test_composite_runtime_bootstrap_runner_stays_plan_based() -> None:
+    """Public composite bootstrap should stay on the declarative plan path."""
+    source = inspect.getsource(composite_runtime.bootstrap_composite_runner)
+    assert "_build_composite_bootstrap_plan" in source
+    assert "_create_composite_runner_from_plan" in source
+    assert "_bootstrap_runtime_basics" not in source
+    assert "_build_runner_factories" not in source
+    assert "_build_support_services" not in source
+    assert "_create_composite_runner(" not in source
+
+
+@pytest.mark.unit
 def test_observability_runtime_public_exports_stable() -> None:
     """Observability runtime facade should preserve stable public __all__."""
     assert observability_runtime.__all__ == [

@@ -327,3 +327,63 @@ def test_bootstrap_composite_runner_delegates_final_assembly_to_plan_helper() ->
         runtime=runtime,
         plan=plan,
     )
+
+
+@pytest.mark.unit
+def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> None:
+    config = _make_config(cross_validation_enabled=False)
+    runtime = _make_runtime()
+    runtime_basics = SimpleNamespace(
+        run_id="00000000-0000-0000-0000-000000000005",
+        settings=MagicMock(),
+        logger=MagicMock(),
+        storage=MagicMock(),
+        lock=MagicMock(),
+    )
+    seed_runner_factory = MagicMock()
+    dependencies_runner_factory = MagicMock()
+    enricher_runner_factory = MagicMock()
+    support_services = MagicMock()
+
+    with (
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._bootstrap_runtime_basics"
+        ) as mock_runtime_basics,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._build_runner_factories"
+        ) as mock_build_runner_factories,
+        patch(
+            "bioetl.composition.bootstrap.runtime.composite._build_support_services"
+        ) as mock_build_support_services,
+    ):
+        mock_runtime_basics.return_value = runtime_basics
+        mock_build_runner_factories.return_value = (
+            seed_runner_factory,
+            dependencies_runner_factory,
+            enricher_runner_factory,
+        )
+        mock_build_support_services.return_value = support_services
+
+        plan = composite_runtime._build_composite_bootstrap_plan(
+            config=config,
+            runtime=runtime,
+            run_id="00000000-0000-0000-0000-000000000005",
+        )
+
+    assert plan.run_id == runtime_basics.run_id
+    assert plan.logger is runtime_basics.logger
+    assert plan.lock is runtime_basics.lock
+    assert plan.seed_runner_factory is seed_runner_factory
+    assert plan.dependencies_runner_factory is dependencies_runner_factory
+    assert plan.enricher_runner_factory is enricher_runner_factory
+    assert plan.support_services is support_services
+    mock_build_runner_factories.assert_called_once_with(
+        config=config,
+        runtime=runtime,
+        logger=runtime_basics.logger,
+    )
+    mock_build_support_services.assert_called_once_with(
+        config=config,
+        runtime=runtime,
+        runtime_basics=runtime_basics,
+    )

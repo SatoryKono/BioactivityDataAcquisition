@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
@@ -30,6 +30,31 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.result import DependencyResult, MergeResult
     from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
+
+class _CompositeRunnerSupportHostProtocol(Protocol):
+    _config: CompositeConfig
+    _runtime: CompositeRuntimeConfig
+    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
+    _checkpoint_manager: CompositeCheckpointService
+    _logger: LoggerPort
+    _run_id_str: str
+    _started_at: datetime | None
+    _preflight_validator: CompositePreflightValidationService | None
+    _fsm: FSMStateHelperService
+
+    def _get_preflight_skip_reason(self) -> str | None: ...
+
+    def _should_run_enricher(
+        self,
+        enricher: EnricherConfig,
+        state: CompositeCheckpointState,
+    ) -> bool: ...
+
+    def _get_required_enricher_failure(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> str | None: ...
+
 __all__ = ["CompositeRunnerSupportMixin"]
 
 
@@ -47,7 +72,7 @@ class CompositeRunnerSupportMixin:
     _fsm: FSMStateHelperService
 
     def _build_composite_result(
-        self,
+        self: _CompositeRunnerSupportHostProtocol,
         seed_result: SeedResult,
         dependency_results: dict[str, DependencyResult],
         enrichment_results: dict[str, EnrichmentResult],
@@ -97,7 +122,9 @@ class CompositeRunnerSupportMixin:
             _required_dependencies=frozenset(self._config.required_dependencies),
         )
 
-    def _validate_config_consistency(self) -> None:
+    def _validate_config_consistency(
+        self: _CompositeRunnerSupportHostProtocol,
+    ) -> None:
         """Validate configuration consistency and log anomalies."""
         expected_required = frozenset(
             enricher.pipeline
@@ -123,7 +150,9 @@ class CompositeRunnerSupportMixin:
                 note="Pipeline will succeed even if all enrichers fail",
             )
 
-    def _run_preflight_validation(self) -> None:
+    def _run_preflight_validation(
+        self: _CompositeRunnerSupportHostProtocol,
+    ) -> None:
         """Run preflight validation for field_priorities configuration."""
         skip_reason = self._get_preflight_skip_reason()
         if skip_reason is not None:
@@ -158,7 +187,9 @@ class CompositeRunnerSupportMixin:
             warnings=len(result.warnings),
         )
 
-    def _get_preflight_skip_reason(self) -> str | None:
+    def _get_preflight_skip_reason(
+        self: _CompositeRunnerSupportHostProtocol,
+    ) -> str | None:
         """Return skip reason for preflight validation when it should not run."""
         if self._preflight_validator is None:
             return "preflight_validator not configured"
@@ -167,7 +198,7 @@ class CompositeRunnerSupportMixin:
         return None
 
     async def _save_checkpoint_safe(
-        self,
+        self: _CompositeRunnerSupportHostProtocol,
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:
@@ -204,7 +235,7 @@ class CompositeRunnerSupportMixin:
             )
             return False
 
-    async def _run_seed(self) -> SeedResult:
+    async def _run_seed(self: _CompositeRunnerSupportHostProtocol) -> SeedResult:
         """Run the seed pipeline."""
         self._logger.info(
             "Running seed pipeline",
@@ -232,7 +263,7 @@ class CompositeRunnerSupportMixin:
         )
 
     def _get_enrichers_to_run(
-        self,
+        self: _CompositeRunnerSupportHostProtocol,
         state: CompositeCheckpointState,
     ) -> list[EnricherConfig]:
         """Determine which enrichers should be run.
@@ -248,7 +279,7 @@ class CompositeRunnerSupportMixin:
         ]
 
     def _should_run_enricher(
-        self,
+        self: _CompositeRunnerSupportHostProtocol,
         enricher: EnricherConfig,
         state: CompositeCheckpointState,
     ) -> bool:
@@ -268,7 +299,7 @@ class CompositeRunnerSupportMixin:
         )
 
     def _check_required_enrichers(
-        self,
+        self: _CompositeRunnerSupportHostProtocol,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:
         """Check that all required enrichers succeeded."""
@@ -277,7 +308,7 @@ class CompositeRunnerSupportMixin:
             raise InvalidStateError(failure)
 
     def _get_required_enricher_failure(
-        self,
+        self: _CompositeRunnerSupportHostProtocol,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> str | None:
         """Return failure reason for required enricher validation, if any."""

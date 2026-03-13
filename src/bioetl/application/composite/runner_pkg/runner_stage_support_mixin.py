@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
@@ -30,6 +30,64 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
+    class _CompositeRunnerStageSupportHostProtocol(Protocol):
+        _config: CompositeConfig
+        _runtime: CompositeRuntimeConfig
+        _logger: LoggerPort
+        _run_id_str: str
+        _fsm: FSMStateHelperService
+        _checkpoint_manager: CompositeCheckpointService
+        _dependency_coordinator: DependencyCoordinatorService | None
+        _dependencies_runner_factory: (
+            Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
+        )
+        _coordinator: EnrichmentCoordinatorService
+        _enricher_runner_factory: Callable[
+            [str, pl.DataFrame], ExecutionMetricsRunnerPort
+        ]
+
+        async def _save_checkpoint_safe(
+            self,
+            state: CompositeCheckpointState,
+            operation: str,
+        ) -> bool: ...
+
+        async def _run_seed(self) -> SeedResult: ...
+
+        def _get_enrichers_to_run(
+            self,
+            state: CompositeCheckpointState,
+        ) -> list[EnricherConfig]: ...
+
+        def _check_required_enrichers(
+            self,
+            enrichment_results: dict[str, EnrichmentResult],
+        ) -> None: ...
+
+        async def _call_save_checkpoint_safe(
+            self,
+            state: CompositeCheckpointState,
+            operation: str,
+        ) -> bool: ...
+
+        def _transition_state_with_fsm_log(
+            self,
+            state: CompositeCheckpointState,
+            to_state: CompositePipelineState,
+            *,
+            stage: str,
+            validate: bool = True,
+            **transition_kwargs: object,
+        ) -> CompositeCheckpointState: ...
+
+        async def _persist_failed_state(
+            self,
+            state: CompositeCheckpointState,
+            *,
+            stage: str,
+            error: str,
+        ) -> CompositeCheckpointState: ...
+
 
 class _CompositeRunnerStageSupportMixin:
     """Shared helper calls and small guards for stage orchestration."""
@@ -48,54 +106,56 @@ class _CompositeRunnerStageSupportMixin:
     _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
 
     async def _save_checkpoint_safe(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:  # pragma: no cover - implemented by support mixin
         raise NotImplementedError
 
-    async def _run_seed(self) -> SeedResult:  # pragma: no cover - support mixin
+    async def _run_seed(
+        self: _CompositeRunnerStageSupportHostProtocol,
+    ) -> SeedResult:  # pragma: no cover - support mixin
         raise NotImplementedError
 
     def _get_enrichers_to_run(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
     ) -> list[EnricherConfig]:  # pragma: no cover - implemented by support mixin
         raise NotImplementedError
 
     def _check_required_enrichers(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:  # pragma: no cover - implemented by support mixin
         raise NotImplementedError
 
     async def _call_save_checkpoint_safe(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:
         """Invoke support-layer checkpoint save helper."""
         return await self._save_checkpoint_safe(state, operation)
 
-    async def _call_run_seed(self) -> SeedResult:
+    async def _call_run_seed(self: _CompositeRunnerStageSupportHostProtocol) -> SeedResult:
         """Invoke support-layer seed runner helper."""
         return await self._run_seed()
 
     def _call_get_enrichers_to_run(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
     ) -> list[EnricherConfig]:
         """Invoke support-layer enricher selection helper."""
         return self._get_enrichers_to_run(state)
 
     def _call_check_required_enrichers(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:
         """Invoke support-layer required-enricher validation helper."""
         self._check_required_enrichers(enrichment_results)
 
-    def _has_dependencies_configured(self) -> bool:
+    def _has_dependencies_configured(self: _CompositeRunnerStageSupportHostProtocol) -> bool:
         """Check if dependencies phase is configured and ready."""
         return bool(
             self._config.dependencies
@@ -104,7 +164,7 @@ class _CompositeRunnerStageSupportMixin:
         )
 
     def _find_required_failures(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         results: dict[str, DependencyResult],
     ) -> list[str]:
         """Find required dependencies that failed."""
@@ -118,7 +178,7 @@ class _CompositeRunnerStageSupportMixin:
         return failed
 
     def _transition_state_with_fsm_log(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
         to_state: CompositePipelineState,
         *,
@@ -144,7 +204,7 @@ class _CompositeRunnerStageSupportMixin:
         return next_state
 
     async def _persist_failed_state(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
         *,
         stage: str,
@@ -162,7 +222,7 @@ class _CompositeRunnerStageSupportMixin:
         return failed_state
 
     async def _start_seed_phase(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Transition checkpoint/FSM to SEED_RUNNING and persist checkpoint."""
@@ -180,7 +240,7 @@ class _CompositeRunnerStageSupportMixin:
         return running_state
 
     async def _complete_seed_phase(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
         seed_result: SeedResult,
     ) -> CompositeCheckpointState:
@@ -204,7 +264,7 @@ class _CompositeRunnerStageSupportMixin:
         return completed_state
 
     async def _handle_seed_phase_exception(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
         error: Exception,
     ) -> None:
@@ -226,7 +286,7 @@ class _CompositeRunnerStageSupportMixin:
         )
 
     async def _fail_required_dependencies(
-        self,
+        self: _CompositeRunnerStageSupportHostProtocol,
         state: CompositeCheckpointState,
         required_failed: list[str],
     ) -> None:
