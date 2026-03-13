@@ -141,7 +141,7 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 class EntitySchema(ETLRecordSchema):
     """Pandera schema for Provider Entity.
 
-    Aligned with RULES.md v5.23 and Provider API v2.0.
+    Aligned with RULES.md v5.24 and Provider API v2.0.
     """
 
     # Primary key

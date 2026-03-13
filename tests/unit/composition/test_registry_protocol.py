@@ -66,6 +66,18 @@ class TestPipelineRegistryUnifiedAPI:
         definition = self.registry.get("test_pipeline")
         assert definition.factory is mock_factory
 
+    def test_register_rejects_mismatched_key(self):
+        """register() should reject keys that drift from factory.pipeline_name."""
+        self.registry.clear()
+
+        mock_factory = MagicMock()
+        mock_factory.pipeline_name = "actual_pipeline"
+        mock_factory.silver_schema = None
+        mock_factory.gold_schema = MagicMock()
+
+        with pytest.raises(ValueError, match="does not match"):
+            self.registry.register("different_pipeline", mock_factory)
+
 
 class TestDataSourceRegistryUnifiedAPI:
     """Test that DataSourceRegistry has unified API methods."""

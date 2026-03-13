@@ -1,5 +1,5 @@
 # Assay Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.23*
+*Version: 1.0.0 | Aligned with RULES.md v5.24*
 
 ## Overview
 

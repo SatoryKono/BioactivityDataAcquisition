@@ -54,12 +54,17 @@ from bioetl.composition._services import (
     get_vacuum_service,
 )
 from bioetl.composition.bootstrap import (
+    bootstrap_composite_runner,
+    load_composite_config,
     load_pipeline_config,
     maybe_start_metrics_server,
 )
+from bioetl.composition.bootstrap.runtime.observability import start_metrics_server
 
 __all__ = [
     # Configuration
+    "bootstrap_composite_runner",
+    "load_composite_config",
     "load_pipeline_config",
     # Option classes (re-exported from application.services)
     "RunOptions",
@@ -100,6 +105,7 @@ __all__ = [
     "inspect_quarantine",
     "list_checkpoints",
     # Metrics server entrypoint
+    "start_metrics_server",
     "ensure_metrics_server_started",
     "maybe_start_metrics_server",
     "push_metrics_to_gateway",

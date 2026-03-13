@@ -1,6 +1,6 @@
 # Cleanup Policy
 
-*Синхронизировано с RULES.md v5.23 (2026-03-03)*
+*Синхронизировано с RULES.md v5.24 (2026-03-13)*
 
 This document defines deterministic cleanup rules and automation for removing caches, build artifacts, and temporary files.
 

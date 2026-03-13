@@ -1,6 +1,6 @@
 # Operations Documentation
 
-*Synced with RULES.md v5.23 (2026-02-24)*
+*Synced with RULES.md v5.24 (2026-02-24)*
 
 > Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, `MemoryLock`.
 

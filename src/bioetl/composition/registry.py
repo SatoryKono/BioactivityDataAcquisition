@@ -69,6 +69,21 @@ class PipelineRegistry:
         self._registry: dict[str, PipelineDefinition] = {}
         self._lock = threading.RLock()
 
+    def _build_definition(self, factory: PipelineFactoryPort) -> PipelineDefinition:
+        """Build the stored pipeline definition after schema validation."""
+        gold_schema = getattr(factory, "gold_schema", None)
+        if gold_schema is None:
+            raise ValueError(
+                f"Factory '{factory.pipeline_name}' must have gold_schema. "
+                "All Gold layer writes require schema validation."
+            )
+        return PipelineDefinition(
+            factory=factory,
+            silver_schema=factory.silver_schema,
+            gold_schema=gold_schema,
+            pandera_silver_schema=getattr(factory, "pandera_silver_schema", None),
+        )
+
     def register_factory(
         self,
         factory: PipelineFactoryPort,
@@ -84,25 +99,7 @@ class PipelineRegistry:
             ValueError: If factory does not have gold_schema attribute
             ValueError: If pipeline is already registered (prevents double registration)
         """
-        gold_schema = getattr(factory, "gold_schema", None)
-        if gold_schema is None:
-            raise ValueError(
-                f"Factory '{factory.pipeline_name}' must have gold_schema. "
-                "All Gold layer writes require schema validation."
-            )
-
-        with self._lock:
-            if factory.pipeline_name in self._registry:
-                raise ValueError(
-                    f"Pipeline already registered: {factory.pipeline_name}. "
-                    "Use a new registry instance or clear() for tests."
-                )
-            self._registry[factory.pipeline_name] = PipelineDefinition(
-                factory=factory,
-                silver_schema=factory.silver_schema,
-                gold_schema=gold_schema,
-                pandera_silver_schema=getattr(factory, "pandera_silver_schema", None),
-            )
+        self.register(factory.pipeline_name, factory)
 
     def get(self, pipeline_name: str) -> PipelineDefinition:
         """Get pipeline definition by name.
@@ -162,13 +159,13 @@ class PipelineRegistry:
 
         Raises:
             ValueError: If factory does not have gold_schema attribute
+            ValueError: If key does not match factory.pipeline_name
             ValueError: If pipeline is already registered
         """
-        gold_schema = getattr(value, "gold_schema", None)
-        if gold_schema is None:
+        if key != value.pipeline_name:
             raise ValueError(
-                f"Factory '{key}' must have gold_schema. "
-                "All Gold layer writes require schema validation."
+                f"Pipeline key '{key}' does not match "
+                f"factory.pipeline_name '{value.pipeline_name}'."
             )
         with self._lock:
             if key in self._registry:
@@ -176,12 +173,7 @@ class PipelineRegistry:
                     f"Pipeline already registered: {key}. "
                     "Use a new registry instance or clear() for tests."
                 )
-            self._registry[key] = PipelineDefinition(
-                factory=value,
-                silver_schema=value.silver_schema,
-                gold_schema=gold_schema,
-                pandera_silver_schema=getattr(value, "pandera_silver_schema", None),
-            )
+            self._registry[key] = self._build_definition(value)
 
     def list_keys(self) -> list[str]:
         """List all registered pipeline names (unified API).

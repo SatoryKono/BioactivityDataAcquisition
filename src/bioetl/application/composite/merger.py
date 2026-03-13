@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["MergeCollaborators", "MergeService"]
+__all__ = ["MergeCollaboratorGroup", "MergeService"]
 
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -50,7 +50,7 @@ def _path_to_table_name(path: str) -> str:
 
 
 @dataclass(frozen=True, slots=True)
-class MergeCollaborators:
+class MergeCollaboratorGroup:
     """Bundle of merge-time collaborators wired in composition."""
 
     deduplicator: EnricherDeduplicatorService
@@ -79,15 +79,15 @@ _LEGACY_COLLABORATOR_KEYS = frozenset(
 
 def _build_merge_collaborators(
     *,
-    collaborators: MergeCollaborators | None,
+    collaborators: MergeCollaboratorGroup | None,
     legacy_collaborators: dict[str, Any],  # Any: phased compatibility bridge
-) -> MergeCollaborators:
+) -> MergeCollaboratorGroup:
     """Normalize new bundle-style wiring and legacy keyword collaborators."""
     if collaborators is not None:
         if legacy_collaborators:
             unexpected = sorted(legacy_collaborators)
             raise TypeError(
-                "MergeService received both collaborators bundle and legacy "
+                "MergeService received both collaborator group and legacy "
                 f"keyword collaborators: {unexpected}"
             )
         return collaborators
@@ -101,11 +101,11 @@ def _build_merge_collaborators(
         if unexpected:
             details.append(f"unexpected={unexpected}")
         raise TypeError(
-            "MergeService requires collaborators=MergeCollaborators(...) or the "
+            "MergeService requires collaborators=MergeCollaboratorGroup(...) or the "
             f"full legacy collaborator keyword set ({', '.join(details)})"
         )
 
-    return MergeCollaborators(
+    return MergeCollaboratorGroup(
         deduplicator=legacy_collaborators["deduplicator"],
         aggregator=legacy_collaborators["aggregator"],
         renamer=legacy_collaborators["renamer"],
@@ -130,7 +130,7 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
         cross_validator: EnrichmentCrossValidationService | None = None,
         gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
         *,
-        collaborators: MergeCollaborators | None = None,
+        collaborators: MergeCollaboratorGroup | None = None,
         **legacy_collaborators: Any,  # Any: phased legacy keyword bridge
     ) -> None:
         """Initialise the MergeService with all required and optional collaborators.

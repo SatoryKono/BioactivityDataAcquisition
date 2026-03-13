@@ -1,6 +1,6 @@
 # Documentation Navigation Policy
 
-*Version: 1.6 (2026-03-03)*
+*Version: 1.7 (2026-03-13)*
 
 ----------------------------------------------------------------------
 
@@ -10,6 +10,10 @@ Define explicit navigation rules for documentation zones so that:
 - normative pages stay discoverable in `mkdocs.yml`;
 - internal and archive materials remain controlled;
 - growth of non-nav pages is tracked via baseline guardrails.
+
+For current project guidance, the active published docs in `docs/00-05` remain
+the source of truth. Materials in `docs/99-archive/**` preserve historical
+traceability, but they are not normative for current project behavior.
 
 ----------------------------------------------------------------------
 
@@ -27,6 +31,8 @@ Define explicit navigation rules for documentation zones so that:
 | `docs/99-archive/**` | `archive` | MUST remain non-nav by default; historical context only | [docs/99-archive/README.md](../../99-archive/README.md) (or equivalent archive index) |
 
 Notes:
+- active project guidance comes from published docs in `docs/00-05`;
+- `docs/99-archive/**` remains historical context only and does not override active guidance;
 - `internal-generated` documents (for example large generated index/variant sets) are allowed outside nav.
 - Non-nav documents MUST NOT be used as the primary source of architecture or operational policy.
 

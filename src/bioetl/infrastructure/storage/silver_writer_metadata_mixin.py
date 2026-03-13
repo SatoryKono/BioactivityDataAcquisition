@@ -66,8 +66,8 @@ class _SilverMergedMetadataWriteRequest:
 
 
 @dataclass(frozen=True, slots=True)
-class _PreparedSilverMetadataWrite:
-    """Prepared Silver metadata context carried into sidecar persistence."""
+class _PreparedSilverMetadataWriteOperation:
+    """Prepared Silver metadata operation carried into sidecar execution."""
 
     request: _SilverMetadataWriteRequest | _SilverMergedMetadataWriteRequest
     provider_name: str
@@ -105,6 +105,16 @@ class _SilverMetadataWriteHostProtocol(Protocol):
 
     async def _get_delta_version(self, table_path: str) -> int | None: ...
 
+    async def _write_silver_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: SilverMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None: ...
+
 
 def _read_delta_version(table_path: str) -> int:
     """Read the current Delta table version synchronously."""
@@ -123,18 +133,16 @@ async def _resolve_silver_metadata_context(
     return _ResolvedSilverMetadataContext(
         provider_name=provider_name,
         entity_name=entity_name,
-        version_after=(
-            version_after
-            if version_after is not None
-            else await host._get_delta_version(table_path)
-        ),
+        version_after=version_after
+        if version_after is not None
+        else await host._get_delta_version(table_path),
     )
 
 
 async def _prepare_silver_metadata_write(
     host: _SilverMetadataWriteHostProtocol,
     request: _SilverMetadataWriteRequest,
-) -> _PreparedSilverMetadataWrite:
+) -> _PreparedSilverMetadataWriteOperation:
     """Resolve provider/entity and build standard Silver metadata payload."""
     context = await _resolve_silver_metadata_context(
         host,
@@ -159,18 +167,15 @@ async def _prepare_silver_metadata_write(
         completed_at=request.completed_at,
     )
     metadata = host._metadata_coordinator.create_silver_metadata(silver_input)
-    return _PreparedSilverMetadataWrite(
-        request=request,
-        provider_name=context.provider_name,
-        entity_name=context.entity_name,
-        metadata=metadata,
+    return _PreparedSilverMetadataWriteOperation(
+        request, context.provider_name, context.entity_name, metadata
     )
 
 
 async def _prepare_silver_merged_metadata_write(
     host: _SilverMetadataWriteHostProtocol,
     request: _SilverMergedMetadataWriteRequest,
-) -> _PreparedSilverMetadataWrite:
+) -> _PreparedSilverMetadataWriteOperation:
     """Resolve provider/entity and build merged Silver metadata payload."""
     from bioetl.infrastructure.storage.metadata_builder import SilverMetadataBuilder
 
@@ -192,27 +197,34 @@ async def _prepare_silver_merged_metadata_write(
         sources_used=request.sources_used,
         version_after=context.version_after,
     )
-    return _PreparedSilverMetadataWrite(
-        request=request,
-        provider_name=context.provider_name,
-        entity_name=context.entity_name,
-        metadata=metadata,
+    return _PreparedSilverMetadataWriteOperation(
+        request,
+        context.provider_name,
+        context.entity_name,
+        metadata,
     )
 
 
-async def _persist_silver_metadata_write(
+async def _execute_prepared_silver_metadata_write_operation(
     host: _SilverMetadataWriteHostProtocol,
-    prepared: _PreparedSilverMetadataWrite,
+    prepared: _PreparedSilverMetadataWriteOperation,
 ) -> None:
-    """Persist one prepared Silver metadata sidecar."""
-    await host._metadata_writer.write_silver_metadata(
-        prepared.request.table_path,
-        prepared.metadata,
-        table_name=prepared.request.table_name,
-        flat_structure=host._flat_structure,
-        provider=prepared.provider_name,
-        entity=prepared.entity_name,
+    """Execute one prepared Silver metadata operation via the canonical writer handoff."""
+    await host._write_silver_metadata_file(
+        table_path=prepared.request.table_path, metadata=prepared.metadata,
+        table_name=prepared.request.table_name, provider_name=prepared.provider_name,
+        entity_name=prepared.entity_name,
     )
+
+
+async def _execute_silver_metadata_write(
+    host: _SilverMetadataWriteHostProtocol,
+    request: _SilverMetadataWriteRequest | _SilverMergedMetadataWriteRequest,
+    prepare: Callable[..., Awaitable[_PreparedSilverMetadataWriteOperation]],
+) -> None:
+    """Prepare and persist one Silver metadata write via the canonical lifecycle."""
+    prepared = await prepare(host, request)
+    await _execute_prepared_silver_metadata_write_operation(host, prepared)
 
 
 class SilverWriterMetadataMixin:
@@ -311,6 +323,27 @@ class SilverWriterMetadataMixin:
         except DeltaTableNotFoundError:
             return None
 
+    def _should_skip_silver_metadata_write(
+        self,
+        *,
+        records: list[BronzeRecord],
+        table_path: str,
+        event_name: str,
+        use_debug_log: bool = False,
+    ) -> bool:
+        """Return whether Silver metadata write should short-circuit before prepare."""
+        if not records:
+            return True
+        if self._metadata_coordinator is None:
+            log = self.logger.debug if use_debug_log else self.logger.warning
+            log(
+                event_name,
+                reason="MetadataCoordinator not configured",
+                table_path=table_path,
+            )
+            return True
+        return False
+
     async def _write_silver_metadata(
         self,
         table_path: str,
@@ -327,18 +360,15 @@ class SilverWriterMetadataMixin:
         version_after: int | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file."""
-        if not records:
+        if self._should_skip_silver_metadata_write(
+            records=records,
+            table_path=table_path,
+            event_name="silver_metadata_skipped",
+        ):
             return
-        if self._metadata_coordinator is None:
-            self.logger.warning(
-                "silver_metadata_skipped",
-                reason="MetadataCoordinator not configured",
-                table_path=table_path,
-            )
-            return
-        prepared = await _prepare_silver_metadata_write(
+        await _execute_silver_metadata_write(
             self,
-            _SilverMetadataWriteRequest(
+            request=_SilverMetadataWriteRequest(
                 table_path=table_path,
                 table_name=table_name,
                 records=records,
@@ -352,8 +382,8 @@ class SilverWriterMetadataMixin:
                 completed_at=completed_at,
                 version_after=version_after,
             ),
+            prepare=_prepare_silver_metadata_write,
         )
-        await _persist_silver_metadata_write(self, prepared)
 
     async def _write_silver_merged_metadata(
         self,
@@ -365,18 +395,16 @@ class SilverWriterMetadataMixin:
         sources_used: list[str] | None = None,
     ) -> None:
         """Write Silver metadata sidecar for merged composite data."""
-        if not records:
+        if self._should_skip_silver_metadata_write(
+            records=records,
+            table_path=table_path,
+            event_name="silver_merged_metadata_skipped",
+            use_debug_log=True,
+        ):
             return
-        if self._metadata_coordinator is None:
-            self.logger.debug(
-                "silver_merged_metadata_skipped",
-                reason="MetadataCoordinator not configured",
-                table_path=table_path,
-            )
-            return
-        prepared = await _prepare_silver_merged_metadata_write(
+        await _execute_silver_metadata_write(
             self,
-            _SilverMergedMetadataWriteRequest(
+            request=_SilverMergedMetadataWriteRequest(
                 table_path=table_path,
                 table_name=table_name,
                 records=records,
@@ -384,8 +412,23 @@ class SilverWriterMetadataMixin:
                 run_id=run_id,
                 sources_used=sources_used,
             ),
+            prepare=_prepare_silver_merged_metadata_write,
         )
-        await _persist_silver_metadata_write(self, prepared)
+
+    async def _write_silver_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: SilverMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None:
+        """Persist one Silver metadata sidecar via the canonical writer handoff."""
+        await self._metadata_writer.write_silver_metadata(
+            table_path, metadata, table_name=table_name, flat_structure=self._flat_structure,
+            provider=provider_name, entity=entity_name,
+        )
 
     async def _maybe_log_silver_audit(
         self,
@@ -396,11 +439,7 @@ class SilverWriterMetadataMixin:
     ) -> None:
         """Guard for audit logging — only calls _log_silver_audit if enabled."""
         if self._audit and records:
-            await self._log_silver_audit(
-                table_name=table_name,
-                records=records,
-                mode=mode,
-            )
+            await self._log_silver_audit(table_name=table_name, records=records, mode=mode)
 
     async def _finalize_silver_write_result(
         self,
@@ -439,13 +478,7 @@ class SilverWriterMetadataMixin:
         )
         if context.version_after is None:
             return None
-
-        return SilverWriteResult(
-            table_name=table_name,
-            table_path=table_path,
-            delta_version=context.version_after,
-            record_count=len(records),
-        )
+        return SilverWriteResult(table_name, table_path, context.version_after, len(records))
 
     async def _prepare_silver_write_finalization_context(
         self,
@@ -461,7 +494,5 @@ class SilverWriterMetadataMixin:
         version_after = await self._get_delta_version(table_path)
         completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
         return _PreparedSilverWriteFinalizationContext(
-            dq_metrics=dq_metrics,
-            version_after=version_after,
-            completed_at=completed_at,
+            dq_metrics, version_after, completed_at
         )

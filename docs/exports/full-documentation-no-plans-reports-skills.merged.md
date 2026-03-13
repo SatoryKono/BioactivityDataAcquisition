@@ -13,7 +13,7 @@ _Generated: 2026-03-03_
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.23 | Last updated: 2026-03-02*
+*Synced with RULES.md v5.24 | Last updated: 2026-03-02*
 
 > **Documentation Update:** 2026-03-02
 > - Source Code Map rewritten to match actual codebase structure (v8.0)
@@ -2245,7 +2245,7 @@ fields:
 
 # BioETL: Утилиты Проекта
 
-*Версия: 2.3 | Синхронизировано с RULES.md v5.23 (2026-03-02)*
+*Версия: 2.3 | Синхронизировано с RULES.md v5.24 (2026-03-02)*
 
 ---
 
@@ -2827,7 +2827,7 @@ if __name__ == "__main__":
 
 # AGENT.md: Инструкции для Агента BioETL (v2.4)
 
-*Синхронизировано с RULES.md v5.23 (2026-02-21) | Дедублировано: ссылки на RULES.md*
+*Синхронизировано с RULES.md v5.24 (2026-02-21) | Дедублировано: ссылки на RULES.md*
 
 Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта, изложенным в `docs/00-project/RULES.md`.
 
@@ -3185,7 +3185,7 @@ git commit -m "..."
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.23 (2026-02-21) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.5.0*
+*Синхронизировано с RULES.md v5.24 (2026-02-21) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.5.0*
 
 ----------------------------------------------------------------------
 
@@ -4245,7 +4245,7 @@ docs/99-archive/reports/<task-id>/
 
 - Исторические отчёты в `docs/99-archive/reports/<task-id>/` могут использовать старые имена файлов (например, `04-refactoring-log.md` вместо `04-implementation-log.md`) и старую нумерацию ADR.
 - Такие артефакты считаются **валидными историческими данными** и НЕ являются ошибкой, если сохранён контекст задачи и трассируемость ID (`AUD-*`, `RF-*`, `DBG-*`, `DOC-*`, `CFG-*`).
-- Для новых задач MUST использовать текущую структуру и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.23 и ADR-001..ADR-040.
+- Для новых задач MUST использовать текущую структуру и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.24 и ADR-001..ADR-040.
 
 
 \newpage
@@ -4901,7 +4901,7 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 
 # Политика именования сущностей
 
-*Синхронизировано с RULES.md v5.23 и ADR-024 | Последнее обновление: 2026-02-21*
+*Синхронизировано с RULES.md v5.24 и ADR-024 | Последнее обновление: 2026-02-21*
 
 ---
 
@@ -5000,7 +5000,7 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 
 # Политика файлов и директорий
 
-*Синхронизировано с RULES.md v5.23 | Последнее обновление: 2026-03-03*
+*Синхронизировано с RULES.md v5.24 | Последнее обновление: 2026-03-03*
 
 ----------------------------------------------------------------------
 
@@ -5266,7 +5266,7 @@ pre-commit run validate-pipeline-configs --all-files
 
 # Расширение BioETL: Добавление новых Pipeline
 
-*Синхронизировано с RULES.md v5.23 | Последнее обновление: 2026-02-21*
+*Синхронизировано с RULES.md v5.24 | Последнее обновление: 2026-02-21*
 
 ----------------------------------------------------------------------
 
@@ -5594,7 +5594,7 @@ python scripts/schema/validate_pipeline_configs.py --verbose
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md v5.23 | Last updated: 2026-02-23*
+*Synced with RULES.md v5.24 | Last updated: 2026-02-23*
 
 ----------------------------------------------------------------------
 
@@ -6257,7 +6257,7 @@ make test
 
 # Rules Summary
 
-*Синхронизировано с RULES.md v5.23 (2026-03-02)*
+*Синхронизировано с RULES.md v5.24 (2026-03-02)*
 
 > **Note**: Этот документ — выжимка из `docs/00-project/RULES.md`. Канонический источник правил — `RULES.md`.
 
@@ -6404,7 +6404,7 @@ make test
 # BioETL: Требования к Проекту
 
 *Версия: 1.7 (2026-03-02)*
-*Синхронизировано с RULES.md v5.23 (2026-03-02)*
+*Синхронизировано с RULES.md v5.24 (2026-03-02)*
 
 ---
 
@@ -7328,8 +7328,8 @@ make test
 
 ## История Изменений
 
-- **1.7** (2026-03-02): Синхронизация с RULES.md v5.23. Обновлена REQ-DEP-001: mixed strategy (`pyproject.toml` ranges + `uv.lock`) вместо требования глобального `==` pinning.
-- **1.6** (2026-02-27): Синхронизация с RULES.md v5.23. Исправлена терминология требований (`health_check`, `from __future__ import annotations`, формат env vars `BIOETL_{PROVIDER}_{KEY}`).
+- **1.7** (2026-03-02): Синхронизация с RULES.md v5.24. Обновлена REQ-DEP-001: mixed strategy (`pyproject.toml` ranges + `uv.lock`) вместо требования глобального `==` pinning.
+- **1.6** (2026-02-27): Синхронизация с RULES.md v5.24. Исправлена терминология требований (`health_check`, `from __future__ import annotations`, формат env vars `BIOETL_{PROVIDER}_{KEY}`).
 - **1.5** (2026-02-04): Local-Only sync. Удалены ссылки на S3/Redis. Синхронизировано с RULES.md v5.20.
 - **1.4** (2026-01-21): Пересчитана сводка требований (156 вместо 139). Исправлены категории и уровни. Синхронизировано с RULES.md v5.20.
 - **1.3** (2026-01-05): Синхронизировано с RULES.md v5.20.
@@ -7344,7 +7344,7 @@ make test
 
 # Architecture Overview
 
-*Synced with RULES.md v5.23 (2026-02-24)*
+*Synced with RULES.md v5.24 (2026-02-24)*
 
 ## Quick Navigation
 
@@ -9354,7 +9354,7 @@ bioetl run --pipeline chembl_activity \
 
 # Data Flow
 
-*Aligned with RULES.md v5.23 (Local-Only Deployment)*
+*Aligned with RULES.md v5.24 (Local-Only Deployment)*
 
 ## Overview
 
@@ -14736,7 +14736,7 @@ pipeline-name: chembl_activity
 
 ## References
 
-- [RULES.md v5.23, Appendix D](../../00-project/RULES.md) - Reference schema
+- [RULES.md v5.24, Appendix D](../../00-project/RULES.md) - Reference schema
 - [ADR-014: Deterministic Writes](ADR-014-deterministic-writes.md) - sort-by requirement
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
 - [03-file-policy.md](../../00-project/governance/03-file-policy.md) - File structure documentation
@@ -16119,8 +16119,8 @@ def run(pipeline: str, enrich-only: str | None, required-only: bool, ...):
 - ADR-010: Local-Only Deployment
 - ADR-015: Pipeline Services Lifecycle
 - ADR-020: BasePipeline Decomposition
-- RULES.md v5.23 §2.4 (Backfill/Replay)
-- RULES.md v5.23 §3.3 (Concurrency & Locks)
+- RULES.md v5.24 §2.4 (Backfill/Replay)
+- RULES.md v5.24 §3.3 (Concurrency & Locks)
 
 
 \newpage
@@ -26348,7 +26348,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 # Diagramming Policy
 
-*Synced with RULES.md v5.23 (2026-02-24)*
+*Synced with RULES.md v5.24 (2026-02-24)*
 
 > **Canonical policy:** [`docs/02-architecture/06-diagram-policy.md`](../../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
 > **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../README.md).
@@ -32837,7 +32837,7 @@ This includes (non-exhaustive):
 
 # System Context
 
-*Aligned with RULES.md v5.23 (Local-Only Deployment)*
+*Aligned with RULES.md v5.24 (Local-Only Deployment)*
 
 ## Overview
 
@@ -33300,7 +33300,7 @@ python -m bioetl run --pipeline chembl_target
 
 # Cleanup Policy
 
-*Синхронизировано с RULES.md v5.23 (2026-03-03)*
+*Синхронизировано с RULES.md v5.24 (2026-03-03)*
 
 This document defines deterministic cleanup rules and automation for removing caches, build artifacts, and temporary files.
 
@@ -39208,7 +39208,7 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 class EntitySchema(ETLRecordSchema):
     """Pandera schema for Provider Entity.
 
-    Aligned with RULES.md v5.23 and Provider API v2.0.
+    Aligned with RULES.md v5.24 and Provider API v2.0.
     """
 
     # Primary key
@@ -41899,7 +41899,7 @@ For publication-specific pipeline details, see the individual specs:
 
 # BioETL Pipeline Documentation
 
-*Updated: 2026-02-21 | Aligned with RULES.md v5.23*
+*Updated: 2026-02-21 | Aligned with RULES.md v5.24*
 
 This directory contains documentation for all BioETL pipelines, including composite pipelines.
 
@@ -42066,7 +42066,7 @@ configs/
 
 # ChEMBL Protein Classification Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -42504,7 +42504,7 @@ See `docs/04-reference/pipelines/chembl/protein-class-fields.csv` for Excel-comp
 
 # ChEMBL Cell Line Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -42963,7 +42963,7 @@ See `docs/04-reference/pipelines/chembl/cell-line-fields.csv` for Excel-compatib
 
 # ChEMBL Molecule Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -43440,7 +43440,7 @@ input_filter:
 
 # ChEMBL Target Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -43672,7 +43672,7 @@ input_filter:
 
 # ChEMBL Activity Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -44148,7 +44148,7 @@ input_filter:
 
 # ChEMBL Assay Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -44417,7 +44417,7 @@ input_filter:
 
 # ChEMBL Publication (Document) Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -44591,7 +44591,7 @@ input_filter:
 
 # ChEMBL Assay Parameters Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -44738,7 +44738,7 @@ input_filter:
 
 # ChEMBL Compound Record Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -44899,7 +44899,7 @@ input_filter:
 
 # ChEMBL Target Component Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -45145,7 +45145,7 @@ Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/d
 
 # ChEMBL Subcellular Fraction Pipeline Specification
 
-*Version 1.0.0 | Aligned with RULES.md v5.23*
+*Version 1.0.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -45242,7 +45242,7 @@ gold_table: "chembl_subcellular_fraction"
 
 # ChEMBL Tissue Pipeline Specification
 
-*Version 1.0.0 | Aligned with RULES.md v5.23*
+*Version 1.0.0 | Aligned with RULES.md v5.24*
 
 ---
 
@@ -45912,7 +45912,7 @@ Uses **enrichers** (not dependencies) because cell-line and tissue are reference
 
 # CrossRef Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ---
 
@@ -46174,7 +46174,7 @@ headers = {
 
 # OpenAlex Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ---
 
@@ -47173,7 +47173,7 @@ erDiagram
 
 # PubChem Compound Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -47430,7 +47430,7 @@ class PubChemAdapter(BaseSyncAdapter):
 
 # PubMed Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ---
 
@@ -47698,7 +47698,7 @@ export NCBI-API-KEY=your-api-key
 
 # Semantic Scholar Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ---
 
@@ -48827,7 +48827,7 @@ The following fields are created by the transformer but not defined in Silver sc
 
 # UniProt Protein Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ----------------------------------------------------------------------
 
@@ -49158,7 +49158,7 @@ input_filter:
 
 # UniProt ID Mapping Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.23*
+*Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ---
 
@@ -54607,7 +54607,7 @@ cat /var/log/bioetl/pipeline.log | \
 # Source: `04-reference/schemas/domain/chembl/activity-schema.md`
 
 # Activity Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.23*
+*Version: 1.0.0 | Aligned with RULES.md v5.24*
 
 ## Overview
 
@@ -55082,7 +55082,7 @@ Gold layer contains only records passing gold-filters:
 # Source: `04-reference/schemas/domain/chembl/assay-schema.md`
 
 # Assay Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.23*
+*Version: 1.0.0 | Aligned with RULES.md v5.24*
 
 ## Overview
 
@@ -55410,7 +55410,7 @@ def -validate-invariants(self) -> None:
 # Source: `04-reference/schemas/domain/chembl/molecule-schema.md`
 
 # Molecule Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.23*
+*Version: 1.0.0 | Aligned with RULES.md v5.24*
 
 ## Overview
 
@@ -55752,7 +55752,7 @@ def -validate-invariants(self) -> None:
 # Source: `04-reference/schemas/domain/chembl/target-schema.md`
 
 # Target Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.23*
+*Version: 1.0.0 | Aligned with RULES.md v5.24*
 
 ## Overview
 
@@ -56031,7 +56031,7 @@ def -validate-invariants(self) -> None:
 
 # Pipeline Review Checklist
 
-*Synced with RULES.md v5.23 (2026-02-24)*
+*Synced with RULES.md v5.24 (2026-02-24)*
 
 Use this checklist when reviewing new or modified pipelines.
 
@@ -56299,7 +56299,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 
 # Operations Documentation
 
-*Synced with RULES.md v5.23 (2026-02-24)*
+*Synced with RULES.md v5.24 (2026-02-24)*
 
 > Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, `MemoryLock`.
 
@@ -58935,7 +58935,7 @@ If an incident cannot be resolved within the Response SLA:
 # Source: `05-operations/runbooks/index.md`
 
 # Operations Runbooks (Playbooks)
-*Synced with RULES.md v5.23 (2026-02-21)*
+*Synced with RULES.md v5.24 (2026-02-21)*
 
 This section contains playbooks for handling common alerts and operational tasks.
 
@@ -70774,7 +70774,7 @@ Publication pipeline использует unified naming из `PublicationBaseSc
 
 > **Impact:** Меняет тип данных в Silver/Gold таблицах → требует REBUILD.
 >
-> **Schema Drift Policy (RULES.md v5.23):** Тип change = **Critical** drift.
+> **Schema Drift Policy (RULES.md v5.24):** Тип change = **Critical** drift.
 > Политика упрощена: только Info (новые поля) и Critical (пропавшее поле / смена типа).
 > Уровень Warn (>3 новых полей) удалён.
 

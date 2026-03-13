@@ -8,7 +8,11 @@ import pytest
 
 from bioetl.application.composite.aggregator import EnricherAggregatorService
 from bioetl.application.composite.deduplication import EnricherDeduplicator
-from bioetl.application.composite.merger import MergeService, _path_to_table_name
+from bioetl.application.composite.merger import (
+    MergeCollaboratorGroup,
+    MergeService,
+    _path_to_table_name,
+)
 from bioetl.domain.composite.config import DependencyConfig, EnricherConfig, MergeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -90,14 +94,16 @@ def test_merge_service_accepts_injected_internal_components(
         merge_config=merge_config,
         storage=mock_storage,
         logger=mock_logger,
-        deduplicator=deduplicator,
-        aggregator=aggregator,
-        renamer=renamer,
-        orderer=orderer,
-        priority_orderer=priority_orderer,
-        coalesce_policy=coalesce_policy,
-        conflict_resolver=conflict_resolver,
-        join_planner=join_planner,
+        collaborators=MergeCollaboratorGroup(
+            deduplicator=deduplicator,
+            aggregator=aggregator,
+            renamer=renamer,
+            orderer=orderer,
+            priority_orderer=priority_orderer,
+            coalesce_policy=coalesce_policy,
+            conflict_resolver=conflict_resolver,
+            join_planner=join_planner,
+        ),
     )
 
     assert service._deduplicator is deduplicator

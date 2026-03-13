@@ -11,7 +11,7 @@ from bioetl.application.composite.cross_validator import (
     EnrichmentCrossValidationService,
 )
 from bioetl.application.composite.join_execution import JoinHow
-from bioetl.application.composite.merger import MergeCollaborators, MergeService
+from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
     build_execution_support_services,
@@ -212,7 +212,7 @@ class CompositeSupportServicesFactory:
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
             gold_schema=self._resolve_gold_schema(self._config.name),
-            collaborators=MergeCollaborators(
+            collaborators=MergeCollaboratorGroup(
                 deduplicator=merge_dependencies.deduplicator,
                 aggregator=merge_dependencies.aggregator,
                 renamer=merge_dependencies.renamer,
