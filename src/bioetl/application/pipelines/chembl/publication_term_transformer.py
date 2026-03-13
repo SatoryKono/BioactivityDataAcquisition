@@ -4,9 +4,6 @@ Transforms Publication records to extract and flatten associated terms.
 This is a derived entity transformer - it extracts nested term data
 from Publication (ChEMBL Document) API responses and flattens the 1:M relationship.
 
-__all__ = ["PublicationTermTransformer"]
-
-
 Uses declarative field_specs DSL for mapping.
 
 .. versionchanged:: 2.0.0
@@ -14,6 +11,8 @@ Uses declarative field_specs DSL for mapping.
 """
 
 from __future__ import annotations
+
+__all__ = ["PublicationTermTransformer"]
 
 from typing import TYPE_CHECKING, Any, cast
 
@@ -189,18 +188,15 @@ class PublicationTermTransformer(BaseChemblTransformer):
     ) -> list[GoldRecord]:
         """Extract and flatten all terms from a Publication record.
 
-        Yields multiple term records from one publication.
+        Returns multiple term records from one publication.
         This is the primary method for derived entity extraction.
 
         Args:
             record: Raw Bronze record from ChEMBL API.
             publication_id: Document ChEMBL ID.
 
-        Yields:
-            Dictionary of term business fields for each term.
-
         Returns:
-            Extracted value.
+            List of term GoldRecord dictionaries, one per extracted term.
         """
         terms: list[GoldRecord] = []
 

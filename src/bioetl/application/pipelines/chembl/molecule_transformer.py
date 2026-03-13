@@ -223,7 +223,9 @@ class MoleculeTransformer(BaseChemblTransformer):
             _PROPERTIES_FIELDS,
             renames=_PROPERTIES_RENAMES,
         )
-        # Derive logp_method from the renamed logp field
+        # ChEMBL provides only ALogP (Wildman-Crippen method) via
+        # molecule_properties.alogp; tag identifies calculation method
+        # for Gold-layer cross-provider unification.
         if properties.get("logp") is not None:
             properties["logp_method"] = "alogp"
 

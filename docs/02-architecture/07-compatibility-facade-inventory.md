@@ -27,6 +27,7 @@ Scope rules:
 | Path | Compatibility role | Canonical target | Status | Exit criteria |
 | --- | --- | --- | --- | --- |
 | `src/bioetl/composition/factories/pipeline/facade.py` | Temporary pipeline factory facade that re-exports legacy assembly and service helpers. | `bioetl.composition.factories.pipeline.pipeline_assembler`, `bioetl.composition.factories.services.bundle`, `bioetl.composition.factories.dq.context_resolver` | `deprecated-warn` | Non-compat imports disappear and only dedicated deprecation coverage remains before removal. |
+| `src/bioetl/composition/entrypoints.py` | Canonical composition entrypoint that intentionally shields internal `_pipeline_execution` and `_resource_management` module paths. | `bioetl.composition.entrypoints` | `retained-entrypoint` | Internal implementation-module imports outside `composition/` stay at zero and entrypoint-only compatibility coverage remains explicit. |
 | `src/bioetl/composition/factories/storage/facade.py` | Storage re-export facade that keeps split storage modules import-compatible. | `bioetl.composition.factories.storage.factory`, `bioetl.composition.factories.storage.adapter` | `compat-shim` | Internal callers move to split modules or package-root exports and facade-only patch points are retired. |
 | `src/bioetl/composition/factories/datasource/factory.py` | Mixed module: `DataSourceFactory` is active, while `DataSourceRegistry` remains a compatibility facade over `ProviderRegistry`. | `bioetl.composition.factories.datasource.data_source_factory`, `bioetl.composition.providers.provider_registry.ProviderRegistry` | `mixed-module` | First-party code uses the canonical datasource helper or `ProviderRegistry.create_data_source()` directly and `DataSourceRegistry` remains only for dedicated compatibility tests. |
 | `src/bioetl/composition/runtime_builders/runner_builder.py` | Mixed runtime builder with stable monkeypatch seams kept for legacy tests. Active runtime flow should resolve through the split subservices rather than wrapper defaults. | `bioetl.composition.runtime_builders.inputs_resolver`, `bioetl.composition.runtime_builders.observability_builder` | `mixed-module` | Legacy patch-point tests migrate to submodule seams and wrapper helpers become unnecessary. |
@@ -47,6 +48,8 @@ Scope rules:
 
 Snapshot after RF-032 compatibility-only cleanup:
 
+- `src/` direct imports of `bioetl.composition._pipeline_execution` outside `src/bioetl/composition/`: `0`
+- `src/` direct imports of `bioetl.composition._resource_management` outside `src/bioetl/composition/`: `0`
 - `src/` direct imports of `bioetl.composition.factories.pipeline.facade`: `0`
 - `src/` direct imports of `bioetl.composition.factories.storage.facade`: `0`
 - `src/` direct imports of `bioetl.infrastructure.storage.delta_writer`: `0`

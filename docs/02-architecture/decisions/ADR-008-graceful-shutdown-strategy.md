@@ -13,12 +13,14 @@
 
 ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding distributed locks. An abrupt shutdown (kill -9, OOM, etc.) can leave the system in an inconsistent state: orphaned locks, missing checkpoints, partially written batches. A coordinated shutdown mechanism was needed to ensure data integrity.
 
+> **Update 2025-12-31:** Signal handlers in `interfaces/orchestration/signals.py` were removed. Shutdown is now handled at CLI level via `KeyboardInterrupt` (in `interfaces/cli/run.py` and `run_all.py`). See `application/core/lifecycle/shutdown.py` for `ShutdownSignal`. The architecture diagram and implementation details below reflect the original design; the interfaces-layer signal handler box is no longer present.
+
 ## The Decision
 
 We have implemented a **two-layer shutdown coordination system**:
 
-1. **`ShutdownSignal`** (`application/core/shutdown.py`): Application-level signal object shared across components
-1. **OS Signal Handlers** (`interfaces/orchestration/signals.py`): Translate SIGTERM/SIGINT to ShutdownSignal
+1. **`ShutdownSignal`** (`application/core/lifecycle/shutdown.py`): Application-level signal object shared across components
+1. **OS Signal Handlers** (`interfaces/orchestration/signals.py`): Translate SIGTERM/SIGINT to ShutdownSignal (removed 2025-12-31; see update note above)
 
 Key characteristics:
 
