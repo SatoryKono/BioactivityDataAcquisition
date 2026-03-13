@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Literal, cast
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.providers.registration import register_all_providers
-from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.providers.loader import ensure_providers_loaded
+from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
@@ -155,13 +155,13 @@ def _resolve_filter_batch_size(yaml_config: PipelineYamlConfig) -> int | None:
 def _initialize_registry(
     *,
     registry: PipelineRegistry | None,
-    get_default_registry_fn: Callable[[], PipelineRegistry],
-    register_all_providers_fn: Callable[[], None],
+    create_registry_fn: Callable[[], PipelineRegistry],
+    ensure_providers_loaded_fn: Callable[[], None],
     register_all_pipelines_fn: Callable[..., None],
 ) -> PipelineRegistry:
     """Initialize provider/pipeline registry with optional explicit registry."""
-    effective_registry = registry if registry is not None else get_default_registry_fn()
-    register_all_providers_fn()
+    effective_registry = registry if registry is not None else create_registry_fn()
+    ensure_providers_loaded_fn()
     register_all_pipelines_fn(registry=effective_registry)
     return effective_registry
 
@@ -190,8 +190,8 @@ def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
     *,
-    get_default_registry_fn: Callable[[], PipelineRegistry] = get_default_registry,
-    register_all_providers_fn: Callable[[], None] = register_all_providers,
+    create_registry_fn: Callable[[], PipelineRegistry] = create_registry,
+    ensure_providers_loaded_fn: Callable[[], None] = ensure_providers_loaded,
     register_all_pipelines_fn: Callable[..., None] = register_all_pipelines,
     get_settings_fn: Callable[[], Settings] = get_settings,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
@@ -208,9 +208,10 @@ def build_pipeline_runner(
 
     Args:
         ctx: Pipeline run context containing pipeline name, run type, and execution options.
-        registry: Optional PipelineRegistry for test isolation; uses default when None.
-        get_default_registry_fn: Callable returning the global PipelineRegistry.
-        register_all_providers_fn: Callable registering all provider adapters.
+        registry: Optional PipelineRegistry for test isolation; creates a fresh
+            runtime registry when None.
+        create_registry_fn: Callable returning a fresh PipelineRegistry instance.
+        ensure_providers_loaded_fn: Callable ensuring provider adapters are loaded.
         register_all_pipelines_fn: Callable registering all pipeline factories.
         get_settings_fn: Callable returning global application Settings.
         load_pipeline_config_fn: Callable loading PipelineYamlConfig by pipeline name.
@@ -230,8 +231,8 @@ def build_pipeline_runner(
     """
     effective_registry = _initialize_registry(
         registry=registry,
-        get_default_registry_fn=get_default_registry_fn,
-        register_all_providers_fn=register_all_providers_fn,
+        create_registry_fn=create_registry_fn,
+        ensure_providers_loaded_fn=ensure_providers_loaded_fn,
         register_all_pipelines_fn=register_all_pipelines_fn,
     )
     build_observability_bundle_impl = (

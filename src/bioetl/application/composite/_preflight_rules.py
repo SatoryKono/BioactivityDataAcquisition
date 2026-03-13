@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bioetl.application.composite._preflight_types import (
     SchemaFields,
     ValidationIssue,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite.config import CompositeConfig
 
 
 class PreflightValidationRulesMixin:

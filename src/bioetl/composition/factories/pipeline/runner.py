@@ -14,8 +14,8 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.providers.registration import register_all_providers
-from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.providers.loader import ensure_providers_loaded
+from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
 if TYPE_CHECKING:
@@ -58,18 +58,20 @@ class RunnerFactory:
     def __init__(
         self,
         registry: PipelineRegistry | None = None,
+        registry_factory: Callable[[], PipelineRegistry] | None = None,
         runner_builder: Callable[..., ExecutionMetricsRunnerPort] | None = None,
     ) -> None:
         """Initialize the factory.
 
         Args:
-            registry: Optional custom registry. If None, uses default.
+            registry: Optional custom registry. If None, a fresh registry is
+                created lazily for this factory instance.
+            registry_factory: Optional registry factory for DI/testing when no
+                explicit registry is supplied.
             runner_builder: Optional runner assembly function for DI/testing.
         """
         self._registry = registry
-        self._default_registry = (
-            None if registry is not None else get_default_registry()
-        )
+        self._registry_factory = registry_factory or create_registry
         self._runner_builder = runner_builder
         self._registrations_done = False
 
@@ -79,7 +81,7 @@ class RunnerFactory:
         Idempotent - safe to call multiple times.
         """
         if not self._registrations_done:
-            register_all_providers()
+            ensure_providers_loaded()
             if not self._effective_registry.list_pipelines():
                 register_all_pipelines(registry=self._effective_registry)
             self._registrations_done = True
@@ -87,11 +89,9 @@ class RunnerFactory:
     @property
     def _effective_registry(self) -> PipelineRegistry:
         """Get the effective registry instance."""
-        if self._registry is not None:
-            return self._registry
-        if self._default_registry is None:
-            raise RuntimeError("RunnerFactory default registry was not initialized")
-        return self._default_registry
+        if self._registry is None:
+            self._registry = self._registry_factory()
+        return self._registry
 
     def create(self, context: PipelineRunContext) -> ExecutionMetricsRunnerPort:
         """Create a configured pipeline runner.
@@ -169,18 +169,25 @@ class MetricsExtractor:
 
 def create_runner_factory(
     registry: PipelineRegistry | None = None,
+    registry_factory: Callable[[], PipelineRegistry] | None = None,
     runner_builder: Callable[..., ExecutionMetricsRunnerPort] | None = None,
 ) -> RunnerFactory:
     """Create a new RunnerFactory instance.
 
     Args:
         registry: Optional custom registry for test isolation.
+        registry_factory: Optional registry factory used when ``registry`` is not
+            provided.
         runner_builder: Optional runner assembly function for DI/testing.
 
     Returns:
         RunnerFactory instance.
     """
-    return RunnerFactory(registry=registry, runner_builder=runner_builder)
+    return RunnerFactory(
+        registry=registry,
+        registry_factory=registry_factory,
+        runner_builder=runner_builder,
+    )
 
 
 def create_metrics_extractor() -> MetricsExtractor:

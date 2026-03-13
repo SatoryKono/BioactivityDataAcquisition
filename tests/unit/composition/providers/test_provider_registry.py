@@ -18,6 +18,7 @@ from bioetl.composition.providers import (
     register_provider,
 )
 from bioetl.composition.providers.loader import (
+    ensure_providers_loaded,
     get_loaded_status,
     load_providers,
     reset_loader,
@@ -494,6 +495,19 @@ class TestProviderLoader:
         reset_loader()
 
         assert get_loaded_status() is False
+
+    def test_ensure_providers_loaded_recovers_from_stale_loaded_flag(self):
+        """Ensure loader recovers when registry was cleared after a successful load."""
+        load_providers()
+        assert get_loaded_status() is True
+
+        ProviderRegistry.clear()
+        assert get_loaded_status() is False
+
+        ensure_providers_loaded()
+
+        assert get_loaded_status() is True
+        assert ProviderRegistry.list_providers()
 
 
 class TestRealProviderRegistration:

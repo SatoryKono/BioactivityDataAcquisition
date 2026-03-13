@@ -6,10 +6,10 @@ Implements table archival to cold storage.
 from __future__ import annotations
 
 import asyncio
+from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition.entrypoints import get_lifecycle_service
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -20,9 +20,21 @@ from bioetl.interfaces.cli.commands.execution_policy import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_info
 
+if TYPE_CHECKING:
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
+
 __all__ = [
     "archive_command",
 ]
+
+
+def get_lifecycle_service() -> MedallionLifecycleService:
+    """Load the lifecycle service through composition on demand."""
+    from bioetl.composition.entrypoints import get_lifecycle_service as _impl
+
+    return _impl()
 
 
 def _handle_archive_failure(

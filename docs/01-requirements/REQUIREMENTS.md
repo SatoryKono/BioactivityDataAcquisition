@@ -795,8 +795,8 @@
 
 #### REQ-DOC-001
 - **Уровень**: MUST
-- **Описание**: Активная документация и generated docs проверяются автоматическими docs guardrails; карты/схемы публикуются и синхронизируются через выделенные скрипты и CI
-- **Проверка**: Прогнать `scripts/docs/check_doc_links.py` и убедиться, что generated-doc проверки (например dependency-map / schema export checks) проходят в CI
+- **Описание**: Активная документация в `docs/00-05` является нормативным published surface и вместе с generated docs проверяется автоматическими docs guardrails; материалы в `docs/99-archive/` сохраняются только как historical/non-normative context
+- **Проверка**: Прогнать `scripts/docs/check_doc_links.py` и убедиться, что generated-doc проверки (например dependency-map / schema export checks) проходят в CI, а active entry points не ссылаются на `docs/99-archive/` как на источник текущих требований
 
 #### REQ-DOC-002
 - **Уровень**: MUST

@@ -2,19 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+
+import polars as pl
 
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    import polars as pl
-
-    from bioetl.domain.composite.config import EnricherConfig, MergeConfig
-    from bioetl.domain.composite.result import DependencyResult, EnrichmentResult
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.composite.config import EnricherConfig, MergeConfig
+from bioetl.domain.composite.result import DependencyResult, EnrichmentResult
+from bioetl.domain.ports import LoggerPort
 
 
 class MergeMetricsRecorderMixin:

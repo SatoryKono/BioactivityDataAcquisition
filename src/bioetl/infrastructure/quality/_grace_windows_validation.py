@@ -89,6 +89,50 @@ def _validate_grace_window_metadata(
     )
 
 
+def _parse_rf_id(rf_id: object) -> tuple[str | None, bool]:
+    """Return (rf_id_str, is_rf_ref) from raw rf_id value."""
+    if not isinstance(rf_id, str) or not rf_id.strip():
+        return None, False
+    return rf_id, rf_id.startswith("RF-")
+
+
+def _validate_approved_field(
+    *,
+    prefix: str,
+    approved: object,
+    allow_rf_only_for_rf: bool,
+    errors: list[str],
+) -> None:
+    if not isinstance(approved, bool):
+        errors.append(f"{prefix}.approved: expected bool")
+        return
+    if allow_rf_only_for_rf and approved is False:
+        errors.append(
+            f"{prefix}.approved: must be true when "
+            "governance.allow_grace_windows_only_for_rf=true"
+        )
+
+
+def _validate_rf_id_reference(
+    *,
+    prefix: str,
+    rf_id_valid: bool,
+    is_rf_ref: bool,
+    approved: object,
+    allow_rf_only_for_rf: bool,
+    errors: list[str],
+) -> None:
+    if not rf_id_valid:
+        return
+    if isinstance(approved, bool) and approved and not is_rf_ref:
+        errors.append(f"{prefix}.rf_id: approved grace window must reference RF-*")
+    if allow_rf_only_for_rf and not is_rf_ref:
+        errors.append(
+            f"{prefix}.rf_id: must reference RF-* when "
+            "governance.allow_grace_windows_only_for_rf=true"
+        )
+
+
 def _validate_grace_window_identity_fields(
     *,
     prefix: str,
@@ -97,30 +141,26 @@ def _validate_grace_window_identity_fields(
     allow_rf_only_for_rf: bool,
     errors: list[str],
 ) -> None:
-    rf_id_str: str | None = rf_id if isinstance(rf_id, str) else None
-    rf_id_is_valid = rf_id_str is not None and bool(rf_id_str.strip())
-    rf_id_is_rf_ref = rf_id_str is not None and rf_id_str.startswith("RF-")
-    approved_is_bool = isinstance(approved, bool)
+    rf_id_str, is_rf_ref = _parse_rf_id(rf_id)
+    rf_id_valid = rf_id_str is not None
 
-    if not rf_id_is_valid:
+    if not rf_id_valid:
         errors.append(f"{prefix}.rf_id: required non-empty string")
 
-    if not approved_is_bool:
-        errors.append(f"{prefix}.approved: expected bool")
-        return
-
-    if allow_rf_only_for_rf and approved is False:
-        errors.append(
-            f"{prefix}.approved: must be true when "
-            "governance.allow_grace_windows_only_for_rf=true"
-        )
-    if approved and rf_id_is_valid and not rf_id_is_rf_ref:
-        errors.append(f"{prefix}.rf_id: approved grace window must reference RF-*")
-    if allow_rf_only_for_rf and rf_id_is_valid and not rf_id_is_rf_ref:
-        errors.append(
-            f"{prefix}.rf_id: must reference RF-* when "
-            "governance.allow_grace_windows_only_for_rf=true"
-        )
+    _validate_approved_field(
+        prefix=prefix,
+        approved=approved,
+        allow_rf_only_for_rf=allow_rf_only_for_rf,
+        errors=errors,
+    )
+    _validate_rf_id_reference(
+        prefix=prefix,
+        rf_id_valid=rf_id_valid,
+        is_rf_ref=is_rf_ref,
+        approved=approved,
+        allow_rf_only_for_rf=allow_rf_only_for_rf,
+        errors=errors,
+    )
 
 
 def _validate_grace_window_dates(

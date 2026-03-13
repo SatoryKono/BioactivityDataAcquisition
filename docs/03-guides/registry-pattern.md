@@ -56,6 +56,11 @@ from bioetl.composition.registry import get_default_registry
 registry = get_default_registry()
 ```
 
+Canonical runtime/bootstrap assembly paths do not rely on that shared
+compatibility instance anymore. `bootstrap_pipeline_runner()`,
+`build_pipeline_runner()`, and `RunnerFactory` now create or receive an explicit
+runtime `PipelineRegistry` instance and pass it through the execution path.
+
 ### Legacy Aliases
 
 `PipelineRegistry` still exposes compatibility aliases:
@@ -69,6 +74,12 @@ registry = get_default_registry()
 
 `ProviderRegistry` is the canonical registry for provider configuration and
 provider-backed creation.
+
+Runtime/bootstrap code should call `ensure_providers_loaded()` instead of
+calling `register_all_providers()` directly. The loader is the lifecycle
+boundary for shared provider registration state: repeated bootstrap calls stay
+idempotent, and stale `_loaded` state is repaired if isolated flows or tests
+clear `ProviderRegistry` after an earlier successful load.
 
 ```python
 from bioetl.composition.providers import ProviderRegistry

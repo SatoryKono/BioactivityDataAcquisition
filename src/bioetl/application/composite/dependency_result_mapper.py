@@ -4,13 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
+from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
+from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
 
 __all__ = ["DependencyResultService"]
 

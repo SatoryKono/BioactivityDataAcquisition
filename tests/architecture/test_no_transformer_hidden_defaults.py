@@ -7,6 +7,9 @@ from pathlib import Path
 
 
 BASE_TRANSFORMER_PATH = Path("src/bioetl/application/core/base_transformer/base.py")
+DEPENDENCIES_MODULE_PATH = Path(
+    "src/bioetl/application/core/base_transformer/dependencies.py"
+)
 FORBIDDEN_CONSTRUCTORS = {
     "NoOpTracing",
     "NoOpMetrics",
@@ -50,3 +53,29 @@ def test_base_transformer_init_does_not_construct_default_collaborators() -> Non
                 return
 
     raise AssertionError("BaseTransformer.__init__ not found")
+
+
+def test_transformer_dependency_module_does_not_construct_default_collaborators() -> (
+    None
+):
+    """Application dependency facade must not build concrete default collaborators."""
+    content = DEPENDENCIES_MODULE_PATH.read_text(encoding="utf-8")
+    tree = ast.parse(content)
+
+    calls = {
+        name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        for name in (
+            [node.func.id]
+            if isinstance(node.func, ast.Name)
+            else [node.func.attr]
+            if isinstance(node.func, ast.Attribute)
+            else []
+        )
+    }
+    forbidden = sorted(FORBIDDEN_CONSTRUCTORS & calls)
+    assert not forbidden, (
+        "base_transformer/dependencies.py must not create concrete defaults; "
+        f"found: {', '.join(forbidden)}"
+    )

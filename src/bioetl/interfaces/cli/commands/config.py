@@ -7,12 +7,15 @@ Uses ConfigService from composition entrypoints for clean layering.
 from __future__ import annotations
 
 import json
+from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition.entrypoints import get_config_service
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
+
+if TYPE_CHECKING:
+    from bioetl.application.services.config_service import ConfigService
 
 __all__ = [
     "COMMANDS",
@@ -22,6 +25,13 @@ __all__ = [
     "show_settings_command",
     "validate_command",
 ]
+
+
+def get_config_service() -> ConfigService:
+    """Load the config service through composition on demand."""
+    from bioetl.composition.entrypoints import get_config_service as _impl
+
+    return _impl()
 
 
 def _config_to_dict(config: object) -> JsonDict:

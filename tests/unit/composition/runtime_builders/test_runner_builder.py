@@ -95,7 +95,7 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
     result = runner_builder.build_pipeline_runner(
         context,
         registry=fake_registry,
-        register_all_providers_fn=lambda: calls.setdefault("providers", True),
+        ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
         register_all_pipelines_fn=lambda registry=None: calls.setdefault(
             "pipelines_registry", registry
         ),
@@ -120,10 +120,10 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
     ]
 
 
-def test_build_pipeline_runner_uses_default_registry() -> None:
-    """Builder should use default registry when no explicit registry is provided."""
+def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
+    """Builder should create a fresh registry when no explicit registry is provided."""
     fake_factory = _FakeFactory()
-    default_registry = _FakeRegistry(factory=fake_factory)
+    created_registry = _FakeRegistry(factory=fake_factory)
 
     def get_settings_fn() -> SimpleNamespace:
         return SimpleNamespace(
@@ -161,8 +161,8 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
 
     result = runner_builder.build_pipeline_runner(
         context,
-        get_default_registry_fn=lambda: default_registry,
-        register_all_providers_fn=lambda: None,
+        create_registry_fn=lambda: created_registry,
+        ensure_providers_loaded_fn=lambda: None,
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
@@ -178,10 +178,10 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
     assert fake_factory.kwargs["runtime"] == "runtime"
 
 
-def test_build_pipeline_runner_registers_pipelines_into_effective_default_registry() -> None:
-    """Builder should register pipelines against the resolved default registry."""
+def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> None:
+    """Builder should register pipelines against the created runtime registry."""
     fake_factory = _FakeFactory()
-    default_registry = _FakeRegistry(factory=fake_factory)
+    created_registry = _FakeRegistry(factory=fake_factory)
     calls: dict[str, object] = {}
 
     context = SimpleNamespace(
@@ -201,8 +201,8 @@ def test_build_pipeline_runner_registers_pipelines_into_effective_default_regist
 
     result = runner_builder.build_pipeline_runner(
         context,
-        get_default_registry_fn=lambda: default_registry,
-        register_all_providers_fn=lambda: calls.setdefault("providers", True),
+        create_registry_fn=lambda: created_registry,
+        ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
         register_all_pipelines_fn=lambda registry=None: calls.setdefault(
             "pipelines_registry", registry
         ),
@@ -227,7 +227,7 @@ def test_build_pipeline_runner_registers_pipelines_into_effective_default_regist
 
     assert result == "runner-instance"
     assert calls["providers"] is True
-    assert calls["pipelines_registry"] is default_registry
+    assert calls["pipelines_registry"] is created_registry
 
 
 def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -> None:
@@ -254,7 +254,7 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
         result = runner_builder.build_pipeline_runner(
             context,
             registry=fake_registry,
-            register_all_providers_fn=lambda: None,
+            ensure_providers_loaded_fn=lambda: None,
             register_all_pipelines_fn=lambda registry=None: None,
             get_settings_fn=lambda: MagicMock(),
             load_pipeline_config_fn=lambda _: MagicMock(),
@@ -324,7 +324,7 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
     runner_builder.build_pipeline_runner(
         context,
         registry=fake_registry,
-        register_all_providers_fn=lambda: None,
+        ensure_providers_loaded_fn=lambda: None,
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
@@ -387,7 +387,7 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
     runner_builder.build_pipeline_runner(
         context,
         registry=fake_registry,
-        register_all_providers_fn=lambda: None,
+        ensure_providers_loaded_fn=lambda: None,
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
@@ -447,7 +447,7 @@ def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled() -> None:
     runner_builder.build_pipeline_runner(
         context,
         registry=fake_registry,
-        register_all_providers_fn=lambda: None,
+        ensure_providers_loaded_fn=lambda: None,
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
