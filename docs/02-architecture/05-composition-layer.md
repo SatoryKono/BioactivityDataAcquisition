@@ -69,6 +69,11 @@ composition/bootstrap/
 Курируемый список таких модулей, их status-модель и exit criteria ведутся в
 [Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
 
+Начиная с `RF-014`, composition также остаётся канонической точкой сборки
+`TransformerDependencyContext`: `NoOp` observability ports, `IdentityService`,
+`DataNormalizationService` и `ContractPolicyPort` должны собираться здесь, а не
+неявно внутри `BaseTransformer`.
+
 **Root-level файлы:**
 
 Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`, `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.

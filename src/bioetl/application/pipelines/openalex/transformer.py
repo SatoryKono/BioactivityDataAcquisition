@@ -21,6 +21,7 @@ __all__ = ["OpenAlexPublicationTransformer"]
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
@@ -98,6 +99,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize OpenAlex transformer.
 
@@ -125,6 +127,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     # ========================================================================

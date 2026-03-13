@@ -12,6 +12,7 @@ __all__ = ["SemanticScholarPublicationTransformer"]
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
@@ -97,6 +98,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize transformer.
 
@@ -124,6 +126,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
 
     def _resolve_publication_type(
