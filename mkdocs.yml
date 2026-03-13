@@ -90,7 +90,7 @@ nav:
             -   "Requirements": 01-requirements/REQUIREMENTS.md
             -   "Rules Summary": 00-project/rules-summary.md
             -   "Glossary": 00-project/glossary.md
-            -   "Tools": 00-project/TOOLS.md
+            -   "Tools Hub": 00-project/TOOLS.md
             -   Governance:
                     -   "Naming Policy": 00-project/governance/02-naming-policy.md
                     -   "File Policy": 00-project/governance/03-file-policy.md

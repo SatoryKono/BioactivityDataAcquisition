@@ -46,6 +46,25 @@ class _ValidatedSilverWriteContext:
 
 
 @dataclass(frozen=True, slots=True)
+class _SilverSchemaPolicyRequest:
+    """Schema drift policy input after synchronous validation completes."""
+
+    table_name: str
+    records: list[BronzeRecord]
+    on_schema_mismatch: Literal["error", "evolve", "ignore"]
+    validated_mode: SilverWriteMode
+    arrow_data: pa.Table
+
+
+@dataclass(frozen=True, slots=True)
+class _SilverSchemaDriftDiff:
+    """Normalized schema drift field sets for one Silver batch."""
+
+    new_fields: tuple[str, ...]
+    missing_fields: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class _SilverWritePreparationRequest:
     """Normalized request payload for Silver validation and Arrow preparation."""
 
@@ -150,6 +169,63 @@ def _diff_schema_fields(
     incoming_fields = set(records[0].keys())
     existing_fields = set(existing_schema.names)
     return incoming_fields - existing_fields, existing_fields - incoming_fields
+
+
+def _build_silver_schema_drift_diff(
+    existing_schema: pa.Schema | None,
+    records: list[BronzeRecord],
+) -> _SilverSchemaDriftDiff | None:
+    """Build a normalized Silver schema drift diff from existing and incoming data."""
+    diff = _diff_schema_fields(existing_schema, records)
+    if diff is None:
+        return None
+
+    new_fields, missing_fields = diff
+    if not new_fields and not missing_fields:
+        return None
+
+    return _SilverSchemaDriftDiff(
+        new_fields=tuple(sorted(new_fields)),
+        missing_fields=tuple(sorted(missing_fields)),
+    )
+
+
+def _build_schema_drift_info(
+    diff: _SilverSchemaDriftDiff,
+) -> SchemaDriftInfo:
+    """Build SchemaDriftInfo from a normalized field diff."""
+    from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
+
+    critical_missing = [
+        field for field in diff.missing_fields if not field.startswith("_")
+    ]
+    status: Literal["info", "warn", "critical"]
+    if critical_missing:
+        status = "critical"
+    elif len(diff.new_fields) > 3:
+        status = "warn"
+    else:
+        status = "info"
+
+    return SchemaDriftInfo(
+        status=status,
+        new_fields=diff.new_fields,
+        missing_fields=diff.missing_fields,
+    )
+
+
+def _build_prepared_silver_write_payload(
+    *,
+    table_path: str,
+    schema_request: _SilverSchemaPolicyRequest,
+) -> _PreparedSilverWritePayload:
+    """Build the final Silver write payload after schema policy checks."""
+    return _PreparedSilverWritePayload(
+        records=schema_request.records,
+        validated_mode=schema_request.validated_mode,
+        table_path=table_path,
+        arrow_data=schema_request.arrow_data,
+    )
 
 
 class SilverWriterValidationMixin:
@@ -296,28 +372,23 @@ class SilverWriterValidationMixin:
     ) -> None:
         """Check schema drift and handle according to configured policy."""
         existing_schema = await self._get_table_schema(table_name)
-        diff = _diff_schema_fields(existing_schema, records)
+        diff = _build_silver_schema_drift_diff(existing_schema, records)
         if diff is None:
-            return
-
-        new_fields, removed_fields = diff
-
-        if not new_fields and not removed_fields:
             return
 
         self.logger.warning(
             "Schema drift detected",
             table=table_name,
-            new_fields=sorted(new_fields) if new_fields else None,
-            removed_fields=sorted(removed_fields) if removed_fields else None,
+            new_fields=list(diff.new_fields) if diff.new_fields else None,
+            removed_fields=list(diff.missing_fields) if diff.missing_fields else None,
             action=on_schema_mismatch,
         )
 
         if on_schema_mismatch == "error":
             raise SchemaEvolutionError(
                 table=table_name,
-                new_fields=new_fields,
-                removed_fields=removed_fields,
+                new_fields=set(diff.new_fields),
+                removed_fields=set(diff.missing_fields),
             )
 
     async def _detect_schema_drift(
@@ -326,33 +397,25 @@ class SilverWriterValidationMixin:
         records: list[BronzeRecord],
     ) -> SchemaDriftInfo | None:
         """Detect schema drift between existing table and incoming records."""
-        from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
-
         existing_schema = await self._get_table_schema(table_name)
-        diff = _diff_schema_fields(existing_schema, records)
+        diff = _build_silver_schema_drift_diff(existing_schema, records)
         if diff is None:
             return None
+        return _build_schema_drift_info(diff)
 
-        new_fields, missing_fields = diff
-
-        if not new_fields and not missing_fields:
-            return None
-
-        critical_missing = [
-            field for field in missing_fields if not field.startswith("_")
-        ]
-        status: Literal["info", "warn", "critical"]
-        if critical_missing:
-            status = "critical"
-        elif len(new_fields) > 3:
-            status = "warn"
-        else:
-            status = "info"
-
-        return SchemaDriftInfo(
-            status=status,
-            new_fields=tuple(sorted(new_fields)),
-            missing_fields=tuple(sorted(missing_fields)),
+    async def _finalize_silver_write_payload(
+        self,
+        schema_request: _SilverSchemaPolicyRequest,
+    ) -> _PreparedSilverWritePayload:
+        """Run schema policy checks and build the final Silver payload."""
+        await self._check_schema_drift(
+            schema_request.table_name,
+            schema_request.records,
+            schema_request.on_schema_mismatch,
+        )
+        return _build_prepared_silver_write_payload(
+            table_path=self._resolve_table_path(schema_request.table_name),
+            schema_request=schema_request,
         )
 
     async def _prepare_silver_write_payload(
@@ -383,18 +446,14 @@ class SilverWriterValidationMixin:
             self._sync_validate_and_build_arrow,
             request,
         )
-        await self._check_schema_drift(
-            table_name,
-            validated.records,
-            on_schema_mismatch,
-        )
-        table_path = self._resolve_table_path(table_name)
-        return _PreparedSilverWritePayload(
+        schema_request = _SilverSchemaPolicyRequest(
+            table_name=table_name,
             records=validated.records,
+            on_schema_mismatch=on_schema_mismatch,
             validated_mode=validated.validated_mode,
-            table_path=table_path,
             arrow_data=validated.arrow_data,
         )
+        return await self._finalize_silver_write_payload(schema_request)
 
 
 SilverWriterValidationMixin._validate_write_mode = staticmethod(

@@ -2,6 +2,19 @@
 
 This is the central documentation hub for the BioETL project.
 
+## Start Here
+
+| Need | Current entry point |
+| --- | --- |
+| Current project rules | [RULES.md](RULES.md) |
+| Active documentation navigator | [Project Navigator](00-map.md) |
+| Current tool commands and placement rules | [Tools Hub](TOOLS.md) |
+| Historical context only | [99-Archive Index](../99-archive/README.md) |
+
+Active guidance lives under `docs/00-05`. Materials in `docs/99-archive/`
+remain useful for traceability, but they are not normative for current project
+behavior.
+
 ## Project Mission
 
 To build a robust, scalable, and maintainable data pipeline for acquiring and processing bioactivity data from various public sources into a unified, analysis-ready format.
@@ -12,9 +25,11 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 - [**Quick Reference**](rules-summary.md): Key rules at a glance.
 - [**Project Navigator**](00-map.md): Full documentation map with links to all resources.
 - [**Project Rules**](RULES.md): The constitution of our project (SSOT). All contributions **MUST** adhere to these rules.
+- [**Tools Hub**](TOOLS.md): Current script entry points, placement rules, and docs toolchain.
 - [**Quick Start Guide**](../03-guides/quick-start.md): Get your local development environment up and running in minutes.
 - [**Architecture Overview**](../02-architecture/system-context.md): Understand the high-level design and data flow.
 - [**How-To Guides**](../03-guides/getting-started.md): Guides for common tasks (adding sources, pipelines, troubleshooting).
+- [**99-Archive Index**](../99-archive/README.md): Historical and superseded materials for traceability only.
 
 ## Key Features
 
@@ -54,7 +69,7 @@ See [Composite Pipeline Diagram](../02-architecture/mmd-diagrams/foundation/29-c
 
 ## Current Version
 
-**v6.0.0** (2026-02-18) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) and [Release Notes](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md#600---2026-02-18) for details.
+**v6.1.0** (2026-03-11) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) and [Release Notes](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md#610---2026-03-11) for details.
 
 ## Getting Started
 
@@ -73,4 +88,4 @@ make test
 
 ----------------------------------------------------------------------
 
-*Last updated: 2026-02-24*
+*Last updated: 2026-03-13*

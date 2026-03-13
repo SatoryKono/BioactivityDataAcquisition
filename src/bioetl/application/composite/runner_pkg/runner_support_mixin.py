@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol
 
@@ -33,9 +34,6 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import (
         config as composite_config,
     )
-    from bioetl.domain.composite import (
-        result as composite_result,
-    )
 
 
 class _CompositeRunnerSupportHostProtocol(Protocol):
@@ -64,6 +62,44 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
         enrichment_results: dict[str, EnrichmentResult],
     ) -> str | None: ...
 
+    def _prepare_preflight_validation_context(
+        self,
+    ) -> _PreparedPreflightValidationContext | None: ...
+
+    def _prepare_composite_result_context(
+        self,
+        artifacts: composite_runner_module.CompositeExecutionContext,
+    ) -> _PreparedCompositeResultContext: ...
+
+    def _log_composite_completion(
+        self,
+        context: _PreparedCompositeResultContext,
+    ) -> None: ...
+
+    def _finalize_composite_result(
+        self,
+        context: _PreparedCompositeResultContext,
+    ) -> CompositeResult: ...
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedPreflightValidationContext:
+    """Resolved runtime data for preflight validation execution."""
+
+    validator: composite_preflight_validator.CompositePreflightValidationService
+    field_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedCompositeResultContext:
+    """Resolved completion metadata used for final result assembly."""
+
+    artifacts: composite_runner_module.CompositeExecutionContext
+    completed_at: datetime
+    total_duration: float
+    had_warnings: bool
+
+
 __all__ = ["CompositeRunnerSupportMixin"]
 
 
@@ -84,51 +120,65 @@ class CompositeRunnerSupportMixin:
 
     def _build_composite_result(
         self: _CompositeRunnerSupportHostProtocol,
-        seed_result: SeedResult,
-        dependency_results: dict[str, composite_result.DependencyResult],
-        enrichment_results: dict[str, EnrichmentResult],
-        merge_result: composite_result.MergeResult | None,
+        artifacts: composite_runner_module.CompositeExecutionContext,
     ) -> CompositeResult:
         """Build the final CompositeResult."""
+        context = self._prepare_composite_result_context(artifacts)
+        self._log_composite_completion(context)
+        return self._finalize_composite_result(context)
+
+    def _prepare_composite_result_context(
+        self: _CompositeRunnerSupportHostProtocol,
+        artifacts: composite_runner_module.CompositeExecutionContext,
+    ) -> _PreparedCompositeResultContext:
+        """Resolve completion metadata before final CompositeResult assembly."""
         completed_at = datetime.now(tz=UTC)
         started = self._started_at or completed_at
-        total_duration = (completed_at - started).total_seconds()
-
         had_warnings = calculate_had_warnings(
-            enrichment_results,
+            artifacts.enrichment_results,
             frozenset(self._config.required_enrichers),
             self._config.name,
             self._logger,
         )
+        return _PreparedCompositeResultContext(
+            artifacts=artifacts,
+            completed_at=completed_at,
+            total_duration=(completed_at - started).total_seconds(),
+            had_warnings=had_warnings,
+        )
 
-        if had_warnings:
-            self._logger.info(
-                PipelineEvent.COMPLETE,
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                duration_seconds=total_duration,
-                status="completed_with_warnings",
-                had_warnings=True,
-            )
-        else:
-            self._logger.info(
-                PipelineEvent.COMPLETE,
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                duration_seconds=total_duration,
-            )
+    def _log_composite_completion(
+        self: _CompositeRunnerSupportHostProtocol,
+        context: _PreparedCompositeResultContext,
+    ) -> None:
+        """Emit the canonical completion log payload for composite runs."""
+        log_kwargs: dict[str, object] = {
+            "composite": self._config.name,
+            "run_id": self._run_id_str,
+            "duration_seconds": context.total_duration,
+        }
+        if context.had_warnings:
+            log_kwargs["status"] = "completed_with_warnings"
+            log_kwargs["had_warnings"] = True
+        self._logger.info(PipelineEvent.COMPLETE, **log_kwargs)
 
+    def _finalize_composite_result(
+        self: _CompositeRunnerSupportHostProtocol,
+        context: _PreparedCompositeResultContext,
+    ) -> CompositeResult:
+        """Assemble the final CompositeResult from the prepared completion context."""
+        artifacts = context.artifacts
         return CompositeResult(
             composite_name=self._config.name,
             composite_run_id=self._run_id_str,
-            seed_result=seed_result,
-            dependency_results=dependency_results,
-            enrichment_results=enrichment_results,
-            merge_result=merge_result,
-            total_duration_seconds=total_duration,
+            seed_result=artifacts.seed_result,
+            dependency_results=artifacts.dependency_results,
+            enrichment_results=artifacts.enrichment_results,
+            merge_result=artifacts.merge_result,
+            total_duration_seconds=context.total_duration,
             started_at=self._started_at,
-            completed_at=completed_at,
-            had_warnings=had_warnings,
+            completed_at=context.completed_at,
+            had_warnings=context.had_warnings,
             _required_enrichers=frozenset(self._config.required_enrichers),
             _required_dependencies=frozenset(self._config.required_dependencies),
         )
@@ -165,12 +215,12 @@ class CompositeRunnerSupportMixin:
         self: _CompositeRunnerSupportHostProtocol,
     ) -> None:
         """Run preflight validation for field_priorities configuration."""
-        skip_reason = self._get_preflight_skip_reason()
-        if skip_reason is not None:
+        context = self._prepare_preflight_validation_context()
+        if context is None:
             self._logger.debug(
                 "Preflight validation skipped",
                 composite=self._config.name,
-                reason=skip_reason,
+                reason=self._get_preflight_skip_reason(),
             )
             return
 
@@ -178,17 +228,14 @@ class CompositeRunnerSupportMixin:
             PipelineEvent.phase_started("preflight_validation"),
             composite=self._config.name,
             run_id=self._run_id_str,
-            field_count=len(self._config.merge.field_priorities),
+            field_count=context.field_count,
         )
 
-        validator = self._preflight_validator
-        assert validator is not None
-
-        result = validator.validate(
+        result = context.validator.validate(
             self._config,
             fail_on_error=True,
         )
-        validator.log_resolved_field_sources(result, self._config.name)
+        context.validator.log_resolved_field_sources(result, self._config.name)
 
         self._logger.info(
             PipelineEvent.phase_completed("preflight_validation"),
@@ -196,6 +243,20 @@ class CompositeRunnerSupportMixin:
             run_id=self._run_id_str,
             fields_validated=len(result.resolved_fields),
             warnings=len(result.warnings),
+        )
+
+    def _prepare_preflight_validation_context(
+        self: _CompositeRunnerSupportHostProtocol,
+    ) -> _PreparedPreflightValidationContext | None:
+        """Build the canonical preflight validation context when validation can run."""
+        if self._get_preflight_skip_reason() is not None:
+            return None
+
+        validator = self._preflight_validator
+        assert validator is not None
+        return _PreparedPreflightValidationContext(
+            validator=validator,
+            field_count=len(self._config.merge.field_priorities),
         )
 
     def _get_preflight_skip_reason(

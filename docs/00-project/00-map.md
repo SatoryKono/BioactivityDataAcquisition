@@ -1,12 +1,13 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.23 | Last updated: 2026-03-10*
+*Synced with RULES.md v5.23 | Last updated: 2026-03-13*
 
 > **Documentation Update:** 2026-03-10
 > - ADR inventory refreshed to ADR-043
 > - Architecture tree paths updated to `mmd-diagrams/`
 > - Quick-start and pipeline command references aligned with current CLI
 > - Inventory-style counts trimmed to avoid stale snapshot drift
+> - Active entry points clarified: `RULES.md`, `TOOLS.md`, and `99-archive/README.md`
 
 ## Quick Links
 
@@ -14,11 +15,13 @@
 |-------------------------|------------------------------------------------------------------------|
 | Understand the rules    | [RULES.md](RULES.md)                 |
 | Look up terminology     | [glossary.md](glossary.md)           |
+| Find tool commands      | [TOOLS.md](TOOLS.md)                 |
 | Create a new pipeline   | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)      |
 | Review a pipeline       | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [runbooks/index.md](../05-operations/runbooks/index.md)                           |
 | Understand architecture | [00-overview.md](../02-architecture/00-overview.md)                  |
 | Check data contracts    | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
+| Need historical context | [99-archive/README.md](../99-archive/README.md) *(non-canonical)* |
 
 ---
 
@@ -43,7 +46,7 @@ docs/
 │   ├── index.md                 # Welcome page
 │   ├── RULES.md                 # Canonical rules document (v5.23)
 │   ├── glossary.md              # Ubiquitous Language terminology
-│   ├── TOOLS.md                 # Tools & Setup
+│   ├── TOOLS.md                 # Active tools hub & unified entry points
 │   ├── rules-summary.md         # TL;DR of RULES.md
 │   └── governance/              # Project governance policies
 │       ├── 02-naming-policy.md  # Entity naming conventions
@@ -79,7 +82,7 @@ docs/
 │   ├── verification/            # Data verification reports
 │   └── ... (Ops guides: vacuum, performance)
 │
-└── 99-archive/                  # Archived / Deprecated
+└── 99-archive/                  # Historical / superseded (non-nav, non-canonical)
     ├── reports/                 # Old project reports
     └── ...
 ```
@@ -92,7 +95,8 @@ docs/
 
 1. [RULES.md](RULES.md) - Project rules (start here)
 2. [rules-summary.md](rules-summary.md) - Quick reference
-3. [04-extending-bioetl.md](governance/04-extending-bioetl.md) - Adding providers/pipelines
+3. [TOOLS.md](TOOLS.md) - Active tools hub and script entry points
+4. [04-extending-bioetl.md](governance/04-extending-bioetl.md) - Adding providers/pipelines
 
 ### Architecture
 
@@ -480,7 +484,7 @@ graph TD
 | glossary.md              | 2026-02-25   | v2.6 (Ubiquitous Language)   |
 | 00-map.md                | 2026-03-02   | v8.0 Source Code Map rewritten |
 | rules-summary.md         | 2026-02-24   | v5.23 Synced                 |
-| TOOLS.md                 | 2026-03-02   | v2.3 Synced with RULES v5.23 |
+| TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-guides/development/   | 2026-01-26   | Config schema guidelines     |
 | ADR-001..043             | 2026-03-09   | Current ADR set documented   |
@@ -491,4 +495,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-03-10. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*
+*Last updated: 2026-03-13. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*

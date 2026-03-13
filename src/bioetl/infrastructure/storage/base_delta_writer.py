@@ -60,6 +60,66 @@ def _get_string_fields(schema: pa.Schema) -> set[str]:
     return _get_string_fields_impl(schema)
 
 
+def _read_delta_records(
+    table: DeltaTable,
+    columns: list[str] | None = None,
+) -> list[BronzeRecord]:
+    """Read Delta rows into generic record dictionaries."""
+    arrow_table = table.to_pyarrow_table(columns=columns)
+    result: list[BronzeRecord] = arrow_table.to_pylist()
+    return result
+
+
+def _load_delta_table(table_path: str) -> DeltaTable:
+    """Open a Delta table from its resolved filesystem path."""
+    return DeltaTable(table_path)
+
+
+def _resolve_delta_table_path(
+    *,
+    base_path: str,
+    table_name: str,
+    flat_structure: bool,
+) -> str:
+    """Resolve the filesystem path for a Delta table."""
+    if flat_structure:
+        return base_path
+    return f"{base_path}/{table_name.replace('.', '/')}"
+
+
+def _get_delta_table_arrow_schema(table: DeltaTable) -> pa.Schema:
+    """Extract the PyArrow schema from an opened Delta table."""
+    return table.schema().to_arrow()
+
+
+def _clear_delta_tables(
+    *,
+    base_path: Path,
+    table_path: Path | None,
+    dry_run: bool,
+) -> int:
+    """Clear one Delta table or all Delta tables rooted at a base path."""
+    import shutil
+
+    if not base_path.exists():
+        return 0
+
+    if table_path is not None:
+        if not table_path.exists():
+            return 0
+        if not dry_run:
+            shutil.rmtree(table_path)
+        return 1
+
+    cleared = 0
+    for item in base_path.iterdir():
+        if item.is_dir() and (item / "_delta_log").exists():
+            if not dry_run:
+                shutil.rmtree(item)
+            cleared += 1
+    return cleared
+
+
 def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
     """Coerce Null-typed columns to concrete types for Delta Lake compatibility.
 
@@ -160,9 +220,11 @@ class BaseDeltaWriter:
         Returns:
             String path to the table directory.
         """
-        if self._flat_structure:
-            return self.base_path
-        return f"{self.base_path}/{table_name.replace('.', '/')}"
+        return _resolve_delta_table_path(
+            base_path=self.base_path,
+            table_name=table_name,
+            flat_structure=self._flat_structure,
+        )
 
     def _prepare_arrow_data(
         self,
@@ -225,10 +287,7 @@ class BaseDeltaWriter:
         table_path = self._resolve_table_path(table_name)
         loop = asyncio.get_running_loop()
         try:
-            return await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
+            return await loop.run_in_executor(None, _load_delta_table, table_path)
         except DeltaTableNotFoundError:
             return None
 
@@ -247,7 +306,8 @@ class BaseDeltaWriter:
         dt = await self._open_delta_table(table_name)
         if dt is None:
             return None
-        return dt.schema().to_arrow()
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, _get_delta_table_arrow_schema, dt)
 
     def get_table_path(self, table_name: str) -> Path:
         """Get the filesystem path for a Delta table.
@@ -292,14 +352,7 @@ class BaseDeltaWriter:
             raise FileNotFoundError(f"Table not found: {table_name}")
 
         loop = asyncio.get_running_loop()
-
-        # Read as PyArrow and convert to list of dicts
-        def _read_table() -> list[BronzeRecord]:
-            arrow_table = dt.to_pyarrow_table(columns=columns)
-            result: list[BronzeRecord] = arrow_table.to_pylist()
-            return result
-
-        return await loop.run_in_executor(None, _read_table)
+        return await loop.run_in_executor(None, _read_delta_records, dt, columns)
 
     def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
         """Clear Delta table(s) by removing their directories.
@@ -319,24 +372,11 @@ class BaseDeltaWriter:
             This operation is destructive and cannot be undone.
             Used primarily for rebuild runs per RULES.md §2.1.
         """
-        import shutil
         from pathlib import Path
 
         base = Path(self.base_path)
-        if not base.exists():
-            return 0
-
-        cleared = 0
-        if table_name:
-            table_path = self.get_table_path(table_name)
-            if table_path.exists():
-                if not dry_run:
-                    shutil.rmtree(table_path)
-                cleared = 1
-        else:
-            for item in base.iterdir():
-                if item.is_dir() and (item / "_delta_log").exists():
-                    if not dry_run:
-                        shutil.rmtree(item)
-                    cleared += 1
-        return cleared
+        return _clear_delta_tables(
+            base_path=base,
+            table_path=self.get_table_path(table_name) if table_name else None,
+            dry_run=dry_run,
+        )

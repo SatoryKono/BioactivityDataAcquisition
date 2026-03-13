@@ -9,12 +9,17 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.runner_pkg.runner import CompositeExecutionContext
 from bioetl.application.composite.runner_pkg.runner_support_mixin import (
     CompositeRunnerSupportMixin,
 )
 from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
     EnrichmentResult,
     EnrichmentStatus,
+    MergeResult,
+    SeedResult,
 )
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -79,6 +84,30 @@ class _SupportMixinHarness(CompositeRunnerSupportMixin):
         self._fsm = MagicMock()
 
 
+def _build_execution_artifacts(
+    *,
+    enrichment_results: dict[str, EnrichmentResult] | None = None,
+) -> CompositeExecutionContext:
+    return CompositeExecutionContext(
+        seed_result=SeedResult(
+            pipeline_name="seed_pipeline",
+            records_extracted=10,
+            records_silver=9,
+        ),
+        dependency_results={
+            "dep_a": DependencyResult(
+                pipeline_name="dep_a",
+                status=DependencyStatus.SUCCESS,
+            )
+        },
+        enrichment_results=enrichment_results or {},
+        merge_result=MergeResult(
+            records_merged=9,
+            records_from_seed=10,
+        ),
+    )
+
+
 # ---------------------------------------------------------------------------
 # _get_preflight_skip_reason
 # ---------------------------------------------------------------------------
@@ -118,6 +147,22 @@ def test_get_preflight_skip_reason_when_configured_then_returns_none() -> None:
     reason = harness._get_preflight_skip_reason()
 
     assert reason is None
+
+
+@pytest.mark.unit
+def test_prepare_preflight_validation_context_when_configured_then_returns_context() -> (
+    None
+):
+    harness = _SupportMixinHarness()
+    validator = MagicMock()
+    harness._preflight_validator = validator
+    harness._config.merge.field_priorities = ["title", "abstract"]
+
+    context = harness._prepare_preflight_validation_context()
+
+    assert context is not None
+    assert context.validator is validator
+    assert context.field_count == 2
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +205,64 @@ def test_run_preflight_validation_when_valid_config_then_calls_validator() -> No
 # ---------------------------------------------------------------------------
 # _validate_config_consistency
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_build_composite_result_when_called_then_uses_named_artifacts() -> None:
+    harness = _SupportMixinHarness()
+    artifacts = _build_execution_artifacts(
+        enrichment_results={
+            "enricher_a": EnrichmentResult(
+                enricher_name="enricher_a",
+                status=EnrichmentStatus.SUCCESS,
+            )
+        }
+    )
+
+    result = harness._build_composite_result(artifacts)
+
+    assert result.seed_result is artifacts.seed_result
+    assert result.dependency_results is artifacts.dependency_results
+    assert result.enrichment_results is artifacts.enrichment_results
+    assert result.merge_result is artifacts.merge_result
+    harness._logger.info.assert_called_once()
+
+
+@pytest.mark.unit
+def test_prepare_composite_result_context_when_called_then_preserves_artifacts() -> None:
+    harness = _SupportMixinHarness()
+    artifacts = _build_execution_artifacts()
+
+    context = harness._prepare_composite_result_context(artifacts)
+
+    assert context.artifacts is artifacts
+
+
+@pytest.mark.unit
+def test_build_composite_result_when_optional_failure_then_logs_warning_completion() -> (
+    None
+):
+    harness = _SupportMixinHarness(
+        config=_make_composite_config(
+            enrichers=[_make_enricher_cfg("opt_a", required=False)],
+            required_enrichers=[],
+        )
+    )
+    artifacts = _build_execution_artifacts(
+        enrichment_results={
+            "opt_a": EnrichmentResult(
+                enricher_name="opt_a",
+                status=EnrichmentStatus.FAILED,
+            )
+        }
+    )
+
+    result = harness._build_composite_result(artifacts)
+
+    assert result.had_warnings is True
+    info_kwargs = harness._logger.info.call_args.kwargs
+    assert info_kwargs["status"] == "completed_with_warnings"
+    assert info_kwargs["had_warnings"] is True
 
 
 @pytest.mark.unit

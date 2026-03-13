@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Protocol
+from collections.abc import Callable, Coroutine
+from dataclasses import dataclass
+from typing import Protocol, TypeVar
 
 import click
 
@@ -25,6 +27,8 @@ from bioetl.interfaces.cli.formatters import (
     echo_info,
     echo_quarantine_record,
 )
+
+_T = TypeVar("_T")
 
 __all__ = [
     "_inspect_quarantine",
@@ -81,6 +85,64 @@ class _QuarantineService(Protocol):
         ...
 
 
+@dataclass(frozen=True, slots=True)
+class _QuarantineCommandContext:
+    """Shared execution context for one quarantine CLI command."""
+
+    pipeline: str
+
+    def run_async(
+        self,
+        coro: Coroutine[object, object, _T],
+        *,
+        reason_prefix: str,
+        domain_error_title: str,
+        unexpected_error_title: str,
+    ) -> _T | None:
+        """Run one async quarantine operation with a consistent policy."""
+        return run_quarantine_async(
+            coro,
+            policy=self._build_policy(
+                reason_prefix=reason_prefix,
+                domain_error_title=domain_error_title,
+                unexpected_error_title=unexpected_error_title,
+            ),
+        )
+
+    def run_sync(
+        self,
+        fn: Callable[[], _T],
+        *,
+        reason_prefix: str,
+        domain_error_title: str,
+        unexpected_error_title: str,
+    ) -> _T | None:
+        """Run one sync quarantine operation with a consistent policy."""
+        return run_quarantine_sync(
+            fn,
+            policy=self._build_policy(
+                reason_prefix=reason_prefix,
+                domain_error_title=domain_error_title,
+                unexpected_error_title=unexpected_error_title,
+            ),
+        )
+
+    def _build_policy(
+        self,
+        *,
+        reason_prefix: str,
+        domain_error_title: str,
+        unexpected_error_title: str,
+    ) -> QuarantineExecutionPolicy:
+        """Build the shared execution policy for one operation."""
+        return QuarantineExecutionPolicy(
+            pipeline=self.pipeline,
+            reason_prefix=reason_prefix,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+        )
+
+
 def _render_stats_dashboard(stats: JsonDict, *, pipeline: str) -> None:
     """Render human-readable quarantine statistics."""
     for line in build_quarantine_stats_lines(stats, pipeline=pipeline):
@@ -96,18 +158,16 @@ def _inspect_quarantine(
 ) -> None:
     """Inspect quarantined records for one pipeline."""
     echo_info(f"Inspecting quarantine for {pipeline} (limit {limit})...")
+    context = _QuarantineCommandContext(pipeline=pipeline)
 
     async def _inspect() -> list[JsonDict]:
         return await manager.inspect(limit=limit, error_code=error_code)
 
-    records = run_quarantine_async(
+    records = context.run_async(
         _inspect(),
-        policy=QuarantineExecutionPolicy(
-            pipeline=pipeline,
-            reason_prefix="CLI_QUARANTINE_INSPECT",
-            domain_error_title="Failed to inspect quarantine with domain error",
-            unexpected_error_title="Unexpected error during quarantine inspect",
-        ),
+        reason_prefix="CLI_QUARANTINE_INSPECT",
+        domain_error_title="Failed to inspect quarantine with domain error",
+        unexpected_error_title="Unexpected error during quarantine inspect",
     )
     if records is None:
         return
@@ -125,18 +185,16 @@ def _show_quarantine_stats(
     output_json: bool,
 ) -> None:
     """Display quarantine statistics for one pipeline."""
+    context = _QuarantineCommandContext(pipeline=pipeline)
 
     async def _stats() -> JsonDict:
         return await manager.get_stats()
 
-    stats = run_quarantine_async(
+    stats = context.run_async(
         _stats(),
-        policy=QuarantineExecutionPolicy(
-            pipeline=pipeline,
-            reason_prefix="CLI_QUARANTINE_STATS",
-            domain_error_title="Failed to get stats",
-            unexpected_error_title="Failed to get stats",
-        ),
+        reason_prefix="CLI_QUARANTINE_STATS",
+        domain_error_title="Failed to get stats",
+        unexpected_error_title="Failed to get stats",
     )
     if stats is None:
         return
@@ -155,18 +213,16 @@ def _replay_quarantine(
     dry_run: bool,
 ) -> None:
     """Replay or preview replay for quarantine records."""
-    records = run_quarantine_sync(
+    context = _QuarantineCommandContext(pipeline=pipeline)
+    records = context.run_sync(
         lambda: service.replay(
             pipeline=pipeline,
             error_code=error_code,
             max_age_days=max_age_days,
         ),
-        policy=QuarantineExecutionPolicy(
-            pipeline=pipeline,
-            reason_prefix="CLI_QUARANTINE_REPLAY",
-            domain_error_title="Failed to replay quarantine records with domain error",
-            unexpected_error_title="Unexpected error during quarantine replay",
-        ),
+        reason_prefix="CLI_QUARANTINE_REPLAY",
+        domain_error_title="Failed to replay quarantine records with domain error",
+        unexpected_error_title="Unexpected error during quarantine replay",
     )
     if records is None:
         return
@@ -179,14 +235,11 @@ def _replay_quarantine(
         return
 
     click.echo(f"\nReplaying {len(records)} record(s)...")
-    marked_count = run_quarantine_sync(
+    marked_count = context.run_sync(
         lambda: service.mark_as_reprocessed(records),
-        policy=QuarantineExecutionPolicy(
-            pipeline=pipeline,
-            reason_prefix="CLI_QUARANTINE_REPLAY_MARK",
-            domain_error_title="Failed to mark replayed records with domain error",
-            unexpected_error_title="Unexpected error during quarantine replay mark",
-        ),
+        reason_prefix="CLI_QUARANTINE_REPLAY_MARK",
+        domain_error_title="Failed to mark replayed records with domain error",
+        unexpected_error_title="Unexpected error during quarantine replay mark",
     )
     if marked_count is None:
         return
@@ -203,19 +256,17 @@ def _purge_quarantine(
     force: bool,
 ) -> None:
     """Purge old quarantine records or preview the purge."""
+    context = _QuarantineCommandContext(pipeline=pipeline)
     if dry_run:
 
         async def _get_stats() -> JsonDict:
             return await service.get_stats(pipeline)
 
-        stats = run_quarantine_async(
+        stats = context.run_async(
             _get_stats(),
-            policy=QuarantineExecutionPolicy(
-                pipeline=pipeline,
-                reason_prefix="CLI_QUARANTINE_PURGE_PREVIEW",
-                domain_error_title="Failed to preview quarantine purge with domain error",
-                unexpected_error_title="Unexpected error during quarantine purge preview",
-            ),
+            reason_prefix="CLI_QUARANTINE_PURGE_PREVIEW",
+            domain_error_title="Failed to preview quarantine purge with domain error",
+            unexpected_error_title="Unexpected error during quarantine purge preview",
         )
         if stats is None:
             return
@@ -233,17 +284,14 @@ def _purge_quarantine(
             abort=True,
         )
 
-    count = run_quarantine_sync(
+    count = context.run_sync(
         lambda: service.purge(
             pipeline=pipeline,
             older_than_days=older_than_days,
         ),
-        policy=QuarantineExecutionPolicy(
-            pipeline=pipeline,
-            reason_prefix="CLI_QUARANTINE_PURGE",
-            domain_error_title="Failed to purge quarantine records with domain error",
-            unexpected_error_title="Unexpected error during quarantine purge",
-        ),
+        reason_prefix="CLI_QUARANTINE_PURGE",
+        domain_error_title="Failed to purge quarantine records with domain error",
+        unexpected_error_title="Unexpected error during quarantine purge",
     )
     if count is None:
         return
@@ -258,17 +306,15 @@ def _resolve_quarantine_record(
     status: str,
 ) -> None:
     """Resolve one quarantine record by payload hash."""
-    success = run_quarantine_sync(
+    context = _QuarantineCommandContext(pipeline=pipeline)
+    success = context.run_sync(
         lambda: service.update_status(
             payload_hash,
             QuarantineRecordStatus[status],
         ),
-        policy=QuarantineExecutionPolicy(
-            pipeline=pipeline,
-            reason_prefix="CLI_QUARANTINE_RESOLVE",
-            domain_error_title="Failed to resolve quarantine record with domain error",
-            unexpected_error_title="Unexpected error during quarantine resolve",
-        ),
+        reason_prefix="CLI_QUARANTINE_RESOLVE",
+        domain_error_title="Failed to resolve quarantine record with domain error",
+        unexpected_error_title="Unexpected error during quarantine resolve",
     )
     if success is None:
         return
