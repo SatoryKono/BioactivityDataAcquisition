@@ -222,3 +222,4 @@ reports/domain-ddd-consolidation-p1-2026-03-06.md
 reports/file-size-decomposition-migration-notes-2026-03-06.md
 reports/quality-debt-scorecard-2026-Q1.md
 svg/INDEX.md
+docs/03-guides/development/codex-wsl2-setup.md

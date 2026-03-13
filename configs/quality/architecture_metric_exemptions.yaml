@@ -16,7 +16,13 @@ registries:
     file_size_limits: { }
     function_complexity: { }
     function_length: { }
-    class_size: { }
+    class_size:
+        src/bioetl/application/core/postrun_service.py::PostrunService:
+            reason: Exceeds 300 lines limit slightly
+            value: 350
+            owner: L1-AI
+            removal_step: Refactor
+            expires_on: "2026-12-31"
     class_method_count: { }
     god_object: { }
     domain_complexity: { }

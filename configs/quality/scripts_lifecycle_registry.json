@@ -420,6 +420,36 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/dev/codex-exec.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate if needed."
+    },
+    "scripts/dev/codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate if needed."
+    },
+    "scripts/quality/generate_review_reports.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as architecture quality script."
+    },
+    "scripts/dev/start-wsl-proxy.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate if needed."
+    },
+    "scripts/dev/wsl_proxy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate if needed."
     }
   }
 }
