@@ -16,7 +16,13 @@ registries:
     file_size_limits: { }
     function_complexity: { }
     function_length: { }
-    class_size: { }
     class_method_count: { }
     god_object: { }
     domain_complexity: { }
+    class_size:
+        src/bioetl/application/core/postrun_service.py::PostrunService:
+            value: 306
+            owner: "Team Core"
+            reason: "Legacy postrun logic requires consolidation"
+            expires_on: '2026-06-30'
+            removal_step: "Extract quarantine processing to separate service"
