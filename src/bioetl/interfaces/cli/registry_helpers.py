@@ -8,9 +8,10 @@ fresh, explicitly populated ``PipelineRegistry`` instance.
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry import PipelineRegistry, create_registry
+if TYPE_CHECKING:
+    from bioetl.composition.registry import PipelineRegistry
 
 __all__ = [
     "build_cli_registry",
@@ -18,6 +19,22 @@ __all__ = [
     "get_default_registry",
     "register_all_pipelines",
 ]
+
+
+def create_registry() -> PipelineRegistry:
+    """Create a fresh registry via the public composition facade."""
+    from bioetl.composition.registry import create_registry as _impl
+
+    return _impl()
+
+
+def register_all_pipelines(*, registry: PipelineRegistry | None = None) -> None:
+    """Register pipelines via the public composition facade."""
+    from bioetl.composition.factories.pipeline.registry import (
+        register_all_pipelines as _impl,
+    )
+
+    _impl(registry=registry)
 
 
 def _build_registered_registry(
