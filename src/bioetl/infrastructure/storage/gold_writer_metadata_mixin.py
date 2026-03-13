@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from datetime import datetime
 from types import ModuleType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
@@ -24,6 +25,100 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import GoldRecord, ScdConfig
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+
+@dataclass(frozen=True, slots=True)
+class _GoldMetadataWriteRequest:
+    """Normalized request payload for one standard Gold metadata write."""
+
+    table_path: str
+    table_name: str
+    records: list[GoldRecord]
+    mode: GoldWriteMode
+    scd_config: ScdConfig | None
+    ingestion_ts: datetime | None
+    run_id: RunID | None
+    silver_refs: list[SilverWriteResult] | None = None
+    gold_schema: object | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedGoldMetadataWrite:
+    """Prepared metadata context carried into metadata sidecar persistence."""
+
+    request: _GoldMetadataWriteRequest
+    provider_name: str
+    entity_name: str
+    metadata: GoldMetadata
+
+
+class _GoldMetadataWriteHostProtocol(Protocol):
+    """Typed host contract for standard Gold metadata write stages."""
+
+    def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]: ...
+
+    def _create_gold_metadata_payload(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        mode: GoldWriteMode,
+        scd_config: ScdConfig | None,
+        ingestion_ts: datetime | None,
+        run_id: RunID | None,
+        silver_refs: list[SilverWriteResult] | None = None,
+        gold_schema: object | None = None,
+    ) -> GoldMetadata: ...
+
+    async def _write_gold_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: GoldMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None: ...
+
+
+def _prepare_gold_metadata_write(
+    host: _GoldMetadataWriteHostProtocol,
+    request: _GoldMetadataWriteRequest,
+) -> _PreparedGoldMetadataWrite:
+    """Resolve provider/entity and build metadata payload before sidecar write."""
+    provider_name, entity_name = host._resolve_provider_entity(request.table_name)
+    metadata = host._create_gold_metadata_payload(
+        table_path=request.table_path,
+        table_name=request.table_name,
+        records=request.records,
+        mode=request.mode,
+        scd_config=request.scd_config,
+        ingestion_ts=request.ingestion_ts,
+        run_id=request.run_id,
+        silver_refs=request.silver_refs,
+        gold_schema=request.gold_schema,
+    )
+    return _PreparedGoldMetadataWrite(
+        request=request,
+        provider_name=provider_name,
+        entity_name=entity_name,
+        metadata=metadata,
+    )
+
+
+async def _persist_gold_metadata_write(
+    host: _GoldMetadataWriteHostProtocol,
+    prepared: _PreparedGoldMetadataWrite,
+) -> None:
+    """Persist one prepared Gold metadata write."""
+    await host._write_gold_metadata_file(
+        table_path=prepared.request.table_path,
+        metadata=prepared.metadata,
+        table_name=prepared.request.table_name,
+        provider_name=prepared.provider_name,
+        entity_name=prepared.entity_name,
+    )
 
 
 class _GoldWriterMergedMetadataInputMixin:
@@ -315,25 +410,21 @@ class GoldWriterMetadataMixin(
         """Write Gold layer metadata sidecar file."""
         if not records:
             return
-        provider_name, entity_name = self._resolve_provider_entity(table_name)
-        metadata = self._create_gold_metadata_payload(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            scd_config=scd_config,
-            ingestion_ts=ingestion_ts,
-            run_id=run_id,
-            silver_refs=silver_refs,
-            gold_schema=gold_schema,
+        prepared = _prepare_gold_metadata_write(
+            self,
+            _GoldMetadataWriteRequest(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                scd_config=scd_config,
+                ingestion_ts=ingestion_ts,
+                run_id=run_id,
+                silver_refs=silver_refs,
+                gold_schema=gold_schema,
+            ),
         )
-        await self._write_gold_metadata_file(
-            table_path=table_path,
-            metadata=metadata,
-            table_name=table_name,
-            provider_name=provider_name,
-            entity_name=entity_name,
-        )
+        await _persist_gold_metadata_write(self, prepared)
 
     async def _write_gold_metadata_file(
         self,

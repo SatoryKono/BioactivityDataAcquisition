@@ -453,6 +453,11 @@ runner = PipelineFactory.create()
 | Converter | `*Converter` | `UnitConverter` |
 | Classifier | `*Classifier` | `AdapterErrorClassifier` |
 | Clock | `*Clock` | `SystemClock` |
+| RateLimiter | `*RateLimiter` | `TokenBucketRateLimiter` |
+| Guard | `*Guard` | `CircuitBreakerGuard` |
+| Reader | `*Reader` | `DeltaReader` |
+| Hasher | `*Hasher` | `Sha256PiiHasher` |
+| Encoder | `*Encoder` | `StdLibJsonEncoder` |
 
 > **Value Object suffixes** (не требуют проверки — исключены из NAME-001):
 > `*Record`, `*Options`, `*Status`, `*Preview`, `*Phase`, `*Issue`,
@@ -460,7 +465,10 @@ runner = PipelineFactory.create()
 > `*Affiliation`, `*Raw`, `*Output`, `*Event`, `*Rule`, `*Report`,
 > `*Mapping`, `*Stats`, `*Metadata`, `*Settings`, `*Token`, `*Params`,
 > `*Input`, `*Score`, `*Value`, `*Distribution`, `*Metric`,
-> `*Pairing`, `*Mismatch`, `*Filter`, `*Alias`.
+> `*Pairing`, `*Mismatch`, `*Filter`, `*Alias`,
+> `*Journal`, `*Funder`, `*License`, `*Link`, `*Grant`, `*Chemical`,
+> `*Heading`, `*DateParts`, `*Assertion`, `*ClinicalTrial`, `*Reference`,
+> `*Response`, `*Message`, `*SearchResult`.
 
 **Детекция:**
 ```bash

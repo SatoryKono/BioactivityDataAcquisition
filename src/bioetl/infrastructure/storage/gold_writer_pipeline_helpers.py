@@ -15,12 +15,37 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 @dataclass(frozen=True, slots=True)
+class GoldWriteRequest:
+    """Normalized request payload for one standard Gold write."""
+
+    table_name: str
+    records: list[GoldRecord]
+    schema: DataFrameSchema
+    primary_keys: list[str] | None = None
+    mode: str = "overwrite"
+    partition_cols: list[str] | None = None
+    scd_config: ScdConfig | None = None
+    column_order: list[str] | None = None
+    ingestion_ts: datetime | None = None
+    run_id: RunID | None = None
+    silver_refs: list[SilverWriteResult] | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class PreparedGoldWriteContext:
     """Prepared pre-write state shared by Gold write phases."""
 
     table_name: str
     table_path: str
     validated_mode: GoldWriteMode
+
+
+@dataclass(frozen=True, slots=True)
+class GoldWriteDispatchContext:
+    """Prepared dispatch state carried into Gold IO mode routing."""
+
+    prepared: PreparedGoldWriteContext
+    request: GoldWriteRequest
 
 
 @dataclass(frozen=True, slots=True)
@@ -163,7 +188,9 @@ async def post_write_gold(
 
 
 __all__ = [
+    "GoldWriteDispatchContext",
     "GoldWritePostwriteContext",
+    "GoldWriteRequest",
     "PreparedGoldWriteContext",
     "normalize_scd_config",
     "post_write_gold",

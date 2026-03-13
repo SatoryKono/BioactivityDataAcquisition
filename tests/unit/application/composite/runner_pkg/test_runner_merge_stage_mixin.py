@@ -105,7 +105,7 @@ def test_transition_to_merging_state_when_called_then_validates_and_logs_fsm() -
     harness = _MergeHarness()
     state = _make_state(CompositePipelineState.ENRICHMENT_COMPLETED)
 
-    new_state = harness._transition_to_merging_state(state)
+    harness._transition_to_merging_state(state)
 
     harness._fsm.validate_fsm_transition.assert_called_once_with(
         CompositePipelineState.ENRICHMENT_COMPLETED,

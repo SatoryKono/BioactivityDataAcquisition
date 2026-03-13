@@ -200,6 +200,51 @@ class TestGoldWriterValidation:
         assert prepared.table_path == "s3://test-bucket/gold/test/table"
         assert prepared.validated_mode.value == "overwrite"
 
+    async def test_write_gold_dispatches_named_context(
+        self, gold_writer, valid_records, strict_schema
+    ):
+        """Test write_gold routes a named request/prepared context into dispatch."""
+        from bioetl.infrastructure.storage.gold_writer import (
+            GoldWriteMode,
+            _PreparedGoldWriteContext,
+        )
+
+        prepared = _PreparedGoldWriteContext(
+            table_name="test.table",
+            table_path="s3://test-bucket/gold/test/table",
+            validated_mode=GoldWriteMode.APPEND,
+        )
+        gold_writer._prepare_write_gold = AsyncMock(  # type: ignore[method-assign]
+            return_value=prepared
+        )
+        gold_writer._dispatch_write = AsyncMock()  # type: ignore[method-assign]
+        gold_writer._post_write_gold = AsyncMock()  # type: ignore[method-assign]
+
+        await gold_writer.write_gold(
+            table_name="test.table",
+            records=valid_records,
+            schema=strict_schema,
+            mode="append",
+            primary_keys=["entity_id"],
+            partition_cols=["year"],
+        )
+
+        gold_writer._prepare_write_gold.assert_awaited_once()
+        gold_writer._dispatch_write.assert_awaited_once()
+        dispatch_context = gold_writer._dispatch_write.await_args.args[0]
+        assert dispatch_context.prepared is prepared
+        assert dispatch_context.request.table_name == "test.table"
+        assert dispatch_context.request.records == valid_records
+        assert dispatch_context.request.schema is strict_schema
+        assert dispatch_context.request.mode == "append"
+        assert dispatch_context.request.primary_keys == ["entity_id"]
+        assert dispatch_context.request.partition_cols == ["year"]
+
+        post_context = gold_writer._post_write_gold.await_args.args[0]
+        assert post_context.prepared is prepared
+        assert post_context.records == valid_records
+        assert post_context.schema is strict_schema
+
     async def test_write_gold_scd2_without_config_raises(
         self, gold_writer, valid_records, strict_schema
     ):

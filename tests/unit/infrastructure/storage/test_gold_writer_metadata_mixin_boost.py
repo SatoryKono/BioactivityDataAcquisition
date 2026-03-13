@@ -6,7 +6,7 @@ Targets uncovered lines: 48-50, 71-78, 117, 154-181, 287-301, 317, 369, 380-388.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -19,7 +19,6 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold_writer_metadata_mixin import (
     GoldWriterMetadataMixin,
     _GoldWriterMergedMetadataInputMixin,
-    _GoldWriterMetadataPayloadMixin,
 )
 
 
@@ -102,7 +101,7 @@ class TestExtractCompletedAt:
         mixin._transform_version = "1.0"
         mixin._transform_steps = ()
 
-        dt = datetime(2025, 3, 10, 12, 0, 0, tzinfo=timezone.utc)
+        dt = datetime(2025, 3, 10, 12, 0, 0, tzinfo=UTC)
         record = {"_lineage_created_at": dt}
         result = mixin._extract_completed_at(record)
 
@@ -197,7 +196,7 @@ class TestLogGoldAudit:
         mixin = _ConcreteGoldMixin(audit=audit)
 
         run_id = _make_run_id()
-        ingestion_ts = datetime(2025, 1, 15, 10, 0, 0, tzinfo=timezone.utc)
+        ingestion_ts = datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC)
 
         await mixin._log_gold_audit(
             table_name="chembl.activity",
@@ -237,7 +236,7 @@ class TestLogGoldAudit:
         audit.log_write = AsyncMock()
         mixin = _ConcreteGoldMixin(audit=audit)
 
-        ingestion_ts = datetime(2025, 1, 15, tzinfo=timezone.utc)
+        ingestion_ts = datetime(2025, 1, 15, tzinfo=UTC)
 
         await mixin._log_gold_audit(
             table_name="chembl.activity",
@@ -257,7 +256,7 @@ class TestLogGoldAudit:
         audit.log_write = AsyncMock()
         mixin = _ConcreteGoldMixin(audit=audit)
 
-        ingestion_ts = datetime(2025, 1, 15, tzinfo=timezone.utc)
+        ingestion_ts = datetime(2025, 1, 15, tzinfo=UTC)
         run_id = _make_run_id()
 
         for mode in GoldWriteMode:
@@ -385,6 +384,43 @@ class TestWriteGoldMetadata:
         )
 
         mixin._metadata_writer.write_gold_metadata.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_prepares_resolved_metadata_context_before_write(self) -> None:
+        """Standard Gold metadata path should resolve provider/entity before persist."""
+        metadata = MagicMock()
+        mixin = _ConcreteGoldMixin(metadata_coordinator=MagicMock())
+        mixin._create_gold_metadata_payload = MagicMock(return_value=metadata)  # type: ignore[method-assign]
+        mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
+
+        await mixin._write_gold_metadata(
+            table_path="gold/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+        )
+
+        mixin._create_gold_metadata_payload.assert_called_once_with(
+            table_path="gold/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+            silver_refs=None,
+            gold_schema=None,
+        )
+        mixin._write_gold_metadata_file.assert_awaited_once_with(
+            table_path="gold/chembl/activity",
+            metadata=metadata,
+            table_name="chembl.activity",
+            provider_name="chembl",
+            entity_name="activity",
+        )
 
 
 @pytest.mark.unit

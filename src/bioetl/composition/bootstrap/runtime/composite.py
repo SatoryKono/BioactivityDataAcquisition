@@ -26,9 +26,6 @@ from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
 from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
     create_composite_runner as _create_composite_runner_builder_impl,
 )
-from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-    CompositeFilterExtractionService,
-)
 from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
     _create_dq_report_service,
     _load_field_group_registry,
@@ -56,7 +53,6 @@ from bioetl.composition.bootstrap.runtime.runner_assembly import (
 )
 from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
     RunnerFactoryBuilderService,
-    resolve_bronze_opts,
 )
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config import get_settings
@@ -80,16 +76,12 @@ __all__ = [
     "bootstrap_composite_runner",
     "load_composite_config",
 ]
-
 # Backward-compatible patch points for helper tests.
 COMPOSITE_CONFIG_DIR = DEFAULT_COMPOSITE_CONFIG_DIR
-COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = dict(
-    DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY
-)
+COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = dict(DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY)
 
 # Backward-compatible patch point used by legacy bootstrap tests.
 CompositePipelineRunner = create_composite_runner_with_legacy_fsm_adapter
-
 
 @dataclass(frozen=True, slots=True)
 class _CompositeBootstrapPlan:
@@ -181,13 +173,20 @@ def _build_runner_factories(
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
     """Build seed/dependency/enricher runner factories for composite phases."""
+    from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+        CompositeFilterExtractionService,
+    )
+    from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
+        resolve_bronze_opts,
+    )
+
     return _build_runner_factories_builder_impl(
         config=config,
         runtime=runtime,
         logger=logger,
         runner_factory_builder_cls=RunnerFactoryBuilderService,
         filter_extraction_service_cls=CompositeFilterExtractionService,
-        pipeline_runner_builder=bootstrap_pipeline_runner,
+        pipeline_runner_builder=_bootstrap_pipeline_runner_impl,
         resolve_bronze_opts_fn=resolve_bronze_opts,
     )
 
@@ -350,5 +349,5 @@ def bootstrap_composite_pipeline(
 
 # CIRCULAR-DEPENDENCY: kept local to avoid entrypoints bootstrap cycle.
 from bioetl.composition.bootstrap.runtime.pipeline import (
-    bootstrap_pipeline_runner,
+    bootstrap_pipeline_runner as _bootstrap_pipeline_runner_impl,
 )

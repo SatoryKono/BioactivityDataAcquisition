@@ -23,7 +23,13 @@ from bioetl.infrastructure.storage.gold_writer_metadata_mixin import (
     GoldWriterMetadataMixin,
 )
 from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    GoldWriteDispatchContext as _GoldWriteDispatchContext,
+)
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
     GoldWritePostwriteContext as _GoldWritePostwriteContext,
+)
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    GoldWriteRequest as _GoldWriteRequest,
 )
 from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
     PreparedGoldWriteContext as _PreparedGoldWriteContext,
@@ -180,36 +186,48 @@ class GoldWriter(
                 if isinstance(scd_config, Mapping)
                 else scd_config
             )
-            self._set_write_span_attributes(span, table_name, mode, len(records))
-            prepared = await self._prepare_write_gold(
+            request = _GoldWriteRequest(
                 table_name=table_name,
                 records=records,
-                mode=mode,
                 schema=schema,
+                primary_keys=primary_keys,
+                mode=mode,
+                partition_cols=partition_cols,
                 scd_config=normalized_scd_config,
+                column_order=column_order,
                 ingestion_ts=ingestion_ts,
+                run_id=run_id,
+                silver_refs=silver_refs,
+            )
+            self._set_write_span_attributes(
+                span,
+                request.table_name,
+                request.mode,
+                len(request.records),
+            )
+            prepared = await self._prepare_write_gold(
+                table_name=request.table_name,
+                records=request.records,
+                mode=request.mode,
+                schema=request.schema,
+                scd_config=request.scd_config,
+                ingestion_ts=request.ingestion_ts,
             )
             await self._dispatch_write(
-                prepared.validated_mode,
-                prepared.table_path,
-                prepared.table_name,
-                records,
-                partition_cols,
-                primary_keys,
-                schema,
-                normalized_scd_config,
-                ingestion_ts,
-                column_order,
+                _GoldWriteDispatchContext(
+                    prepared=prepared,
+                    request=request,
+                )
             )
             await self._post_write_gold(
                 _GoldWritePostwriteContext(
                     prepared=prepared,
-                    records=records,
-                    ingestion_ts=ingestion_ts,
-                    run_id=run_id,
-                    scd_config=normalized_scd_config,
-                    silver_refs=silver_refs,
-                    schema=schema,
+                    records=request.records,
+                    ingestion_ts=request.ingestion_ts,
+                    run_id=request.run_id,
+                    scd_config=request.scd_config,
+                    silver_refs=request.silver_refs,
+                    schema=request.schema,
                 )
             )
 

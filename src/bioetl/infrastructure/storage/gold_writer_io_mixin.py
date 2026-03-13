@@ -17,6 +17,9 @@ from bioetl.infrastructure.storage.gold_writer_io_delta_mixins import (
 from bioetl.infrastructure.storage.gold_writer_io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
+from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    GoldWriteDispatchContext as _GoldWriteDispatchContext,
+)
 from bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin import (
     GoldWriterReadCleanupMixin,
 )
@@ -263,44 +266,41 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
 
     async def _dispatch_write(
         self,
-        mode: GoldWriteMode,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        partition_cols: list[str] | None,
-        primary_keys: list[str] | None,
-        schema: DataFrameSchema,
-        scd_config: ScdConfig | None,
-        ingestion_ts: datetime | None,
-        column_order: list[str] | None,
+        context: _GoldWriteDispatchContext,
     ) -> None:
         """Dispatch to appropriate write method based on mode."""
         module = _load_gold_writer_module()
+        prepared = context.prepared
+        request = context.request
+        mode = prepared.validated_mode
 
         if mode == GoldWriteMode.SCD2:
-            assert ingestion_ts is not None
-            assert scd_config is not None
-            normalized = module._normalize_scd_config(scd_config, primary_keys)
+            assert request.ingestion_ts is not None
+            assert request.scd_config is not None
+            normalized = module._normalize_scd_config(
+                request.scd_config,
+                request.primary_keys,
+            )
             dispatch_target = cast(_GoldWriteDispatchTargetProtocol, self)
             await dispatch_target._write_scd2(
-                table_path,
-                records,
+                prepared.table_path,
+                request.records,
                 normalized,
-                partition_cols,
-                ingestion_ts,
-                column_order,
+                request.partition_cols,
+                request.ingestion_ts,
+                request.column_order,
             )
             return
         dispatch_target = cast(_GoldWriteDispatchTargetProtocol, self)
         await dispatch_target._write_simple(
-            table_path,
-            table_name,
-            records,
+            prepared.table_path,
+            prepared.table_name,
+            request.records,
             mode.value,
-            partition_cols,
-            primary_keys,
-            schema,
-            column_order,
+            request.partition_cols,
+            request.primary_keys,
+            request.schema,
+            request.column_order,
         )
 
 
