@@ -18,11 +18,29 @@ Structure:
 
 from __future__ import annotations
 
-# Re-export entrypoint functions for convenience
-from bioetl.composition.entrypoints import create_pipeline_runner
+from typing import TYPE_CHECKING
+
 from bioetl.interfaces.cli.commands.run_helpers import validate_pipeline_name
 from bioetl.interfaces.cli.main import cli, main
 from bioetl.interfaces.cli.registry_helpers import get_default_registry
+
+if TYPE_CHECKING:
+    from bioetl.application.services import RunOptions
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+
+def create_pipeline_runner(
+    name: str,
+    options: RunOptions,
+) -> ExecutionMetricsRunnerPort:
+    """Build a pipeline runner via the public composition facade.
+
+    Kept as a package-level convenience export while avoiding a direct
+    composition import at module import time.
+    """
+    from bioetl.composition.entrypoints import create_pipeline_runner as _impl
+
+    return _impl(name, options)
 
 __all__ = [
     "cli",

@@ -9,8 +9,6 @@ from __future__ import annotations
 import click
 
 from bioetl import __version__
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry import create_registry
 from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
@@ -25,7 +23,9 @@ from bioetl.interfaces.cli.commands.run_all import run_all
 from bioetl.interfaces.cli.commands.run_composite import run_composite
 from bioetl.interfaces.cli.registry_helpers import (
     _build_registered_registry,
+    create_registry,
     get_default_registry,
+    register_all_pipelines,
 )
 
 __all__ = [
@@ -35,7 +35,12 @@ __all__ = [
 
 
 def _build_main_registry() -> object:
-    """Build an explicit registry for the canonical process entrypoint."""
+    """Build an explicit registry for the canonical process entrypoint.
+
+    Uses interface-layer registry helpers so the CLI entry module does not
+    import composition modules directly while preserving historical patch
+    points used by tests.
+    """
     return _build_registered_registry(
         create_registry_fn=create_registry,
         register_all_pipelines_fn=register_all_pipelines,

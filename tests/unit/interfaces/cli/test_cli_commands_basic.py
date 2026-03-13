@@ -228,6 +228,27 @@ class TestRunCommand:
 class TestMainFunction:
     """Tests for main entry point."""
 
+    @patch("bioetl.interfaces.cli.main._build_registered_registry")
+    def test_build_main_registry_uses_interface_registry_helpers(
+        self,
+        mock_build_registered_registry,
+    ) -> None:
+        """Main registry builder should delegate via interface helper collaborators."""
+        import importlib
+
+        cli_main_module = importlib.import_module("bioetl.interfaces.cli.main")
+
+        registry = MagicMock()
+        mock_build_registered_registry.return_value = registry
+
+        result = cli_main_module._build_main_registry()
+
+        assert result is registry
+        mock_build_registered_registry.assert_called_once_with(
+            create_registry_fn=cli_main_module.create_registry,
+            register_all_pipelines_fn=cli_main_module.register_all_pipelines,
+        )
+
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     @patch("bioetl.interfaces.cli.main.cli")
     def test_main_calls_cli_with_explicit_registry(
