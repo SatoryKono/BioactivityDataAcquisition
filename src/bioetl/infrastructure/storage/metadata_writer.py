@@ -1,19 +1,11 @@
-"""Metadata writer implementation for Medallion layer sidecar files.
-
-Writes _metadata.yaml files alongside data artifacts in Bronze, Silver,
-and Gold layers using atomic write pattern for consistency.
-
-Implements RULES.md 2.3 and 02-user-rules.md 2.4:
-- Lineage tracking
-- QC information
-- Runtime context
-"""
+"""Atomic sidecar metadata writer for Bronze, Silver, and Gold layers."""
 
 from __future__ import annotations
 
 __all__ = ["METADATA_FILENAME", "MetadataWriter"]
 
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -41,32 +33,54 @@ METADATA_FILENAME = "_metadata.yaml"
 @dataclass(frozen=True, slots=True)
 class _PreparedMetadataWrite:
     """Prepared metadata sidecar write request."""
-
     metadata_path: Path
     yaml_content: str
     pipeline_label: str
 
 
 @dataclass(frozen=True, slots=True)
+class _MetadataWriteRequest:
+    """Named request for a metadata sidecar write."""
+    base_path: str | Path
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata
+    layer: str
+    table_name: str | None = None
+    flat_structure: bool = False
+    provider: str | None = None
+    entity: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _ResolvedMetadataTarget:
+    """Resolved target path and pipeline label for one metadata sidecar."""
+    metadata_path: Path
+    pipeline_label: str
+
+
+@dataclass(frozen=True, slots=True)
 class _MetadataWriteTelemetryContext:
     """Shared telemetry fields for metadata sidecar writes."""
-
     layer: str
     provider: str | None
     pipeline: str
 
 
+@dataclass(frozen=True, slots=True)
+class _PreparedMetadataWriteOperation:
+    """Prepared write operation with shared telemetry/log context."""
+    prepared_write: _PreparedMetadataWrite
+    telemetry_context: _MetadataWriteTelemetryContext
+    run_id: str
+
+
+@dataclass(slots=True)
+class _MetadataWriteRetryState:
+    """Mutable retry count shared with the atomic-write callback."""
+    count: int = 0
+
+
 def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
-    """Generate metadata filename based on provider and entity.
-
-    Args:
-        provider: Provider name (e.g., 'chembl').
-        entity: Entity type (e.g., 'activity').
-
-    Returns:
-        Filename in format {provider}_{entity}_metadata.yaml if both provided,
-        otherwise falls back to _metadata.yaml.
-    """
+    """Return `{provider}_{entity}_metadata.yaml` or the default filename."""
     if provider and entity:
         return f"{provider}_{entity}_metadata.yaml"
     return METADATA_FILENAME
@@ -83,28 +97,80 @@ def _prepare_metadata_write(
     entity: str | None,
 ) -> _PreparedMetadataWrite:
     """Build the file target, serialized payload, and telemetry label."""
-    path = Path(base_path)
+    target = _resolve_metadata_target(
+        _MetadataWriteRequest(
+            base_path=base_path,
+            metadata=metadata,
+            layer=layer,
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
+        )
+    )
+    return _PreparedMetadataWrite(
+        metadata_path=target.metadata_path,
+        yaml_content=_serialize_metadata_yaml(metadata),
+        pipeline_label=target.pipeline_label,
+    )
+
+
+def _resolve_metadata_target(request: _MetadataWriteRequest) -> _ResolvedMetadataTarget:
+    """Resolve the file path and pipeline label for a metadata write."""
+    path = Path(request.base_path)
+    provider = request.provider
+    entity = request.entity
+
     if provider and entity:
         metadata_path = path / _get_metadata_filename(provider, entity)
-    elif flat_structure and table_name:
-        metadata_path = path / f"{table_name}_metadata.yaml"
+    elif request.flat_structure and request.table_name:
+        metadata_path = path / f"{request.table_name}_metadata.yaml"
     else:
         metadata_path = path / METADATA_FILENAME
 
-    metadata_dict = metadata.model_dump(mode="json", by_alias=True)
-    yaml_content = yaml.safe_dump(
-        metadata_dict,
+    pipeline_label = request.table_name or (
+        f"{provider}.{entity}" if provider and entity else f"{request.layer}_metadata"
+    )
+    return _ResolvedMetadataTarget(
+        metadata_path=metadata_path,
+        pipeline_label=pipeline_label,
+    )
+
+
+def _serialize_metadata_yaml(
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+) -> str:
+    """Serialize the metadata model to canonical YAML content."""
+    serialized_yaml = yaml.safe_dump(
+        metadata.model_dump(mode="json", by_alias=True),
         default_flow_style=False,
         allow_unicode=True,
         sort_keys=False,
     )
-    pipeline_label = table_name or (
-        f"{provider}.{entity}" if provider and entity else f"{layer}_metadata"
+    return str(serialized_yaml)
+
+
+def _prepare_metadata_write_operation(
+    request: _MetadataWriteRequest,
+) -> _PreparedMetadataWriteOperation:
+    """Resolve the prepared write payload and shared telemetry context."""
+    prepared_write = _prepare_metadata_write(
+        base_path=request.base_path,
+        metadata=request.metadata,
+        layer=request.layer,
+        table_name=request.table_name,
+        flat_structure=request.flat_structure,
+        provider=request.provider,
+        entity=request.entity,
     )
-    return _PreparedMetadataWrite(
-        metadata_path=metadata_path,
-        yaml_content=yaml_content,
-        pipeline_label=pipeline_label,
+    return _PreparedMetadataWriteOperation(
+        prepared_write=prepared_write,
+        telemetry_context=_MetadataWriteTelemetryContext(
+            layer=request.layer,
+            provider=request.provider,
+            pipeline=prepared_write.pipeline_label,
+        ),
+        run_id=request.metadata.runtime.run_id,
     )
 
 
@@ -183,6 +249,48 @@ def _emit_final_telemetry(
         )
 
 
+def _build_retry_callback(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+    context: _MetadataWriteTelemetryContext,
+    retry_state: _MetadataWriteRetryState,
+) -> Callable[[int, float, OSError], None]:
+    """Build the retry callback used by atomic_write_text."""
+    def on_retry(attempt: int, delay_seconds: float, error: OSError) -> None:
+        retry_state.count = attempt
+        _emit_retry_telemetry(
+            logger=logger,
+            metrics=metrics,
+            context=context,
+            attempt=attempt,
+            delay_seconds=delay_seconds,
+            reason=str(getattr(error, "errno", "os_error")),
+        )
+
+    return on_retry
+
+
+def _emit_atomic_write_final_telemetry(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+    context: _MetadataWriteTelemetryContext,
+    retry_state: _MetadataWriteRetryState,
+    status: str,
+    final_reason: str,
+) -> None:
+    """Emit the final metadata-write event from the accumulated retry state."""
+    _emit_final_telemetry(
+        logger=logger,
+        metrics=metrics,
+        context=context,
+        retry_count=retry_state.count,
+        status=status,
+        final_reason=final_reason,
+    )
+
+
 async def _execute_atomic_metadata_write(
     *,
     logger: LoggerPort,
@@ -192,18 +300,13 @@ async def _execute_atomic_metadata_write(
     context: _MetadataWriteTelemetryContext,
 ) -> int:
     """Write prepared metadata atomically and emit retry/final telemetry."""
-    retry_state = {"count": 0}
-
-    def on_retry(attempt: int, delay_seconds: float, error: OSError) -> None:
-        retry_state["count"] = attempt
-        _emit_retry_telemetry(
-            logger=logger,
-            metrics=metrics,
-            context=context,
-            attempt=attempt,
-            delay_seconds=delay_seconds,
-            reason=str(getattr(error, "errno", "os_error")),
-        )
+    retry_state = _MetadataWriteRetryState()
+    on_retry = _build_retry_callback(
+        logger=logger,
+        metrics=metrics,
+        context=context,
+        retry_state=retry_state,
+    )
 
     loop = asyncio.get_running_loop()
     try:
@@ -217,29 +320,29 @@ async def _execute_atomic_metadata_write(
             ),
         )
     except AtomicWriteError as exc:
-        _emit_final_telemetry(
+        _emit_atomic_write_final_telemetry(
             logger=logger,
             metrics=metrics,
             context=context,
-            retry_count=retry_state["count"],
+            retry_state=retry_state,
             status="failed",
             final_reason=exc.reason or "atomic_write_error",
         )
         raise
 
-    _emit_final_telemetry(
+    _emit_atomic_write_final_telemetry(
         logger=logger,
         metrics=metrics,
         context=context,
-        retry_count=retry_state["count"],
+        retry_state=retry_state,
         status="succeeded",
         final_reason=(
             "success_after_retry"
-            if retry_state["count"] > 0
+            if retry_state.count > 0
             else "success_without_retry"
         ),
     )
-    return retry_state["count"]
+    return retry_state.count
 
 
 class MetadataWriter:
@@ -281,7 +384,13 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            base_path, metadata, "bronze", provider=provider, entity=entity
+            _MetadataWriteRequest(
+                base_path=base_path,
+                metadata=metadata,
+                layer="bronze",
+                provider=provider,
+                entity=entity,
+            )
         )
 
     async def write_silver_metadata(
@@ -310,13 +419,15 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            base_path,
-            metadata,
-            "silver",
-            table_name=table_name,
-            flat_structure=flat_structure,
-            provider=provider,
-            entity=entity,
+            _MetadataWriteRequest(
+                base_path=base_path,
+                metadata=metadata,
+                layer="silver",
+                table_name=table_name,
+                flat_structure=flat_structure,
+                provider=provider,
+                entity=entity,
+            )
         )
 
     async def write_gold_metadata(
@@ -345,59 +456,36 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            base_path,
-            metadata,
-            "gold",
-            table_name=table_name,
-            flat_structure=flat_structure,
-            provider=provider,
-            entity=entity,
+            _MetadataWriteRequest(
+                base_path=base_path,
+                metadata=metadata,
+                layer="gold",
+                table_name=table_name,
+                flat_structure=flat_structure,
+                provider=provider,
+                entity=entity,
+            )
         )
 
-    async def _write_metadata(
-        self,
-        base_path: str | Path,
-        metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
-        layer: str,
-        *,
-        table_name: str | None = None,
-        flat_structure: bool = False,
-        provider: str | None = None,
-        entity: str | None = None,
-        ) -> str:
+    async def _write_metadata(self, request: _MetadataWriteRequest) -> str:
         """Write sidecar metadata for Bronze/Silver/Gold layers and return file path."""
-        prepared_write = _prepare_metadata_write(
-            base_path=base_path,
-            metadata=metadata,
-            layer=layer,
-            table_name=table_name,
-            flat_structure=flat_structure,
-            provider=provider,
-            entity=entity,
-        )
+        operation = _prepare_metadata_write_operation(request)
         await _execute_atomic_metadata_write(
             logger=self._logger,
             metrics=self._metrics,
-            prepared_write=prepared_write,
+            prepared_write=operation.prepared_write,
             retry_policy=self._atomic_replace_retry_policy,
-            context=_MetadataWriteTelemetryContext(
-                layer=layer,
-                provider=provider,
-                pipeline=prepared_write.pipeline_label,
-            ),
+            context=operation.telemetry_context,
         )
 
         self._logger.info(
             "metadata_written",
-            layer=layer,
-            path=str(prepared_write.metadata_path),
-            run_id=metadata.runtime.run_id,
+            layer=request.layer,
+            path=str(operation.prepared_write.metadata_path),
+            run_id=operation.run_id,
         )
 
-        return str(prepared_write.metadata_path.resolve())
+        return str(operation.prepared_write.metadata_path.resolve())
 
     async def aclose(self) -> None:
-        """Release any resources held by the metadata writer.
-
-        No resources to release for filesystem-based writer.
-        """
+        """Release any resources held by the metadata writer."""

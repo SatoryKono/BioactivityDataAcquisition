@@ -26,6 +26,9 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import (
+    build_test_transformer_dependencies,
+)
 
 
 class ConcreteTransformer(BaseTransformer):
@@ -53,7 +56,22 @@ def mock_context() -> PipelineContext:
 @pytest.fixture
 def transformer() -> ConcreteTransformer:
     """Create a concrete transformer for testing."""
-    return ConcreteTransformer(provider="test")
+    return ConcreteTransformer(
+        provider="test",
+        dependencies=build_test_transformer_dependencies(),
+    )
+
+
+@pytest.mark.unit
+def test_base_transformer_requires_explicit_dependencies(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """BaseTransformer no longer creates collaborators implicitly."""
+    from bioetl.application.core.base_transformer import base as base_module
+
+    monkeypatch.setattr(base_module, "_COMPAT_DEPENDENCY_BUILDER", None)
+    with pytest.raises(TypeError, match="requires explicit collaborator injection"):
+        ConcreteTransformer(provider="test")
 
 
 @pytest.mark.unit
@@ -266,7 +284,10 @@ class TestTemplateMethodPattern:
             async def _transform_impl(self, context, record, index):
                 raise ValueError("Entity validation failed")
 
-        transformer = FailingTransformer(provider="test")
+        transformer = FailingTransformer(
+            provider="test",
+            dependencies=build_test_transformer_dependencies(),
+        )
         result = await transformer.transform(mock_context, {"id": "123"}, index=0)
 
         assert result is None
@@ -282,6 +303,7 @@ class TestTemplateMethodPattern:
         transformer = ConcreteTransformer(
             provider="test",
             silver_filters=SilverFilterConfig(required_fields=("must_exist",)),
+            dependencies=build_test_transformer_dependencies(),
         )
 
         with pytest.raises(FilteredOutError):
@@ -499,7 +521,10 @@ class TestGoldMethods:
         self, mock_context: PipelineContext
     ) -> None:
         """Test should_write_gold returns True when no filters are configured."""
-        transformer = ConcreteTransformer(provider="test")
+        transformer = ConcreteTransformer(
+            provider="test",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {"field": "value"}
         assert transformer.should_write_gold(mock_context, record) is True
 
@@ -512,7 +537,11 @@ class TestGoldMethods:
 
         col_filter = GoldColumnFilter(column="type", values=frozenset(["Ki"]))
         filters = GoldFilterConfig(column_filters=(col_filter,))
-        transformer = ConcreteTransformer(provider="test", gold_filters=filters)
+        transformer = ConcreteTransformer(
+            provider="test",
+            gold_filters=filters,
+            dependencies=build_test_transformer_dependencies(),
+        )
 
         # Matching record
         assert transformer.should_write_gold(mock_context, {"type": "Ki"}) is True
@@ -533,7 +562,10 @@ class TestGoldMethods:
         class TransformerWithExclusions(ConcreteTransformer):
             GOLD_EXCLUDE_FIELDS = frozenset({"content_hash", "molecule_properties"})
 
-        transformer = TransformerWithExclusions(provider="test")
+        transformer = TransformerWithExclusions(
+            provider="test",
+            dependencies=build_test_transformer_dependencies(),
+        )
         silver_record = {
             "valid_field": "keep_me",
             "content_hash": "remove_me",

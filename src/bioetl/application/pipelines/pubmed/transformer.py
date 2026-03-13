@@ -73,9 +73,8 @@ class PubMedPublicationTransformer(
     _cached_xml_root: ET.Element | None
 
     # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-    # Validates year/month ranges (01-12 months, 01-31 days) but does NOT
-    # enforce month-day consistency (e.g., Feb 31 passes). Guards
-    # _compute_publication_date against malformed PubMed date strings.
+    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
+    # they propagate to _compute_publication_date.
     _VALID_DATE_PATTERNS: ClassVar[tuple[re.Pattern[str], ...]] = (
         # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
         re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
@@ -85,7 +84,6 @@ class PubMedPublicationTransformer(
         re.compile(r"^\d{4}$"),
     )
 
-    # PubMed XML <Month> abbreviation → numeric mapping for date parsing.
     _MONTH_MAP: ClassVar[dict[str, int]] = {
         "jan": 1,
         "feb": 2,

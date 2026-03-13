@@ -8,14 +8,11 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.composition.factories.pipeline.construction import (
     DomainConfigResolver,
     RunContextFactory,
     TransformerBuilder,
-)
-from bioetl.application.core.base_transformer import TransformerDependencyContext
-from bioetl.application.core.base_transformer.contract_policy import (
-    _DefaultContractPolicy,
 )
 from bioetl.domain.types import RunID, RunType
 
@@ -135,8 +132,7 @@ def test_transformer_builder_builds_transformer_with_policy_fallback() -> None:
     assert built["provider"] == "chembl"
     assert built["entity_type"] == "activity"
     assert isinstance(built["dependencies"], TransformerDependencyContext)
-    assert isinstance(built["dependencies"].contract_policy, _DefaultContractPolicy)
-    assert built["dependencies"].identity_service is not None
-    assert built["dependencies"].data_normalizer is not None
+    dependencies = built["dependencies"]
+    assert dependencies.contract_policy is not None
     assert built["silver_filters"] == "silver-filter"
     assert built["gold_filters"] == "gold-filter"

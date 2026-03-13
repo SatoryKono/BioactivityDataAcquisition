@@ -223,9 +223,6 @@ class TestEmitFinalTelemetry:
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
 
-        # Simulate AtomicWriteError during write
-        from bioetl.infrastructure.storage._atomic import atomic_write_text
-
         base_path = tmp_path / "bronze"
         base_path.mkdir(parents=True)
 
@@ -412,6 +409,37 @@ class TestWriteMetadataPathLogic:
         assert len(info_calls) >= 1
         # pipeline label should be bronze_metadata
         assert info_calls[0].kwargs.get("pipeline") == "bronze_metadata"
+
+    @pytest.mark.asyncio
+    async def test_metadata_written_log_uses_resolved_operation_context(
+        self, tmp_path: Path
+    ) -> None:
+        """metadata_written log keeps layer, path, and run_id after request wrapping."""
+        logger = MagicMock()
+        writer = MetadataWriter(logger=logger)
+        metadata = _make_gold_metadata()
+        base_path = tmp_path / "gold"
+        base_path.mkdir(parents=True)
+
+        result = await writer.write_gold_metadata(
+            base_path,
+            metadata,
+            provider="chembl",
+            entity="activity",
+        )
+
+        written_calls = [
+            call
+            for call in logger.info.call_args_list
+            if call.args and call.args[0] == "metadata_written"
+        ]
+        assert len(written_calls) == 1
+        assert written_calls[0].kwargs == {
+            "layer": "gold",
+            "path": str(base_path / "chembl_activity_metadata.yaml"),
+            "run_id": metadata.runtime.run_id,
+        }
+        assert result == str((base_path / "chembl_activity_metadata.yaml").resolve())
 
     @pytest.mark.asyncio
     async def test_success_after_retry_final_reason(self, tmp_path: Path) -> None:

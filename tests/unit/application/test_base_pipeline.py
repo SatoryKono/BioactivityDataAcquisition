@@ -14,6 +14,9 @@ from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.transformer_dependencies import (
+    build_test_transformer_dependencies,
+)
 
 
 class ConcretePipeline(BasePipeline):
@@ -27,7 +30,10 @@ class MockTransformer(BaseTransformer):
     """Mock transformer for testing."""
 
     def __init__(self):
-        super().__init__(provider="test")
+        super().__init__(
+            provider="test",
+            dependencies=build_test_transformer_dependencies(),
+        )
 
     async def _transform_impl(self, context, record):
         return record

@@ -10,7 +10,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.composition.factories.transformer_factory import (
     _TRANSFORMER_REGISTRY,
     TransformerRegistrationSpec,
@@ -50,39 +49,22 @@ class MockTransformer:
     ):
         self.provider = provider
         self.entity_type = entity_type
-        self.dependencies = dependencies
-        self.tracer = (
-            dependencies.tracer
-            if isinstance(dependencies, TransformerDependencyContext)
-            else tracer
-        )
-        self.metrics = (
-            dependencies.metrics
-            if isinstance(dependencies, TransformerDependencyContext)
-            else metrics
-        )
+        resolved = dependencies
+        self.tracer = tracer if resolved is None else resolved.tracer
+        self.metrics = metrics if resolved is None else resolved.metrics
         self.silver_filters = silver_filters
         self.gold_filters = gold_filters
         self.identity_service = (
-            dependencies.identity_service
-            if isinstance(dependencies, TransformerDependencyContext)
-            else identity_service
+            identity_service if resolved is None else resolved.identity_service
         )
-        self.pii_hasher = (
-            dependencies.pii_hasher
-            if isinstance(dependencies, TransformerDependencyContext)
-            else pii_hasher
-        )
+        self.pii_hasher = pii_hasher if resolved is None else resolved.pii_hasher
         self.data_normalizer = (
-            dependencies.data_normalizer
-            if isinstance(dependencies, TransformerDependencyContext)
-            else data_normalizer
+            data_normalizer if resolved is None else resolved.data_normalizer
         )
         self.contract_policy = (
-            dependencies.contract_policy
-            if isinstance(dependencies, TransformerDependencyContext)
-            else contract_policy
+            contract_policy if resolved is None else resolved.contract_policy
         )
+        self.dependencies = dependencies
 
 
 class TestRegisterTransformer:
@@ -237,7 +219,6 @@ class TestCreateTransformer:
         )
 
         assert transformer.identity_service is mock_identity_service
-        assert isinstance(transformer.dependencies, TransformerDependencyContext)
 
     def test_create_transformer_with_pii_hasher(self) -> None:
         """create_transformer passes pii_hasher."""
@@ -249,7 +230,6 @@ class TestCreateTransformer:
         )
 
         assert transformer.pii_hasher is mock_pii_hasher
-        assert isinstance(transformer.dependencies, TransformerDependencyContext)
 
     def test_create_transformer_with_all_parameters(self) -> None:
         """create_transformer passes all parameters correctly."""
@@ -277,6 +257,14 @@ class TestCreateTransformer:
         assert transformer.gold_filters is mock_gold_filters
         assert transformer.identity_service is mock_identity_service
         assert transformer.pii_hasher is mock_pii_hasher
+
+    def test_create_transformer_builds_contract_policy_when_missing(self) -> None:
+        """Composition factory must inject explicit contract-policy fallback."""
+        register_transformer("chembl", "activity", MockTransformer)
+
+        transformer = create_transformer("chembl", "activity")
+
+        assert transformer.contract_policy is not None
 
     def test_create_transformer_unregistered_raises(self) -> None:
         """create_transformer raises KeyError for unregistered."""

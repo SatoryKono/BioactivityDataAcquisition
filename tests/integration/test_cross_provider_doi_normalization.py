@@ -31,6 +31,7 @@ from bioetl.application.pipelines.semanticscholar.transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
@@ -116,10 +117,16 @@ class TestCrossProviderDoiNormalization:
     ) -> None:
         """Test that the same raw DOI normalizes identically across all providers."""
         # Create transformers
-        pubmed_transformer = PubMedPublicationTransformer()
-        s2_transformer = SemanticScholarPublicationTransformer()
-        openalex_transformer = OpenAlexPublicationTransformer()
-        crossref_transformer = CrossRefPublicationTransformer()
+        pubmed_transformer = instantiate_test_transformer(PubMedPublicationTransformer)
+        s2_transformer = instantiate_test_transformer(
+            SemanticScholarPublicationTransformer
+        )
+        openalex_transformer = instantiate_test_transformer(
+            OpenAlexPublicationTransformer
+        )
+        crossref_transformer = instantiate_test_transformer(
+            CrossRefPublicationTransformer
+        )
 
         # Transform records
         pubmed_result = await pubmed_transformer.transform(
@@ -174,16 +181,22 @@ class TestCrossProviderDoiNormalization:
         expected_normalized = "10.1038/nature12373"
 
         transformers = {
-            "pubmed": (PubMedPublicationTransformer(), self._make_pubmed_record),
+            "pubmed": (
+                instantiate_test_transformer(PubMedPublicationTransformer),
+                self._make_pubmed_record,
+            ),
             "semanticscholar": (
-                SemanticScholarPublicationTransformer(),
+                instantiate_test_transformer(SemanticScholarPublicationTransformer),
                 self._make_semanticscholar_record,
             ),
             "openalex": (
-                OpenAlexPublicationTransformer(),
+                instantiate_test_transformer(OpenAlexPublicationTransformer),
                 self._make_openalex_record,
             ),
-            "crossref": (CrossRefPublicationTransformer(), self._make_crossref_record),
+            "crossref": (
+                instantiate_test_transformer(CrossRefPublicationTransformer),
+                self._make_crossref_record,
+            ),
         }
 
         for provider_name, (transformer, make_record) in transformers.items():
@@ -247,13 +260,19 @@ class TestCrossProviderDoiNormalization:
 
         # CrossRef requires DOI, so skip it for this test
 
-        pubmed_result = await PubMedPublicationTransformer().transform(
+        pubmed_result = await instantiate_test_transformer(
+            PubMedPublicationTransformer
+        ).transform(
             mock_context, pubmed_record, 0
         )
-        s2_result = await SemanticScholarPublicationTransformer().transform(
+        s2_result = await instantiate_test_transformer(
+            SemanticScholarPublicationTransformer
+        ).transform(
             mock_context, s2_record, 0
         )
-        openalex_result = await OpenAlexPublicationTransformer().transform(
+        openalex_result = await instantiate_test_transformer(
+            OpenAlexPublicationTransformer
+        ).transform(
             mock_context, openalex_record, 0
         )
 
@@ -315,13 +334,19 @@ class TestCrossProviderDoiNormalization:
             "_lookup_method": "doi",
         }
 
-        pubmed_result = await PubMedPublicationTransformer().transform(
+        pubmed_result = await instantiate_test_transformer(
+            PubMedPublicationTransformer
+        ).transform(
             mock_context, pubmed_record, 0
         )
-        s2_result = await SemanticScholarPublicationTransformer().transform(
+        s2_result = await instantiate_test_transformer(
+            SemanticScholarPublicationTransformer
+        ).transform(
             mock_context, s2_record, 0
         )
-        openalex_result = await OpenAlexPublicationTransformer().transform(
+        openalex_result = await instantiate_test_transformer(
+            OpenAlexPublicationTransformer
+        ).transform(
             mock_context, openalex_record, 0
         )
 

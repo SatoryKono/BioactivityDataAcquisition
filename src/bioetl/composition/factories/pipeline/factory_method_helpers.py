@@ -5,12 +5,12 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.composition.factories.pipeline.transformer_dependencies import (
-    build_transformer_dependencies,
-)
 from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
     create_pipeline_with_services,
+)
+from bioetl.composition.factories.transformer_dependencies import (
+    build_transformer_dependencies,
 )
 from bioetl.domain.services import IdentityService
 from bioetl.infrastructure.config import load_pipeline_config
@@ -21,6 +21,9 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.base_transformer.types import (
+        TransformerDependencyContext,
+    )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.factories.datasource.data_source_factory import (
@@ -65,27 +68,29 @@ def create_transformer_instance(
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
     contract_policy: ContractPolicyPort | None = None,
+    dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer | None:
     """Create transformer when a transformer class is configured."""
     if transformer_class is None:
         return None
-    entity_type = extract_entity_type(pipeline_name)
-    dependencies = build_transformer_dependencies(
-        provider=provider,
-        entity_type=entity_type,
-        tracer=tracer,
-        metrics=metrics,
-        identity_service=identity_service,
-        pii_hasher=pii_hasher,
-        data_normalizer=data_normalizer,
-        contract_policy=contract_policy,
+    resolved_dependencies = (
+        dependencies
+        if dependencies is not None
+        else build_transformer_dependencies(
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
+        )
     )
     return transformer_class(
         provider=provider,
-        entity_type=entity_type,
+        entity_type=extract_entity_type(pipeline_name),
         silver_filters=silver_filters,
         gold_filters=gold_filters,
-        dependencies=dependencies,
+        dependencies=resolved_dependencies,
     )
 
 

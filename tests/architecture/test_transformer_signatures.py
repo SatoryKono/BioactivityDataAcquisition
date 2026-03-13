@@ -9,7 +9,7 @@ These tests verify:
 3. All transformers have observability parameters (tracer, metrics)
 4. All concrete transformers implement _transform_impl
 5. Transformers don't override the transform() template method
-6. All transformers can be instantiated with defaults
+6. All transformers can be instantiated via the explicit DI seam
 7. All transformers have entity_type set after initialization
 
 See RULES.md §2 for architecture requirements.
@@ -22,6 +22,9 @@ import inspect
 import pytest
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from tests.helpers.transformer_dependencies import (
+    build_test_transformer_dependencies,
+)
 
 
 def get_all_transformers() -> list[type[BaseTransformer]]:
@@ -91,9 +94,13 @@ def get_all_transformers() -> list[type[BaseTransformer]]:
     ]
 
 
+def _build_dependencies():
+    """Create explicit default collaborators for architecture checks."""
+    return build_test_transformer_dependencies()
+
+
 # Standard parameters that all transformers SHOULD have
 STANDARD_OPTIONAL_PARAMS = {
-    "dependencies",
     "tracer",
     "metrics",
     "gold_filters",
@@ -278,24 +285,20 @@ class TestTransformerImplementation:
 
 
 class TestTransformerInstantiation:
-    """Test transformer instantiation with default parameters."""
+    """Test transformer instantiation with explicit dependencies."""
 
     @pytest.mark.parametrize("transformer_class", get_all_transformers())
-    def test_instantiation_with_defaults(
+    def test_instantiation_with_explicit_dependencies(
         self, transformer_class: type[BaseTransformer]
     ) -> None:
-        """All transformers MUST be instantiable with default parameters only.
-
-        This ensures transformers have sensible defaults and can be used
-        without complex configuration for testing and simple use cases.
-        """
+        """All transformers MUST be instantiable via explicit DI."""
         try:
-            instance = transformer_class()
+            instance = transformer_class(dependencies=_build_dependencies())
             assert instance is not None
         except TypeError as e:
             pytest.fail(
                 f"{transformer_class.__name__} cannot be instantiated "
-                f"with defaults: {e}"
+                f"with explicit dependencies: {e}"
             )
 
     @pytest.mark.parametrize("transformer_class", get_all_transformers())
@@ -305,7 +308,7 @@ class TestTransformerInstantiation:
         Entity type is used for metrics labeling and tracing attributes.
         It should be a meaningful value, not "unknown".
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "entity_type"), (
             f"{transformer_class.__name__} must have entity_type attribute"
         )
@@ -323,7 +326,7 @@ class TestTransformerInstantiation:
 
         Provider identifies the data source and is used for entity IDs.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "provider"), (
             f"{transformer_class.__name__} must have provider attribute"
         )
@@ -344,8 +347,8 @@ class TestTransformerObservability:
     ) -> None:
         """Tracer parameter SHOULD default to None.
 
-        Compatibility-only dependency resolution fills the tracer when omitted,
-        while canonical first-party wiring should pass explicit dependencies.
+        None marks the collaborator as composition-owned; the explicit
+        runtime default is assembled outside BaseTransformer.
         """
         sig = inspect.signature(transformer_class.__init__)
         tracer_param = sig.parameters.get("tracer")
@@ -360,8 +363,8 @@ class TestTransformerObservability:
     ) -> None:
         """Metrics parameter SHOULD default to None.
 
-        Compatibility-only dependency resolution fills metrics when omitted,
-        while canonical first-party wiring should pass explicit dependencies.
+        None marks the collaborator as composition-owned; the explicit
+        runtime default is assembled outside BaseTransformer.
         """
         sig = inspect.signature(transformer_class.__init__)
         metrics_param = sig.parameters.get("metrics")
@@ -378,7 +381,7 @@ class TestTransformerObservability:
 
         This is set by BaseTransformer and used for distributed tracing.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "_tracer"), (
             f"{transformer_class.__name__} must have _tracer attribute"
         )
@@ -391,7 +394,7 @@ class TestTransformerObservability:
 
         This is set by BaseTransformer and used for duration/error tracking.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "_metrics"), (
             f"{transformer_class.__name__} must have _metrics attribute"
         )
@@ -409,7 +412,7 @@ class TestTransformerGoldFiltering:
         This method determines if a Silver record should be written to Gold.
         Inherited from BaseTransformer.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "should_write_gold"), (
             f"{transformer_class.__name__} must have should_write_gold method"
         )
@@ -426,7 +429,7 @@ class TestTransformerGoldFiltering:
         This method transforms Silver records for Gold layer.
         Inherited from BaseTransformer.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "transform_for_gold"), (
             f"{transformer_class.__name__} must have transform_for_gold method"
         )
@@ -447,7 +450,7 @@ class TestTransformerIdentity:
         Content hash is used for record versioning and deduplication.
         Inherited from BaseTransformer.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "compute_content_hash"), (
             f"{transformer_class.__name__} must have compute_content_hash method"
         )
@@ -464,7 +467,7 @@ class TestTransformerIdentity:
         Entity ID provides stable identification across runs.
         Inherited from BaseTransformer.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "compute_entity_id"), (
             f"{transformer_class.__name__} must have compute_entity_id method"
         )
@@ -485,7 +488,7 @@ class TestTransformerPiiHashing:
         PII hashing enables privacy-preserving author data handling.
         Inherited from BaseTransformer.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "hash_pii_value"), (
             f"{transformer_class.__name__} must have hash_pii_value method"
         )
@@ -502,7 +505,7 @@ class TestTransformerPiiHashing:
         PII list hashing is used for author lists.
         Inherited from BaseTransformer.
         """
-        instance = transformer_class()
+        instance = transformer_class(dependencies=_build_dependencies())
         assert hasattr(instance, "hash_pii_list"), (
             f"{transformer_class.__name__} must have hash_pii_list method"
         )
@@ -516,25 +519,14 @@ class TestTransformerPiiHashing:
     ) -> None:
         """pii_hasher parameter SHOULD default to None.
 
-        Compatibility-only dependency resolution fills the PII hasher when omitted.
+        None marks the collaborator as composition-owned; the explicit
+        runtime default is assembled outside BaseTransformer.
         """
         sig = inspect.signature(transformer_class.__init__)
         pii_hasher_param = sig.parameters.get("pii_hasher")
         if pii_hasher_param is not None:
             assert pii_hasher_param.default is None, (
                 f"{transformer_class.__name__}.pii_hasher should default to None"
-            )
-
-    @pytest.mark.parametrize("transformer_class", get_all_transformers())
-    def test_dependencies_has_none_default(
-        self, transformer_class: type[BaseTransformer]
-    ) -> None:
-        """dependencies parameter SHOULD remain optional for compatibility."""
-        sig = inspect.signature(transformer_class.__init__)
-        dependencies_param = sig.parameters.get("dependencies")
-        if dependencies_param is not None:
-            assert dependencies_param.default is None, (
-                f"{transformer_class.__name__}.dependencies should default to None"
             )
 
 

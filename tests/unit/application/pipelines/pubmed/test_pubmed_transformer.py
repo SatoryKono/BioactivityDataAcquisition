@@ -22,6 +22,7 @@ from bioetl.application.pipelines.pubmed.transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 # Sample PubMed XML for testing
 MINIMAL_PUBMED_XML = """<?xml version="1.0"?>
@@ -169,14 +170,18 @@ class TestPubMedPublicationTransformer:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     def test_init_accepts_injected_extractors(self) -> None:
         """Transformer should allow extractor overrides via DI."""
         author_extractor = MagicMock(spec=AuthorExtractor)
         date_extractor = MagicMock(spec=DateExtractor)
 
-        transformer = PubMedPublicationTransformer(
+        transformer = instantiate_test_transformer(
+            PubMedPublicationTransformer,
             provider="pubmed",
             author_extractor=author_extractor,
             date_extractor=date_extractor,
@@ -190,7 +195,8 @@ class TestPubMedPublicationTransformer:
         author_extractor = MagicMock(spec=AuthorExtractor)
         author_extractor.normalize.return_value = ["Smith, J"]
         author_extractor.parse_structured_affiliations.return_value = []
-        transformer = PubMedPublicationTransformer(
+        transformer = instantiate_test_transformer(
+            PubMedPublicationTransformer,
             provider="pubmed",
             author_extractor=author_extractor,
         )
@@ -440,7 +446,10 @@ class TestPubMedTransformerJournalExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.asyncio
     async def test_missing_journal_element(
@@ -507,7 +516,10 @@ class TestPubMedTransformerDateExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.asyncio
     async def test_year_only_date(
@@ -599,7 +611,10 @@ class TestPubMedTransformerIdentifierExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.asyncio
     async def test_doi_from_elocation(
@@ -677,7 +692,10 @@ class TestPubMedTransformerClassificationExtraction:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.asyncio
     async def test_empty_classification_lists(
@@ -734,7 +752,10 @@ class TestPubMedTransformerDoiNormalization:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @staticmethod
     def _make_xml_with_doi(pmid: str, doi: str) -> str:
@@ -836,7 +857,10 @@ class TestPubMedTransformerUnifiedPageFields:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.asyncio
     async def test_unified_page_fields_in_transform(
@@ -862,7 +886,10 @@ class TestPubMedTransformerUnifiedDateFields:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     def test_compute_publication_date_from_epub(
         self,
@@ -982,7 +1009,10 @@ class TestPubMedTransformerIdentifierNormalization:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @staticmethod
     def _make_xml_with_identifiers(
@@ -1190,7 +1220,10 @@ class TestPubMedTransformerDateValidation:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     def test_is_valid_date_format_full_date(
         self,
@@ -1379,7 +1412,10 @@ class TestPubMedTransformerContentHashStability:
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.mark.asyncio
     async def test_valid_record_content_hash_deterministic(
@@ -1452,7 +1488,10 @@ class TestPubMedTransformerContentHashStability:
 @pytest.fixture
 def _orphan_transformer() -> PubMedPublicationTransformer:
     """Create a PubMedPublicationTransformer instance (orphan fixture)."""
-    return PubMedPublicationTransformer(provider="pubmed")
+    return instantiate_test_transformer(
+        PubMedPublicationTransformer,
+        provider="pubmed",
+    )
 
 
 @pytest.fixture

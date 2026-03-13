@@ -13,6 +13,7 @@ from bioetl.application.pipelines.pubmed import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
@@ -38,7 +39,10 @@ def mock_runtime():
 @pytest.fixture
 def pipeline(mock_config, mock_runtime, mock_services):
     run_id = uuid4()
-    transformer = PubMedPublicationTransformer(provider="pubmed")
+    transformer = instantiate_test_transformer(
+        PubMedPublicationTransformer,
+        provider="pubmed",
+    )
     return PubMedPublicationPipeline(
         mock_config,
         mock_runtime,

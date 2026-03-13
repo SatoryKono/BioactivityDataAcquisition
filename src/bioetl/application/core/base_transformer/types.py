@@ -2,13 +2,39 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
+
+from bioetl.domain.ports import (
+    ContractPolicyPort,
+    DataNormalizationPort,
+    MetricsPort,
+    PiiHasherPort,
+    TracingPort,
+)
+from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.entities import BaseEntity
 
 T = TypeVar("T", bound="BaseEntity")
 V = TypeVar("V", covariant=True)
+
+
+@dataclass(frozen=True, slots=True)
+class TransformerDependencyContext:
+    """Explicit collaborator bundle for ``BaseTransformer`` wiring.
+
+    The transformer core consumes this contract, while composition remains the
+    owner of concrete runtime defaults.
+    """
+
+    tracer: TracingPort
+    metrics: MetricsPort
+    identity_service: IdentityService
+    pii_hasher: PiiHasherPort
+    data_normalizer: DataNormalizationPort
+    contract_policy: ContractPolicyPort
 
 
 @runtime_checkable

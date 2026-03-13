@@ -18,6 +18,7 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 _MOCK_TOKEN = FencingToken(
     sequence=1,
@@ -132,7 +133,10 @@ class TestPubChemCompoundPipelineTransform:
             services=mock_pubchem_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=PubChemCompoundTransformer(provider="pubchem"),
+            transformer=instantiate_test_transformer(
+                PubChemCompoundTransformer,
+                provider="pubchem",
+            ),
         )
 
         context = PipelineContext(
@@ -186,7 +190,10 @@ class TestPubChemCompoundPipelineTransform:
             services=mock_pubchem_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=PubChemCompoundTransformer(provider="pubchem"),
+            transformer=instantiate_test_transformer(
+                PubChemCompoundTransformer,
+                provider="pubchem",
+            ),
         )
 
         context = PipelineContext(
@@ -233,7 +240,10 @@ class TestPubChemCompoundPipelineTransform:
             services=mock_pubchem_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=PubChemCompoundTransformer(provider="pubchem"),
+            transformer=instantiate_test_transformer(
+                PubChemCompoundTransformer,
+                provider="pubchem",
+            ),
         )
 
         context = PipelineContext(
@@ -268,7 +278,10 @@ class TestPubChemCompoundPipelineTransform:
             services=mock_pubchem_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=PubChemCompoundTransformer(provider="pubchem"),
+            transformer=instantiate_test_transformer(
+                PubChemCompoundTransformer,
+                provider="pubchem",
+            ),
         )
 
         context = PipelineContext(

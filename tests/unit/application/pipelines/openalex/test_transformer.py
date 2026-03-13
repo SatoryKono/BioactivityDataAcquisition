@@ -18,12 +18,13 @@ from bioetl.application.pipelines.openalex.transformer import (
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
 def transformer() -> OpenAlexPublicationTransformer:
     """Create a transformer instance for testing."""
-    return OpenAlexPublicationTransformer()
+    return instantiate_test_transformer(OpenAlexPublicationTransformer)
 
 
 @pytest.fixture
@@ -336,7 +337,7 @@ class TestOpenAlexDoiNormalization:
     @pytest.fixture
     def transformer(self) -> OpenAlexPublicationTransformer:
         """Create a transformer instance for testing."""
-        return OpenAlexPublicationTransformer()
+        return instantiate_test_transformer(OpenAlexPublicationTransformer)
 
     @staticmethod
     def _make_record_with_doi(doi_url: str | None) -> dict[str, Any]:
@@ -421,7 +422,7 @@ class TestOpenAlexPublicationDateNormalization:
     @pytest.fixture
     def transformer(self) -> OpenAlexPublicationTransformer:
         """Create a transformer instance for testing."""
-        return OpenAlexPublicationTransformer()
+        return instantiate_test_transformer(OpenAlexPublicationTransformer)
 
     @staticmethod
     def _make_record_with_date(pub_date: str | None) -> dict[str, Any]:

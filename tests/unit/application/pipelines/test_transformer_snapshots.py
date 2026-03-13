@@ -35,6 +35,7 @@ from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTra
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
 @pytest.fixture
@@ -86,7 +87,7 @@ class TestActivityTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> ActivityTransformer:
-        return ActivityTransformer(provider="chembl")
+        return instantiate_test_transformer(ActivityTransformer, provider="chembl")
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -366,7 +367,10 @@ class TestPubChemCompoundTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> PubChemCompoundTransformer:
-        return PubChemCompoundTransformer(provider="pubchem")
+        return instantiate_test_transformer(
+            PubChemCompoundTransformer,
+            provider="pubchem",
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -401,7 +405,10 @@ class TestUniProtProteinTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> UniProtProteinTransformer:
-        return UniProtProteinTransformer(provider="uniprot")
+        return instantiate_test_transformer(
+            UniProtProteinTransformer,
+            provider="uniprot",
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -541,7 +548,10 @@ class TestPubMedPublicationTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
-        return PubMedPublicationTransformer(provider="pubmed")
+        return instantiate_test_transformer(
+            PubMedPublicationTransformer,
+            provider="pubmed",
+        )
 
     @pytest.fixture
     def minimal_record(self) -> dict[str, Any]:

@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 from bioetl.application.core.base_transformer.base import BaseTransformer, T
-from bioetl.application.core.base_transformer.dependencies import (
-    TransformerDependencyContext,
-)
 from bioetl.application.core.base_transformer.errors import (
     FilteredOutError,
     TransformationError,
 )
-from bioetl.application.core.base_transformer.types import V, ValueObjectWithFromRaw
+from bioetl.application.core.base_transformer.types import (
+    TransformerDependencyContext,
+    V,
+    ValueObjectWithFromRaw,
+)
 
 __all__ = [
     "BaseTransformer",

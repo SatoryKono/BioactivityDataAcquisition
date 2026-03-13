@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
     PIPELINE_EXECUTION_ERRORS,
@@ -30,7 +30,158 @@ if TYPE_CHECKING:
     from bioetl.application.composite.dependency_coordinator import (
         DependencyCoordinatorService,
     )
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+
+    class _CompositeRunnerStageHostProtocol(Protocol):
+        _config: CompositeConfig
+        _logger: LoggerPort
+        _run_id_str: str
+        _fsm: FSMStateHelperService
+        _dependency_coordinator: DependencyCoordinatorService | None
+        _dependencies_runner_factory: (
+            Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
+        )
+
+        async def _run_seed_with_fsm(
+            self,
+            state: CompositeCheckpointState,
+        ) -> tuple[CompositeCheckpointState, SeedResult]: ...
+
+        def _resume_seed_phase(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _start_seed_phase(
+            self,
+            state: CompositeCheckpointState,
+        ) -> CompositeCheckpointState: ...
+
+        async def _call_run_seed(self) -> SeedResult: ...
+
+        async def _handle_seed_phase_exception(
+            self,
+            state: CompositeCheckpointState,
+            error: Exception,
+        ) -> None: ...
+
+        async def _complete_seed_phase(
+            self,
+            state: CompositeCheckpointState,
+            seed_result: SeedResult,
+        ) -> CompositeCheckpointState: ...
+
+        def _has_dependencies_configured(self) -> bool: ...
+
+        async def _skip_dependencies_phase(
+            self,
+            state: CompositeCheckpointState,
+        ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
+
+        def _prepare_dependencies_run_context(
+            self,
+        ) -> tuple[
+            DependencyCoordinatorService,
+            Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+            list[str],
+        ]: ...
+
+        async def _start_dependencies_phase(
+            self,
+            state: CompositeCheckpointState,
+            *,
+            dependencies: list[str],
+        ) -> CompositeCheckpointState: ...
+
+        async def _run_dependencies(
+            self,
+            *,
+            coordinator: DependencyCoordinatorService,
+            runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+            keys_df: pl.DataFrame,
+            state: CompositeCheckpointState,
+        ) -> dict[str, DependencyResult]: ...
+
+        async def _handle_dependencies_phase_exception(
+            self,
+            state: CompositeCheckpointState,
+            error: Exception,
+        ) -> None: ...
+
+        async def _postprocess_dependency_results(
+            self,
+            state: CompositeCheckpointState,
+            dependency_results: dict[str, DependencyResult],
+        ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
+
+        def _collect_successful_dependencies(
+            self,
+            state: CompositeCheckpointState,
+            dependency_results: dict[str, DependencyResult],
+        ) -> CompositeCheckpointState: ...
+
+        async def _finalize_dependencies_phase(
+            self,
+            state: CompositeCheckpointState,
+            dependency_results: dict[str, DependencyResult],
+        ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
+
+        def _validate_dependency_preconditions(
+            self,
+        ) -> tuple[
+            DependencyCoordinatorService,
+            Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+        ]: ...
+
+        def _find_required_failures(
+            self,
+            results: dict[str, DependencyResult],
+        ) -> list[str]: ...
+
+        async def _fail_required_dependencies(
+            self,
+            state: CompositeCheckpointState,
+            required_failed: list[str],
+        ) -> None: ...
+
+        def _summarize_dependency_outcomes(
+            self,
+            dependency_results: dict[str, DependencyResult],
+        ) -> tuple[int, int]: ...
+
+        async def _complete_dependencies_phase(
+            self,
+            state: CompositeCheckpointState,
+            *,
+            succeeded: int,
+            failed: int,
+        ) -> CompositeCheckpointState: ...
+
+        async def _persist_failed_state(
+            self,
+            state: CompositeCheckpointState,
+            *,
+            stage: str,
+            error: str,
+        ) -> CompositeCheckpointState: ...
+
+        def _transition_state_with_fsm_log(
+            self,
+            state: CompositeCheckpointState,
+            to_state: CompositePipelineState,
+            *,
+            stage: str,
+            validate: bool = True,
+            **transition_kwargs: object,
+        ) -> CompositeCheckpointState: ...
+
+        async def _call_save_checkpoint_safe(
+            self,
+            state: CompositeCheckpointState,
+            operation: str,
+        ) -> bool: ...
 
 __all__ = ["CompositeRunnerStageMixin"]
 
@@ -42,7 +193,7 @@ class CompositeRunnerStageMixin(
     """Mixin with seed/dependencies/enrichment stage orchestration."""
 
     async def _execute_seed_phase(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, SeedResult]:
         """Execute the seed phase or resume from checkpoint."""
@@ -53,7 +204,7 @@ class CompositeRunnerStageMixin(
         return state, SeedResult(pipeline_name=self._config.seed.pipeline, resumed=True)
 
     def _resume_seed_phase(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Normalize resumed seed state and emit resume logging."""
@@ -73,7 +224,7 @@ class CompositeRunnerStageMixin(
         return state
 
     async def _run_seed_with_fsm(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, SeedResult]:
         """Run seed pipeline with FSM state transitions."""
@@ -89,7 +240,7 @@ class CompositeRunnerStageMixin(
         return state, seed_result
 
     async def _execute_dependencies_phase(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         keys_df: pl.DataFrame,
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
@@ -120,14 +271,14 @@ class CompositeRunnerStageMixin(
         return await self._postprocess_dependency_results(state, dependency_results)
 
     async def _skip_dependencies_phase(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
         """Keep checkpoint state unchanged when no dependencies are configured."""
         return state, {}
 
     def _prepare_dependencies_run_context(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
     ) -> tuple[
         DependencyCoordinatorService,
         Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
@@ -141,7 +292,7 @@ class CompositeRunnerStageMixin(
         return coordinator, runner_factory, dependency_pipeline_names
 
     async def _run_dependencies(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         *,
         coordinator: DependencyCoordinatorService,
         runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
@@ -157,7 +308,7 @@ class CompositeRunnerStageMixin(
         )
 
     async def _start_dependencies_phase(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         *,
         dependencies: list[str],
@@ -181,7 +332,7 @@ class CompositeRunnerStageMixin(
         return state
 
     async def _postprocess_dependency_results(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         dependency_results: dict[str, DependencyResult],
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
@@ -190,7 +341,7 @@ class CompositeRunnerStageMixin(
         return await self._finalize_dependencies_phase(state, dependency_results)
 
     def _validate_dependency_preconditions(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
     ) -> tuple[
         DependencyCoordinatorService,
         Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
@@ -213,7 +364,7 @@ class CompositeRunnerStageMixin(
         return coordinator, runner_factory
 
     def _collect_successful_dependencies(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         dependency_results: dict[str, DependencyResult],
     ) -> CompositeCheckpointState:
@@ -232,7 +383,7 @@ class CompositeRunnerStageMixin(
         return state
 
     async def _finalize_dependencies_phase(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         dependency_results: dict[str, DependencyResult],
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
@@ -264,7 +415,7 @@ class CompositeRunnerStageMixin(
         return completed_state, dependency_results
 
     async def _complete_dependencies_phase(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         *,
         succeeded: int,
@@ -290,7 +441,7 @@ class CompositeRunnerStageMixin(
         return completed_state
 
     async def _handle_dependencies_phase_exception(
-        self,
+        self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         error: Exception,
     ) -> None:

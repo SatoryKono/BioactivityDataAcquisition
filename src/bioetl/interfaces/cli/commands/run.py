@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from functools import partial
 from typing import NoReturn
 
 import click
@@ -130,22 +131,55 @@ def execute_run(
         RunResult with pipeline execution status and record counts.
     """
 
-    async def _run_pipeline_with_registry(
-        request: RunExecutionRequest,
-    ) -> RunResult:
-        return await _run_pipeline_async(
-            request.pipeline,
-            request.options,
-            health_server_enabled=request.health_server,
-            health_port=request.health_port,
-            registry=registry,
-        )
-
     return _CLI_RUN_ORCHESTRATION_SERVICE.execute_pipeline(
         request=request,
-        run_pipeline_async=_run_pipeline_with_registry,
+        run_pipeline_async=partial(_run_prepared_request_async, registry=registry),
         run_coroutine=asyncio.run,
         flush_metrics=push_metrics_to_gateway,
+    )
+
+
+def _build_run_command_input(
+    *,
+    pipeline: str,
+    run_type: str,
+    resume: bool,
+    start_offset: int | None,
+    limit: int | None,
+    input_csv: str | None,
+    filter_column: str | None,
+    filter_field: str | None,
+    dry_run: bool,
+    yes: bool,
+    vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None,
+    debug: bool,
+    health_server: bool,
+    health_port: int,
+    use_cached_bronze: bool,
+    cached_bronze_date: str | None,
+    cached_bronze_path: str | None,
+) -> RunCommandInput:
+    """Build normalized CLI input payload for run_command_flow."""
+    return RunCommandInput(
+        pipeline=pipeline,
+        run_type=run_type,
+        resume=resume,
+        start_offset=start_offset,
+        limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        dry_run=dry_run,
+        yes=yes,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
+        debug=debug,
+        health_server=health_server,
+        health_port=health_port,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_date=cached_bronze_date,
+        cached_bronze_path=cached_bronze_path,
     )
 
 
@@ -155,6 +189,11 @@ def _map_status_to_exit_code(
 ) -> ExitCode:
     """Map run status to CLI exit code."""
     return map_status_to_exit_code(status, error_type)
+
+
+def _present_run_health_info(request: RunExecutionRequest) -> None:
+    """Render health-server info for a prepared run request."""
+    echo_health_server_info(request.health_server, request.health_port)
 
 
 async def _run_pipeline_async(
@@ -182,6 +221,20 @@ async def _run_pipeline_async(
     ):
         service = get_pipeline_runner_service(registry=registry)
         return await service.run(pipeline, options=options)
+
+
+async def _run_prepared_request_async(
+    request: RunExecutionRequest,
+    registry: PipelineRegistry | None = None,
+) -> RunResult:
+    """Execute a prepared CLI run request via the canonical async runtime path."""
+    return await _run_pipeline_async(
+        request.pipeline,
+        request.options,
+        health_server_enabled=request.health_server,
+        health_port=request.health_port,
+        registry=registry,
+    )
 
 
 @click.command()
@@ -306,33 +359,31 @@ def run(
 ) -> None:
     """Run an ETL pipeline."""
     registry = resolve_context_registry(ctx)
+    cli_input = _build_run_command_input(
+        pipeline=pipeline,
+        run_type=run_type,
+        resume=resume,
+        start_offset=start_offset,
+        limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        dry_run=dry_run,
+        yes=yes,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
+        debug=debug,
+        health_server=health_server,
+        health_port=health_port,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_date=cached_bronze_date,
+        cached_bronze_path=cached_bronze_path,
+    )
     run_command_flow(
-        cli_input=RunCommandInput(
-            pipeline=pipeline,
-            run_type=run_type,
-            resume=resume,
-            start_offset=start_offset,
-            limit=limit,
-            input_csv=input_csv,
-            filter_column=filter_column,
-            filter_field=filter_field,
-            dry_run=dry_run,
-            yes=yes,
-            vacuum_after_run=vacuum_after_run,
-            vacuum_retention_days=vacuum_retention_days,
-            debug=debug,
-            health_server=health_server,
-            health_port=health_port,
-            use_cached_bronze=use_cached_bronze,
-            cached_bronze_date=cached_bronze_date,
-            cached_bronze_path=cached_bronze_path,
-        ),
+        cli_input=cli_input,
         service=_CLI_RUN_ORCHESTRATION_SERVICE,
-        execute_run=lambda prepared_request: execute_run(
-            request=prepared_request,
-            registry=registry,
-        ),
-        health_info_presenter=echo_health_server_info,
+        execute_run=partial(execute_run, registry=registry),
+        health_info_presenter=_present_run_health_info,
         result_presenter=_echo_run_result,
         exit_func=_exit_with_code,
     )

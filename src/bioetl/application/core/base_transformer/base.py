@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
-import dataclasses
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
-from bioetl.application.core.base_transformer.dependencies import (
-    TransformerDependencyContext,
-    resolve_transformer_dependencies,
-)
 from bioetl.application.core.base_transformer.errors import (
     FilteredOutError,
     TransformationError,
 )
-from bioetl.application.core.base_transformer.types import T, ValueObjectWithFromRaw
+from bioetl.application.core.base_transformer.types import (
+    T,
+    TransformerDependencyContext,
+)
+from bioetl.application.core.base_transformer_dependency_helpers_mixin import (
+    _BaseTransformerDependencyHelpersMixin,
+)
 from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
@@ -27,7 +29,7 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.services import IdentityService
-from bioetl.domain.types import ContentHash, EntityID, GoldRecord
+from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -36,31 +38,127 @@ if TYPE_CHECKING:
 
 __all__ = ["BaseTransformer", "T"]
 
-
-def _apply_hash_policy(
-    contract_policy: ContractPolicyPort,
-    business_data: GoldRecord,
-) -> GoldRecord:
-    """Apply include/exclude hash policy from contract config."""
-    include_fields = contract_policy.hash_include
-    exclude_fields = set(contract_policy.hash_exclude)
-
-    if include_fields:
-        scoped = {
-            key: business_data.get(key)
-            for key in include_fields
-            if key in business_data
-        }
-    else:
-        scoped = dict(business_data)
-
-    for field in exclude_fields:
-        scoped.pop(field, None)
-
-    return scoped
+_COMPAT_DEPENDENCY_BUILDER: Callable[[], TransformerDependencyContext] | None = None
 
 
-class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
+def _merge_dependency_context(
+    dependencies: TransformerDependencyContext,
+    *,
+    tracer: TracingPort | None,
+    metrics: MetricsPort | None,
+    identity_service: IdentityService | None,
+    pii_hasher: PiiHasherPort | None,
+    data_normalizer: DataNormalizationPort | None,
+    contract_policy: ContractPolicyPort | None,
+) -> TransformerDependencyContext:
+    """Overlay explicit collaborators on top of a dependency context."""
+    return TransformerDependencyContext(
+        tracer=dependencies.tracer if tracer is None else tracer,
+        metrics=dependencies.metrics if metrics is None else metrics,
+        identity_service=(
+            dependencies.identity_service
+            if identity_service is None
+            else identity_service
+        ),
+        pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
+        data_normalizer=(
+            dependencies.data_normalizer
+            if data_normalizer is None
+            else data_normalizer
+        ),
+        contract_policy=(
+            dependencies.contract_policy
+            if contract_policy is None
+            else contract_policy
+        ),
+    )
+
+
+def _build_explicit_dependency_context(
+    *,
+    tracer: TracingPort | None,
+    metrics: MetricsPort | None,
+    identity_service: IdentityService | None,
+    pii_hasher: PiiHasherPort | None,
+    data_normalizer: DataNormalizationPort | None,
+    contract_policy: ContractPolicyPort | None,
+) -> TransformerDependencyContext:
+    """Validate and materialize fully explicit collaborators."""
+    explicit_values = {
+        "tracer": tracer,
+        "metrics": metrics,
+        "identity_service": identity_service,
+        "pii_hasher": pii_hasher,
+        "data_normalizer": data_normalizer,
+        "contract_policy": contract_policy,
+    }
+    missing = [name for name, value in explicit_values.items() if value is None]
+    if missing:
+        missing_list = ", ".join(missing)
+        raise TypeError(
+            "BaseTransformer requires explicit collaborator injection; "
+            f"missing: {missing_list}. Build defaults in composition."
+        )
+    return TransformerDependencyContext(
+        tracer=cast("TracingPort", tracer),
+        metrics=cast("MetricsPort", metrics),
+        identity_service=cast("IdentityService", identity_service),
+        pii_hasher=cast("PiiHasherPort", pii_hasher),
+        data_normalizer=cast("DataNormalizationPort", data_normalizer),
+        contract_policy=cast("ContractPolicyPort", contract_policy),
+    )
+
+
+def _resolve_dependency_context(
+    *,
+    tracer: TracingPort | None,
+    metrics: MetricsPort | None,
+    identity_service: IdentityService | None,
+    pii_hasher: PiiHasherPort | None,
+    data_normalizer: DataNormalizationPort | None,
+    contract_policy: ContractPolicyPort | None,
+    dependencies: TransformerDependencyContext | None,
+) -> TransformerDependencyContext:
+    """Resolve transformer collaborators without constructing defaults locally."""
+    if dependencies is not None:
+        return _merge_dependency_context(
+            dependencies,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
+        )
+
+    if _COMPAT_DEPENDENCY_BUILDER is not None and all(
+        value is None
+        for value in (
+            tracer,
+            metrics,
+            identity_service,
+            pii_hasher,
+            data_normalizer,
+            contract_policy,
+        )
+    ):
+        return _COMPAT_DEPENDENCY_BUILDER()
+
+    return _build_explicit_dependency_context(
+        tracer=tracer,
+        metrics=metrics,
+        identity_service=identity_service,
+        pii_hasher=pii_hasher,
+        data_normalizer=data_normalizer,
+        contract_policy=contract_policy,
+    )
+
+
+class BaseTransformer(
+    _BaseTransformerDependencyHelpersMixin,
+    _BaseTransformerRecordHelpersMixin,
+    ABC,
+):
     """Abstract base class for Bronze -> Silver transformers."""
 
     GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset()
@@ -79,64 +177,26 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:
-        """Initialize transformer with provider context and overridable services."""
+        """Initialize transformer with explicitly wired collaborators."""
         self.provider = provider
         self.entity_type = entity_type or "unknown"
-        resolved_dependencies = resolve_transformer_dependencies(
-            dependencies=dependencies,
+        self._silver_filters = silver_filters
+        self._gold_filters = gold_filters
+        resolved_dependencies = _resolve_dependency_context(
             tracer=tracer,
             metrics=metrics,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
+            dependencies=dependencies,
         )
         self._tracer = resolved_dependencies.tracer
         self._metrics = resolved_dependencies.metrics
-        self._silver_filters = silver_filters
-        self._gold_filters = gold_filters
         self._identity = resolved_dependencies.identity_service
         self._pii_hasher = resolved_dependencies.pii_hasher
         self._data_normalizer = resolved_dependencies.data_normalizer
         self._contract_policy = resolved_dependencies.contract_policy
-
-    def hash_pii_value(self, value: str | None) -> str | None:
-        """Hash a single PII value."""
-        return self._pii_hasher.hash_value(value)
-
-    def hash_pii_list(self, values: list[str] | None) -> list[str] | None:
-        """Hash a list of PII values."""
-        return self._pii_hasher.hash_list(values)
-
-    @staticmethod
-    def validate_value_object(
-        vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type param
-        value: object,
-        *,
-        as_string: bool = True,
-    ) -> str | int | None:
-        """Validate a value using a Value Object and return normalized value."""
-        vo = vo_class.from_raw(value)
-        if vo is None:
-            return None
-        return str(vo) if as_string else vo.value
-
-    @staticmethod
-    def validate_value_objects(
-        vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type param
-        values: list[object] | None,
-        *,
-        as_string: bool = True,
-    ) -> list[str | int] | None:
-        """Validate a list of values using a Value Object."""
-        if not values:
-            return None
-        result: list[str | int] = []
-        for val in values:
-            vo = vo_class.from_raw(val)
-            if vo is not None:
-                result.append(str(vo) if as_string else vo.value)
-        return result if result else None
 
     def _start_transform_span(
         self,
@@ -293,60 +353,3 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         if self._gold_filters is None or self._gold_filters.is_empty():
             return True
         return self._gold_filters.should_include(record)
-
-    def transform_for_gold(
-        self,
-        _context: PipelineContext,
-        silver_record: GoldRecord,
-    ) -> GoldRecord:
-        """Transform Silver record for Gold layer."""
-        return {
-            k: v for k, v in silver_record.items() if k not in self.GOLD_EXCLUDE_FIELDS
-        }
-
-    def compute_content_hash(
-        self,
-        business_data: GoldRecord,
-        *,
-        exclude_none: bool = True,
-    ) -> ContentHash:
-        """Generate canonical content hash for record versioning."""
-        hash_input = _apply_hash_policy(self._contract_policy, business_data)
-        return self._identity.compute_content_hash(
-            self.provider,
-            hash_input,
-            exclude_none=exclude_none,
-        )
-
-    def compute_entity_id(
-        self,
-        source_id: str | None,
-        record: GoldRecord,
-    ) -> EntityID:
-        """Generate stable entity identifier."""
-        return self._identity.compute_entity_id(
-            provider=self.provider,
-            entity_type=self.entity_type,
-            source_id=source_id,
-            record=record,
-        )
-
-    def entity_to_silver_record(
-        self,
-        entity: object,
-    ) -> GoldRecord:
-        """Convert Domain Entity to SilverRecord format using policy rename map."""
-        if not dataclasses.is_dataclass(entity) or isinstance(entity, type):
-            raise TypeError(f"Expected dataclass entity, got {type(entity).__name__}")
-
-        silver_record = dataclasses.asdict(entity)
-        rename_map = self._contract_policy.rename_map
-        for source_key, target_key in rename_map.items():
-            if source_key in silver_record and target_key not in silver_record:
-                value = silver_record.pop(source_key)
-                silver_record[target_key] = self._normalize_lineage_value(
-                    source_key,
-                    value,
-                )
-
-        return silver_record

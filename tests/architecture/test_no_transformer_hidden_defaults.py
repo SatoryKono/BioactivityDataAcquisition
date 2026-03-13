@@ -1,4 +1,4 @@
-"""Architecture guardrails for explicit transformer DI."""
+"""Architecture guardrail for explicit transformer DI."""
 
 from __future__ import annotations
 
@@ -17,29 +17,36 @@ FORBIDDEN_CONSTRUCTORS = {
 }
 
 
-def _load_base_transformer_init() -> ast.FunctionDef:
+def _iter_constructor_calls(function_node: ast.FunctionDef) -> list[str]:
+    """Return constructor names called inside the target function."""
+    names: list[str] = []
+    for node in ast.walk(function_node):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if isinstance(func, ast.Name):
+            names.append(func.id)
+        elif isinstance(func, ast.Attribute):
+            names.append(func.attr)
+    return names
+
+
+def test_base_transformer_init_does_not_construct_default_collaborators() -> None:
+    """BaseTransformer must consume injected collaborators, not create them."""
     content = BASE_TRANSFORMER_PATH.read_text(encoding="utf-8")
     tree = ast.parse(content)
-    for node in tree.body:
-        if isinstance(node, ast.ClassDef) and node.name == "BaseTransformer":
-            for item in node.body:
-                if isinstance(item, ast.FunctionDef) and item.name == "__init__":
-                    return item
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef) or node.name != "BaseTransformer":
+            continue
+        for item in node.body:
+            if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                calls = set(_iter_constructor_calls(item))
+                forbidden = sorted(FORBIDDEN_CONSTRUCTORS & calls)
+                assert not forbidden, (
+                    "BaseTransformer.__init__ must not create concrete defaults; "
+                    f"found: {', '.join(forbidden)}"
+                )
+                return
+
     raise AssertionError("BaseTransformer.__init__ not found")
-
-
-def test_base_transformer_init_does_not_construct_hidden_defaults() -> None:
-    """BaseTransformer must resolve collaborators, not construct them inline."""
-    init_fn = _load_base_transformer_init()
-    forbidden_calls: list[str] = []
-
-    for node in ast.walk(init_fn):
-        if isinstance(node, ast.Call):
-            func = node.func
-            if isinstance(func, ast.Name) and func.id in FORBIDDEN_CONSTRUCTORS:
-                forbidden_calls.append(func.id)
-
-    assert not forbidden_calls, (
-        "BaseTransformer.__init__ must not construct concrete collaborators inline. "
-        f"Found: {sorted(set(forbidden_calls))}"
-    )
