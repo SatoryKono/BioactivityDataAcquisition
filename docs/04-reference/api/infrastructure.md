@@ -132,7 +132,7 @@ Each provider has its own `models.py` with API response models:
 
 | Class | Description |
 |---|---|
-| `RetentionManager` | Data retention policy enforcement |
+| `RetentionPolicy` | Delta table retention, VACUUM, optimize, and maintenance policy enforcement |
 | `AdaptiveRetryPolicy` | Adaptive retry for write operations |
 | `ArrowDataConverter` | Pandas/Arrow data type conversion |
 

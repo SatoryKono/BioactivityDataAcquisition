@@ -546,10 +546,11 @@ class TestRuntimeEnricherSelectionPolicy:
             run_id=str(uuid4()),
             created_at=datetime.now(tz=UTC),
         )
+        context = runner._prepare_enrichment_run_context(state)
 
         finalized = runner._finalize_enrichment_results(
             state=state,
-            enrichers_to_run=[runner._config.enrichers[0]],
+            context=context,
             enrichment_results={
                 "crossref": EnrichmentResult.success(
                     enricher_name="crossref",

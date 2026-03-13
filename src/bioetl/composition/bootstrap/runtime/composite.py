@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
-from uuid import uuid4
 
 from pydantic import ValidationError
 
@@ -13,7 +12,6 @@ from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunnerService,
     CompositeRuntimeConfig,
 )
-from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
     bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
 )
@@ -32,7 +30,6 @@ from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
 )
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServices,
-    CompositeSupportServicesFactory,
 )
 from bioetl.composition.bootstrap.runtime.config_loader import (
     DEFAULT_COMPOSITE_CONFIG_DIR,
@@ -47,16 +44,10 @@ from bioetl.composition.bootstrap.runtime.config_loader import (
 from bioetl.composition.bootstrap.runtime.config_loader import (
     resolve_composite_gold_schema as _resolve_composite_gold_schema_impl,
 )
-from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
     create_composite_runner_with_legacy_fsm_adapter,
 )
-from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
-    RunnerFactoryBuilderService,
-)
 from bioetl.domain.composite.config import CompositeConfig
-from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
@@ -147,6 +138,15 @@ def _bootstrap_runtime_basics(
     run_id: str | None,
 ) -> CompositeRuntimeBasics:
     """Build base runtime dependencies shared across composite bootstrap."""
+    from uuid import uuid4
+
+    from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+    from bioetl.composition.bootstrap.runtime.observability import (
+        bootstrap_logger_port,
+    )
+    from bioetl.infrastructure.config import get_settings
+    from bioetl.infrastructure.locking.memory_lock import MemoryLock
+
     return _bootstrap_runtime_basics_builder_impl(
         config=config,
         run_id=run_id,
@@ -179,6 +179,7 @@ def _build_runner_factories(
         CompositeFilterExtractionService,
     )
     from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
+        RunnerFactoryBuilderService,
         resolve_bronze_opts,
     )
 
@@ -200,6 +201,10 @@ def _build_support_services(
     runtime_basics: CompositeRuntimeBasics,
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade."""
+    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+        CompositeSupportServicesFactory,
+    )
+
     return _build_support_services_builder_impl(
         config=config,
         runtime=runtime,

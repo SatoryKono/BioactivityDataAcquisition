@@ -439,7 +439,7 @@ class TestMergeInputPolicy:
             run_id=test_run_id,
         )
 
-        mergeable_enrichers, mergeable_dependencies = runner._build_merge_inputs(
+        prepared_inputs = runner._build_merge_inputs(
             {
                 "crossref": EnrichmentResult.success(
                     enricher_name="crossref",
@@ -471,8 +471,8 @@ class TestMergeInputPolicy:
             },
         )
 
-        assert [cfg.pipeline for cfg in mergeable_enrichers] == ["crossref"]
-        assert [cfg.pipeline for cfg in mergeable_dependencies] == ["pubmed"]
+        assert [cfg.pipeline for cfg in prepared_inputs.enrichers] == ["crossref"]
+        assert [cfg.pipeline for cfg in prepared_inputs.dependencies] == ["pubmed"]
 
     def test_transition_to_merging_state_sets_merge_state_and_logs_transition(
         self,
@@ -871,13 +871,11 @@ class TestFSMDependenciesCompletedTransition:
         runner._dependency_coordinator = mock_coordinator  # type: ignore[attr-defined]
         runner._dependencies_runner_factory = MagicMock()  # type: ignore[attr-defined]
 
-        coordinator, runner_factory, dependency_names = (
-            runner._prepare_dependencies_run_context()
-        )
+        prepared_context = runner._prepare_dependencies_run_context()
 
-        assert coordinator is runner._dependency_coordinator
-        assert runner_factory is runner._dependencies_runner_factory
-        assert dependency_names == ["pubmed", "crossref"]
+        assert prepared_context.coordinator is runner._dependency_coordinator
+        assert prepared_context.runner_factory is runner._dependencies_runner_factory
+        assert prepared_context.dependency_pipeline_names == ["pubmed", "crossref"]
 
     @pytest.mark.asyncio
     async def test_run_dependencies_delegates_to_coordinator_with_state_context(
@@ -927,6 +925,8 @@ class TestFSMDependenciesCompletedTransition:
             completed_dependencies=frozenset({"crossref"}),
         )
         runner_factory = MagicMock()
+        runner._dependency_coordinator = mock_coordinator  # type: ignore[attr-defined]
+        runner._dependencies_runner_factory = runner_factory  # type: ignore[attr-defined]
         keys_df = pl.DataFrame({"doi": ["10.1234/test"]})
         expected_results = {
             "pubmed": DependencyResult.success(
@@ -936,10 +936,10 @@ class TestFSMDependenciesCompletedTransition:
             )
         }
         mock_coordinator.run_dependencies.return_value = expected_results
+        prepared_context = runner._prepare_dependencies_run_context()
 
         dependency_results = await runner._run_dependencies(
-            coordinator=mock_coordinator,
-            runner_factory=runner_factory,
+            context=prepared_context,
             keys_df=keys_df,
             state=state,
         )
@@ -1043,10 +1043,18 @@ class TestFSMDependenciesCompletedTransition:
             state=CompositePipelineState.SEED_COMPLETED,
         )
         runner._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+        dep_pubmed = MagicMock()
+        dep_pubmed.pipeline = "pubmed"
+        dep_crossref = MagicMock()
+        dep_crossref.pipeline = "crossref"
+        mock_config.dependencies = [dep_pubmed, dep_crossref]
+        runner._dependency_coordinator = mock_coordinator  # type: ignore[attr-defined]
+        runner._dependencies_runner_factory = MagicMock()  # type: ignore[attr-defined]
+        prepared_context = runner._prepare_dependencies_run_context()
 
         next_state = await runner._start_dependencies_phase(
             state,
-            dependencies=["pubmed", "crossref"],
+            context=prepared_context,
         )
 
         assert next_state.state == CompositePipelineState.DEPENDENCIES_RUNNING

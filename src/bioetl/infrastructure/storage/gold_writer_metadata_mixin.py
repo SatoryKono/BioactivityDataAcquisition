@@ -436,9 +436,6 @@ class GoldWriterMetadataMixin(
         table_path: str,
         table_name: str,
         records: list[GoldRecord],
-        primary_keys: list[str],
-        run_id: str | None = None,
-        sources_used: list[str] | None = None,
         schema: DataFrameSchema | None = None,
     ) -> None:
         prepared = _maybe_prepare_gold_merged_metadata_write(

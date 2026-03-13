@@ -2,8 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Protocol
 
+import polars as pl
+
+from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinatorService,
+)
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg.runner_constants import (
     PIPELINE_EXECUTION_ERRORS,
 )
@@ -13,6 +22,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin impor
 from bioetl.application.composite.runner_pkg.runner_stage_support_mixin import (
     _CompositeRunnerStageSupportMixin,
 )
+from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     SeedResult,
@@ -20,168 +30,162 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError, InvalidStateError
+from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
-    import polars as pl
-
-    from bioetl.application.composite.checkpoint import CompositeCheckpointState
-    from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinatorService,
+class _CompositeRunnerStageHostProtocol(Protocol):
+    _config: CompositeConfig
+    _logger: LoggerPort
+    _run_id_str: str
+    _fsm: FSMStateHelperService
+    _dependency_coordinator: DependencyCoordinatorService | None
+    _dependencies_runner_factory: (
+        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
     )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
-    class _CompositeRunnerStageHostProtocol(Protocol):
-        _config: CompositeConfig
-        _logger: LoggerPort
-        _run_id_str: str
-        _fsm: FSMStateHelperService
-        _dependency_coordinator: DependencyCoordinatorService | None
-        _dependencies_runner_factory: (
-            Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
-        )
+    async def _run_seed_with_fsm(
+        self,
+        state: CompositeCheckpointState,
+    ) -> tuple[CompositeCheckpointState, SeedResult]: ...
 
-        async def _run_seed_with_fsm(
-            self,
-            state: CompositeCheckpointState,
-        ) -> tuple[CompositeCheckpointState, SeedResult]: ...
+    def _resume_seed_phase(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState: ...
 
-        def _resume_seed_phase(
-            self,
-            state: CompositeCheckpointState,
-        ) -> CompositeCheckpointState: ...
+    async def _start_seed_phase(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState: ...
 
-        async def _start_seed_phase(
-            self,
-            state: CompositeCheckpointState,
-        ) -> CompositeCheckpointState: ...
+    async def _call_run_seed(self) -> SeedResult: ...
 
-        async def _call_run_seed(self) -> SeedResult: ...
+    async def _handle_seed_phase_exception(
+        self,
+        state: CompositeCheckpointState,
+        error: Exception,
+    ) -> None: ...
 
-        async def _handle_seed_phase_exception(
-            self,
-            state: CompositeCheckpointState,
-            error: Exception,
-        ) -> None: ...
+    async def _complete_seed_phase(
+        self,
+        state: CompositeCheckpointState,
+        seed_result: SeedResult,
+    ) -> CompositeCheckpointState: ...
 
-        async def _complete_seed_phase(
-            self,
-            state: CompositeCheckpointState,
-            seed_result: SeedResult,
-        ) -> CompositeCheckpointState: ...
+    def _has_dependencies_configured(self) -> bool: ...
 
-        def _has_dependencies_configured(self) -> bool: ...
+    async def _skip_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
 
-        async def _skip_dependencies_phase(
-            self,
-            state: CompositeCheckpointState,
-        ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
+    def _prepare_dependencies_run_context(
+        self,
+    ) -> _PreparedDependenciesRunContext: ...
 
-        def _prepare_dependencies_run_context(
-            self,
-        ) -> tuple[
-            DependencyCoordinatorService,
-            Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
-            list[str],
-        ]: ...
+    async def _start_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        *,
+        context: _PreparedDependenciesRunContext,
+    ) -> CompositeCheckpointState: ...
 
-        async def _start_dependencies_phase(
-            self,
-            state: CompositeCheckpointState,
-            *,
-            dependencies: list[str],
-        ) -> CompositeCheckpointState: ...
+    async def _run_dependencies(
+        self,
+        *,
+        context: _PreparedDependenciesRunContext,
+        keys_df: pl.DataFrame,
+        state: CompositeCheckpointState,
+    ) -> dict[str, DependencyResult]: ...
 
-        async def _run_dependencies(
-            self,
-            *,
-            coordinator: DependencyCoordinatorService,
-            runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
-            keys_df: pl.DataFrame,
-            state: CompositeCheckpointState,
-        ) -> dict[str, DependencyResult]: ...
+    async def _handle_dependencies_phase_exception(
+        self,
+        state: CompositeCheckpointState,
+        error: Exception,
+    ) -> None: ...
 
-        async def _handle_dependencies_phase_exception(
-            self,
-            state: CompositeCheckpointState,
-            error: Exception,
-        ) -> None: ...
+    async def _postprocess_dependency_results(
+        self,
+        state: CompositeCheckpointState,
+        dependency_results: dict[str, DependencyResult],
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
 
-        async def _postprocess_dependency_results(
-            self,
-            state: CompositeCheckpointState,
-            dependency_results: dict[str, DependencyResult],
-        ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
+    def _collect_successful_dependencies(
+        self,
+        state: CompositeCheckpointState,
+        dependency_results: dict[str, DependencyResult],
+    ) -> CompositeCheckpointState: ...
 
-        def _collect_successful_dependencies(
-            self,
-            state: CompositeCheckpointState,
-            dependency_results: dict[str, DependencyResult],
-        ) -> CompositeCheckpointState: ...
+    async def _finalize_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        dependency_results: dict[str, DependencyResult],
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
 
-        async def _finalize_dependencies_phase(
-            self,
-            state: CompositeCheckpointState,
-            dependency_results: dict[str, DependencyResult],
-        ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]: ...
+    def _validate_dependency_preconditions(
+        self,
+    ) -> tuple[
+        DependencyCoordinatorService,
+        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+    ]: ...
 
-        def _validate_dependency_preconditions(
-            self,
-        ) -> tuple[
-            DependencyCoordinatorService,
-            Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
-        ]: ...
+    def _find_required_failures(
+        self,
+        results: dict[str, DependencyResult],
+    ) -> list[str]: ...
 
-        def _find_required_failures(
-            self,
-            results: dict[str, DependencyResult],
-        ) -> list[str]: ...
+    async def _fail_required_dependencies(
+        self,
+        state: CompositeCheckpointState,
+        required_failed: list[str],
+    ) -> None: ...
 
-        async def _fail_required_dependencies(
-            self,
-            state: CompositeCheckpointState,
-            required_failed: list[str],
-        ) -> None: ...
+    def _summarize_dependency_outcomes(
+        self,
+        dependency_results: dict[str, DependencyResult],
+    ) -> tuple[int, int]: ...
 
-        def _summarize_dependency_outcomes(
-            self,
-            dependency_results: dict[str, DependencyResult],
-        ) -> tuple[int, int]: ...
+    async def _complete_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        *,
+        succeeded: int,
+        failed: int,
+    ) -> CompositeCheckpointState: ...
 
-        async def _complete_dependencies_phase(
-            self,
-            state: CompositeCheckpointState,
-            *,
-            succeeded: int,
-            failed: int,
-        ) -> CompositeCheckpointState: ...
+    async def _persist_failed_state(
+        self,
+        state: CompositeCheckpointState,
+        *,
+        stage: str,
+        error: str,
+    ) -> CompositeCheckpointState: ...
 
-        async def _persist_failed_state(
-            self,
-            state: CompositeCheckpointState,
-            *,
-            stage: str,
-            error: str,
-        ) -> CompositeCheckpointState: ...
+    def _transition_state_with_fsm_log(
+        self,
+        state: CompositeCheckpointState,
+        to_state: CompositePipelineState,
+        *,
+        stage: str,
+        validate: bool = True,
+        **transition_kwargs: object,
+    ) -> CompositeCheckpointState: ...
 
-        def _transition_state_with_fsm_log(
-            self,
-            state: CompositeCheckpointState,
-            to_state: CompositePipelineState,
-            *,
-            stage: str,
-            validate: bool = True,
-            **transition_kwargs: object,
-        ) -> CompositeCheckpointState: ...
+    async def _call_save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool: ...
 
-        async def _call_save_checkpoint_safe(
-            self,
-            state: CompositeCheckpointState,
-            operation: str,
-        ) -> bool: ...
+
+@dataclass(frozen=True, slots=True)
+class _PreparedDependenciesRunContext:
+    """Resolved runtime collaborators needed for the dependencies phase."""
+
+    coordinator: DependencyCoordinatorService
+    runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
+    dependency_pipeline_names: list[str]
+
 
 __all__ = ["CompositeRunnerStageMixin"]
 
@@ -248,19 +252,16 @@ class CompositeRunnerStageMixin(
         if not self._has_dependencies_configured():
             return await self._skip_dependencies_phase(state)
 
-        coordinator, runner_factory, dependency_pipeline_names = (
-            self._prepare_dependencies_run_context()
-        )
+        prepared_context = self._prepare_dependencies_run_context()
 
         state = await self._start_dependencies_phase(
             state,
-            dependencies=dependency_pipeline_names,
+            context=prepared_context,
         )
 
         try:
             dependency_results = await self._run_dependencies(
-                coordinator=coordinator,
-                runner_factory=runner_factory,
+                context=prepared_context,
                 keys_df=keys_df,
                 state=state,
             )
@@ -279,41 +280,41 @@ class CompositeRunnerStageMixin(
 
     def _prepare_dependencies_run_context(
         self: _CompositeRunnerStageHostProtocol,
-    ) -> tuple[
-        DependencyCoordinatorService,
-        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
-        list[str],
-    ]:
+    ) -> _PreparedDependenciesRunContext:
         """Resolve dependency runtime collaborators and pipeline names for execution."""
         coordinator, runner_factory = self._validate_dependency_preconditions()
         dependency_pipeline_names = [
             dependency.pipeline for dependency in self._config.dependencies
         ]
-        return coordinator, runner_factory, dependency_pipeline_names
+        return _PreparedDependenciesRunContext(
+            coordinator=coordinator,
+            runner_factory=runner_factory,
+            dependency_pipeline_names=dependency_pipeline_names,
+        )
 
     async def _run_dependencies(
         self: _CompositeRunnerStageHostProtocol,
         *,
-        coordinator: DependencyCoordinatorService,
-        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+        context: _PreparedDependenciesRunContext,
         keys_df: pl.DataFrame,
         state: CompositeCheckpointState,
     ) -> dict[str, DependencyResult]:
         """Run configured dependencies through the coordinator."""
-        return await coordinator.run_dependencies(
+        return await context.coordinator.run_dependencies(
             keys=keys_df,
             dependencies=self._config.dependencies,
             completed=state.completed_dependencies,
-            runner_factory=runner_factory,
+            runner_factory=context.runner_factory,
         )
 
     async def _start_dependencies_phase(
         self: _CompositeRunnerStageHostProtocol,
         state: CompositeCheckpointState,
         *,
-        dependencies: list[str],
+        context: _PreparedDependenciesRunContext,
     ) -> CompositeCheckpointState:
         """Transition to DEPENDENCIES_RUNNING, persist checkpoint, and emit phase log."""
+        dependencies = context.dependency_pipeline_names
         state = self._transition_state_with_fsm_log(
             state,
             CompositePipelineState.DEPENDENCIES_RUNNING,

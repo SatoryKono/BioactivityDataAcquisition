@@ -139,6 +139,19 @@ def _validate_key_nullability_impl(
         )
 
 
+def _diff_schema_fields(
+    existing_schema: pa.Schema | None,
+    records: list[BronzeRecord],
+) -> tuple[set[str], set[str]] | None:
+    """Return incoming-only and existing-only fields for one Silver batch."""
+    if existing_schema is None or not records:
+        return None
+
+    incoming_fields = set(records[0].keys())
+    existing_fields = set(existing_schema.names)
+    return incoming_fields - existing_fields, existing_fields - incoming_fields
+
+
 class SilverWriterValidationMixin:
     """Mixin with write policy and schema validation logic."""
 
@@ -283,14 +296,11 @@ class SilverWriterValidationMixin:
     ) -> None:
         """Check schema drift and handle according to configured policy."""
         existing_schema = await self._get_table_schema(table_name)
-        if existing_schema is None or not records:
+        diff = _diff_schema_fields(existing_schema, records)
+        if diff is None:
             return
 
-        incoming_fields = set(records[0].keys())
-        existing_fields = set(existing_schema.names)
-
-        new_fields = incoming_fields - existing_fields
-        removed_fields = existing_fields - incoming_fields
+        new_fields, removed_fields = diff
 
         if not new_fields and not removed_fields:
             return
@@ -319,14 +329,11 @@ class SilverWriterValidationMixin:
         from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
 
         existing_schema = await self._get_table_schema(table_name)
-        if existing_schema is None or not records:
+        diff = _diff_schema_fields(existing_schema, records)
+        if diff is None:
             return None
 
-        incoming_fields = set(records[0].keys())
-        existing_fields = set(existing_schema.names)
-
-        new_fields = incoming_fields - existing_fields
-        missing_fields = existing_fields - incoming_fields
+        new_fields, missing_fields = diff
 
         if not new_fields and not missing_fields:
             return None

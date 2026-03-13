@@ -59,8 +59,15 @@ def test_composite_runtime_does_not_expose_helper_only_symbols() -> None:
     """Helper-only wiring symbols should not leak through the runtime facade."""
     unexpected_attrs = {
         "CompositeFilterExtractionService",
+        "CompositeSupportServicesFactory",
+        "MemoryLock",
+        "RunnerFactoryBuilderService",
         "resolve_bronze_opts",
         "bootstrap_pipeline_runner",
+        "bootstrap_logger_port",
+        "bootstrap_storage_adapter",
+        "get_settings",
+        "uuid4",
     }
     leaked = [
         name for name in sorted(unexpected_attrs) if hasattr(composite_runtime, name)

@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams With Descriptions
 
-- Generated: 2026-03-12T15:50:17
+- Generated: 2026-03-13T11:52:02
 - Diagram count: 52
 
 ## Table of Contents
@@ -272,7 +272,7 @@
 ![06-storage-layer](architecture/png/06-storage-layer.png)
 
 ### Описание
-Диаграмма «Storage Layer Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.. На схеме отражено примерно 21 узлов и 23 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Storage Writers, Bronze Storage, Silver Storage, Gold Storage, Delta Reader. Показательные узлы для быстрого чтения: StoragePort (Protocol), AtomicWriteGroup ━━━━━━━━━━━━━━━━━ Atomic multi-file writes with rollback, GoldWriter csv_exporter + audit + metadata_writer write_gold / clear_gold, ArrowDataConverter (records → PyArrow), RetentionManager (vacuum/retention), MetadataWriter (_metadata.yaml). Примечание: Decomposed into 06a-storage-writers, 06b-storage-support.
+Диаграмма «Storage Layer Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.. На схеме отражено примерно 21 узлов и 23 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Storage Writers, Bronze Storage, Silver Storage, Gold Storage, Delta Reader. Показательные узлы для быстрого чтения: StoragePort (Protocol), AtomicWriteGroup ━━━━━━━━━━━━━━━━━ Atomic multi-file writes with rollback, GoldWriter csv_exporter + audit + metadata_writer write_gold / clear_gold, ArrowDataConverter (records → PyArrow), RetentionPolicy (vacuum/retention), MetadataWriter (_metadata.yaml). Примечание: Decomposed into 06a-storage-writers, 06b-storage-support.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -306,7 +306,7 @@
 ![06b-storage-support](architecture/png/06b-storage-support.png)
 
 ### Описание
-Диаграмма «Storage Support Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Support utilities, validators, and metadata builders for the storage layer.. На схеме отражено примерно 11 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Support Components, Validation, Metadata Builders. Показательные узлы для быстрого чтения: ArrowDataConverter records → PyArrow, RetentionManager vacuum / retention, MetadataWriter _metadata.yaml, CsvExporter Delta → CSV export, DQReportWriter DQ reports JSON, PanderaSilverValidator SilverValidatorPort impl.
+Диаграмма «Storage Support Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Support utilities, validators, and metadata builders for the storage layer.. На схеме отражено примерно 11 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Support Components, Validation, Metadata Builders. Показательные узлы для быстрого чтения: ArrowDataConverter records → PyArrow, RetentionPolicy vacuum / retention, MetadataWriter _metadata.yaml, CsvExporter Delta → CSV export, DQReportWriter DQ reports JSON, PanderaSilverValidator SilverValidatorPort impl.
 
 ### Метаданные
 - Тип: `flowchart`

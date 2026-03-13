@@ -17,37 +17,46 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError, InvalidStateError
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.checkpoint import (
-        CompositeCheckpointService,
-        CompositeCheckpointState,
+    from bioetl.application.composite import (
+        checkpoint as composite_checkpoint,
     )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.preflight_validator import (
-        CompositePreflightValidationService,
+    from bioetl.application.composite import (
+        fsm_helper as composite_fsm_helper,
     )
-    from bioetl.application.composite.runner_pkg.runner import CompositeRuntimeConfig
-    from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
-    from bioetl.domain.composite.result import DependencyResult, MergeResult
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+    from bioetl.application.composite import (
+        preflight_validator as composite_preflight_validator,
+    )
+    from bioetl.application.composite.runner_pkg import (
+        runner as composite_runner_module,
+    )
+    from bioetl.domain import ports as domain_ports
+    from bioetl.domain.composite import (
+        config as composite_config,
+    )
+    from bioetl.domain.composite import (
+        result as composite_result,
+    )
 
 
 class _CompositeRunnerSupportHostProtocol(Protocol):
-    _config: CompositeConfig
-    _runtime: CompositeRuntimeConfig
-    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
-    _checkpoint_manager: CompositeCheckpointService
-    _logger: LoggerPort
+    _config: composite_config.CompositeConfig
+    _runtime: composite_runner_module.CompositeRuntimeConfig
+    _seed_runner_factory: Callable[[], domain_ports.ExecutionMetricsRunnerPort]
+    _checkpoint_manager: composite_checkpoint.CompositeCheckpointService
+    _logger: domain_ports.LoggerPort
     _run_id_str: str
     _started_at: datetime | None
-    _preflight_validator: CompositePreflightValidationService | None
-    _fsm: FSMStateHelperService
+    _preflight_validator: (
+        composite_preflight_validator.CompositePreflightValidationService | None
+    )
+    _fsm: composite_fsm_helper.FSMStateHelperService
 
     def _get_preflight_skip_reason(self) -> str | None: ...
 
     def _should_run_enricher(
         self,
-        enricher: EnricherConfig,
-        state: CompositeCheckpointState,
+        enricher: composite_config.EnricherConfig,
+        state: composite_checkpoint.CompositeCheckpointState,
     ) -> bool: ...
 
     def _get_required_enricher_failure(
@@ -61,22 +70,24 @@ __all__ = ["CompositeRunnerSupportMixin"]
 class CompositeRunnerSupportMixin:
     """Mixin with utility and side-effect helpers."""
 
-    _config: CompositeConfig
-    _runtime: CompositeRuntimeConfig
-    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
-    _checkpoint_manager: CompositeCheckpointService
-    _logger: LoggerPort
+    _config: composite_config.CompositeConfig
+    _runtime: composite_runner_module.CompositeRuntimeConfig
+    _seed_runner_factory: Callable[[], domain_ports.ExecutionMetricsRunnerPort]
+    _checkpoint_manager: composite_checkpoint.CompositeCheckpointService
+    _logger: domain_ports.LoggerPort
     _run_id_str: str
     _started_at: datetime | None
-    _preflight_validator: CompositePreflightValidationService | None
-    _fsm: FSMStateHelperService
+    _preflight_validator: (
+        composite_preflight_validator.CompositePreflightValidationService | None
+    )
+    _fsm: composite_fsm_helper.FSMStateHelperService
 
     def _build_composite_result(
         self: _CompositeRunnerSupportHostProtocol,
         seed_result: SeedResult,
-        dependency_results: dict[str, DependencyResult],
+        dependency_results: dict[str, composite_result.DependencyResult],
         enrichment_results: dict[str, EnrichmentResult],
-        merge_result: MergeResult | None,
+        merge_result: composite_result.MergeResult | None,
     ) -> CompositeResult:
         """Build the final CompositeResult."""
         completed_at = datetime.now(tz=UTC)
@@ -199,7 +210,7 @@ class CompositeRunnerSupportMixin:
 
     async def _save_checkpoint_safe(
         self: _CompositeRunnerSupportHostProtocol,
-        state: CompositeCheckpointState,
+        state: composite_checkpoint.CompositeCheckpointState,
         operation: str,
     ) -> bool:
         """Save checkpoint with graceful error handling.
@@ -264,8 +275,8 @@ class CompositeRunnerSupportMixin:
 
     def _get_enrichers_to_run(
         self: _CompositeRunnerSupportHostProtocol,
-        state: CompositeCheckpointState,
-    ) -> list[EnricherConfig]:
+        state: composite_checkpoint.CompositeCheckpointState,
+    ) -> list[composite_config.EnricherConfig]:
         """Determine which enrichers should be run.
 
         Returns:
@@ -280,8 +291,8 @@ class CompositeRunnerSupportMixin:
 
     def _should_run_enricher(
         self: _CompositeRunnerSupportHostProtocol,
-        enricher: EnricherConfig,
-        state: CompositeCheckpointState,
+        enricher: composite_config.EnricherConfig,
+        state: composite_checkpoint.CompositeCheckpointState,
     ) -> bool:
         """Return whether an enricher should execute under current runtime policy."""
         if (

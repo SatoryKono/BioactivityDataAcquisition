@@ -308,7 +308,7 @@
 249. **BaseDeltaWriter** - Class - Common Delta operations
 250. **DeltaReader** - Class - Delta table reader
 251. **MetadataWriter** - Class - Metadata YAML writer
-252. **RetentionManager** - Class - VACUUM manager
+252. **RetentionPolicy** - Class - VACUUM and retention policy manager
 253. **UnifiedHTTPClient** - Class - HTTP client
 254. **RateLimiter** - Class - Rate limiting
 255. **CircuitBreaker** - Class - Circuit breaker
