@@ -1,15 +1,18 @@
 """Arrow table conversion utilities for Delta Lake writers.
 
-Extracts Arrow table preparation logic from GoldWriter to reduce
-file size and improve reusability.
+Extracts shared Arrow table preparation logic from storage writers to reduce
+file size and keep schema-aware conversion behavior centralized.
 
 Implements RULES.md §2.4 and ADR-014 for deterministic writes.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
+import orjson
 import pyarrow as pa
 
 from bioetl.domain.types import JsonDict
@@ -18,16 +21,96 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+@dataclass(frozen=True, slots=True)
+class ArrowSchemaPreparationContext:
+    """Prepared schema context for deterministic schema-aware Arrow conversion."""
+
+    schema_names: tuple[str, ...]
+    schema_fields: frozenset[str]
+    string_fields: frozenset[str]
+
+
+def serialize_value_for_arrow_schema(
+    value: Any,  # Any: Arrow field value type varies by input record
+    is_string_field: bool,
+) -> Any:  # Any: schema-aware conversion preserves heterogeneous scalar types
+    """Serialize one value for schema-aware Arrow conversion."""
+    if value is None:
+        return None
+    if is_string_field and isinstance(value, (dict, list)):
+        return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+    return value
+
+
+def get_string_fields(schema: pa.Schema) -> set[str]:
+    """Return field names backed by string-like Arrow types."""
+    return {
+        field.name
+        for field in schema
+        if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
+    }
+
+
+def build_arrow_schema_preparation_context(
+    schema: pa.Schema,
+) -> ArrowSchemaPreparationContext:
+    """Build immutable schema context for filtered Arrow conversion."""
+    schema_names = tuple(schema.names)
+    return ArrowSchemaPreparationContext(
+        schema_names=schema_names,
+        schema_fields=frozenset(schema_names),
+        string_fields=frozenset(get_string_fields(schema)),
+    )
+
+
+def filter_record_for_schema(
+    record: JsonDict,
+    context: ArrowSchemaPreparationContext,
+) -> JsonDict:
+    """Filter one record to schema fields and serialize string-backed complex values."""
+    return {
+        key: serialize_value_for_arrow_schema(value, key in context.string_fields)
+        for key, value in record.items()
+        if key in context.schema_fields
+    }
+
+
+def sort_arrow_table_by_primary_keys(
+    arrow_data: pa.Table,
+    primary_keys: list[str] | None,
+    *,
+    schema_names: Sequence[str] | None = None,
+    logger: LoggerPort | None = None,
+) -> pa.Table:
+    """Sort an Arrow table by available primary keys for deterministic writes."""
+    if not primary_keys:
+        return arrow_data
+
+    available_schema_names = tuple(schema_names or arrow_data.schema.names)
+    valid_keys = [pk for pk in primary_keys if pk in available_schema_names]
+    if valid_keys:
+        return arrow_data.sort_by([(pk, "ascending") for pk in valid_keys])
+
+    if logger is not None:
+        logger.warning(
+            "Primary keys not found in schema, skipping sort",
+            primary_keys=primary_keys,
+            schema_fields=available_schema_names,
+        )
+    return arrow_data
+
+
 class ArrowDataConverter:
     """Converter for preparing PyArrow tables for Delta Lake writes.
 
     Handles:
+    - Schema-aware record filtering and serialization
     - Null type coercion (Delta Lake doesn't support null type)
     - Canonical column ordering (ADR-014)
     - Primary key sorting for deterministic writes
 
-    This class extracts the Arrow table preparation logic from GoldWriter
-    to reduce file size and improve testability.
+    This class centralizes shared Arrow preparation logic used by storage
+    writers to reduce duplication and improve testability.
     """
 
     def __init__(self, logger: LoggerPort | None = None) -> None:
@@ -103,12 +186,11 @@ class ArrowDataConverter:
         Returns:
             Arrow table sorted ascending by the provided primary keys, unsorted if none provided.
         """
-        if not primary_keys:
-            return arrow_data
-        valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
-        if valid_keys:
-            return arrow_data.sort_by([(pk, "ascending") for pk in valid_keys])
-        return arrow_data
+        return sort_arrow_table_by_primary_keys(
+            arrow_data,
+            primary_keys,
+            logger=self._logger,
+        )
 
     def convert_records_to_arrow(
         self,
@@ -140,6 +222,25 @@ class ArrowDataConverter:
             arrow_data = self._sanitize_null_columns(arrow_data)
 
         return self._sort_by_keys(arrow_data, primary_keys)
+
+    def convert_records_to_arrow_with_schema(
+        self,
+        records: list[JsonDict],  # Any: record/metadata values are heterogeneous
+        schema: pa.Schema,
+        primary_keys: list[str] | None = None,
+    ) -> pa.Table:
+        """Convert records to Arrow using schema filtering, serialization, and sorting."""
+        context = build_arrow_schema_preparation_context(schema)
+        filtered_records = [
+            filter_record_for_schema(record, context) for record in records
+        ]
+        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+        return sort_arrow_table_by_primary_keys(
+            arrow_data,
+            primary_keys,
+            schema_names=schema.names,
+            logger=self._logger,
+        )
 
     def _sanitize_null_columns(self, arrow_data: pa.Table) -> pa.Table:
         """Sanitize null-typed columns in Arrow table.
@@ -188,5 +289,12 @@ class ArrowDataConverter:
         new_schema = pa.schema(new_fields)
         return pa.Table.from_arrays(new_columns, schema=new_schema)
 
-
-__all__ = ["ArrowDataConverter"]
+__all__ = [
+    "ArrowDataConverter",
+    "ArrowSchemaPreparationContext",
+    "build_arrow_schema_preparation_context",
+    "filter_record_for_schema",
+    "get_string_fields",
+    "serialize_value_for_arrow_schema",
+    "sort_arrow_table_by_primary_keys",
+]

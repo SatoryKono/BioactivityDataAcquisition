@@ -19,13 +19,9 @@ from bioetl.application.core.batch_executor_helpers import (
     build_run_statistics,
 )
 from bioetl.application.core.batch_executor_loop_helpers import (
-    append_record_and_update_batch_size,
     create_batch_extraction_loop_state,
-    ensure_extraction_not_shutdown,
-    flush_batch_if_needed,
     flush_remaining_batch,
-    report_batch_progress,
-    save_periodic_checkpoint_for_loop,
+    process_extracted_record_iteration,
 )
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
@@ -35,6 +31,8 @@ from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+
+    from opentelemetry.trace import Span
 
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
@@ -71,6 +69,14 @@ class _BatchExecutionContext:
     resume_offset: int
 
 
+@dataclass(frozen=True, slots=True)
+class _BatchExecutionLifecycleContext:
+    """Top-level execution state shared across success and failure handlers."""
+
+    execution_context: _BatchExecutionContext
+    root_span: Span | None
+
+
 class _BatchProcessingServicePort(Protocol):
     """Minimal contract required by BatchExecutor for batch processing service."""
 
@@ -103,6 +109,50 @@ class _BatchProcessingServicePort(Protocol):
             start_index: Absolute record index of the first record in this batch.
             query_string: Query string used to fetch these records, for logging context.
         """
+
+
+def _finalize_successful_execution(
+    executor: BatchExecutor,
+    lifecycle_context: _BatchExecutionLifecycleContext,
+) -> None:
+    """Record success stats and close the execution span cleanly."""
+    executor._tracing.set_execution_stats(
+        lifecycle_context.root_span,
+        total_fetched=executor.records_fetched,
+        total_bronze=executor.records_bronze,
+        total_silver=executor.records_silver,
+        total_gold=executor.records_gold,
+        total_quarantined=executor.records_quarantined,
+        batch_size_reductions=executor._memory.batch_size_reductions,
+        min_batch_size_used=executor._memory.min_batch_size_used,
+    )
+    executor._tracing.end_span(lifecycle_context.root_span)
+
+
+async def _handle_shutdown_during_execution(
+    executor: BatchExecutor,
+    lifecycle_context: _BatchExecutionLifecycleContext,
+) -> None:
+    """Persist shutdown checkpoint and mark the execution span accordingly."""
+    await executor._checkpoint_recovery_service.save_checkpoint_on_shutdown(
+        records_fetched=executor.records_fetched,
+        resume_offset=lifecycle_context.execution_context.resume_offset,
+    )
+    executor._tracing.end_span_with_shutdown(lifecycle_context.root_span)
+
+
+async def _handle_failed_execution(
+    executor: BatchExecutor,
+    lifecycle_context: _BatchExecutionLifecycleContext,
+    error: Exception,
+) -> None:
+    """Persist recovery checkpoint and close the execution span with error."""
+    await executor._checkpoint_recovery_service.save_checkpoint_on_exception(
+        records_fetched=executor.records_fetched,
+        resume_offset=lifecycle_context.execution_context.resume_offset,
+        error=error,
+    )
+    executor._tracing.end_span(lifecycle_context.root_span, error)
 
 
 class BatchExecutor(_BatchExecutorDQMixin):
@@ -188,63 +238,39 @@ class BatchExecutor(_BatchExecutorDQMixin):
         return self._config.entity_type
 
     async def execute(
-        self,
-        limit: int | None,
-        query: str | None = None,
-        offset: int | None = None,
+        self, limit: int | None, query: str | None = None, offset: int | None = None
     ) -> None:
-        """Execute the pipeline: fetch -> transform -> write.
-
-        Args:
-            limit: Maximum number of records to fetch, or None for all available.
-            query: Optional query string forwarded to the data source.
-            offset: Optional starting offset for resuming a previous run.
-        """
-        execution_context = self._prepare_execution_context(
-            limit=limit,
-            query=query,
-            offset=offset,
+        """Execute the pipeline for the provided limit/query/offset inputs."""
+        lifecycle_context = await self._start_execution(
+            limit=limit, query=query, offset=offset
         )
-        await self._progress_service.initialize_tracking(execution_context.limit)
-
-        root_span = self._tracing.start_execution_span()
 
         try:
-            await self._run_extraction_loop(execution_context)
-            self._tracing.set_execution_stats(
-                root_span,
-                total_fetched=self.records_fetched,
-                total_bronze=self.records_bronze,
-                total_silver=self.records_silver,
-                total_gold=self.records_gold,
-                total_quarantined=self.records_quarantined,
-                batch_size_reductions=self._memory.batch_size_reductions,
-                min_batch_size_used=self._memory.min_batch_size_used,
-            )
+            await self._run_extraction_loop(lifecycle_context.execution_context)
         except PipelineShutdownError:
-            await self._checkpoint_recovery_service.save_checkpoint_on_shutdown(
-                records_fetched=self.records_fetched,
-                resume_offset=execution_context.resume_offset,
-            )
-            self._tracing.end_span_with_shutdown(root_span)
+            await _handle_shutdown_during_execution(self, lifecycle_context)
             raise
         except self._PIPELINE_EXECUTION_ERRORS as error:
-            await self._checkpoint_recovery_service.save_checkpoint_on_exception(
-                records_fetched=self.records_fetched,
-                resume_offset=execution_context.resume_offset,
-                error=error,
-            )
-            self._tracing.end_span(root_span, error)
+            await _handle_failed_execution(self, lifecycle_context, error)
             raise
         else:
-            self._tracing.end_span(root_span)
+            _finalize_successful_execution(self, lifecycle_context)
+
+    async def _start_execution(
+        self, *, limit: int | None, query: str | None, offset: int | None
+    ) -> _BatchExecutionLifecycleContext:
+        """Initialize progress tracking and tracing for one executor run."""
+        execution_context = self._prepare_execution_context(
+            limit=limit, query=query, offset=offset
+        )
+        await self._progress_service.initialize_tracking(execution_context.limit)
+        return _BatchExecutionLifecycleContext(
+            execution_context=execution_context,
+            root_span=self._tracing.start_execution_span(),
+        )
 
     def _prepare_execution_context(
-        self,
-        *,
-        limit: int | None,
-        query: str | None,
-        offset: int | None,
+        self, *, limit: int | None, query: str | None, offset: int | None
     ) -> _BatchExecutionContext:
         """Persist execution-scoped inputs and return the explicit loop context."""
         execution_context = _BatchExecutionContext(
@@ -272,38 +298,17 @@ class BatchExecutor(_BatchExecutorDQMixin):
             query=execution_context.query,
             offset=execution_context.offset,
         ):
-            await ensure_extraction_not_shutdown(
+            self.records_fetched = await process_extracted_record_iteration(
+                loop_state=loop_state,
+                raw_record=raw_record,
                 shutdown_requested=self._shutdown_signal.is_requested,
                 checkpoint_recovery_service=self._checkpoint_recovery_service,
                 records_fetched=self.records_fetched,
                 resume_offset=execution_context.resume_offset,
-            )
-
-            self.records_fetched += 1
-            append_record_and_update_batch_size(
-                loop_state=loop_state,
-                raw_record=raw_record,
                 memory_manager=self._memory,
-                records_fetched=self.records_fetched,
-            )
-            report_batch_progress(
-                progress_service=self._progress_service,
-                state=self,
-            )
-
-            await flush_batch_if_needed(
-                loop_state=loop_state,
-                records_fetched=self.records_fetched,
                 process_batch=self._process_batch_and_update_state,
-                memory_manager=self._memory,
                 progress_service=self._progress_service,
                 progress_state=self,
-            )
-
-            await save_periodic_checkpoint_for_loop(
-                checkpoint_recovery_service=self._checkpoint_recovery_service,
-                records_fetched=self.records_fetched,
-                resume_offset=execution_context.resume_offset,
                 checkpoint_interval=self.checkpoint_interval,
             )
 

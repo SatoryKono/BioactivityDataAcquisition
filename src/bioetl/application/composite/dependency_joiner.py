@@ -3,20 +3,18 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.dependency_join_support import (
     CompositeJoinContext,
     PreparedDependencyJoinContext,
     ResolvedCompositeJoinContext,
-    SingleKeyJoinContext,
-    build_asymmetric_join_key_set,
     build_composite_join_metadata,
     build_single_key_join_metadata,
     execute_dependency_join,
     prepare_dependency_join_frames,
     resolve_composite_join_context,
+    resolve_single_key_join_context,
 )
 from bioetl.application.composite.protocols import (
     JoinExecutorProtocol,
@@ -33,42 +31,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 __all__ = ["DependencyJoinerService"]
-
-
-@dataclass(frozen=True, slots=True)
-class _ResolvedSingleKeyJoinContext:
-    prepared_context: PreparedDependencyJoinContext
-    seed_join_key: str
-    dep_join_key: str
-    join_key_set: set[str]
-
-
-def _resolve_single_key_join_context(
-    *,
-    join_key_resolver: JoinKeyResolverProtocol,
-    metadata: SingleKeyJoinContext,
-    dep_pipeline: str,
-    prepared_context: PreparedDependencyJoinContext,
-) -> _ResolvedSingleKeyJoinContext:
-    seed_join_key, dep_join_key, seed_join_key_qualified = (
-        join_key_resolver.resolve_join_key_names_asymmetric(
-            left_key=metadata.primary_key,
-            right_key=metadata.right_key,
-            left_pipeline=metadata.left_pipeline,
-            right_pipeline=dep_pipeline,
-            merged_columns=prepared_context.merged_df.columns,
-        )
-    )
-    return _ResolvedSingleKeyJoinContext(
-        prepared_context=prepared_context,
-        seed_join_key=seed_join_key,
-        dep_join_key=dep_join_key,
-        join_key_set=build_asymmetric_join_key_set(
-            left_join_key=seed_join_key,
-            right_join_key=dep_join_key,
-            left_join_key_qualified=seed_join_key_qualified,
-        ),
-    )
 
 
 class DependencyJoinerService:
@@ -191,10 +153,10 @@ class DependencyJoinerService:
             right_join_keys=metadata.right_keys_list,
             seed_pipeline=seed_pipeline,
         )
-        resolved_context = _resolve_single_key_join_context(
+        resolved_context = resolve_single_key_join_context(
             join_key_resolver=self._join_key_resolver,
             metadata=metadata,
-            dep_pipeline=dep.pipeline,
+            dependency=dep.pipeline,
             prepared_context=prepared_context,
         )
         return self._execute_prepared_dependency_join(

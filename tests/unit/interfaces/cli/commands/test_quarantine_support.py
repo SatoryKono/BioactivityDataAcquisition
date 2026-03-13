@@ -5,13 +5,11 @@ Tests quarantine inspection, stats display, replay, purge, and record resolution
 
 from __future__ import annotations
 
-import json
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.types import QuarantineRecordStatus
 from bioetl.interfaces.cli.commands.quarantine_support import (
     _inspect_quarantine,
     _purge_quarantine,

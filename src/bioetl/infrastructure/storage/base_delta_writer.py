@@ -4,7 +4,7 @@ Provides common functionality for Silver and Gold Delta Lake writers,
 including Arrow data preparation, schema handling, and table management.
 
 Implements shared infrastructure for RULES.md §2.1 Medallion Architecture:
-- Arrow table preparation with schema filtering
+- Arrow table preparation with schema-aware filtering delegated to ArrowDataConverter
 - Primary key sorting for deterministic writes (ADR-014)
 - Table path management
 - Clear/cleanup operations
@@ -15,21 +15,30 @@ to follow DRY principle and simplify maintenance.
 
 from __future__ import annotations
 
-__all__ = ["BaseDeltaWriter", "coerce_null_types_for_delta"]
-
-
 import asyncio
 from collections.abc import Sequence
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-import orjson
 import pyarrow as pa
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.storage.retention_manager import RetentionManager
+from bioetl.infrastructure.storage.arrow_converter import (
+    ArrowDataConverter,
+)
+from bioetl.infrastructure.storage.arrow_converter import (
+    get_string_fields as _get_string_fields_impl,
+)
+from bioetl.infrastructure.storage.arrow_converter import (
+    serialize_value_for_arrow_schema as _serialize_value_impl,
+)
+from bioetl.infrastructure.storage.arrow_converter import (
+    sort_arrow_table_by_primary_keys as _sort_by_primary_keys_impl,
+)
+from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
+
+__all__ = ["BaseDeltaWriter", "coerce_null_types_for_delta"]
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -42,91 +51,13 @@ def _serialize_value(
     value: Any,  # Any: Arrow field value type varies
     is_string_field: bool,  # Any: Arrow field value type varies
 ) -> Any:  # Any: input/output type varies
-    """Serialize a value for Arrow storage.
-
-    Converts complex Python types (dict, list) to JSON strings for string fields.
-    This ensures proper storage in Delta Lake while preserving forensic data.
-
-    Args:
-        value: Value to serialize. Can be any Python type.
-        is_string_field: True if the target Arrow field is a string type.
-
-    Returns:
-        Serialized value: JSON string for complex types in string fields,
-        original value otherwise, or None if input is None.
-
-    Example:
-        >>> _serialize_value({"key": "val"}, is_string_field=True)
-        '{"key":"val"}'
-        >>> _serialize_value({"key": "val"}, is_string_field=False)
-        {'key': 'val'}
-        >>> _serialize_value(None, is_string_field=True)
-        None
-    """
-    if value is None:
-        return None
-    if is_string_field and isinstance(value, (dict, list)):
-        return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-    return value
+    """Compatibility wrapper delegating schema-aware serialization to Arrow converter."""
+    return _serialize_value_impl(value, is_string_field)
 
 
 def _get_string_fields(schema: pa.Schema) -> set[str]:
-    """Extract field names that are string types from Arrow schema.
-
-    Identifies fields that need JSON serialization for complex values.
-    Handles both regular string and large_string Arrow types.
-
-    Args:
-        schema: PyArrow schema to inspect.
-
-    Returns:
-        Set of field names that are string types.
-
-    Example:
-        >>> schema = pa.schema([
-        ...     pa.field("id", pa.int64()),
-        ...     pa.field("name", pa.string()),
-        ...     pa.field("data_json", pa.large_string()),
-        ... ])
-        >>> _get_string_fields(schema)
-        {'name', 'data_json'}
-    """
-    return {
-        field.name
-        for field in schema
-        if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
-    }
-
-
-@dataclass(frozen=True, slots=True)
-class _ArrowPreparationContext:
-    """Prepared schema context for deterministic Arrow conversion."""
-
-    schema_names: tuple[str, ...]
-    schema_fields: frozenset[str]
-    string_fields: frozenset[str]
-
-
-def _build_arrow_preparation_context(schema: pa.Schema) -> _ArrowPreparationContext:
-    """Build the immutable schema context used during Arrow preparation."""
-    schema_names = tuple(schema.names)
-    return _ArrowPreparationContext(
-        schema_names=schema_names,
-        schema_fields=frozenset(schema_names),
-        string_fields=frozenset(_get_string_fields(schema)),
-    )
-
-
-def _filter_record_for_schema(
-    record: BronzeRecord,
-    context: _ArrowPreparationContext,
-) -> BronzeRecord:
-    """Filter and serialize one record against the prepared schema context."""
-    return {
-        key: _serialize_value(value, key in context.string_fields)
-        for key, value in record.items()
-        if key in context.schema_fields
-    }
+    """Compatibility wrapper delegating schema inspection to Arrow converter."""
+    return _get_string_fields_impl(schema)
 
 
 def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
@@ -214,7 +145,8 @@ class BaseDeltaWriter:
         self.base_path = str(base_path).rstrip("/")
         self.logger = logger
         self._flat_structure = flat_structure
-        self._retention_manager = RetentionManager(base_path)
+        self._arrow_converter = ArrowDataConverter(logger=logger)
+        self._retention_manager = RetentionPolicy(base_path)
 
     def _resolve_table_path(self, table_name: str) -> str:
         """Resolve the filesystem path for a Delta table.
@@ -253,15 +185,10 @@ class BaseDeltaWriter:
         Returns:
             PyArrow Table with filtered, serialized, and sorted data.
         """
-        preparation = _build_arrow_preparation_context(schema)
-        filtered_records = [
-            _filter_record_for_schema(record, preparation) for record in records
-        ]
-        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
-        return self._sort_by_primary_keys(
-            arrow_data,
-            primary_keys,
-            preparation.schema_names,
+        return self._arrow_converter.convert_records_to_arrow_with_schema(
+            records,
+            schema,
+            primary_keys=primary_keys,
         )
 
     def _sort_by_primary_keys(
@@ -286,19 +213,24 @@ class BaseDeltaWriter:
         Note:
             Logs a warning if specified primary keys are not in schema.
         """
-        if not primary_keys:
-            return table
-
-        valid_keys = [pk for pk in primary_keys if pk in schema_names]
-        if valid_keys:
-            return table.sort_by([(pk, "ascending") for pk in valid_keys])
-
-        self.logger.warning(
-            "Primary keys not found in schema, skipping sort",
-            primary_keys=primary_keys,
-            schema_fields=schema_names,
+        return _sort_by_primary_keys_impl(
+            table,
+            primary_keys,
+            schema_names=schema_names,
+            logger=self.logger,
         )
-        return table
+
+    async def _open_delta_table(self, table_name: str) -> DeltaTable | None:
+        """Open one Delta table by name and return None when it is missing."""
+        table_path = self._resolve_table_path(table_name)
+        loop = asyncio.get_running_loop()
+        try:
+            return await loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path),
+            )
+        except DeltaTableNotFoundError:
+            return None
 
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get existing table schema if table exists.
@@ -312,16 +244,10 @@ class BaseDeltaWriter:
         Returns:
             PyArrow Schema if table exists, None otherwise.
         """
-        table_path = self._resolve_table_path(table_name)
-        loop = asyncio.get_running_loop()
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return dt.schema().to_arrow()
-        except DeltaTableNotFoundError:
+        dt = await self._open_delta_table(table_name)
+        if dt is None:
             return None
+        return dt.schema().to_arrow()
 
     def get_table_path(self, table_name: str) -> Path:
         """Get the filesystem path for a Delta table.
@@ -361,16 +287,11 @@ class BaseDeltaWriter:
         Raises:
             FileNotFoundError: If the table does not exist.
         """
-        table_path = self._resolve_table_path(table_name)
-        loop = asyncio.get_running_loop()
+        dt = await self._open_delta_table(table_name)
+        if dt is None:
+            raise FileNotFoundError(f"Table not found: {table_name}")
 
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-        except DeltaTableNotFoundError as e:
-            raise FileNotFoundError(f"Table not found: {table_name}") from e
+        loop = asyncio.get_running_loop()
 
         # Read as PyArrow and convert to list of dicts
         def _read_table() -> list[BronzeRecord]:

@@ -44,6 +44,14 @@ class ResolvedCompositeJoinContext:
     join_key_set: set[str]
 
 
+@dataclass(frozen=True, slots=True)
+class ResolvedSingleKeyJoinContext:
+    prepared_context: PreparedDependencyJoinContext
+    seed_join_key: str
+    dep_join_key: str
+    join_key_set: set[str]
+
+
 def resolve_left_pipeline(
     dep: DependencyConfig,
     seed_pipeline: str | None,
@@ -246,6 +254,34 @@ def resolve_composite_join_context(
         left_keys=left_keys,
         right_keys=right_keys,
         join_key_set=join_key_set,
+    )
+
+
+def resolve_single_key_join_context(
+    *,
+    join_key_resolver: JoinKeyResolverProtocol,
+    metadata: SingleKeyJoinContext,
+    dependency: str,
+    prepared_context: PreparedDependencyJoinContext,
+) -> ResolvedSingleKeyJoinContext:
+    seed_join_key, dep_join_key, seed_join_key_qualified = (
+        join_key_resolver.resolve_join_key_names_asymmetric(
+            left_key=metadata.primary_key,
+            right_key=metadata.right_key,
+            left_pipeline=metadata.left_pipeline,
+            right_pipeline=dependency,
+            merged_columns=prepared_context.merged_df.columns,
+        )
+    )
+    return ResolvedSingleKeyJoinContext(
+        prepared_context=prepared_context,
+        seed_join_key=seed_join_key,
+        dep_join_key=dep_join_key,
+        join_key_set=build_asymmetric_join_key_set(
+            left_join_key=seed_join_key,
+            right_join_key=dep_join_key,
+            left_join_key_qualified=seed_join_key_qualified,
+        ),
     )
 
 
