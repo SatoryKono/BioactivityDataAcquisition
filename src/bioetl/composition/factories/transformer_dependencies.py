@@ -46,8 +46,6 @@ def build_transformer_dependencies(
             else DataNormalizationService()
         ),
         contract_policy=(
-            contract_policy
-            if contract_policy is not None
-            else _DefaultContractPolicy()
+            contract_policy if contract_policy is not None else _DefaultContractPolicy()
         ),
     )

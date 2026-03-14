@@ -9,7 +9,6 @@ from uuid import uuid4
 
 import pytest
 
-import bioetl.application.core.batch_transformer_helpers as batch_transformer_helpers
 import bioetl.application.core.batch_transformer_orchestration as batch_transformer_orchestration
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult

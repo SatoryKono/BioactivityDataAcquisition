@@ -6,21 +6,16 @@ execution plan creation, result recording, and summary output.
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+from bioetl.application.services import PipelineRunResult, RunResult
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     BatchRunResult,
-    RunAllExecutionPlan,
     create_run_all_execution_plan,
     create_run_all_options,
-    determine_batch_exit_code,
     echo_batch_summary,
-    emit_destructive_confirmation_preview,
-    emit_run_all_listing,
-    emit_run_all_preview,
     filter_pipelines_by_provider,
     get_available_providers,
     handle_destructive_confirmation,
@@ -389,7 +384,9 @@ class TestEchoBatchSummary:
         """Test dry-run summary uses preview language."""
         batch = BatchRunResult(total=3, succeeded=0, failed=0, skipped=3)
         messages: list[str] = []
-        info_printer = lambda *args: messages.extend(args)
+
+        def info_printer(*args: str) -> None:
+            messages.extend(args)
 
         echo_batch_summary(result=batch, dry_run=True, info_printer=info_printer)
 

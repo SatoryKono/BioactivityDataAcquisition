@@ -450,9 +450,7 @@ class TestPipelineRunnerServiceObservability:
         result = await service.run("test_pipeline")
 
         assert result.status == PipelineRunResult.SHUTDOWN
-        mock_logger.warning.assert_called_once_with(
-            "Pipeline was gracefully shut down"
-        )
+        mock_logger.warning.assert_called_once_with("Pipeline was gracefully shut down")
 
     @pytest.mark.asyncio
     async def test_failure_path_logs_exception_with_error_type(

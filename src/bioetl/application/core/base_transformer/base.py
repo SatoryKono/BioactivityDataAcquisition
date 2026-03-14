@@ -62,14 +62,10 @@ def _merge_dependency_context(
         ),
         pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
         data_normalizer=(
-            dependencies.data_normalizer
-            if data_normalizer is None
-            else data_normalizer
+            dependencies.data_normalizer if data_normalizer is None else data_normalizer
         ),
         contract_policy=(
-            dependencies.contract_policy
-            if contract_policy is None
-            else contract_policy
+            dependencies.contract_policy if contract_policy is None else contract_policy
         ),
     )
 

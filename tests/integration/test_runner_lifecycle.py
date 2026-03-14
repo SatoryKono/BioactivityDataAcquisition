@@ -22,6 +22,7 @@ from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
 from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,

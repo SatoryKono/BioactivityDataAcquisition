@@ -397,7 +397,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
             outcome=build_processed_batch_outcome(
                 records=records,
                 output=output,
-            )
+            ),
         )
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:

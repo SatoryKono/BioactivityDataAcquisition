@@ -15,7 +15,6 @@ import pytest
 
 from bioetl.application.composite.checkpoint.service import CompositeCheckpointService
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.domain.composite.result import EnrichmentResult, SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import CheckpointConflictError, StorageError
 

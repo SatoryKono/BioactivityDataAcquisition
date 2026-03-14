@@ -23,7 +23,9 @@ class _MergeCompatibilityJoinPlannerMixin:
         self,
         method_name: str,
         *args: object,
-    ) -> Any:  # Any: dynamic bridge preserves typed legacy wrappers over service dispatch
+    ) -> (
+        Any
+    ):  # Any: dynamic bridge preserves typed legacy wrappers over service dispatch
         """Route sync compatibility wrappers to the canonical join planner."""
         method = cast(
             Any,  # Any: getattr-based dispatch returns heterogeneous join-planner callables

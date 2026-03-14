@@ -84,9 +84,7 @@ async def _execute_atomic_metadata_write(
         retry_state=retry_state,
         status="succeeded",
         final_reason=(
-            "success_after_retry"
-            if retry_state.count > 0
-            else "success_without_retry"
+            "success_after_retry" if retry_state.count > 0 else "success_without_retry"
         ),
     )
     return retry_state.count

@@ -94,7 +94,7 @@ class TestValidateBaselineSection:
             }
         }
         errors: list[str] = []
-        result = _validate_baseline_section(raw, errors)
+        _validate_baseline_section(raw, errors)
         assert any("non-negative" in e for e in errors)
 
     def test_total_none_is_allowed(self) -> None:

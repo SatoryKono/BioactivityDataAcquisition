@@ -12,7 +12,6 @@ import yaml
 from bioetl.infrastructure.quality.exemptions_registry import (
     EXEMPTION_REGISTRIES_ALLOW_EMPTY,
     REQUIRED_EXEMPTION_REGISTRIES,
-    build_module_path_key,
     get_registry_values,
     load_exemptions_registry,
     resolve_registry_value,
@@ -193,7 +192,7 @@ class TestValidateExemptionKeyNormalization:
         raw = {
             "registries": {
                 "file_size_limits": {
-                    f"src/bioetl/quality/module.py": {
+                    "src/bioetl/quality/module.py": {
                         "value": 500,
                         "owner": "alice",
                     }

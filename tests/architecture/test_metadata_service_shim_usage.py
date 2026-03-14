@@ -17,7 +17,12 @@ ALLOWED_SHIM_MODULES = frozenset(
 )
 ALLOWED_FILES = frozenset(
     {
-        ROOT / "src" / "bioetl" / "composition" / "services" / "metadata_coordinator.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "services"
+        / "metadata_coordinator.py",
         ROOT / "src" / "bioetl" / "composition" / "services" / "metadata_assemblers.py",
     }
 )
@@ -32,9 +37,7 @@ def _iter_shim_import_violations() -> list[str]:
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module in ALLOWED_SHIM_MODULES:
                 rel_path = py_file.relative_to(ROOT).as_posix()
-                violations.append(
-                    f"{rel_path}:{node.lineno} imports {node.module}"
-                )
+                violations.append(f"{rel_path}:{node.lineno} imports {node.module}")
             elif isinstance(node, ast.Import):
                 for alias in node.names:
                     if alias.name in ALLOWED_SHIM_MODULES:

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from bioetl.application.core.config import LockConfig
 from bioetl.domain.types import RunType
