@@ -26,4 +26,5 @@ entrypoint.sh
 mkdocs.yml
 pyproject.toml
 requirements.txt
+setup.sh
 uv.lock
