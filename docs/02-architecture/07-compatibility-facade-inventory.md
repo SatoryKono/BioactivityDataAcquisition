@@ -36,10 +36,7 @@ This inventory is also the freeze ledger for compatibility debt in the current c
 
 | Path | Compatibility role | Canonical target | Status | Owner | Introduced in | Allowed call sites | Remove by / review date | Migration path | Exit criteria |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `src/bioetl/composition/factories/pipeline/facade.py` | Temporary pipeline factory facade that re-exports legacy assembly and service helpers. | `bioetl.composition.factories.pipeline.pipeline_assembler`, `bioetl.composition.factories.services.bundle`, `bioetl.composition.factories.dq.context_resolver` | `deprecated-warn` | `bioetl.composition.factories.pipeline` | `2026-03 pipeline cleanup` | `src`: none; `tests`: `tests/unit/composition/factories/test_factory_decoupling_contracts.py`, `tests/architecture/test_deprecation_warnings.py` | `2026-06-30` | Move imports and call sites to `bioetl.composition.factories.pipeline.pipeline_assembler`, `bioetl.composition.factories.services.bundle`, and `bioetl.composition.factories.dq.context_resolver`; keep only deprecation coverage on the facade. | Non-compat imports disappear and only dedicated deprecation coverage remains before removal. |
 | `src/bioetl/composition/entrypoints.py` | Canonical composition entrypoint that intentionally shields internal `_pipeline_execution` and `_resource_management` module paths. | `bioetl.composition.entrypoints` | `retained-entrypoint` | `bioetl.composition` | `2026-03 entrypoint freeze` | `src`: canonical entrypoint usage allowed; `tests`: CLI and composition entrypoint boundary coverage | `2026-09-30` | Use `bioetl.composition.entrypoints` as the public seam; do not import `bioetl.composition._pipeline_execution` or `bioetl.composition._resource_management` directly. | Internal implementation-module imports outside `composition/` stay at zero and entrypoint-only compatibility coverage remains explicit. |
-| `src/bioetl/composition/runtime_builders/runner_builder.py` | Mixed runtime builder that retains only the `VacuumConfig` alias while the active runner-input flow resolves directly through split subservices. | `bioetl.composition.runtime_builders.inputs_resolver`, `bioetl.composition.runtime_builders.observability_builder` | `mixed-module` | `bioetl.composition.runtime_builders` | `2026-03 runner-builder cleanup` | `src`: canonical runner-builder usage allowed; `tests`: `tests/unit/composition/runtime_builders/test_runner_builder.py` covers canonical default wiring and absence of legacy wrapper patch-points | `2026-09-30` | Route new code to `bioetl.composition.runtime_builders.inputs_resolver` and `bioetl.composition.runtime_builders.observability_builder`; remove the `VacuumConfig` alias after callers migrate. | The `VacuumConfig` alias is no longer needed and runner_builder remains a thin composition leaf without reintroduced compatibility wrappers. |
-| `src/bioetl/application/composite/join_planner_compat_mixin.py` | Compatibility delegation mixin preserving legacy join-planner helper API inside the canonical join planner service. | `bioetl.application.composite.join_planner.JoinPlannerService` | `compat-shim` | `bioetl.application.composite` | `legacy-pre-2026-03` | `src`: allowed only in `src/bioetl/application/composite/join_planner.py`; `tests`: none beyond architecture review | `2026-09-30` | Keep callers on `bioetl.application.composite.join_planner.JoinPlannerService`; do not add new imports of the compatibility mixin. | Join-planner compatibility wrappers are inlined or retired and no new imports appear outside the canonical service module. |
 | `src/bioetl/application/composite/merger_compat_mixin.py` | Compatibility delegation mixin preserving legacy MergeService helper API while collaborator services own the real behavior. | `bioetl.application.composite.merger.MergeService` | `compat-shim` | `bioetl.application.composite` | `legacy-pre-2026-03` | `src`: allowed only in `src/bioetl/application/composite/merger.py`; `tests`: none beyond architecture review | `2026-09-30` | Keep callers on `bioetl.application.composite.merger.MergeService`; do not add new imports of the compatibility mixin. | MergeService no longer needs the compatibility wrapper mixin and no new imports appear outside the canonical merger module. |
 | `src/bioetl/domain/composite/config.py` | Canonical public entrypoint for composite config models that shields split config internals. | `bioetl.domain.composite.config` | `retained-entrypoint` | `bioetl.domain.composite` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/composite/`; `tests`: facade coverage in `tests/unit/domain/composite/test_composite_config_facade.py` and ordinary imports may continue using the root config entrypoint | `2026-09-30` | Keep using `bioetl.domain.composite.config`; do not import split `config_*` internals outside the owning package. | Direct imports of split config internals remain confined to the owning package and the root config entrypoint stays the stable public path. |
 | `src/bioetl/domain/value_objects/activity_values.py` | Canonical public entrypoint for activity-related value objects that shields split concentration/type/pChEMBL modules. | `bioetl.domain.value_objects.activity_values` | `retained-entrypoint` | `bioetl.domain.value_objects` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/value_objects/`; `tests`: facade coverage in `tests/unit/domain/value_objects/test_value_object_facade_reexports.py` and ordinary imports may continue using the public entrypoint | `2026-09-30` | Keep using `bioetl.domain.value_objects.activity_values`; do not import split value-object internals outside the owning package. | Direct imports of split activity-value internals remain confined to the owning package and the facade stays the stable public path. |
@@ -56,17 +53,14 @@ This registry is the measurable compatibility-surface baseline for CI. It is the
 
 Snapshot for this cycle:
 
-- Curated inventory rows: `10`
-- Measured tracked modules: `10`
+- Curated inventory rows: `7`
+- Measured tracked modules: `7`
 - Measured-only modules outside curated inventory: `0`
 
 Tracked module paths:
 
-- `src/bioetl/application/composite/join_planner_compat_mixin.py`
 - `src/bioetl/application/composite/merger_compat_mixin.py`
 - `src/bioetl/composition/entrypoints.py`
-- `src/bioetl/composition/factories/pipeline/facade.py`
-- `src/bioetl/composition/runtime_builders/runner_builder.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
@@ -86,22 +80,17 @@ Snapshot after RF-002 controlled removal wave:
 
 - `src/` direct imports of `bioetl.composition._pipeline_execution` outside `src/bioetl/composition/`: `0`
 - `src/` direct imports of `bioetl.composition._resource_management` outside `src/bioetl/composition/`: `0`
-- `src/` direct imports of `bioetl.composition.factories.pipeline.facade`: `0`
-- `src/` direct imports of `bioetl.application.composite.join_planner_compat_mixin` outside `src/bioetl/application/composite/join_planner.py`: `0`
 - `src/` direct imports of `bioetl.application.composite.merger_compat_mixin` outside `src/bioetl/application/composite/merger.py`: `0`
 - `src/` direct imports of split `bioetl.domain.composite.config_*` internals outside `src/bioetl/domain/composite/`: `0`
 - `src/` direct imports of split activity/publication value-object internals outside `src/bioetl/domain/value_objects/`: `0`
 - `src/` direct `DataSourceRegistry` usages outside explicit compatibility re-exports: `0`
 - `tests/` direct `DataSourceRegistry` imports outside dedicated compatibility/contract coverage: `0`
 - Dedicated compatibility coverage remains in tests:
-  - `tests/unit/composition/factories/datasource/test_data_source_registry.py`
-  - `tests/unit/composition/test_registry_protocol.py`
-  - `tests/architecture/test_registry_contracts.py`
-  - `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`
-  - `tests/unit/domain/composite/test_composite_config_facade.py`
-  - deprecation/compat behavior around pipeline facade is exercised via
-    `tests/unit/composition/factories/test_factory_decoupling_contracts.py`
-    and `tests/architecture/test_deprecation_warnings.py`
+- `tests/unit/composition/factories/datasource/test_data_source_registry.py`
+- `tests/unit/composition/test_registry_protocol.py`
+- `tests/architecture/test_registry_contracts.py`
+- `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`
+- `tests/unit/domain/composite/test_composite_config_facade.py`
 
 Compatibility-only policy for this cycle:
 

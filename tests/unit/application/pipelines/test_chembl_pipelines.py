@@ -22,6 +22,7 @@ from bioetl.application.pipelines.chembl import (
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.ports import NoOpMetrics
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -94,7 +95,7 @@ class TestChEMBLAssayPipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=AssayTransformer(provider="chembl"),
+            transformer=AssayTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -146,7 +147,7 @@ class TestChEMBLPublicationPipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=PublicationTransformer(provider="chembl"),
+            transformer=PublicationTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -199,7 +200,7 @@ class TestChEMBLMoleculePipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=MoleculeTransformer(provider="chembl"),
+            transformer=MoleculeTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -251,7 +252,7 @@ class TestChEMBLTargetPipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=TargetTransformer(provider="chembl"),
+            transformer=TargetTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
         )
 
     def test_pipeline_initialization(self, pipeline):

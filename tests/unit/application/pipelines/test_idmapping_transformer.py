@@ -12,6 +12,7 @@ from bioetl.application.pipelines.uniprot.idmapping_transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ class TestIDMappingTransformer:
     @pytest.fixture
     def transformer(self):
         """Create IDMappingTransformer instance."""
-        return IDMappingTransformer(provider="uniprot", entity_type="idmapping")
+        return IDMappingTransformer(provider="uniprot", entity_type="idmapping", dependencies=build_test_transformer_dependencies())
 
     @pytest.mark.asyncio
     async def test_transform_found_mapping(self, transformer, mock_context):
@@ -285,7 +286,7 @@ class TestIDMappingTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = IDMappingTransformer(provider="custom_provider")
+        transformer = IDMappingTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
         record = {
             "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",

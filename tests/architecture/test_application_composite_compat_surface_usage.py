@@ -13,17 +13,11 @@ TESTS_ROOT = ROOT / "tests"
 COMPAT_PARENT_IMPORTS = {
     "bioetl.application.composite": frozenset(
         {
-            "join_planner_compat_mixin",
             "merger_compat_mixin",
         }
     ),
 }
 ALLOWED_SRC_IMPORTS = {
-    "bioetl.application.composite.join_planner_compat_mixin": frozenset(
-        {
-            ROOT / "src" / "bioetl" / "application" / "composite" / "join_planner.py",
-        }
-    ),
     "bioetl.application.composite.merger_compat_mixin": frozenset(
         {
             ROOT / "src" / "bioetl" / "application" / "composite" / "merger.py",
@@ -31,15 +25,30 @@ ALLOWED_SRC_IMPORTS = {
     ),
 }
 ALLOWED_TEST_IMPORTS = {
-    "bioetl.application.composite.join_planner_compat_mixin": frozenset(),
     "bioetl.application.composite.merger_compat_mixin": frozenset(),
 }
-REMOVED_COMPAT_MODULES = frozenset({"bioetl.application.composite.runner"})
+REMOVED_COMPAT_MODULES = frozenset(
+    {
+        "bioetl.application.composite.join_planner_compat_mixin",
+        "bioetl.application.composite.runner",
+    }
+)
 REMOVED_COMPAT_PARENT_IMPORTS = {
-    "bioetl.application.composite": frozenset({"runner"})
+    "bioetl.application.composite": frozenset(
+        {
+            "join_planner_compat_mixin",
+            "runner",
+        }
+    )
 }
 REMOVED_COMPAT_FILES = frozenset(
     {
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "composite"
+        / "join_planner_compat_mixin.py",
         ROOT / "src" / "bioetl" / "application" / "composite" / "runner.py",
     }
 )
@@ -147,21 +156,21 @@ def test_application_composite_compat_surfaces_are_confined_in_tests() -> None:
 
 @pytest.mark.architecture
 def test_removed_application_composite_runner_facade_file_stays_absent() -> None:
-    """Removed runner root facade should not return as a compatibility shim."""
+    """Removed application.composite compat shims should stay absent."""
     lingering = sorted(
         path.relative_to(ROOT).as_posix()
         for path in REMOVED_COMPAT_FILES
         if path.exists()
     )
     assert not lingering, (
-        "Removed application.composite runner facade must stay absent:\n"
+        "Removed application.composite compat shims must stay absent:\n"
         + "\n".join(lingering)
     )
 
 
 @pytest.mark.architecture
 def test_removed_application_composite_runner_facade_is_not_imported() -> None:
-    """Removed runner root facade must not be imported from src or tests."""
+    """Removed application.composite compat shims must not be imported."""
     records = _iter_removed_import_records(SRC_ROOT)
     records.extend(_iter_removed_import_records(TESTS_ROOT))
     violations = [
@@ -169,6 +178,6 @@ def test_removed_application_composite_runner_facade_is_not_imported() -> None:
         for py_file, lineno, module_name in records
     ]
     assert not violations, (
-        "Removed application.composite runner facade must stay absent from imports:\n"
+        "Removed application.composite compat shims must stay absent from imports:\n"
         + "\n".join(violations)
     )

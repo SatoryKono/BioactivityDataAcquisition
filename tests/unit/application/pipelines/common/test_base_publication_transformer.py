@@ -18,6 +18,7 @@ from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -108,6 +109,7 @@ def transformer() -> StubPublicationTransformer:
     return StubPublicationTransformer(
         provider="test_provider",
         entity_type="publication",
+        dependencies=build_test_transformer_dependencies(),
     )
 
 
@@ -373,6 +375,7 @@ class TestFallbackLookupLogging:
         transformer = StubWithoutFallbackLogging(
             provider="test_provider",
             entity_type="publication",
+            dependencies=build_test_transformer_dependencies(),
         )
         record = {
             "id": "test-123",
@@ -405,6 +408,7 @@ class TestPreExtractValidation:
         transformer = StubWithPreValidation(
             provider="test_provider",
             entity_type="publication",
+            dependencies=build_test_transformer_dependencies(),
         )
         record = {
             "id": None,  # Will fail pre-validation
@@ -426,6 +430,7 @@ class TestPreExtractValidation:
         transformer = StubWithPreValidation(
             provider="test_provider",
             entity_type="publication",
+            dependencies=build_test_transformer_dependencies(),
         )
 
         result = await transformer.transform(mock_context, sample_record, 0)
@@ -493,6 +498,7 @@ class TestProviderConfiguration:
         transformer = StubPublicationTransformer(
             provider="custom_provider",
             entity_type="publication",
+            dependencies=build_test_transformer_dependencies(),
         )
         assert transformer.provider == "custom_provider"
 
@@ -501,12 +507,13 @@ class TestProviderConfiguration:
         transformer = StubPublicationTransformer(
             provider="test",
             entity_type="custom_type",
+            dependencies=build_test_transformer_dependencies(),
         )
         assert transformer.entity_type == "custom_type"
 
     def test_default_entity_type(self) -> None:
         """Should use 'unknown' as default entity_type."""
-        transformer = StubPublicationTransformer(provider="test")
+        transformer = StubPublicationTransformer(provider="test", dependencies=build_test_transformer_dependencies())
         assert transformer.entity_type == "unknown"
 
 
@@ -545,5 +552,5 @@ class TestAbstractMethodContracts:
 
     def test_should_log_fallback_can_be_overridden(self) -> None:
         """_should_log_fallback_lookup can be overridden to False."""
-        transformer = StubWithoutFallbackLogging(provider="test")
+        transformer = StubWithoutFallbackLogging(provider="test", dependencies=build_test_transformer_dependencies())
         assert transformer._should_log_fallback_lookup() is False

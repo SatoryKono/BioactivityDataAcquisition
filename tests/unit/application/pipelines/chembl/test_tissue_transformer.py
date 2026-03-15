@@ -3,6 +3,7 @@
 import pytest
 
 from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 class TestTissueTransformer:
@@ -11,7 +12,7 @@ class TestTissueTransformer:
     @pytest.fixture
     def transformer(self):
         """Create transformer instance."""
-        return TissueTransformer(provider="chembl")
+        return TissueTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
     @pytest.fixture
     def sample_record(self):

@@ -239,7 +239,6 @@ Compat mixins (backward compatibility, thin delegation):
 | ------------------------------------- | ------------------------------------------------ |
 | `merger_compat_mixin.py`              | Compat wrappers для conflict/coalesce policy      |
 | `merger_compat_join_planner_mixin.py` | Compat wrappers для join planner operations       |
-| `join_planner_compat_mixin.py`        | Compat wrapper для join type resolution           |
 
 #### 2.5.3. Column и Join Infrastructure
 

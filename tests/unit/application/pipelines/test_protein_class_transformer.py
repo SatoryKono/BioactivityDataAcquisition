@@ -13,6 +13,7 @@ from bioetl.application.pipelines.chembl.protein_class_transformer import (
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import ProteinClassification
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -35,7 +36,7 @@ class TestProteinClassTransformer:
     @pytest.fixture
     def transformer(self):
         """Create ProteinClassTransformer instance."""
-        return ProteinClassTransformer(provider="chembl")
+        return ProteinClassTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
     def test_entity_class_is_protein_classification(self, transformer):
         """Verify entity_class is set correctly."""
@@ -255,7 +256,7 @@ class TestProteinClassTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = ProteinClassTransformer(provider="custom_provider")
+        transformer = ProteinClassTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
         record = {
             "protein_class_id": 1,
             "pref_name": "CustomClass",
@@ -274,7 +275,7 @@ class TestProteinClassTransformerExtractBusinessData:
     @pytest.fixture
     def transformer(self):
         """Create ProteinClassTransformer instance."""
-        return ProteinClassTransformer(provider="chembl")
+        return ProteinClassTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
     def test_extract_root_node(self, transformer):
         """Test extraction of root node data."""

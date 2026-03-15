@@ -14,6 +14,7 @@ from bioetl.application.pipelines.chembl.activity_transformer import ActivityTra
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -42,7 +43,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         logger=logger,
     )
     run_id = uuid4()
-    transformer = ActivityTransformer(provider="chembl")
+    transformer = ActivityTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
     return ChEMBLActivityPipeline(
         config=config,
         runtime=runtime,

@@ -297,6 +297,7 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
 def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:
     """Legacy monkeypatch wrappers should stay removed from runner_builder."""
     for attr_name in (
+        "VacuumSettings",
         "_assemble_vacuum_settings",
         "_assemble_runtime_config",
         "_assemble_filter_config",
@@ -307,6 +308,12 @@ def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:
         "_resolve_filter_batch_size",
     ):
         assert not hasattr(runner_builder, attr_name)
+
+
+def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
+    """Runtime builder helpers should not expose the old VacuumSettings alias."""
+    assert hasattr(inputs_resolver, "ResolvedVacuumSettings")
+    assert not hasattr(inputs_resolver, "VacuumSettings")
 
 
 def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:

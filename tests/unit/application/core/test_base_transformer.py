@@ -63,13 +63,8 @@ def transformer() -> ConcreteTransformer:
 
 
 @pytest.mark.unit
-def test_base_transformer_requires_explicit_dependencies(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_base_transformer_requires_explicit_dependencies() -> None:
     """BaseTransformer no longer creates collaborators implicitly."""
-    from bioetl.application.core.base_transformer import base as base_module
-
-    monkeypatch.setattr(base_module, "_COMPAT_DEPENDENCY_BUILDER", None)
     with pytest.raises(TypeError, match="requires explicit collaborator injection"):
         ConcreteTransformer(provider="test")
 

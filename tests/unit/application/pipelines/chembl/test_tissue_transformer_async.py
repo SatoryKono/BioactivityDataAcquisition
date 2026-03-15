@@ -16,6 +16,7 @@ import pytest
 from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture()
@@ -33,7 +34,7 @@ def mock_context() -> PipelineContext:
 
 @pytest.fixture()
 def transformer() -> TissueTransformer:
-    return TissueTransformer(provider="chembl")
+    return TissueTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
 
 @pytest.mark.unit

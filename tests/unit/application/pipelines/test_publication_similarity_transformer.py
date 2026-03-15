@@ -12,6 +12,7 @@ from bioetl.application.pipelines.chembl.publication_similarity_transformer impo
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ class TestPublicationSimilarityTransformer:
     @pytest.fixture
     def transformer(self):
         """Create PublicationSimilarityTransformer instance."""
-        return PublicationSimilarityTransformer(provider="chembl")
+        return PublicationSimilarityTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -260,7 +261,7 @@ class TestPublicationSimilarityTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = PublicationSimilarityTransformer(provider="custom_provider")
+        transformer = PublicationSimilarityTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
         record = {
             "sim_id": 1,
             "doc_1": 100,

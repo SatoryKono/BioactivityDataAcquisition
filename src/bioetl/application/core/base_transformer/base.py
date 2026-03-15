@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import time
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.core.base_transformer.errors import (
@@ -37,8 +36,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 __all__ = ["BaseTransformer", "T"]
-
-_COMPAT_DEPENDENCY_BUILDER: Callable[[], TransformerDependencyContext] | None = None
 
 
 def _merge_dependency_context(
@@ -130,19 +127,6 @@ def _resolve_dependency_context(
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
         )
-
-    if _COMPAT_DEPENDENCY_BUILDER is not None and all(
-        value is None
-        for value in (
-            tracer,
-            metrics,
-            identity_service,
-            pii_hasher,
-            data_normalizer,
-            contract_policy,
-        )
-    ):
-        return _COMPAT_DEPENDENCY_BUILDER()
 
     return _build_explicit_dependency_context(
         tracer=tracer,
