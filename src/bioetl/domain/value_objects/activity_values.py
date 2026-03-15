@@ -1,4 +1,4 @@
-"""Compatibility facade for activity-related value objects."""
+"""Canonical public entrypoint for activity-related value objects."""
 
 from __future__ import annotations
 

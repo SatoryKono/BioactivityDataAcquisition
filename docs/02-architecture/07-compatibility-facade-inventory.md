@@ -133,6 +133,38 @@ Policy implications:
 - Any future deprecation proposal must include a fresh usage inventory and an explicit review
   of the retained public `create_pubmed_adapter` factory surface.
 
+## Retained Entrypoint Review Wave (2026-03-15)
+
+Review outcome for the remaining curated inventory rows:
+
+- `src/bioetl/composition/entrypoints.py`: `retain`
+  because active first-party interface code still uses it as the public seam while
+  `_pipeline_execution`, `_resource_management`, and `_services` remain confined to
+  `composition/` and dedicated entrypoint tests.
+- `src/bioetl/domain/composite/config.py`: `retain`
+  because application, composition, infrastructure, and tests depend on the root config
+  entrypoint while split `config_*` internals remain confined to `domain/composite/`
+  and the dedicated facade test.
+- `src/bioetl/domain/value_objects/activity_values.py`: `retain`
+  because domain/application code uses the public activity value-object entrypoint and
+  the split implementation modules remain confined to `domain/value_objects/`.
+- `src/bioetl/domain/value_objects/publication_field_groups.py`: `retain`
+  because public field-group types are consumed through the root entrypoint while
+  private `_publication_field_group_*` modules remain internal.
+- `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
+  because the package root and provider registration still use the canonical client
+  entrypoint and legacy `pubmed_client` references are confined to the retained
+  entrypoint plus dedicated compatibility coverage.
+- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
+  because the package root still uses the canonical client entrypoint and legacy
+  `adapter` references remain confined to the retained entrypoint plus dedicated
+  compatibility coverage.
+
+Wave decision:
+
+- No retained-entrypoint row graduates to removal in the current cycle.
+- Next action is policy enforcement and re-review by `2026-09-30`, not deprecation.
+
 Related docs:
 
 - [Composition Layer](05-composition-layer.md)

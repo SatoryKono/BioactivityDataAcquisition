@@ -99,7 +99,6 @@ class TestIsValidInchikey:
 
     def test_three_dashes(self) -> None:
         # 27 chars with 3 dashes
-        key = "BSYNRY-TXBXSQ-UHFFF-OYSA-N"
         # This is 27 chars but has 4 dashes actually; craft one with exactly 3
         key3 = "BSY-RYM-XBX-UHFFFAOYSANNNN"
         assert len(key3) != 27 or is_valid_inchikey(key3) is False

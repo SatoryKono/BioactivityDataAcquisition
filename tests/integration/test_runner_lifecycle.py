@@ -18,6 +18,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.postrun import CompactionResult
 from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner

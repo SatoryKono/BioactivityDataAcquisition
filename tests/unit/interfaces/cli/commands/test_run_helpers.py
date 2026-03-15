@@ -9,7 +9,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import click
 import pytest
-from click.testing import CliRunner
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.composition.registry import PipelineRegistry

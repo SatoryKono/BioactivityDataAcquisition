@@ -90,6 +90,13 @@ LEGACY_DATASOURCE_FACTORY_MODULE_PATH = (
     / "factory.py"
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
+ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES = frozenset(
+    {
+        ROOT / "tests" / "unit" / "composition" / "test_services_entrypoints.py",
+        ROOT / "tests" / "unit" / "composition" / "test_entrypoints.py",
+        ROOT / "tests" / "unit" / "composition" / "test_resource_management.py",
+    }
+)
 
 
 def _iter_module_import_violations(
@@ -333,7 +340,7 @@ def test_internal_composition_entrypoint_modules_are_not_imported_in_unit_tests(
     violations = _iter_module_import_violations(
         TESTS_ROOT / "unit",
         module_name=module_name,
-        allowed_files=frozenset(),
+        allowed_files=ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES,
     )
     assert not violations, (
         "Internal composition entrypoint module gained new unit-test imports:\n"
@@ -350,7 +357,7 @@ def test_internal_composition_entrypoint_module_strings_are_not_used_in_unit_tes
     violations = _iter_string_mentions(
         TESTS_ROOT / "unit",
         needle=module_name,
-        allowed_files=frozenset(),
+        allowed_files=ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES,
     )
     assert not violations, (
         "Internal composition entrypoint module gained new string references in unit tests:\n"

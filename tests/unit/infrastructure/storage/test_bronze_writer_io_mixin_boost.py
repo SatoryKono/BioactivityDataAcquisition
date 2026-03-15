@@ -5,10 +5,9 @@ Targets uncovered lines: 78-79, 161, 192, 199, 266-274, 286-292.
 
 from __future__ import annotations
 
-import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -117,7 +116,7 @@ class TestListBatches:
     async def test_list_batches_with_date_uses_date_glob(self, tmp_path: Path) -> None:
         """Line 173: with date uses 'batch_*.jsonl.zst' pattern."""
         mixin = _ConcreteBronzeMixin(tmp_path)
-        date = datetime(2025, 1, 15, tzinfo=timezone.utc)
+        date = datetime(2025, 1, 15, tzinfo=UTC)
         date_path = tmp_path / "chembl" / "activity" / "2025-01-15"
         date_path.mkdir(parents=True)
         (date_path / "batch_2025-01-15_001.jsonl.zst").write_bytes(b"data")
@@ -144,7 +143,7 @@ class TestListBatches:
     ) -> None:
         """Line 161: flat_structure with empty provider/entity."""
         mixin = _ConcreteBronzeMixin(tmp_path, flat_structure=True)
-        date = datetime(2025, 1, 15, tzinfo=timezone.utc)
+        date = datetime(2025, 1, 15, tzinfo=UTC)
         date_path = tmp_path / "2025-01-15"
         date_path.mkdir(parents=True)
         (date_path / "batch_2025-01-15_001.jsonl.zst").write_bytes(b"data")
@@ -246,7 +245,7 @@ class TestCleanupOldFiles:
         old_dir.mkdir(parents=True)
         (old_dir / "batch.jsonl.zst").write_bytes(b"data")
 
-        cutoff = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         result = await mixin.cleanup_old_files(cutoff, dry_run=True)
 
         # File still exists
@@ -264,7 +263,7 @@ class TestCleanupOldFiles:
         (old_dir / "batch1.jsonl.zst").write_bytes(b"data1")
         (old_dir / "batch2.jsonl.zst").write_bytes(b"data2")
 
-        cutoff = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         result = await mixin.cleanup_old_files(cutoff, dry_run=False)
 
         assert result["files_removed"] == 2
@@ -281,7 +280,7 @@ class TestCleanupOldFiles:
         old_dir.mkdir(parents=True)
         (old_dir / "batch.jsonl.zst").write_bytes(b"data")
 
-        cutoff = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        cutoff = datetime(2025, 1, 1, tzinfo=UTC)
         await mixin.cleanup_old_files(cutoff, dry_run=False)
 
         assert metrics.increment_counter.call_count >= 2
@@ -294,7 +293,7 @@ class TestCleanupOldFiles:
         mixin._metrics = metrics
 
         # No old files exist
-        cutoff = datetime(2020, 1, 1, tzinfo=timezone.utc)
+        cutoff = datetime(2020, 1, 1, tzinfo=UTC)
         result = await mixin.cleanup_old_files(cutoff, dry_run=False)
 
         assert result["files_removed"] == 0

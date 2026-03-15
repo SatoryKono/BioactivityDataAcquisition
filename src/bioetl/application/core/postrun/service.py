@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable
+from collections.abc import Awaitable, Generator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -116,22 +117,6 @@ class PostrunService:
         metadata_writer: MetadataWriterPort | None = None,
         tracer: TracingPort | None = None,
     ) -> None:
-        """Initialize postrun service.
-
-        Args:
-            config: Pipeline configuration.
-            runtime: Runtime configuration.
-            context: Pipeline execution context.
-            dq_service: Data quality evaluation service.
-            lifecycle_service: Medallion lifecycle service for vacuum.
-            storage: Storage maintenance port.
-            metrics: Optional metrics port.
-            logger: Structured logger.
-            dependencies: Postrun collaborators (cleanup, DQ reports, compaction).
-            metadata_coordinator: Optional metadata coordinator.
-            metadata_writer: Optional metadata writer.
-            tracer: Optional tracing port. Defaults to NoOpTracing.
-        """
         self._config = config
         self._runtime = runtime
         self._context = context
@@ -148,17 +133,11 @@ class PostrunService:
         self._compact_orchestrator = dependencies.compact_orchestrator
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
 
-    def _start_postrun_span(self, span_name: str) -> Span | None:
-        """Start a postrun OTel span.
-
-        Args:
-            span_name: Name for the span (e.g. "postrun.run", "postrun.cleanup").
-
-        Returns:
-            OpenTelemetry span context, or None if tracing disabled.
-        """
+    @contextmanager
+    def _postrun_span(self, span_name: str) -> Generator[Span, None, None]:
+        """Context manager for OTel span lifecycle."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
-        span = cast(
+        with cast(
             "Span",
             otel_tracer.start_as_current_span(
                 span_name,
@@ -169,25 +148,8 @@ class PostrunService:
                     "bioetl.run_type": self._runtime.run_type.value,
                 },
             ),
-        )
-        span.__enter__()
-        return span
-
-    def _end_postrun_span(
-        self, span: Span | None, error: Exception | None = None
-    ) -> None:
-        """End a postrun span, optionally recording an error.
-
-        Args:
-            span: The span to end.
-            error: Optional exception to record on the span.
-        """
-        if not span:
-            return
-        if error:
-            span.set_attribute("error", True)
-            span.record_exception(error)
-        span.__exit__(None, None, None)
+        ) as span:
+            yield span
 
     async def run(
         self,
@@ -203,8 +165,7 @@ class PostrunService:
         Returns:
             PostrunResult with DQ check results, DQ report paths, and vacuum stats.
         """
-        span = self._start_postrun_span("postrun.run")
-        try:
+        with self._postrun_span("postrun.run") as span:
             # Silver compact before DQ so checks see deduplicated data
             compaction = await self.run_silver_compact_if_needed()
 
@@ -222,15 +183,8 @@ class PostrunService:
                 vacuum=vacuum_result,
                 compaction=compaction,
             )
-            if span:
-                span.set_attribute(
-                    "bioetl.dq_status", dq_result.status.value
-                )
-            self._end_postrun_span(span)
+            span.set_attribute("bioetl.dq_status", dq_result.status.value)
             return result
-        except Exception as exc:
-            self._end_postrun_span(span, exc)
-            raise
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.

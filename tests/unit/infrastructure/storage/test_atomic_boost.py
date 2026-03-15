@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import errno
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -16,8 +16,6 @@ from bioetl.infrastructure.storage._atomic import (
     AtomicWriteGroup,
     _replace_with_retry,
     atomic_write,
-    atomic_write_bytes,
-    atomic_write_text,
 )
 from bioetl.infrastructure.storage.write_resilience import AdaptiveRetryPolicy
 
@@ -143,7 +141,6 @@ class TestAtomicWriteErrorHandling:
         """Line 146-147: OSError during temp cleanup is suppressed."""
         target = tmp_path / "test.txt"
 
-        original_unlink = Path.unlink
         unlink_call_count = {"count": 0}
 
         def raising_unlink(self: Path, missing_ok: bool = False) -> None:
@@ -171,8 +168,6 @@ class TestAtomicWriteGroupAddFailure:
 
         # Patch os.fdopen to simulate write failure
         import os
-
-        original_fdopen = os.fdopen
 
         class FakeFile:
             def write(self, data: bytes) -> int:
@@ -252,8 +247,6 @@ class TestAtomicWriteGroupRollback:
         group = AtomicWriteGroup()
         target = tmp_path / "target.txt"
         group.add(target, b"data")
-
-        original_unlink = Path.unlink
 
         def raising_unlink(self: Path, missing_ok: bool = False) -> None:
             raise OSError("rollback unlink failed")

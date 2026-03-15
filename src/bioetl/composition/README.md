@@ -7,7 +7,7 @@ together. No business logic lives here — only assembly, factory, and registrat
 
 ```
 composition/
-├── entrypoints.py              # Top-level entry: run_pipeline(), run_composite()
+├── entrypoints.py              # Public seam: run_pipeline(), services, resource ops
 ├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
 ├── builders.py                 # High-level builder helpers for CLI/orchestration
 ├── types.py                    # Shared type aliases for composition
@@ -52,7 +52,7 @@ composition/
 | What you want to do | Start here |
 |---------------------|------------|
 | Run a single pipeline | `entrypoints.run_pipeline()` |
-| Run a composite pipeline | `entrypoints.run_composite()` |
+| Bootstrap a composite pipeline runtime | `entrypoints.load_composite_config()` + `entrypoints.bootstrap_composite_runner()` |
 | Look up a pipeline by provider+entity | `registry.PipelineRegistry` |
 | Create an HTTP adapter for a provider | `providers.provider_registry.ProviderRegistry` |
 | Wire storage (Bronze/Silver/Gold) | `factories/storage/storage_factory.StorageFactory` |
@@ -107,7 +107,6 @@ StorageFactory
   ├── maintenance_mixin.py → vacuum, compaction
   ├── merged_mixin.py     → merged storage for composite pipelines
   ├── adapter.py          → StorageAdapter (composite of all ports)
-  ├── facade.py           → Backward-compatible facade
   ├── factory.py          → Core factory logic
   └── storage_factory.py  → Public StorageFactory class
 ```
@@ -118,3 +117,12 @@ StorageFactory
 - **No imports from interfaces** — composition wires for interfaces, not the reverse
 - **Factories only here** — `Factory.create()` calls must not appear in domain/application
 - **Module-level singletons OK** — `_default_registry` is the only approved module-level instance
+
+## Retained Entrypoint Policy
+
+- `composition.entrypoints` is the canonical public seam for CLI/interface access.
+- Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`
+  stay private to `composition/` plus dedicated entrypoint tests.
+- Composite runtime flows should use `load_composite_config()` and
+  `bootstrap_composite_runner()` instead of inventing a parallel `run_composite()`
+  wrapper at the `entrypoints.py` level.

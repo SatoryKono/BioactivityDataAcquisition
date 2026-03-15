@@ -262,7 +262,7 @@ class TestPipelineRunnerSpan:
 
     @pytest.mark.asyncio
     async def test_pipeline_run_span_records_error_on_exception(self) -> None:
-        """Verify span records exception and error attribute when run() raises."""
+        """Verify span __exit__ receives exception info when run() raises."""
         mock_tracer = _make_mock_tracer()
         runner = self._build_runner(tracer=mock_tracer)
         runner._executor.execute.side_effect = RuntimeError("forced error")
@@ -271,8 +271,10 @@ class TestPipelineRunnerSpan:
             await runner.run()
 
         mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
-        mock_span.set_attribute.assert_any_call("error", True)
-        mock_span.record_exception.assert_called_once()
+        exit_args = mock_span.__exit__.call_args[0]
+        assert exit_args[0] is RuntimeError
+        assert isinstance(exit_args[1], RuntimeError)
+        assert str(exit_args[1]) == "forced error"
 
     @pytest.mark.asyncio
     async def test_pipeline_run_noop_tracer_no_errors(self) -> None:
@@ -453,7 +455,7 @@ class TestPostrunServiceSpan:
 
     @pytest.mark.asyncio
     async def test_postrun_run_span_records_error_on_exception(self) -> None:
-        """Verify span records exception when run() raises."""
+        """Verify span __exit__ receives exception info when run() raises."""
         mock_tracer = _make_mock_tracer()
         service = self._build_postrun_service(tracer=mock_tracer)
         service._dq_service.evaluate.side_effect = RuntimeError("dq error")
@@ -462,8 +464,10 @@ class TestPostrunServiceSpan:
             await service.run(executor=self._make_executor())
 
         mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
-        mock_span.set_attribute.assert_any_call("error", True)
-        mock_span.record_exception.assert_called_once()
+        exit_args = mock_span.__exit__.call_args[0]
+        assert exit_args[0] is RuntimeError
+        assert isinstance(exit_args[1], RuntimeError)
+        assert str(exit_args[1]) == "dq error"
 
     @pytest.mark.asyncio
     async def test_postrun_run_noop_tracer_no_errors(self) -> None:

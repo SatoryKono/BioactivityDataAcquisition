@@ -510,7 +510,7 @@ class TestCsvExporterTrueAppend:
         await exporter.export("locked_test", table1)
 
         # Make the open() call raise PermissionError for the target file
-        original_open = open  # noqa: A001
+        original_open = open
 
         def _patched_open(path: object, mode: str = "r", **kwargs: object) -> object:
             if str(path).endswith("locked_test.csv") and "b" in mode and "a" in mode:

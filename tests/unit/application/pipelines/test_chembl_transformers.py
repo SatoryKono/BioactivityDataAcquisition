@@ -616,7 +616,10 @@ class TestTargetTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = TargetTransformer(provider="custom_target_provider", dependencies=build_test_transformer_dependencies())
+        transformer = TargetTransformer(
+            provider="custom_target_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {"target_id": "CUSTOM123"}
 
         result = await transformer.transform(mock_context, record, index=0)

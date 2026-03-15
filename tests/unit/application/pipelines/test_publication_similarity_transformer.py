@@ -261,7 +261,10 @@ class TestPublicationSimilarityTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = PublicationSimilarityTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
+        transformer = PublicationSimilarityTransformer(
+            provider="custom_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {
             "sim_id": 1,
             "doc_1": 100,

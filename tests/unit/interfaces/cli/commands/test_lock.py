@@ -12,7 +12,6 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
-from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
 
 _VALID_UUID = str(uuid4())
 _INVALID_UUID = "not-a-uuid"
