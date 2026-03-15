@@ -1,0 +1,37 @@
+interactions:
+- request:
+    body: smiles=C1CCCCC1
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '15'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - pubchem.ncbi.nlm.nih.gov
+      User-Agent:
+      - Python-urllib/3.13
+    method: POST
+    uri: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/JSON
+  response:
+    body:
+      string: "Service Unavailable"
+    headers:
+      Connection:
+      - close
+      Content-Type:
+      - text/plain
+      Date:
+      - Sun, 15 Mar 2026 12:00:00 GMT
+      Retry-After:
+      - '30'
+      Server:
+      - Apache
+      X-Throttling-Control:
+      - 'Request Count status: Red (100%), Request Time status: Red (100%), Service
+        status: Red (100%)'
+    status:
+      code: 503
+      message: Service Unavailable
+version: 1

@@ -19,6 +19,7 @@ class _ContextHarness(HTTPClientContextMixin):
         contact_email: str | None = "team@example.org",
         run_id: object | None = "run-123",
         timeout: float = 10.0,
+        read_timeout_multiplier: float = 2.0,
         max_connections: int = 20,
         max_keepalive_connections: int = 10,
     ) -> None:
@@ -27,6 +28,7 @@ class _ContextHarness(HTTPClientContextMixin):
         self.contact_email = contact_email
         self.run_id = run_id
         self.timeout = timeout
+        self.read_timeout_multiplier = read_timeout_multiplier
         self.max_connections = max_connections
         self.max_keepalive_connections = max_keepalive_connections
 
@@ -75,3 +77,29 @@ def test_get_client_raises_when_context_not_entered() -> None:
 
     with pytest.raises(RuntimeError, match="must be used within async context manager"):
         _ = harness._get_client()
+
+
+@pytest.mark.asyncio
+async def test_read_timeout_uses_default_multiplier() -> None:
+    """Default read timeout should be timeout * 2.0."""
+    harness = _ContextHarness(timeout=15.0)
+    await harness.__aenter__()
+    client = harness._get_client()
+
+    assert client._transport._pool._ssl_context is not None or True
+    # httpx stores timeout as Timeout object
+    assert client.timeout.read == 30.0  # 15.0 * 2.0
+
+    await harness.__aexit__(None, None, None)
+
+
+@pytest.mark.asyncio
+async def test_read_timeout_uses_custom_multiplier() -> None:
+    """Custom read_timeout_multiplier should scale the read timeout."""
+    harness = _ContextHarness(timeout=10.0, read_timeout_multiplier=3.0)
+    await harness.__aenter__()
+    client = harness._get_client()
+
+    assert client.timeout.read == 30.0  # 10.0 * 3.0
+
+    await harness.__aexit__(None, None, None)

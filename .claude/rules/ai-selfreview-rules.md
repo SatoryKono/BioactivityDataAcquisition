@@ -465,7 +465,7 @@ runner = PipelineFactory.create()
 > `*Affiliation`, `*Raw`, `*Output`, `*Event`, `*Rule`, `*Report`,
 > `*Mapping`, `*Stats`, `*Metadata`, `*Settings`, `*Token`, `*Params`,
 > `*Input`, `*Score`, `*Value`, `*Distribution`, `*Metric`,
-> `*Pairing`, `*Mismatch`, `*Filter`, `*Alias`,
+> `*Pairing`, `*Mismatch`, `*Filter`, `*Alias`, `*Outcome`,
 > `*Journal`, `*Funder`, `*License`, `*Link`, `*Grant`, `*Chemical`,
 > `*Heading`, `*DateParts`, `*Assertion`, `*ClinicalTrial`, `*Reference`,
 > `*Response`, `*Message`, `*SearchResult`.

@@ -10,10 +10,12 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
-from bioetl.domain.ports import ExecutorMetricsPort
+from bioetl.domain.ports import ExecutorMetricsPort, NoOpTracing
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.postrun.cleanup_orchestrator import (
         PostrunCleanupService,
     )
@@ -97,6 +99,8 @@ class PostrunDependencyContext:
 class PostrunService:
     """Handles post-execution operations."""
 
+    TRACER_NAME = "bioetl.postrun"
+
     def __init__(
         self,
         config: PipelineConfig,
@@ -110,8 +114,24 @@ class PostrunService:
         dependencies: PostrunDependencyContext,
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
+        tracer: TracingPort | None = None,
     ) -> None:
-        """Initialize postrun service."""
+        """Initialize postrun service.
+
+        Args:
+            config: Pipeline configuration.
+            runtime: Runtime configuration.
+            context: Pipeline execution context.
+            dq_service: Data quality evaluation service.
+            lifecycle_service: Medallion lifecycle service for vacuum.
+            storage: Storage maintenance port.
+            metrics: Optional metrics port.
+            logger: Structured logger.
+            dependencies: Postrun collaborators (cleanup, DQ reports, compaction).
+            metadata_coordinator: Optional metadata coordinator.
+            metadata_writer: Optional metadata writer.
+            tracer: Optional tracing port. Defaults to NoOpTracing.
+        """
         self._config = config
         self._runtime = runtime
         self._context = context
@@ -126,6 +146,48 @@ class PostrunService:
         self._dq_report_orchestrator = dependencies.dq_report_orchestrator
         self._metadata_version_resolver = dependencies.metadata_version_resolver
         self._compact_orchestrator = dependencies.compact_orchestrator
+        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
+
+    def _start_postrun_span(self, span_name: str) -> Span | None:
+        """Start a postrun OTel span.
+
+        Args:
+            span_name: Name for the span (e.g. "postrun.run", "postrun.cleanup").
+
+        Returns:
+            OpenTelemetry span context, or None if tracing disabled.
+        """
+        otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
+        span = cast(
+            "Span",
+            otel_tracer.start_as_current_span(
+                span_name,
+                attributes={
+                    "bioetl.pipeline": self._config.pipeline_name or "unknown",
+                    "bioetl.provider": self._config.provider,
+                    "bioetl.entity_type": self._config.entity_type,
+                    "bioetl.run_type": self._runtime.run_type.value,
+                },
+            ),
+        )
+        span.__enter__()
+        return span
+
+    def _end_postrun_span(
+        self, span: Span | None, error: Exception | None = None
+    ) -> None:
+        """End a postrun span, optionally recording an error.
+
+        Args:
+            span: The span to end.
+            error: Optional exception to record on the span.
+        """
+        if not span:
+            return
+        if error:
+            span.set_attribute("error", True)
+            span.record_exception(error)
+        span.__exit__(None, None, None)
 
     async def run(
         self,
@@ -141,23 +203,34 @@ class PostrunService:
         Returns:
             PostrunResult with DQ check results, DQ report paths, and vacuum stats.
         """
-        # Silver compact before DQ so checks see deduplicated data
-        compaction = await self.run_silver_compact_if_needed()
+        span = self._start_postrun_span("postrun.run")
+        try:
+            # Silver compact before DQ so checks see deduplicated data
+            compaction = await self.run_silver_compact_if_needed()
 
-        dq_result = await self.run_dq_checks(executor)
-        dq_reports = await self._generate_dq_reports(dq_context)
-        vacuum_result = await self.run_vacuum_if_enabled()
+            dq_result = await self.run_dq_checks(executor)
+            dq_reports = await self._generate_dq_reports(dq_context)
+            vacuum_result = await self.run_vacuum_if_enabled()
 
-        # Write final run-level metadata (aggregates all batches)
-        if self._metadata_coordinator and self._metadata_writer:
-            await self._write_final_metadata(executor, dq_reports)
+            # Write final run-level metadata (aggregates all batches)
+            if self._metadata_coordinator and self._metadata_writer:
+                await self._write_final_metadata(executor, dq_reports)
 
-        return PostrunResult(
-            dq=dq_result,
-            dq_reports=dq_reports,
-            vacuum=vacuum_result,
-            compaction=compaction,
-        )
+            result = PostrunResult(
+                dq=dq_result,
+                dq_reports=dq_reports,
+                vacuum=vacuum_result,
+                compaction=compaction,
+            )
+            if span:
+                span.set_attribute(
+                    "bioetl.dq_status", dq_result.status.value
+                )
+            self._end_postrun_span(span)
+            return result
+        except Exception as exc:
+            self._end_postrun_span(span, exc)
+            raise
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.

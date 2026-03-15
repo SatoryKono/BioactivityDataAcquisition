@@ -258,6 +258,7 @@ def assemble_runner_impl(
         logger_port=logger_port,
         lifecycle_service=lifecycle_service,
         dq_configs=dq_configs,
+        tracer=observability.tracer,
     )
     observer = _build_observer(
         pipeline=pipeline,

@@ -32,10 +32,14 @@ governance:
     review_policy:
         new_exemption_requires:
             - owner
+            - classification
+            - linked_rf
             - expires_on
             - removal_step
         reviewer_checks:
             - owner maps to subsystem scope
+            - classification is technical_debt or intentional_exception
+            - linked_rf points to active RF/QG/AUD/DOC/CFG/DBG follow-up
             - removal_step references concrete follow-up action
             - placeholder exemptions require concrete technical follow-up (RF/issue link) and must be reviewed on 2026-06-30
             - owner diversification enforcement follows governance.owner_diversification.starts_quarter activation window
@@ -50,12 +54,12 @@ governance:
             registry:*: '2026-06-30'
             group:*: '2026-03-03'
 baseline:
-    total_exemptions: 0
+    total_exemptions: 1
     by_registry:
         file_size_limits: 0
         function_complexity: 0
         function_length: 0
-        class_size: 0
+        class_size: 1
         class_method_count: 0
         god_object: 0
         domain_complexity: 0

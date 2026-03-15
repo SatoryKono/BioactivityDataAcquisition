@@ -105,6 +105,14 @@ class DoiBatchProcessor:
         self._headers_fn = headers_fn
         self._request_collector = request_collector
 
+    def _record_response_timing(
+        self, response: Response | None, duration_ms: float
+    ) -> None:
+        """Record API request timing for metadata enrichment if collector present."""
+        if self._request_collector and response is not None:
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
     async def fetch_single(self, doi: str) -> BronzeRecord | None:
         """Fetch a single publication by DOI.
 
@@ -126,11 +134,7 @@ class DoiBatchProcessor:
             with self._metrics.measure_request("/works/{doi}"):
                 response = await self._http.get(url, headers=self._headers_fn())
             duration_ms = (time.perf_counter() - start_time) * 1000
-
-            # Record request for metadata enrichment
-            if self._request_collector and response is not None:
-                with contextlib.suppress(Exception):
-                    self._request_collector.record_from_response(response, duration_ms)
+            self._record_response_timing(response, duration_ms)
 
             if response is None:
                 raise CrossRefApiError(
@@ -217,10 +221,7 @@ class DoiBatchProcessor:
                 url, params=params, headers=self._headers_fn()
             )
         duration_ms = (time.perf_counter() - start_time) * 1000
-
-        if self._request_collector and response is not None:
-            with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
+        self._record_response_timing(response, duration_ms)
 
         return response
 
@@ -315,6 +316,14 @@ class SearchPaginator:
         self._headers_fn = headers_fn
         self._request_collector = request_collector
 
+    def _record_response_timing(
+        self, response: Response | None, duration_ms: float
+    ) -> None:
+        """Record API request timing for metadata enrichment if collector present."""
+        if self._request_collector and response is not None:
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
     async def _fetch_page(
         self, query: str, rows: int, cursor: str
     ) -> tuple[list[BronzeRecord], str | None]:
@@ -343,11 +352,7 @@ class SearchPaginator:
                 url, params=params, headers=self._headers_fn()
             )
         duration_ms = (time.perf_counter() - start_time) * 1000
-
-        # Record request for metadata enrichment
-        if self._request_collector and response is not None:
-            with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
+        self._record_response_timing(response, duration_ms)
 
         if response is None:
             self._logger.error(

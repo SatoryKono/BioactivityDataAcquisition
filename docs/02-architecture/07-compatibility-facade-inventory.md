@@ -31,13 +31,14 @@ This inventory is also the freeze ledger for compatibility debt in the current c
 - Compatibility entrypoints remain only as controlled transition surfaces.
 - Allowed call sites are explicit. Adding new ones is a regression unless the inventory is updated first.
 - For `retained-entrypoint` rows, the remove-by field is interpreted as a mandatory review date, not an automatic deletion date.
+- Canonical documentation updates for active architecture/reference guidance MUST land only after the corresponding technical change-set is green on targeted verification.
+- `docs/exports/**`, `docs/reports/**`, and `docs/99-archive/**` are evidence/history zones and MUST NOT replace canonical guidance in `docs/02-architecture/**`, `docs/03-guides/**`, or `docs/04-reference/**`.
 
 ## Inventory
 
 | Path | Compatibility role | Canonical target | Status | Owner | Introduced in | Allowed call sites | Remove by / review date | Migration path | Exit criteria |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `src/bioetl/composition/entrypoints.py` | Canonical composition entrypoint that intentionally shields internal `_pipeline_execution` and `_resource_management` module paths. | `bioetl.composition.entrypoints` | `retained-entrypoint` | `bioetl.composition` | `2026-03 entrypoint freeze` | `src`: canonical entrypoint usage allowed; `tests`: CLI and composition entrypoint boundary coverage | `2026-09-30` | Use `bioetl.composition.entrypoints` as the public seam; do not import `bioetl.composition._pipeline_execution` or `bioetl.composition._resource_management` directly. | Internal implementation-module imports outside `composition/` stay at zero and entrypoint-only compatibility coverage remains explicit. |
-| `src/bioetl/application/composite/merger_compat_mixin.py` | Compatibility delegation mixin preserving legacy MergeService helper API while collaborator services own the real behavior. | `bioetl.application.composite.merger.MergeService` | `compat-shim` | `bioetl.application.composite` | `legacy-pre-2026-03` | `src`: allowed only in `src/bioetl/application/composite/merger.py`; `tests`: none beyond architecture review | `2026-09-30` | Keep callers on `bioetl.application.composite.merger.MergeService`; do not add new imports of the compatibility mixin. | MergeService no longer needs the compatibility wrapper mixin and no new imports appear outside the canonical merger module. |
+| `src/bioetl/composition/entrypoints.py` | Canonical composition entrypoint that intentionally shields internal `_pipeline_execution`, `_resource_management`, and `_services` module paths. | `bioetl.composition.entrypoints` | `retained-entrypoint` | `bioetl.composition` | `2026-03 entrypoint freeze` | `src`: canonical entrypoint usage allowed; `tests`: CLI and composition entrypoint boundary coverage | `2026-09-30` | Use `bioetl.composition.entrypoints` as the public seam; do not import `bioetl.composition._pipeline_execution` or `bioetl.composition._resource_management` directly. | Internal implementation-module imports outside `composition/` stay at zero and entrypoint-only compatibility coverage remains explicit. |
 | `src/bioetl/domain/composite/config.py` | Canonical public entrypoint for composite config models that shields split config internals. | `bioetl.domain.composite.config` | `retained-entrypoint` | `bioetl.domain.composite` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/composite/`; `tests`: facade coverage in `tests/unit/domain/composite/test_composite_config_facade.py` and ordinary imports may continue using the root config entrypoint | `2026-09-30` | Keep using `bioetl.domain.composite.config`; do not import split `config_*` internals outside the owning package. | Direct imports of split config internals remain confined to the owning package and the root config entrypoint stays the stable public path. |
 | `src/bioetl/domain/value_objects/activity_values.py` | Canonical public entrypoint for activity-related value objects that shields split concentration/type/pChEMBL modules. | `bioetl.domain.value_objects.activity_values` | `retained-entrypoint` | `bioetl.domain.value_objects` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/value_objects/`; `tests`: facade coverage in `tests/unit/domain/value_objects/test_value_object_facade_reexports.py` and ordinary imports may continue using the public entrypoint | `2026-09-30` | Keep using `bioetl.domain.value_objects.activity_values`; do not import split value-object internals outside the owning package. | Direct imports of split activity-value internals remain confined to the owning package and the facade stays the stable public path. |
 | `src/bioetl/domain/value_objects/publication_field_groups.py` | Canonical public entrypoint for publication field-group definitions that shields private split config/type modules. | `bioetl.domain.value_objects.publication_field_groups` | `retained-entrypoint` | `bioetl.domain.value_objects` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; private split modules stay inside `src/bioetl/domain/value_objects/`; `tests`: facade coverage in `tests/unit/domain/value_objects/test_value_object_facade_reexports.py` and ordinary imports may continue using the public entrypoint | `2026-09-30` | Keep using `bioetl.domain.value_objects.publication_field_groups`; do not import split value-object internals outside the owning package. | Direct imports of private publication-field-group internals remain confined to the owning package and the facade stays the stable public path. |
@@ -53,13 +54,12 @@ This registry is the measurable compatibility-surface baseline for CI. It is the
 
 Snapshot for this cycle:
 
-- Curated inventory rows: `7`
-- Measured tracked modules: `7`
+- Curated inventory rows: `6`
+- Measured tracked modules: `6`
 - Measured-only modules outside curated inventory: `0`
 
 Tracked module paths:
 
-- `src/bioetl/application/composite/merger_compat_mixin.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
@@ -80,7 +80,7 @@ Snapshot after RF-002 controlled removal wave:
 
 - `src/` direct imports of `bioetl.composition._pipeline_execution` outside `src/bioetl/composition/`: `0`
 - `src/` direct imports of `bioetl.composition._resource_management` outside `src/bioetl/composition/`: `0`
-- `src/` direct imports of `bioetl.application.composite.merger_compat_mixin` outside `src/bioetl/application/composite/merger.py`: `0`
+- `src/` direct imports of `bioetl.composition._services` outside `src/bioetl/composition/`: `0`
 - `src/` direct imports of split `bioetl.domain.composite.config_*` internals outside `src/bioetl/domain/composite/`: `0`
 - `src/` direct imports of split activity/publication value-object internals outside `src/bioetl/domain/value_objects/`: `0`
 - `src/` direct `DataSourceRegistry` usages outside explicit compatibility re-exports: `0`
@@ -91,6 +91,9 @@ Snapshot after RF-002 controlled removal wave:
 - `tests/architecture/test_registry_contracts.py`
 - `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`
 - `tests/unit/domain/composite/test_composite_config_facade.py`
+- `tests/unit/composition/test_services_entrypoints.py`
+- `tests/unit/composition/test_entrypoints.py`
+- `tests/unit/composition/test_resource_management.py`
 
 Compatibility-only policy for this cycle:
 

@@ -456,3 +456,49 @@ class TestCircuitBreakerMetrics:
             if c[0][0] == METRIC_CIRCUIT_BREAKER_TRIPS
         ]
         assert len(trip_calls) == 0
+
+
+class TestCircuitBreakerErrorNarrowing:
+    """Tests for RF-001: narrowed CALL_OPERATION_ERRORS tuple."""
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "exc_cls",
+        [ValueError, TypeError, LookupError, ArithmeticError, AssertionError],
+        ids=["ValueError", "TypeError", "LookupError", "ArithmeticError", "AssertionError"],
+    )
+    async def test_excluded_errors_do_not_trip_breaker(
+        self, exc_cls: type[Exception]
+    ) -> None:
+        """Programming errors must propagate without tripping the circuit breaker."""
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=1)
+
+        async def raise_exc() -> None:
+            raise exc_cls("bug")
+
+        with pytest.raises(exc_cls):
+            await cb.call(raise_exc)
+
+        assert cb.get_state() == CircuitBreakerState.CLOSED
+        assert cb.get_failure_count() == 0
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "exc_cls",
+        [RuntimeError, OSError],
+        ids=["RuntimeError", "OSError"],
+    )
+    async def test_transient_errors_do_trip_breaker(
+        self, exc_cls: type[Exception]
+    ) -> None:
+        """Transient infrastructure errors must trip the circuit breaker."""
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=1)
+
+        async def raise_exc() -> None:
+            raise exc_cls("transient")
+
+        with pytest.raises(exc_cls):
+            await cb.call(raise_exc)
+
+        assert cb.get_state() == CircuitBreakerState.OPEN
+        assert cb.get_failure_count() == 1

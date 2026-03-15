@@ -50,7 +50,13 @@ def _valid_scorecard() -> dict[str, object]:
         },
         "governance": {
             "review_policy": {
-                "new_exemption_requires": ["owner", "expires_on", "removal_step"]
+                "new_exemption_requires": [
+                    "owner",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
             },
             "owner_registry_q2_subsystems": {
                 "sub_a": {"owner": "alice"},
@@ -249,7 +255,6 @@ class TestEvaluateDebtScorecard:
 
     def test_validation_errors_returned(self, tmp_path: Path) -> None:
         """If scorecard validation fails, errors returned and no summary."""
-        import yaml
 
         scorecard_file = tmp_path / "scorecard.yaml"
         scorecard_file.write_text("schema_version: 2\n", encoding="utf-8")

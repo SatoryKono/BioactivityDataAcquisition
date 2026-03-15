@@ -41,6 +41,7 @@ class UnifiedHTTPClient(
     circuit_breaker: CircuitBreakerPort
     retry_config: RetryConfig = field(default_factory=RetryConfig)
     timeout: float = 30.0
+    read_timeout_multiplier: float = 2.0
     run_id: RunID | None = None
     user_agent: str = "BioETL/5.0.0"
     contact_email: str | None = None

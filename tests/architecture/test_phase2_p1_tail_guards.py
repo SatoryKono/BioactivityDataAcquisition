@@ -13,7 +13,7 @@ P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/postrun/cleanup_orchestrator.py",
     "src/bioetl/application/core/postrun/dq_report_orchestrator.py",
     "src/bioetl/application/core/postrun/metadata_version_resolver.py",
-    "src/bioetl/application/composite/runner.py",
+    "src/bioetl/application/composite/runner_pkg/runner.py",
     "src/bioetl/interfaces/http/health_server.py",
     "src/bioetl/interfaces/http/health_server_http_mixin.py",
 )

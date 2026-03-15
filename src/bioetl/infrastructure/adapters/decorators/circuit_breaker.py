@@ -120,10 +120,12 @@ class CircuitBreakerDataSourceDecorator:
                     state=state.value,
                     failure_count=self.circuit_breaker.get_failure_count(),
                 )
-            # Standard recovery timeout for data source level CB
+            retry_after = float(
+                getattr(self.circuit_breaker, "recovery_timeout", 60.0)
+            )
             raise CircuitBreakerOpenError(
                 provider=self.provider_name,
-                retry_after=60.0,  # Default 60s recovery time
+                retry_after=retry_after,
             )
 
     def _record_success(self) -> None:

@@ -12,11 +12,11 @@ import yaml
 from bioetl.infrastructure.quality.exemptions_registry import (
     EXEMPTION_REGISTRIES_ALLOW_EMPTY,
     REQUIRED_EXEMPTION_REGISTRIES,
-    build_module_path_key,
     get_registry_values,
     load_exemptions_registry,
     resolve_registry_value,
     validate_exemption_key_normalization,
+    validate_exemption_target_references,
     validate_exemptions_registry,
 )
 
@@ -193,7 +193,7 @@ class TestValidateExemptionKeyNormalization:
         raw = {
             "registries": {
                 "file_size_limits": {
-                    f"src/bioetl/quality/module.py": {
+                    "src/bioetl/quality/module.py": {
                         "value": 500,
                         "owner": "alice",
                     }
@@ -265,6 +265,8 @@ class TestValidateExemptionsRegistry:
                     "value",
                     "owner",
                     "reason",
+                    "classification",
+                    "linked_rf",
                     "expires_on",
                     "removal_step",
                 ]
@@ -277,6 +279,9 @@ class TestValidateExemptionsRegistry:
         path = _write_registry(tmp_path, self._valid_raw())
         with patch(
             "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+            return_value=[],
+        ), patch(
+            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
             return_value=[],
         ):
             meta_errors, expired = validate_exemptions_registry(
@@ -296,7 +301,15 @@ class TestValidateExemptionsRegistry:
         path = _write_registry(
             tmp_path,
             {
-                "policy": {"required_fields": ["owner", "expires_on", "removal_step"]},
+                "policy": {
+                    "required_fields": [
+                        "owner",
+                        "classification",
+                        "linked_rf",
+                        "expires_on",
+                        "removal_step",
+                    ]
+                },
                 "registries": "not_a_dict",
             },
         )
@@ -312,6 +325,9 @@ class TestValidateExemptionsRegistry:
         with patch(
             "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
             return_value=[],
+        ), patch(
+            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+            return_value=[],
         ):
             meta_errors, _ = validate_exemptions_registry(path, today=date(2025, 6, 15))
         assert any("god_object" in e for e in meta_errors)
@@ -325,6 +341,8 @@ class TestValidateExemptionsRegistry:
                 "value": 15,
                 "owner": "alice",
                 "reason": "big class",
+                "classification": "technical_debt",
+                "linked_rf": "RF-001",
                 "expires_on": "2020-01-01",
                 "removal_step": "refactor",
             }
@@ -332,6 +350,9 @@ class TestValidateExemptionsRegistry:
         path = _write_registry(tmp_path, raw)
         with patch(
             "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+            return_value=[],
+        ), patch(
+            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
             return_value=[],
         ):
             _, expired = validate_exemptions_registry(path, today=date(2025, 6, 15))
@@ -343,6 +364,9 @@ class TestValidateExemptionsRegistry:
         with patch(
             "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
             return_value=[],
+        ), patch(
+            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+            return_value=[],
         ):
             meta_errors, _ = validate_exemptions_registry(path)
         assert isinstance(meta_errors, list)
@@ -352,3 +376,107 @@ class TestValidateExemptionsRegistry:
         assert isinstance(REQUIRED_EXEMPTION_REGISTRIES, tuple)
         assert "god_object" in REQUIRED_EXEMPTION_REGISTRIES
         assert isinstance(EXEMPTION_REGISTRIES_ALLOW_EMPTY, frozenset)
+
+
+class TestValidateExemptionTargetReferences:
+    """Tests for validate_exemption_target_references."""
+
+    def test_valid_path_qualified_class_key(self, tmp_path: Path) -> None:
+        """Path-qualified class keys should validate against live source files."""
+        src_dir = tmp_path / "src" / "bioetl" / "application"
+        src_dir.mkdir(parents=True)
+        module_file = src_dir / "module.py"
+        module_file.write_text(
+            "class ExampleService:\n"
+            "    pass\n",
+            encoding="utf-8",
+        )
+
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "value",
+                    "owner",
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
+            },
+            "registries": {
+                name: {} for name in REQUIRED_EXEMPTION_REGISTRIES
+            },
+        }
+        registries = raw["registries"]
+        assert isinstance(registries, dict)
+        registries["class_size"] = {
+            "src/bioetl/application/module.py::ExampleService": {
+                "value": 350,
+                "owner": "alice",
+                "reason": "temporary hotspot",
+                "classification": "technical_debt",
+                "linked_rf": "RF-001",
+                "expires_on": "2026-06-30",
+                "removal_step": "split service",
+            }
+        }
+
+        path = _write_registry(tmp_path, raw)
+        with patch(
+            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            return_value=tmp_path,
+        ):
+            errors = validate_exemption_target_references(path)
+
+        assert errors == []
+
+    def test_missing_symbol_reports_error(self, tmp_path: Path) -> None:
+        """Missing path-qualified symbols should raise target-reference errors."""
+        src_dir = tmp_path / "src" / "bioetl" / "application"
+        src_dir.mkdir(parents=True)
+        module_file = src_dir / "module.py"
+        module_file.write_text(
+            "class ExampleService:\n"
+            "    pass\n",
+            encoding="utf-8",
+        )
+
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "value",
+                    "owner",
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
+            },
+            "registries": {
+                name: {} for name in REQUIRED_EXEMPTION_REGISTRIES
+            },
+        }
+        registries = raw["registries"]
+        assert isinstance(registries, dict)
+        registries["class_size"] = {
+            "src/bioetl/application/module.py::MissingService": {
+                "value": 350,
+                "owner": "alice",
+                "reason": "temporary hotspot",
+                "classification": "technical_debt",
+                "linked_rf": "RF-001",
+                "expires_on": "2026-06-30",
+                "removal_step": "split service",
+            }
+        }
+
+        path = _write_registry(tmp_path, raw)
+        with patch(
+            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            return_value=tmp_path,
+        ):
+            errors = validate_exemption_target_references(path)
+
+        assert any("MissingService" in error for error in errors)

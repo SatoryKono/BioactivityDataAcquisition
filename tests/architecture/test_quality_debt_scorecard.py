@@ -84,10 +84,10 @@ def test_debt_scorecard_schema_is_valid() -> None:
     )
 
 
-def test_debt_scorecard_governance_review_policy_requires_owner_and_removal_step() -> (
+def test_debt_scorecard_governance_review_policy_requires_tracking_and_classification() -> (
     None
 ):
-    """Scorecard governance must require owner/expiry/removal-step for new exemptions."""
+    """Scorecard governance must require tracking/classification for new exemptions."""
     scorecard = load_debt_scorecard()
     governance = scorecard.get("governance", {})
     assert isinstance(governance, dict)
@@ -97,10 +97,17 @@ def test_debt_scorecard_governance_review_policy_requires_owner_and_removal_step
     required_fields = review_policy.get("new_exemption_requires", [])
     assert isinstance(required_fields, list)
     assert "owner" in required_fields
+    assert "classification" in required_fields
+    assert "linked_rf" in required_fields
     assert "expires_on" in required_fields
     assert "removal_step" in required_fields
     reviewer_checks = review_policy.get("reviewer_checks", [])
     assert isinstance(reviewer_checks, list)
+    assert any(
+        "classification is technical_debt or intentional_exception" in str(item)
+        for item in reviewer_checks
+    )
+    assert any("linked_rf points to active" in str(item) for item in reviewer_checks)
     assert any(
         "placeholder exemptions require concrete technical follow-up" in str(item)
         for item in reviewer_checks
@@ -364,6 +371,8 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
                         "value",
                         "owner",
                         "reason",
+                        "classification",
+                        "linked_rf",
                         "expires_on",
                         "removal_step",
                     ]
@@ -374,6 +383,8 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
                             "value": 1,
                             "owner": "@bioetl-architecture",
                             "reason": "Synthetic exemption for done-criteria test.",
+                            "classification": "technical_debt",
+                            "linked_rf": "RF-001",
                             "expires_on": "2026-06-30",
                             "removal_step": "Remove after test.",
                         }

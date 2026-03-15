@@ -45,12 +45,9 @@ jobs:
           echo "Running full mypy strict gate on src/bioetl..."
           echo "Event: ${{ github.event_name }}" | tee reports/mypy_strict.log
 
-          # Always run full strict gate without incremental cache for deterministic CI.
-          rm -rf .mypy_cache
-
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \
+            make qa-types \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -185,4 +182,3 @@ jobs:
             reports/
           if-no-files-found: warn
           retention-days: 14
-

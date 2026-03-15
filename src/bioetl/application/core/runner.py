@@ -16,11 +16,14 @@ from __future__ import annotations
 __all__ = ["PipelineRunner"]
 
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.ports import NoOpTracing
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.lifecycle.checkpoint_manager import (
@@ -98,7 +101,7 @@ class PipelineRunner:
         self._shutdown_signal = shutdown_signal
         self._logger = logger
         self._pipeline = pipeline
-        self._tracer = tracer
+        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
 
         # Services injected directly via DI (created in composition layer)
         self._lock_manager = lock_manager
@@ -138,6 +141,45 @@ class PipelineRunner:
             "records_quarantined": int(self._executor.records_quarantined),
         }
 
+    def _start_pipeline_span(self) -> Span | None:
+        """Start a top-level OTel span for the pipeline.run phase.
+
+        Returns:
+            OpenTelemetry span context, or None if tracing disabled.
+        """
+        otel_tracer = self._tracer.get_tracer("bioetl.runner")
+        span = cast(
+            "Span",
+            otel_tracer.start_as_current_span(
+                "pipeline.run",
+                attributes={
+                    "bioetl.pipeline": self._config.pipeline_name or "unknown",
+                    "bioetl.provider": self._config.provider,
+                    "bioetl.entity_type": self._config.entity_type,
+                    "bioetl.run_type": self._runtime.run_type.value,
+                    "bioetl.run_id": str(self._context.run_id),
+                },
+            ),
+        )
+        span.__enter__()
+        return span
+
+    def _end_pipeline_span(
+        self, span: Span | None, error: Exception | None = None
+    ) -> None:
+        """End the pipeline.run span, optionally recording an error.
+
+        Args:
+            span: The span to end.
+            error: Optional exception to record on the span.
+        """
+        if not span:
+            return
+        if error:
+            span.set_attribute("error", True)
+            span.record_exception(error)
+        span.__exit__(None, None, None)
+
     async def run(self) -> None:
         """Execute pipeline. Main entry point.
 
@@ -153,6 +195,7 @@ class PipelineRunner:
             run_type=self._runtime.run_type.value,
         )
 
+        pipeline_span = self._start_pipeline_span()
         try:
             with self._observer:
                 async with self._services, self._lock_manager:
@@ -204,6 +247,10 @@ class PipelineRunner:
                     PipelineEvent.COMPLETE,
                     records_fetched=self._executor.records_fetched,
                 )
+            self._end_pipeline_span(pipeline_span)
+        except Exception as exc:
+            self._end_pipeline_span(pipeline_span, exc)
+            raise
         finally:
             await self._postrun_service.cleanup(self._tracer)
 

@@ -27,7 +27,7 @@ def _validate_review_policy(review_policy: object, *, errors: list[str]) -> None
     required_set = {
         item.strip() for item in required if isinstance(item, str) and item.strip()
     }
-    for field in ("owner", "expires_on", "removal_step"):
+    for field in ("owner", "classification", "linked_rf", "expires_on", "removal_step"):
         if field not in required_set:
             errors.append(
                 "governance.review_policy.new_exemption_requires: "

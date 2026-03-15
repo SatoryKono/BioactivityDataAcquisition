@@ -48,11 +48,6 @@ CALL_OPERATION_ERRORS: tuple[type[Exception], ...] = (
     httpx.HTTPError,
     OSError,
     RuntimeError,
-    ValueError,
-    TypeError,
-    LookupError,
-    ArithmeticError,
-    AssertionError,
 )
 
 
