@@ -96,10 +96,8 @@ class _PreparedSilverWriteFinalizationContext:
 def _build_silver_write_result(
     *, table_name: str, table_path: str, version_after: int | None, records_count: int
 ) -> SilverWriteResult | None:
-    return (
-        None
-        if version_after is None
-        else SilverWriteResult(table_name, table_path, version_after, records_count)
+    return None if version_after is None else SilverWriteResult(
+        table_name, table_path, version_after, records_count
     )
 
 
@@ -140,11 +138,7 @@ async def _resolve_silver_metadata_context(
 ) -> _ResolvedSilverMetadataContext:
     """Resolve shared provider/entity/version context for Silver metadata writes."""
     provider_name, entity_name = _parse_table_name(table_name)
-    version = (
-        version_after
-        if version_after is not None
-        else await host._get_delta_version(table_path)
-    )
+    version = version_after if version_after is not None else await host._get_delta_version(table_path)
     return _ResolvedSilverMetadataContext(provider_name, entity_name, version)
 
 
@@ -176,9 +170,7 @@ async def _prepare_silver_metadata_write(
         completed_at=request.completed_at,
     )
     metadata = host._metadata_coordinator.create_silver_metadata(silver_input)
-    return _PreparedSilverMetadataWriteOperation(
-        request, context.provider_name, context.entity_name, metadata
-    )
+    return _PreparedSilverMetadataWriteOperation(request, context.provider_name, context.entity_name, metadata)
 
 
 async def _prepare_silver_merged_metadata_write(
@@ -205,9 +197,7 @@ async def _prepare_silver_merged_metadata_write(
         sources_used=request.sources_used,
         version_after=context.version_after,
     )
-    return _PreparedSilverMetadataWriteOperation(
-        request, context.provider_name, context.entity_name, metadata
-    )
+    return _PreparedSilverMetadataWriteOperation(request, context.provider_name, context.entity_name, metadata)
 
 
 async def _execute_prepared_silver_metadata_write_operation(
@@ -450,9 +440,7 @@ class SilverWriterMetadataMixin:
     ) -> None:
         """Guard for audit logging — only calls _log_silver_audit if enabled."""
         if self._audit and records:
-            await self._log_silver_audit(
-                table_name=table_name, records=records, mode=mode
-            )
+            await self._log_silver_audit(table_name=table_name, records=records, mode=mode)
 
     async def _finalize_silver_write_result(
         self,
@@ -509,6 +497,4 @@ class SilverWriterMetadataMixin:
         dq_metrics = await self._compute_dq_metrics(table_name, records)
         version_after = await self._get_delta_version(table_path)
         completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
-        return _PreparedSilverWriteFinalizationContext(
-            dq_metrics, version_after, completed_at
-        )
+        return _PreparedSilverWriteFinalizationContext(dq_metrics, version_after, completed_at)

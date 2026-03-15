@@ -168,16 +168,8 @@ class CsvFilterReader:
         """Process rows building ID list and fallback mapping. Returns title_only_count."""
         title_only_count = 0
         for row in df.iter_rows(named=True):
-            primary_str = (
-                str(row.get(primary_column, "")).strip()
-                if row.get(primary_column)
-                else ""
-            )
-            fallback_str = (
-                str(row.get(fallback_column, "")).strip()
-                if row.get(fallback_column)
-                else ""
-            )
+            primary_str = str(row.get(primary_column, "")).strip() if row.get(primary_column) else ""
+            fallback_str = str(row.get(fallback_column, "")).strip() if row.get(fallback_column) else ""
 
             if primary_str:
                 all_ids.append(primary_str)
@@ -234,11 +226,7 @@ class CsvFilterReader:
             all_ids = self._extract_column_ids(df, primary_column)
         else:
             title_only_count = self._build_fallback_rows(
-                df,
-                primary_column,
-                fallback_column,
-                all_ids,
-                fallback_mapping,
+                df, primary_column, fallback_column, all_ids, fallback_mapping,
             )
             if self._logger:
                 self._logger.info(
