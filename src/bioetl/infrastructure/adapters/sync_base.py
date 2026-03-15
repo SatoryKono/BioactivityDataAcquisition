@@ -82,6 +82,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
     circuit_breaker: CircuitBreakerGuard
     thread_pool: ThreadPoolExecutor
     _error_handler: ErrorHandlerPort
+    _owns_thread_pool: bool
 
     def __init__(
         self,
@@ -93,6 +94,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         metrics: MetricsPort | None = None,
         *,
         error_handler: ErrorHandlerPort | None = None,
+        owns_thread_pool: bool = False,
     ) -> None:
         """Initialize Sync Adapter resources.
 
@@ -107,6 +109,9 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             metrics: MetricsPort instance for metrics collection.
             error_handler: Pre-built error handler (optional, injected by
                     AdapterHelpersFactory). Falls back to inline ErrorService.
+            owns_thread_pool: Whether this adapter owns the injected executor and
+                should shut it down on ``close()``/GC finalization. Defaults to
+                ``False`` so externally managed executors are not closed implicitly.
 
         """
         self.logger = logger
@@ -115,6 +120,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         self.rate_limiter = rate_limiter
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
+        self._owns_thread_pool = owns_thread_pool
         self.strict_error_handling = strict_error_handling
         self._error_handler = (
             error_handler
@@ -122,8 +128,12 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             else create_default_error_handler(logger=logger, metrics=self.metrics)
         )
 
-        # Safety: ensure shutdown if aclose/context manager is misused
-        self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)
+        # Safety: owned executors are finalized if explicit close is missed.
+        self._finalizer = (
+            weakref.finalize(self, self.thread_pool.shutdown, wait=False)
+            if owns_thread_pool
+            else None
+        )
 
     @property
     def _circuit_breaker(self) -> CircuitBreakerPort:
@@ -151,7 +161,11 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         await self.close()
 
     async def close(self) -> None:
-        """Close thread pool."""
+        """Close owned executor resources."""
+        if not self._owns_thread_pool:
+            return
+        if self._finalizer is not None and self._finalizer.alive:
+            self._finalizer.detach()
         self.thread_pool.shutdown(wait=True)
 
     async def aclose(self) -> None:

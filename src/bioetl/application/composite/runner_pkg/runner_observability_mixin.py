@@ -3,29 +3,28 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Protocol, cast
 
 from bioetl.application.composite.runner_pkg.runner_constants import (
     DQ_REPORT_NON_FATAL_ERRORS,
     QUARANTINE_WRITE_NON_FATAL_ERRORS,
 )
+from bioetl.application.services.dq_report_service import DQReportService
+from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
+from bioetl.domain.types import RunID
 
-if TYPE_CHECKING:
-    from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.composite.result import MergeResult
-    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
-    from bioetl.domain.types import RunID
 
-    class _CompositeRunnerObservabilityHostProtocol(Protocol):
-        _config: CompositeConfig
-        _logger: LoggerPort
-        _run_id_str: str
-        _run_id: RunID
-        _dq_report_service: DQReportService | None
-        _quarantine_port: QuarantinePort | None
-        _metrics: MetricsPort | None
+class _CompositeRunnerObservabilityHostProtocol(Protocol):
+    _config: CompositeConfig
+    _logger: LoggerPort
+    _run_id_str: str
+    _run_id: RunID
+    _dq_report_service: DQReportService | None
+    _quarantine_port: QuarantinePort | None
+    _metrics: MetricsPort | None
 
 
 class CompositeRunnerObservabilityMixin:

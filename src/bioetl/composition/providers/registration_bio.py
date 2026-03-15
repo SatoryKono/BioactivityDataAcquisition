@@ -141,6 +141,7 @@ def _create_pubchem_adapter(
             metrics=metrics,
         ),
         thread_pool=ThreadPoolExecutor(max_workers=max_workers),
+        owns_thread_pool=True,
         strict_error_handling=strict_error_handling,
     )
 
