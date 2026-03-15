@@ -13,10 +13,28 @@ policy:
         - expires_on
         - removal_step
 registries:
-    file_size_limits: { }
+    file_size_limits:
+        src/bioetl/infrastructure/storage/silver_writer_metadata_mixin.py:
+            value: 514
+            owner: infrastructure
+            reason: Formatting updates increased the vertical line count over 500 limit.
+            expires_on: '2026-12-31'
+            removal_step: Extracted to a dedicated service.
     function_complexity: { }
     function_length: { }
-    class_size: { }
+    class_size:
+        src/bioetl/infrastructure/adapters/input/csv_filter_reader.py::CsvFilterReader:
+            value: 305
+            owner: infrastructure
+            reason: Formatting updates increased the vertical line count over 300 limit.
+            expires_on: '2026-12-31'
+            removal_step: Refactor class into smaller components.
     class_method_count: { }
-    god_object: { }
+    god_object:
+        src/bioetl/infrastructure/adapters/input/csv_filter_reader.py::CsvFilterReader:
+            value: 2
+            owner: infrastructure
+            reason: Exceeded threshold due to parsing logic. Needs delegation.
+            expires_on: '2026-12-31'
+            removal_step: Introduce dedicated parsers to increase delegation.
     domain_complexity: { }
