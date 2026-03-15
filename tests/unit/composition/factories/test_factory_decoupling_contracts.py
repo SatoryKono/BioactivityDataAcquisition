@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
-from bioetl.composition.factories.pipeline import facade as pipeline_factory
+from bioetl.composition.factories.pipeline import build_pipeline_services
 
 
 @pytest.mark.unit
@@ -32,53 +31,8 @@ def test_service_bundle_factory_has_no_pipeline_factory_proxy_imports() -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.pipeline.facade._build_pipeline_services")
-def test_pipeline_factory_build_services_injects_compat_dependencies(
-    mock_build_pipeline_services,
-) -> None:
-    """Facade build_pipeline_services should pass explicit compatibility deps."""
-    mock_build_pipeline_services.return_value = "services"
-
-    with pytest.warns(DeprecationWarning):
-        result = pipeline_factory.build_pipeline_services(
-            "chembl_activity",
-            object(),
-            object(),
-            object(),
-        )
-
-    assert result == "services"
-    deps = mock_build_pipeline_services.call_args.kwargs["_deps"]
-    assert deps.base_services_factory is pipeline_factory.BaseServicesFactory
-    assert deps.load_pipeline_config is pipeline_factory.load_pipeline_config
-    assert deps.yaml_config_to_domain is pipeline_factory.yaml_config_to_domain
-    assert deps.compute_config_hash is pipeline_factory.compute_config_hash
-
-
-@pytest.mark.unit
-@patch("bioetl.composition.factories.pipeline.facade._create_pipeline_with_services")
-def test_pipeline_factory_create_with_services_injects_compat_dependencies(
-    mock_create_pipeline_with_services,
-) -> None:
-    """Facade create_pipeline_with_services should pass explicit compatibility deps."""
-    mock_create_pipeline_with_services.return_value = "pipeline"
-
-    with pytest.warns(DeprecationWarning):
-        result = pipeline_factory.create_pipeline_with_services(
-            "chembl_activity",
-            object(),  # pipeline_class
-            "chembl",  # provider
-            object(),  # create_data_source_fn
-            None,  # transformer_class
-            "run-test",  # run_id
-            object(),  # runtime
-            object(),  # settings
-            object(),  # logger
-        )
-
-    assert result == "pipeline"
-    deps = mock_create_pipeline_with_services.call_args.kwargs["_deps"]
-    assert deps.base_services_factory is pipeline_factory.BaseServicesFactory
-    assert deps.load_pipeline_config is pipeline_factory.load_pipeline_config
-    assert deps.yaml_config_to_domain is pipeline_factory.yaml_config_to_domain
-    assert deps.compute_config_hash is pipeline_factory.compute_config_hash
+def test_pipeline_package_root_reexports_canonical_service_bundle_entrypoint() -> None:
+    """Package root should expose the canonical service bundle function directly."""
+    assert build_pipeline_services.__module__ == (
+        "bioetl.composition.factories.services.bundle"
+    )

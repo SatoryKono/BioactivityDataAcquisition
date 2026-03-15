@@ -31,11 +31,8 @@ REQUIRED_PATHS = frozenset(
         "src/bioetl/domain/composite/config.py",
         "src/bioetl/domain/value_objects/activity_values.py",
         "src/bioetl/domain/value_objects/publication_field_groups.py",
-        "src/bioetl/application/composite/join_planner_compat_mixin.py",
         "src/bioetl/application/composite/merger_compat_mixin.py",
         "src/bioetl/composition/entrypoints.py",
-        "src/bioetl/composition/factories/pipeline/facade.py",
-        "src/bioetl/composition/runtime_builders/runner_builder.py",
         "src/bioetl/infrastructure/adapters/pubmed/client.py",
         "src/bioetl/infrastructure/adapters/semanticscholar/client.py",
     }

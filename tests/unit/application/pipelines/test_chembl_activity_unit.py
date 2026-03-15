@@ -16,6 +16,7 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import get_pipeline_config
 from bioetl.domain.ports import NoOpMetrics
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -43,7 +44,7 @@ def chembl_pipeline():
     run_id = uuid4()
     # Create transformer with gold_filters from config
     transformer = ActivityTransformer(
-        provider="chembl", gold_filters=config.gold_filters
+        provider="chembl", gold_filters=config.gold_filters, dependencies=build_test_transformer_dependencies()
     )
     pipeline = ChEMBLActivityPipeline.create(
         run_id=run_id,

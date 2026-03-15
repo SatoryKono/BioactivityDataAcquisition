@@ -178,7 +178,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | `RunnerBuilder` | Builds runner instances from resolved configuration |
 | `ObservabilityBuilder` | Builds observability stack |
 | `RunnerInputs` | Resolved runner input configuration |
-| `VacuumSettings` | Vacuum operation settings |
+| `ResolvedVacuumSettings` | Resolved vacuum operation settings |
 
 ---
 

@@ -28,7 +28,6 @@ from bioetl.domain.composite.config_composite_validation import (
 )
 from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
 from bioetl.domain.composite.config_merge import ColumnGroupConfig, MergeConfig
-
 from bioetl.domain.composite.config_models import (
     CrossValidationConfig,
     DataSchemaConfig,

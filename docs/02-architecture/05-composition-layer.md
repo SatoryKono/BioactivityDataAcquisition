@@ -90,14 +90,14 @@ composition/bootstrap/
 
 В v6.0+ логика создания компонентов централизована в специализированных фабриках, организованных в подпакеты:
 
-**Расположение:** `src/bioetl/composition/factories/` (48 .py файлов в 5 подпакетах)
+**Расположение:** `src/bioetl/composition/factories/` (56 .py файлов в 5 подпакетах)
 
 | Подпакет / Файл             | Ключевые компоненты                          | Назначение                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline/assembler.py`     | `GenericPipelineFactory`                     | Универсальный конструктор пайплайнов (декларативно)            |
+| `pipeline/pipeline_assembler.py` | Public entrypoint                        | Публичный entrypoint для pipeline assembly                     |
 | `pipeline/registry.py`      | Реестр фабрик                                | Все зарегистрированные pipeline factories                      |
 | `pipeline/runner.py`        | `RunnerFactory`                              | Создание `PipelineRunner` с DI                                 |
-| `pipeline/facade.py`        | `PipelineFacade`                             | Фасад для pipeline операций                                    |
 | `datasource/factory.py`     | `DataSourceFactory`                          | Создает `DataSourcePort` для провайдера                        |
 | `datasource/http_client.py` | `HttpClientFactory`                          | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
 | `storage/factory.py`        | `StorageFactory`                             | Сборка `StoragePort` (Bronze + Silver + Gold)                  |

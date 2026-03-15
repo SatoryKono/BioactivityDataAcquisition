@@ -1,4 +1,4 @@
-"""Leaf builder facade for runtime pipeline runner construction."""
+"""Leaf builder for runtime pipeline runner construction."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
-    VacuumSettings,
+    ResolvedVacuumSettings,
     assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
@@ -91,7 +91,7 @@ def build_pipeline_runner(
     get_settings_fn: Callable[[], Settings] = get_settings,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
-    assemble_vacuum_settings_fn: Callable[..., VacuumSettings] | None = None,
+    assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
     assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None = None,
     assemble_cached_bronze_context_fn: Callable[

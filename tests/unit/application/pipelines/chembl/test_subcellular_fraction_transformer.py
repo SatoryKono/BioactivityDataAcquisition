@@ -16,6 +16,7 @@ from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ def mock_context() -> PipelineContext:
 @pytest.fixture
 def transformer() -> SubcellularFractionTransformer:
     """Create transformer instance."""
-    return SubcellularFractionTransformer()
+    return SubcellularFractionTransformer(dependencies=build_test_transformer_dependencies())
 
 
 @pytest.mark.unit
@@ -228,7 +229,7 @@ class TestComputeFractionEntityId:
     @pytest.fixture
     def transformer(self) -> SubcellularFractionTransformer:
         """Create transformer instance."""
-        return SubcellularFractionTransformer()
+        return SubcellularFractionTransformer(dependencies=build_test_transformer_dependencies())
 
     def test_basic_computation(
         self,
@@ -294,7 +295,7 @@ class TestExtractFractionFromAssay:
     @pytest.fixture
     def transformer(self) -> SubcellularFractionTransformer:
         """Create transformer instance."""
-        return SubcellularFractionTransformer()
+        return SubcellularFractionTransformer(dependencies=build_test_transformer_dependencies())
 
     def test_extract_valid_fraction(
         self,

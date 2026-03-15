@@ -12,6 +12,7 @@ from bioetl.application.pipelines.chembl.cell_line_transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ class TestCellLineTransformer:
     @pytest.fixture
     def transformer(self):
         """Create CellLineTransformer instance."""
-        return CellLineTransformer(provider="chembl")
+        return CellLineTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -220,7 +221,7 @@ class TestCellLineTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = CellLineTransformer(provider="custom_provider")
+        transformer = CellLineTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
         record = {
             "cell_id": "CUSTOM123",
             "cell_name": "CustomCell",

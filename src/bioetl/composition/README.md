@@ -67,7 +67,7 @@ This is the most complex sub-package. It handles pipeline runtime assembly:
 
 | Module | Responsibility |
 |--------|---------------|
-| `assembly.py` | Pure functions: build RuntimeConfig, FilterConfig, VacuumSettings |
+| `assembly.py` | Pure functions: build RuntimeConfig, FilterConfig, ResolvedVacuumSettings |
 | `config_loader.py` | Load and merge YAML pipeline configs |
 | `pipeline.py` | Assemble BasePipeline subclass instances |
 | `runner.py` | Assemble PipelineRunner with all dependencies |

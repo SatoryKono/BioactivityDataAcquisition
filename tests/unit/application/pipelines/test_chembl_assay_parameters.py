@@ -15,6 +15,7 @@ from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -212,7 +213,7 @@ class TestAssayParametersTransformer:
     @pytest.fixture
     def transformer(self) -> AssayParametersTransformer:
         """Create AssayParametersTransformer instance."""
-        return AssayParametersTransformer(provider="chembl")
+        return AssayParametersTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
     @pytest.fixture
     def sample_record(self) -> dict:
@@ -364,7 +365,7 @@ class TestAssayParametersTransformer:
         mock_context,
     ) -> None:
         """Test transformation with custom provider."""
-        transformer = AssayParametersTransformer(provider="custom_provider")
+        transformer = AssayParametersTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
         record = {
             "assay_param_id": 12350,
             "assay_id": "CHEMBL1217643",

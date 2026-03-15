@@ -7,9 +7,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.join_execution import JoinHow
-from bioetl.application.composite.join_planner_compat_mixin import (
-    JoinPlannerCompatibilityMixin,
-)
 from bioetl.application.composite.join_planner_helpers import (
     EnricherJoinMetadataContext,
     build_enricher_join_metadata,
@@ -47,7 +44,7 @@ class _PreparedEnricherJoinContext:
     enricher_df: pl.DataFrame
 
 
-class JoinPlannerService(JoinPlannerCompatibilityMixin):
+class JoinPlannerService:
     """Prepares and executes enricher/dependency joins with key normalization."""
 
     _NORMALIZE_JOIN_KEYS: frozenset[str] = frozenset({"doi", "pmid", "pmc_id"})
@@ -118,6 +115,117 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         self._join_key_resolver = join_key_resolver
         self._join_executor = join_executor
         self._dependency_joiner = dependency_joiner
+
+    def find_join_key_column(
+        self,
+        key: str,
+        columns: list[str],
+        pipeline: str | None = None,
+    ) -> str | None:
+        """Find a join key column, preferring qualified names when available."""
+        return self._join_key_resolver.find_join_key_column(key, columns, pipeline)
+
+    def normalize_join_key_columns(
+        self,
+        df: pl.DataFrame,
+        join_keys: list[str],
+        pipeline: str | None = None,
+    ) -> pl.DataFrame:
+        """Normalize selected identifier join keys to lowercase."""
+        return self._join_key_resolver.normalize_join_key_columns(
+            df,
+            join_keys,
+            pipeline,
+        )
+
+    def drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Drop system columns that should not leak from the right side."""
+        return self._dependency_joiner.drop_system_columns(df)
+
+    def execute_polars_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_key: str,
+        right_key: str,
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute a single-key join while preserving the right join key."""
+        return self._join_executor.execute_polars_join(
+            left_df,
+            right_df,
+            left_key,
+            right_key,
+            pipeline_name,
+        )
+
+    def resolve_join_key_names(
+        self,
+        primary_key: str,
+        seed_pipeline: str | None,
+        enricher_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[str, str, str | None]:
+        """Resolve qualified join key names for a seed/enricher join."""
+        return self._join_key_resolver.resolve_join_key_names(
+            primary_key,
+            seed_pipeline,
+            enricher_pipeline,
+            merged_columns,
+        )
+
+    def resolve_join_key_names_asymmetric(
+        self,
+        left_key: str,
+        right_key: str,
+        left_pipeline: str | None,
+        right_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[str, str, str | None]:
+        """Resolve qualified join key names when left/right keys differ."""
+        return self._join_key_resolver.resolve_join_key_names_asymmetric(
+            left_key,
+            right_key,
+            left_pipeline,
+            right_pipeline,
+            merged_columns,
+        )
+
+    def resolve_composite_join_keys(
+        self,
+        join_keys_list: list[str],
+        left_pipeline: str | None,
+        right_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[list[str], list[str], set[str]]:
+        """Resolve all keys required for a composite-key dependency join."""
+        return self._join_key_resolver.resolve_composite_join_keys(
+            join_keys_list,
+            left_pipeline,
+            right_pipeline,
+            merged_columns,
+        )
+
+    def execute_composite_key_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_keys: list[str],
+        right_keys: list[str],
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute a multi-key join preserving right-side key columns."""
+        return self._join_executor.execute_composite_key_join(
+            left_df,
+            right_df,
+            left_keys,
+            right_keys,
+            pipeline_name,
+        )
+
+    def get_polars_join_type(self) -> JoinHow:
+        """Map the configured merge strategy to a Polars join type."""
+        return self._join_executor.get_polars_join_type()
 
     async def apply_joins(
         self,

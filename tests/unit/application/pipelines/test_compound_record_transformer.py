@@ -12,6 +12,7 @@ from bioetl.application.pipelines.chembl.compound_record_transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
+from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ class TestCompoundRecordTransformer:
     @pytest.fixture
     def transformer(self):
         """Create CompoundRecordTransformer instance."""
-        return CompoundRecordTransformer(provider="chembl")
+        return CompoundRecordTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -192,7 +193,7 @@ class TestCompoundRecordTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = CompoundRecordTransformer(provider="custom_provider")
+        transformer = CompoundRecordTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
         record = {
             "record_id": 12345,
             "molecule_id": "CUSTOM25",
