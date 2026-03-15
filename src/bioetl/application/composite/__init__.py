@@ -39,6 +39,8 @@ from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositePipelineRunnerService,
 )
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.domain.composite.state import CompositePipelineState
 
 __all__ = [
     "ColumnOrderer",
@@ -48,8 +50,10 @@ __all__ = [
     "CompositeCheckpointState",
     "CompositePipelineRunner",
     "CompositePipelineRunnerService",
+    "CompositePipelineState",
     "CompositePreflightValidationService",
     "CompositePreflightValidator",
+    "CompositeRuntimeConfig",
     "DependencyCoordinatorService",
     "EnrichmentCoordinatorService",
     "KeyExtractorService",

@@ -8237,7 +8237,7 @@ Graceful shutdown обрабатывается непосредственно в
 - `interfaces/cli/commands/run.py`
 - `interfaces/cli/commands/run_all.py`
 - `interfaces/cli/commands/run_composite.py`
-  Shutdown логика вынесена в `application/core/shutdown.py`.
+  Shutdown логика вынесена в `application/core/lifecycle/shutdown.py`.
 
 ----------------------------------------------------------------------
 
@@ -10509,7 +10509,7 @@ async def fetch-activity(activity-id: int) -> dict:
 # Source: `02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md`
 
 > **Superseded:** Signal handlers удалены 2025-12-31.
-> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/shutdown.py.
+> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/lifecycle/shutdown.py.
 > orchestration/ модуль пуст.
 
 # ADR-008: Graceful Shutdown Strategy
@@ -10527,7 +10527,7 @@ ETL pipelines process large datasets in batches, maintaining state via checkpoin
 
 We have implemented a **two-layer shutdown coordination system**:
 
-1. **`ShutdownSignal`** (`application/core/shutdown.py`): Application-level signal object shared across components
+1. **`ShutdownSignal`** (`application/core/lifecycle/shutdown.py`): Application-level signal object shared across components
 1. **OS Signal Handlers** (`interfaces/orchestration/signals.py`): Translate SIGTERM/SIGINT to ShutdownSignal
 
 Key characteristics:
@@ -16723,7 +16723,7 @@ class OutputMetadata(BaseModel):
 - `src/bioetl/domain/ports/metadata_coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
 
 **Services:**
-- `src/bioetl/composition/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
+- `src/bioetl/application/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
 
 **Infrastructure:**
 - `src/bioetl/infrastructure/storage/bronze_writer.py` — _build_full_bronze_metadata
@@ -27318,7 +27318,7 @@ src/bioetl/application/core/checkpoint-manager.py
 src/bioetl/application/core/preflight-service.py
 src/bioetl/application/core/postrun-service.py
 src/bioetl/application/core/heartbeat.py
-src/bioetl/application/core/shutdown.py
+src/bioetl/application/core/lifecycle/shutdown.py
 src/bioetl/application/core/quarantine-manager.py
 src/bioetl/application/core/cleanup-service.py
 src/bioetl/application/core/filtered-data-source.py
@@ -49917,7 +49917,7 @@ META_FIELDS = {
 
 ### 6.2. Silver Layer
 
-**Файл:** `src/bioetl/infrastructure/storage/delta_writer.py`
+**Файл:** `src/bioetl/infrastructure/storage/silver_writer.py`
 
 **PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
 
@@ -50082,7 +50082,7 @@ class BatchResult:
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                     |
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`              |
-| Delta Writer  | `src/bioetl/infrastructure/storage/delta_writer.py`               |
+| Silver Writer | `src/bioetl/infrastructure/storage/silver_writer.py`              |
 | Gold Writer   | `src/bioetl/infrastructure/storage/gold_writer.py`                |
 | Data Contract | `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`                               |
 

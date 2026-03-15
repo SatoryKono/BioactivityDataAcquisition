@@ -132,12 +132,12 @@ composition/bootstrap/
 
 ### 2.3. Реестр провайдеров и DataSourceRegistry
 
-**Расположение:** `src/bioetl/composition/factories/datasource/factory.py` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
+**Расположение:** `src/bioetl/composition/factories/datasource/` (`DataSourceRegistry`, `DataSourceFactory`) и `src/bioetl/composition/providers/` (`ProviderRegistry`).
 
 Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
 
 - **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
-- **`DataSourceRegistry`**: Фасад для backward compatibility. Делегирует создание в `ProviderRegistry`.
+- **`DataSourceRegistry`**: Лёгкий реестр-адаптер, экспортируемый из `bioetl.composition.factories.datasource`. Делегирует создание в `ProviderRegistry`.
 
 Полная deprecation/inventory картина по `DataSourceRegistry` и соседним compat-модулям описана в
 [Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
