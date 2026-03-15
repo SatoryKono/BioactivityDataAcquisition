@@ -99,6 +99,13 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES = frozenset(
 )
 
 
+def _normalized_allowed_rel_paths(allowed_files: frozenset[Path]) -> frozenset[str]:
+    """Normalize allowlist paths to project-relative POSIX strings."""
+    return frozenset(
+        path.resolve().relative_to(ROOT).as_posix() for path in allowed_files
+    )
+
+
 def _iter_module_import_violations(
     search_root: Path,
     *,
@@ -106,11 +113,12 @@ def _iter_module_import_violations(
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
+    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file in search_root.rglob("*.py"):
-        if py_file in allowed_files or "__pycache__" in py_file.parts:
+        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
             continue
         tree = ast.parse(py_file.read_text(encoding="utf-8"))
-        rel_path = py_file.relative_to(ROOT).as_posix()
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module is not None:
                 is_absolute_match = node.module == module_name
@@ -147,10 +155,11 @@ def _iter_symbol_mentions(
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
+    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file in search_root.rglob("*.py"):
-        if py_file in allowed_files or "__pycache__" in py_file.parts:
+        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
             continue
-        rel_path = py_file.relative_to(ROOT).as_posix()
         for lineno, line in enumerate(
             py_file.read_text(encoding="utf-8").splitlines(), 1
         ):
@@ -166,10 +175,11 @@ def _iter_string_mentions(
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
+    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file in search_root.rglob("*.py"):
-        if py_file in allowed_files or "__pycache__" in py_file.parts:
+        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
             continue
-        rel_path = py_file.relative_to(ROOT).as_posix()
         for lineno, line in enumerate(
             py_file.read_text(encoding="utf-8").splitlines(), 1
         ):
@@ -186,11 +196,12 @@ def _iter_imported_symbol_violations(
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
+    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file in search_root.rglob("*.py"):
-        if py_file in allowed_files or "__pycache__" in py_file.parts:
+        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
             continue
         tree = ast.parse(py_file.read_text(encoding="utf-8"))
-        rel_path = py_file.relative_to(ROOT).as_posix()
         for node in ast.walk(tree):
             if not isinstance(node, ast.ImportFrom):
                 continue
