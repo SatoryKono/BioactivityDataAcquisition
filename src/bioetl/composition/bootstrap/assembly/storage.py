@@ -33,9 +33,6 @@ from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = [
-    # Deprecated alias (backward compatibility)
-    "bootstrap_storage",
-    # Canonical name (use this)
     "bootstrap_storage_adapter",
 ]
 
@@ -131,15 +128,3 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
     )
 
 
-def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
-    """Bootstrap a storage adapter for CLI and composite pipeline operations.
-
-
-    Args:
-        enable_csv_export: If True, creates CsvExporters for Silver and Gold
-            layers. Used by composite pipelines that need CSV output.
-
-    Returns:
-        StorageAdapter configured for the current environment.
-    """
-    return bootstrap_storage_adapter(enable_csv_export=enable_csv_export)

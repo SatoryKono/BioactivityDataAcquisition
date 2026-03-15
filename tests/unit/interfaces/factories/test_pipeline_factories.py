@@ -99,7 +99,7 @@ class TestPubChemCompoundFactory:
         mock_pipeline_config,
         mock_services,
     ):
-        """Test build_services creates data source via DataSourceRegistry."""
+        """Test build_services creates a data source via the stored creator."""
         from bioetl.composition.factories.pipeline.registry import (
             pubchem_compound_factory,
         )

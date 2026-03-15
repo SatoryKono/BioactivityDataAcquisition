@@ -46,9 +46,6 @@ from bioetl.composition.bootstrap.cli.noop import (
 )
 from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_bronze_cleanup_service,
-    # Deprecated alias
-    bootstrap_cleanup,
-    # Canonical name
     bootstrap_cleanup_service,
     bootstrap_export_service,
     bootstrap_lifecycle_service,
@@ -60,13 +57,9 @@ __all__ = [
     "HealthServerDependencies",
     # ADR
     "bootstrap_adr_service",
-    # Storage & Maintenance (canonical)
     "bootstrap_bronze_cleanup_service",
-    # Checkpoint & Quarantine
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",
-    # Storage & Maintenance (deprecated alias)
-    "bootstrap_cleanup",
     "bootstrap_cleanup_service",
     # Config
     "bootstrap_config_service",

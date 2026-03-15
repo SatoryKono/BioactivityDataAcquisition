@@ -1,4 +1,4 @@
-"""Tests for GenericPipelineFactory and datasource registry compatibility."""
+"""Tests for GenericPipelineFactory and canonical data-source creator helpers."""
 
 from __future__ import annotations
 
@@ -7,10 +7,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceRegistry,
+    get_data_source_creator,
 )
 from bioetl.composition.factories.pipeline import GenericPipelineFactory
 from bioetl.composition.factories.pipeline import create_pipeline_factory
+from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 
 
 @pytest.fixture
@@ -41,22 +42,25 @@ def mock_logger():
     return MagicMock()
 
 
-class TestDataSourceRegistry:
-    """Tests for DataSourceRegistry."""
+class TestDataSourceCreatorHelper:
+    """Tests for the canonical provider-bound creator helper."""
 
     def test_get_known_provider(self):
         """Test getting creator for known provider."""
-        creator = DataSourceRegistry.get("chembl")
+        ensure_providers_loaded()
+        creator = get_data_source_creator("chembl")
         assert callable(creator)
 
     def test_get_unknown_provider_raises(self):
         """Test getting creator for unknown provider raises KeyError."""
+        ensure_providers_loaded()
         with pytest.raises(KeyError, match="Unknown provider"):
-            DataSourceRegistry.get("unknown_provider")
+            get_data_source_creator("unknown_provider")
 
     def test_list_providers(self):
-        """Test listing all registered providers."""
-        providers = DataSourceRegistry.list_providers()
+        """Test listing all registered providers from the canonical registry."""
+        ensure_providers_loaded()
+        providers = ProviderRegistry.list_providers()
         assert "chembl" in providers
         assert "pubchem" in providers
         assert "uniprot" in providers

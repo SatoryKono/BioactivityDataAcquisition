@@ -33,16 +33,11 @@ if TYPE_CHECKING:
 
 __all__ = [
     "ResolvedVacuumSettings",
-    "VacuumConfig",
     "assemble_cached_bronze_context",
     "assemble_filter_config",
     "assemble_runtime_config",
     "assemble_vacuum_settings",
 ]
-
-
-# Backward-compat alias for legacy imports/tests.
-VacuumConfig = ResolvedVacuumSettings
 
 
 def assemble_vacuum_settings(

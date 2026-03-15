@@ -12,7 +12,6 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
-    bootstrap_logger,
     bootstrap_logger_port,
 )
 from bioetl.domain.ports import LoggerPort
@@ -130,40 +129,3 @@ class TestBootstrapLoggerPort:
         assert captured_run_ids[0] != captured_run_ids[1]
 
 
-@pytest.mark.unit
-class TestBootstrapLoggerAlias:
-    """Tests for bootstrap_logger (deprecated alias)."""
-
-    def test_alias_delegates_to_port_variant(self) -> None:
-        """bootstrap_logger should produce equivalent result to bootstrap_logger_port."""
-        mock_logger = MagicMock(spec=LoggerPort)
-        factory = MagicMock(return_value=mock_logger)
-
-        run_id = uuid4()
-        result = bootstrap_logger(
-            pipeline="test_pipeline",
-            run_id=run_id,
-            log_level="WARNING",
-            logger_factory=factory,
-        )
-
-        assert result is mock_logger
-        factory.assert_called_once()
-
-    def test_alias_passes_same_args(self) -> None:
-        """Alias should pass through all arguments identically."""
-        captured: list[tuple] = []
-
-        def capture_factory(pipeline: str, run_id: UUID, log_level: str) -> LoggerPort:
-            captured.append((pipeline, run_id, log_level))
-            return MagicMock(spec=LoggerPort)
-
-        run_id = uuid4()
-        bootstrap_logger(
-            pipeline="my_pipeline",
-            run_id=run_id,
-            log_level="ERROR",
-            logger_factory=capture_factory,
-        )
-
-        assert captured[0] == ("my_pipeline", run_id, "ERROR")

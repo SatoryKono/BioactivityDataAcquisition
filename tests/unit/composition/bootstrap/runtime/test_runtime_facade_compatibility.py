@@ -20,17 +20,12 @@ def test_composite_runtime_public_exports_stable() -> None:
     """Composite runtime facade should preserve stable public __all__."""
     assert composite_runtime.__all__ == [
         "CompositeRuntimeConfig",
-        "bootstrap_composite_pipeline",
         "bootstrap_composite_runner",
         "load_composite_config",
     ]
     assert (
         runtime_facade.bootstrap_composite_runner
         is composite_runtime.bootstrap_composite_runner
-    )
-    assert (
-        runtime_facade.bootstrap_composite_pipeline
-        is composite_runtime.bootstrap_composite_pipeline
     )
     assert (
         runtime_facade.load_composite_config is composite_runtime.load_composite_config
@@ -41,9 +36,9 @@ def test_composite_runtime_public_exports_stable() -> None:
 def test_composite_runtime_patch_points_remain_available() -> None:
     """Legacy tests rely on these patch points for monkeypatching internals."""
     expected_attrs = {
-        "COMPOSITE_CONFIG_DIR",
-        "COMPOSITE_GOLD_SCHEMA_REGISTRY",
-        "CompositePipelineRunner",
+        "DEFAULT_COMPOSITE_CONFIG_DIR",
+        "DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY",
+        "create_composite_runner_with_legacy_fsm_adapter",
         "ValidationError",
         "_resolve_composite_config_path",
         "validate_composite_config_payload",
@@ -103,15 +98,10 @@ def test_observability_runtime_public_exports_stable() -> None:
     """Observability runtime facade should preserve stable public __all__."""
     assert observability_runtime.__all__ == [
         "MetricsServerError",
-        "bootstrap_dq_monitor",
         "bootstrap_dq_monitor_port",
-        "bootstrap_logger",
         "bootstrap_logger_port",
-        "bootstrap_metrics",
         "bootstrap_metrics_port",
-        "bootstrap_observability",
         "bootstrap_observability_bundle",
-        "bootstrap_tracer",
         "bootstrap_tracer_port",
         "maybe_start_metrics_server",
         "start_metrics_server",

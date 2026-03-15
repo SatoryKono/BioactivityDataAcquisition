@@ -1,7 +1,8 @@
-"""Unit tests for composition/_resource_management.py.
+"""Unit tests for public composition resource-management entrypoints.
 
-Tests the resource management entrypoint functions that delegate to
-bootstrap functions. All external dependencies are mocked via patch.
+Tests the resource management entrypoint functions exposed via
+``bioetl.composition.entrypoints``. All external dependencies are mocked via
+public patch points.
 """
 
 from __future__ import annotations
@@ -26,14 +27,14 @@ class TestGetQuarantineManager:
 
         with (
             patch(
-                "bioetl.composition._resource_management._ensure_registrations"
+                "bioetl.composition.entrypoints._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager",
+                "bioetl.composition.entrypoints.bootstrap_quarantine_manager",
                 return_value=mock_manager,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._resource_management import get_quarantine_manager
+            from bioetl.composition.entrypoints import get_quarantine_manager
 
             result = get_quarantine_manager("chembl_activity")
 
@@ -46,13 +47,13 @@ class TestGetQuarantineManager:
         expected = MagicMock(name="QuarantineManagerMock")
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition.entrypoints._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager",
+                "bioetl.composition.entrypoints.bootstrap_quarantine_manager",
                 return_value=expected,
             ),
         ):
-            from bioetl.composition._resource_management import get_quarantine_manager
+            from bioetl.composition.entrypoints import get_quarantine_manager
 
             result = get_quarantine_manager("any_pipeline")
 
@@ -61,12 +62,12 @@ class TestGetQuarantineManager:
     def test_passes_pipeline_name_to_bootstrap(self) -> None:
         """Test that pipeline name is forwarded to bootstrap function."""
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition.entrypoints._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager"
+                "bioetl.composition.entrypoints.bootstrap_quarantine_manager"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._resource_management import get_quarantine_manager
+            from bioetl.composition.entrypoints import get_quarantine_manager
 
             get_quarantine_manager("pubmed_publication")
 
@@ -88,14 +89,14 @@ class TestGetCheckpointManager:
 
         with (
             patch(
-                "bioetl.composition._resource_management._ensure_registrations"
+                "bioetl.composition.entrypoints._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition._resource_management.bootstrap_checkpoint_manager",
+                "bioetl.composition.entrypoints.bootstrap_checkpoint_manager",
                 return_value=mock_manager,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._resource_management import get_checkpoint_manager
+            from bioetl.composition.entrypoints import get_checkpoint_manager
 
             result = get_checkpoint_manager("chembl_activity")
 
@@ -106,12 +107,12 @@ class TestGetCheckpointManager:
     def test_passes_pipeline_name_to_bootstrap(self) -> None:
         """Test that pipeline name is forwarded to bootstrap function."""
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition.entrypoints._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_checkpoint_manager"
+                "bioetl.composition.entrypoints.bootstrap_checkpoint_manager"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._resource_management import get_checkpoint_manager
+            from bioetl.composition.entrypoints import get_checkpoint_manager
 
             get_checkpoint_manager("uniprot_protein")
 
@@ -133,14 +134,14 @@ class TestGetLifecycleService:
 
         with (
             patch(
-                "bioetl.composition._resource_management._ensure_registrations"
+                "bioetl.composition.entrypoints._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition._resource_management.bootstrap_lifecycle_service",
+                "bioetl.composition.entrypoints.bootstrap_lifecycle_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._resource_management import get_lifecycle_service
+            from bioetl.composition.entrypoints import get_lifecycle_service
 
             result = get_lifecycle_service()
 
@@ -161,19 +162,18 @@ class TestVacuumTable:
     @pytest.mark.asyncio
     async def test_vacuum_table_calls_service_vacuum(self) -> None:
         """Test that vacuum_table delegates to lifecycle service.vacuum."""
-        from bioetl.composition._pipeline_execution import VacuumOptions
+        from bioetl.composition.entrypoints import VacuumOptions
 
         mock_service = MagicMock()
         mock_service.vacuum = AsyncMock(return_value=42)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_lifecycle_service",
+                "bioetl.composition.entrypoints.get_lifecycle_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._resource_management import vacuum_table
+            from bioetl.composition.entrypoints import vacuum_table
 
             options = VacuumOptions(retention_days=30, dry_run=True)
             result = await vacuum_table("chembl.activity", options)
@@ -188,19 +188,18 @@ class TestVacuumTable:
     @pytest.mark.asyncio
     async def test_vacuum_table_returns_file_count(self) -> None:
         """Test that vacuum_table returns file count from service."""
-        from bioetl.composition._pipeline_execution import VacuumOptions
+        from bioetl.composition.entrypoints import VacuumOptions
 
         mock_service = MagicMock()
         mock_service.vacuum = AsyncMock(return_value=7)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_lifecycle_service",
+                "bioetl.composition.entrypoints.get_lifecycle_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._resource_management import vacuum_table
+            from bioetl.composition.entrypoints import vacuum_table
 
             options = VacuumOptions(retention_days=7, dry_run=False)
             result = await vacuum_table("pubchem.compound", options)
@@ -210,19 +209,18 @@ class TestVacuumTable:
     @pytest.mark.asyncio
     async def test_vacuum_table_dry_run_mode(self) -> None:
         """Test that vacuum_table respects dry_run option."""
-        from bioetl.composition._pipeline_execution import VacuumOptions
+        from bioetl.composition.entrypoints import VacuumOptions
 
         mock_service = MagicMock()
         mock_service.vacuum = AsyncMock(return_value=0)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_lifecycle_service",
+                "bioetl.composition.entrypoints.get_lifecycle_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._resource_management import vacuum_table
+            from bioetl.composition.entrypoints import vacuum_table
 
             options = VacuumOptions(retention_days=7, dry_run=True)
             await vacuum_table("some.table", options)
@@ -243,19 +241,18 @@ class TestArchiveTable:
     @pytest.mark.asyncio
     async def test_archive_table_calls_service_archive(self) -> None:
         """Test that archive_table delegates to lifecycle service.archive."""
-        from bioetl.composition._pipeline_execution import ArchiveOptions
+        from bioetl.composition.entrypoints import ArchiveOptions
 
         mock_service = MagicMock()
         mock_service.archive = AsyncMock(return_value=10)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_lifecycle_service",
+                "bioetl.composition.entrypoints.get_lifecycle_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._resource_management import archive_table
+            from bioetl.composition.entrypoints import archive_table
 
             options = ArchiveOptions(target_path="/archive/path", remove_source=False)
             result = await archive_table("chembl.activity", options)
@@ -270,19 +267,18 @@ class TestArchiveTable:
     @pytest.mark.asyncio
     async def test_archive_table_with_remove_source(self) -> None:
         """Test that archive_table passes remove_source=True correctly."""
-        from bioetl.composition._pipeline_execution import ArchiveOptions
+        from bioetl.composition.entrypoints import ArchiveOptions
 
         mock_service = MagicMock()
         mock_service.archive = AsyncMock(return_value=5)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_lifecycle_service",
+                "bioetl.composition.entrypoints.get_lifecycle_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._resource_management import archive_table
+            from bioetl.composition.entrypoints import archive_table
 
             options = ArchiveOptions(target_path="/cold/storage", remove_source=True)
             await archive_table("old.table", options)
@@ -316,17 +312,17 @@ class TestPreviewCleanup:
         mock_cleanup_service.preview = AsyncMock(return_value=mock_preview)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition.entrypoints._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.load_pipeline_config",
+                "bioetl.composition.entrypoints.load_pipeline_config",
                 return_value=mock_pipeline_cfg,
             ),
             patch(
-                "bioetl.composition._resource_management.bootstrap_cleanup_service",
+                "bioetl.composition.entrypoints.bootstrap_cleanup_service",
                 return_value=mock_cleanup_service,
             ),
         ):
-            from bioetl.composition._resource_management import preview_cleanup
+            from bioetl.composition.entrypoints import preview_cleanup
 
             result = await preview_cleanup("chembl_activity")
 
@@ -346,17 +342,17 @@ class TestPreviewCleanup:
         mock_cleanup_service.preview = AsyncMock(return_value=mock_preview)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition.entrypoints._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.load_pipeline_config",
+                "bioetl.composition.entrypoints.load_pipeline_config",
                 return_value=mock_pipeline_cfg,
             ),
             patch(
-                "bioetl.composition._resource_management.bootstrap_cleanup_service",
+                "bioetl.composition.entrypoints.bootstrap_cleanup_service",
                 return_value=mock_cleanup_service,
             ),
         ):
-            from bioetl.composition._resource_management import preview_cleanup
+            from bioetl.composition.entrypoints import preview_cleanup
 
             await preview_cleanup("chembl_activity")
 
@@ -379,17 +375,17 @@ class TestPreviewCleanup:
         mock_cleanup_service.preview = AsyncMock(return_value=mock_preview)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
+            patch("bioetl.composition.entrypoints._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.load_pipeline_config",
+                "bioetl.composition.entrypoints.load_pipeline_config",
                 return_value=mock_pipeline_cfg,
             ),
             patch(
-                "bioetl.composition._resource_management.bootstrap_cleanup_service",
+                "bioetl.composition.entrypoints.bootstrap_cleanup_service",
                 return_value=mock_cleanup_service,
             ),
         ):
-            from bioetl.composition._resource_management import preview_cleanup
+            from bioetl.composition.entrypoints import preview_cleanup
 
             await preview_cleanup("pubchem_compound")
 
@@ -416,13 +412,12 @@ class TestInspectQuarantine:
         mock_manager.inspect = AsyncMock(return_value=mock_records)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager",
+                "bioetl.composition.entrypoints.get_quarantine_manager",
                 return_value=mock_manager,
             ),
         ):
-            from bioetl.composition._resource_management import inspect_quarantine
+            from bioetl.composition.entrypoints import inspect_quarantine
 
             result = await inspect_quarantine("chembl_activity", limit=50)
 
@@ -436,13 +431,12 @@ class TestInspectQuarantine:
         mock_manager.inspect = AsyncMock(return_value=[])
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_quarantine_manager",
+                "bioetl.composition.entrypoints.get_quarantine_manager",
                 return_value=mock_manager,
             ),
         ):
-            from bioetl.composition._resource_management import inspect_quarantine
+            from bioetl.composition.entrypoints import inspect_quarantine
 
             await inspect_quarantine("chembl_activity")
 
@@ -467,13 +461,12 @@ class TestListCheckpoints:
         mock_manager.list_all = AsyncMock(return_value=mock_checkpoints)
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_checkpoint_manager",
+                "bioetl.composition.entrypoints.get_checkpoint_manager",
                 return_value=mock_manager,
             ),
         ):
-            from bioetl.composition._resource_management import list_checkpoints
+            from bioetl.composition.entrypoints import list_checkpoints
 
             result = await list_checkpoints("chembl_activity")
 
@@ -487,13 +480,12 @@ class TestListCheckpoints:
         mock_manager.list_all = AsyncMock(return_value=[])
 
         with (
-            patch("bioetl.composition._resource_management._ensure_registrations"),
             patch(
-                "bioetl.composition._resource_management.bootstrap_checkpoint_manager",
+                "bioetl.composition.entrypoints.get_checkpoint_manager",
                 return_value=mock_manager,
             ),
         ):
-            from bioetl.composition._resource_management import list_checkpoints
+            from bioetl.composition.entrypoints import list_checkpoints
 
             result = await list_checkpoints("any_pipeline")
 

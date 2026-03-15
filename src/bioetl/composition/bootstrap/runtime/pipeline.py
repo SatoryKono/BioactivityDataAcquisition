@@ -30,9 +30,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 __all__ = [
-    # Deprecated alias (backward compatibility)
-    "bootstrap_pipeline",
-    # Canonical name (use this)
     "bootstrap_pipeline_runner",
 ]
 
@@ -78,18 +75,3 @@ def bootstrap_pipeline_runner(
     )
 
 
-def bootstrap_pipeline(
-    ctx: PipelineRunContext,
-    registry: PipelineRegistry | None = None,
-) -> PipelineRunner:
-    """Composition Root: Assembles and returns a fully configured PipelineRunner.
-
-
-    Args:
-        ctx: Pipeline run context containing launch parameters.
-        registry: Optional PipelineRegistry instance.
-
-    Returns:
-        PipelineRunner: Fully configured runner ready for execution.
-    """
-    return bootstrap_pipeline_runner(ctx=ctx, registry=registry)

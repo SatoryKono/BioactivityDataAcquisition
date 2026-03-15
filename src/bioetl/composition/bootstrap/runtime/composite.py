@@ -63,16 +63,9 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CompositeRuntimeConfig",
-    "bootstrap_composite_pipeline",
     "bootstrap_composite_runner",
     "load_composite_config",
 ]
-# Backward-compatible patch points for helper tests.
-COMPOSITE_CONFIG_DIR = DEFAULT_COMPOSITE_CONFIG_DIR
-COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = dict(DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY)
-
-# Backward-compatible patch point used by legacy bootstrap tests.
-CompositePipelineRunner = create_composite_runner_with_legacy_fsm_adapter
 
 @dataclass(frozen=True, slots=True)
 class _CompositeBootstrapPlan:
@@ -91,13 +84,13 @@ def _resolve_composite_gold_schema(composite_name: str) -> type | None:
     """Resolve composite Gold contract by composite pipeline name."""
     return _resolve_composite_gold_schema_impl(
         composite_name,
-        schema_registry=COMPOSITE_GOLD_SCHEMA_REGISTRY,
+        schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
     )
 
 
 def _resolve_composite_config_path(name: str) -> Path:
     """Resolve composite config path from canonical composites directory."""
-    return _resolve_composite_config_path_impl(name, config_dir=COMPOSITE_CONFIG_DIR)
+    return _resolve_composite_config_path_impl(name, config_dir=DEFAULT_COMPOSITE_CONFIG_DIR)
 
 
 def load_composite_config(name: str) -> CompositeConfig:
@@ -265,7 +258,7 @@ def _create_composite_runner_from_plan(
         dependencies_runner_factory=plan.dependencies_runner_factory,
         enricher_runner_factory=plan.enricher_runner_factory,
         support_services=plan.support_services,
-        runner_factory=CompositePipelineRunner,
+        runner_factory=create_composite_runner_with_legacy_fsm_adapter,
     )
 
 
@@ -291,19 +284,3 @@ def bootstrap_composite_runner(
     return _create_composite_runner_from_plan(config=config, runtime=runtime, plan=plan)
 
 
-def bootstrap_composite_pipeline(
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    run_id: str | None = None,
-) -> CompositePipelineRunnerService:
-    """Bootstrap alias for :func:`bootstrap_composite_runner`.
-
-    Args:
-        config: Parsed and validated CompositeConfig domain object.
-        runtime: Immutable runtime options for this composite run.
-        run_id: Optional UUID string identifying this run; generated when None.
-
-    Returns:
-        Fully wired CompositePipelineRunnerService ready for execution.
-    """
-    return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)

@@ -62,51 +62,41 @@ from bioetl.composition.bootstrap import (
 from bioetl.composition.bootstrap.runtime.observability import start_metrics_server
 
 __all__ = [
-    # Configuration
-    "bootstrap_composite_runner",
-    "load_composite_config",
-    "load_pipeline_config",
-    # Option classes (re-exported from application.services)
-    "RunOptions",
-    "VacuumOptions",
     "ArchiveOptions",
-    # Result classes (re-exported from application.services)
-    "RunResult",
     "PipelineRunResult",
-    # Pipeline operations
+    "RunOptions",
+    "RunResult",
+    "VacuumOptions",
+    "archive_table",
+    "bootstrap_composite_runner",
     "build_pipeline_context",
+    "cleanup_bronze",
     "create_pipeline_runner",
-    "run_pipeline",
-    # Resource management (retained manager surface for compatibility)
-    "get_quarantine_manager",
-    "get_checkpoint_manager",
-    "get_lifecycle_service",
-    # Resource management (services - new)
-    "get_checkpoint_service",
-    # ADR
+    "ensure_metrics_server_started",
     "get_adr_service",
+    "get_bronze_cleanup_service",
+    "get_checkpoint_manager",
+    "get_checkpoint_service",
     "get_config_service",
+    "get_export_service",
     "get_health_server_dependencies",
     "get_health_service",
+    "get_lifecycle_service",
     "get_lock_service",
     "get_metrics_service",
     "get_pipeline_runner_service",
+    "get_quarantine_manager",
     "get_quarantine_service",
     "get_quarantine_store",
-    "get_bronze_cleanup_service",
-    "get_export_service",
     "get_vacuum_service",
-    # Maintenance operations
-    "vacuum_table",
-    "archive_table",
-    "preview_cleanup",
-    "cleanup_bronze",
-    # Inspection
     "inspect_quarantine",
     "list_checkpoints",
-    # Metrics server entrypoint
-    "start_metrics_server",
-    "ensure_metrics_server_started",
+    "load_composite_config",
+    "load_pipeline_config",
     "maybe_start_metrics_server",
+    "preview_cleanup",
     "push_metrics_to_gateway",
+    "run_pipeline",
+    "start_metrics_server",
+    "vacuum_table",
 ]

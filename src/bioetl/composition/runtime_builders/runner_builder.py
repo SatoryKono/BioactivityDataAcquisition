@@ -30,9 +30,6 @@ from bioetl.infrastructure.config import (
     load_source_config,
 )
 
-# Backward-compat alias retained for legacy bootstrap imports.
-VacuumConfig = VacuumSettings
-
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import (

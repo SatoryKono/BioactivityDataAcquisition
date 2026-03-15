@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
-    bootstrap_dq_monitor,
     bootstrap_dq_monitor_port,
 )
 from bioetl.domain.ports import DQMonitorPort
@@ -215,33 +214,3 @@ class TestBootstrapDqMonitorPort:
         assert kwargs["z_score_threshold"] == 2.0
 
 
-@pytest.mark.unit
-class TestBootstrapDqMonitorAlias:
-    """Tests for bootstrap_dq_monitor (deprecated alias)."""
-
-    def test_alias_returns_none_when_disabled(self) -> None:
-        """Alias should return None when dq_monitor_enabled is False."""
-        settings = _make_settings(enabled=False)
-
-        result = bootstrap_dq_monitor(settings=settings)
-
-        assert result is None
-
-    def test_alias_returns_monitor_when_enabled(self) -> None:
-        """Alias should return DQMonitorPort when enabled."""
-        settings = _make_settings(enabled=True)
-
-        result = bootstrap_dq_monitor(settings=settings)
-
-        assert result is not None
-        assert isinstance(result, DQMonitorPort)
-
-    def test_alias_delegates_to_port_variant(self) -> None:
-        """bootstrap_dq_monitor should produce same result as bootstrap_dq_monitor_port."""
-        settings = _make_settings(enabled=False)
-
-        result_alias = bootstrap_dq_monitor(settings=settings)
-        result_canonical = bootstrap_dq_monitor_port(settings=settings)
-
-        # Both should return None when disabled
-        assert result_alias == result_canonical

@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 TracerFactory = Callable[[str], TracingPort]
 
 __all__ = [
-    "bootstrap_tracer",
     "bootstrap_tracer_port",
 ]
 
@@ -45,25 +44,3 @@ def bootstrap_tracer_port(
         factory = tracer_factory or _default_tracer_factory
         return factory(service_name)
     return NoOpTracing()
-
-
-def bootstrap_tracer(
-    settings: Settings,
-    service_name: str = "bioetl",
-    tracer_factory: TracerFactory | None = None,
-) -> TracingPort:
-    """Deprecated alias for :func:`bootstrap_tracer_port`.
-
-    Args:
-        settings: Application settings used to check whether tracing is enabled.
-        service_name: OpenTelemetry service name used for span identification.
-        tracer_factory: Optional factory callable for DI/testing.
-
-    Returns:
-        Configured TracingPort, or NoOpTracing if tracing is disabled.
-    """
-    return bootstrap_tracer_port(
-        settings=settings,
-        service_name=service_name,
-        tracer_factory=tracer_factory,
-    )

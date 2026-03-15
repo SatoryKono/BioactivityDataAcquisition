@@ -6,8 +6,8 @@ from pathlib import Path
 
 import yaml
 
-from bioetl.composition.bootstrap.runtime.composite import (
-    COMPOSITE_GOLD_SCHEMA_REGISTRY,
+from bioetl.composition.bootstrap.runtime.config_loader import (
+    DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY as COMPOSITE_GOLD_SCHEMA_REGISTRY,
 )
 from bioetl.domain.contracts.gold import composite as composite_contracts
 

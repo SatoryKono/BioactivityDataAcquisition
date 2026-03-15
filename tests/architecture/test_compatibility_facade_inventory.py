@@ -24,9 +24,20 @@ ALLOWED_STATUSES = frozenset(
         "retained-entrypoint",
     }
 )
+INVENTORY_ROW_CELL_COUNT = 10
 
 REQUIRED_PATHS = frozenset(
     {
+        "src/bioetl/domain/composite/config.py",
+        "src/bioetl/domain/value_objects/activity_values.py",
+        "src/bioetl/domain/value_objects/publication_field_groups.py",
+        "src/bioetl/infrastructure/adapters/_error_classifier.py",
+        "src/bioetl/infrastructure/adapters/chembl/fetch_mixin.py",
+        "src/bioetl/infrastructure/adapters/openalex/client_helpers_mixin.py",
+        "src/bioetl/infrastructure/adapters/uniprot/metadata_mixin.py",
+        "src/bioetl/application/composite/join_planner_compat_mixin.py",
+        "src/bioetl/application/composite/merger_compat_mixin.py",
+        "src/bioetl/application/composite/runner.py",
         "src/bioetl/application/core/batch_transformer_helpers.py",
         "src/bioetl/application/core/checkpoint_manager.py",
         "src/bioetl/application/core/cleanup_service.py",
@@ -65,7 +76,9 @@ def _extract_inventory_rows(text: str) -> list[tuple[str, str]]:
         if not stripped.startswith("| `src/bioetl/"):
             continue
         cells = [cell.strip() for cell in stripped.strip("|").split("|")]
-        assert len(cells) == 8, f"Unexpected inventory row format: {line}"
+        assert len(cells) == INVENTORY_ROW_CELL_COUNT, (
+            f"Unexpected inventory row format: {line}"
+        )
         path = cells[0].strip("`")
         status = cells[3].strip("`")
         rows.append((path, status))
@@ -79,7 +92,9 @@ def _iter_inventory_cells(text: str) -> list[dict[str, str]]:
         if not stripped.startswith("| `src/bioetl/"):
             continue
         cells = [cell.strip() for cell in stripped.strip("|").split("|")]
-        assert len(cells) == 8, f"Unexpected inventory row format: {line}"
+        assert len(cells) == INVENTORY_ROW_CELL_COUNT, (
+            f"Unexpected inventory row format: {line}"
+        )
         rows.append(
             {
                 "path": cells[0].strip("`"),
@@ -87,9 +102,11 @@ def _iter_inventory_cells(text: str) -> list[dict[str, str]]:
                 "canonical_target": cells[2],
                 "status": cells[3].strip("`"),
                 "owner": cells[4].strip("`"),
-                "allowed_call_sites": cells[5],
-                "sunset": cells[6].strip("`"),
-                "exit_criteria": cells[7],
+                "introduced_in": cells[5].strip("`"),
+                "allowed_call_sites": cells[6],
+                "remove_by": cells[7].strip("`"),
+                "migration_path": cells[8],
+                "exit_criteria": cells[9],
             }
         )
     return rows
@@ -163,8 +180,8 @@ def test_inventory_doc_covers_curated_facade_modules() -> None:
 
 
 @pytest.mark.architecture
-def test_inventory_rows_capture_owner_call_sites_and_sunset_dates() -> None:
-    """Compatibility rows must record ownership and explicit freeze metadata."""
+def test_inventory_rows_capture_owner_call_sites_and_lifecycle_metadata() -> None:
+    """Compatibility rows must record ownership and explicit lifecycle metadata."""
     text = INVENTORY_DOC.read_text(encoding="utf-8")
     rows = _iter_inventory_cells(text)
 
@@ -175,8 +192,18 @@ def test_inventory_rows_capture_owner_call_sites_and_sunset_dates() -> None:
     for row in rows:
         assert row["canonical_target"], f"Missing canonical target for {row['path']}"
         assert row["owner"], f"Missing owner for {row['path']}"
+        assert row["introduced_in"], f"Missing introduced_in for {row['path']}"
+        assert re.search(r"\d{4}|RF-\d+", row["introduced_in"]), (
+            f"introduced_in should contain a traceable marker for {row['path']}: "
+            f"{row['introduced_in']}"
+        )
         assert row["allowed_call_sites"], (
             f"Missing allowed call sites for {row['path']}"
+        )
+        assert row["migration_path"], f"Missing migration path for {row['path']}"
+        assert re.search(r"`[^`]+`", row["migration_path"]), (
+            f"Migration path should mention a concrete module or API path for "
+            f"{row['path']}: {row['migration_path']}"
         )
         assert "`src`:" in row["allowed_call_sites"], (
             f"Allowed call sites must document src policy for {row['path']}"
@@ -185,9 +212,10 @@ def test_inventory_rows_capture_owner_call_sites_and_sunset_dates() -> None:
             f"Allowed call sites must document test policy for {row['path']}"
         )
 
-        parsed_date = date.fromisoformat(row["sunset"])
+        parsed_date = date.fromisoformat(row["remove_by"])
         assert parsed_date.year >= 2026, (
-            f"Unexpected sunset/review date for {row['path']}: {row['sunset']}"
+            f"Unexpected remove-by/review date for {row['path']}: "
+            f"{row['remove_by']}"
         )
 
         referenced_paths = path_pattern.findall(row["allowed_call_sites"])

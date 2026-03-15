@@ -180,7 +180,7 @@ class TestResolveCompositeConfigPath:
         fn = helpers["_resolve_composite_config_path"]
 
         with patch(
-            "bioetl.composition.bootstrap.runtime.composite.COMPOSITE_CONFIG_DIR",
+            "bioetl.composition.bootstrap.runtime.composite.DEFAULT_COMPOSITE_CONFIG_DIR",
             tmp_path / "composites",
         ):
             with pytest.raises(FileNotFoundError, match="Composite config not found"):
@@ -197,7 +197,7 @@ class TestResolveCompositeConfigPath:
         config_file.write_text("composite: {}")
 
         with patch(
-            "bioetl.composition.bootstrap.runtime.composite.COMPOSITE_CONFIG_DIR",
+            "bioetl.composition.bootstrap.runtime.composite.DEFAULT_COMPOSITE_CONFIG_DIR",
             primary_dir,
         ):
             result = fn("my_pipeline")

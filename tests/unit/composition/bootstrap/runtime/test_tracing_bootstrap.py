@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
-    bootstrap_tracer,
     bootstrap_tracer_port,
 )
 from bioetl.domain.ports import NoOpTracing, TracingPort
@@ -104,42 +103,3 @@ class TestBootstrapTracerPort:
         assert result_on is mock_tracer
 
 
-@pytest.mark.unit
-class TestBootstrapTracerAlias:
-    """Tests for bootstrap_tracer (deprecated alias)."""
-
-    def test_alias_returns_noop_when_disabled(self) -> None:
-        """Alias should return NoOpTracing when tracing disabled."""
-        settings = _make_settings(tracing_enabled=False)
-
-        result = bootstrap_tracer(settings=settings)
-
-        assert isinstance(result, NoOpTracing)
-
-    def test_alias_delegates_to_port_variant(self) -> None:
-        """bootstrap_tracer should produce same result as bootstrap_tracer_port."""
-        mock_tracer = MagicMock(spec=TracingPort)
-        factory = MagicMock(return_value=mock_tracer)
-        settings = _make_settings(tracing_enabled=True)
-
-        result = bootstrap_tracer(settings=settings, tracer_factory=factory)
-
-        assert result is mock_tracer
-
-    def test_alias_passes_service_name(self) -> None:
-        """Alias should forward service_name to factory."""
-        captured_names: list[str] = []
-
-        def capture_factory(name: str) -> TracingPort:
-            captured_names.append(name)
-            return MagicMock(spec=TracingPort)
-
-        settings = _make_settings(tracing_enabled=True)
-
-        bootstrap_tracer(
-            settings=settings,
-            service_name="custom_service",
-            tracer_factory=capture_factory,
-        )
-
-        assert captured_names[0] == "custom_service"

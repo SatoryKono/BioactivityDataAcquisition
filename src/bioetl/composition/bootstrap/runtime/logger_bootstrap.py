@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    "bootstrap_logger",
     "bootstrap_logger_port",
 ]
 
@@ -50,28 +49,3 @@ def bootstrap_logger_port(
     effective_run_id = run_id if run_id is not None else uuid4()
     factory = logger_factory or _default_logger_factory
     return factory(pipeline, effective_run_id, log_level)
-
-
-def bootstrap_logger(
-    pipeline: str,
-    run_id: UUID | None = None,
-    log_level: str = "INFO",
-    logger_factory: LoggerFactory | None = None,
-) -> LoggerPort:
-    """Deprecated alias for :func:`bootstrap_logger_port`.
-
-    Args:
-        pipeline: Pipeline name used as a structured log field.
-        run_id: Run UUID for log correlation; a new UUID is generated if None.
-        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
-        logger_factory: Optional factory callable for DI/testing.
-
-    Returns:
-        Configured LoggerPort for structured pipeline logging.
-    """
-    return bootstrap_logger_port(
-        pipeline=pipeline,
-        run_id=run_id,
-        log_level=log_level,
-        logger_factory=logger_factory,
-    )

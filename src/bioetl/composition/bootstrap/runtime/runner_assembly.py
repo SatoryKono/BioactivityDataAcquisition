@@ -41,8 +41,6 @@ CompositeRunnerFactory = Callable[..., CompositePipelineRunnerService]
 
 
 __all__ = [
-    "CompositePipelineRunner",
-    "bootstrap_composite_pipeline",
     "bootstrap_composite_runner",
     "create_composite_runner",
     "create_composite_runner_with_legacy_fsm_adapter",
@@ -116,9 +114,6 @@ def create_composite_runner_with_legacy_fsm_adapter(
     )
 
 
-# Backward-compatible patch point used by legacy bootstrap tests.
-CompositePipelineRunner = create_composite_runner_with_legacy_fsm_adapter
-
 
 def create_composite_runner(
     *,
@@ -131,7 +126,7 @@ def create_composite_runner(
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     support_services: CompositeSupportServices,
-    runner_factory: CompositeRunnerFactory = CompositePipelineRunner,
+    runner_factory: CompositeRunnerFactory = create_composite_runner_with_legacy_fsm_adapter,
 ) -> CompositePipelineRunnerService:
     """Create fully wired CompositePipelineRunner service.
 
@@ -224,25 +219,3 @@ def bootstrap_composite_runner(
     )
 
 
-def bootstrap_composite_pipeline(
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    run_id: str | None,
-    bootstrap_runner_fn: Callable[
-        [CompositeConfig, CompositeRuntimeConfig, str | None],
-        CompositePipelineRunnerService,
-    ],
-) -> CompositePipelineRunnerService:
-    """Alias wrapper for composite runner bootstrap entry point.
-
-    Args:
-        config: Validated CompositeConfig for this composite run.
-        runtime: Runtime options for the composite run.
-        run_id: Optional UUID string for this run; generated when None.
-        bootstrap_runner_fn: Callable implementing the actual bootstrap logic;
-            called with (config, runtime, run_id).
-
-    Returns:
-        Fully wired CompositePipelineRunnerService ready for execution.
-    """
-    return bootstrap_runner_fn(config, runtime, run_id)

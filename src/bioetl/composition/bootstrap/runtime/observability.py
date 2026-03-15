@@ -22,11 +22,8 @@ from bioetl.infrastructure.observability import (
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
-from .dq_bootstrap import bootstrap_dq_monitor as _bootstrap_dq_monitor_impl
 from .dq_bootstrap import bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl
-from .logger_bootstrap import bootstrap_logger as _bootstrap_logger_impl
 from .logger_bootstrap import bootstrap_logger_port as _bootstrap_logger_port_impl
-from .metrics_bootstrap import bootstrap_metrics as _bootstrap_metrics_impl
 from .metrics_bootstrap import bootstrap_metrics_port as _bootstrap_metrics_port_impl
 from .metrics_bootstrap import (
     maybe_start_metrics_server as _maybe_start_metrics_server_impl,
@@ -37,7 +34,6 @@ from .observability_bundle import (
 from .observability_bundle import (
     validate_observability_preflight_impl as _validate_observability_preflight_impl,
 )
-from .tracing_bootstrap import bootstrap_tracer as _bootstrap_tracer_impl
 from .tracing_bootstrap import bootstrap_tracer_port as _bootstrap_tracer_port_impl
 
 if TYPE_CHECKING:
@@ -45,17 +41,10 @@ if TYPE_CHECKING:
 
 __all__ = [
     "MetricsServerError",
-    # Deprecated aliases (backward compatibility)
-    "bootstrap_dq_monitor",
-    # Canonical names (use these)
     "bootstrap_dq_monitor_port",
-    "bootstrap_logger",
     "bootstrap_logger_port",
-    "bootstrap_metrics",
     "bootstrap_metrics_port",
-    "bootstrap_observability",
     "bootstrap_observability_bundle",
-    "bootstrap_tracer",
     "bootstrap_tracer_port",
     "maybe_start_metrics_server",
     "start_metrics_server",
@@ -121,36 +110,6 @@ def bootstrap_logger_port(
     )
 
 
-def bootstrap_logger(
-    pipeline: str,
-    run_id: UUID | None = None,
-    log_level: str = "INFO",
-) -> LoggerPort:
-    """Deprecated alias for :func:`bootstrap_logger_port`.
-
-    Args:
-        pipeline: Pipeline name used as a structured log field.
-        run_id: Run UUID for log correlation; a new UUID is generated if None.
-        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
-
-    Returns:
-        Configured LoggerPort for structured pipeline logging.
-    """
-    return _bootstrap_logger_impl(
-        pipeline=pipeline,
-        run_id=run_id,
-        log_level=log_level,
-        logger_factory=lambda logger_pipeline, logger_run_id, logger_level: (
-            UnifiedLogger(
-                pipeline=logger_pipeline,
-                run_id=logger_run_id,
-                log_level=logger_level,
-                json_format=True,
-            )
-        ),
-    )
-
-
 def bootstrap_tracer_port(
     settings: Settings,
     service_name: str = "bioetl",
@@ -166,28 +125,6 @@ def bootstrap_tracer_port(
         Configured TracingPort for distributed tracing.
     """
     return _bootstrap_tracer_port_impl(
-        settings=settings,
-        service_name=service_name,
-        tracer_factory=lambda trace_service_name: OpenTelemetryTracer(
-            service_name=trace_service_name
-        ),
-    )
-
-
-def bootstrap_tracer(
-    settings: Settings,
-    service_name: str = "bioetl",
-) -> TracingPort:
-    """Deprecated alias for :func:`bootstrap_tracer_port`.
-
-    Args:
-        settings: Application settings used to check whether tracing is enabled.
-        service_name: OpenTelemetry service name for span identification.
-
-    Returns:
-        Configured TracingPort for distributed tracing.
-    """
-    return _bootstrap_tracer_impl(
         settings=settings,
         service_name=service_name,
         tracer_factory=lambda trace_service_name: OpenTelemetryTracer(
@@ -226,18 +163,6 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
     )
 
 
-def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Deprecated alias for :func:`bootstrap_metrics_port`.
-
-    Args:
-        settings: Application settings used to determine if metrics are enabled.
-
-    Returns:
-        Configured MetricsPort for pipeline metrics collection.
-    """
-    return _bootstrap_metrics_impl(settings=settings, metrics_factory=PrometheusMetrics)
-
-
 def bootstrap_dq_monitor_port(
     settings: Settings,
     logger: LoggerPort | None = None,
@@ -253,27 +178,6 @@ def bootstrap_dq_monitor_port(
         DQMonitorPort if DQ monitoring is enabled, None otherwise.
     """
     return _bootstrap_dq_monitor_port_impl(
-        settings=settings,
-        logger=logger,
-        monitor_cls=DataQualityMonitorService,
-        noop_logger_cls=NoOpLogger,
-    )
-
-
-def bootstrap_dq_monitor(
-    settings: Settings,
-    logger: LoggerPort | None = None,
-) -> DQMonitorPort | None:
-    """Deprecated alias for :func:`bootstrap_dq_monitor_port`.
-
-    Args:
-        settings: Application settings used to check whether DQ monitoring is enabled.
-        logger: Optional LoggerPort for structured DQ monitor logging.
-
-    Returns:
-        DQMonitorPort if DQ monitoring is enabled, None otherwise.
-    """
-    return _bootstrap_dq_monitor_impl(
         settings=settings,
         logger=logger,
         monitor_cls=DataQualityMonitorService,
@@ -311,26 +215,3 @@ def bootstrap_observability_bundle(
     )
 
 
-def bootstrap_observability(
-    pipeline: str,
-    run_id: UUID,
-    settings: Settings,
-    log_level: str = "INFO",
-) -> ObservabilityBundle:
-    """Deprecated alias for :func:`bootstrap_observability_bundle`.
-
-    Args:
-        pipeline: Pipeline name used for logger and tracer context.
-        run_id: Run UUID used for log correlation.
-        settings: Application settings driving feature flags for each component.
-        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
-
-    Returns:
-        Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
-    """
-    return bootstrap_observability_bundle(
-        pipeline=pipeline,
-        run_id=run_id,
-        settings=settings,
-        log_level=log_level,
-    )

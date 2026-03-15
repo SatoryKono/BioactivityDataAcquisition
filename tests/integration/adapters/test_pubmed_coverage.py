@@ -15,10 +15,10 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
-from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
-from bioetl.infrastructure.adapters.pubmed.client import (
+from bioetl.infrastructure.adapters.pubmed import (
     ENTREZ_API_BASE,
-    _create_pubmed_adapter,
+    PubMedAdapter,
+    create_pubmed_adapter,
 )
 
 
@@ -188,7 +188,7 @@ async def test_adapter_factory(mock_logger):
 
     http_client = MagicMock(spec=UnifiedHTTPClient)
 
-    adapter = _create_pubmed_adapter(
+    adapter = create_pubmed_adapter(
         http_client=http_client,
         logger=mock_logger,
         settings=settings,
@@ -203,10 +203,10 @@ async def test_adapter_factory(mock_logger):
 @pytest.mark.integration
 async def test_adapter_factory_missing_args():
     with pytest.raises(ValueError, match="PubMed adapter requires email"):
-        _create_pubmed_adapter(None, None, None)
+        create_pubmed_adapter(None, None, None)
 
     with pytest.raises(ValueError, match="PubMed adapter requires http_client"):
-        _create_pubmed_adapter(None, MagicMock(), MagicMock(default_email="a@b.com"))
+        create_pubmed_adapter(None, MagicMock(), MagicMock(default_email="a@b.com"))
 
 
 @pytest.mark.integration
