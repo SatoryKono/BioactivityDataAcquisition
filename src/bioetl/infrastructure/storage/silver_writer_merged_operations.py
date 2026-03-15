@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 import pyarrow as pa
 from deltalake import write_deltalake
@@ -13,6 +12,9 @@ from deltalake import write_deltalake
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = [
     "_MergedSilverWriteRequest",
@@ -44,24 +46,11 @@ class _PreparedMergedSilverWrite:
     arrow_table: pa.Table
 
 
-class _MergedCsvExporterProtocol(Protocol):
-    """Minimal exporter contract used by merged Silver write helpers."""
-
-    async def export(
-        self,
-        table_name: str,
-        data: pa.Table,
-        append: bool = False,
-        sort_by: list[str] | None = None,
-        primary_keys: list[str] | None = None,
-    ) -> Path: ...
-
-
 class _SilverWriterMergedHostProtocol(Protocol):
     """Structural type for merged-write helper dependencies."""
 
     logger: LoggerPort
-    csv_exporter: _MergedCsvExporterProtocol | None
+    csv_exporter: CsvExporter | None
     _arrow_converter: ArrowDataConverter
 
     def _resolve_table_path(self, table_name: str) -> str: ...
