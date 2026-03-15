@@ -117,6 +117,7 @@ class TestBuildPostrunService:
             dependencies=dependencies,
             metadata_coordinator=pipeline.services.metadata_coordinator,
             metadata_writer=pipeline.services.metadata_writer,
+            tracer=None,
         )
 
     def test_build_postrun_service_passes_outer_wiring_to_dependencies(self) -> None:
