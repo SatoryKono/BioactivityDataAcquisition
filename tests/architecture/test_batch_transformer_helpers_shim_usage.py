@@ -11,25 +11,18 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 TESTS_ROOT = ROOT / "tests"
 COMPAT_MODULE = "bioetl.application.core.batch_transformer_helpers"
+REMOVED_FILE = (
+    ROOT / "src" / "bioetl" / "application" / "core" / "batch_transformer_helpers.py"
+)
 COMPAT_PARENT_IMPORTS = {
     "bioetl.application.core": frozenset({"batch_transformer_helpers"}),
 }
-ALLOWED_TEST_FILES = frozenset(
-    {
-        ROOT
-        / "tests"
-        / "unit"
-        / "application"
-        / "core"
-        / "test_batch_transformer_helpers_reexport.py",
-    }
-)
 
 
 def _iter_compat_import_violations(search_root: Path) -> list[str]:
     violations: list[str] = []
     for py_file in search_root.rglob("*.py"):
-        if py_file in ALLOWED_TEST_FILES or "__pycache__" in py_file.parts:
+        if "__pycache__" in py_file.parts:
             continue
         tree = ast.parse(py_file.read_text(encoding="utf-8"))
         rel_path = py_file.relative_to(ROOT).as_posix()
@@ -55,6 +48,15 @@ def _iter_compat_import_violations(search_root: Path) -> list[str]:
 
 
 @pytest.mark.architecture
+def test_batch_transformer_helpers_shim_file_has_been_removed() -> None:
+    """The batch_transformer_helpers compatibility module should no longer exist."""
+    assert not REMOVED_FILE.exists(), (
+        "batch_transformer_helpers compatibility shim must stay removed: "
+        "src/bioetl/application/core/batch_transformer_helpers.py"
+    )
+
+
+@pytest.mark.architecture
 def test_batch_transformer_helpers_shim_is_not_used_in_src() -> None:
     """First-party src must import canonical batch-transform helper modules directly."""
     violations = _iter_compat_import_violations(SRC_ROOT)
@@ -65,10 +67,10 @@ def test_batch_transformer_helpers_shim_is_not_used_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_batch_transformer_helpers_shim_is_only_used_by_smoke_test() -> None:
-    """Ordinary tests must not accumulate new direct imports of helper shim."""
+def test_batch_transformer_helpers_shim_is_not_used_in_tests() -> None:
+    """Tests must not keep importing the removed helper shim."""
     violations = _iter_compat_import_violations(TESTS_ROOT)
     assert not violations, (
-        "batch_transformer_helpers compatibility shim gained new direct test imports:\n"
+        "batch_transformer_helpers compatibility shim must stay removed from tests:\n"
         + "\n".join(violations)
     )

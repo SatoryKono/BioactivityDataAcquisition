@@ -18,15 +18,14 @@ INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
 )
 
 TRANSFORMER_DEPENDENCY_SHIM = "bioetl.application.core.base_transformer.dependencies"
-ALLOWED_TRANSFORMER_TEST_FILES = frozenset(
-    {
-        ROOT
-        / "tests"
-        / "unit"
-        / "application"
-        / "core"
-        / "test_base_transformer_dependencies_reexport.py",
-    }
+TRANSFORMER_DEPENDENCY_SHIM_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "base_transformer"
+    / "dependencies.py"
 )
 
 ALLOWED_DATASOURCE_REGISTRY_SRC_FILES = frozenset(
@@ -202,6 +201,15 @@ def _iter_imported_symbol_violations(
 
 
 @pytest.mark.architecture
+def test_transformer_dependency_compat_shim_file_has_been_removed() -> None:
+    """Legacy base-transformer dependency shim should no longer exist."""
+    assert not TRANSFORMER_DEPENDENCY_SHIM_PATH.exists(), (
+        "Legacy base-transformer dependency shim must stay removed: "
+        "src/bioetl/application/core/base_transformer/dependencies.py"
+    )
+
+
+@pytest.mark.architecture
 def test_transformer_dependency_compat_shim_is_not_used_in_src() -> None:
     """First-party src must use canonical base-transformer dependency types directly."""
     violations = _iter_module_import_violations(
@@ -216,15 +224,15 @@ def test_transformer_dependency_compat_shim_is_not_used_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_transformer_dependency_compat_shim_is_only_used_by_smoke_test() -> None:
-    """Ordinary tests must not accumulate new direct imports of dependency shim."""
+def test_transformer_dependency_compat_shim_is_not_used_in_tests() -> None:
+    """Tests must not keep importing the removed dependency shim."""
     violations = _iter_module_import_violations(
         TESTS_ROOT,
         module_name=TRANSFORMER_DEPENDENCY_SHIM,
-        allowed_files=ALLOWED_TRANSFORMER_TEST_FILES,
+        allowed_files=frozenset(),
     )
     assert not violations, (
-        "base_transformer dependency compatibility shim gained new non-smoke test imports:\n"
+        "base_transformer dependency compatibility shim must stay removed from tests:\n"
         + "\n".join(violations)
     )
 

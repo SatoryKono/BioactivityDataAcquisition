@@ -16,26 +16,10 @@ ALLOWED_SHIM_MODULES = frozenset(
         "bioetl.composition.services.metadata_assemblers",
     }
 )
-ALLOWED_FILES = frozenset(
+REMOVED_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "services" / "metadata_coordinator.py",
         ROOT / "src" / "bioetl" / "composition" / "services" / "metadata_assemblers.py",
-    }
-)
-ALLOWED_TEST_FILES = frozenset(
-    {
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "services"
-        / "test_metadata_coordinator_reexport.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "services"
-        / "test_metadata_assemblers_reexport.py",
     }
 )
 
@@ -67,11 +51,23 @@ def _iter_shim_import_violations(
 
 
 @pytest.mark.architecture
+def test_metadata_service_shim_files_have_been_removed() -> None:
+    """Metadata composition shim files should no longer exist."""
+    lingering = sorted(
+        path.relative_to(ROOT).as_posix() for path in REMOVED_FILES if path.exists()
+    )
+    assert not lingering, (
+        "Metadata service compatibility shims must stay removed:\n"
+        + "\n".join(lingering)
+    )
+
+
+@pytest.mark.architecture
 def test_metadata_service_shims_are_not_used_in_src() -> None:
     """First-party source code must import canonical metadata services directly."""
     violations = _iter_shim_import_violations(
         SRC_ROOT,
-        allowed_files=ALLOWED_FILES,
+        allowed_files=frozenset(),
     )
     assert not violations, (
         "Metadata service compatibility shims are still imported from src/:\n"
@@ -80,13 +76,13 @@ def test_metadata_service_shims_are_not_used_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_metadata_service_shims_are_only_used_by_dedicated_smoke_tests() -> None:
-    """Ordinary tests must not accumulate new direct imports of metadata shims."""
+def test_metadata_service_shims_are_not_used_in_tests() -> None:
+    """Tests must not keep importing removed metadata shim modules."""
     violations = _iter_shim_import_violations(
         TESTS_ROOT,
-        allowed_files=ALLOWED_TEST_FILES,
+        allowed_files=frozenset(),
     )
     assert not violations, (
-        "Metadata service compatibility shims gained new non-smoke test imports:\n"
+        "Metadata service compatibility shims must stay removed from tests:\n"
         + "\n".join(violations)
     )

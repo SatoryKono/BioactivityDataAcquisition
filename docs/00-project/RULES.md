@@ -1016,7 +1016,7 @@ from __future__ import annotations
 
 ### 5.3. Graceful Shutdown (Штатное завершение)
 
-См. [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) *(Superseded — shutdown реализован в CLI и `application/core/shutdown.py`)*.
+См. [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) *(Superseded — shutdown реализован в CLI и `application/core/lifecycle/shutdown.py`)*.
 При получении SIGTERM/SIGINT:
 
 1. Прекратить извлечение (fetch) новых записей.

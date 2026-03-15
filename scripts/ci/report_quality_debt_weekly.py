@@ -6,8 +6,21 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import asdict, dataclass
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
+
+if __package__ in {None, ""}:
+    from _compatibility_telemetry import (  # type: ignore[import-not-found]
+        CompatibilitySurfaceSnapshot,
+        collect_compatibility_surface_snapshot,
+        render_compatibility_surface_section,
+    )
+else:
+    from ._compatibility_telemetry import (
+        CompatibilitySurfaceSnapshot,
+        collect_compatibility_surface_snapshot,
+        render_compatibility_surface_section,
+    )
 
 from bioetl.infrastructure.quality import (
     build_exemption_inventory,
@@ -31,6 +44,7 @@ class WeeklyDebtSnapshot:
     growth_violations: int
     by_registry: dict[str, int]
     by_owner: dict[str, int]
+    compatibility_surface: CompatibilitySurfaceSnapshot
 
 
 def _parse_args() -> argparse.Namespace:
@@ -93,9 +107,10 @@ def _build_snapshot(
     baseline = scorecard.get("baseline", {})
     baseline_total = int(baseline.get("total_exemptions", inventory.total_exemptions))
     new_debt = max(0, inventory.total_exemptions - baseline_total)
+    compatibility_surface = collect_compatibility_surface_snapshot()
 
     return WeeklyDebtSnapshot(
-        generated_at_utc=datetime.now(timezone.utc).isoformat(),
+        generated_at_utc=datetime.now(UTC).isoformat(),
         quarter=evaluation.quarter,
         total_debt=inventory.total_exemptions,
         expired_debt=inventory.expired_entries,
@@ -106,6 +121,7 @@ def _build_snapshot(
         growth_violations=len(violations),
         by_registry=evaluation.by_registry,
         by_owner=evaluation.by_owner,
+        compatibility_surface=compatibility_surface,
     )
 
 
@@ -115,6 +131,10 @@ def _render_markdown(snapshot: WeeklyDebtSnapshot) -> str:
     )
     by_owner_lines = "\n".join(
         f"- `{name}`: {count}" for name, count in snapshot.by_owner.items()
+    )
+    compatibility_section = render_compatibility_surface_section(
+        snapshot.compatibility_surface,
+        heading="## Compatibility Surface",
     )
     return (
         "# Weekly Quality Debt Report\n\n"
@@ -127,6 +147,7 @@ def _render_markdown(snapshot: WeeklyDebtSnapshot) -> str:
         f"- Quarter budget: `{snapshot.total_budget}`\n"
         f"- Integral debt score: `{snapshot.integral_score}`\n"
         f"- Growth violations: `{snapshot.growth_violations}`\n\n"
+        f"{compatibility_section}\n\n"
         "## By Registry\n\n"
         f"{by_registry_lines or '- (none)'}\n\n"
         "## By Owner\n\n"
@@ -169,6 +190,10 @@ def main() -> int:
                         f"- expired_debt: `{snapshot.expired_debt}`",
                         f"- new_debt: `{snapshot.new_debt}`",
                         f"- quarter: `{snapshot.quarter}`",
+                        render_compatibility_surface_section(
+                            snapshot.compatibility_surface,
+                            heading="## Compatibility Surface Snapshot",
+                        ),
                     ]
                 )
                 + "\n"

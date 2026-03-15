@@ -158,7 +158,7 @@ Records with identical `content-hash` are deduplicated during merge.
 - `src/bioetl/domain/config.py` — Add `force-full-scan` field to `PipelineConfig`
 
 **Application:**
-- `src/bioetl/application/core/checkpoint_manager.py` — Block resume when `force-full-scan=True`
+- `src/bioetl/application/core/lifecycle/checkpoint_manager.py` — Block resume when `force-full-scan=True`
 
 **Infrastructure:**
 - `src/bioetl/infrastructure/schemas/pipeline_config.py` — Add `force-full-scan` to YAML schema

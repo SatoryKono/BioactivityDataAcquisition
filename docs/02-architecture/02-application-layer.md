@@ -58,7 +58,7 @@
 
 - **`PipelineService`** (`pipeline_services.py`) — DI bundle портов для pipeline execution
 - **`PipelineServices`** (`pipeline_services.py`) — Extended DI bundle с DQ-портами для PipelineRunner
-- **`LockCoordinator`** (`lock_manager.py`) — Координация блокировок
+- **`LockCoordinator`** (`lifecycle/lock_manager.py`) — Координация блокировок
 - **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
 - **`CheckpointManagerService`** (`lifecycle/checkpoint_manager.py`) — Checkpoint I/O

@@ -137,7 +137,7 @@ class OutputMetadata(BaseModel):
 - `src/bioetl/domain/ports/metadata_coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
 
 **Services:**
-- `src/bioetl/composition/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
+- `src/bioetl/application/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
 
 **Infrastructure:**
 - `src/bioetl/infrastructure/storage/bronze_writer.py` — _build_full_bronze_metadata

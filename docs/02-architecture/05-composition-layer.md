@@ -127,7 +127,7 @@ composition/bootstrap/
 | Пакет              | Ключевые модули                                         | Назначение                                           |
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------- |
 | `providers/`       | `provider_registry.py`, `registration.py`, `registration_biblio.py`, `registration_bio.py`, `factory_loader.py`, `loader.py` | Реестр провайдеров, авто-регистрация, загрузка фабрик |
-| `services/`        | `metadata_coordinator.py`, `metadata_assemblers.py`, `versioning.py` | Composition-level сервисы (metadata, versioning)     |
+| `services/`        | `__init__.py`, `versioning.py` | Composition-level re-exports для metadata coordination и versioning utilities |
 | `runtime_builders/`| `runner_builder.py`, `observability_builder.py`, `inputs_resolver.py` | Builders для runtime assembly                        |
 
 ### 2.3. Реестр провайдеров и DataSourceRegistry
@@ -183,7 +183,7 @@ data_source = ProviderRegistry.create_data_source("chembl", settings, config, lo
 ```python
 from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_runner
 from bioetl.domain.composite.config import CompositeConfig
-from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 
 runner = bootstrap_composite_runner(
     config=CompositeConfig(...),
