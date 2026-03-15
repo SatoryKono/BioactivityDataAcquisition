@@ -25,7 +25,6 @@ from bioetl.composition.factories.pipeline.runner_assembly import (
 from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
-    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -52,7 +51,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.types import RunID
+    from bioetl.domain.types import GoldSchemaType, RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -75,7 +74,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: type[TPipeline],
         provider: str,
         silver_schema: pa.Schema | None = None,
-        gold_schema: type[pandera.DataFrameModel] | None = None,
+        gold_schema: GoldSchemaType | None = None,
         pandera_silver_schema: object | None = None,
         data_source_creator: DataSourceCreatorProtocol | None = None,
         transformer_class: type[BaseTransformer] | None = None,
@@ -230,7 +229,7 @@ def create_pipeline_factory(
     pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
-    gold_schema: type[pandera.DataFrameModel] | None = None,
+    gold_schema: GoldSchemaType | None = None,
     pandera_silver_schema: object | None = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
@@ -250,7 +249,7 @@ def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: GoldSchemaType,
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:

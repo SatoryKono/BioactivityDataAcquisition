@@ -6,7 +6,6 @@ __all__ = ["BatchWriter"]
 
 from typing import TYPE_CHECKING, Literal, cast
 
-from bioetl.application.composite.column_orderer import ColumnOrdererService
 from bioetl.application.core.batch_writer_columns_mixin import BatchWriterColumnsMixin
 from bioetl.application.core.batch_writer_io_mixin import BatchWriterIOMixin
 from bioetl.application.core.batch_writer_tracing_mixin import (
@@ -16,6 +15,7 @@ from bioetl.application.core.batch_writer_tracing_mixin import (
 from bioetl.domain.composite.config import DataSchemaConfig
 
 if TYPE_CHECKING:
+    from bioetl.application.composite.column_orderer import ColumnOrderer
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.domain.context import PipelineContext
@@ -37,6 +37,7 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         tracer: TracingPort | None = None,
         lock_validator: BatchWriterLockValidator = None,
         data_schema_config: DataSchemaConfig | None = None,
+        column_orderer: ColumnOrderer | None = None,
     ) -> None:
         """Initialize writer dependencies and static write configuration.
 
@@ -52,6 +53,8 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
                 still held before each write. If None, lock validation is skipped.
             data_schema_config: Optional override for composite data-schema configuration.
                 Falls back to ``config.data_schema`` when None.
+            column_orderer: Optional column orderer for semantic column ordering.
+                If None and column_groups are configured, a default ColumnOrderer is created.
         """
         self._storage = storage
         self._context = context
@@ -71,13 +74,7 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         self._data_schema = (
             data_schema_config if data_schema_config is not None else config.data_schema
         )
-        self._column_orderer = (
-            ColumnOrdererService(
-                self._context.logger, column_groups=self._column_groups
-            )
-            if self._column_groups
-            else None
-        )
+        self._column_orderer = column_orderer
 
         self._silver_table_name = (
             self._table_config.silver_table or f"{self._provider}.{self._entity_type}"

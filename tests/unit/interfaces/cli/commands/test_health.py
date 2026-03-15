@@ -150,16 +150,11 @@ class TestHealthCheckCommand:
         assert "--provider" in result.output
         assert "--json" in result.output
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_all_providers_healthy(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check when all providers are healthy."""
-        # Setup mock
-        mock_factory.list_providers.return_value = ["chembl", "pubchem"]
-
         results = {
             "chembl": {"status": "healthy", "latency_ms": "10.50", "endpoint": "/api"},
             "pubchem": {"status": "healthy", "latency_ms": "15.30", "endpoint": "/pug"},
@@ -172,15 +167,11 @@ class TestHealthCheckCommand:
         assert "All providers healthy." in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_some_unhealthy(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check when some providers are unhealthy."""
-        mock_factory.list_providers.return_value = ["chembl", "pubchem"]
-
         results = {
             "chembl": {"status": "healthy", "latency_ms": "10.50", "endpoint": "/api"},
             "pubchem": {"status": "unhealthy", "error": "Connection refused"},
@@ -192,15 +183,11 @@ class TestHealthCheckCommand:
         assert "Some providers unhealthy." in result.output
         assert result.exit_code == ExitCode.FAIL.value
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_degraded_status(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check with degraded status."""
-        mock_factory.list_providers.return_value = ["chembl"]
-
         results = {
             "chembl": {
                 "status": "degraded",
@@ -216,15 +203,11 @@ class TestHealthCheckCommand:
         assert "Some providers unhealthy." in result.output
         assert result.exit_code == ExitCode.FAIL.value
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_json_output(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check with JSON output."""
-        mock_factory.list_providers.return_value = ["chembl"]
-
         results = {
             "chembl": {"status": "healthy", "latency_ms": "10.50", "endpoint": "/api"},
         }
@@ -237,15 +220,11 @@ class TestHealthCheckCommand:
         assert '"status": "healthy"' in result.output
         assert '"latency_ms": "10.50"' in result.output
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_specific_providers(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check for specific providers."""
-        mock_factory.list_providers.return_value = ["chembl", "pubchem", "uniprot"]
-
         # Return result only for the requested providers
         results = {
             "chembl": {"status": "healthy", "latency_ms": "10.50", "endpoint": "/api"},
@@ -261,15 +240,11 @@ class TestHealthCheckCommand:
         assert "Running health checks..." in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_display_latency(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check displays latency in output."""
-        mock_factory.list_providers.return_value = ["chembl"]
-
         results = {
             "chembl": {"status": "healthy", "latency_ms": "25.50", "endpoint": "/api"},
         }
@@ -280,15 +255,11 @@ class TestHealthCheckCommand:
         assert "25.50ms" in result.output
         assert "[OK]" in result.output
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_display_error(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check displays error in output."""
-        mock_factory.list_providers.return_value = ["chembl"]
-
         results = {
             "chembl": {"status": "unhealthy", "error": "Connection timeout"},
         }
@@ -310,15 +281,11 @@ class TestHealthCheckCommand:
         assert "Error running health checks" in result.output
         assert result.exit_code == ExitCode.FAIL.value
 
-    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_unknown_status(
         self,
-        mock_factory: MagicMock,
         cli_runner: CliRunner,
     ) -> None:
         """Test health check with unknown status shows FAIL icon."""
-        mock_factory.list_providers.return_value = ["chembl"]
-
         results = {
             "chembl": {"status": "unknown", "error": "No health check method"},
         }

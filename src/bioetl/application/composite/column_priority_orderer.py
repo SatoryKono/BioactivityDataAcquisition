@@ -10,10 +10,10 @@ from bioetl.application.composite.join_planner_helpers import parse_pipeline_nam
 from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.ports import LoggerPort
 
-__all__ = ["ColumnPriorityOrdererService"]
+__all__ = ["ColumnPriorityOrderer"]
 
 
-class ColumnPriorityOrdererService:
+class ColumnPriorityOrderer:
     """Resolves source column ordering for explicit field priority rules."""
 
     def __init__(self, logger: LoggerPort) -> None:
@@ -174,7 +174,7 @@ class ColumnPriorityOrdererService:
             ``"pipeline_"`` when pipeline name cannot be parsed.
         """
         try:
-            provider, entity = ColumnPriorityOrdererService._parse_pipeline_name(
+            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(
                 enricher_pipeline
             )
             return f"{provider}.{entity}."
@@ -198,7 +198,7 @@ class ColumnPriorityOrdererService:
         source_lower = source.lower()
 
         if source_lower == "seed":
-            return ColumnPriorityOrdererService._resolve_seed_column(
+            return ColumnPriorityOrderer._resolve_seed_column(
                 field,
                 seed_provider,
                 seed_entity,
@@ -212,7 +212,7 @@ class ColumnPriorityOrdererService:
         if seed_provider and provider == seed_provider.lower() and seed_entity:
             return f"{provider}.{seed_entity}.{field}"
 
-        return ColumnPriorityOrdererService._resolve_by_column_scan(
+        return ColumnPriorityOrderer._resolve_by_column_scan(
             provider,
             field,
             columns_set,

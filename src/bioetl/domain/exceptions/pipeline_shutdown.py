@@ -14,6 +14,10 @@ Moving them here breaks that cycle: all layers import from domain.exceptions.
 from __future__ import annotations
 
 from enum import Enum
+from typing import ClassVar
+
+from bioetl.domain.exceptions.base import CriticalError
+from bioetl.domain.types import ErrorType
 
 __all__ = ["PipelineShutdownError", "ShutdownReason"]
 
@@ -30,7 +34,7 @@ class ShutdownReason(Enum):
     UNKNOWN = "unknown"
 
 
-class PipelineShutdownError(Exception):
+class PipelineShutdownError(CriticalError):
     """Raised when pipeline receives shutdown signal.
 
     This exception signals that the pipeline should gracefully terminate,
@@ -39,6 +43,8 @@ class PipelineShutdownError(Exception):
     Attributes:
         reason: The reason for shutdown.
     """
+
+    error_type: ClassVar[ErrorType] = ErrorType.DB_UNAVAILABLE
 
     def __init__(
         self,

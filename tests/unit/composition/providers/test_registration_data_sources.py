@@ -9,7 +9,9 @@ import pytest
 
 from bioetl.composition.providers.registration_biblio import (
     _create_crossref_data_source,
+    _create_openalex_adapter_from_settings,
     _create_openalex_data_source,
+    _create_pubmed_adapter_from_settings,
     _create_pubmed_data_source,
     _create_semanticscholar_data_source,
 )
@@ -139,6 +141,57 @@ class TestCrossRefAndOpenAlexCreators:
         call_kwargs = mock_create_http_ds.call_args.kwargs
         assert call_kwargs["extra_kwargs"]["mailto"] == "default@example.org"
         assert call_kwargs["extra_kwargs"]["batch_size"] == 55
+        assert "settings" not in call_kwargs["extra_kwargs"]
+        assert result is mock_adapter
+
+    @patch("bioetl.composition.providers.registration_biblio.OpenAlexAdapter")
+    def test_openalex_custom_creator_uses_settings_email_fallback(
+        self,
+        mock_adapter_cls: MagicMock,
+    ) -> None:
+        mock_adapter = MagicMock()
+        mock_adapter_cls.return_value = mock_adapter
+        settings = MagicMock()
+        settings.default_email = "default@example.org"
+
+        result = _create_openalex_adapter_from_settings(
+            http_client=MagicMock(),
+            logger=MagicMock(),
+            settings=settings,
+            batch_size=55,
+        )
+
+        mock_adapter_cls.assert_called_once()
+        call_kwargs = mock_adapter_cls.call_args.kwargs
+        assert call_kwargs["mailto"] == "default@example.org"
+        assert call_kwargs["batch_size"] == 55
+        assert result is mock_adapter
+
+    @patch("bioetl.composition.providers.registration_biblio.PubMedAdapter")
+    def test_pubmed_custom_creator_uses_settings_fallbacks(
+        self,
+        mock_adapter_cls: MagicMock,
+    ) -> None:
+        mock_adapter = MagicMock()
+        mock_adapter_cls.return_value = mock_adapter
+
+        settings = MagicMock()
+        settings.default_email = "default@example.org"
+        settings.pubmed_api_key = MagicMock()
+        settings.pubmed_api_key.get_secret_value.return_value = "settings-key"
+
+        result = _create_pubmed_adapter_from_settings(
+            http_client=MagicMock(),
+            logger=MagicMock(),
+            settings=settings,
+            batch_size=77,
+        )
+
+        mock_adapter_cls.assert_called_once()
+        call_kwargs = mock_adapter_cls.call_args.kwargs
+        assert call_kwargs["email"] == "default@example.org"
+        assert call_kwargs["api_key"] == "settings-key"
+        assert call_kwargs["batch_size"] == 77
         assert result is mock_adapter
 
 

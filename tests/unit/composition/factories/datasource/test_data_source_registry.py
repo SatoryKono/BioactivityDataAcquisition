@@ -10,10 +10,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.composition.factories.datasource.factory import (
-    DataSourceRegistry,
-)
 from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceRegistry,
     get_data_source_creator,
 )
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded

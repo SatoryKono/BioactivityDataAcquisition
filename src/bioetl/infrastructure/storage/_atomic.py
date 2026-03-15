@@ -32,13 +32,14 @@ from pathlib import Path
 from types import TracebackType
 from typing import IO, Any
 
+from bioetl.domain.exceptions.infrastructure import InfrastructureError as _InfraBase
 from bioetl.infrastructure.storage.write_resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
 )
 
 
-class AtomicWriteError(Exception):
+class AtomicWriteError(_InfraBase):
     """Raised when atomic write fails."""
 
     def __init__(self, target: Path, reason: str) -> None:

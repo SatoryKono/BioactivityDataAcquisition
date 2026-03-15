@@ -10,11 +10,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
-from bioetl.domain.types import ArrowSchema, ScdConfig
+from bioetl.domain.types import ArrowSchema, GoldSchemaType, ScdConfig
 
 if TYPE_CHECKING:
-    import pandera
-
     from bioetl.domain.composite.config import DataSchemaConfig
     from bioetl.domain.types import RunType
 
@@ -27,7 +25,7 @@ class RecordProcessorConfig:
     provider: str
     entity_type: str
     silver_schema: ArrowSchema | None
-    gold_schema: type[pandera.DataFrameModel]
+    gold_schema: GoldSchemaType
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)

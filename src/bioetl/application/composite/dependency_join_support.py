@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import polars as pl
 
-from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.join_planner_helpers import (
@@ -124,7 +124,7 @@ def prepare_dependency_join_frames(
     *,
     deduplicator: EnricherDeduplicatorService,
     join_key_resolver: JoinKeyResolverProtocol,
-    renamer: ColumnRenamerService,
+    renamer: ColumnRenamer,
     logger: LoggerPort,
     field_alias_resolver: Callable[[str], dict[str, str] | None],
     drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],

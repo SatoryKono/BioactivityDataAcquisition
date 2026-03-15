@@ -25,6 +25,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from bioetl.domain.constants import DEFAULT_BATCH_SIZE
 from bioetl.domain.resilience import AdapterConfig as DomainAdapterConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 from bioetl.domain.types import JsonDict
@@ -186,7 +187,7 @@ class SourceSectionConfig(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    batch_size: int = Field(default=100, ge=1, le=10000)
+    batch_size: int = Field(default=DEFAULT_BATCH_SIZE, ge=1, le=10000)
     provider_config: ProviderConfigYaml = Field(
         default_factory=lambda: ProviderConfigYaml()
     )

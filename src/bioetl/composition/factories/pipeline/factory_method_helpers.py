@@ -16,7 +16,6 @@ from bioetl.domain.services import IdentityService
 from bioetl.infrastructure.config import load_pipeline_config
 
 if TYPE_CHECKING:
-    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -47,7 +46,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.types import RunID
+    from bioetl.domain.types import GoldSchemaType, RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -184,7 +183,7 @@ def create_factory_runner(
     *,
     pipeline_name: str,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: GoldSchemaType,
     run_id: RunID,
     runtime: RuntimeConfig,
     settings: Settings,

@@ -7,8 +7,8 @@ This package contains application services for composite pipeline orchestration:
 - MergeService: Data merging with conflict resolution
 - KeyExtractorService: Extract join keys from seed Silver tables
 - CompositeCheckpointService: Checkpoint management for resume capability
-- ColumnRenamerService: Unified column renaming to qualified format
-- ColumnOrdererService: Semantic column ordering for consistent output
+- ColumnRenamer: Unified column renaming to qualified format
+- ColumnOrderer: Semantic column ordering for consistent output
 - CompositePreflightValidationService: Preflight validation for field_priorities
 
 See ADR-026 for architectural decisions.
@@ -21,8 +21,8 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
     CompositeCheckpointState,
 )
-from bioetl.application.composite.column_orderer import ColumnOrdererService
-from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
@@ -41,8 +41,8 @@ from bioetl.application.composite.runner_pkg import (
 )
 
 __all__ = [
-    "ColumnOrdererService",
-    "ColumnRenamerService",
+    "ColumnOrderer",
+    "ColumnRenamer",
     "CompositeCheckpointManager",
     "CompositeCheckpointService",
     "CompositeCheckpointState",

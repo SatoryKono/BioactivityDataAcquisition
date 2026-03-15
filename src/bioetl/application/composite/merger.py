@@ -22,16 +22,16 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.aggregator import EnricherAggregatorService
+    from bioetl.application.composite.aggregator import EnricherAggregator
     from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-    from bioetl.application.composite.column_orderer import ColumnOrdererService
+    from bioetl.application.composite.column_orderer import ColumnOrderer
     from bioetl.application.composite.column_priority_orderer import (
-        ColumnPriorityOrdererService,
+        ColumnPriorityOrderer,
     )
-    from bioetl.application.composite.column_renamer import ColumnRenamerService
+    from bioetl.application.composite.column_renamer import ColumnRenamer
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.cross_validator import (
-        EnrichmentCrossValidationService,
+        EnrichmentCrossValidator,
     )
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.application.composite.join_planner import JoinPlannerService
@@ -54,10 +54,10 @@ class MergeCollaboratorGroup:
     """Bundle of merge-time collaborators wired in composition."""
 
     deduplicator: EnricherDeduplicatorService
-    aggregator: EnricherAggregatorService
-    renamer: ColumnRenamerService
-    orderer: ColumnOrdererService
-    priority_orderer: ColumnPriorityOrdererService
+    aggregator: EnricherAggregator
+    renamer: ColumnRenamer
+    orderer: ColumnOrderer
+    priority_orderer: ColumnPriorityOrderer
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
@@ -127,7 +127,7 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
         field_group_registry: FieldGroupRegistry | None = None,
-        cross_validator: EnrichmentCrossValidationService | None = None,
+        cross_validator: EnrichmentCrossValidator | None = None,
         gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
         *,
         collaborators: MergeCollaboratorGroup | None = None,

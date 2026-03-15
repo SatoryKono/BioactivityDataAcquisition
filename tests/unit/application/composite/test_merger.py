@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.composite.aggregator import EnricherAggregatorService
+from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.application.composite.merger import (
     MergeCollaboratorGroup,
@@ -49,8 +49,8 @@ def deduplicator(mock_logger):
 
 @pytest.fixture
 def aggregator(mock_logger):
-    """Create an EnricherAggregatorService instance."""
-    return EnricherAggregatorService(mock_logger)
+    """Create an EnricherAggregator instance."""
+    return EnricherAggregator(mock_logger)
 
 
 @pytest.fixture
@@ -1043,7 +1043,7 @@ class TestApplyJoinsSmartColumnRenaming:
             seed_pipeline=None,  # No seed pipeline
         )
 
-        # ColumnRenamerService always uses qualified format from enricher pipeline
+        # ColumnRenamer always uses qualified format from enricher pipeline
         assert "crossref.publication.title" in result.columns
 
 

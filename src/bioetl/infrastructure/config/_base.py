@@ -31,9 +31,13 @@ from pydantic_settings import (
 )
 
 from bioetl.domain.config import PipelineConfig
+from bioetl.domain.constants import (
+    DEFAULT_BATCH_SIZE,
+    DEFAULT_CHECKPOINT_INTERVAL,
+    DEFAULT_DQ_QUALITY_SCORE_MIN,
+)
 from bioetl.infrastructure.config._yaml_settings_source import YamlSettingsSource
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
-from bioetl.infrastructure.config.source_config_loader import load_source_config
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
@@ -118,7 +122,9 @@ class ObservabilitySettings(BaseSettings):
     dq_error_rate_max: float = Field(default=0.10, ge=0.0, le=1.0)
     """Maximum allowed error rate (10% default)."""
 
-    dq_quality_score_min: float = Field(default=0.80, ge=0.0, le=1.0)
+    dq_quality_score_min: float = Field(
+        default=DEFAULT_DQ_QUALITY_SCORE_MIN, ge=0.0, le=1.0
+    )
     """Minimum quality score threshold (80% default)."""
 
 
@@ -167,10 +173,10 @@ class PipelineSettings(BaseSettings):
         max_delay_seconds: float = Field(default=2.0, ge=0.0, le=60.0)
         jitter_seconds: float = Field(default=0.050, ge=0.0, le=5.0)
 
-    batch_size: int = Field(default=100, ge=1, le=10000)
+    batch_size: int = Field(default=DEFAULT_BATCH_SIZE, ge=1, le=10000)
     """Number of records per batch write."""
 
-    checkpoint_interval: int = Field(default=1000, ge=100)
+    checkpoint_interval: int = Field(default=DEFAULT_CHECKPOINT_INTERVAL, ge=100)
     """Save checkpoint every N records."""
 
     relaxed_dq: bool = Field(default=False)
@@ -351,6 +357,5 @@ __all__ = [
     "SourceYamlConfig",
     "get_pipeline_config",
     "get_settings",
-    "load_source_config",
     "yaml_config_to_domain",
 ]

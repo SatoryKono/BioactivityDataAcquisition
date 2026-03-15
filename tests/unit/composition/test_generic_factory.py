@@ -6,7 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.datasource.factory import DataSourceRegistry
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceRegistry,
+)
 from bioetl.composition.factories.pipeline import GenericPipelineFactory
 from bioetl.composition.factories.pipeline import create_pipeline_factory
 

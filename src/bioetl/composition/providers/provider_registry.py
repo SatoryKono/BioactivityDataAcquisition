@@ -78,30 +78,12 @@ class ProviderRegistry:
 
     @classmethod
     def register(cls, name: str, config: ProviderConfig) -> None:
-        """Register a provider.
-
-        Re-registering the same provider overwrites the configuration.
-        This allows correct behavior during module reloads.
-
-        Args:
-            name: Unique provider name (e.g., "chembl", "pubchem").
-            config: Provider configuration.
-        """
+        """Register a provider (re-registration overwrites)."""
         register_provider_config(cls._providers, name, config)
 
     @classmethod
     def get(cls, name: str) -> ProviderConfig:
-        """Return provider configuration.
-
-        Args:
-            name: Provider name.
-
-        Returns:
-            Provider configuration.
-
-        Raises:
-            KeyError: If the provider is not registered.
-        """
+        """Return provider configuration; raises KeyError if unknown."""
         return get_provider_config(cls._providers, name)
 
     @classmethod
@@ -142,14 +124,7 @@ class ProviderRegistry:
 
     @classmethod
     def is_registered(cls, name: str) -> bool:
-        """Check whether a provider is registered.
-
-        Args:
-            name: Provider name.
-
-        Returns:
-            True if the provider is registered.
-        """
+        """Check whether a provider is registered."""
         return is_provider_registered(cls._providers, name)
 
     @classmethod
@@ -161,24 +136,7 @@ class ProviderRegistry:
         settings: Settings | None = None,
         **kwargs: object,
     ) -> DataSourcePort:
-        """Create a provider adapter instance using registry metadata.
-
-        Args:
-            name: Provider name (e.g., 'chembl', 'pubmed').
-            http_client: Optional HTTP client; required for providers with
-                requires_http_client=True.
-            logger: Optional LoggerPort; required for providers with
-                requires_logger=True.
-            settings: Optional application settings forwarded to custom creators.
-            **kwargs: Additional keyword arguments merged with provider default_kwargs.
-
-        Returns:
-            Configured DataSourcePort adapter for the provider.
-
-        Raises:
-            KeyError: If the provider is not registered.
-            ValueError: If http_client or logger is required but not provided.
-        """
+        """Create a provider adapter instance using registry metadata."""
         return create_provider_adapter(
             name=name,
             config=cls.get(name),
@@ -190,14 +148,7 @@ class ProviderRegistry:
 
     @classmethod
     def get_http_config(cls, name: str) -> HttpConfig | None:
-        """Return the HTTP configuration for a provider.
-
-        Args:
-            name: Provider name.
-
-        Returns:
-            HttpConfig or None if the provider does not use a shared HTTP client.
-        """
+        """Return the HTTP configuration for a provider, or None."""
         return cls.get(name).http_config
 
     @classmethod
@@ -211,28 +162,7 @@ class ProviderRegistry:
         metrics: MetricsPort | None = None,
         pipeline_name: str = "unknown",
     ) -> DataSourcePort:
-        """Create a fully configured data source with filtering support.
-
-        High-level method combining the functionality of ProviderRegistry
-        and the former DataSourceRegistry. Uses data_source_creator from
-        the provider configuration if one is specified.
-
-        Args:
-            name: Provider name.
-            settings: Application settings.
-            pipeline_config: Pipeline configuration from YAML.
-            logger: LoggerPort instance for structured logging.
-            filter_config: Optional filter configuration.
-            metrics: Optional MetricsPort for statistics.
-            pipeline_name: Pipeline name for metric labels.
-
-        Returns:
-            Configured DataSourcePort with filtering support.
-
-        Raises:
-            KeyError: If the provider is not registered.
-            ValueError: If data_source_creator is not set for the provider.
-        """
+        """Create a fully configured data source with filtering support."""
         return create_provider_data_source(
             name=name,
             config=cls.get(name),
@@ -246,25 +176,14 @@ class ProviderRegistry:
 
     @classmethod
     def has_data_source_creator(cls, name: str) -> bool:
-        """Check whether a provider has a data_source_creator.
-
-        Args:
-            name: Provider name.
-
-        Returns:
-            True if the provider has a data_source_creator.
-        """
+        """Check whether a provider has a data_source_creator."""
         if not cls.is_registered(name):
             return False
         return provider_has_data_source_creator(cls.get(name))
 
     @classmethod
     def list_providers(cls) -> list[str]:
-        """List all registered providers.
-
-        Returns:
-            Sorted list of provider names.
-        """
+        """Return sorted list of registered provider names."""
         return list_provider_names(cls._providers)
 
     @classmethod

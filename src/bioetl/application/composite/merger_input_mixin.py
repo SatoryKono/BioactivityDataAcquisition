@@ -8,7 +8,7 @@ from typing import Any, cast
 
 import polars as pl
 
-from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.join_planner_helpers import (
     count_qualified_columns,
     infer_pipeline_from_table,
@@ -78,7 +78,7 @@ class _MergeInputLoaderMixin:
     _logger: LoggerPort
     _storage: MergedStoragePort
     _delta_reader: DeltaReaderPort | None
-    _renamer: ColumnRenamerService
+    _renamer: ColumnRenamer
 
     async def _read_optional_merge_input(
         self,

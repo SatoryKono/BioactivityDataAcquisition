@@ -6,6 +6,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer import BatchTransformer
@@ -31,7 +32,6 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
-    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
         MemoryMonitorPort,
         TracingPort,
     )
-    from bioetl.domain.types import RunID
+    from bioetl.domain.types import GoldSchemaType, RunID
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +95,11 @@ def create_batch_processing_components(
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
     )
+    column_orderer = (
+        ColumnOrderer(context.logger, column_groups=config.column_groups)
+        if config.column_groups
+        else None
+    )
     writer = BatchWriter(
         storage=services.storage,
         context=context,
@@ -104,6 +109,7 @@ def create_batch_processing_components(
         batch_metrics=batch_metrics,
         tracer=tracer,
         lock_validator=lock_validator,
+        column_orderer=column_orderer,
     )
     return BatchProcessingComponents(
         batch_metrics=batch_metrics, transformer=transformer, writer=writer
@@ -134,7 +140,7 @@ def create_record_processor_from_pipeline(
     *,
     pipeline: BasePipeline,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: GoldSchemaType,
     callbacks: PipelineCallbacksContext,
     create_record_processor_fn: Callable[..., RecordProcessor],
     strict_gold_validation: bool = True,
@@ -172,7 +178,7 @@ def _build_record_processor_config(
     *,
     pipeline: BasePipeline,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: GoldSchemaType,
     strict_gold_validation: bool,
     bronze_output_path: str | None,
     silver_output_path: str | None,
@@ -205,7 +211,7 @@ def create_batch_executor_from_pipeline(
     pipeline: BasePipeline,
     callbacks: PipelineCallbacksContext,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: GoldSchemaType,
     checkpoint_manager: CheckpointManagerService,
     shutdown_signal: ShutdownSignal,
     create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],

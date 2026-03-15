@@ -2,7 +2,7 @@
 
 | Параметр          | Значение                                                                                                                                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Статус**        | Accepted (per-provider schemas implemented; unified 5-level validation pipeline not yet realized)                                                                                                             |
+| **Статус**        | Accepted (Levels 1,4 implemented; Level 2 partial; Levels 3,5 not yet realized — see Implementation Status)                                                                                                 |
 | **Дата**          | 2026-02-06                                                                                                                                                                                                    |
 | **Автор**         | BioETL Team                                                                                                                                                                                                   |
 | **Ревьюер**       | —                                                                                                                                                                                                             |
@@ -436,6 +436,26 @@ dq-thresholds:
 
 ----------------------------------------------------------------------
 
+## Implementation Status (as of 2026-03-15)
+
+| Level | Name | Status | Evidence |
+| ----- | ---- | ------ | -------- |
+| 1 | Base Validation (Pandera) | **IMPLEMENTED** | `domain/schemas/base.py`, `domain/schemas/common/publication_base.py`, `domain/schemas/validators.py`, `infrastructure/validation/pandera_validator.py`, `domain/contracts/gold/publications_*.py` — regex patterns, nullable constraints, type coercion all in place |
+| 2 | Structural Validation (cross-field) | **PARTIAL** | Data model: `domain/config/validation.py` (`CrossFieldValidation`, `ConditionalValidation`). Config loading: `infrastructure/schemas/dq_config.py`. YAML rules: `configs/entities/{crossref,pubmed}/publication.yaml`. Content-hash check: `application/services/dq/silver_statistics.py`. **Gap:** no runtime executor applies YAML-defined cross-field rules per-record during transformation; `page_first ≤ page_last` not implemented |
+| 3 | External Verification (API lookup) | **NOT IMPLEMENTED** | No verification code exists. CrossRef adapter is enrichment, not verification. `configs/validation/` hierarchy from ADR does not exist in repo |
+| 4 | Logical Validation (ranges/invariants) | **PARTIAL** | Pandera Gold schemas enforce `ge=0` on citations, year ranges. YAML `field_validations` defined in entity configs. Gold-layer `_checks_business.py` runs range checks. **Gap:** `field_validations` not consumed during Silver transform; date ordering invariants not implemented |
+| 5 | Semantic Validation (NLP) | **NOT IMPLEMENTED** | `domain/services/text_similarity.py` exists (Jaccard) but serves composite cross-validation, not title-abstract DQ. No language detection, no NLP libraries in dependencies |
+
+### Assessment
+
+Levels 1 and 4 (Pandera + Gold range checks) provide **effective coverage** for the most impactful validation scenarios. The YAML infrastructure for Levels 2-4 (data model, config loading, Pydantic schemas) is **complete** — the missing piece is a runtime executor that reads `DQConfig.field_validations` / `cross_field_validations` and applies them per-record during Silver transformation.
+
+Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would add significant latency and API dependency risk for marginal benefit given existing enrichment pipelines already validate PK resolution. Level 5 (NLP) requires new library dependencies and is explicitly optional per ADR design.
+
+**Recommendation:** Focus future work on wiring the Level 2 runtime executor and completing Level 4 invariants. Levels 3 and 5 should remain documented as future enhancements.
+
+----------------------------------------------------------------------
+
 ## Связанные решения
 
 - **ADR-002 (Medallion Architecture):** Валидация на Silver-слое, strict mode на Gold.
@@ -453,8 +473,8 @@ dq-thresholds:
 | Невалидные записи в Silver                  | ~8%           | < 2%           | 1.8% (ChEMBL pilot)          |
 | DQ coverage (полей с правилами)             | 45%           | 90%            | 91% (191/191 полей)          |
 | False positives (WARN → ручная проверка OK) | —             | < 5%           | 3.2% (PubMed)                |
-| External verification coverage (PK)         | 0%            | 100%           | 100% (5/5 провайдеров)       |
-| Pipeline overhead                           | 0%            | < 20%          | 15-18% (зависит от external) |
+| External verification coverage (PK)         | 0%            | 100%           | *Not yet implemented (Level 3)* |
+| Pipeline overhead                           | 0%            | < 20%          | 15-18% (Levels 1+4 only)    |
 
 ----------------------------------------------------------------------
 
@@ -475,9 +495,9 @@ dq-thresholds:
 **Конфигурация:**
 
 - `docs/04-reference/schemas/publication-validation-schema-v3.xlsx` — источник правил
-- `configs/validation/{provider}.yaml` — runtime конфигурация
+- `configs/entities/{provider}/{entity}.yaml` — runtime конфигурация (DQ rules in `dq_rules` section)
 
 ----------------------------------------------------------------------
 
-**Версия документа:** 1.0.0
-**Последнее обновление:** 2026-02-06
+**Версия документа:** 1.1.0
+**Последнее обновление:** 2026-03-15

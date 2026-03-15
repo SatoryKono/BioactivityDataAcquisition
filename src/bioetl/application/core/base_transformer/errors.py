@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.domain.exceptions.base import DataQualityError
 
-class TransformationError(Exception):
+
+class TransformationError(DataQualityError):
     """Raised when a transformation fails due to missing/invalid data."""
 
     def __init__(self, message: str, field: str | None = None) -> None:
@@ -11,7 +13,7 @@ class TransformationError(Exception):
         self.field = field
 
 
-class FilteredOutError(Exception):
+class FilteredOutError(DataQualityError):
     """Raised when a record is excluded by Silver filters."""
 
     def __init__(self, reason: str = "Record excluded by silver filters") -> None:

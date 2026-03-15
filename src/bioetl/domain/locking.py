@@ -15,6 +15,8 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
+
 if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
@@ -126,7 +128,7 @@ class LockContext:
             acquired_at=time.monotonic(),
         )
 
-    def is_valid(self, ttl_seconds: int = 3600) -> bool:
+    def is_valid(self, ttl_seconds: int = DEFAULT_LOCK_TTL_SECONDS) -> bool:
         """Check if lock context is still valid (not expired).
 
         Args:

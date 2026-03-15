@@ -3,47 +3,29 @@
 
 from __future__ import annotations
 
-import asyncio
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 import pyarrow as pa
-from deltalake import write_deltalake
 
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.export.csv_exporter import CsvExporter
-
-
-@dataclass(frozen=True, slots=True)
-class _MergedSilverWriteRequest:
-    """Normalized request carried through one merged Silver write flow."""
-
-    table_name: str
-    records: list[BronzeRecord]
-    primary_keys: list[str] | None = None
-    run_id: str | None = None
-    sources_used: list[str] | None = None
-    preserve_column_order: bool = False
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedMergedSilverWrite:
-    """Prepared merged Silver payload shared across write stages."""
-
-    request: _MergedSilverWriteRequest
-    table_path: str
-    arrow_table: pa.Table
+from bioetl.infrastructure.storage.silver_writer_merged_operations import (
+    _export_silver_merged_csv,
+    _MergedCsvExporterProtocol,
+    _MergedSilverWriteRequest,
+    _prepare_merged_silver_write,
+    _PreparedMergedSilverWrite,
+    _write_silver_merged_delta,
+)
 
 
 class _SilverWriterMergedContext(Protocol):
     """Structural type for mixin self dependencies."""
 
     logger: LoggerPort
-    csv_exporter: CsvExporter | None
+    csv_exporter: _MergedCsvExporterProtocol | None
+    _arrow_converter: ArrowDataConverter
 
     def _resolve_table_path(self, table_name: str) -> str: ...
 
@@ -74,15 +56,7 @@ class SilverWriterMergedMixin:
         Returns:
             Prepared write payload with resolved table path and normalized Arrow table.
         """
-        return _PreparedMergedSilverWrite(
-            request=request,
-            table_path=self._resolve_table_path(request.table_name),
-            arrow_table=ArrowDataConverter(logger=self.logger).convert_records_to_arrow(
-                request.records,
-                primary_keys=request.primary_keys,
-                apply_column_order=not request.preserve_column_order,
-            ),
-        )
+        return _prepare_merged_silver_write(self, request)
 
     async def _write_silver_merged_delta(
         self: _SilverWriterMergedContext,
@@ -96,12 +70,9 @@ class SilverWriterMergedMixin:
             table_path: File system path to the Delta table target.
             arrow_table: PyArrow Table to write in overwrite mode.
         """
-        await asyncio.to_thread(
-            write_deltalake,
-            table_path,
-            arrow_table,
-            mode="overwrite",
-            schema_mode="overwrite",
+        await _write_silver_merged_delta(
+            table_path=table_path,
+            arrow_table=arrow_table,
         )
 
     async def _export_silver_merged_csv(
@@ -116,12 +87,11 @@ class SilverWriterMergedMixin:
             table_name: Logical table name used as the CSV export target.
             arrow_table: PyArrow Table containing the merged records to export.
         """
-        if self.csv_exporter:
-            await self.csv_exporter.export(
-                table_name,
-                arrow_table,
-                append=False,
-            )
+        await _export_silver_merged_csv(
+            self,
+            table_name=table_name,
+            arrow_table=arrow_table,
+        )
 
     async def write_silver_merged(
         self: _SilverWriterMergedContext,

@@ -16,17 +16,17 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["ColumnRenamerService"]
+__all__ = ["ColumnRenamer"]
 
 
-class ColumnRenamerService:
+class ColumnRenamer:
     """Service for renaming columns to qualified format.
 
     Renames all business columns to {provider}.{entity}.{field} format.
     Excludes join keys and system columns from renaming.
 
     Example:
-        >>> renamer = ColumnRenamerService(logger)
+        >>> renamer = ColumnRenamer(logger)
         >>> result = renamer.rename_dataframe(df, "chembl_publication")
         >>> # 'title' -> 'chembl.publication.title'
         >>> # 'doi' -> 'doi' (join key, unchanged)

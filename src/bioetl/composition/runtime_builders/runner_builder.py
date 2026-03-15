@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
@@ -20,25 +19,18 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
     assemble_runtime_config,
     assemble_vacuum_settings,
     prepare_runner_inputs,
-    resolve_filter_batch_size,
-    resolve_health_check_mode,
-    validate_pk_contract,
 )
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
 from bioetl.domain.config import RuntimeConfig
-from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.config import (
     get_settings,
     load_pipeline_config,
     load_source_config,
 )
-from bioetl.infrastructure.observability import OpenTelemetryTracer, PrometheusMetrics
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
-from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
-# Backward-compat alias for legacy imports/tests.
+# Backward-compat alias retained for legacy bootstrap imports.
 VacuumConfig = VacuumSettings
 
 if TYPE_CHECKING:
@@ -47,109 +39,15 @@ if TYPE_CHECKING:
         CachedBronzeContext,
         PipelineRunContext,
     )
-    from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import PipelineFactoryPort
-    from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
-        InputFilterYamlConfig as YamlInputFilter,
-    )
-    from bioetl.infrastructure.schemas.pipeline_config import (
-        MaintenanceConfig,
         PipelineYamlConfig,
     )
 
 
 __all__ = ["build_pipeline_runner"]
-
-
-def _assemble_vacuum_settings(
-    *,
-    cli_vacuum: CliVacuumSettings,
-    yaml_maintenance: MaintenanceConfig,
-) -> VacuumSettings:
-    """Compatibility wrapper for legacy tests/monkeypatching."""
-    return assemble_vacuum_settings(
-        cli_vacuum=cli_vacuum,
-        yaml_maintenance=yaml_maintenance,
-    )
-
-
-def _assemble_runtime_config(
-    *,
-    ctx: PipelineRunContext,
-    heartbeat_interval: int,
-    vacuum: VacuumSettings,
-    health_check_mode: Literal["strict", "probe"],
-) -> RuntimeConfig:
-    """Compatibility wrapper for legacy tests/monkeypatching."""
-    return assemble_runtime_config(
-        ctx=ctx,
-        heartbeat_interval=heartbeat_interval,
-        vacuum=vacuum,
-        health_check_mode=health_check_mode,
-    )
-
-
-def _assemble_filter_config(
-    *,
-    yaml_filter: YamlInputFilter,
-    ctx: PipelineRunContext,
-    test_mode: bool,
-) -> InputFilterConfig | None:
-    """Compatibility wrapper for legacy tests/monkeypatching."""
-    return assemble_filter_config(
-        yaml_filter=yaml_filter,
-        ctx=ctx,
-        test_mode=test_mode,
-        filter_builder=FilterConfigBuilder,
-    )
-
-
-def _assemble_cached_bronze_context(ctx: PipelineRunContext) -> CachedBronzeContext:
-    """Compatibility wrapper for legacy tests/monkeypatching."""
-    return assemble_cached_bronze_context(ctx)
-
-
-def _build_observability_bundle(
-    *,
-    pipeline: str,
-    run_id: RunID,
-    settings: Settings,
-    log_level: str = "INFO",
-) -> ObservabilityBundle:
-    """Compatibility wrapper keeping patch-points in this module."""
-    return build_observability_bundle(
-        pipeline=pipeline,
-        run_id=run_id,
-        settings=settings,
-        log_level=log_level,
-        logger_factory=UnifiedLogger,
-        tracer_factory=OpenTelemetryTracer,
-        metrics_factory=PrometheusMetrics,
-        noop_tracing_factory=NoOpTracing,
-        noop_metrics_factory=NoOpMetrics,
-        dq_monitor_factory=DataQualityMonitorService,
-    )
-
-
-def _validate_pk_contract(config: PipelineYamlConfig) -> None:
-    """Compatibility wrapper for legacy tests/monkeypatching."""
-    validate_pk_contract(config)
-
-
-def _resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
-    """Compatibility wrapper for legacy tests/monkeypatching."""
-    return resolve_health_check_mode(settings=settings)
-
-
-def _resolve_filter_batch_size(yaml_config: PipelineYamlConfig) -> int | None:
-    """Compatibility wrapper for legacy tests/monkeypatching."""
-    return resolve_filter_batch_size(
-        yaml_config,
-        load_source_config_fn=load_source_config,
-    )
 
 
 def _initialize_registry(
