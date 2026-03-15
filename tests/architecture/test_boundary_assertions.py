@@ -23,7 +23,7 @@ EXPECTED_ASSERTIONS = [
     ("factories/services/port_factories.py", "create_checkpoint", "CheckpointPort"),
     ("factories/services/port_factories.py", "create_quarantine", "QuarantinePort"),
     ("factories/services/port_factories.py", "create_metrics", "MetricsPort"),
-    ("factories/datasource/factory.py", "create", "DataSourcePort"),
+    ("factories/datasource/data_source_factory.py", "create", "DataSourcePort"),
     (
         "bootstrap/assembly/checkpoint.py",
         "bootstrap_quarantine_port",

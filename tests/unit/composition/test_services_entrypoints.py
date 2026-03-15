@@ -39,10 +39,10 @@ class TestGetCheckpointService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_checkpoint_service",
+                "bioetl.composition._services.bootstrap_checkpoint_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -70,10 +70,10 @@ class TestGetQuarantineService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_quarantine_service",
+                "bioetl.composition._services.bootstrap_quarantine_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -101,10 +101,10 @@ class TestGetBronzeCleanupService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_bronze_cleanup_service",
+                "bioetl.composition._services.bootstrap_bronze_cleanup_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -132,10 +132,10 @@ class TestGetVacuumService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_vacuum_service",
+                "bioetl.composition._services.bootstrap_vacuum_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -163,10 +163,10 @@ class TestGetExportService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_export_service",
+                "bioetl.composition._services.bootstrap_export_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -194,10 +194,10 @@ class TestGetLockService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_lock_service",
+                "bioetl.composition._services.bootstrap_lock_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -230,7 +230,7 @@ class TestCleanupBronze:
 
         with (
             patch(
-                "bioetl.composition.entrypoints.get_bronze_cleanup_service",
+                "bioetl.composition._services.get_bronze_cleanup_service",
                 return_value=mock_service,
             ),
         ):
@@ -252,7 +252,7 @@ class TestCleanupBronze:
 
         with (
             patch(
-                "bioetl.composition.entrypoints.get_bronze_cleanup_service",
+                "bioetl.composition._services.get_bronze_cleanup_service",
                 return_value=mock_service,
             ),
         ):
@@ -272,7 +272,7 @@ class TestCleanupBronze:
 
         with (
             patch(
-                "bioetl.composition.entrypoints.get_bronze_cleanup_service",
+                "bioetl.composition._services.get_bronze_cleanup_service",
                 return_value=mock_service,
             ),
         ):
@@ -300,10 +300,10 @@ class TestGetPipelineRunnerService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_pipeline_runner_service",
+                "bioetl.composition._services.bootstrap_pipeline_runner_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -322,10 +322,10 @@ class TestGetPipelineRunnerService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_pipeline_runner_service",
+                "bioetl.composition._services.bootstrap_pipeline_runner_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -353,10 +353,10 @@ class TestGetConfigService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_config_service",
+                "bioetl.composition._services.bootstrap_config_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -384,10 +384,10 @@ class TestGetHealthService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_health_service",
+                "bioetl.composition._services.bootstrap_health_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -415,10 +415,10 @@ class TestGetHealthServerDependencies:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_health_server_dependencies",
+                "bioetl.composition._services.bootstrap_health_server_dependencies",
                 return_value=mock_deps,
             ) as mock_bootstrap,
         ):
@@ -446,10 +446,10 @@ class TestGetMetricsService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_metrics_service",
+                "bioetl.composition._services.bootstrap_metrics_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -477,10 +477,10 @@ class TestGetAdrService:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_adr_service",
+                "bioetl.composition._services.bootstrap_adr_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
@@ -508,10 +508,10 @@ class TestGetQuarantineStore:
 
         with (
             patch(
-                "bioetl.composition.entrypoints._ensure_registrations"
+                "bioetl.composition._services._ensure_registrations"
             ) as mock_ensure,
             patch(
-                "bioetl.composition.entrypoints.bootstrap_quarantine_port",
+                "bioetl.composition._services.bootstrap_quarantine_port",
                 return_value=mock_port,
             ) as mock_bootstrap,
         ):
@@ -529,7 +529,7 @@ class TestGetQuarantineStore:
 
         with (
             patch(
-                "bioetl.composition.entrypoints.bootstrap_quarantine_port",
+                "bioetl.composition._services.bootstrap_quarantine_port",
                 return_value=mock_port,
             ),
         ):

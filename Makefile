@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check qa-arch-fast qa-arch-full qa-types qa-debt
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -31,6 +31,11 @@ else
 	RUN := $(VENV_PYTHON) -m
 	PY_RUN := $(VENV_PYTHON)
 endif
+
+QUALITY_EXEMPTIONS_REGISTRY ?= configs/quality/architecture_metric_exemptions.yaml
+QUALITY_EXEMPTIONS_SCORECARD ?= configs/quality/debt_scorecard.yaml
+QUALITY_REPORT_OUTPUT ?= reports/quality/ci-quality-metrics.local.json
+QUALITY_SUMMARY_OUT ?=
 
 # Colors for output
 BLUE := \033[0;34m
@@ -401,6 +406,37 @@ arch-lint: ## Run import-linter contracts
 
 arch-all: arch-lint arch-test ## Run all architecture checks (lint + tests)
 	@echo "$(GREEN)All architecture checks passed!$(NC)"
+
+qa-arch-fast: ## Run canonical fast architecture gate used by CI baseline
+	@echo "$(BLUE)Running canonical fast architecture gate...$(NC)"
+	HYPOTHESIS_PROFILE=$${HYPOTHESIS_PROFILE:-ci} $(RUN) pytest tests/architecture/ -m "not slow and not serial" -q --tb=short
+	$(PY_RUN) src/tools/scripts/check_architecture.py
+	$(PY_RUN) scripts/qa/generate_architecture_dependency_map.py --check
+	@echo "$(GREEN)Canonical fast architecture gate passed!$(NC)"
+
+qa-arch-full: ## Run canonical full architecture gate used by blocking CI jobs
+	@echo "$(BLUE)Running canonical full architecture gate...$(NC)"
+	$(RUN) pytest tests/architecture/ -v --tb=short
+	$(RUN) lint-imports --config .importlinter
+	$(PY_RUN) src/tools/scripts/check_application_deps.py
+	$(PY_RUN) src/tools/scripts/check_architecture.py
+	@echo "$(GREEN)Canonical full architecture gate passed!$(NC)"
+
+qa-types: ## Run canonical strict type-checking gate used by CI
+	@echo "$(BLUE)Running canonical strict mypy gate...$(NC)"
+	rm -rf .mypy_cache
+	$(RUN) mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
+	@echo "$(GREEN)Canonical strict mypy gate passed!$(NC)"
+
+qa-debt: ## Run canonical quality debt gate used by CI
+	@echo "$(BLUE)Running canonical quality debt gate...$(NC)"
+	@mkdir -p reports/quality
+	$(PY_RUN) scripts/ci/quality_integral_gate.py \
+		--registry "$(QUALITY_EXEMPTIONS_REGISTRY)" \
+		--scorecard "$(QUALITY_EXEMPTIONS_SCORECARD)" \
+		--output "$(QUALITY_REPORT_OUTPUT)" $(if $(QUALITY_SUMMARY_OUT),\
+		--summary-out "$(QUALITY_SUMMARY_OUT)",)
+	@echo "$(GREEN)Canonical quality debt gate passed!$(NC)"
 
 complexity: ## Check cyclomatic complexity (max CC=10)
 	@echo "$(BLUE)Checking code complexity...$(NC)"

@@ -10,25 +10,13 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 TESTS_ROOT = ROOT / "tests"
-COMPAT_PARENT_IMPORTS = {
-    "bioetl.application.composite": frozenset(
-        {
-            "merger_compat_mixin",
-        }
-    ),
-}
-ALLOWED_SRC_IMPORTS = {
-    "bioetl.application.composite.merger_compat_mixin": frozenset(
-        {
-            ROOT / "src" / "bioetl" / "application" / "composite" / "merger.py",
-        }
-    ),
-}
-ALLOWED_TEST_IMPORTS = {
-    "bioetl.application.composite.merger_compat_mixin": frozenset(),
-}
+COMPAT_PARENT_IMPORTS: dict[str, frozenset[str]] = {}
+ALLOWED_SRC_IMPORTS: dict[str, frozenset[Path]] = {}
+ALLOWED_TEST_IMPORTS: dict[str, frozenset[Path]] = {}
 REMOVED_COMPAT_MODULES = frozenset(
     {
+        "bioetl.application.composite.merger_compat_mixin",
+        "bioetl.application.composite.merger_compat_join_planner_mixin",
         "bioetl.application.composite.join_planner_compat_mixin",
         "bioetl.application.composite.runner",
     }
@@ -36,6 +24,7 @@ REMOVED_COMPAT_MODULES = frozenset(
 REMOVED_COMPAT_PARENT_IMPORTS = {
     "bioetl.application.composite": frozenset(
         {
+            "merger_compat_mixin",
             "join_planner_compat_mixin",
             "runner",
         }
@@ -43,6 +32,18 @@ REMOVED_COMPAT_PARENT_IMPORTS = {
 }
 REMOVED_COMPAT_FILES = frozenset(
     {
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "composite"
+        / "merger_compat_mixin.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "composite"
+        / "merger_compat_join_planner_mixin.py",
         ROOT
         / "src"
         / "bioetl"
@@ -130,7 +131,7 @@ def _iter_removed_import_records(search_root: Path) -> list[tuple[Path, int, str
 
 @pytest.mark.architecture
 def test_application_composite_compat_surfaces_are_confined_in_src() -> None:
-    """First-party src must not grow new imports of composite compatibility modules."""
+    """First-party src must not grow new imports of active composite compat modules."""
     violations = _format_violations(
         _iter_import_records(SRC_ROOT),
         allowed_imports=ALLOWED_SRC_IMPORTS,
@@ -143,7 +144,7 @@ def test_application_composite_compat_surfaces_are_confined_in_src() -> None:
 
 @pytest.mark.architecture
 def test_application_composite_compat_surfaces_are_confined_in_tests() -> None:
-    """Ordinary tests must not accumulate new imports of composite compatibility modules."""
+    """Ordinary tests must not accumulate new imports of active composite compat modules."""
     violations = _format_violations(
         _iter_import_records(TESTS_ROOT),
         allowed_imports=ALLOWED_TEST_IMPORTS,
@@ -155,7 +156,7 @@ def test_application_composite_compat_surfaces_are_confined_in_tests() -> None:
 
 
 @pytest.mark.architecture
-def test_removed_application_composite_runner_facade_file_stays_absent() -> None:
+def test_removed_application_composite_compat_shim_files_stay_absent() -> None:
     """Removed application.composite compat shims should stay absent."""
     lingering = sorted(
         path.relative_to(ROOT).as_posix()
@@ -169,7 +170,7 @@ def test_removed_application_composite_runner_facade_file_stays_absent() -> None
 
 
 @pytest.mark.architecture
-def test_removed_application_composite_runner_facade_is_not_imported() -> None:
+def test_removed_application_composite_compat_shims_are_not_imported() -> None:
     """Removed application.composite compat shims must not be imported."""
     records = _iter_removed_import_records(SRC_ROOT)
     records.extend(_iter_removed_import_records(TESTS_ROOT))

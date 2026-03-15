@@ -421,25 +421,24 @@ class TestMixedErrorTypesDuringDegradation:
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
     @pytest.mark.unit
-    async def test_business_errors_count_as_failures(self) -> None:
-        """Mixed errors: All exceptions count in circuit breaker.
+    async def test_business_errors_do_not_trip_breaker(self) -> None:
+        """Business errors (ValueError) must NOT trip the circuit breaker.
 
-        Note: CircuitBreakerGuard itself counts all exceptions. Error classification
-        (is_circuit_breaker_error) is used at HTTP client level to demolecule_ide
-        whether to pass failure to circuit breaker.
+        After RF-001, CALL_OPERATION_ERRORS only includes transient infrastructure
+        errors. Programming/business errors propagate without affecting CB state.
         """
         cb = CircuitBreakerGuard(provider="test", failure_threshold=2)
 
         async def business_error() -> None:
             raise ValueError("Invalid data")
 
-        # Business errors DO count when passed to circuit breaker
         for _ in range(2):
             with pytest.raises(ValueError):
                 await cb.call(business_error)
 
-        # Circuit opens because CB counts all exceptions
-        assert cb.get_state() == CircuitBreakerState.OPEN
+        # Circuit stays CLOSED — ValueError is not a transient error
+        assert cb.get_state() == CircuitBreakerState.CLOSED
+        assert cb.get_failure_count() == 0
 
 
 class TestConcurrentHalfOpenProbes:

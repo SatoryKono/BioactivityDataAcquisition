@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+from bioetl.infrastructure.storage.silver_writer_validation_operations import (
     _PreparedSilverWritePayload,
 )
 

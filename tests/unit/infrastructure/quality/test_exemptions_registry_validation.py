@@ -131,12 +131,21 @@ class TestGetPolicyRequiredFields:
         """Valid policy with all required fields should return without errors."""
         raw = {
             "policy": {
-                "required_fields": ["owner", "reason", "expires_on", "removal_step"]
+                "required_fields": [
+                    "owner",
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
             }
         }
         errors: list[str] = []
         result = get_policy_required_fields(raw, errors)
         assert "owner" in result
+        assert "classification" in result
+        assert "linked_rf" in result
         assert "removal_step" in result
         assert errors == []
 
@@ -150,21 +159,84 @@ class TestGetPolicyRequiredFields:
 
     def test_missing_owner_in_fields(self) -> None:
         """Policy without 'owner' should add error."""
-        raw = {"policy": {"required_fields": ["reason", "expires_on", "removal_step"]}}
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
+            }
+        }
         errors: list[str] = []
         get_policy_required_fields(raw, errors)
         assert any("owner" in e for e in errors)
 
+    def test_missing_classification(self) -> None:
+        """Policy without 'classification' should add error."""
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "owner",
+                    "reason",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
+            }
+        }
+        errors: list[str] = []
+        get_policy_required_fields(raw, errors)
+        assert any("classification" in e for e in errors)
+
+    def test_missing_linked_rf(self) -> None:
+        """Policy without 'linked_rf' should add error."""
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "owner",
+                    "reason",
+                    "classification",
+                    "expires_on",
+                    "removal_step",
+                ]
+            }
+        }
+        errors: list[str] = []
+        get_policy_required_fields(raw, errors)
+        assert any("linked_rf" in e for e in errors)
+
     def test_missing_removal_step(self) -> None:
         """Policy without 'removal_step' should add error."""
-        raw = {"policy": {"required_fields": ["owner", "expires_on"]}}
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "owner",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                ]
+            }
+        }
         errors: list[str] = []
         get_policy_required_fields(raw, errors)
         assert any("removal_step" in e for e in errors)
 
     def test_missing_due_date_field(self) -> None:
         """Policy without any due-date field should add error."""
-        raw = {"policy": {"required_fields": ["owner", "reason", "removal_step"]}}
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "owner",
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "removal_step",
+                ]
+            }
+        }
         errors: list[str] = []
         get_policy_required_fields(raw, errors)
         assert any("due date" in e for e in errors)
@@ -308,6 +380,8 @@ class TestValidateExemptionEntry:
             "value": 500,
             "owner": "alice",
             "reason": "legacy code",
+            "classification": "technical_debt",
+            "linked_rf": "RF-001",
             "expires_on": "2026-12-31",
             "removal_step": "refactor module",
         }
@@ -320,7 +394,15 @@ class TestValidateExemptionEntry:
             "reg_a",
             "my_module.py",
             self._valid_entry(),
-            ("value", "owner", "reason", "expires_on", "removal_step"),
+            (
+                "value",
+                "owner",
+                "reason",
+                "classification",
+                "linked_rf",
+                "expires_on",
+                "removal_step",
+            ),
             date(2025, 6, 15),
             errors,
             expired,
@@ -399,12 +481,72 @@ class TestValidateExemptionEntry:
                 "value": 100,
                 "owner": "alice",
                 "reason": "old",
+                "classification": "technical_debt",
+                "linked_rf": "RF-001",
                 "expires_on": "2020-01-01",
                 "removal_step": "fix it",
             },
-            ("value", "owner", "reason", "expires_on", "removal_step"),
+            (
+                "value",
+                "owner",
+                "reason",
+                "classification",
+                "linked_rf",
+                "expires_on",
+                "removal_step",
+            ),
             date(2025, 6, 15),
             errors,
             expired,
         )
         assert len(expired) == 1
+
+    def test_invalid_classification_adds_error(self) -> None:
+        """Unknown classification should be rejected."""
+        errors: list[str] = []
+        expired: list[str] = []
+        entry = self._valid_entry()
+        entry["classification"] = "temporary"
+        validate_exemption_entry(
+            "reg_a",
+            "my_module.py",
+            entry,
+            (
+                "value",
+                "owner",
+                "reason",
+                "classification",
+                "linked_rf",
+                "expires_on",
+                "removal_step",
+            ),
+            date(2025, 6, 15),
+            errors,
+            expired,
+        )
+        assert any("classification must be one of" in error for error in errors)
+
+    def test_invalid_linked_rf_adds_error(self) -> None:
+        """Tracking id should follow RF-001/QG-001 style format."""
+        errors: list[str] = []
+        expired: list[str] = []
+        entry = self._valid_entry()
+        entry["linked_rf"] = "ticket-1"
+        validate_exemption_entry(
+            "reg_a",
+            "my_module.py",
+            entry,
+            (
+                "value",
+                "owner",
+                "reason",
+                "classification",
+                "linked_rf",
+                "expires_on",
+                "removal_step",
+            ),
+            date(2025, 6, 15),
+            errors,
+            expired,
+        )
+        assert any("linked_rf must match" in error for error in errors)

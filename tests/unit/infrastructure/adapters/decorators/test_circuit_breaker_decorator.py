@@ -377,3 +377,47 @@ class TestCircuitBreakerDecoratorLogging:
         mock_logger.warning.assert_called()
         call_args = mock_logger.warning.call_args
         assert call_args[0][0] == "circuit_breaker_rejecting"
+
+
+class TestCircuitBreakerDecoratorRecoveryTimeout:
+    """Tests for RF-002: recovery_timeout propagation to CircuitBreakerOpenError."""
+
+    @pytest.mark.asyncio
+    async def test_retry_after_uses_guard_recovery_timeout(
+        self,
+        mock_data_source: MockDataSource,
+    ) -> None:
+        """retry_after in CircuitBreakerOpenError should match guard's recovery_timeout."""
+        cb = MockCircuitBreaker(state=CircuitBreakerState.OPEN)
+        cb.recovery_timeout = 120  # type: ignore[attr-defined]
+
+        decorator = CircuitBreakerDataSourceDecorator(
+            data_source=mock_data_source,
+            circuit_breaker=cb,
+        )
+
+        async with decorator:
+            with pytest.raises(CircuitBreakerOpenError) as exc_info:
+                _ = [r async for r in decorator.fetch("activity")]
+
+        assert exc_info.value.retry_after == 120.0
+
+    @pytest.mark.asyncio
+    async def test_retry_after_defaults_when_no_recovery_timeout_attr(
+        self,
+        mock_data_source: MockDataSource,
+        mock_circuit_breaker: MockCircuitBreaker,
+    ) -> None:
+        """retry_after should default to 60.0 when guard lacks recovery_timeout."""
+        mock_circuit_breaker.set_state(CircuitBreakerState.OPEN)
+
+        decorator = CircuitBreakerDataSourceDecorator(
+            data_source=mock_data_source,
+            circuit_breaker=mock_circuit_breaker,
+        )
+
+        async with decorator:
+            with pytest.raises(CircuitBreakerOpenError) as exc_info:
+                _ = [r async for r in decorator.fetch("activity")]
+
+        assert exc_info.value.retry_after == 60.0

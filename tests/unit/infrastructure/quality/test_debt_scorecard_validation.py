@@ -21,7 +21,13 @@ def _minimal_valid_scorecard() -> dict[str, object]:
         },
         "governance": {
             "review_policy": {
-                "new_exemption_requires": ["owner", "expires_on", "removal_step"]
+                "new_exemption_requires": [
+                    "owner",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
             },
             "owner_registry_q2_subsystems": {
                 "sub_a": {"owner": "alice"},

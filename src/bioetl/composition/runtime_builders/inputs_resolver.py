@@ -57,8 +57,8 @@ class RunnerInputs:
 
 
 __all__ = [
-    "RunnerInputs",
     "ResolvedVacuumSettings",
+    "RunnerInputs",
     "adjust_batch_size_for_filter",
     "assemble_cached_bronze_context",
     "assemble_filter_config",

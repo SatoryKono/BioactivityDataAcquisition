@@ -10,15 +10,15 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.inputs_resolver import (
-    RunnerInputs as _RunnerInputs,
-)
-from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
     assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
     prepare_runner_inputs,
+)
+from bioetl.composition.runtime_builders.inputs_resolver import (
+    RunnerInputs as _RunnerInputs,
 )
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,

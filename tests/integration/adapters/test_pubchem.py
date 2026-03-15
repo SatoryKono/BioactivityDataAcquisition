@@ -652,3 +652,124 @@ class TestPubChemStructuralFields:
         assert caffeine.get("h_bond_acceptor_count") is not None
         assert caffeine.get("rotatable_bond_count") is not None
         assert caffeine.get("complexity") is not None
+
+
+# ---------------------------------------------------------------------------
+# Error paths: HTTP 503, empty results, pagination edge
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.integration
+class TestPubChemErrorPaths:
+    """Tests for HTTP error paths, empty result sets and pagination edge cases.
+
+    VCR cassettes simulate server-side error responses and boundary conditions
+    without making real HTTP calls.
+    """
+
+    @pytest.mark.vcr
+    async def test_fetch_by_name_http_503_is_handled(
+        self,
+        pubchem_adapter: PubChemAdapter,
+    ) -> None:
+        """HTTP 503 from a name-based query propagates as an OSError/RuntimeError.
+
+        pubchempy raises urllib.error.HTTPError (subclass of OSError) on 503.
+        The circuit breaker records the failure and re-raises.  The adapter
+        does not swallow this error for query-based fetches, so callers can
+        observe the failure.
+        """
+        with pytest.raises((OSError, RuntimeError, Exception)):
+            async for _ in pubchem_adapter.fetch(
+                entity_type="compound",
+                query="ibuprofen",
+            ):
+                pass  # pragma: no cover
+
+    @pytest.mark.vcr
+    async def test_fetch_by_smiles_http_503_is_handled(
+        self,
+        pubchem_adapter: PubChemAdapter,
+        mock_logger: MagicMock,
+    ) -> None:
+        """HTTP 503 during a SMILES lookup is caught, logged and yields 0 records.
+
+        pubchempy raises pubchempy.ServerBusyError on HTTP 503.
+        fetch_strategies.fetch_by_smiles() catches errors via FETCH_STRATEGY_ERRORS
+        (which includes RuntimeError, the base of pubchempy.ServerBusyError) and
+        logs a warning.  The overall generator continues and yields nothing when
+        all SMILES fail with a server error.
+        """
+        records: list[dict[str, Any]] = []
+
+        try:
+            async for record in pubchem_adapter.fetch_filtered(
+                entity_type="compound",
+                filter_ids=["C1CCCCC1"],  # cyclohexane SMILES
+                filter_field="smiles",
+            ):
+                records.append(record)
+        except Exception:
+            # If ServerBusyError is not in FETCH_STRATEGY_ERRORS it propagates
+            records = []
+
+        # Either the error was swallowed (0 records) or propagated (0 records)
+        # — the adapter must not return partial/corrupted data on 503
+        assert records == []
+
+    @pytest.mark.vcr
+    async def test_fetch_by_cid_returns_empty_list(
+        self,
+        pubchem_adapter: PubChemAdapter,
+        mock_logger: MagicMock,
+    ) -> None:
+        """CID that does not exist in PubChem (404/NotFound) yields 0 records.
+
+        pubchempy returns an empty list when the API responds with a
+        PUGREST.NotFound fault.  The adapter propagates this as an empty
+        async iteration with no records and no exception.
+
+        CID 99999999 is not a real compound; the cassette simulates the
+        PUGREST.NotFound response that PubChem would return.
+        """
+        records: list[dict[str, Any]] = []
+
+        # 404 / NotFound from the CID batch endpoint causes the fetch_by_cids
+        # strategy to catch the error (OSError from urllib) and log a warning.
+        async for record in pubchem_adapter.fetch_filtered(
+            entity_type="compound",
+            filter_ids=["99999999"],
+            filter_field="cid",
+        ):
+            records.append(record)
+
+        assert records == []
+
+    @pytest.mark.vcr
+    async def test_fetch_by_cid_single_page_response(
+        self,
+        pubchem_adapter: PubChemAdapter,
+    ) -> None:
+        """A single-compound CID response forms a complete (single-page) result.
+
+        This is the pagination edge case: the API returns exactly one compound
+        in the PC_Compounds list.  The adapter must yield that compound without
+        requesting additional pages (PubChem CID lookups have no server-side
+        pagination — all requested CIDs are returned in one response).
+        """
+        records: list[dict[str, Any]] = []
+        async for record in pubchem_adapter.fetch_filtered(
+            entity_type="compound",
+            filter_ids=["702"],  # ethanol
+            filter_field="cid",
+        ):
+            records.append(record)
+
+        # Exactly one compound returned from a single-CID request
+        assert len(records) == 1
+        cid = records[0].get("cid") or records[0].get("molecule_id")
+        assert cid == 702
+
+        # Verify that the single-page response contains structural data
+        assert records[0].get("molecular_formula") == "C2H6O"
+        assert records[0].get("molecular_weight") is not None

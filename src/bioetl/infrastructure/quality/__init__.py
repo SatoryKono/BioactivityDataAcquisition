@@ -19,6 +19,7 @@ from bioetl.infrastructure.quality.exemptions_registry import (
     load_exemptions_registry,
     resolve_registry_value,
     validate_exemption_key_normalization,
+    validate_exemption_target_references,
     validate_exemptions_registry,
 )
 
@@ -36,6 +37,7 @@ __all__ = [
     "split_growth_violations_by_severity",
     "validate_debt_scorecard",
     "validate_exemption_key_normalization",
+    "validate_exemption_target_references",
     "validate_exemptions_registry",
     "validate_scorecard_registry_sync",
 ]

@@ -149,17 +149,8 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
 
-            -   name: Architecture tests (all)
-                run: uv run pytest tests/architecture/ -v --tb=short
-
-            -   name: Import Linter contract
-                run: uv run lint-imports --config .importlinter
-
-            -   name: Application layer dependency graph
-                run: uv run python src/tools/scripts/check_application_deps.py
-
-            -   name: Infrastructure layer architecture check
-                run: uv run python src/tools/scripts/check_architecture.py
+            -   name: Run canonical full architecture gate
+                run: make qa-arch-full
 
     unit-tests:
         needs: lint

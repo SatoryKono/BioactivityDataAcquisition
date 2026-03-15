@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         LoggerPort,
         SilverDQConfigPort,
         StorageMaintenancePort,
+        TracingPort,
     )
 
 
@@ -102,6 +103,7 @@ def build_postrun_service(
     logger_port: LoggerPort,
     lifecycle_service: MedallionLifecycleService,
     dq_configs: DQConfigsContext,
+    tracer: TracingPort | None = None,
 ) -> PostrunService:
     """Build the postrun service and its collaborators in the composition layer."""
     dq_service = DataQualityService(
@@ -134,4 +136,5 @@ def build_postrun_service(
         dependencies=dependencies,
         metadata_coordinator=pipeline.services.metadata_coordinator,
         metadata_writer=pipeline.services.metadata_writer,
+        tracer=tracer,
     )

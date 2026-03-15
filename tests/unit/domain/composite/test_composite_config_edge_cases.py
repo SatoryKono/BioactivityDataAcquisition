@@ -14,6 +14,8 @@ from bioetl.domain.composite.config import (
     ExecutionConfig,
     MergeConfig,
     SeedConfig,
+)
+from bioetl.domain.composite.config_validators import (
     _validate_optional_threshold,
     _validate_positive,
     _validate_threshold_order,

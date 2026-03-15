@@ -233,12 +233,9 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 | `merger_orchestration.py`         | Оркестрация merge workflow                                |
 | `merger_post_join.py`             | Post-join обработка (conflict resolution, coalesce)       |
 
-Compat mixins (backward compatibility, thin delegation):
-
-| Файл                                  | Назначение                                       |
-| ------------------------------------- | ------------------------------------------------ |
-| `merger_compat_mixin.py`              | Compat wrappers для conflict/coalesce policy      |
-| `merger_compat_join_planner_mixin.py` | Compat wrappers для join planner operations       |
+Compatibility mixins for `MergeService` removed in RF-002. Remaining private legacy
+helper methods now live directly on `merger.py`, while canonical behavior stays in the
+collaborator services listed below.
 
 #### 2.5.3. Column и Join Infrastructure
 

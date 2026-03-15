@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Protocol
+from collections.abc import Awaitable, Callable
 
 import pyarrow as pa
 
@@ -20,32 +20,27 @@ from bioetl.infrastructure.storage.silver_writer_merged_operations import (
 )
 
 
-class _SilverWriterMergedContext(Protocol):
-    """Structural type for mixin self dependencies."""
+class SilverWriterMergedMixin:
+    """Merged write path extracted from ``SilverWriter`` class body."""
 
     logger: LoggerPort
     csv_exporter: _MergedCsvExporterProtocol | None
     _arrow_converter: ArrowDataConverter
-
-    def _resolve_table_path(self, table_name: str) -> str: ...
-
-    async def _write_silver_merged_metadata(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        run_id: str | None,
-        sources_used: list[str] | None,
-    ) -> None: ...
-
-
-class SilverWriterMergedMixin:
-    """Merged write path extracted from ``SilverWriter`` class body."""
+    _resolve_table_path: Callable[[str], str]
+    _write_silver_merged_metadata: Callable[
+        [
+            str,
+            str,
+            list[BronzeRecord],
+            list[str],
+            str | None,
+            list[str] | None,
+        ],
+        Awaitable[None],
+    ]
 
     def _prepare_merged_silver_write(
-        self: _SilverWriterMergedContext,
+        self,
         request: _MergedSilverWriteRequest,
     ) -> _PreparedMergedSilverWrite:
         """Prepare normalized Arrow payload and resolved table path for merged writes.
@@ -59,7 +54,7 @@ class SilverWriterMergedMixin:
         return _prepare_merged_silver_write(self, request)
 
     async def _write_silver_merged_delta(
-        self: _SilverWriterMergedContext,
+        self,
         *,
         table_path: str,
         arrow_table: pa.Table,
@@ -76,7 +71,7 @@ class SilverWriterMergedMixin:
         )
 
     async def _export_silver_merged_csv(
-        self: _SilverWriterMergedContext,
+        self,
         *,
         table_name: str,
         arrow_table: pa.Table,
@@ -94,7 +89,7 @@ class SilverWriterMergedMixin:
         )
 
     async def write_silver_merged(
-        self: _SilverWriterMergedContext,
+        self,
         table_name: str,
         records: list[BronzeRecord],
         primary_keys: list[str] | None = None,

@@ -7,8 +7,17 @@ from datetime import date
 
 from bioetl.domain.types import JsonDict
 
-_DEFAULT_REQUIRED_FIELDS = ("value", "owner", "reason", "expires_on", "removal_step")
+_DEFAULT_REQUIRED_FIELDS = (
+    "value",
+    "owner",
+    "reason",
+    "classification",
+    "linked_rf",
+    "expires_on",
+    "removal_step",
+)
 _DUE_DATE_FIELDS = ("expires_on", "due_on")
+_ALLOWED_CLASSIFICATIONS = frozenset({"technical_debt", "intentional_exception"})
 _PLACEHOLDER_NAME_RE = re.compile(
     r"^(todo|tbd|unknown|temp|fixme|example|placeholder)$",
     re.IGNORECASE,
@@ -17,6 +26,7 @@ _PLACEHOLDER_OWNER_RE = re.compile(
     r"^(todo|tbd|unknown|none|unassigned|team)$",
     re.IGNORECASE,
 )
+_TRACKING_ID_RE = re.compile(r"^(?:RF|QG|AUD|DOC|CFG|DBG)-\d{3}$")
 
 
 def _validate_required_fields(
@@ -65,7 +75,7 @@ def get_policy_required_fields(
     raw: JsonDict,  # Any: DQ check values vary by check type
     metadata_errors: list[str],
 ) -> tuple[str, ...]:
-    """Read required field policy and enforce owner+due-date governance."""
+    """Read required field policy and enforce tracking/removal governance."""
     required_fields: tuple[str, ...]
     policy = raw.get("policy", {})
     if not isinstance(policy, dict):
@@ -79,6 +89,10 @@ def get_policy_required_fields(
 
     if "owner" not in required_fields:
         metadata_errors.append("policy.required_fields must include 'owner'")
+    if "classification" not in required_fields:
+        metadata_errors.append("policy.required_fields must include 'classification'")
+    if "linked_rf" not in required_fields:
+        metadata_errors.append("policy.required_fields must include 'linked_rf'")
     if "removal_step" not in required_fields:
         metadata_errors.append("policy.required_fields must include 'removal_step'")
     if not any(field in required_fields for field in _DUE_DATE_FIELDS):
@@ -98,6 +112,46 @@ def _validate_owner(
     owner = entry.get("owner")
     if isinstance(owner, str) and _PLACEHOLDER_OWNER_RE.match(owner.strip()):
         metadata_errors.append(f"{prefix}: owner placeholder is not allowed")
+
+
+def _validate_classification(
+    prefix: str,
+    entry: JsonDict,  # Any: DQ check values vary by check type
+    metadata_errors: list[str],
+) -> None:
+    """Validate exemption classification uses the approved vocabulary."""
+    classification = entry.get("classification")
+    if not isinstance(classification, str) or not classification.strip():
+        metadata_errors.append(
+            f"{prefix}: classification must be non-empty string "
+            f"({', '.join(sorted(_ALLOWED_CLASSIFICATIONS))})"
+        )
+        return
+
+    normalized = classification.strip()
+    if normalized not in _ALLOWED_CLASSIFICATIONS:
+        metadata_errors.append(
+            f"{prefix}: classification must be one of "
+            f"{', '.join(sorted(_ALLOWED_CLASSIFICATIONS))}"
+        )
+
+
+def _validate_linked_rf(
+    prefix: str,
+    entry: JsonDict,  # Any: DQ check values vary by check type
+    metadata_errors: list[str],
+) -> None:
+    """Validate tracking link format for exemption follow-up work."""
+    linked_rf = entry.get("linked_rf")
+    if not isinstance(linked_rf, str) or not linked_rf.strip():
+        metadata_errors.append(
+            f"{prefix}: linked_rf must be non-empty tracking id like RF-001 or QG-001"
+        )
+        return
+    if _TRACKING_ID_RE.match(linked_rf.strip()) is None:
+        metadata_errors.append(
+            f"{prefix}: linked_rf must match RF-001/QG-001 style tracking id"
+        )
 
 
 def _resolve_due_field(
@@ -171,6 +225,8 @@ def validate_exemption_entry(
 
     _validate_required_fields(prefix, entry, required_fields, metadata_errors)
     _validate_owner(prefix, entry, metadata_errors)
+    _validate_classification(prefix, entry, metadata_errors)
+    _validate_linked_rf(prefix, entry, metadata_errors)
     _validate_due_date(
         prefix,
         entry,

@@ -10,6 +10,7 @@ from bioetl.infrastructure.quality import (
     get_registry_values,
     load_exemptions_registry,
     validate_exemption_key_normalization,
+    validate_exemption_target_references,
     validate_exemptions_registry,
 )
 
@@ -39,8 +40,10 @@ def test_exemption_registry_file_size_keys_are_normalized() -> None:
     )
 
 
-def test_exemption_registry_policy_requires_owner_removal_step_and_due_date() -> None:
-    """Registry policy must enforce owner/removal-step/due-date metadata."""
+def test_exemption_registry_policy_requires_tracking_classification_and_due_date() -> (
+    None
+):
+    """Registry policy must enforce tracking/classification/removal metadata."""
     raw = load_exemptions_registry()
     policy = raw.get("policy", {})
     assert isinstance(policy, dict), "policy section must be a mapping"
@@ -48,11 +51,26 @@ def test_exemption_registry_policy_requires_owner_removal_step_and_due_date() ->
     required_fields = policy.get("required_fields", [])
     assert isinstance(required_fields, list), "policy.required_fields must be a list"
     assert "owner" in required_fields, "policy.required_fields must include 'owner'"
+    assert "classification" in required_fields, (
+        "policy.required_fields must include 'classification'"
+    )
+    assert "linked_rf" in required_fields, (
+        "policy.required_fields must include 'linked_rf'"
+    )
     assert "removal_step" in required_fields, (
         "policy.required_fields must include 'removal_step'"
     )
     assert any(field in required_fields for field in ("expires_on", "due_on")), (
         "policy.required_fields must include due-date field ('expires_on' or 'due_on')"
+    )
+
+
+def test_exemption_registry_targets_are_live() -> None:
+    """Path- and symbol-based exemptions must point to live source targets."""
+    target_errors = validate_exemption_target_references()
+    assert not target_errors, (
+        "Exemption registry target-reference errors found:\n"
+        + "\n".join(f"  - {e}" for e in target_errors)
     )
 
 

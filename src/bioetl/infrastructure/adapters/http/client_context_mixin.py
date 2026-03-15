@@ -17,6 +17,7 @@ class HTTPClientContextMixin:
     contact_email: str | None
     run_id: object | None
     timeout: float
+    read_timeout_multiplier: float
     max_connections: int
     max_keepalive_connections: int
 
@@ -37,7 +38,7 @@ class HTTPClientContextMixin:
         self._client = httpx.AsyncClient(
             timeout=httpx.Timeout(
                 connect=self.timeout,
-                read=self.timeout * 2,
+                read=self.timeout * self.read_timeout_multiplier,
                 write=self.timeout,
                 pool=self.timeout,
             ),

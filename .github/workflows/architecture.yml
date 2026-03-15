@@ -59,17 +59,11 @@ jobs:
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "arch-metrics"
 
-            -   name: Run fast architecture baseline
+            -   name: Run canonical fast architecture gate
                 run: |
-                    uv run pytest tests/architecture/ \
-                      -m "not slow and not serial" \
-                      -q --tb=short
-
-            -   name: Infrastructure layer architecture check
-                run: uv run python src/tools/scripts/check_architecture.py
-
-            -   name: Check architecture dependency docs drift
-                run: uv run python scripts/qa/generate_architecture_dependency_map.py --check
+                    # Keep the fast baseline aligned with the ratchet contract:
+                    # pytest tests/architecture/ -m "not slow and not serial"
+                    make qa-arch-fast
 
     architecture-heavy-nightly:
         if: >

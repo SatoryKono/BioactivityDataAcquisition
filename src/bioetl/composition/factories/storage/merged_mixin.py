@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, Protocol, cast
 
 from bioetl.domain.types import JsonDict
 
@@ -13,6 +13,21 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = ["StorageAdapterMergedMixin"]
+
+
+class _SilverMergedWriteProtocol(Protocol):
+    """Minimal bound-method contract for merged Silver writes."""
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[JsonDict],
+        primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
+    ) -> None: ...
 
 
 class StorageAdapterMergedMixin:
@@ -89,7 +104,10 @@ class StorageAdapterMergedMixin:
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
         """
-        await self.silver.write_silver_merged(
+        await cast(
+            _SilverMergedWriteProtocol,
+            self.silver,
+        ).write_silver_merged(
             table_name,
             records,
             primary_keys,
