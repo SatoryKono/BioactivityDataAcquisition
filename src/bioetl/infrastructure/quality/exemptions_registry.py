@@ -219,7 +219,9 @@ def _validate_required_registries(
             continue
         entries = registries.get(name)
         if not isinstance(entries, dict):
-            errors.append(f"{name}: expected mapping of exemptions, got {type(entries).__name__}")
+            errors.append(
+                f"{name}: expected mapping of exemptions, got {type(entries).__name__}"
+            )
             continue
         if not entries and name not in EXEMPTION_REGISTRIES_ALLOW_EMPTY:
             errors.append(f"{name}: registry must not be empty")
@@ -255,8 +257,13 @@ def validate_exemptions_registry(
             continue
         for exemption_name, entry in sorted(entries.items()):
             _validate_exemption_entry(
-                registry_name, exemption_name, entry,
-                required_fields, now, metadata_errors, expired_entries,
+                registry_name,
+                exemption_name,
+                entry,
+                required_fields,
+                now,
+                metadata_errors,
+                expired_entries,
             )
 
     metadata_errors.extend(validate_exemption_key_normalization(path))

@@ -106,7 +106,9 @@ def test_inventory_doc_is_linked_from_discovery_docs() -> None:
 
 
 @pytest.mark.architecture
-def test_src_outside_composition_avoids_internal_composition_entrypoint_modules() -> None:
+def test_src_outside_composition_avoids_internal_composition_entrypoint_modules() -> (
+    None
+):
     """First-party source outside composition should use composition.entrypoints."""
     internal_modules = frozenset(
         {

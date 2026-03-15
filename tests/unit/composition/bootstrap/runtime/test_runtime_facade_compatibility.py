@@ -72,7 +72,9 @@ def test_composite_runtime_does_not_expose_helper_only_symbols() -> None:
     leaked = [
         name for name in sorted(unexpected_attrs) if hasattr(composite_runtime, name)
     ]
-    assert not leaked, f"Unexpected helper symbols leaked via composite runtime: {leaked}"
+    assert not leaked, (
+        f"Unexpected helper symbols leaked via composite runtime: {leaked}"
+    )
 
 
 @pytest.mark.unit

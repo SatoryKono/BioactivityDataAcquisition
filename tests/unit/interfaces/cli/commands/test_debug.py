@@ -5,7 +5,7 @@ Tests the debug command for step-through pipeline execution.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner

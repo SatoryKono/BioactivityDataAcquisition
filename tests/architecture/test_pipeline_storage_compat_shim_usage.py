@@ -24,10 +24,7 @@ COMPAT_PARENT_IMPORTS = {
 }
 ALLOWED_FILES = frozenset(
     {
-        ROOT
-        / "tests"
-        / "architecture"
-        / "test_deprecation_warnings.py",
+        ROOT / "tests" / "architecture" / "test_deprecation_warnings.py",
         ROOT
         / "tests"
         / "unit"
@@ -70,7 +67,9 @@ def _iter_compat_import_violations(search_root: Path) -> list[str]:
                 for alias in node.names:
                     if alias.name in COMPAT_MODULES:
                         rel_path = py_file.relative_to(ROOT).as_posix()
-                        violations.append(f"{rel_path}:{node.lineno} imports {alias.name}")
+                        violations.append(
+                            f"{rel_path}:{node.lineno} imports {alias.name}"
+                        )
     return violations
 
 

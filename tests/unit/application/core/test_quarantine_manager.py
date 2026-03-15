@@ -10,7 +10,6 @@ import pytest
 
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
-    FilteredQuarantineEntry,
     QuarantineManagerService,
 )
 from bioetl.domain.types import BatchID, ErrorType

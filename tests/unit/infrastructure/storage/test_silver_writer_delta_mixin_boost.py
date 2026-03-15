@@ -5,7 +5,6 @@ Targets uncovered lines: 69-70, 130, 142-158, 195, 275, 297, 333.
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pyarrow as pa

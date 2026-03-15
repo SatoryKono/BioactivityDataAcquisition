@@ -28,7 +28,9 @@ if TYPE_CHECKING:
     class _CompositeRunnerStageEnrichmentHostProtocol(Protocol):
         _config: CompositeConfig
         _coordinator: EnrichmentCoordinatorService
-        _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
+        _enricher_runner_factory: Callable[
+            [str, pl.DataFrame], ExecutionMetricsRunnerPort
+        ]
         _fsm: FSMStateHelperService
         _logger: LoggerPort
         _runtime: CompositeRuntimeConfig

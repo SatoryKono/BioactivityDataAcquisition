@@ -18,6 +18,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
 from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
@@ -259,7 +260,6 @@ def mock_postrun_service(call_recorder):
 
     We mock the run() method to record the expected calls.
     """
-    from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
     from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.services.medallion_lifecycle import VacuumResult
     from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult

@@ -1,17 +1,13 @@
 # Consolidated Review — S1: Domain
 **Date**: 2026-03-15
 **Sub-reviews**: 5 agents
-**Status**: PASS
-**Consolidated Score**: 9.2/10.0
+**Status**: WARN
+**Consolidated Score**: 6.7/10.0
 
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S1.1 — ports, contracts | 79 | 6.8 | WARN | 0 | 27 |
-| S1.2 — entities, value_objects | 66 | 9.8 | PASS | 0 | 0 |
-| S1.3 — schemas | 41 | 10.0 | PASS | 0 | 0 |
-| S1.4 — services, filtering, mapping | 50 | 10.0 | PASS | 0 | 0 |
-| S1.5 — config, composite, exceptions, other | 113 | 9.9 | PASS | 0 | 0 |
+| S1.1 — Domain Core | 349 | 6.7 | WARN | 0 | 27 |
 
 ## Aggregated Issues
 ### Critical (MUST fix)
@@ -44,3 +40,7 @@
 - **ARCH-003**: src/bioetl/domain/ports/noop/_metrics.py:11 - Class 'NoOpMetrics' in domain/ports must end with Port
 - **ARCH-003**: src/bioetl/domain/ports/noop/_debug.py:15 - Class 'NoOpDebug' in domain/ports must end with Port
 - **ARCH-003**: src/bioetl/domain/ports/quality/quarantine.py:27 - Class 'QuarantineWriteRequest' in domain/ports must end with Port
+
+## Top 5 Recommendations
+1. Fix all critical issues immediately.
+2. Address high-priority architectural violations.

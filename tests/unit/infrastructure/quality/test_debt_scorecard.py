@@ -249,7 +249,6 @@ class TestEvaluateDebtScorecard:
 
     def test_validation_errors_returned(self, tmp_path: Path) -> None:
         """If scorecard validation fails, errors returned and no summary."""
-        import yaml
 
         scorecard_file = tmp_path / "scorecard.yaml"
         scorecard_file.write_text("schema_version: 2\n", encoding="utf-8")

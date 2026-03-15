@@ -296,6 +296,7 @@ class ArrowDataConverter:
         new_schema = pa.schema(new_fields)
         return pa.Table.from_arrays(new_columns, schema=new_schema)
 
+
 __all__ = [
     "ArrowDataConverter",
     "ArrowSchemaPreparationContext",
