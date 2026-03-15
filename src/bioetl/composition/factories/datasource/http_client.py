@@ -19,7 +19,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.composition.providers.loader import ensure_providers_loaded
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
@@ -95,8 +94,9 @@ class HttpClientFactory:
         Raises:
             ValueError: If the provider is unknown.
         """
-        # Ensure providers are loaded
-        ensure_providers_loaded()
+        # Keep provider bootstrap behind the registry facade to avoid
+        # spreading loader knowledge across internal composition helpers.
+        ProviderRegistry.ensure_loaded()
 
         # Validate provider is registered
         if not ProviderRegistry.is_registered(provider):

@@ -12,7 +12,7 @@ from bioetl.application.composite.cross_validator import (
 )
 from bioetl.application.composite.join_execution import JoinHow
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
-from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
     build_execution_support_services,
     build_merge_dependencies,

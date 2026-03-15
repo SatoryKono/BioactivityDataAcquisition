@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointService
-    from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import (

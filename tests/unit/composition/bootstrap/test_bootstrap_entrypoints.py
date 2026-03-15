@@ -180,14 +180,16 @@ class TestBootstrapPipeline:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry.ensure_loaded"
+    )
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
     def test_bootstrap_pipeline_chembl_activity(
         self,
         mock_load_config,
         mock_register_pipelines,
-        mock_ensure_providers_loaded,
+        mock_ensure_loaded,
         mock_observability_bundle,
         mock_create_registry,
         mock_get_settings,
@@ -237,7 +239,7 @@ class TestBootstrapPipeline:
 
         assert result is mock_runner
         mock_factory.create_runner.assert_called_once()
-        mock_ensure_providers_loaded.assert_called_once_with()
+        mock_ensure_loaded.assert_called_once_with()
         mock_register_pipelines.assert_called_once_with(
             registry=mock_create_registry.return_value
         )

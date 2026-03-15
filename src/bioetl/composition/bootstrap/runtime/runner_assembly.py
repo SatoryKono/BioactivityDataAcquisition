@@ -16,10 +16,8 @@ from bioetl.application.composite.key_extractor import (
     KeyExtractorService as _KeyExtractorService,
 )
 from bioetl.application.composite.merger import MergeService as _MergeService
-from bioetl.application.composite.runner_pkg import (
-    CompositePipelineRunnerService,
-    CompositeRuntimeConfig,
-)
+from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.ports import LoggerPort
 

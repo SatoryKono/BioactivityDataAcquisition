@@ -55,7 +55,7 @@ bioetl run --pipeline chembl_activity
 | --------------- | --------------------- | ----------------------------------------------- | ------------------ |
 | **Incremental** | (по умолчанию)        | Обработка новых записей с последнего checkpoint | Нет                |
 | **Backfill**    | `--run-type backfill` | Обработка записей для заполнения пробелов       | Silver/Gold        |
-| **Rebuild**     | `--run-type rebuild`  | Полная перезагрузка всех данных                 | Bronze/Silver/Gold |
+| **Rebuild**     | `--run-type rebuild`  | Полная перезагрузка производных данных          | Silver/Gold        |
 
 ### Incremental Run
 
@@ -82,7 +82,7 @@ bioetl run --pipeline chembl_activity --run-type backfill --dry-run
 
 ### Full Rebuild
 
-Полная перезагрузка данных. Очищает все слои (Bronze/Silver/Gold):
+Полная перезагрузка производных данных. Очищает Silver/Gold и заново строит их из доступного Bronze:
 
 ```bash
 # С подтверждением

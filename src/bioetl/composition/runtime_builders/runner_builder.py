@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Literal, cast
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.providers.loader import ensure_providers_loaded
+from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
@@ -191,7 +191,7 @@ def build_pipeline_runner(
     registry: PipelineRegistry | None = None,
     *,
     create_registry_fn: Callable[[], PipelineRegistry] = create_registry,
-    ensure_providers_loaded_fn: Callable[[], None] = ensure_providers_loaded,
+    ensure_providers_loaded_fn: Callable[[], None] = ProviderRegistry.ensure_loaded,
     register_all_pipelines_fn: Callable[..., None] = register_all_pipelines,
     get_settings_fn: Callable[[], Settings] = get_settings,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] = load_pipeline_config,

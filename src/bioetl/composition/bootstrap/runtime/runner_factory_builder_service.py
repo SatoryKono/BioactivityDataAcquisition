@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, TypedDict, TypeVar
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
     from bioetl.domain.context import PipelineRunContext

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
