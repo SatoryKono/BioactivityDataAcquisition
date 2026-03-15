@@ -32,9 +32,6 @@ from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 __all__ = [
     "bootstrap_bronze_cleanup_service",
-    # Deprecated alias (backward compatibility)
-    "bootstrap_cleanup",
-    # Canonical name (use this)
     "bootstrap_cleanup_service",
     "bootstrap_export_service",
     "bootstrap_lifecycle_service",
@@ -57,16 +54,6 @@ def bootstrap_cleanup_service() -> CleanupService:
     noop_logger = create_noop_logger()
 
     return CleanupService(storage=storage, logger=noop_logger)
-
-
-def bootstrap_cleanup() -> CleanupService:
-    """Bootstrap the cleanup service for CLI operations.
-
-
-    Returns:
-        CleanupService configured for the current environment.
-    """
-    return bootstrap_cleanup_service()
 
 
 def bootstrap_lifecycle_service() -> MedallionLifecycleService:

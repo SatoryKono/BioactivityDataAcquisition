@@ -107,7 +107,7 @@ def test_bootstrap_composite_runner_orchestrates_builders(
             "bioetl.composition.bootstrap.runtime.composite._build_support_services"
         ) as mock_build_support_services,
         patch(
-            "bioetl.composition.bootstrap.runtime.composite.CompositePipelineRunner"
+            "bioetl.composition.bootstrap.runtime.composite.create_composite_runner_with_legacy_fsm_adapter"
         ) as mock_runner_cls,
     ):
         mock_runtime_basics.return_value = runtime_basics
@@ -192,7 +192,7 @@ def test_bootstrap_composite_runner_generates_run_id(
             "bioetl.composition.bootstrap.runtime.composite._build_support_services"
         ) as mock_build_support_services,
         patch(
-            "bioetl.composition.bootstrap.runtime.composite.CompositePipelineRunner"
+            "bioetl.composition.bootstrap.runtime.composite.create_composite_runner_with_legacy_fsm_adapter"
         ) as mock_runner_cls,
     ):
         mock_runtime_basics.return_value = runtime_basics
@@ -246,29 +246,6 @@ def test_create_dq_report_service_builds_writer_and_service() -> None:
         "logger": logger,
         "report_writer": writer_instance,
     }
-
-
-@pytest.mark.unit
-def test_bootstrap_composite_pipeline_alias_calls_runner() -> None:
-    config = _make_config(cross_validation_enabled=False)
-    runtime = _make_runtime()
-
-    with patch(
-        "bioetl.composition.bootstrap.runtime.composite.bootstrap_composite_runner"
-    ) as mock_runner:
-        mock_runner.return_value = MagicMock()
-
-        composite_runtime.bootstrap_composite_pipeline(
-            config=config,
-            runtime=runtime,
-            run_id="00000000-0000-0000-0000-000000000003",
-        )
-
-    mock_runner.assert_called_once_with(
-        config=config,
-        runtime=runtime,
-        run_id="00000000-0000-0000-0000-000000000003",
-    )
 
 
 @pytest.mark.unit

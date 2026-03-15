@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    "bootstrap_dq_monitor",
     "bootstrap_dq_monitor_port",
 ]
 
@@ -63,28 +62,3 @@ def bootstrap_dq_monitor_port(
     )
 
     return monitor
-
-
-def bootstrap_dq_monitor(
-    settings: Settings,
-    logger: LoggerPort | None = None,
-    monitor_cls: type[DataQualityMonitorService] = DataQualityMonitorService,
-    noop_logger_cls: type[NoOpLogger] = NoOpLogger,
-) -> DQMonitorPort | None:
-    """Deprecated alias for :func:`bootstrap_dq_monitor_port`.
-
-    Args:
-        settings: Application settings providing DQ monitoring configuration.
-        logger: Optional LoggerPort for structured DQ monitor logging.
-        monitor_cls: DataQualityMonitorService class for DI/testing.
-        noop_logger_cls: NoOpLogger class for DI/testing.
-
-    Returns:
-        DQMonitorPort if DQ monitoring is enabled, None otherwise.
-    """
-    return bootstrap_dq_monitor_port(
-        settings=settings,
-        logger=logger,
-        monitor_cls=monitor_cls,
-        noop_logger_cls=noop_logger_cls,
-    )

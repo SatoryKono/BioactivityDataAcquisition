@@ -289,7 +289,9 @@ class TestCompositeBootstrapFacade:
             composition_entrypoints.bootstrap_composite_runner
             is bootstrap_composite_runner_impl
         )
-        assert composition_entrypoints.load_composite_config is load_composite_config_impl
+        assert (
+            composition_entrypoints.load_composite_config is load_composite_config_impl
+        )
 
 
 @pytest.mark.unit
@@ -321,11 +323,11 @@ class TestRunPipelineIntegration:
         mock_settings = MagicMock()
         with (
             patch(
-                "bioetl.composition._pipeline_execution.get_settings",
+                "bioetl.composition.entrypoints.get_settings",
                 return_value=mock_settings,
             ),
             patch(
-                "bioetl.composition._pipeline_execution.maybe_start_metrics_server",
+                "bioetl.composition.entrypoints.maybe_start_metrics_server",
             ),
         ):
             yield
@@ -336,7 +338,7 @@ class TestRunPipelineIntegration:
         from bioetl.composition.entrypoints import run_pipeline
 
         with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            "bioetl.composition.entrypoints.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
@@ -360,7 +362,7 @@ class TestRunPipelineIntegration:
         )
 
         with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            "bioetl.composition.entrypoints.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
@@ -376,7 +378,7 @@ class TestRunPipelineIntegration:
         mock_runner.run = AsyncMock(side_effect=RuntimeError("Connection failed"))
 
         with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            "bioetl.composition.entrypoints.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = await run_pipeline("test_pipeline", RunOptions(run_type="rebuild"))
@@ -396,7 +398,7 @@ class TestRunPipelineIntegration:
         mock_runner.run = AsyncMock(side_effect=RuntimeError("Mid-run failure"))
 
         with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            "bioetl.composition.entrypoints.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
@@ -411,7 +413,7 @@ class TestRunPipelineIntegration:
         from bioetl.composition.entrypoints import run_pipeline
 
         with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            "bioetl.composition.entrypoints.create_pipeline_runner",
             return_value=mock_runner,
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
@@ -435,7 +437,7 @@ class TestRunPipelineIntegration:
 
         runner = MinimalRunner()
         with patch(
-            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            "bioetl.composition.entrypoints.create_pipeline_runner",
             return_value=runner,
         ):
             with pytest.raises(

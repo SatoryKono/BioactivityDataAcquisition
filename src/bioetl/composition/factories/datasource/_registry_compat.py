@@ -1,4 +1,4 @@
-"""Compatibility helpers for legacy DataSourceRegistry access."""
+"""Internal helpers for legacy DataSourceRegistry access."""
 
 from __future__ import annotations
 

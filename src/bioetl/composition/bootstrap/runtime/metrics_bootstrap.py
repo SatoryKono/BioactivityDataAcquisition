@@ -15,7 +15,6 @@ MetricsFactory = Callable[[], MetricsPort]
 MetricsServerStarter = Callable[..., bool]
 
 __all__ = [
-    "bootstrap_metrics",
     "bootstrap_metrics_port",
     "maybe_start_metrics_server",
 ]
@@ -71,19 +70,3 @@ def maybe_start_metrics_server(
         retry_count=obs.metrics_retry_count,
         retry_delay=obs.metrics_retry_delay,
     )
-
-
-def bootstrap_metrics(
-    settings: Settings,
-    metrics_factory: MetricsFactory | None = None,
-) -> MetricsPort:
-    """Deprecated alias for :func:`bootstrap_metrics_port`.
-
-    Args:
-        settings: Application settings used to check whether metrics are enabled.
-        metrics_factory: Optional factory callable for DI/testing.
-
-    Returns:
-        Configured MetricsPort, or NoOpMetrics if metrics are disabled.
-    """
-    return bootstrap_metrics_port(settings=settings, metrics_factory=metrics_factory)

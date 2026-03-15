@@ -159,7 +159,6 @@ ALLOWED_NO_SUFFIX = {
     "RetryPolicy",
     # Context classes
     "InputFilterContext",
-    "VacuumConfig",
     "PipelineContext",
     "PipelineRunContext",
     "StorageContext",

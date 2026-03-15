@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
-    bootstrap_metrics,
     bootstrap_metrics_port,
     maybe_start_metrics_server,
 )
@@ -165,24 +164,3 @@ class TestMaybeStartMetricsServer:
             maybe_start_metrics_server(settings=settings, start_server=mock_starter)
 
 
-@pytest.mark.unit
-class TestBootstrapMetricsAlias:
-    """Tests for bootstrap_metrics (deprecated alias)."""
-
-    def test_alias_returns_noop_when_disabled(self) -> None:
-        """Alias should return NoOpMetrics when metrics disabled."""
-        settings = _make_settings(metrics_enabled=False)
-
-        result = bootstrap_metrics(settings=settings)
-
-        assert isinstance(result, NoOpMetrics)
-
-    def test_alias_delegates_to_port_variant(self) -> None:
-        """bootstrap_metrics should produce same result as bootstrap_metrics_port."""
-        mock_metrics = MagicMock(spec=MetricsPort)
-        factory = MagicMock(return_value=mock_metrics)
-        settings = _make_settings(metrics_enabled=True)
-
-        result = bootstrap_metrics(settings=settings, metrics_factory=factory)
-
-        assert result is mock_metrics

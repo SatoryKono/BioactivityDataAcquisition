@@ -1,7 +1,8 @@
-"""Unit tests for composition/_services.py.
+"""Unit tests for public composition service entrypoints.
 
-Tests the service entrypoint functions that delegate to bootstrap functions.
-All external dependencies (bootstrap, _ensure_registrations) are mocked.
+Tests the service entrypoint functions exposed via
+``bioetl.composition.entrypoints``. All external dependencies are mocked via
+public patch points.
 """
 
 from __future__ import annotations
@@ -19,7 +20,7 @@ from bioetl.composition.registry import PipelineRegistry
 
 
 def _patch_services(*args: str, **kwargs: MagicMock):
-    """Return a list of patches for _services module internals."""
+    """Return a list of patches for service entrypoint internals."""
     pass
 
 
@@ -37,13 +38,15 @@ class TestGetCheckpointService:
         mock_service = MagicMock(name="CheckpointService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_checkpoint_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_checkpoint_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_checkpoint_service
+            from bioetl.composition.entrypoints import get_checkpoint_service
 
             result = get_checkpoint_service()
 
@@ -66,13 +69,15 @@ class TestGetQuarantineService:
         mock_service = MagicMock(name="QuarantineService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_quarantine_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_quarantine_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_quarantine_service
+            from bioetl.composition.entrypoints import get_quarantine_service
 
             result = get_quarantine_service()
 
@@ -95,13 +100,15 @@ class TestGetBronzeCleanupService:
         mock_service = MagicMock(name="BronzeCleanupService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_bronze_cleanup_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_bronze_cleanup_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_bronze_cleanup_service
+            from bioetl.composition.entrypoints import get_bronze_cleanup_service
 
             result = get_bronze_cleanup_service()
 
@@ -124,13 +131,15 @@ class TestGetVacuumService:
         mock_service = MagicMock(name="VacuumService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_vacuum_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_vacuum_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_vacuum_service
+            from bioetl.composition.entrypoints import get_vacuum_service
 
             result = get_vacuum_service()
 
@@ -153,13 +162,15 @@ class TestGetExportService:
         mock_service = MagicMock(name="ExportService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_export_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_export_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_export_service
+            from bioetl.composition.entrypoints import get_export_service
 
             result = get_export_service()
 
@@ -182,13 +193,15 @@ class TestGetLockService:
         mock_service = MagicMock(name="LockService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_lock_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_lock_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_lock_service
+            from bioetl.composition.entrypoints import get_lock_service
 
             result = get_lock_service()
 
@@ -216,13 +229,12 @@ class TestCleanupBronze:
         mock_service.cleanup = AsyncMock(return_value=mock_result)
 
         with (
-            patch("bioetl.composition._services._ensure_registrations"),
             patch(
-                "bioetl.composition._services.bootstrap_bronze_cleanup_service",
+                "bioetl.composition.entrypoints.get_bronze_cleanup_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._services import cleanup_bronze
+            from bioetl.composition.entrypoints import cleanup_bronze
 
             result = await cleanup_bronze(retention_days=90, dry_run=False)
 
@@ -239,13 +251,12 @@ class TestCleanupBronze:
         mock_service.cleanup = AsyncMock(return_value=MagicMock())
 
         with (
-            patch("bioetl.composition._services._ensure_registrations"),
             patch(
-                "bioetl.composition._services.bootstrap_bronze_cleanup_service",
+                "bioetl.composition.entrypoints.get_bronze_cleanup_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._services import cleanup_bronze
+            from bioetl.composition.entrypoints import cleanup_bronze
 
             await cleanup_bronze()
 
@@ -260,13 +271,12 @@ class TestCleanupBronze:
         mock_service.cleanup = AsyncMock(return_value=MagicMock())
 
         with (
-            patch("bioetl.composition._services._ensure_registrations"),
             patch(
-                "bioetl.composition._services.bootstrap_bronze_cleanup_service",
+                "bioetl.composition.entrypoints.get_bronze_cleanup_service",
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition._services import cleanup_bronze
+            from bioetl.composition.entrypoints import cleanup_bronze
 
             await cleanup_bronze(retention_days=30, dry_run=True)
 
@@ -289,13 +299,15 @@ class TestGetPipelineRunnerService:
         mock_service = MagicMock(name="PipelineRunnerService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_pipeline_runner_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_pipeline_runner_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_pipeline_runner_service
+            from bioetl.composition.entrypoints import get_pipeline_runner_service
 
             result = get_pipeline_runner_service()
 
@@ -309,13 +321,15 @@ class TestGetPipelineRunnerService:
         registry = PipelineRegistry()
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_pipeline_runner_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_pipeline_runner_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_pipeline_runner_service
+            from bioetl.composition.entrypoints import get_pipeline_runner_service
 
             result = get_pipeline_runner_service(registry=registry)
 
@@ -338,13 +352,15 @@ class TestGetConfigService:
         mock_service = MagicMock(name="ConfigService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_config_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_config_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_config_service
+            from bioetl.composition.entrypoints import get_config_service
 
             result = get_config_service()
 
@@ -367,13 +383,15 @@ class TestGetHealthService:
         mock_service = MagicMock(name="HealthService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_health_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_health_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_health_service
+            from bioetl.composition.entrypoints import get_health_service
 
             result = get_health_service()
 
@@ -396,13 +414,15 @@ class TestGetHealthServerDependencies:
         mock_deps = MagicMock(name="HealthServerDependencies")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_health_server_dependencies",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_health_server_dependencies",
                 return_value=mock_deps,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_health_server_dependencies
+            from bioetl.composition.entrypoints import get_health_server_dependencies
 
             result = get_health_server_dependencies()
 
@@ -425,13 +445,15 @@ class TestGetMetricsService:
         mock_service = MagicMock(name="MetricsService")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_metrics_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_metrics_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_metrics_service
+            from bioetl.composition.entrypoints import get_metrics_service
 
             result = get_metrics_service()
 
@@ -454,13 +476,15 @@ class TestGetAdrService:
         mock_service = MagicMock(name="AdrServicePort")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_adr_service",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_adr_service",
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_adr_service
+            from bioetl.composition.entrypoints import get_adr_service
 
             result = get_adr_service()
 
@@ -483,13 +507,15 @@ class TestGetQuarantineStore:
         mock_port = MagicMock(name="QuarantinePort")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
-                "bioetl.composition._services.bootstrap_quarantine_port",
+                "bioetl.composition.entrypoints._ensure_registrations"
+            ) as mock_ensure,
+            patch(
+                "bioetl.composition.entrypoints.bootstrap_quarantine_port",
                 return_value=mock_port,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition._services import get_quarantine_store
+            from bioetl.composition.entrypoints import get_quarantine_store
 
             result = get_quarantine_store("chembl_activity")
 
@@ -502,13 +528,12 @@ class TestGetQuarantineStore:
         mock_port = MagicMock(name="QuarantinePort")
 
         with (
-            patch("bioetl.composition._services._ensure_registrations"),
             patch(
-                "bioetl.composition._services.bootstrap_quarantine_port",
+                "bioetl.composition.entrypoints.bootstrap_quarantine_port",
                 return_value=mock_port,
             ),
         ):
-            from bioetl.composition._services import get_quarantine_store
+            from bioetl.composition.entrypoints import get_quarantine_store
 
             # Should not raise regardless of pipeline name
             result = get_quarantine_store("any_pipeline")

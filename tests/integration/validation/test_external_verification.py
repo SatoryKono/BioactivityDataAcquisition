@@ -26,10 +26,7 @@ from bioetl.infrastructure.adapters.openalex.client import (
     OPENALEX_API_BASE,
 )
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
-from bioetl.infrastructure.adapters.pubmed.client import (
-    ENTREZ_API_BASE,
-)
-from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
+from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,

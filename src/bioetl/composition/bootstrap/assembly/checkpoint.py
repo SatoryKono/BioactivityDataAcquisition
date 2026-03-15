@@ -24,12 +24,8 @@ from bioetl.infrastructure.storage.composite_checkpoint_writer import (
 )
 
 __all__ = [
-    # Deprecated aliases (backward compatibility)
-    "bootstrap_checkpoint",
-    # Canonical names (use these)
     "bootstrap_checkpoint_port",
     "bootstrap_composite_checkpoint_port",
-    "bootstrap_quarantine",
     "bootstrap_quarantine_port",
 ]
 
@@ -52,16 +48,6 @@ def bootstrap_quarantine_port() -> QuarantinePort:
         f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"
     )
     return quarantine
-
-
-def bootstrap_quarantine() -> QuarantinePort:
-    """Bootstrap the quarantine port for record quarantine storage.
-
-
-    Returns:
-        QuarantinePort implementation for quarantine operations.
-    """
-    return bootstrap_quarantine_port()
 
 
 def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
@@ -109,15 +95,3 @@ def bootstrap_composite_checkpoint_port() -> CompositeCheckpointPort:
     )
     return checkpoint
 
-
-def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
-    """Bootstrap the checkpoint port for pipeline state persistence.
-
-
-    Args:
-        pipeline_name: Name of the pipeline for checkpoint scoping.
-
-    Returns:
-        CheckpointPort implementation for checkpoint operations.
-    """
-    return bootstrap_checkpoint_port(pipeline_name=pipeline_name)

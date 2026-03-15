@@ -10,7 +10,9 @@ from __future__ import annotations
 from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
     ENTREZ_API_BASE,
     PubMedAdapter,
-    _create_pubmed_adapter,
+)
+from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+    _create_pubmed_adapter as create_pubmed_adapter,
 )
 
-__all__ = ["ENTREZ_API_BASE", "PubMedAdapter", "_create_pubmed_adapter"]
+__all__ = ["ENTREZ_API_BASE", "PubMedAdapter", "create_pubmed_adapter"]

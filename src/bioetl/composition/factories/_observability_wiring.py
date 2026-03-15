@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .datasource.factory import DataSourceCreatorProtocol
+from .datasource.data_source_factory import DataSourceCreatorProtocol
 from .services.factory import BaseServicesFactory
 
 if TYPE_CHECKING:
