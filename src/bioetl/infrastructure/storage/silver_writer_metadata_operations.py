@@ -132,8 +132,10 @@ class _SilverWriteFinalizationHostProtocol(Protocol):
 def _build_silver_write_result(
     *, table_name: str, table_path: str, version_after: int | None, records_count: int
 ) -> SilverWriteResult | None:
-    return None if version_after is None else SilverWriteResult(
-        table_name, table_path, version_after, records_count
+    return (
+        None
+        if version_after is None
+        else SilverWriteResult(table_name, table_path, version_after, records_count)
     )
 
 

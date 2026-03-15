@@ -12,7 +12,9 @@ class TestTissueTransformer:
     @pytest.fixture
     def transformer(self):
         """Create transformer instance."""
-        return TissueTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return TissueTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.fixture
     def sample_record(self):

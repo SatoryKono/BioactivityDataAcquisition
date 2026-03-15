@@ -622,6 +622,96 @@
       "decision": "evaluate",
       "review_by": "2026-06-30",
       "next_step": "Evaluate whether the wrapper-backed config path linter should stay supported or be archived."
+    },
+    "scripts/ci/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.ci package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/ci/_compatibility_telemetry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Compatibility surface telemetry collector used by quality_integral_gate.py and report_quality_debt_weekly.py. Keep as active CI helper."
+    },
+    "scripts/data/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.data package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/dev/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical dev scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/dev/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.dev package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/diagnostics/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical diagnostics scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/diagnostics/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.diagnostics package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/diagrams/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.diagrams package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/diagrams/generate_all_bundles.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "All-bundles generator aggregates individual bundle scripts. Keep as manual maintenance tool until bundle regeneration workflow is formalized."
+    },
+    "scripts/docs/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.docs package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/ops/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical ops scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/ops/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.ops package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/ops/check_mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "MCP health-check shell helper. Keep as manual operations tool and document operator workflow."
+    },
+    "scripts/qa/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.qa package. Keep until inventory tooling classifies package entrypoints separately."
+    },
+    "scripts/schema/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "CLI entrypoint for scripts.schema package. Keep until inventory tooling classifies package entrypoints separately."
     }
   }
 }

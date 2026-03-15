@@ -363,9 +363,7 @@ def _validate_records(
 
     required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
     if missing_fields := required_fields - set(records[0].keys()):
-        raise ValueError(
-            f"Records missing required metadata fields: {missing_fields}"
-        )
+        raise ValueError(f"Records missing required metadata fields: {missing_fields}")
 
     keys = set(records[0].keys())
     optional_missing = [key for key in schema.names if key not in keys]

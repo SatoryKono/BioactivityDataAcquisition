@@ -67,6 +67,7 @@ __all__ = [
     "load_composite_config",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class _CompositeBootstrapPlan:
     """Resolved bootstrap plan passed to the final runner factory."""
@@ -90,7 +91,9 @@ def _resolve_composite_gold_schema(composite_name: str) -> type | None:
 
 def _resolve_composite_config_path(name: str) -> Path:
     """Resolve composite config path from canonical composites directory."""
-    return _resolve_composite_config_path_impl(name, config_dir=DEFAULT_COMPOSITE_CONFIG_DIR)
+    return _resolve_composite_config_path_impl(
+        name, config_dir=DEFAULT_COMPOSITE_CONFIG_DIR
+    )
 
 
 def load_composite_config(name: str) -> CompositeConfig:
@@ -280,7 +283,7 @@ def bootstrap_composite_runner(
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
-    plan = _build_composite_bootstrap_plan(config=config, runtime=runtime, run_id=run_id)
+    plan = _build_composite_bootstrap_plan(
+        config=config, runtime=runtime, run_id=run_id
+    )
     return _create_composite_runner_from_plan(config=config, runtime=runtime, plan=plan)
-
-

@@ -382,9 +382,8 @@ def test_report_docs_excluded_from_active_scope() -> None:
     active_paths = {path.as_posix() for path in _iter_active_docs_markdown()}
     report_paths = {path.as_posix() for path in _iter_report_docs_markdown()}
     overlap = sorted(active_paths & report_paths)
-    assert not overlap, (
-        "Report docs leaked into active docs sync scope:\n"
-        + "\n".join(f"  - {item}" for item in overlap)
+    assert not overlap, "Report docs leaked into active docs sync scope:\n" + "\n".join(
+        f"  - {item}" for item in overlap
     )
 
 

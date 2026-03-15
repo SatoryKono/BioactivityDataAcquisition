@@ -87,9 +87,7 @@ class TestColumnOrderer:
 
         assert max(title_indices) < min(abstract_indices)
 
-    def test_provider_priority_within_group(
-        self, orderer: ColumnOrderer
-    ) -> None:
+    def test_provider_priority_within_group(self, orderer: ColumnOrderer) -> None:
         """Within same group, chembl comes before crossref."""
         df = pl.DataFrame(
             {
@@ -106,9 +104,7 @@ class TestColumnOrderer:
 
         assert chembl_idx < crossref_idx < pubmed_idx
 
-    def test_unqualified_columns_have_priority(
-        self, orderer: ColumnOrderer
-    ) -> None:
+    def test_unqualified_columns_have_priority(self, orderer: ColumnOrderer) -> None:
         """Unqualified columns appear before qualified in same group."""
         df = pl.DataFrame(
             {

@@ -34,7 +34,9 @@ def mock_context() -> PipelineContext:
 
 @pytest.fixture()
 def transformer() -> TissueTransformer:
-    return TissueTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+    return TissueTransformer(
+        provider="chembl", dependencies=build_test_transformer_dependencies()
+    )
 
 
 @pytest.mark.unit

@@ -513,7 +513,9 @@ class TestProviderConfiguration:
 
     def test_default_entity_type(self) -> None:
         """Should use 'unknown' as default entity_type."""
-        transformer = StubPublicationTransformer(provider="test", dependencies=build_test_transformer_dependencies())
+        transformer = StubPublicationTransformer(
+            provider="test", dependencies=build_test_transformer_dependencies()
+        )
         assert transformer.entity_type == "unknown"
 
 
@@ -552,5 +554,7 @@ class TestAbstractMethodContracts:
 
     def test_should_log_fallback_can_be_overridden(self) -> None:
         """_should_log_fallback_lookup can be overridden to False."""
-        transformer = StubWithoutFallbackLogging(provider="test", dependencies=build_test_transformer_dependencies())
+        transformer = StubWithoutFallbackLogging(
+            provider="test", dependencies=build_test_transformer_dependencies()
+        )
         assert transformer._should_log_fallback_lookup() is False

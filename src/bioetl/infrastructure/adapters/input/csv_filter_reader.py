@@ -34,11 +34,7 @@ class CsvFilterReader:
         self._logger = logger
 
     def _read_csv_dataframe(self, source_path: str) -> pl.DataFrame:
-        """Read CSV file and return DataFrame.
-
-        Returns:
-            Polars DataFrame loaded from the given CSV file path.
-        """
+        """Read CSV file and return Polars DataFrame."""
         path = Path(source_path)
         if not path.exists():
             raise FileNotFoundError(f"CSV filter file not found: {source_path}")
@@ -49,11 +45,7 @@ class CsvFilterReader:
             raise ValueError(f"Failed to read CSV file: {e}") from e
 
     def _extract_column_ids(self, df: pl.DataFrame, column_name: str) -> list[str]:
-        """Extract and clean IDs from specified column.
-
-        Returns:
-            List of non-empty stripped string values from the specified column.
-        """
+        """Extract and clean IDs from specified column."""
         if column_name not in df.columns:
             available = ", ".join(df.columns)
             raise ValueError(
@@ -72,11 +64,7 @@ class CsvFilterReader:
     def _compute_duplicate_stats(
         self, all_ids: list[str]
     ) -> tuple[tuple[str, ...], int, int, frozenset[str]]:
-        """Compute unique IDs and duplicate statistics.
-
-        Returns:
-            Tuple of (unique IDs sorted tuple, unique count, duplicate count, frozenset of duplicated values).
-        """
+        """Compute unique IDs and duplicate statistics."""
         total_count = len(all_ids)
         id_counts = Counter(all_ids)
         duplicates = frozenset(
@@ -90,11 +78,7 @@ class CsvFilterReader:
     def _extract_column_ids_map(
         self, df: pl.DataFrame, columns: list[FilterColumn]
     ) -> dict[str, tuple[str, ...]]:
-        """Extract unique IDs per column for server-side filtering.
-
-        Returns:
-            Dictionary mapping each filter_field name to its sorted tuple of unique IDs.
-        """
+        """Extract unique IDs per column for server-side filtering."""
         return {
             col.filter_field: tuple(
                 sorted(set(self._extract_column_ids(df, col.column_name)))
@@ -168,8 +152,16 @@ class CsvFilterReader:
         """Process rows building ID list and fallback mapping. Returns title_only_count."""
         title_only_count = 0
         for row in df.iter_rows(named=True):
-            primary_str = str(row.get(primary_column, "")).strip() if row.get(primary_column) else ""
-            fallback_str = str(row.get(fallback_column, "")).strip() if row.get(fallback_column) else ""
+            primary_str = (
+                str(row.get(primary_column, "")).strip()
+                if row.get(primary_column)
+                else ""
+            )
+            fallback_str = (
+                str(row.get(fallback_column, "")).strip()
+                if row.get(fallback_column)
+                else ""
+            )
 
             if primary_str:
                 all_ids.append(primary_str)
@@ -226,7 +218,11 @@ class CsvFilterReader:
             all_ids = self._extract_column_ids(df, primary_column)
         else:
             title_only_count = self._build_fallback_rows(
-                df, primary_column, fallback_column, all_ids, fallback_mapping,
+                df,
+                primary_column,
+                fallback_column,
+                all_ids,
+                fallback_mapping,
             )
             if self._logger:
                 self._logger.info(

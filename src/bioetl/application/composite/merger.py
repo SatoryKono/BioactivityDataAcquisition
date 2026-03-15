@@ -269,7 +269,9 @@ class MergeService(MergeIOMixin, MergeMetricsRecorderMixin):
         self,
         method_name: str,
         *args: object,
-    ) -> Any:  # Any: getattr-based dispatch returns heterogeneous join-planner callables
+    ) -> (
+        Any
+    ):  # Any: getattr-based dispatch returns heterogeneous join-planner callables
         """Route sync helper calls to the canonical join planner."""
         method = cast(
             Any,  # Any: dynamic bridge preserves typed wrappers over service dispatch

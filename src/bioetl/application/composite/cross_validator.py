@@ -268,5 +268,3 @@ class EnrichmentCrossValidator:
                 f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
             )
         return parts[0], parts[1]
-
-

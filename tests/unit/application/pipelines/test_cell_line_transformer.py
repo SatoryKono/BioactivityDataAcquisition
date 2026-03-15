@@ -35,7 +35,9 @@ class TestCellLineTransformer:
     @pytest.fixture
     def transformer(self):
         """Create CellLineTransformer instance."""
-        return CellLineTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return CellLineTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):

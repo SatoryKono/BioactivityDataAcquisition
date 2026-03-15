@@ -168,6 +168,7 @@ class TestPipelineRunnerSpan:
 
         postrun = MagicMock(spec=PostrunService)
         from bioetl.application.core.postrun.service import PostrunResult
+
         postrun.run = AsyncMock(
             return_value=PostrunResult(
                 dq=DQResult(
@@ -225,9 +226,9 @@ class TestPipelineRunnerSpan:
 
         mock_tracer.get_tracer.assert_called_with("bioetl.runner")
         mock_tracer.get_tracer.return_value.start_as_current_span.assert_called_once()
-        span_name = (
-            mock_tracer.get_tracer.return_value.start_as_current_span.call_args[0][0]
-        )
+        span_name = mock_tracer.get_tracer.return_value.start_as_current_span.call_args[
+            0
+        ][0]
         assert span_name == "pipeline.run"
 
     @pytest.mark.asyncio
@@ -238,9 +239,7 @@ class TestPipelineRunnerSpan:
 
         await runner.run()
 
-        kwargs = (
-            mock_tracer.get_tracer.return_value.start_as_current_span.call_args[1]
-        )
+        kwargs = mock_tracer.get_tracer.return_value.start_as_current_span.call_args[1]
         attrs = kwargs["attributes"]
         assert attrs["bioetl.provider"] == "chembl"
         assert attrs["bioetl.entity_type"] == "activity"
@@ -256,7 +255,9 @@ class TestPipelineRunnerSpan:
 
         await runner.run()
 
-        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
         mock_span.__enter__.assert_called_once()
         mock_span.__exit__.assert_called_once()
 
@@ -270,7 +271,9 @@ class TestPipelineRunnerSpan:
         with pytest.raises(RuntimeError, match="forced error"):
             await runner.run()
 
-        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
         exit_args = mock_span.__exit__.call_args[0]
         assert exit_args[0] is RuntimeError
         assert isinstance(exit_args[1], RuntimeError)
@@ -345,7 +348,9 @@ class TestPostrunServiceSpan:
             )
         )
 
-        from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+        from bioetl.application.services.medallion_lifecycle import (
+            MedallionLifecycleService,
+        )
         from bioetl.application.services.medallion_types import VacuumResult
 
         lifecycle_service = MagicMock(spec=MedallionLifecycleService)
@@ -408,9 +413,9 @@ class TestPostrunServiceSpan:
         await service.run(executor=self._make_executor())
 
         mock_tracer.get_tracer.assert_called_with("bioetl.postrun")
-        span_name = (
-            mock_tracer.get_tracer.return_value.start_as_current_span.call_args[0][0]
-        )
+        span_name = mock_tracer.get_tracer.return_value.start_as_current_span.call_args[
+            0
+        ][0]
         assert span_name == "postrun.run"
 
     @pytest.mark.asyncio
@@ -421,9 +426,7 @@ class TestPostrunServiceSpan:
 
         await service.run(executor=self._make_executor())
 
-        kwargs = (
-            mock_tracer.get_tracer.return_value.start_as_current_span.call_args[1]
-        )
+        kwargs = mock_tracer.get_tracer.return_value.start_as_current_span.call_args[1]
         attrs = kwargs["attributes"]
         assert attrs["bioetl.provider"] == "chembl"
         assert attrs["bioetl.entity_type"] == "activity"
@@ -438,7 +441,9 @@ class TestPostrunServiceSpan:
 
         await service.run(executor=self._make_executor())
 
-        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
         mock_span.set_attribute.assert_any_call("bioetl.dq_status", "passed")
 
     @pytest.mark.asyncio
@@ -449,7 +454,9 @@ class TestPostrunServiceSpan:
 
         await service.run(executor=self._make_executor())
 
-        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
         mock_span.__enter__.assert_called_once()
         mock_span.__exit__.assert_called_once()
 
@@ -463,7 +470,9 @@ class TestPostrunServiceSpan:
         with pytest.raises(RuntimeError, match="dq error"):
             await service.run(executor=self._make_executor())
 
-        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
         exit_args = mock_span.__exit__.call_args[0]
         assert exit_args[0] is RuntimeError
         assert isinstance(exit_args[1], RuntimeError)
@@ -550,13 +559,12 @@ class TestRecordProcessorSpanRegression:
         processor = self._build_record_processor(tracer=mock_tracer)
 
         from bioetl.domain.types import BatchID
+
         batch_id = BatchID("test-batch-001")
         await processor.process_batch(records=[{"id": "1"}], batch_id=batch_id)
 
         # get_tracer("bioetl.processor") should be called for span creation
-        tracer_names = [
-            c.args[0] for c in mock_tracer.get_tracer.call_args_list
-        ]
+        tracer_names = [c.args[0] for c in mock_tracer.get_tracer.call_args_list]
         assert "bioetl.processor" in tracer_names
 
     @pytest.mark.asyncio
@@ -565,8 +573,7 @@ class TestRecordProcessorSpanRegression:
         processor = self._build_record_processor(tracer=NoOpTracing())
 
         from bioetl.domain.types import BatchID
+
         batch_id = BatchID("test-batch-001")
-        result = await processor.process_batch(
-            records=[{"id": "1"}], batch_id=batch_id
-        )
+        result = await processor.process_batch(records=[{"id": "1"}], batch_id=batch_id)
         assert result is not None

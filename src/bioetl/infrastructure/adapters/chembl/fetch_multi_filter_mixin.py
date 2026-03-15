@@ -67,7 +67,9 @@ class ChemblFetchMultiFilterMixin:
             if not records:
                 break
             for record in records:
-                if not self._is_duplicate_record(record, pk_field, seen_ids, entity_type):
+                if not self._is_duplicate_record(
+                    record, pk_field, seen_ids, entity_type
+                ):
                     yield record
             if not has_next:
                 break
@@ -108,7 +110,11 @@ class ChemblFetchMultiFilterMixin:
             current_filters = dict(zip(api_filter_keys, batch_combination, strict=True))
             filter_params = self._build_filter_in_params(current_filters)
             async for record in self._fetch_multi_filter_page_loop(
-                url, filter_params, entity_type, pk_field, seen_ids,
+                url,
+                filter_params,
+                entity_type,
+                pk_field,
+                seen_ids,
             ):
                 yield record
                 total_fetched += 1

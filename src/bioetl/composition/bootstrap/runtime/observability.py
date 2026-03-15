@@ -213,5 +213,3 @@ def bootstrap_observability_bundle(
         dq_monitor_bootstrapper=bootstrap_dq_monitor_port,
         preflight_validator=validate_observability_preflight,
     )
-
-

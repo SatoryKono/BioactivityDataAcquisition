@@ -56,10 +56,7 @@ ALLOWED_DATASOURCE_REGISTRY_SRC_FILES = frozenset(
 )
 ALLOWED_DATASOURCE_REGISTRY_TEST_FILES = frozenset(
     {
-        ROOT
-        / "tests"
-        / "architecture"
-        / "test_registry_contracts.py",
+        ROOT / "tests" / "architecture" / "test_registry_contracts.py",
         ROOT
         / "tests"
         / "unit"
@@ -67,27 +64,13 @@ ALLOWED_DATASOURCE_REGISTRY_TEST_FILES = frozenset(
         / "factories"
         / "datasource"
         / "test_data_source_registry.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "test_canonical_module_paths.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "test_registry_protocol.py",
+        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
+        ROOT / "tests" / "unit" / "composition" / "test_registry_protocol.py",
     }
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_SRC_FILES: frozenset[Path] = frozenset()
 LEGACY_DATASOURCE_FACTORY_MODULE_PATH = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "composition"
-    / "factories"
-    / "datasource"
-    / "factory.py"
+    ROOT / "src" / "bioetl" / "composition" / "factories" / "datasource" / "factory.py"
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES = frozenset(
@@ -126,7 +109,9 @@ def _iter_module_import_violations(
                 if node.level > 0:
                     module_parts = list(py_file.relative_to(ROOT).with_suffix("").parts)
                     current_package_parts = (
-                        module_parts if py_file.stem == "__init__" else module_parts[:-1]
+                        module_parts
+                        if py_file.stem == "__init__"
+                        else module_parts[:-1]
                     )
                     anchor_length = len(current_package_parts) - (node.level - 1)
                     if anchor_length > 0:

@@ -24,7 +24,9 @@ from tests.helpers.transformer_dependencies import build_test_transformer_depend
 @pytest.fixture
 def transformer():
     """Fixture for ActivityTransformer instance."""
-    return ActivityTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+    return ActivityTransformer(
+        provider="chembl", dependencies=build_test_transformer_dependencies()
+    )
 
 
 @pytest.fixture

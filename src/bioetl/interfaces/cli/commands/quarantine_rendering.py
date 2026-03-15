@@ -55,7 +55,9 @@ def build_replay_preview_lines(records: list[JsonDict]) -> list[str]:
     return lines
 
 
-def build_purge_preview_lines(*, older_than_days: int, total_count: object) -> list[str]:
+def build_purge_preview_lines(
+    *, older_than_days: int, total_count: object
+) -> list[str]:
     """Build dry-run preview lines for quarantine purge."""
     return [
         f"\nWould purge records older than {older_than_days} days.",

@@ -258,7 +258,9 @@ class SilverWriterMetadataMixin:
     ) -> None:
         """Guard for audit logging — only calls _log_silver_audit if enabled."""
         if self._audit and records:
-            await self._log_silver_audit(table_name=table_name, records=records, mode=mode)
+            await self._log_silver_audit(
+                table_name=table_name, records=records, mode=mode
+            )
 
     async def _finalize_silver_write_result(
         self,

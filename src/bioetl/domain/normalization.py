@@ -81,7 +81,7 @@ def strip_doi_prefix(doi: str) -> str:
     """
     for prefix in _DOI_URL_PREFIXES:
         if doi.startswith(prefix):
-            return doi[len(prefix):]
+            return doi[len(prefix) :]
     return doi
 
 

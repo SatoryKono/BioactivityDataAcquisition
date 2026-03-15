@@ -44,13 +44,12 @@ def test_compatibility_surface_snapshot_matches_inventory_status_counts() -> Non
     assert snapshot.compat_shim_modules == status_counts["compat-shim"]
     assert snapshot.mixed_modules == status_counts["mixed-module"]
     assert snapshot.retained_entrypoints == status_counts["retained-entrypoint"]
+    assert f"- Curated inventory rows: `{snapshot.curated_inventory_rows}`" in text
+    assert f"- Measured tracked modules: `{snapshot.measured_tracked_modules}`" in text
     assert (
-        f"- Curated inventory rows: `{snapshot.curated_inventory_rows}`" in text
+        f"- Measured-only modules outside curated inventory: `{snapshot.measured_only_modules}`"
+        in text
     )
-    assert (
-        f"- Measured tracked modules: `{snapshot.measured_tracked_modules}`" in text
-    )
-    assert f"- Measured-only modules outside curated inventory: `{snapshot.measured_only_modules}`" in text
 
 
 @pytest.mark.architecture

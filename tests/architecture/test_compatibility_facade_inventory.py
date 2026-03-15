@@ -193,8 +193,7 @@ def test_inventory_rows_capture_owner_call_sites_and_lifecycle_metadata() -> Non
 
         parsed_date = date.fromisoformat(row["remove_by"])
         assert parsed_date.year >= 2026, (
-            f"Unexpected remove-by/review date for {row['path']}: "
-            f"{row['remove_by']}"
+            f"Unexpected remove-by/review date for {row['path']}: {row['remove_by']}"
         )
 
         referenced_paths = path_pattern.findall(row["allowed_call_sites"])

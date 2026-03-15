@@ -53,9 +53,7 @@ def test_compat_file_sunset(name: str, path: Path) -> None:
         )
 
 
-@pytest.mark.parametrize(
-    "name,path", COMPAT_MODULES.items(), ids=COMPAT_MODULES.keys()
-)
+@pytest.mark.parametrize("name,path", COMPAT_MODULES.items(), ids=COMPAT_MODULES.keys())
 def test_compat_module_sunset(name: str, path: Path) -> None:
     """Before sunset: compat module MUST exist. After sunset: MUST be removed."""
     today = date.today()

@@ -106,7 +106,10 @@ def _iter_removed_import_records(search_root: Path) -> list[tuple[Path, int, str
             continue
         tree = ast.parse(py_file.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module in REMOVED_COMPAT_MODULES:
+            if (
+                isinstance(node, ast.ImportFrom)
+                and node.module in REMOVED_COMPAT_MODULES
+            ):
                 records.append((py_file, node.lineno, node.module))
             elif (
                 isinstance(node, ast.ImportFrom)
