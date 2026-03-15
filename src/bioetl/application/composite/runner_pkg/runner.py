@@ -6,13 +6,16 @@ Coordinates high-level execution flow while delegating stage logic to mixins.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
+)
+from bioetl.application.composite.runner_pkg.runner_models import (
+    CompositeExecutionContext,
+    CompositeRuntimeConfig,
 )
 from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
@@ -52,12 +55,6 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.composite.result import (
-        DependencyResult,
-        EnrichmentResult,
-        MergeResult,
-        SeedResult,
-    )
     from bioetl.domain.ports import (
         ExecutionMetricsRunnerPort,
         LockPort,
@@ -73,38 +70,6 @@ __all__ = [
     "CompositePipelineRunnerService",
     "CompositeRuntimeConfig",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class CompositeRuntimeConfig:
-    """Runtime configuration for composite pipeline execution."""
-
-    resume: bool = False
-    dry_run: bool = False
-    enrich_only: tuple[str, ...] | None = None
-    required_only: bool = False
-    force_enricher: str | None = None
-    seed_limit: int | None = None
-    use_cached_bronze: bool = False
-    cached_bronze_path: str | None = None
-    cached_bronze_date: str | None = None
-    cached_bronze_enrichers: bool | None = None
-    cached_bronze_dependencies: bool = False
-
-    def __post_init__(self) -> None:
-        """Normalize mutable values into immutable runtime fields."""
-        if isinstance(self.enrich_only, list):
-            object.__setattr__(self, "enrich_only", tuple(self.enrich_only))
-
-
-@dataclass(frozen=True, slots=True)
-class CompositeExecutionContext:
-    """Named stage outputs passed into final result assembly."""
-
-    seed_result: SeedResult
-    dependency_results: dict[str, DependencyResult]
-    enrichment_results: dict[str, EnrichmentResult]
-    merge_result: MergeResult | None
 
 
 class CompositePipelineRunner(

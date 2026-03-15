@@ -1,10 +1,8 @@
 """Architecture tests for interfaces layer dependencies.
 
-Ensures that CLI and other interfaces don't directly import from infrastructure,
-enforcing proper dependency flow through Application layer services.
-
-Per RULES.md §1.1, interfaces should use Application services for administrative
-operations, not access infrastructure adapters directly.
+Ensures that CLI and other interfaces do not directly import infrastructure.
+In project policy, interfaces should route through application services or
+composition entrypoints rather than bind themselves to infrastructure modules.
 """
 
 from __future__ import annotations
@@ -94,12 +92,8 @@ class TestInterfacesNoDIrectInfrastructure:
     def test_all_cli_commands_no_infrastructure_imports(self):
         """Test that ALL CLI command files don't import infrastructure.
 
-        Per RULES.md §1.1 layer matrix, interfaces should not directly
-        access infrastructure adapters. CLI commands should use
-        Application services or Composition entrypoints instead.
-
-        Note: While the architecture matrix technically allows interfaces → infrastructure,
-        we prefer routing through Application services for consistency and testability.
+        CLI commands should use Application services or Composition entrypoints
+        instead of importing infrastructure modules directly.
         """
         commands_dir = SRC_PATH / "interfaces" / "cli" / "commands"
 
@@ -190,21 +184,13 @@ class TestInterfacesNoDIrectInfrastructure:
             imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
-        # Note: observability.py may still import from infrastructure
-        # as per the architecture matrix (interfaces → infrastructure is allowed)
-        # but we want to track this for awareness
-        if infrastructure_imports:
-            pytest.xfail(
-                f"interfaces/__init__ imports from infrastructure: {infrastructure_imports}"
-            )
+        assert infrastructure_imports == [], (
+            "interfaces/__init__ should not import infrastructure directly. "
+            f"Found: {infrastructure_imports}"
+        )
 
-    def test_observability_allowed_infrastructure(self):
-        """Document that observability.py is allowed infrastructure imports.
-
-        Per architecture matrix, interfaces → infrastructure is technically allowed,
-        but we prefer routing through Application layer for consistency.
-        This test documents the current state.
-        """
+    def test_observability_no_infrastructure_imports(self):
+        """Observability interface should route through composition, not infrastructure."""
         obs_path = SRC_PATH / "interfaces" / "observability.py"
 
         if not obs_path.exists():
@@ -216,10 +202,10 @@ class TestInterfacesNoDIrectInfrastructure:
             imp for imp in imports if "bioetl.infrastructure" in imp
         ]
 
-        # This is allowed but documented for future refactoring consideration
-        if infrastructure_imports:
-            # Just pass - this is expected and allowed
-            pass
+        assert infrastructure_imports == [], (
+            "interfaces/observability.py should not import infrastructure directly. "
+            f"Found: {infrastructure_imports}"
+        )
 
 
 @pytest.mark.architecture

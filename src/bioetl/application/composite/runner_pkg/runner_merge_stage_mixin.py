@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
-
+from bioetl.application.composite.checkpoint import (
+    CompositeCheckpointService,
+    CompositeCheckpointState,
+)
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
     PIPELINE_EXECUTION_ERRORS,
@@ -13,150 +16,24 @@ from bioetl.application.composite.runner_pkg.runner_helpers import (
     get_mergeable_dependencies,
     get_mergeable_enrichers,
 )
+from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
+    _CompositeRunnerMergeStageHostProtocol,
+    _PreparedMergeInputs,
+    _PreparedMergeRequest,
+)
+from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
+from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    EnrichmentResult,
+    MergeResult,
+)
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError
-
-if TYPE_CHECKING:
-    from bioetl.application.composite.checkpoint import (
-        CompositeCheckpointService,
-        CompositeCheckpointState,
-    )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.merger import MergeService
-    from bioetl.application.composite.runner_pkg.runner import CompositeRuntimeConfig
-    from bioetl.domain.composite.config import (
-        CompositeConfig,
-        DependencyConfig,
-        EnricherConfig,
-    )
-    from bioetl.domain.composite.result import (
-        DependencyResult,
-        EnrichmentResult,
-        MergeResult,
-    )
-    from bioetl.domain.ports import LoggerPort
-
-    class _CompositeRunnerMergeStageHostProtocol(Protocol):
-        _runtime: CompositeRuntimeConfig
-        _fsm: FSMStateHelperService
-        _logger: LoggerPort
-        _config: CompositeConfig
-        _run_id_str: str
-        _merger: MergeService
-        _checkpoint_manager: CompositeCheckpointService
-
-        async def _save_checkpoint_safe(
-            self,
-            state: CompositeCheckpointState,
-            operation: str,
-        ) -> bool: ...
-
-        async def _generate_dq_reports(
-            self,
-            merge_result: MergeResult,
-        ) -> None: ...
-
-        async def _write_cv_quarantine(
-            self,
-            merge_result: MergeResult,
-        ) -> None: ...
-
-        async def _call_save_checkpoint_safe(
-            self,
-            state: CompositeCheckpointState,
-            operation: str,
-        ) -> bool: ...
-
-        async def _call_generate_dq_reports(self, merge_result: MergeResult) -> None: ...
-
-        async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None: ...
-
-        def _transition_to_merging_state(
-            self,
-            state: CompositeCheckpointState,
-        ) -> CompositeCheckpointState: ...
-
-        async def _start_merge_phase(
-            self,
-            state: CompositeCheckpointState,
-        ) -> CompositeCheckpointState: ...
-
-        async def _handle_merge_phase_exception(
-            self,
-            state: CompositeCheckpointState,
-            error: Exception,
-        ) -> None: ...
-
-        def _build_merge_inputs(
-            self,
-            enrichment_results: dict[str, EnrichmentResult],
-            dependency_results: dict[str, DependencyResult] | None,
-        ) -> _PreparedMergeInputs: ...
-
-        def _prepare_merge_request(
-            self,
-            enrichment_results: dict[str, EnrichmentResult],
-            dependency_results: dict[str, DependencyResult] | None,
-        ) -> _PreparedMergeRequest: ...
-
-        async def _run_prepared_merge_request(
-            self,
-            request: _PreparedMergeRequest,
-        ) -> MergeResult: ...
-
-        async def _execute_started_merge_phase(
-            self,
-            state: CompositeCheckpointState,
-            *,
-            enrichment_results: dict[str, EnrichmentResult],
-            dependency_results: dict[str, DependencyResult] | None,
-        ) -> MergeResult: ...
-
-        def _handle_dry_run_merge_skip(
-            self,
-            state: CompositeCheckpointState,
-        ) -> CompositeCheckpointState: ...
-
-        async def _delete_checkpoint_safe(self) -> None: ...
-
-        def _transition_to_completed_state(
-            self,
-            state: CompositeCheckpointState,
-        ) -> CompositeCheckpointState: ...
-
-        async def _persist_completed_state(
-            self,
-            state: CompositeCheckpointState,
-        ) -> None: ...
-
-        async def _handle_merge_success(
-            self,
-            merge_result: MergeResult,
-        ) -> None: ...
+from bioetl.domain.ports import LoggerPort
 
 __all__ = ["CompositeRunnerMergeStageMixin"]
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedMergeInputs:
-    """Mergeable enricher/dependency inputs resolved for the merge stage."""
-
-    enrichers: list[EnricherConfig]
-    dependencies: list[DependencyConfig]
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedMergeRequest:
-    """Normalized merge request passed into the merger runtime seam."""
-
-    seed_table: str
-    seed_pipeline: str
-    enrichers: list[EnricherConfig]
-    enrichment_results: dict[str, EnrichmentResult]
-    run_id: str
-    dependencies: list[DependencyConfig]
-    dependency_results: dict[str, DependencyResult] | None
 
 
 class CompositeRunnerMergeStageMixin:
