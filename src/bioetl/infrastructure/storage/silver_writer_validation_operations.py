@@ -149,7 +149,7 @@ def _deduplicate_by_primary_keys_impl(
     if not primary_keys or not records:
         return records
 
-    unique_records: dict[tuple[Any, ...], BronzeRecord] = {}
+    unique_records: dict[tuple[Any, ...], BronzeRecord] = {}  # Any: primary key values are heterogeneous (str | int | None)
     for record in records:
         key = tuple(record.get(primary_key) for primary_key in primary_keys)
         unique_records[key] = record

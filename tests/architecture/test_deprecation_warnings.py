@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from unittest.mock import patch
-from uuid import uuid4
 
 import pytest
 
@@ -12,11 +11,6 @@ from bioetl.composition.bootstrap.runtime.runner_assembly import (
     create_composite_runner_with_legacy_fsm_adapter,
 )
 from bioetl.composition.factories.pipeline import facade as pipeline_factory
-from bioetl.domain.types import BatchID
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-from bioetl.infrastructure.storage.bronze_write_result_helpers import (
-    bronze_write_result_exists,
-)
 
 
 _FACADE_PATH = (
@@ -72,23 +66,6 @@ def test_pipeline_factory_create_pipeline_with_services_warns() -> None:
                 object(),  # settings
                 object(),  # logger
             )
-
-
-def test_bronze_write_result_exists_warns(tmp_path: Path) -> None:
-    """Legacy bronze helper must remain noisy until call sites migrate."""
-    result = BronzeWriteResult(
-        batch_id=BatchID(uuid4()),
-        relative_path="chembl/activity/2026-03-06/batch_1.jsonl.zst",
-        absolute_path=str(tmp_path / "batch_1.jsonl.zst"),
-        record_count=1,
-        compressed_size=10,
-        uncompressed_size=20,
-        checksum_blake2="abc123",
-    )
-    Path(result.absolute_path).write_bytes(b"payload")
-
-    with pytest.warns(DeprecationWarning, match="deprecated"):
-        assert bronze_write_result_exists(result)
 
 
 def test_legacy_composite_runner_factory_warns_without_fsm_helper() -> None:

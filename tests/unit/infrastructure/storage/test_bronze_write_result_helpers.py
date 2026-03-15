@@ -10,7 +10,6 @@ import pytest
 from bioetl.domain.types import BatchID
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze_write_result_helpers import (
-    bronze_write_result_exists,
     is_bronze_write_result_persisted,
 )
 
@@ -37,12 +36,3 @@ def test_is_bronze_write_result_persisted_reports_file_state(tmp_path: Path) -> 
 
     file_path.write_bytes(b"payload")
     assert is_bronze_write_result_persisted(result)
-
-
-def test_bronze_write_result_exists_warns_and_delegates(tmp_path: Path) -> None:
-    file_path = tmp_path / "batch_abc.jsonl.zst"
-    file_path.write_bytes(b"payload")
-    result = _make_result(file_path)
-
-    with pytest.deprecated_call(match="deprecated"):
-        assert bronze_write_result_exists(result)

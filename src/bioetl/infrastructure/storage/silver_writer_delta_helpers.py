@@ -75,7 +75,7 @@ def _build_merge_execute_callable(
     dt: DeltaTableType,
     records: pa.Table | pa.RecordBatchReader,
     merge_condition: str,
-) -> Callable[[], Any]:
+) -> Callable[[], Any]:  # Any: Delta merge returns heterogeneous result
     """Build the blocking Delta merge callable for ``run_in_executor``."""
 
     def _execute() -> Any:  # Any: Delta merge returns heterogeneous result

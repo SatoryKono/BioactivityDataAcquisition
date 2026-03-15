@@ -35,7 +35,6 @@ REQUIRED_PATHS = frozenset(
         "src/bioetl/application/composite/merger_compat_mixin.py",
         "src/bioetl/composition/entrypoints.py",
         "src/bioetl/composition/factories/pipeline/facade.py",
-        "src/bioetl/composition/factories/datasource/factory.py",
         "src/bioetl/composition/runtime_builders/runner_builder.py",
         "src/bioetl/infrastructure/adapters/pubmed/client.py",
         "src/bioetl/infrastructure/adapters/semanticscholar/client.py",

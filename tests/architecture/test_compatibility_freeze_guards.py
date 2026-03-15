@@ -52,13 +52,6 @@ ALLOWED_DATASOURCE_REGISTRY_SRC_FILES = frozenset(
         / "factories"
         / "datasource"
         / "data_source_factory.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "factories"
-        / "datasource"
-        / "factory.py",
     }
 )
 ALLOWED_DATASOURCE_REGISTRY_TEST_FILES = frozenset(
@@ -87,11 +80,16 @@ ALLOWED_DATASOURCE_REGISTRY_TEST_FILES = frozenset(
     }
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_SRC_FILES: frozenset[Path] = frozenset()
-ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
-    }
+LEGACY_DATASOURCE_FACTORY_MODULE_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "factories"
+    / "datasource"
+    / "factory.py"
 )
+ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
 
 
 def _iter_module_import_violations(
@@ -273,6 +271,15 @@ def test_datasource_registry_symbol_is_confined_to_compat_tests() -> None:
 
 
 @pytest.mark.architecture
+def test_legacy_datasource_factory_module_file_has_been_removed() -> None:
+    """Legacy datasource.factory shim should remain deleted."""
+    assert not LEGACY_DATASOURCE_FACTORY_MODULE_PATH.exists(), (
+        "Legacy datasource factory shim must stay removed: "
+        "src/bioetl/composition/factories/datasource/factory.py"
+    )
+
+
+@pytest.mark.architecture
 def test_legacy_datasource_factory_module_is_not_used_in_src() -> None:
     """First-party src must use canonical datasource module paths."""
     violations = _iter_module_import_violations(
@@ -281,21 +288,21 @@ def test_legacy_datasource_factory_module_is_not_used_in_src() -> None:
         allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_SRC_FILES,
     )
     assert not violations, (
-        "Legacy datasource.factory module is still imported from src/ beyond the "
-        "canonical wrapper:\n" + "\n".join(violations)
+        "Legacy datasource.factory module must stay removed from src imports:\n"
+        + "\n".join(violations)
     )
 
 
 @pytest.mark.architecture
 def test_legacy_datasource_factory_module_is_only_used_by_compat_tests() -> None:
-    """Ordinary tests must not accumulate new direct imports of legacy datasource module."""
+    """Tests must not keep importing the removed legacy datasource module."""
     violations = _iter_module_import_violations(
         TESTS_ROOT,
         module_name=LEGACY_DATASOURCE_FACTORY_MODULE,
         allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES,
     )
     assert not violations, (
-        "Legacy datasource.factory module gained new non-compat test imports:\n"
+        "Legacy datasource.factory module must stay removed from tests:\n"
         + "\n".join(violations)
     )
 
@@ -304,7 +311,7 @@ def test_legacy_datasource_factory_module_is_only_used_by_compat_tests() -> None
 def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat_tests() -> (
     None
 ):
-    """Ordinary tests must not reintroduce string-based patch targets for legacy datasource module."""
+    """Tests must not reintroduce string patch targets for removed datasource module."""
     violations = _iter_string_mentions(
         TESTS_ROOT,
         needle=LEGACY_DATASOURCE_FACTORY_MODULE,
@@ -312,7 +319,7 @@ def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat
         | frozenset({Path(__file__).resolve()}),
     )
     assert not violations, (
-        "Legacy datasource.factory module gained new string-based references in tests:\n"
+        "Legacy datasource.factory module must stay removed from string references:\n"
         + "\n".join(violations)
     )
 

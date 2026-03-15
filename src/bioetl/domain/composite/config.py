@@ -28,6 +28,7 @@ from bioetl.domain.composite.config_composite_validation import (
 )
 from bioetl.domain.composite.config_dq import CompositeDQConfig, DQOverrideConfig
 from bioetl.domain.composite.config_merge import ColumnGroupConfig, MergeConfig
+
 from bioetl.domain.composite.config_models import (
     CrossValidationConfig,
     DataSchemaConfig,
@@ -37,13 +38,6 @@ from bioetl.domain.composite.config_models import (
     SeedConfig,
 )
 from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
-from bioetl.domain.composite.config_validators import (
-    _require_non_empty,
-    _validate_optional_threshold,
-    _validate_positive,
-    _validate_positive_limit,
-    _validate_threshold_order,
-)
 from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 
 __all__ = [
@@ -183,13 +177,3 @@ class CompositeConfig:
             CompositeConfig instance reconstructed from the given dict.
         """
         return _composite_from_dict(data)
-
-
-# Keep explicit references so static analyzers treat compatibility re-exports as used.
-_COMPAT_VALIDATOR_EXPORTS = (
-    _require_non_empty,
-    _validate_positive,
-    _validate_positive_limit,
-    _validate_optional_threshold,
-    _validate_threshold_order,
-)

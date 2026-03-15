@@ -27,7 +27,6 @@ from bioetl.domain.exceptions import (
     UploadError,
 )
 from bioetl.infrastructure.storage.bronze_write_result_helpers import (
-    bronze_write_result_exists,
     is_bronze_write_result_persisted,
 )
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -48,6 +47,5 @@ __all__ = [
     "StorageError",
     "TableNotFoundError",
     "UploadError",
-    "bronze_write_result_exists",
     "is_bronze_write_result_persisted",
 ]
