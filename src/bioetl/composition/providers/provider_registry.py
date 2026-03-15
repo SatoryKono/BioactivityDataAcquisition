@@ -70,6 +70,13 @@ class ProviderRegistry:
     _providers: ClassVar[dict[str, ProviderConfig]] = {}
 
     @classmethod
+    def ensure_loaded(cls) -> None:
+        """Ensure provider registrations are loaded into the registry."""
+        from bioetl.composition.providers.loader import ensure_providers_loaded
+
+        ensure_providers_loaded()
+
+    @classmethod
     def register(cls, name: str, config: ProviderConfig) -> None:
         """Register a provider.
 
@@ -96,6 +103,42 @@ class ProviderRegistry:
             KeyError: If the provider is not registered.
         """
         return get_provider_config(cls._providers, name)
+
+    @classmethod
+    def build_data_source_creator(cls, name: str) -> DataSourceCreatorProtocol:
+        """Return a provider-bound data-source creator closure."""
+        cls.ensure_loaded()
+
+        if not cls.is_registered(name):
+            available = ", ".join(cls.list_providers())
+            raise KeyError(f"Unknown provider: {name}. Available: {available}")
+
+        if not cls.has_data_source_creator(name):
+            raise KeyError(
+                f"Provider '{name}' does not have a data_source_creator. "
+                "Ensure it is registered with data_source_creator in registration.py."
+            )
+
+        def creator(
+            settings: Settings,
+            pipeline_config: PipelineYamlConfig,
+            logger: LoggerPort,
+            filter_config: InputFilterConfig | None = None,
+            metrics: MetricsPort | None = None,
+            pipeline_name: str = "unknown",
+        ) -> DataSourcePort:
+            """Create a data source for the captured provider name."""
+            return cls.create_data_source(
+                name=name,
+                settings=settings,
+                pipeline_config=pipeline_config,
+                logger=logger,
+                filter_config=filter_config,
+                metrics=metrics,
+                pipeline_name=pipeline_name,
+            )
+
+        return creator
 
     @classmethod
     def is_registered(cls, name: str) -> bool:

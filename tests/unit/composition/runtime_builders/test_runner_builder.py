@@ -28,6 +28,18 @@ class _FakeRegistry:
         return SimpleNamespace(factory=self._factory, pipeline_name=pipeline_name)
 
 
+def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:
+    """Default provider bootstrap should come from ProviderRegistry facade."""
+    default_fn = runner_builder.build_pipeline_runner.__kwdefaults__[
+        "ensure_providers_loaded_fn"
+    ]
+
+    assert getattr(default_fn, "__self__", None) is runner_builder.ProviderRegistry
+    assert getattr(default_fn, "__func__", None) is (
+        runner_builder.ProviderRegistry.ensure_loaded.__func__
+    )
+
+
 def test_build_pipeline_runner_wires_dependencies() -> None:
     """Builder should assemble dependencies and pass them to pipeline factory."""
     fake_factory = _FakeFactory()

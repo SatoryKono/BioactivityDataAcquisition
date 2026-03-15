@@ -24,7 +24,7 @@ class TestHttpClientFactory:
         """Factory should fail fast for unknown providers."""
         from bioetl.composition.factories.datasource import http_client as module
 
-        monkeypatch.setattr(module, "ensure_providers_loaded", lambda: None)
+        monkeypatch.setattr(module.ProviderRegistry, "ensure_loaded", lambda: None)
         monkeypatch.setattr(module.ProviderRegistry, "is_registered", lambda _: False)
         monkeypatch.setattr(
             module.ProviderRegistry, "list_providers", lambda: ["chembl", "pubmed"]
@@ -51,7 +51,7 @@ class TestHttpClientFactory:
         )
         client_ctor = MagicMock(return_value="client-from-source")
 
-        monkeypatch.setattr(module, "ensure_providers_loaded", lambda: None)
+        monkeypatch.setattr(module.ProviderRegistry, "ensure_loaded", lambda: None)
         monkeypatch.setattr(module.ProviderRegistry, "is_registered", lambda _: True)
         monkeypatch.setattr(module, "load_source_config", lambda _: source_config)
         monkeypatch.setattr(module.ProviderRegistry, "get_http_config", lambda _: None)
@@ -86,7 +86,7 @@ class TestHttpClientFactory:
         )
         client_ctor = MagicMock(return_value="client-with-override")
 
-        monkeypatch.setattr(module, "ensure_providers_loaded", lambda: None)
+        monkeypatch.setattr(module.ProviderRegistry, "ensure_loaded", lambda: None)
         monkeypatch.setattr(module.ProviderRegistry, "is_registered", lambda _: True)
 
         def _raise_missing_source_config(_: str):

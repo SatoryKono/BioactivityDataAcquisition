@@ -1,0 +1,120 @@
+# Composition Layer — Navigation Map
+
+The composition layer is the **only place** where concrete implementations are wired
+together. No business logic lives here — only assembly, factory, and registration code.
+
+## Package Structure
+
+```
+composition/
+├── entrypoints.py              # Top-level entry: run_pipeline(), run_composite()
+├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
+├── builders.py                 # High-level builder helpers for CLI/orchestration
+├── types.py                    # Shared type aliases for composition
+├── observability.py            # ObservabilityBundle dataclass
+├── bootstrap_contexts.py       # Bootstrap context containers
+├── bootstrap_logger.py         # Early-stage logger before DI is ready
+│
+├── bootstrap/                  # Assembly of runtime components
+│   ├── assembly/               # Low-level assembly: storage, checkpoint
+│   ├── cli/                    # CLI-specific bootstrap: config, health, lock, metrics, noop, storage
+│   └── runtime/                # Pipeline runtime assembly (see below)
+│
+├── factories/                  # Factory classes — one per concern
+│   ├── datasource/             # DataSourceFactory, HttpClientFactory, adapter helpers
+│   ├── dq/                     # DQServicesFactory — Bronze/Silver/Gold DQ wiring
+│   ├── pipeline/               # GenericPipelineFactory, PipelineAssembler, runner assembly
+│   ├── services/               # BaseServicesFactory, ServiceBundleDependencies, port factories
+│   ├── storage/                # StorageFactory — Bronze/Silver/Gold/Merged writers
+│   ├── transformer_factory.py  # TransformerBuilder
+│   └── transformer_dependencies.py
+│
+├── providers/                  # ProviderRegistry — adapter creation per provider
+│   ├── provider_registry.py    # Class-based registry with create_adapter()/create_data_source()
+│   ├── registration.py         # register_all_providers()
+│   ├── registration_biblio.py  # CrossRef, OpenAlex, PubMed, SemanticScholar
+│   ├── registration_bio.py     # ChEMBL, PubChem, UniProt
+│   └── factory_loader.py       # Dynamic loading of provider factories
+│
+├── runtime_builders/           # Late-stage runtime assembly
+│   ├── runner_builder.py       # RunnerBuilder — assembles PipelineRunner
+│   ├── inputs_resolver.py      # Resolves RunnerInputs from config
+│   └── observability_builder.py # Wires logger + tracer + metrics
+│
+└── services/                   # Composition-level service wiring
+    ├── metadata_assemblers.py  # MetadataBuilder assembly
+    ├── metadata_coordinator.py # MetadataCoordinator wiring
+    └── versioning.py           # Version info assembly
+```
+
+## Key Entry Points
+
+| What you want to do | Start here |
+|---------------------|------------|
+| Run a single pipeline | `entrypoints.run_pipeline()` |
+| Run a composite pipeline | `entrypoints.run_composite()` |
+| Look up a pipeline by provider+entity | `registry.PipelineRegistry` |
+| Create an HTTP adapter for a provider | `providers.provider_registry.ProviderRegistry` |
+| Wire storage (Bronze/Silver/Gold) | `factories/storage/storage_factory.StorageFactory` |
+| Wire DQ services | `factories/dq/dq_services_factory.DQServicesFactory` |
+| Assemble a full pipeline with runner | `factories/pipeline/pipeline_assembler.GenericPipelineFactory` |
+| Bootstrap observability (logger+tracer+metrics) | `runtime_builders/observability_builder` |
+| Bootstrap CLI commands | `bootstrap/cli/` (one module per concern) |
+
+## bootstrap/runtime/ — Detailed Map
+
+This is the most complex sub-package. It handles pipeline runtime assembly:
+
+| Module | Responsibility |
+|--------|---------------|
+| `assembly.py` | Pure functions: build RuntimeConfig, FilterConfig, VacuumSettings |
+| `config_loader.py` | Load and merge YAML pipeline configs |
+| `pipeline.py` | Assemble BasePipeline subclass instances |
+| `runner.py` | Assemble PipelineRunner with all dependencies |
+| `runner_assembly.py` | RunnerAssembly helpers |
+| `runner_factory_builder_service.py` | RunnerFactoryBuilderService |
+| `composite.py` | Composite pipeline assembly |
+| `composite_bootstrap_builders.py` | Composite-specific builder helpers |
+| `composite_support_services_factory.py` | Support services for composite pipelines |
+| `composite_dq_loader.py` | DQ config loading for composites |
+| `composite_filter_extraction_service.py` | Filter extraction for composites |
+| `composite_support_helpers.py` | Utility helpers for composite support |
+| `composite_support_service_builders.py` | Service builders for composite support |
+| `observability.py` | Observability bootstrap (logger, tracer, metrics) |
+| `observability_bundle.py` | ObservabilityBundle assembly |
+| `logger_bootstrap.py` | StructlogLogger bootstrap |
+| `tracing_bootstrap.py` | OpenTelemetryTracer bootstrap |
+| `metrics_bootstrap.py` | PrometheusMetrics bootstrap |
+| `dq_bootstrap.py` | DQ services bootstrap |
+| `classification_init.py` | Publication type classification init |
+| `runtime_basics.py` | CompositeRuntimeBasics container |
+| `pipeline_runner_service_bootstrap.py` | PipelineRunnerService bootstrap |
+
+## factories/storage/ — Mixin Architecture
+
+StorageFactory uses a mixin pattern to compose storage capabilities:
+
+```
+StorageFactory
+  ├── _bronze.py          → BronzeWriter creation
+  ├── _silver.py          → SilverWriter creation (Delta Lake)
+  ├── _gold.py            → GoldWriter creation (Delta Lake)
+  ├── _resilience.py      → Retry/resilience policies
+  ├── _helpers.py         → Shared helper functions
+  ├── clear_mixin.py      → clear_silver(), clear_gold() per run type
+  ├── write_mixin.py      → write operations
+  ├── health_mixin.py     → storage health checks
+  ├── maintenance_mixin.py → vacuum, compaction
+  ├── merged_mixin.py     → merged storage for composite pipelines
+  ├── adapter.py          → StorageAdapter (composite of all ports)
+  ├── facade.py           → Backward-compatible facade
+  ├── factory.py          → Core factory logic
+  └── storage_factory.py  → Public StorageFactory class
+```
+
+## Architectural Rules
+
+- **No business logic** in composition — only wiring
+- **No imports from interfaces** — composition wires for interfaces, not the reverse
+- **Factories only here** — `Factory.create()` calls must not appear in domain/application
+- **Module-level singletons OK** — `_default_registry` is the only approved module-level instance

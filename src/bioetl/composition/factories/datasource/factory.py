@@ -42,51 +42,9 @@ DataSourceCreatorPort = DataSourceCreatorProtocol
 __all__ = ["DataSourceCreatorProtocol", "DataSourceFactory", "DataSourceRegistry"]
 
 
-def _ensure_providers_loaded() -> None:
-    """Lazily load provider registrations to avoid import-time cycles."""
-    from bioetl.composition.providers.loader import ensure_providers_loaded
-
-    ensure_providers_loaded()
-
-
 def _build_data_source_creator(provider: str) -> DataSourceCreatorProtocol:
-    """Build a provider-bound data-source creator callback.
-
-    This is the shared implementation for the canonical datasource helper and
-    the legacy ``DataSourceRegistry.get()`` compatibility path.
-    """
-    _ensure_providers_loaded()
-
-    if not ProviderRegistry.is_registered(provider):
-        available = ", ".join(ProviderRegistry.list_providers())
-        raise KeyError(f"Unknown provider: {provider}. Available: {available}")
-
-    if not ProviderRegistry.has_data_source_creator(provider):
-        raise KeyError(
-            f"Provider '{provider}' does not have a data_source_creator. "
-            "Ensure it is registered with data_source_creator in registration.py."
-        )
-
-    def creator(
-        settings: Settings,
-        pipeline_config: PipelineYamlConfig,
-        logger: LoggerPort,
-        filter_config: InputFilterConfig | None = None,
-        metrics: MetricsPort | None = None,
-        pipeline_name: str = "unknown",
-    ) -> DataSourcePort:
-        """Create a data source for the captured provider name."""
-        return ProviderRegistry.create_data_source(
-            name=provider,
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-            filter_config=filter_config,
-            metrics=metrics,
-            pipeline_name=pipeline_name,
-        )
-
-    return creator
+    """Build a provider-bound data-source creator callback."""
+    return ProviderRegistry.build_data_source_creator(provider)
 
 
 class DataSourceFactory:
@@ -121,8 +79,7 @@ class DataSourceFactory:
         Raises:
             ValueError: If the provider is unknown.
         """
-        # Ensure providers are loaded
-        _ensure_providers_loaded()
+        ProviderRegistry.ensure_loaded()
 
         # Validate provider is registered
         if not ProviderRegistry.is_registered(provider):
@@ -194,7 +151,7 @@ class DataSourceFactory:
         Returns:
             Sorted list of registered provider names.
         """
-        _ensure_providers_loaded()
+        ProviderRegistry.ensure_loaded()
         return ProviderRegistry.list_providers()
 
 
@@ -248,7 +205,7 @@ class DataSourceRegistry:
         Returns:
             Collection of providers.
         """
-        _ensure_providers_loaded()
+        ProviderRegistry.ensure_loaded()
         # Return all providers from ProviderRegistry
         # (they all have data_source_creator after unification)
         return ProviderRegistry.list_providers()
@@ -274,7 +231,7 @@ class DataSourceRegistry:
         Returns:
             True if provider is registered and has data_source_creator
         """
-        _ensure_providers_loaded()
+        ProviderRegistry.ensure_loaded()
         return ProviderRegistry.has_data_source_creator(key)
 
     @classmethod

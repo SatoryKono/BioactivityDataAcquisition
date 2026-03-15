@@ -79,7 +79,7 @@ class TestRunnerFactory:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ) as mock_providers,
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -103,7 +103,7 @@ class TestRunnerFactory:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -120,7 +120,7 @@ class TestRunnerFactory:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -155,7 +155,7 @@ class TestRunnerFactoryCreate:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -177,7 +177,7 @@ class TestRunnerFactoryCreate:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -202,7 +202,7 @@ class TestRunnerFactoryCreate:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -229,7 +229,7 @@ class TestRunnerFactoryCreate:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -257,7 +257,7 @@ class TestRunnerFactoryListPipelines:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -279,7 +279,7 @@ class TestRunnerFactoryListPipelines:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ) as mock_providers,
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -304,7 +304,7 @@ class TestRunnerFactoryContains:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
@@ -324,7 +324,7 @@ class TestRunnerFactoryContains:
 
         with (
             patch(
-                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+                "bioetl.composition.factories.pipeline.runner.ProviderRegistry.ensure_loaded"
             ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"

@@ -11,7 +11,7 @@ from bioetl.application.composite.checkpoint import CompositeCheckpointService
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (

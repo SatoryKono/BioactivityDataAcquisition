@@ -14,7 +14,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.providers.loader import ensure_providers_loaded
+from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
@@ -81,7 +81,7 @@ class RunnerFactory:
         Idempotent - safe to call multiple times.
         """
         if not self._registrations_done:
-            ensure_providers_loaded()
+            ProviderRegistry.ensure_loaded()
             if not self._effective_registry.list_pipelines():
                 register_all_pipelines(registry=self._effective_registry)
             self._registrations_done = True

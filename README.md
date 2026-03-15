@@ -58,7 +58,7 @@ The domain layer implements Domain-Driven Design patterns:
 | **Aggregates**    | Domain aggregates with invariant protection (`domain/aggregates/`) |
 | **Value Objects** | Immutable domain primitives (`domain/value_objects/`)              |
 | **Entities**      | Domain entities per provider (`domain/entities/`)                  |
-| **Schemas**       | Pydantic models for data validation (`domain/schemas/`)            |
+| **Schemas**       | Pandera `DataFrameModel` schemas for dataframe validation (`domain/schemas/`) |
 
 ## Supported Providers
 
@@ -168,7 +168,7 @@ Environment variables: `BIOETL_SKIP_PRECOMMIT=1`, `BIOETL_SKIP_DOCKER=1`.
    | `BIOETL_PIPELINE__BATCH_SIZE` | Records per batch write (1–10000) | `100` |
    | `BIOETL_PIPELINE__CHECKPOINT_INTERVAL` | Save checkpoint every N records (≥100) | `1000` |
    | `BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES` | Max concurrent batch writes (1–16) | `4` |
-   | `BIOETL_PIPELINE__HEARTBEAT_INTERVAL` | Lock heartbeat interval in seconds (5–60) | `20` |
+   | `BIOETL_PIPELINE__HEARTBEAT_INTERVAL` | Lock heartbeat interval in seconds (5–60) | `30` |
    | **Provider API Keys** | | |
    | `BIOETL_UNIPROT_API_KEY` | UniProt API key (higher rate limits) | — |
    | `BIOETL_PUBMED_API_KEY` | NCBI E-utilities API key | — |

@@ -97,7 +97,7 @@ bioetl run --pipeline chembl_activity --debug
 |---------------|-------------------------------------------------|--------------------|
 | `incremental` | Обработка новых записей с последнего checkpoint | Нет                |
 | `backfill`    | Обработка определённого диапазона               | Silver/Gold        |
-| `rebuild`     | Полная перезагрузка всех данных                 | Bronze/Silver/Gold |
+| `rebuild`     | Полная перезагрузка производных данных          | Silver/Gold        |
 
 **Exit Codes:**
 
