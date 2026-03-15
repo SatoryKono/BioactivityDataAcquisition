@@ -6,7 +6,9 @@ from unittest.mock import Mock
 
 import pytest
 
-from bioetl.composition.factories.datasource.factory import DataSourceFactory
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceFactory,
+)
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 

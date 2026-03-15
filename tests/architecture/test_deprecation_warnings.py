@@ -29,8 +29,8 @@ _FACADE_PATH = (
     / "facade.py"
 )
 
-# Snapshot at RF-007: facade must not grow beyond current size.
-_FACADE_MAX_LINES = 248
+# Snapshot after wrapper extraction: facade stays a thin forwarder.
+_FACADE_MAX_LINES = 180
 
 
 @pytest.mark.architecture

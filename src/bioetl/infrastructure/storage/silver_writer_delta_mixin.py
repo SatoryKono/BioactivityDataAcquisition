@@ -7,25 +7,19 @@ __all__ = ["SilverWriterDeltaMixin"]
 from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
-from deltalake.exceptions import CommitFailedError
-from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.infrastructure.storage.silver_writer_delta_helpers import (
     _build_dispatch_policy,
     _DeltaWriteRequest,
     _dispatch_request_by_mode,
     _dispatch_request_with_domain_errors,
-    _load_delta_table,
     _merge_records_with_timeout,
-    _MergeExecutionTimeoutError,
     _write_plain_delta_request,
 )
 from bioetl.infrastructure.storage.silver_writer_merge_resilience_helpers import (
     _emit_merge_final_event,
-    _emit_merge_recovered_after_retry,
     _emit_merge_retry_event,
-    _handle_commit_retry,
-    _handle_timeout_retry,
+    _execute_merge_write_request,
 )
 from bioetl.infrastructure.storage.write_resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
@@ -85,57 +79,20 @@ class SilverWriterDeltaMixin:
         request: _DeltaWriteRequest,
     ) -> None:
         """Write data using merge/upsert strategy with conflict retry."""
-        policy = getattr(
-            self,
-            "_merge_resilience_policy",
-            DEFAULT_SILVER_MERGE_POLICY,
+        await _execute_merge_write_request(
+            request=request,
+            policy=getattr(
+                self,
+                "_merge_resilience_policy",
+                DEFAULT_SILVER_MERGE_POLICY,
+            ),
+            load_module=self._load_silver_writer_module,
+            write_append=self._write_append,
+            merge_records=self._merge_records,
+            emit_final=self._emit_merge_final_telemetry,
+            emit_retry=self._emit_merge_retry_telemetry,
+            logger=self._logger,
         )
-        commit_retry_count = 0
-        timeout_retry_count = 0
-
-        while True:
-            try:
-                table = await _load_delta_table(
-                    load_module=self._load_silver_writer_module,
-                    table_path=request.table_path,
-                )
-                await self._merge_records(
-                    table,
-                    request.arrow_data,
-                    request.primary_keys,
-                    request.table_path,
-                    timeout_seconds=policy.execution_timeout_seconds,
-                )
-                _emit_merge_recovered_after_retry(
-                    logger=self._logger,
-                    table_path=request.table_path,
-                    commit_retry_count=commit_retry_count,
-                    timeout_retry_count=timeout_retry_count,
-                )
-                return
-            except DeltaTableNotFoundError:
-                await self._write_append(request)
-                return
-            except CommitFailedError:
-                next_commit_retry_count = await _handle_commit_retry(
-                    table_path=request.table_path,
-                    policy=policy,
-                    retry_count=commit_retry_count,
-                    emit_final=self._emit_merge_final_telemetry,
-                    emit_retry=self._emit_merge_retry_telemetry,
-                )
-                if next_commit_retry_count is None:
-                    raise
-                commit_retry_count = next_commit_retry_count
-            except _MergeExecutionTimeoutError as exc:
-                timeout_retry_count = await _handle_timeout_retry(
-                    table_path=request.table_path,
-                    policy=policy,
-                    retry_count=timeout_retry_count,
-                    cause=exc,
-                    emit_final=self._emit_merge_final_telemetry,
-                    emit_retry=self._emit_merge_retry_telemetry,
-                )
 
     async def _dispatch_write(
         self,

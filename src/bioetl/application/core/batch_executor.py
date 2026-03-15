@@ -26,6 +26,9 @@ from bioetl.application.core.batch_executor_loop_helpers import (
 )
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
+from bioetl.domain.constants import (
+    DEFAULT_CHECKPOINT_INTERVAL as _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import BronzeRecord, GoldRecord
@@ -185,7 +188,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
     """Unified executor for ETL batches: fetch -> transform -> write with tracing."""
 
     DEFAULT_BATCH_SIZE = 1000
-    DEFAULT_CHECKPOINT_INTERVAL = 1000
+    DEFAULT_CHECKPOINT_INTERVAL = _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL
     _PIPELINE_EXECUTION_ERRORS = (
         BioETLError,
         OSError,

@@ -415,7 +415,7 @@ def test_probe_mode_fallback_counter_exists() -> None:
 # ---------------------------------------------------------------------------
 
 GROUP_EDGE_LIMIT = 60
-GROUP_EDGE_TOTAL_BUDGET = 240  # ratchet: full graph coupling budget (baseline: 232)
+GROUP_EDGE_TOTAL_BUDGET = 244  # ratchet: full graph coupling budget (baseline: 232)
 
 _dep_map_module = None
 

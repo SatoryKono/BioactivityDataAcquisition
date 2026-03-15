@@ -1,10 +1,10 @@
-"""Tests for ColumnOrdererService service."""
+"""Tests for ColumnOrderer service."""
 
 import polars as pl
 import pytest
 from unittest.mock import MagicMock
 
-from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.value_objects.column_order import (
     ColumnOrderConfig,
@@ -21,15 +21,15 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def orderer(mock_logger: MagicMock) -> ColumnOrdererService:
-    """Create ColumnOrdererService instance."""
-    return ColumnOrdererService(mock_logger)
+def orderer(mock_logger: MagicMock) -> ColumnOrderer:
+    """Create ColumnOrderer instance."""
+    return ColumnOrderer(mock_logger)
 
 
 class TestColumnOrderer:
-    """Tests for ColumnOrdererService."""
+    """Tests for ColumnOrderer."""
 
-    def test_system_columns_first(self, orderer: ColumnOrdererService) -> None:
+    def test_system_columns_first(self, orderer: ColumnOrderer) -> None:
         """System columns appear first."""
         df = pl.DataFrame(
             {
@@ -45,7 +45,7 @@ class TestColumnOrderer:
         assert result.columns[0] in ("entity_id", "_run_id")
         assert result.columns[1] in ("entity_id", "_run_id")
 
-    def test_identifiers_before_content(self, orderer: ColumnOrdererService) -> None:
+    def test_identifiers_before_content(self, orderer: ColumnOrderer) -> None:
         """Identifiers appear before content fields."""
         df = pl.DataFrame(
             {
@@ -66,7 +66,7 @@ class TestColumnOrderer:
         assert pmid_idx < title_idx
         assert title_idx < abstract_idx
 
-    def test_title_before_abstract(self, orderer: ColumnOrdererService) -> None:
+    def test_title_before_abstract(self, orderer: ColumnOrderer) -> None:
         """Title fields appear before abstract fields."""
         df = pl.DataFrame(
             {
@@ -88,7 +88,7 @@ class TestColumnOrderer:
         assert max(title_indices) < min(abstract_indices)
 
     def test_provider_priority_within_group(
-        self, orderer: ColumnOrdererService
+        self, orderer: ColumnOrderer
     ) -> None:
         """Within same group, chembl comes before crossref."""
         df = pl.DataFrame(
@@ -107,7 +107,7 @@ class TestColumnOrderer:
         assert chembl_idx < crossref_idx < pubmed_idx
 
     def test_unqualified_columns_have_priority(
-        self, orderer: ColumnOrdererService
+        self, orderer: ColumnOrderer
     ) -> None:
         """Unqualified columns appear before qualified in same group."""
         df = pl.DataFrame(
@@ -123,13 +123,13 @@ class TestColumnOrderer:
 
         assert title_idx < crossref_idx
 
-    def test_empty_dataframe(self, orderer: ColumnOrdererService) -> None:
+    def test_empty_dataframe(self, orderer: ColumnOrderer) -> None:
         """Empty DataFrame returns empty DataFrame."""
         df = pl.DataFrame()
         result = orderer.order_columns(df)
         assert len(result.columns) == 0
 
-    def test_get_ordered_columns(self, orderer: ColumnOrdererService) -> None:
+    def test_get_ordered_columns(self, orderer: ColumnOrderer) -> None:
         """Get ordered column names without DataFrame."""
         columns = ["abstract", "title", "_run_id", "doi"]
         ordered = orderer.get_ordered_columns(columns)
@@ -138,7 +138,7 @@ class TestColumnOrderer:
         assert ordered.index("doi") < ordered.index("title")
         assert ordered.index("title") < ordered.index("abstract")
 
-    def test_group_columns(self, orderer: ColumnOrdererService) -> None:
+    def test_group_columns(self, orderer: ColumnOrderer) -> None:
         """Group columns by semantic type."""
         columns = [
             "_run_id",
@@ -153,7 +153,7 @@ class TestColumnOrderer:
         assert "chembl.publication.title" in groups[SemanticGroup.TITLE]
         assert "crossref.publication.abstract" in groups[SemanticGroup.ABSTRACT]
 
-    def test_data_preserved_after_reorder(self, orderer: ColumnOrdererService) -> None:
+    def test_data_preserved_after_reorder(self, orderer: ColumnOrderer) -> None:
         """Data values are preserved after reordering."""
         df = pl.DataFrame(
             {
@@ -173,7 +173,7 @@ class TestColumnOrderer:
         config = ColumnOrderConfig(
             provider_priority=("crossref", "chembl")  # Reversed
         )
-        orderer = ColumnOrdererService(mock_logger, config)
+        orderer = ColumnOrderer(mock_logger, config)
 
         df = pl.DataFrame(
             {
@@ -189,7 +189,7 @@ class TestColumnOrderer:
 
         assert crossref_idx < chembl_idx
 
-    def test_full_publication_order(self, orderer: ColumnOrdererService) -> None:
+    def test_full_publication_order(self, orderer: ColumnOrderer) -> None:
         """Full publication DataFrame is ordered correctly."""
         df = pl.DataFrame(
             {
@@ -241,7 +241,7 @@ class TestColumnOrdererYAMLGroups:
             ColumnGroupConfig(name="title", fields=("title",)),
             ColumnGroupConfig(name="abstract", fields=("abstract",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -263,7 +263,7 @@ class TestColumnOrdererYAMLGroups:
             ColumnGroupConfig(name="system", pattern=r"^_"),
             ColumnGroupConfig(name="content", fields=("title",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -288,7 +288,7 @@ class TestColumnOrdererYAMLGroups:
                 provider_order=("crossref", "openalex", "semanticscholar"),
             ),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -310,7 +310,7 @@ class TestColumnOrdererYAMLGroups:
         groups = [
             ColumnGroupConfig(name="title", fields=("title",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -328,7 +328,7 @@ class TestColumnOrdererYAMLGroups:
         groups = [
             ColumnGroupConfig(name="title", fields=("title",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -351,7 +351,7 @@ class TestColumnOrdererYAMLGroups:
             ColumnGroupConfig(name="title", fields=("title",)),
             ColumnGroupConfig(name="abstract", fields=("abstract",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -388,7 +388,7 @@ class TestColumnOrdererYAMLGroups:
             ColumnGroupConfig(name="id", fields=("doi",)),
             ColumnGroupConfig(name="title", fields=("title",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -406,7 +406,7 @@ class TestColumnOrdererYAMLGroups:
         groups = [
             ColumnGroupConfig(name="title", fields=("title",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame()
         result = orderer.order_columns(df)
@@ -414,7 +414,7 @@ class TestColumnOrdererYAMLGroups:
 
     def test_yaml_groups_fallback_to_default(self, mock_logger: MagicMock) -> None:
         """Without YAML groups, falls back to default ColumnOrderConfig."""
-        orderer = ColumnOrdererService(mock_logger)  # No column_groups
+        orderer = ColumnOrderer(mock_logger)  # No column_groups
 
         df = pl.DataFrame(
             {
@@ -436,7 +436,7 @@ class TestColumnOrdererYAMLGroups:
                 provider_order=("chembl", "crossref"),
             ),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -473,7 +473,7 @@ class TestColumnOrdererYAMLGroups:
                 provider_order=("chembl", "openalex"),
             ),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -507,7 +507,7 @@ class TestColumnOrdererYAMLGroups:
             ),
             ColumnGroupConfig(name="content", fields=("title",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {
@@ -538,7 +538,7 @@ class TestColumnOrdererYAMLGroups:
             ColumnGroupConfig(name="system", fields=("entity_id",)),
             ColumnGroupConfig(name="content", fields=("title",)),
         ]
-        orderer = ColumnOrdererService(mock_logger, column_groups=groups)
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
 
         df = pl.DataFrame(
             {

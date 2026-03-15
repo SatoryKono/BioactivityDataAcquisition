@@ -20,7 +20,7 @@ import polars as pl
 import pytest
 import yaml
 
-from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.domain.composite.config import (
     ColumnGroupConfig,
     CompositeConfig,
@@ -202,7 +202,7 @@ class TestCompositeMoleculePipeline:
     ) -> None:
         """Verify pipeline configuration preserves all seed records."""
         # Create column renamer
-        renamer = ColumnRenamerService(mock_logger)
+        renamer = ColumnRenamer(mock_logger)
 
         # Rename seed for merge
         seed_renamed = renamer.rename_dataframe(seed_molecule_df, "chembl_molecule")
@@ -220,7 +220,7 @@ class TestCompositeMoleculePipeline:
     ) -> None:
         """Verify InChIKey-based join works correctly."""
         # Create column renamer
-        renamer = ColumnRenamerService(mock_logger)
+        renamer = ColumnRenamer(mock_logger)
 
         # Rename DataFrames
         seed_renamed = renamer.rename_dataframe(seed_molecule_df, "chembl_molecule")
@@ -277,7 +277,7 @@ class TestCompositeMoleculePipeline:
         assert composite_molecule_config.enrichers[0].required is False
 
         # Create column renamer
-        renamer = ColumnRenamerService(mock_logger)
+        renamer = ColumnRenamer(mock_logger)
 
         # When enricher fails, seed data should be preserved
         seed_renamed = renamer.rename_dataframe(seed_molecule_df, "chembl_molecule")

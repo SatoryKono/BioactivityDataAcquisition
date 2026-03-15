@@ -8,7 +8,7 @@ import polars as pl
 
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrdererService,
+    ColumnPriorityOrderer,
 )
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.join_planner_helpers import (
@@ -40,7 +40,7 @@ class _MergeCompatibilityConflictPolicyMixin:
     _config: MergeConfig
     _conflict_resolver: ConflictResolverService
     _coalesce_policy: CoalescePolicyService
-    _priority_orderer: ColumnPriorityOrdererService
+    _priority_orderer: ColumnPriorityOrderer
 
     def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
         """Compatibility wrapper for suffix allocation."""

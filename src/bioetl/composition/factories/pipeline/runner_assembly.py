@@ -26,7 +26,6 @@ from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy, WriteModePolicy
 
 if TYPE_CHECKING:
-    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -37,6 +36,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.service import PostrunService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.types import GoldSchemaType
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -143,7 +143,7 @@ def _build_batch_executor(
     pipeline: BasePipeline,
     yaml_config: PipelineYamlConfig | None,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: GoldSchemaType,
     strict_gold_validation: bool,
     checkpoint_manager: CheckpointManagerService,
     lock_manager: LockCoordinator,
@@ -201,7 +201,7 @@ def assemble_runner_impl(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: GoldSchemaType,
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
     dq_configs_extractor: (

@@ -34,7 +34,6 @@ from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteM
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
-    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -50,7 +49,7 @@ if TYPE_CHECKING:
         MemoryMonitorPort,
         TracingPort,
     )
-    from bioetl.domain.types import RunID, ScdConfig
+    from bioetl.domain.types import GoldSchemaType, RunID, ScdConfig
 
 __all__ = [
     "ServicesBuilder",
@@ -130,7 +129,7 @@ class ServicesBuilder:
         provider: str,
         entity_type: str,
         silver_schema: pa.Schema | None,
-        gold_schema: type[pandera.DataFrameModel],
+        gold_schema: GoldSchemaType,
         dq_config: DQConfig | None,
         primary_keys: Sequence[str],
         silver_table: str,
@@ -198,7 +197,7 @@ class ServicesBuilder:
     def create_record_processor_from_pipeline(
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
-        gold_schema: type[pandera.DataFrameModel],
+        gold_schema: GoldSchemaType,
         *,
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
@@ -231,7 +230,7 @@ class ServicesBuilder:
     def create_batch_executor_from_pipeline(
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
-        gold_schema: type[pandera.DataFrameModel],
+        gold_schema: GoldSchemaType,
         checkpoint_manager: CheckpointManagerService,
         shutdown_signal: ShutdownSignal,
         *,

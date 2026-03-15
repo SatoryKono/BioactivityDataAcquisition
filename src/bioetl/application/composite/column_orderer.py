@@ -29,10 +29,10 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["ColumnOrdererService"]
+__all__ = ["ColumnOrderer"]
 
 
-class ColumnOrdererService:
+class ColumnOrderer:
     """Service for ordering columns by semantic groups."""
 
     def __init__(

@@ -8,10 +8,14 @@ import pytest
 @pytest.mark.unit
 def test_metadata_assemblers_reexports() -> None:
     """composition.services.metadata_assemblers re-exports canonical classes."""
+    from bioetl.application.services.metadata_assemblers import (
+        GoldMetadataAssembler as CanonicalGoldMetadataAssembler,
+        SilverMetadataAssembler as CanonicalSilverMetadataAssembler,
+    )
     from bioetl.composition.services.metadata_assemblers import (
         GoldMetadataAssembler,
         SilverMetadataAssembler,
     )
 
-    assert GoldMetadataAssembler is not None
-    assert SilverMetadataAssembler is not None
+    assert GoldMetadataAssembler is CanonicalGoldMetadataAssembler
+    assert SilverMetadataAssembler is CanonicalSilverMetadataAssembler

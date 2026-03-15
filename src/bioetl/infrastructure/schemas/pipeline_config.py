@@ -6,6 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from bioetl.domain.constants import DEFAULT_CHECKPOINT_INTERVAL
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
 from bioetl.infrastructure.schemas.pipeline_config_common import (
@@ -96,7 +97,7 @@ class PipelineYamlConfig(BaseModel):
         "The only pagination parameter a pipeline may set. "
         "Source config defines pagination strategy and defaults.",
     )
-    checkpoint_interval: int = Field(default=1000, ge=100)
+    checkpoint_interval: int = Field(default=DEFAULT_CHECKPOINT_INTERVAL, ge=100)
     dq_config_file: str | None = Field(
         default=None,
         description="Path to DQ config file relative to pipeline config. "

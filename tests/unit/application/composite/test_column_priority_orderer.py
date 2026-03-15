@@ -1,4 +1,4 @@
-"""Unit tests for ColumnPriorityOrdererService."""
+"""Unit tests for ColumnPriorityOrderer."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrdererService,
+    ColumnPriorityOrderer,
 )
 from bioetl.domain.composite.config import EnricherConfig
 
@@ -25,13 +25,13 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def orderer(mock_logger: MagicMock) -> ColumnPriorityOrdererService:
+def orderer(mock_logger: MagicMock) -> ColumnPriorityOrderer:
     """Create service under test."""
-    return ColumnPriorityOrdererService(mock_logger)
+    return ColumnPriorityOrderer(mock_logger)
 
 
 def test_collect_field_columns_includes_seed_and_enricher_qualified_columns(
-    orderer: ColumnPriorityOrdererService,
+    orderer: ColumnPriorityOrderer,
 ) -> None:
     enrichers = (
         EnricherConfig(pipeline="crossref_publication", join_keys=("doi",)),
@@ -54,7 +54,7 @@ def test_collect_field_columns_includes_seed_and_enricher_qualified_columns(
 
 
 def test_collect_field_columns_falls_back_to_legacy_prefix_for_invalid_pipeline_names(
-    orderer: ColumnPriorityOrdererService,
+    orderer: ColumnPriorityOrderer,
     mock_logger: MagicMock,
 ) -> None:
     enrichers = (EnricherConfig(pipeline="legacycrossref", join_keys=("doi",)),)
@@ -72,7 +72,7 @@ def test_collect_field_columns_falls_back_to_legacy_prefix_for_invalid_pipeline_
 
 
 def test_order_columns_by_priority_respects_seed_qualified_and_provider_order(
-    orderer: ColumnPriorityOrdererService,
+    orderer: ColumnPriorityOrderer,
 ) -> None:
     columns = [
         "pubchem.compound.title",
@@ -94,7 +94,7 @@ def test_order_columns_by_priority_respects_seed_qualified_and_provider_order(
 
 
 def test_order_columns_by_priority_appends_remaining_columns_in_input_order(
-    orderer: ColumnPriorityOrdererService,
+    orderer: ColumnPriorityOrderer,
 ) -> None:
     columns = [
         "crossref.publication.title",
@@ -116,7 +116,7 @@ def test_order_columns_by_priority_appends_remaining_columns_in_input_order(
 
 
 def test_filter_compatible_columns_returns_empty_for_no_ordered_columns(
-    orderer: ColumnPriorityOrdererService,
+    orderer: ColumnPriorityOrderer,
 ) -> None:
     df = pl.DataFrame({"a": [1]})
     compatible, incompatible = orderer.filter_compatible_columns(
@@ -130,7 +130,7 @@ def test_filter_compatible_columns_returns_empty_for_no_ordered_columns(
 
 
 def test_filter_compatible_columns_tracks_incompatible_columns_and_logs(
-    orderer: ColumnPriorityOrdererService,
+    orderer: ColumnPriorityOrderer,
     mock_logger: MagicMock,
 ) -> None:
     df = pl.DataFrame(
@@ -154,24 +154,24 @@ def test_filter_compatible_columns_tracks_incompatible_columns_and_logs(
 
 def test_get_enricher_prefix_prefers_provider_entity_format() -> None:
     assert (
-        ColumnPriorityOrdererService.get_enricher_prefix("crossref_publication")
+        ColumnPriorityOrderer.get_enricher_prefix("crossref_publication")
         == "crossref.publication."
     )
 
 
 def test_get_enricher_prefix_uses_legacy_format_when_pipeline_name_invalid() -> None:
     assert (
-        ColumnPriorityOrdererService.get_enricher_prefix("legacyname") == "legacyname_"
+        ColumnPriorityOrderer.get_enricher_prefix("legacyname") == "legacyname_"
     )
 
 
 def test_parse_pipeline_name_raises_for_invalid_format() -> None:
     with pytest.raises(ValueError, match="must be in format"):
-        ColumnPriorityOrdererService._parse_pipeline_name("invalid")
+        ColumnPriorityOrderer._parse_pipeline_name("invalid")
 
 
 def test_resolve_priority_column_returns_none_for_seed_without_seed_context() -> None:
-    resolved = ColumnPriorityOrdererService._resolve_priority_column(
+    resolved = ColumnPriorityOrderer._resolve_priority_column(
         source="seed",
         field="title",
         columns_set={"crossref.publication.title"},

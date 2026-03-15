@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from bioetl.domain.exceptions.base import RecoverableError
+
 __all__ = ["IDMappingJobError", "IDMappingTimeoutError"]
 
 
-class IDMappingJobError(Exception):
+class IDMappingJobError(RecoverableError):
     """Raised when ID Mapping job fails."""
 
     def __init__(self, job_id: str, message: str) -> None:
@@ -13,7 +15,7 @@ class IDMappingJobError(Exception):
         self.job_id = job_id
 
 
-class IDMappingTimeoutError(Exception):
+class IDMappingTimeoutError(RecoverableError):
     """Raised when ID Mapping job polling times out."""
 
     def __init__(self, job_id: str, attempts: int) -> None:

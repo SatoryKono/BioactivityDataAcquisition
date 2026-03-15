@@ -13,6 +13,7 @@ from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.table import TableConfig
+from bioetl.domain.constants import DEFAULT_BATCH_SIZE, DEFAULT_CHECKPOINT_INTERVAL
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.types import ScdConfig
 
@@ -52,8 +53,8 @@ class PipelineConfig:
     # Processing
     silver_filters: SilverFilterConfig | None = None
     gold_filters: GoldFilterConfig | None = None
-    batch_size: int = 100
-    checkpoint_interval: int = 1000
+    batch_size: int = DEFAULT_BATCH_SIZE
+    checkpoint_interval: int = DEFAULT_CHECKPOINT_INTERVAL
     fields: tuple[str, ...] = ()
     column_groups: tuple[ColumnGroupConfig, ...] = ()
 

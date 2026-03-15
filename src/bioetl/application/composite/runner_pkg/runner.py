@@ -28,6 +28,7 @@ from bioetl.application.composite.runner_pkg.runner_support_mixin import (
 )
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -170,7 +171,7 @@ class CompositePipelineRunner(
         acquired = await self._lock.acquire(
             key=lock_key,
             owner_id=self._run_id,
-            ttl=3600,
+            ttl=DEFAULT_LOCK_TTL_SECONDS,
         )
         if not acquired:
             raise LockAcquisitionError(key=lock_key)

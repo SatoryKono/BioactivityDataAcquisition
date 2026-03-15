@@ -15,10 +15,10 @@ from bioetl.domain.composite.aggregation import (
 )
 from bioetl.domain.ports import LoggerPort
 
-__all__ = ["EnricherAggregatorService"]
+__all__ = ["EnricherAggregator"]
 
 
-class EnricherAggregatorService:
+class EnricherAggregator:
     """Aggregates 1:M enricher data into 1:1 before join."""
 
     def __init__(self, logger: LoggerPort) -> None:

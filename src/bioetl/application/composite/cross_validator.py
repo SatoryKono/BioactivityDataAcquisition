@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["EnrichmentCrossValidationService", "EnrichmentCrossValidator"]
+__all__ = ["EnrichmentCrossValidator"]
 
 
 @dataclass
@@ -38,7 +38,7 @@ class _EnricherValidationResult:
     detail: pl.Series  # JSON string per row, null where no mismatches
 
 
-class EnrichmentCrossValidationService:
+class EnrichmentCrossValidator:
     """Validates enricher data consistency against seed before merge."""
 
     def __init__(
@@ -270,5 +270,3 @@ class EnrichmentCrossValidationService:
         return parts[0], parts[1]
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-EnrichmentCrossValidator = EnrichmentCrossValidationService

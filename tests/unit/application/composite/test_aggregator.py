@@ -1,4 +1,4 @@
-"""Unit tests for EnricherAggregatorService."""
+"""Unit tests for EnricherAggregator."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.aggregator import EnricherAggregatorService
+from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
@@ -23,8 +23,8 @@ def mock_logger():
 
 @pytest.fixture
 def aggregator(mock_logger):
-    """Create an EnricherAggregatorService instance."""
-    return EnricherAggregatorService(mock_logger)
+    """Create an EnricherAggregator instance."""
+    return EnricherAggregator(mock_logger)
 
 
 # ---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ def aggregator(mock_logger):
 class TestAggregateCollectList:
     """Tests for COLLECT_LIST aggregation."""
 
-    def test_collect_list_basic(self, aggregator: EnricherAggregatorService):
+    def test_collect_list_basic(self, aggregator: EnricherAggregator):
         """Test COLLECT_LIST collects all non-null values into a list."""
         df = pl.DataFrame(
             {
@@ -61,7 +61,7 @@ class TestAggregateCollectList:
         terms = d1_row["term"].to_list()[0]
         assert sorted(terms) == ["cancer", "oncology"]
 
-    def test_collect_list_drops_nulls(self, aggregator: EnricherAggregatorService):
+    def test_collect_list_drops_nulls(self, aggregator: EnricherAggregator):
         """Test COLLECT_LIST drops null values."""
         df = pl.DataFrame(
             {
@@ -90,7 +90,7 @@ class TestAggregateCollectList:
 class TestAggregateCollectSet:
     """Tests for COLLECT_SET aggregation."""
 
-    def test_collect_set_deduplicates(self, aggregator: EnricherAggregatorService):
+    def test_collect_set_deduplicates(self, aggregator: EnricherAggregator):
         """Test COLLECT_SET returns unique values only."""
         df = pl.DataFrame(
             {
@@ -118,7 +118,7 @@ class TestAggregateCollectSet:
 class TestAggregateCount:
     """Tests for COUNT aggregation."""
 
-    def test_count_basic(self, aggregator: EnricherAggregatorService):
+    def test_count_basic(self, aggregator: EnricherAggregator):
         """Test COUNT returns number of rows per group."""
         df = pl.DataFrame(
             {
@@ -148,7 +148,7 @@ class TestAggregateCount:
 class TestAggregateFirst:
     """Tests for FIRST aggregation."""
 
-    def test_first_takes_first_value(self, aggregator: EnricherAggregatorService):
+    def test_first_takes_first_value(self, aggregator: EnricherAggregator):
         """Test FIRST returns the first value per group."""
         df = pl.DataFrame(
             {
@@ -175,7 +175,7 @@ class TestAggregateFirst:
 class TestAggregateConcatStr:
     """Tests for CONCAT_STR aggregation."""
 
-    def test_concat_str_joins_values(self, aggregator: EnricherAggregatorService):
+    def test_concat_str_joins_values(self, aggregator: EnricherAggregator):
         """Test CONCAT_STR joins values with comma separator."""
         df = pl.DataFrame(
             {
@@ -200,7 +200,7 @@ class TestAggregateConcatStr:
         assert "oncology" in concatenated
         assert ", " in concatenated
 
-    def test_concat_str_drops_nulls(self, aggregator: EnricherAggregatorService):
+    def test_concat_str_drops_nulls(self, aggregator: EnricherAggregator):
         """Test CONCAT_STR drops null values before concatenation."""
         df = pl.DataFrame(
             {
@@ -233,7 +233,7 @@ class TestAggregateConcatStr:
 class TestOutputFieldAlias:
     """Tests for output_field aliasing in aggregation."""
 
-    def test_output_field_renames_column(self, aggregator: EnricherAggregatorService):
+    def test_output_field_renames_column(self, aggregator: EnricherAggregator):
         """Test that output_field renames the result column."""
         df = pl.DataFrame(
             {
@@ -258,7 +258,7 @@ class TestOutputFieldAlias:
         assert "term" not in result.columns
 
     def test_default_output_field_uses_source(
-        self, aggregator: EnricherAggregatorService
+        self, aggregator: EnricherAggregator
     ):
         """Test that omitting output_field keeps the source field name."""
         df = pl.DataFrame(
@@ -291,7 +291,7 @@ class TestOutputFieldAlias:
 class TestFilterCondition:
     """Tests for filter_condition in aggregation fields."""
 
-    def test_filter_is_not_null(self, aggregator: EnricherAggregatorService):
+    def test_filter_is_not_null(self, aggregator: EnricherAggregator):
         """Test IS NOT NULL filter condition."""
         df = pl.DataFrame(
             {
@@ -316,7 +316,7 @@ class TestFilterCondition:
         terms = result["term"].to_list()[0]
         assert len(terms) == 2
 
-    def test_filter_is_null(self, aggregator: EnricherAggregatorService):
+    def test_filter_is_null(self, aggregator: EnricherAggregator):
         """Test IS NULL filter condition."""
         df = pl.DataFrame(
             {
@@ -341,7 +341,7 @@ class TestFilterCondition:
         terms = result["term"].to_list()[0]
         assert len(terms) == 1
 
-    def test_filter_equality(self, aggregator: EnricherAggregatorService):
+    def test_filter_equality(self, aggregator: EnricherAggregator):
         """Test == equality filter condition."""
         df = pl.DataFrame(
             {
@@ -366,7 +366,7 @@ class TestFilterCondition:
         terms = result["term"].to_list()[0]
         assert sorted(terms) == ["cancer", "tumor"]
 
-    def test_filter_inequality(self, aggregator: EnricherAggregatorService):
+    def test_filter_inequality(self, aggregator: EnricherAggregator):
         """Test != inequality filter condition."""
         df = pl.DataFrame(
             {
@@ -392,7 +392,7 @@ class TestFilterCondition:
         assert terms == ["chemo"]
 
     def test_invalid_filter_returns_unfiltered(
-        self, aggregator: EnricherAggregatorService, mock_logger: MagicMock
+        self, aggregator: EnricherAggregator, mock_logger: MagicMock
     ):
         """Test that an unparseable filter condition returns None (no filter)."""
         result = aggregator._parse_filter_condition("bad filter!")
@@ -411,7 +411,7 @@ class TestMultipleFields:
     """Tests for aggregating multiple fields simultaneously."""
 
     def test_multiple_fields_in_single_config(
-        self, aggregator: EnricherAggregatorService
+        self, aggregator: EnricherAggregator
     ):
         """Test aggregation with multiple field specs in one config."""
         df = pl.DataFrame(
@@ -452,7 +452,7 @@ class TestAggregatorLogging:
     """Tests for logging behavior."""
 
     def test_aggregate_logs_debug_and_info(
-        self, aggregator: EnricherAggregatorService, mock_logger: MagicMock
+        self, aggregator: EnricherAggregator, mock_logger: MagicMock
     ):
         """Test that aggregate() logs debug before and info after."""
         df = pl.DataFrame({"doc_id": ["D1"], "term": ["cancer"]})
@@ -476,7 +476,7 @@ class TestAggregatorLogging:
         assert debug_kwargs[1]["enricher"] == "my_enricher"
 
     def test_aggregate_logs_row_counts(
-        self, aggregator: EnricherAggregatorService, mock_logger: MagicMock
+        self, aggregator: EnricherAggregator, mock_logger: MagicMock
     ):
         """Test that info log contains rows_before and rows_after."""
         df = pl.DataFrame(

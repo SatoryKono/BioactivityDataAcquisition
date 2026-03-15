@@ -8,6 +8,8 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.composition.runtime_builders import inputs_resolver
+from bioetl.composition.runtime_builders import observability_builder
 from bioetl.composition.runtime_builders import runner_builder
 
 
@@ -292,6 +294,21 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
     assert kwargs["load_source_config_fn"] is runner_builder.load_source_config
 
 
+def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:
+    """Legacy monkeypatch wrappers should stay removed from runner_builder."""
+    for attr_name in (
+        "_assemble_vacuum_settings",
+        "_assemble_runtime_config",
+        "_assemble_filter_config",
+        "_assemble_cached_bronze_context",
+        "_build_observability_bundle",
+        "_validate_pk_contract",
+        "_resolve_health_check_mode",
+        "_resolve_filter_batch_size",
+    ):
+        assert not hasattr(runner_builder, attr_name)
+
+
 def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
     """Builder must pass probe health mode when settings.test_mode is enabled."""
     fake_factory = _FakeFactory()
@@ -470,7 +487,7 @@ def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled() -> None:
             enabled=False,
             retention_days=7,
         ),
-        assemble_runtime_config_fn=runner_builder._assemble_runtime_config,
+        assemble_runtime_config_fn=runner_builder.assemble_runtime_config,
         assemble_filter_config_fn=lambda **_: None,
         assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
@@ -498,9 +515,9 @@ def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
     sentinel = object()
 
     with patch.object(
-        runner_builder.FilterConfigBuilder, "build", return_value=sentinel
+        inputs_resolver.FilterConfigBuilder, "build", return_value=sentinel
     ) as mock_build:
-        result = runner_builder._assemble_filter_config(
+        result = inputs_resolver.assemble_filter_config(
             yaml_filter=SimpleNamespace(),
             ctx=ctx,
             test_mode=False,
@@ -512,22 +529,15 @@ def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.runtime_builders.runner_builder.NoOpMetrics")
-@patch("bioetl.composition.runtime_builders.runner_builder.NoOpTracing")
-@patch("bioetl.composition.runtime_builders.runner_builder.UnifiedLogger")
-def test_build_observability_bundle_uses_noop_when_disabled(
-    mock_logger_cls: MagicMock,
-    mock_noop_tracing_cls: MagicMock,
-    mock_noop_metrics_cls: MagicMock,
-) -> None:
+def test_canonical_observability_builder_uses_noop_when_disabled() -> None:
     logger = MagicMock()
     tracer = MagicMock()
     metrics = MagicMock()
-    mock_logger_cls.return_value = logger
-    mock_noop_tracing_cls.return_value = tracer
-    mock_noop_metrics_cls.return_value = metrics
+    logger_factory = MagicMock(return_value=logger)
+    noop_tracing_factory = MagicMock(return_value=tracer)
+    noop_metrics_factory = MagicMock(return_value=metrics)
 
-    result = runner_builder._build_observability_bundle(
+    result = observability_builder.build_observability_bundle(
         pipeline="chembl_activity",
         run_id=uuid4(),
         settings=SimpleNamespace(
@@ -537,34 +547,29 @@ def test_build_observability_bundle_uses_noop_when_disabled(
                 dq_monitor_enabled=False,
             )
         ),
+        logger_factory=logger_factory,
+        noop_tracing_factory=noop_tracing_factory,
+        noop_metrics_factory=noop_metrics_factory,
     )
 
     assert result.logger is logger
     assert result.tracer is tracer
     assert result.metrics is metrics
     assert result.dq_monitor is None
-    mock_noop_metrics_cls.assert_called_once_with(warn_on_use=False)
+    noop_metrics_factory.assert_called_once_with(warn_on_use=False)
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.runtime_builders.runner_builder.DataQualityMonitorService")
-@patch("bioetl.composition.runtime_builders.runner_builder.PrometheusMetrics")
-@patch("bioetl.composition.runtime_builders.runner_builder.OpenTelemetryTracer")
-@patch("bioetl.composition.runtime_builders.runner_builder.UnifiedLogger")
-def test_build_observability_bundle_configures_dq_monitor_thresholds(
-    mock_logger_cls: MagicMock,
-    mock_tracer_cls: MagicMock,
-    mock_metrics_cls: MagicMock,
-    mock_dq_monitor_cls: MagicMock,
+def test_canonical_observability_builder_configures_dq_monitor_thresholds(
 ) -> None:
     logger = MagicMock()
     tracer = MagicMock()
     metrics = MagicMock()
     dq_monitor = MagicMock()
-    mock_logger_cls.return_value = logger
-    mock_tracer_cls.return_value = tracer
-    mock_metrics_cls.return_value = metrics
-    mock_dq_monitor_cls.return_value = dq_monitor
+    logger_factory = MagicMock(return_value=logger)
+    tracer_factory = MagicMock(return_value=tracer)
+    metrics_factory = MagicMock(return_value=metrics)
+    dq_monitor_factory = MagicMock(return_value=dq_monitor)
 
     settings = SimpleNamespace(
         observability=SimpleNamespace(
@@ -579,10 +584,14 @@ def test_build_observability_bundle_configures_dq_monitor_thresholds(
         )
     )
 
-    result = runner_builder._build_observability_bundle(
+    result = observability_builder.build_observability_bundle(
         pipeline="chembl_activity",
         run_id=uuid4(),
         settings=settings,
+        logger_factory=logger_factory,
+        tracer_factory=tracer_factory,
+        metrics_factory=metrics_factory,
+        dq_monitor_factory=dq_monitor_factory,
     )
 
     assert result.logger is logger
@@ -601,7 +610,7 @@ def test_validate_pk_contract_requires_business_primary_keys() -> None:
     )
 
     with pytest.raises(ValueError, match="business_primary_keys must be non-empty"):
-        runner_builder._validate_pk_contract(config)
+        inputs_resolver.validate_pk_contract(config)
 
 
 def test_validate_pk_contract_rejects_legacy_pk_mismatch() -> None:
@@ -612,7 +621,7 @@ def test_validate_pk_contract_rejects_legacy_pk_mismatch() -> None:
     )
 
     with pytest.raises(ValueError, match="PK mismatch"):
-        runner_builder._validate_pk_contract(config)
+        inputs_resolver.validate_pk_contract(config)
 
 
 def test_validate_pk_contract_requires_technical_primary_key() -> None:
@@ -623,4 +632,4 @@ def test_validate_pk_contract_requires_technical_primary_key() -> None:
     )
 
     with pytest.raises(ValueError, match="technical_primary_key must be non-empty"):
-        runner_builder._validate_pk_contract(config)
+        inputs_resolver.validate_pk_contract(config)

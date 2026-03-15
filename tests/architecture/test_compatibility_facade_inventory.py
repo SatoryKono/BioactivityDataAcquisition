@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import ast
+import re
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -24,6 +27,13 @@ ALLOWED_STATUSES = frozenset(
 
 REQUIRED_PATHS = frozenset(
     {
+        "src/bioetl/application/core/batch_transformer_helpers.py",
+        "src/bioetl/application/core/checkpoint_manager.py",
+        "src/bioetl/application/core/cleanup_service.py",
+        "src/bioetl/application/core/heartbeat.py",
+        "src/bioetl/application/core/lock_manager.py",
+        "src/bioetl/application/core/shutdown.py",
+        "src/bioetl/application/core/base_transformer/dependencies.py",
         "src/bioetl/composition/entrypoints.py",
         "src/bioetl/composition/factories/pipeline/facade.py",
         "src/bioetl/composition/factories/storage/facade.py",
@@ -37,6 +47,16 @@ REQUIRED_PATHS = frozenset(
     }
 )
 
+MEASURED_DOCSTRING_PREFIXES = (
+    "Backward-compatible ",
+    "Compatibility ",
+    "Compatibility-",
+    "Deprecated compatibility",
+    "Composition-level compatibility",
+    "Pipeline factory compatibility-only facade",
+    "Storage compatibility-only facade",
+)
+
 
 def _extract_inventory_rows(text: str) -> list[tuple[str, str]]:
     rows: list[tuple[str, str]] = []
@@ -45,11 +65,57 @@ def _extract_inventory_rows(text: str) -> list[tuple[str, str]]:
         if not stripped.startswith("| `src/bioetl/"):
             continue
         cells = [cell.strip() for cell in stripped.strip("|").split("|")]
-        assert len(cells) == 5, f"Unexpected inventory row format: {line}"
+        assert len(cells) == 8, f"Unexpected inventory row format: {line}"
         path = cells[0].strip("`")
         status = cells[3].strip("`")
         rows.append((path, status))
     return rows
+
+
+def _iter_inventory_cells(text: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("| `src/bioetl/"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        assert len(cells) == 8, f"Unexpected inventory row format: {line}"
+        rows.append(
+            {
+                "path": cells[0].strip("`"),
+                "role": cells[1],
+                "canonical_target": cells[2],
+                "status": cells[3].strip("`"),
+                "owner": cells[4].strip("`"),
+                "allowed_call_sites": cells[5],
+                "sunset": cells[6].strip("`"),
+                "exit_criteria": cells[7],
+            }
+        )
+    return rows
+
+
+def _extract_measured_registry_paths(text: str) -> set[str]:
+    return {
+        line.split("`")[1]
+        for line in text.splitlines()
+        if line.startswith("- `src/bioetl/")
+    }
+
+
+def _iter_measured_registry_paths() -> set[str]:
+    paths = set(REQUIRED_PATHS)
+
+    for path in (ROOT / "src" / "bioetl").rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        module_docstring = ast.get_docstring(tree)
+        if module_docstring is None:
+            continue
+        first_line = module_docstring.splitlines()[0].strip()
+        if first_line.startswith(MEASURED_DOCSTRING_PREFIXES):
+            paths.add(path.relative_to(ROOT).as_posix())
+
+    return paths
 
 
 @pytest.mark.architecture
@@ -64,7 +130,9 @@ def test_inventory_doc_exists_with_required_sections() -> None:
     for heading in (
         "# Compatibility Facade Inventory",
         "## Status Model",
+        "## Governance Freeze",
         "## Inventory",
+        "## Measured Registry",
     ):
         assert heading in text, f"Missing heading in inventory doc: {heading}"
 
@@ -95,6 +163,42 @@ def test_inventory_doc_covers_curated_facade_modules() -> None:
 
 
 @pytest.mark.architecture
+def test_inventory_rows_capture_owner_call_sites_and_sunset_dates() -> None:
+    """Compatibility rows must record ownership and explicit freeze metadata."""
+    text = INVENTORY_DOC.read_text(encoding="utf-8")
+    rows = _iter_inventory_cells(text)
+
+    assert rows, "Compatibility facade inventory table is empty."
+
+    path_pattern = re.compile(r"`((?:src|tests)/[^`]+\.py)`")
+
+    for row in rows:
+        assert row["canonical_target"], f"Missing canonical target for {row['path']}"
+        assert row["owner"], f"Missing owner for {row['path']}"
+        assert row["allowed_call_sites"], (
+            f"Missing allowed call sites for {row['path']}"
+        )
+        assert "`src`:" in row["allowed_call_sites"], (
+            f"Allowed call sites must document src policy for {row['path']}"
+        )
+        assert "`tests`:" in row["allowed_call_sites"], (
+            f"Allowed call sites must document test policy for {row['path']}"
+        )
+
+        parsed_date = date.fromisoformat(row["sunset"])
+        assert parsed_date.year >= 2026, (
+            f"Unexpected sunset/review date for {row['path']}: {row['sunset']}"
+        )
+
+        referenced_paths = path_pattern.findall(row["allowed_call_sites"])
+        for rel_path in referenced_paths:
+            assert (ROOT / rel_path).exists(), (
+                f"Inventory allowed-call-site path does not exist for {row['path']}: "
+                f"{rel_path}"
+            )
+
+
+@pytest.mark.architecture
 def test_inventory_doc_is_linked_from_discovery_docs() -> None:
     """Inventory should be discoverable from composition and registry docs."""
     inventory_name = "07-compatibility-facade-inventory.md"
@@ -106,7 +210,35 @@ def test_inventory_doc_is_linked_from_discovery_docs() -> None:
 
 
 @pytest.mark.architecture
-def test_src_outside_composition_avoids_internal_composition_entrypoint_modules() -> None:
+def test_inventory_doc_tracks_measured_compatibility_registry() -> None:
+    """Inventory doc must capture the measurable compatibility-surface baseline."""
+    text = INVENTORY_DOC.read_text(encoding="utf-8")
+    inventory_rows = _extract_inventory_rows(text)
+    inventory_paths = {path for path, _status in inventory_rows}
+    measured_paths = _extract_measured_registry_paths(text)
+    expected_paths = _iter_measured_registry_paths()
+
+    assert measured_paths == expected_paths, (
+        "Measured compatibility registry drifted from tracked source modules.\n"
+        "Documented:\n"
+        + "\n".join(sorted(measured_paths))
+        + "\nExpected:\n"
+        + "\n".join(sorted(expected_paths))
+    )
+
+    measured_only_count = len(expected_paths - inventory_paths)
+    assert f"- Curated inventory rows: `{len(inventory_paths)}`" in text
+    assert f"- Measured tracked modules: `{len(expected_paths)}`" in text
+    assert (
+        f"- Measured-only modules outside curated inventory: `{measured_only_count}`"
+        in text
+    )
+
+
+@pytest.mark.architecture
+def test_src_outside_composition_avoids_internal_composition_entrypoint_modules() -> (
+    None
+):
     """First-party source outside composition should use composition.entrypoints."""
     internal_modules = frozenset(
         {

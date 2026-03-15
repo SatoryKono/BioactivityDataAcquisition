@@ -5,7 +5,7 @@ Extracted from registration.py for LOC compliance.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
@@ -22,18 +22,99 @@ from bioetl.composition.providers._models import (
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
-from bioetl.infrastructure.adapters.openalex.client import (
-    _create_openalex_adapter,
-)
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
-from bioetl.infrastructure.adapters.pubmed.client import _create_pubmed_adapter
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+def _get_default_email(settings: Settings | None) -> str | None:
+    """Return non-empty default email from settings when available."""
+    if settings is None:
+        return None
+    return settings.default_email or None
+
+
+def _get_pubmed_api_key(settings: Settings | None) -> str | None:
+    """Return resolved PubMed API key from settings when configured."""
+    if settings is None or settings.pubmed_api_key is None:
+        return None
+    return settings.pubmed_api_key.get_secret_value()
+
+
+def _create_pubmed_adapter_from_settings(
+    http_client: UnifiedHTTPClient | None,
+    logger: LoggerPort | None,
+    settings: Settings | None,
+    **kwargs: Any,  # Any: forward arbitrary adapter kwargs
+) -> PubMedAdapter:
+    """Create PubMedAdapter with credential resolution owned by composition."""
+    email = kwargs.get("email")
+    if not email:
+        email = _get_default_email(settings)
+    if not email:
+        raise ValueError("PubMed adapter requires email")
+
+    api_key = kwargs.get("api_key")
+    if not api_key:
+        api_key = _get_pubmed_api_key(settings)
+
+    if http_client is None:
+        raise ValueError("PubMed adapter requires http_client")
+    if logger is None:
+        raise ValueError("PubMed adapter requires logger")
+
+    return PubMedAdapter(
+        http_client=http_client,
+        logger=logger,
+        email=email,
+        api_key=api_key,
+        batch_size=kwargs.get("batch_size", 200),
+        metrics=kwargs.get("metrics"),
+        error_handler=kwargs.get("error_handler"),
+        adapter_metrics=kwargs.get("adapter_metrics"),
+        request_collector=kwargs.get("request_collector"),
+        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
+    )
+
+
+def _create_openalex_adapter_from_settings(
+    http_client: UnifiedHTTPClient | None,
+    logger: LoggerPort | None,
+    settings: Settings | None,
+    **kwargs: Any,  # Any: forward arbitrary adapter kwargs
+) -> OpenAlexAdapter:
+    """Create OpenAlexAdapter with mailto resolution owned by composition."""
+    mailto = kwargs.get("mailto")
+    if not mailto:
+        mailto = _get_default_email(settings)
+    if not mailto:
+        raise ValueError(
+            "OpenAlex adapter requires mailto. "
+            "Provide via 'mailto' kwarg or settings.default_email"
+        )
+
+    if http_client is None:
+        raise ValueError("OpenAlex adapter requires http_client")
+    if logger is None:
+        raise ValueError("OpenAlex adapter requires logger")
+
+    return OpenAlexAdapter(
+        http_client=http_client,
+        logger=logger,
+        mailto=mailto,
+        batch_size=kwargs.get("batch_size", 50),
+        metrics=kwargs.get("metrics"),
+        error_handler=kwargs.get("error_handler"),
+        adapter_metrics=kwargs.get("adapter_metrics"),
+        request_collector=kwargs.get("request_collector"),
+        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
+    )
 
 
 def _create_pubmed_data_source(
@@ -132,8 +213,8 @@ def _create_openalex_data_source(
         filter_config=filter_config,
         metrics=metrics,
         pipeline_name=pipeline_name,
-        adapter_factory=_create_openalex_adapter,
-        extra_kwargs={"settings": settings, "mailto": mailto, "batch_size": batch_size},
+        adapter_factory=OpenAlexAdapter,
+        extra_kwargs={"mailto": mailto, "batch_size": batch_size},
     )
 
 
@@ -188,7 +269,7 @@ def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
             ),
             requires_http_client=True,
             requires_logger=True,
-            custom_creator=_create_pubmed_adapter,
+            custom_creator=_create_pubmed_adapter_from_settings,
             data_source_creator=_create_pubmed_data_source,
         ),
         "crossref": ProviderConfig(
@@ -204,7 +285,7 @@ def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
             http_config=HttpConfig(rate=openalex.rate, capacity=openalex.capacity),
             requires_http_client=True,
             requires_logger=True,
-            custom_creator=_create_openalex_adapter,
+            custom_creator=_create_openalex_adapter_from_settings,
             data_source_creator=_create_openalex_data_source,
         ),
         "semanticscholar": ProviderConfig(

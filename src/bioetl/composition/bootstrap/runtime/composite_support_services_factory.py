@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
 from bioetl.application.composite.cross_validator import (
-    EnrichmentCrossValidationService,
+    EnrichmentCrossValidator,
 )
 from bioetl.application.composite.join_execution import JoinHow
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
@@ -182,10 +182,10 @@ class CompositeSupportServicesFactory:
             logger=self._logger,
         )
 
-    def _create_cross_validator(self) -> EnrichmentCrossValidationService | None:
+    def _create_cross_validator(self) -> EnrichmentCrossValidator | None:
         if not self._config.cross_validation.enabled:
             return None
-        return EnrichmentCrossValidationService(
+        return EnrichmentCrossValidator(
             config=self._config.cross_validation,
             logger=self._logger,
         )
@@ -195,7 +195,7 @@ class CompositeSupportServicesFactory:
         *,
         delta_reader: DeltaReader,
         field_group_registry: FieldGroupRegistry | None,
-        cross_validator: EnrichmentCrossValidationService | None,
+        cross_validator: EnrichmentCrossValidator | None,
     ) -> MergeService:
         merge_dependencies = build_merge_dependencies(
             config=self._config,

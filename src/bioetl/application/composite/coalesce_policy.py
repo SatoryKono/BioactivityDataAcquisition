@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrdererService,
+    ColumnPriorityOrderer,
 )
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ class CoalescePolicyService:
     def __init__(
         self,
         logger: LoggerPort,
-        priority_orderer: ColumnPriorityOrdererService,
+        priority_orderer: ColumnPriorityOrderer,
     ) -> None:
         self._logger = logger
         self._priority_orderer = priority_orderer
@@ -280,7 +280,7 @@ class CoalescePolicyService:
             return None
 
         try:
-            provider, entity = ColumnPriorityOrdererService._parse_pipeline_name(
+            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(
                 seed_pipeline
             )
             return f"{provider}.{entity}."

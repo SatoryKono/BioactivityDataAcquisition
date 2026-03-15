@@ -5,13 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.aggregator import EnricherAggregatorService
+from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrdererService,
+    ColumnPriorityOrderer,
 )
-from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
@@ -84,10 +84,10 @@ class MergeDependenciesBundle:
     """Merge-specific collaborators assembled in composition."""
 
     deduplicator: EnricherDeduplicatorService
-    aggregator: EnricherAggregatorService
-    renamer: ColumnRenamerService
-    orderer: ColumnOrdererService
-    priority_orderer: ColumnPriorityOrdererService
+    aggregator: EnricherAggregator
+    renamer: ColumnRenamer
+    orderer: ColumnOrderer
+    priority_orderer: ColumnPriorityOrderer
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
@@ -165,13 +165,13 @@ def build_merge_dependencies(
     """Assemble merge-specific collaborators used by MergeService."""
     merge_column_groups = getattr(config.merge, "column_groups", None)
     deduplicator = EnricherDeduplicatorService(logger)
-    aggregator = EnricherAggregatorService(logger)
-    renamer = ColumnRenamerService(logger)
-    orderer = ColumnOrdererService(
+    aggregator = EnricherAggregator(logger)
+    renamer = ColumnRenamer(logger)
+    orderer = ColumnOrderer(
         logger,
         column_groups=merge_column_groups if merge_column_groups else None,
     )
-    priority_orderer = ColumnPriorityOrdererService(logger)
+    priority_orderer = ColumnPriorityOrderer(logger)
     coalesce_policy = CoalescePolicyService(logger, priority_orderer)
     conflict_resolver = ConflictResolverService(
         config.merge,

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.cross_validator import (
-        EnrichmentCrossValidationService,
+        EnrichmentCrossValidator,
     )
     from bioetl.domain.composite.config import (
         DependencyConfig,
@@ -34,7 +34,7 @@ class MergeIOMixin(MergeOutputWriterMixin, _MergeInputLoaderMixin):
     _config: MergeConfig
     _logger: LoggerPort
     _field_group_registry: FieldGroupRegistry | None
-    _cross_validator: EnrichmentCrossValidationService | None
+    _cross_validator: EnrichmentCrossValidator | None
     _gold_schema: Any | None  # Any: Pandera DataFrameModel class or instance
     _join_planner: JoinPlannerService
     _calculate_field_coverage: Callable[[pl.DataFrame], dict[str, float]]
