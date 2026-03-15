@@ -1,7 +1,7 @@
-"""Backward-compatible facade for composite configuration domain models.
+"""Canonical public entrypoint for composite configuration domain models.
 
 Public API remains stable at ``bioetl.domain.composite.config`` while
-implementation details are split into focused modules.
+implementation details stay split into focused internal modules.
 """
 
 from __future__ import annotations

@@ -365,7 +365,10 @@ class TestAssayParametersTransformer:
         mock_context,
     ) -> None:
         """Test transformation with custom provider."""
-        transformer = AssayParametersTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
+        transformer = AssayParametersTransformer(
+            provider="custom_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {
             "assay_param_id": 12350,
             "assay_id": "CHEMBL1217643",

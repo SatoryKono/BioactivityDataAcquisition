@@ -38,6 +38,25 @@ REQUIRED_SYNC_DOCS = [
     "docs/03-guides/cleanup-policy.md",
     "docs/02-architecture/00-overview.md",
 ]
+NONCANONICAL_DOC_PARTS = frozenset(
+    {
+        "archived",
+        "audits",
+        "audit",
+        "__-prompts",
+        "audit-reports",
+        "99-archive",
+        "reports",
+        "exports",
+        "generated",
+        "site",
+    }
+)
+CANONICAL_VERSION_ROOTS = (
+    "docs/02-architecture",
+    "docs/03-guides",
+    "docs/04-reference",
+)
 
 
 def get_project_root() -> Path:
@@ -74,6 +93,64 @@ def extract_doc_version(content: str) -> str | None:
         if match:
             return match.group(1)
     return None
+
+
+def is_noncanonical_doc(md_file: Path) -> bool:
+    """Return True for generated/historical doc zones excluded from active version sync."""
+    return any(excluded in md_file.parts for excluded in NONCANONICAL_DOC_PARTS)
+
+
+def collect_outdated_version_refs(
+    *,
+    paths: list[Path],
+    project_root: Path,
+    rules_version: str,
+) -> list[str]:
+    """Collect stale RULES.md version references outside changelog/history sections."""
+    outdated: list[str] = []
+    current_major_minor = tuple(map(int, rules_version.split(".")))
+
+    for md_file in paths:
+        try:
+            content = md_file.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+
+        changelog_markers = [
+            "## changelog",
+            "## history",
+            "## история изменений",
+            "## version history",
+            "## изменения",
+        ]
+        changelog_start = len(content)
+        content_lower = content.lower()
+        for marker in changelog_markers:
+            pos = content_lower.find(marker)
+            if pos != -1 and pos < changelog_start:
+                changelog_start = pos
+
+        for pattern in DOC_VERSION_PATTERNS:
+            for match in pattern.finditer(content):
+                found_version = match.group(1)
+                found_major_minor = tuple(map(int, found_version.split(".")))
+                if found_major_minor < current_major_minor:
+                    if match.start() >= changelog_start:
+                        continue
+                    line_start = content.rfind("\n", 0, match.start()) + 1
+                    line = content[line_start : match.end() + 50].lower()
+                    if any(
+                        kw in line
+                        for kw in ["changelog", "history", "история", "версия:"]
+                    ):
+                        continue
+                    relative_path = md_file.relative_to(project_root)
+                    outdated.append(
+                        f"{relative_path}: v{found_version} "
+                        f"(current: v{rules_version})"
+                    )
+
+    return sorted(set(outdated))
 
 
 class TestDocsVersionSync:
@@ -184,83 +261,50 @@ class TestDocsVersionSync:
         - docs/__-prompts/ - шаблоны промптов
         - Changelog/История изменений секции (версия в контексте истории)
         """
-        # Директории для исключения
-        excluded_dirs = {
-            "archived",
-            "audits",
-            "audit",
-            "__-prompts",
-            "audit-reports",
-            "99-archive",
-        }
-
-        outdated = []
-        current_major_minor = tuple(map(int, rules_version.split(".")))
-
         docs_dir = project_root / "docs"
         if not docs_dir.exists():
             pytest.skip("docs/ directory not found")
 
-        for md_file in docs_dir.rglob("*.md"):
-            # Пропускаем исключённые директории
-            if any(excluded in md_file.parts for excluded in excluded_dirs):
-                continue
-
-            try:
-                content = md_file.read_text(encoding="utf-8")
-            except UnicodeDecodeError:
-                # Skip files with non-UTF-8 encoding (e.g., binary files)
-                continue
-
-            # Определяем, есть ли секция changelog/history
-            # и где она начинается
-            changelog_markers = [
-                "## changelog",
-                "## history",
-                "## история изменений",
-                "## version history",
-                "## изменения",
-            ]
-            changelog_start = len(content)  # По умолчанию - конец файла
-            content_lower = content.lower()
-            for marker in changelog_markers:
-                pos = content_lower.find(marker)
-                if pos != -1 and pos < changelog_start:
-                    changelog_start = pos
-
-            # Ищем все упоминания версий
-            for pattern in DOC_VERSION_PATTERNS:
-                for match in pattern.finditer(content):
-                    found_version = match.group(1)
-                    found_major_minor = tuple(map(int, found_version.split(".")))
-
-                    # Проверяем, что версия не устаревшая
-                    if found_major_minor < current_major_minor:
-                        # Пропускаем упоминания в changelog секциях
-                        if match.start() >= changelog_start:
-                            continue
-
-                        # Также проверяем контекст строки
-                        line_start = content.rfind("\n", 0, match.start()) + 1
-                        line = content[line_start : match.end() + 50].lower()
-                        if any(
-                            kw in line
-                            for kw in ["changelog", "history", "история", "версия:"]
-                        ):
-                            continue
-
-                        relative_path = md_file.relative_to(project_root)
-                        outdated.append(
-                            f"{relative_path}: v{found_version} "
-                            f"(current: v{rules_version})"
-                        )
-
-        # Уникальные записи
-        outdated = list(set(outdated))
+        active_docs = [
+            md_file
+            for md_file in docs_dir.rglob("*.md")
+            if not is_noncanonical_doc(md_file)
+        ]
+        outdated = collect_outdated_version_refs(
+            paths=active_docs,
+            project_root=project_root,
+            rules_version=rules_version,
+        )
 
         assert not outdated, (
             f"Found {len(outdated)} documents referencing outdated RULES.md versions:\n"
             + "\n".join(f"  - {f}" for f in sorted(outdated)[:20])
+            + ("\n  ... and more" if len(outdated) > 20 else "")
+        )
+
+    def test_no_outdated_versions_in_canonical_docs(
+        self, project_root: Path, rules_version: str
+    ) -> None:
+        """Canonical docs in 02/03/04 MUST not reference stale RULES.md versions."""
+        canonical_docs: list[Path] = []
+        for root in CANONICAL_VERSION_ROOTS:
+            root_path = project_root / root
+            if not root_path.exists():
+                continue
+            canonical_docs.extend(
+                md_file
+                for md_file in root_path.rglob("*.md")
+                if not is_noncanonical_doc(md_file)
+            )
+
+        outdated = collect_outdated_version_refs(
+            paths=canonical_docs,
+            project_root=project_root,
+            rules_version=rules_version,
+        )
+        assert not outdated, (
+            "Canonical docs contain stale RULES.md version references:\n"
+            + "\n".join(f"  - {item}" for item in outdated[:20])
             + ("\n  ... and more" if len(outdated) > 20 else "")
         )
 

@@ -46,12 +46,12 @@ def test_tests_workflow_has_fail_fast_quality_ratchet_profile() -> None:
 
 
 def test_tests_workflow_runs_ci_quality_integral_gate() -> None:
-    """Merge pipeline must run CI quality integral metrics gate and publish JSON."""
+    """Merge pipeline must run the canonical CI quality debt gate and publish JSON."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "quality-metrics-gate" in workflow
-    assert "scripts/ci/quality_integral_gate.py" in workflow
+    assert "make qa-debt" in workflow
     assert "reports/quality/ci-quality-metrics.json" in workflow
-    assert '--summary-out "$GITHUB_STEP_SUMMARY"' in workflow
+    assert 'QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"' in workflow
 
 
 def test_tests_workflow_enforces_scripts_lifecycle_governance() -> None:

@@ -320,7 +320,10 @@ class TestActivityTransformerTransform:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = ActivityTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
+        transformer = ActivityTransformer(
+            provider="custom_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {
             "activity_id": 12345,
             "molecule_id": "CHEMBL25",

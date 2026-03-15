@@ -256,7 +256,10 @@ class TestProteinClassTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = ProteinClassTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
+        transformer = ProteinClassTransformer(
+            provider="custom_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {
             "protein_class_id": 1,
             "pref_name": "CustomClass",

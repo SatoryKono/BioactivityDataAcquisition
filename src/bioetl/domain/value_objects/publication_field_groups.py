@@ -1,4 +1,4 @@
-"""Compatibility facade for publication field-group definitions."""
+"""Canonical public entrypoint for publication field-group definitions."""
 
 from __future__ import annotations
 

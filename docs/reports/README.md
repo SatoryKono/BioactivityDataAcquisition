@@ -4,6 +4,7 @@
 *Last updated: 2026-03-03*
 
 This directory stores audit reports, comparative analyses, and one-off investigation results.
+Canonical project guidance remains in `docs/02-architecture/**`, `docs/03-guides/**`, and `docs/04-reference/**`.
 
 ## Navigation
 

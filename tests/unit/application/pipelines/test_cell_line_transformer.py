@@ -221,7 +221,10 @@ class TestCellLineTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = CellLineTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
+        transformer = CellLineTransformer(
+            provider="custom_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {
             "cell_id": "CUSTOM123",
             "cell_name": "CustomCell",

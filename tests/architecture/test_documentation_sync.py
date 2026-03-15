@@ -6,10 +6,15 @@ from pathlib import Path
 
 import yaml
 
-ACTIVE_DOC_EXCLUDED_PARTS = frozenset({"99-archive", "exports"})
+ACTIVE_DOC_EXCLUDED_PARTS = frozenset({"99-archive", "exports", "reports", "generated"})
 GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
 GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
     r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
+)
+CANONICAL_DOC_ROOTS = (
+    Path("docs/02-architecture"),
+    Path("docs/03-guides"),
+    Path("docs/04-reference"),
 )
 
 
@@ -47,6 +52,36 @@ def _iter_generated_docs_markdown() -> list[Path]:
         if _is_generated_docs_artifact(path, docs_root):
             generated.append(path)
     return sorted(generated)
+
+
+def _iter_report_docs_markdown() -> list[Path]:
+    """Collect dated/internal report docs excluded from active sync scope."""
+    reports_dir = Path("docs/reports")
+    if not reports_dir.exists():
+        return []
+    return sorted(reports_dir.rglob("*.md"))
+
+
+def _iter_generated_zone_markdown() -> list[Path]:
+    """Collect markdown from generated documentation zones."""
+    generated_dir = Path("docs/02-architecture/generated")
+    zone_docs = sorted(generated_dir.rglob("*.md")) if generated_dir.exists() else []
+    return sorted({*zone_docs, *_iter_generated_docs_markdown()})
+
+
+def _iter_canonical_docs_markdown() -> list[Path]:
+    """Collect canonical active docs under architecture/guides/reference roots."""
+    canonical: list[Path] = []
+    for root in CANONICAL_DOC_ROOTS:
+        if not root.exists():
+            continue
+        canonical.extend(
+            path
+            for path in root.rglob("*.md")
+            if ACTIVE_DOC_EXCLUDED_PARTS.isdisjoint(path.parts)
+            and not _is_generated_docs_artifact(path)
+        )
+    return sorted(canonical)
 
 
 def test_ports_count_matches_docs() -> None:
@@ -339,6 +374,47 @@ def test_generated_docs_artifacts_excluded_from_active_scope() -> None:
     assert not overlap, (
         "Generated docs leaked into active docs sync scope:\n"
         + "\n".join(f"  - {item}" for item in overlap)
+    )
+
+
+def test_report_docs_excluded_from_active_scope() -> None:
+    """Dated/internal reports must not participate in canonical active-doc sync checks."""
+    active_paths = {path.as_posix() for path in _iter_active_docs_markdown()}
+    report_paths = {path.as_posix() for path in _iter_report_docs_markdown()}
+    overlap = sorted(active_paths & report_paths)
+    assert not overlap, (
+        "Report docs leaked into active docs sync scope:\n"
+        + "\n".join(f"  - {item}" for item in overlap)
+    )
+
+
+def test_generated_zone_docs_excluded_from_active_scope() -> None:
+    """Generated documentation zones must not be treated as canonical active docs."""
+    active_paths = {path.as_posix() for path in _iter_active_docs_markdown()}
+    generated_zone_paths = {path.as_posix() for path in _iter_generated_zone_markdown()}
+    overlap = sorted(active_paths & generated_zone_paths)
+    assert not overlap, (
+        "Generated-zone docs leaked into active docs sync scope:\n"
+        + "\n".join(f"  - {item}" for item in overlap)
+    )
+
+
+def test_canonical_doc_roots_are_active_scope_only() -> None:
+    """Canonical documentation roots should not resolve to reports/exports/generated zones."""
+    canonical_paths = {path.as_posix() for path in _iter_canonical_docs_markdown()}
+    noncanonical_suffixes = (
+        "docs/reports/",
+        "docs/exports/",
+        "docs/02-architecture/generated/",
+    )
+    leaked = sorted(
+        path
+        for path in canonical_paths
+        if any(fragment in path for fragment in noncanonical_suffixes)
+    )
+    assert not leaked, (
+        "Canonical docs iterator leaked non-canonical paths:\n"
+        + "\n".join(f"  - {item}" for item in leaked)
     )
 
 

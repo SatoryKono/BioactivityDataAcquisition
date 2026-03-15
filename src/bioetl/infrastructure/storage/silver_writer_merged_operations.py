@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol
 
 import pyarrow as pa
@@ -49,9 +50,11 @@ class _MergedCsvExporterProtocol(Protocol):
     async def export(
         self,
         table_name: str,
-        arrow_table: pa.Table,
+        data: pa.Table,
         append: bool = False,
-    ) -> None: ...
+        sort_by: list[str] | None = None,
+        primary_keys: list[str] | None = None,
+    ) -> Path: ...
 
 
 class _SilverWriterMergedHostProtocol(Protocol):

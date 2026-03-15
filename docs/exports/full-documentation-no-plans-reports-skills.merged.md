@@ -6,6 +6,7 @@ date: 2026-03-03
 # BioETL Documentation (excluding plans/reports/skills)
 
 _Generated: 2026-03-03_
+_Status: Generated export artifact (non-normative). Canonical project guidance remains in `docs/02-architecture/**`, `docs/03-guides/**`, and `docs/04-reference/**`._
 
 \newpage
 

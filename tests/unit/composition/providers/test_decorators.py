@@ -16,8 +16,6 @@ from bioetl.composition.providers.decorators import (
     register_provider,
 )
 from bioetl.composition.providers.provider_registry import (
-    HttpConfig,
-    ProviderConfig,
     ProviderRegistry,
 )
 

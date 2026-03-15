@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING, Protocol, cast
 
 import pyarrow as pa
 
@@ -12,32 +13,40 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.silver_writer_merged_operations import (
     _export_silver_merged_csv,
-    _MergedCsvExporterProtocol,
     _MergedSilverWriteRequest,
     _prepare_merged_silver_write,
     _PreparedMergedSilverWrite,
+    _SilverWriterMergedHostProtocol,
     _write_silver_merged_delta,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
+
+class _MergedSilverMetadataWriterProtocol(Protocol):
+    """Keyword-friendly contract for merged-write metadata finalization."""
+
+    def __call__(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        run_id: str | None,
+        sources_used: list[str] | None,
+    ) -> Awaitable[None]: ...
 
 
 class SilverWriterMergedMixin:
     """Merged write path extracted from ``SilverWriter`` class body."""
 
     logger: LoggerPort
-    csv_exporter: _MergedCsvExporterProtocol | None
+    csv_exporter: CsvExporter | None
     _arrow_converter: ArrowDataConverter
     _resolve_table_path: Callable[[str], str]
-    _write_silver_merged_metadata: Callable[
-        [
-            str,
-            str,
-            list[BronzeRecord],
-            list[str],
-            str | None,
-            list[str] | None,
-        ],
-        Awaitable[None],
-    ]
+    _write_silver_merged_metadata: _MergedSilverMetadataWriterProtocol
 
     def _prepare_merged_silver_write(
         self,
@@ -51,7 +60,10 @@ class SilverWriterMergedMixin:
         Returns:
             Prepared write payload with resolved table path and normalized Arrow table.
         """
-        return _prepare_merged_silver_write(self, request)
+        return _prepare_merged_silver_write(
+            cast(_SilverWriterMergedHostProtocol, self),
+            request,
+        )
 
     async def _write_silver_merged_delta(
         self,
@@ -83,7 +95,7 @@ class SilverWriterMergedMixin:
             arrow_table: PyArrow Table containing the merged records to export.
         """
         await _export_silver_merged_csv(
-            self,
+            cast(_SilverWriterMergedHostProtocol, self),
             table_name=table_name,
             arrow_table=arrow_table,
         )

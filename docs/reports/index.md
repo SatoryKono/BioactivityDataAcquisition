@@ -4,6 +4,7 @@
 *Last updated: 2026-03-06*
 
 This section aggregates dated engineering reports. Use these reports as operational history, not as the primary source of architectural truth.
+Canonical project guidance remains in `docs/02-architecture/**`, `docs/03-guides/**`, and `docs/04-reference/**`.
 
 ## Latest
 

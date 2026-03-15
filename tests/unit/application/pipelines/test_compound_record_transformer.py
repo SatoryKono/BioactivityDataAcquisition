@@ -193,7 +193,10 @@ class TestCompoundRecordTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = CompoundRecordTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
+        transformer = CompoundRecordTransformer(
+            provider="custom_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {
             "record_id": 12345,
             "molecule_id": "CUSTOM25",
