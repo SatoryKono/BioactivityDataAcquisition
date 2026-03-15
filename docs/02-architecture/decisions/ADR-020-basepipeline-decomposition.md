@@ -51,7 +51,7 @@ def __init__(
 - `src/bioetl/application/pipelines/chembl/activity.py` - наследник
 - `src/bioetl/application/core/runner.py` - зависит от BasePipeline
 - `src/bioetl/application/core/batch_executor.py` - зависит от BasePipeline
-- `src/bioetl/application/core/lock_manager.py` - зависит от BasePipeline
+- `src/bioetl/application/core/lifecycle/lock_manager.py` - зависит от BasePipeline
 - `src/bioetl/application/core/quarantine_manager.py` - зависит от BasePipeline
 - `tests/unit/application/test_base_pipeline.py` - тесты
 - `tests/unit/application/core/test_batch_executor.py` - тесты

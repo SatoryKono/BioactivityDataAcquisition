@@ -342,7 +342,7 @@ META_FIELDS = {
 
 ### 6.2. Silver Layer
 
-**Файл:** `src/bioetl/infrastructure/storage/delta_writer.py`
+**Файл:** `src/bioetl/infrastructure/storage/silver_writer.py`
 
 **PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
 
@@ -468,7 +468,7 @@ class BatchResult:
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                     |
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`              |
-| Delta Writer  | `src/bioetl/infrastructure/storage/delta_writer.py`               |
+| Silver Writer | `src/bioetl/infrastructure/storage/silver_writer.py`              |
 | Gold Writer   | Not used by the active `chembl_activity` pipeline                  |
 | Data Contract | `src/bioetl/domain/contracts/gold/` (canonical source for generated exports) |
 

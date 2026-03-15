@@ -135,7 +135,7 @@ loading-strategy: full-scan-only
 - `src/bioetl/domain/config/pipeline.py` — Add `loading-strategy` field to `PipelineConfig`
 
 **Application:**
-- `src/bioetl/application/core/checkpoint_manager.py` — Use `LoadingStrategy` for validation
+- `src/bioetl/application/core/lifecycle/checkpoint_manager.py` — Use `LoadingStrategy` for validation
 
 **Infrastructure:**
 - `src/bioetl/infrastructure/schemas/pipeline_config.py` — Add `loading-strategy` to YAML schema

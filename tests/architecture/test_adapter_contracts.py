@@ -34,13 +34,15 @@ ADAPTER_MIXIN_CANONICAL_FILES = frozenset(
     }
 )
 
-ADAPTER_MIXIN_LEGACY_SHIMS: dict[str, str] = {
-    "chembl/fetch_mixin.py": "fetch_adapter_mixin",
-    "openalex/client_helpers_mixin.py": "client_helpers_adapter_mixin",
-    "uniprot/metadata_mixin.py": "metadata_adapter_mixin",
-}
+REMOVED_ADAPTER_MIXIN_SHIMS = frozenset(
+    {
+        "chembl/fetch_mixin.py",
+        "openalex/client_helpers_mixin.py",
+        "uniprot/metadata_mixin.py",
+    }
+)
 
-LEGACY_SHIM_IMPORT_PATHS = frozenset(
+REMOVED_SHIM_IMPORT_PATHS = frozenset(
     {
         "bioetl.infrastructure.adapters.chembl.fetch_mixin",
         "bioetl.infrastructure.adapters.openalex.client_helpers_mixin",
@@ -103,9 +105,6 @@ class TestAdapterHealthCheck:
                 continue
             if rel_path in ADAPTER_MIXIN_CANONICAL_FILES:
                 # Adapter mixins are behavioral fragments, not entrypoints.
-                continue
-            if rel_path in ADAPTER_MIXIN_LEGACY_SHIMS:
-                # Legacy shim modules are compatibility re-exports only.
                 continue
             if py_file.name.endswith("_mixin.py"):
                 # Mixins are behavioral fragments, not full DataSourcePort adapters.
@@ -195,78 +194,51 @@ class TestAdapterMixinPolicy:
             + "\n".join(f"  - {v}" for v in violations)
         )
 
-    def test_legacy_mixin_shims_are_reexport_only(self, src_dir: Path) -> None:
-        """Legacy mixin modules must remain thin compatibility shims."""
+    def test_removed_legacy_mixin_shims_are_absent(self, src_dir: Path) -> None:
+        """Removed legacy mixin shim modules must stay deleted."""
         adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
         if not adapters_path.exists():
             pytest.skip("Infrastructure adapters not found")
 
-        violations: list[str] = []
-        for rel, expected_import in ADAPTER_MIXIN_LEGACY_SHIMS.items():
-            file_path = adapters_path / rel
-            if not file_path.exists():
-                violations.append(f"{rel}: missing legacy shim")
-                continue
+        lingering = [
+            rel for rel in sorted(REMOVED_ADAPTER_MIXIN_SHIMS) if (adapters_path / rel).exists()
+        ]
 
-            content = file_path.read_text(encoding="utf-8")
-            tree = ast.parse(content)
-            has_runtime_defs = any(
-                isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-                for node in tree.body
-            )
-            if has_runtime_defs:
-                violations.append(
-                    f"{rel}: must not define classes/functions (re-export only)"
-                )
-
-            if expected_import not in content:
-                violations.append(
-                    f"{rel}: must import canonical module '{expected_import}'"
-                )
-
-        assert not violations, "Legacy adapter-mixin shim violations:\n" + "\n".join(
-            f"  - {v}" for v in violations
+        assert not lingering, (
+            "Removed legacy adapter-mixin shims must stay deleted.\n"
+            + "\n".join(f"  - {rel}" for rel in lingering)
         )
 
     def test_src_does_not_import_legacy_adapter_mixin_modules(
         self, src_dir: Path
     ) -> None:
-        """Production source must import canonical *_adapter_mixin modules only."""
-        src_root = src_dir / "bioetl"
-        if not src_root.exists():
-            pytest.skip("bioetl source not found")
-
+        """Removed legacy adapter-mixin module paths must stay absent everywhere."""
         violations: list[str] = []
-        for py_file in src_root.rglob("*.py"):
-            rel_path = py_file.relative_to(src_dir).as_posix()
-            if rel_path.endswith("/__init__.py"):
-                continue
-            if rel_path.startswith(
-                "bioetl/infrastructure/adapters/"
-            ) and rel_path.split("bioetl/infrastructure/adapters/", 1)[1] in {
-                *ADAPTER_MIXIN_LEGACY_SHIMS.keys()
-            }:
-                # Skip legacy shim modules themselves.
-                continue
+        search_roots = [src_dir / "bioetl", src_dir.parent / "tests"]
 
-            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=rel_path)
-            for node in ast.walk(tree):
-                if (
-                    isinstance(node, ast.ImportFrom)
-                    and node.module in LEGACY_SHIM_IMPORT_PATHS
-                ):
-                    violations.append(
-                        f"{rel_path}:{node.lineno} imports legacy module '{node.module}'"
-                    )
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        if alias.name in LEGACY_SHIM_IMPORT_PATHS:
-                            violations.append(
-                                f"{rel_path}:{node.lineno} imports legacy module '{alias.name}'"
-                            )
+        for root in search_roots:
+            if not root.exists():
+                continue
+            for py_file in root.rglob("*.py"):
+                rel_path = py_file.relative_to(src_dir.parent).as_posix()
+                tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=rel_path)
+                for node in ast.walk(tree):
+                    if (
+                        isinstance(node, ast.ImportFrom)
+                        and node.module in REMOVED_SHIM_IMPORT_PATHS
+                    ):
+                        violations.append(
+                            f"{rel_path}:{node.lineno} imports removed module '{node.module}'"
+                        )
+                    if isinstance(node, ast.Import):
+                        for alias in node.names:
+                            if alias.name in REMOVED_SHIM_IMPORT_PATHS:
+                                violations.append(
+                                    f"{rel_path}:{node.lineno} imports removed module '{alias.name}'"
+                                )
 
         assert not violations, (
-            "Legacy adapter-mixin module imports are forbidden in src.\n"
+            "Removed legacy adapter-mixin module imports are forbidden.\n"
             + "\n".join(f"  - {v}" for v in violations)
         )
 
@@ -279,14 +251,6 @@ class TestAdapterMixinPolicy:
         violations: list[str] = []
         for py_file in src_root.rglob("*.py"):
             rel_path = py_file.relative_to(src_dir).as_posix()
-            if rel_path.startswith(
-                "bioetl/infrastructure/adapters/"
-            ) and rel_path.split("bioetl/infrastructure/adapters/", 1)[1] in {
-                *ADAPTER_MIXIN_LEGACY_SHIMS.keys()
-            }:
-                # Legacy shim files define the aliases intentionally.
-                continue
-
             content = py_file.read_text(encoding="utf-8")
             for symbol in LEGACY_SHIM_SYMBOLS:
                 if re.search(rf"\b{re.escape(symbol)}\b", content):

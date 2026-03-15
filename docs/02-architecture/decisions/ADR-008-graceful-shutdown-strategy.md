@@ -1,10 +1,10 @@
 > **Superseded:** Signal handlers удалены 2025-12-31.
-> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/shutdown.py.
+> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/lifecycle/shutdown.py.
 > orchestration/ модуль пуст.
 
 # ADR-008: Graceful Shutdown Strategy
 
-**Status:** Superseded (signal handlers removed; shutdown handled in CLI and application/core/shutdown.py)
+**Status:** Superseded (signal handlers removed; shutdown handled in CLI and application/core/lifecycle/shutdown.py)
 **Date:** 2025-12-22
 **Last Updated:** 2026-01-02
 **Decision makers:** @BioETL-Team

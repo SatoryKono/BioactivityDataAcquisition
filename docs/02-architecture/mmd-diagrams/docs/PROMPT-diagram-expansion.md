@@ -227,8 +227,8 @@ src/bioetl/application/core/lock-manager.py
 src/bioetl/application/core/checkpoint-manager.py
 src/bioetl/application/core/preflight-service.py
 src/bioetl/application/core/postrun-service.py
-src/bioetl/application/core/heartbeat.py
-src/bioetl/application/core/shutdown.py
+src/bioetl/application/core/lifecycle/heartbeat.py
+src/bioetl/application/core/lifecycle/shutdown.py
 src/bioetl/application/core/quarantine-manager.py
 src/bioetl/application/core/cleanup-service.py
 src/bioetl/application/core/filtered-data-source.py

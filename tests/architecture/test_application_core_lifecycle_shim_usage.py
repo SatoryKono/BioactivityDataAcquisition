@@ -19,6 +19,15 @@ COMPAT_MODULES = frozenset(
         "bioetl.application.core.shutdown",
     }
 )
+REMOVED_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "application" / "core" / "checkpoint_manager.py",
+        ROOT / "src" / "bioetl" / "application" / "core" / "cleanup_service.py",
+        ROOT / "src" / "bioetl" / "application" / "core" / "heartbeat.py",
+        ROOT / "src" / "bioetl" / "application" / "core" / "lock_manager.py",
+        ROOT / "src" / "bioetl" / "application" / "core" / "shutdown.py",
+    }
+)
 COMPAT_PARENT_IMPORTS = {
     "bioetl.application.core": frozenset(
         {
@@ -30,22 +39,12 @@ COMPAT_PARENT_IMPORTS = {
         }
     ),
 }
-ALLOWED_TEST_FILES = frozenset(
-    {
-        ROOT
-        / "tests"
-        / "unit"
-        / "application"
-        / "core"
-        / "test_lifecycle_shim_reexports.py",
-    }
-)
 
 
 def _iter_compat_import_violations(search_root: Path) -> list[str]:
     violations: list[str] = []
     for py_file in search_root.rglob("*.py"):
-        if py_file in ALLOWED_TEST_FILES or "__pycache__" in py_file.parts:
+        if "__pycache__" in py_file.parts:
             continue
         tree = ast.parse(py_file.read_text(encoding="utf-8"))
         rel_path = py_file.relative_to(ROOT).as_posix()
@@ -71,6 +70,18 @@ def _iter_compat_import_violations(search_root: Path) -> list[str]:
 
 
 @pytest.mark.architecture
+def test_application_core_lifecycle_shim_files_have_been_removed() -> None:
+    """Lifecycle compatibility shim files should no longer exist."""
+    lingering = sorted(
+        path.relative_to(ROOT).as_posix() for path in REMOVED_FILES if path.exists()
+    )
+    assert not lingering, (
+        "application.core lifecycle compatibility shims must stay removed:\n"
+        + "\n".join(lingering)
+    )
+
+
+@pytest.mark.architecture
 def test_application_core_lifecycle_shims_are_not_used_in_src() -> None:
     """First-party src must import lifecycle implementations directly."""
     violations = _iter_compat_import_violations(SRC_ROOT)
@@ -81,10 +92,10 @@ def test_application_core_lifecycle_shims_are_not_used_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_application_core_lifecycle_shims_are_only_used_by_smoke_test() -> None:
-    """Ordinary tests must not accumulate new direct imports of lifecycle shims."""
+def test_application_core_lifecycle_shims_are_not_used_in_tests() -> None:
+    """Tests must not keep importing removed lifecycle shim modules."""
     violations = _iter_compat_import_violations(TESTS_ROOT)
     assert not violations, (
-        "application.core lifecycle compatibility shims gained new direct test imports:\n"
+        "application.core lifecycle compatibility shims must stay removed from tests:\n"
         + "\n".join(violations)
     )

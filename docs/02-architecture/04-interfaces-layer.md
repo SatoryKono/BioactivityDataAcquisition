@@ -87,7 +87,7 @@ Graceful shutdown обрабатывается непосредственно в
 - `interfaces/cli/commands/run.py`
 - `interfaces/cli/commands/run_all.py`
 - `interfaces/cli/commands/run_composite.py`
-  Shutdown логика вынесена в `application/core/shutdown.py`.
+  Shutdown логика вынесена в `application/core/lifecycle/shutdown.py`.
 
 ----------------------------------------------------------------------
 

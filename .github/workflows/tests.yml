@@ -156,7 +156,8 @@ jobs:
                     uv run python scripts/ci/quality_integral_gate.py \
                       --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
                       --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
-                      --output reports/quality/ci-quality-metrics.json
+                      --output reports/quality/ci-quality-metrics.json \
+                      --summary-out "$GITHUB_STEP_SUMMARY"
 
             -   name: Upload quality metrics artifact
                 if: always()

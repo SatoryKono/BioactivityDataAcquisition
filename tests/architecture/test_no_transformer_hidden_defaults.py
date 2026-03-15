@@ -8,7 +8,7 @@ from pathlib import Path
 
 BASE_TRANSFORMER_PATH = Path("src/bioetl/application/core/base_transformer/base.py")
 DEPENDENCIES_MODULE_PATH = Path(
-    "src/bioetl/application/core/base_transformer/dependencies.py"
+    "src/bioetl/application/core/base_transformer/types.py"
 )
 FORBIDDEN_CONSTRUCTORS = {
     "NoOpTracing",
@@ -58,7 +58,7 @@ def test_base_transformer_init_does_not_construct_default_collaborators() -> Non
 def test_transformer_dependency_module_does_not_construct_default_collaborators() -> (
     None
 ):
-    """Application dependency facade must not build concrete default collaborators."""
+    """Transformer dependency context module must not build concrete defaults."""
     content = DEPENDENCIES_MODULE_PATH.read_text(encoding="utf-8")
     tree = ast.parse(content)
 
@@ -76,6 +76,6 @@ def test_transformer_dependency_module_does_not_construct_default_collaborators(
     }
     forbidden = sorted(FORBIDDEN_CONSTRUCTORS & calls)
     assert not forbidden, (
-        "base_transformer/dependencies.py must not create concrete defaults; "
+        "base_transformer/types.py must not create concrete defaults; "
         f"found: {', '.join(forbidden)}"
     )

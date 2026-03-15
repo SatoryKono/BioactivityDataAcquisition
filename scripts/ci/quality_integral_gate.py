@@ -19,6 +19,17 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    from _compatibility_telemetry import (  # type: ignore[import-not-found]
+        collect_compatibility_surface_snapshot,
+        render_compatibility_surface_section,
+    )
+else:
+    from ._compatibility_telemetry import (
+        collect_compatibility_surface_snapshot,
+        render_compatibility_surface_section,
+    )
+
 from bioetl.infrastructure.quality.debt_scorecard import (
     evaluate_debt_scorecard,
     load_debt_scorecard,
@@ -81,6 +92,11 @@ def _parse_args() -> argparse.Namespace:
         help="Output JSON report path.",
     )
     parser.add_argument(
+        "--summary-out",
+        default="",
+        help="Optional path to append a compact markdown summary.",
+    )
+    parser.add_argument(
         "--coverage-threshold",
         type=float,
         default=85.0,
@@ -108,7 +124,7 @@ def _resolve_ruff_cmd() -> list[str]:
         root / ".venv" / "bin" / "ruff",
     ]
     for candidate in local_candidates:
-        if candidate.exists():
+        if candidate.exists() and os.access(candidate, os.X_OK):
             return [str(candidate)]
     return [sys.executable, "-m", "ruff"]
 
@@ -310,6 +326,26 @@ def _ci_target_for_quarter(
     return default_target
 
 
+def _require_int(mapping: dict[str, object], key: str) -> int:
+    value = mapping[key]
+    if isinstance(value, bool):
+        raise TypeError(f"{key} must not be boolean")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float | str):
+        return int(value)
+    raise TypeError(f"{key} must be numeric-compatible, got {type(value)!r}")
+
+
+def _require_float(mapping: dict[str, object], key: str) -> float:
+    value = mapping[key]
+    if isinstance(value, bool):
+        raise TypeError(f"{key} must not be boolean")
+    if isinstance(value, int | float | str):
+        return float(value)
+    raise TypeError(f"{key} must be float-compatible, got {type(value)!r}")
+
+
 def main() -> int:
     args = _parse_args()
     registry_path = Path(args.registry)
@@ -338,8 +374,8 @@ def main() -> int:
         print(f"[quality-integral-gate] missing quarterly target for {quarter}")
         return 1
 
-    max_total_exemptions = int(quarter_target["max_total_exemptions"])
-    min_integral_score = float(quarter_target["min_integral_score"])
+    max_total_exemptions = _require_int(quarter_target, "max_total_exemptions")
+    min_integral_score = _require_float(quarter_target, "min_integral_score")
 
     total_exemptions = _count_total_exemptions(registry_path)
     domain_cc_exemptions = _count_domain_cc_exemptions(registry_path)
@@ -356,7 +392,8 @@ def main() -> int:
         vcr_min_per_provider_target=args.vcr_min_per_provider_target,
         coverage_threshold_percent=args.coverage_threshold,
     )
-    coverage_threshold = float(ci_target["coverage_threshold_percent"])
+    coverage_threshold = _require_float(ci_target, "coverage_threshold_percent")
+    compatibility_surface = collect_compatibility_surface_snapshot()
 
     bonus = 0.0
     if arch_failures == 0:
@@ -391,6 +428,7 @@ def main() -> int:
             "coverage_percent": coverage_percent,
             "coverage_verified": coverage_percent is not None,
         },
+        "compatibility_surface": compatibility_surface.as_dict(),
         "integral_score": {
             "base": summary.integral_score,
             "bonus": bonus,
@@ -404,19 +442,21 @@ def main() -> int:
         },
         "metric_comparison": {
             "architecture_test_failures_ok": arch_failures
-            <= int(ci_target["architecture_test_failures_max"]),
+            <= _require_int(ci_target, "architecture_test_failures_max"),
             "total_exemptions_ok": total_exemptions
-            <= int(ci_target["total_exemptions_max"]),
-            "max_class_loc_ok": max_class_loc <= int(ci_target["max_class_loc_max"]),
+            <= _require_int(ci_target, "total_exemptions_max"),
+            "max_class_loc_ok": max_class_loc
+            <= _require_int(ci_target, "max_class_loc_max"),
             "domain_cc_gt5_exemptions_ok": domain_cc_exemptions
-            <= int(ci_target["domain_cc_gt5_exemptions_max"]),
+            <= _require_int(ci_target, "domain_cc_gt5_exemptions_max"),
             "vcr_cassettes_min_per_provider_ok": min_provider_vcr
-            >= int(ci_target["vcr_cassettes_min_per_provider"]),
+            >= _require_int(ci_target, "vcr_cassettes_min_per_provider"),
             "ruff_formatting_violations_ok": ruff_violations
-            <= int(ci_target["ruff_formatting_violations_max"]),
+            <= _require_int(ci_target, "ruff_formatting_violations_max"),
             "coverage_ok": (
                 coverage_percent is not None
-                and coverage_percent >= float(ci_target["coverage_threshold_percent"])
+                and coverage_percent
+                >= _require_float(ci_target, "coverage_threshold_percent")
             ),
         },
     }
@@ -427,12 +467,39 @@ def main() -> int:
         json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
+    if args.summary_out:
+        summary_path = Path(args.summary_out)
+        summary_path.parent.mkdir(parents=True, exist_ok=True)
+        summary_lines = [
+            "## CI Quality Metrics Snapshot",
+            f"- quarter: `{quarter}`",
+            f"- adjusted_integral_score: `{adjusted_integral_score}`",
+            f"- min_required: `{min_integral_score}`",
+            f"- architecture_test_failures: `{arch_failures}`",
+            f"- total_exemptions: `{total_exemptions}`",
+            render_compatibility_surface_section(
+                compatibility_surface, heading="## Compatibility Surface Snapshot"
+            ),
+        ]
+        with summary_path.open("a", encoding="utf-8") as stream:
+            stream.write("\n".join(summary_lines) + "\n")
+
     print(
         "[quality-integral-gate] "
         f"quarter={quarter}; arch_failures={arch_failures}; "
         f"total_exemptions={total_exemptions}/{max_total_exemptions}; "
         f"base_score={summary.integral_score}; bonus={bonus}; "
         f"adjusted_score={adjusted_integral_score}; min_required={min_integral_score}"
+    )
+    print(
+        "[quality-integral-gate] "
+        "compatibility_surface="
+        f"curated={compatibility_surface.curated_inventory_rows}; "
+        f"measured={compatibility_surface.measured_tracked_modules}; "
+        f"measured_only={compatibility_surface.measured_only_modules}; "
+        f"compat_shims={compatibility_surface.compat_shim_modules}; "
+        f"mixed={compatibility_surface.mixed_modules}; "
+        f"retained={compatibility_surface.retained_entrypoints}"
     )
     print(f"[quality-integral-gate] wrote metrics: {output_path}")
 

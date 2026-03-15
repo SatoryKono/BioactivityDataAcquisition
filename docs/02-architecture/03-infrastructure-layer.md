@@ -142,7 +142,7 @@ PubMedAdapter                         (pubchempy)
 | Файл                     | Компонент            | Назначение                                    |
 | ------------------------ | -------------------- | --------------------------------------------- |
 | `base_delta_writer.py`   | `BaseDeltaWriter`    | Базовый класс для Silver/Gold writers         |
-| `delta_writer.py`        | `DeltaWriter`        | Low-level Delta Lake write adapter            |
+| `silver_writer.py`       | `SilverWriter`       | Канонический Delta Lake writer для Silver layer |
 | `delta_reader.py`        | `DeltaReader`        | Чтение Delta Lake таблиц                      |
 | `arrow_converter.py`     | `ArrowDataConverter` | PyArrow conversion utilities                  |
 | `_atomic.py`             | `atomic_write_text`  | Atomic file write (temp + rename)             |
@@ -170,7 +170,6 @@ PubMedAdapter                         (pubchempy)
 
 | Файл                         | Компонент                   | Назначение                                    |
 | ---------------------------- | --------------------------- | --------------------------------------------- |
-| `_error_classifier.py`       | Internal error classifier   | Внутренняя классификация ошибок               |
 | `adapter_error_classifier.py`| `AdapterErrorClassifier`    | Классификация ошибок адаптеров (retryable и др.) |
 | `adapter_error_mapper.py`    | `AdapterErrorMapper`        | Маппинг HTTP-ошибок на domain exceptions      |
 | `error_handling.py`          | Error handling utilities    | Общие утилиты обработки ошибок                |
