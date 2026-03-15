@@ -71,10 +71,13 @@ __all__ = [
 ]
 # Backward-compatible patch points for helper tests.
 COMPOSITE_CONFIG_DIR = DEFAULT_COMPOSITE_CONFIG_DIR
-COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = dict(DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY)
+COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = dict(
+    DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY
+)
 
 # Backward-compatible patch point used by legacy bootstrap tests.
 CompositePipelineRunner = create_composite_runner_with_legacy_fsm_adapter
+
 
 @dataclass(frozen=True, slots=True)
 class _CompositeBootstrapPlan:
@@ -289,7 +292,9 @@ def bootstrap_composite_runner(
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
-    plan = _build_composite_bootstrap_plan(config=config, runtime=runtime, run_id=run_id)
+    plan = _build_composite_bootstrap_plan(
+        config=config, runtime=runtime, run_id=run_id
+    )
     return _create_composite_runner_from_plan(config=config, runtime=runtime, plan=plan)
 
 

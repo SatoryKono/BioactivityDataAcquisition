@@ -66,8 +66,7 @@ def _make_config(*, cross_validation_enabled: bool) -> SimpleNamespace:
 
 
 @pytest.mark.unit
-def test_bootstrap_composite_runner_orchestrates_builders(
-) -> None:
+def test_bootstrap_composite_runner_orchestrates_builders() -> None:
     config = _make_config(cross_validation_enabled=True)
     runtime = _make_runtime()
     logger = MagicMock()
@@ -157,8 +156,7 @@ def test_bootstrap_composite_runner_orchestrates_builders(
 
 
 @pytest.mark.unit
-def test_bootstrap_composite_runner_generates_run_id(
-) -> None:
+def test_bootstrap_composite_runner_generates_run_id() -> None:
     config = _make_config(cross_validation_enabled=False)
     runtime = _make_runtime(use_cached_bronze=False)
 

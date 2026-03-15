@@ -206,11 +206,19 @@ class ChemblFetchPagingMixin:
             if use_composite:
                 assert pk_fields is not None
                 if self._is_duplicate_composite(
-                    record, pk_fields, seen_ids, entity_type, filter_field,
+                    record,
+                    pk_fields,
+                    seen_ids,
+                    entity_type,
+                    filter_field,
                 ):
                     continue
             elif self._is_duplicate_simple(
-                record, pk_field, seen_ids, entity_type, filter_field,
+                record,
+                pk_field,
+                seen_ids,
+                entity_type,
+                filter_field,
             ):
                 continue
             yield record

@@ -289,7 +289,9 @@ class TestCompositeBootstrapFacade:
             composition_entrypoints.bootstrap_composite_runner
             is bootstrap_composite_runner_impl
         )
-        assert composition_entrypoints.load_composite_config is load_composite_config_impl
+        assert (
+            composition_entrypoints.load_composite_config is load_composite_config_impl
+        )
 
 
 @pytest.mark.unit

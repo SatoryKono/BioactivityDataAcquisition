@@ -229,7 +229,9 @@ def test_build_composite_result_when_called_then_uses_named_artifacts() -> None:
 
 
 @pytest.mark.unit
-def test_prepare_composite_result_context_when_called_then_preserves_artifacts() -> None:
+def test_prepare_composite_result_context_when_called_then_preserves_artifacts() -> (
+    None
+):
     harness = _SupportMixinHarness()
     artifacts = _build_execution_artifacts()
 

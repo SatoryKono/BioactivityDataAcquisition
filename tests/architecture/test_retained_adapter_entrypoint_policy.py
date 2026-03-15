@@ -18,7 +18,13 @@ LEGACY_IMPLEMENTATION_PATHS = frozenset(
 )
 ALLOWED_SRC_FILES = frozenset(
     {
-        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "client.py",
         ROOT
         / "src"
         / "bioetl"

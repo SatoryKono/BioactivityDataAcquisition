@@ -43,7 +43,9 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["sequential-thinking"]["args"][1] == (
         "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
     )
-    assert servers["github"]["args"][1] == "@modelcontextprotocol/server-github@2025.4.8"
+    assert (
+        servers["github"]["args"][1] == "@modelcontextprotocol/server-github@2025.4.8"
+    )
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:

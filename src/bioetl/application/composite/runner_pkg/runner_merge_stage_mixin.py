@@ -68,9 +68,13 @@ if TYPE_CHECKING:
             operation: str,
         ) -> bool: ...
 
-        async def _call_generate_dq_reports(self, merge_result: MergeResult) -> None: ...
+        async def _call_generate_dq_reports(
+            self, merge_result: MergeResult
+        ) -> None: ...
 
-        async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None: ...
+        async def _call_write_cv_quarantine(
+            self, merge_result: MergeResult
+        ) -> None: ...
 
         def _transition_to_merging_state(
             self,
@@ -134,6 +138,7 @@ if TYPE_CHECKING:
             self,
             merge_result: MergeResult,
         ) -> None: ...
+
 
 __all__ = ["CompositeRunnerMergeStageMixin"]
 

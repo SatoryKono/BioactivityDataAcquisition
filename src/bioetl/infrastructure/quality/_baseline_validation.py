@@ -89,7 +89,9 @@ def _validate_grouped_registry_coverage(
     grouped_counter = Counter(grouped_registries)
     duplicates = sorted(name for name, count in grouped_counter.items() if count > 1)
     if duplicates:
-        errors.append(f"registry_groups: registries listed in multiple groups: {duplicates}")
+        errors.append(
+            f"registry_groups: registries listed in multiple groups: {duplicates}"
+        )
 
     grouped_names = set(grouped_counter)
     missing = sorted(baseline_registry_names - grouped_names)
@@ -118,14 +120,18 @@ def _validate_registry_groups_section(
             errors.append("registry_groups: group name must be non-empty string")
             continue
         parsed = _validate_registry_group_entry(
-            group_name=group_name, group_data=group_data, errors=errors,
+            group_name=group_name,
+            group_data=group_data,
+            errors=errors,
         )
         if parsed is None:
             continue
         normalized_groups[group_name] = parsed
         grouped_registries.extend(parsed)
 
-    _validate_grouped_registry_coverage(grouped_registries, baseline_registry_names, errors)
+    _validate_grouped_registry_coverage(
+        grouped_registries, baseline_registry_names, errors
+    )
     return normalized_groups
 
 
