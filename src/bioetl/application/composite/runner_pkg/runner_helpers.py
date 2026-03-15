@@ -14,21 +14,16 @@ __all__ = [
     "log_enrichment_summary",
 ]
 
-from collections.abc import Iterable
-from typing import TYPE_CHECKING
+from collections.abc import Iterable, Set
 
+from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,
     EnrichmentResult,
     EnrichmentStatus,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import Set
-
-    from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import LoggerPort
 
 
 def log_enrichment_summary(

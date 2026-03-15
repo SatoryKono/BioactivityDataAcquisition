@@ -2,7 +2,7 @@
 
 These tests verify that the clean architecture layer boundaries are respected:
 - Domain layer: No dependencies on infrastructure or external I/O libraries
-- Application layer: Can depend on Domain, but not on Infrastructure implementations
+- Application layer: Can depend on Domain, but not on Infrastructure or Composition
 - Infrastructure layer: Implements Domain ports, can depend on external libraries
 
 Uses both static analysis and import-linter for comprehensive checks.
@@ -121,36 +121,32 @@ def test_domain_layer_no_infrastructure_layer_imports(src_dir: Path) -> None:
     assert not all_errors, "\n".join(all_errors)
 
 
-def test_application_layer_no_infrastructure_implementation_imports(
+def test_application_layer_no_common_infrastructure_adapter_imports(
     src_dir: Path,
 ) -> None:
-    """Application layer should not import infrastructure implementations at module level.
+    """Fast smoke check for historically regressed infrastructure imports.
 
-    REQ-ARCH-004: Application layer should depend on domain ports,
-    not concrete infrastructure implementations at module level.
-
-    Note: Local imports within functions (for lazy loading or type hints)
-    and imports in docstrings are allowed.
+    The authoritative rule is enforced by ``test_application_layer_no_infrastructure_imports``
+    and import-linter. This test keeps a smaller, explicit denylist for the most
+    architecture-sensitive infrastructure modules that previously regressed.
     """
     application_path = src_dir / "bioetl" / "application"
     if not application_path.exists():
         pytest.skip("Application layer not found")
 
-    # These are specific implementation modules that should not be imported
-    # Application can import from bioetl.infrastructure for dependency injection
-    # but should not import specific adapter implementations directly in business logic
     implementation_imports = {
         "bioetl.infrastructure.adapters.chembl",
         "bioetl.infrastructure.adapters.pubchem",
+        "bioetl.infrastructure.adapters.uniprot",
+        "bioetl.infrastructure.adapters.pubmed",
+        "bioetl.infrastructure.locking.memory_lock",
+        "bioetl.infrastructure.checkpoint.local_checkpoint",
+        "bioetl.infrastructure.quarantine.unified_quarantine",
     }
 
     all_errors = []
     for py_file in application_path.rglob("*.py"):
-        # Skip __init__.py and dependency injection files
-        if py_file.name in ("__init__.py", "container.py", "bootstrap.py"):
-            continue
-        # Skip pipeline files - they may have legitimate local imports for lazy loading
-        if "pipeline" in str(py_file):
+        if py_file.name == "__init__.py":
             continue
         errors = _check_imports_in_file(py_file, implementation_imports)
         all_errors.extend(errors)

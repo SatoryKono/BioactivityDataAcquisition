@@ -6,13 +6,11 @@ multiple data sources (seed + enrichers) into a unified dataset.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import click
 
-from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
-from bioetl.composition.entrypoints import (
-    bootstrap_composite_runner,
-    load_composite_config,
-)
+from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
@@ -39,6 +37,10 @@ from bioetl.interfaces.cli.commands.run_composite_runtime import (
 )
 from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
+if TYPE_CHECKING:
+    from bioetl.application.composite.runner_pkg import CompositePipelineRunner
+    from bioetl.domain.composite.config import CompositeConfig
+
 __all__ = [
     "run_composite",
 ]
@@ -51,6 +53,23 @@ def _validate_composite_name(
     if not value:
         raise click.BadParameter("Composite pipeline name is required")
     return value
+
+
+def load_composite_config(name: str) -> CompositeConfig:
+    """Load composite config through composition on demand."""
+    from bioetl.composition.entrypoints import load_composite_config as _impl
+
+    return _impl(name)
+
+
+def bootstrap_composite_runner(
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+) -> CompositePipelineRunner:
+    """Build composite runner through composition on demand."""
+    from bioetl.composition.entrypoints import bootstrap_composite_runner as _impl
+
+    return _impl(config, runtime)
 
 
 async def _run_composite_inner(

@@ -33,6 +33,7 @@ class StubSyncAdapter(BaseSyncAdapter):
         fail_probe: bool = False,
         probe_error: Exception | None = None,
         health_endpoint: str = "/health",
+        owns_thread_pool: bool = False,
     ) -> None:
         super().__init__(
             logger=logger,
@@ -40,6 +41,7 @@ class StubSyncAdapter(BaseSyncAdapter):
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
             metrics=metrics,
+            owns_thread_pool=owns_thread_pool,
         )
         self._fail_probe = fail_probe
         self._probe_error = probe_error or Exception("Probe failed")
@@ -316,3 +318,43 @@ class TestHealthCheckLogging:
         call_kwargs = mock_logger.warning.call_args[1]
         assert call_kwargs["error_type"] == "TimeoutError"
         assert call_kwargs["error_message"] == "Request timed out"
+
+    async def test_close_does_not_shutdown_injected_thread_pool(
+        self,
+        mock_logger: MagicMock,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
+        thread_pool: ThreadPoolExecutor,
+    ) -> None:
+        """Injected executors remain caller-owned by default."""
+        adapter = StubSyncAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+        )
+
+        await adapter.close()
+
+        assert thread_pool._shutdown is False
+        assert thread_pool.submit(lambda: "ok").result() == "ok"
+
+    async def test_close_shuts_down_owned_thread_pool(
+        self,
+        mock_logger: MagicMock,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
+    ) -> None:
+        """Owned executors are still cleaned up by the adapter."""
+        owned_pool = ThreadPoolExecutor(max_workers=1)
+        adapter = StubSyncAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=owned_pool,
+            owns_thread_pool=True,
+        )
+
+        await adapter.close()
+
+        assert owned_pool._shutdown is True
