@@ -7,7 +7,7 @@ import sys
 from collections.abc import Callable, Coroutine
 from typing import Any
 
-from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
+from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,

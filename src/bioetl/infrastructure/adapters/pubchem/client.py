@@ -109,6 +109,7 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
         strict_error_handling: bool = False,
         *,
         error_handler: ErrorHandlerPort | None = None,
+        owns_thread_pool: bool = False,
         request_collector: APIRequestCollector | None = None,
         entity_mapper: PubChemEntityMapper | None = None,
         fetch_strategies: PubChemFetchStrategies | None = None,
@@ -125,6 +126,8 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
             strict_error_handling: Whether to raise exceptions or log warnings.
             error_handler: Pre-built error handler (optional, injected by
                     AdapterHelpersFactory). Falls back to inline ErrorService.
+            owns_thread_pool: Whether this adapter owns the injected thread pool
+                and should shut it down on close.
             request_collector: Pre-built request collector (optional, injected by
                     AdapterHelpersFactory). Falls back to inline APIRequestCollector.
             entity_mapper: Pre-built entity mapper (optional).
@@ -138,6 +141,7 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
             thread_pool=thread_pool,
             strict_error_handling=strict_error_handling,
             error_handler=error_handler,
+            owns_thread_pool=owns_thread_pool,
         )
         self._mapper = (
             entity_mapper
