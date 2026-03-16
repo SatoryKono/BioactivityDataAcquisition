@@ -49,8 +49,9 @@ def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
     Returns:
         PyArrow string array with each value serialized as a JSON string.
     """
+    # ⚡ Bolt: Cache v.as_py() evaluation using walrus operator to avoid double conversion cost
     vals = [
-        serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
+        serialize_to_json(val) if (val := v.as_py()) is not None else None for v in col
     ]
     return pa.array(vals, type=pa.string())
 
