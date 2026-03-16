@@ -12,6 +12,7 @@ from __future__ import annotations
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quality._baseline_validation import (
     _validate_baseline_section,
+    _validate_historical_baseline_section,
     _validate_registry_groups_section,
 )
 from bioetl.infrastructure.quality._decomposition_validation import (
@@ -52,7 +53,14 @@ def validate_debt_scorecard_structure(
     baseline_result = _validate_baseline_section(raw, errors)
     if baseline_result is None:
         return errors
-    _, normalized_registry_counts = baseline_result
+    baseline_total, normalized_registry_counts = baseline_result
+
+    _validate_historical_baseline_section(
+        raw,
+        enforceable_total=baseline_total,
+        enforceable_registry_counts=normalized_registry_counts,
+        errors=errors,
+    )
 
     baseline_registry_names = set(normalized_registry_counts)
     normalized_groups = _validate_registry_groups_section(

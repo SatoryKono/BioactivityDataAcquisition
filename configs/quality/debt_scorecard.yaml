@@ -3,6 +3,11 @@ governance:
     baseline_date: '2026-03-09'
     description: Architecture debt scorecard governance for exemption registry.
     growth_gate_default_mode: block
+    baseline_policy:
+        enforceable_section: baseline
+        historical_section: historical_baseline
+        registry_sync_source: baseline
+        rationale: Keep the live ratchet baseline synchronized with the current registry while preserving the frozen 2026-Q1 debt snapshot for program tracking.
     temporary_exemptions:
         window_policy: budget-only
         max_window_days: 45
@@ -63,6 +68,18 @@ baseline:
         class_method_count: 0
         god_object: 0
         domain_complexity: 0
+historical_baseline:
+    snapshot_date: '2026-03-04'
+    source_report: docs/reports/quality-debt-scorecard-2026-Q1.md
+    total_exemptions: 485
+    by_registry:
+        file_size_limits: 97
+        function_complexity: 97
+        function_length: 118
+        class_size: 82
+        class_method_count: 1
+        god_object: 49
+        domain_complexity: 41
 registry_groups:
     size_shape:
         registries:
@@ -75,6 +92,45 @@ registry_groups:
         registries:
             - function_complexity
             - domain_complexity
+hotspot_budgets:
+    -   name: application_composite
+        rationale: Keep composite orchestration debt in application/composite on a shrinking leash.
+        path_prefixes:
+            - src/bioetl/application/composite/
+        registry_budgets:
+            class_size: 8
+            function_length: 24
+            function_complexity: 10
+            god_object: 4
+    -   name: infrastructure_storage
+        rationale: Prevent Silver/Gold writer mixins and Delta orchestration debt from regrowing.
+        path_prefixes:
+            - src/bioetl/infrastructure/storage/
+        registry_budgets:
+            file_size_limits: 8
+            function_length: 20
+            function_complexity: 8
+            class_size: 6
+            god_object: 4
+    -   name: infrastructure_config
+        rationale: Keep config loading and normalization debt constrained to an explicit budget.
+        path_prefixes:
+            - src/bioetl/infrastructure/config/
+            - src/bioetl/infrastructure/config_loader.py
+            - src/bioetl/infrastructure/config_merge.py
+            - src/bioetl/infrastructure/schemas/source_config.py
+        registry_budgets:
+            file_size_limits: 6
+            function_length: 12
+            function_complexity: 6
+    -   name: composition_factories
+        rationale: Limit growth in datasource, pipeline, and storage factory assembly helpers.
+        path_prefixes:
+            - src/bioetl/composition/factories/
+        registry_budgets:
+            function_length: 10
+            class_size: 4
+            function_complexity: 4
 quarterly_targets:
     -   quarter: 2026-Q1
         max_total_exemptions: 313

@@ -127,6 +127,32 @@ def test_debt_scorecard_governance_review_policy_requires_tracking_and_classific
     assert len(owners) >= 3
 
 
+def test_debt_scorecard_declares_enforceable_and_historical_baselines() -> None:
+    """Governance must explicitly separate live ratchet baseline from historical snapshot."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+
+    baseline_policy = governance.get("baseline_policy", {})
+    assert isinstance(baseline_policy, dict)
+    assert baseline_policy.get("enforceable_section") == "baseline"
+    assert baseline_policy.get("historical_section") == "historical_baseline"
+    assert baseline_policy.get("registry_sync_source") == "baseline"
+
+    baseline = scorecard.get("baseline", {})
+    historical = scorecard.get("historical_baseline", {})
+    assert isinstance(baseline, dict)
+    assert isinstance(historical, dict)
+
+    assert historical.get("total_exemptions", 0) >= baseline.get("total_exemptions", 0)
+    baseline_by_registry = baseline.get("by_registry", {})
+    historical_by_registry = historical.get("by_registry", {})
+    assert isinstance(baseline_by_registry, dict)
+    assert isinstance(historical_by_registry, dict)
+    for registry_name, enforceable_count in baseline_by_registry.items():
+        assert historical_by_registry.get(registry_name, -1) >= enforceable_count
+
+
 def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:
     """Grace windows policy must be budget-only and explicitly timeboxed."""
     scorecard = load_debt_scorecard()
@@ -159,6 +185,37 @@ def test_debt_scorecard_priority_burndown_registries_cover_q2_program() -> None:
     )
 
 
+def test_debt_scorecard_hotspot_budgets_cover_priority_registries() -> None:
+    """Each burn-down priority registry must be covered by at least one hotspot budget."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+    burn_down = governance.get("burn_down_priorities", {})
+    assert isinstance(burn_down, dict)
+    priority_registries = burn_down.get("registries", [])
+    assert isinstance(priority_registries, list)
+
+    hotspot_budgets = scorecard.get("hotspot_budgets", [])
+    assert isinstance(hotspot_budgets, list) and hotspot_budgets
+
+    covered = {
+        registry_name
+        for item in hotspot_budgets
+        if isinstance(item, dict)
+        for registry_name in item.get("registry_budgets", {})
+        if isinstance(registry_name, str)
+    }
+    missing = sorted(
+        registry_name
+        for registry_name in priority_registries
+        if isinstance(registry_name, str) and registry_name not in covered
+    )
+    assert not missing, (
+        "hotspot_budgets must cover burn_down_priorities registries: "
+        + ", ".join(missing)
+    )
+
+
 def test_debt_scorecard_current_quarter_within_budget() -> None:
     """Current debt inventory should stay within active quarter budgets."""
     violations, summary = evaluate_debt_scorecard()
@@ -166,6 +223,19 @@ def test_debt_scorecard_current_quarter_within_budget() -> None:
     assert not violations, "Debt scorecard budget violations:\n" + "\n".join(
         f"  - {item}" for item in violations
     )
+
+
+def test_debt_scorecard_current_inventory_within_hotspot_budgets() -> None:
+    """Current inventory must stay within declared hotspot budgets."""
+    violations, summary = evaluate_debt_scorecard()
+    assert summary is not None
+    hotspot_violations = [
+        item for item in violations if item.startswith("hotspot '")
+    ]
+    assert not hotspot_violations, "Hotspot budget violations:\n" + "\n".join(
+        f"  - {item}" for item in hotspot_violations
+    )
+    assert summary.by_hotspot, "Hotspot budget summary must not be empty"
 
 
 def test_debt_scorecard_inventory_has_owner_and_expiry_decomposition() -> None:

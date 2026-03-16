@@ -4,17 +4,15 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 import pyarrow as pa
 from deltalake import write_deltalake
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = [
     "_MergedSilverWriteRequest",

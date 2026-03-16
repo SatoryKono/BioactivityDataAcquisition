@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -149,7 +150,7 @@ class _SkipMarkerCounter:
         self.skipped = 0
         self.total = 0
 
-    def pytest_collection_modifyitems(self, items: list) -> None:
+    def pytest_collection_modifyitems(self, items: list[pytest.Item]) -> None:
         """Count items with skip/skipif markers (without running tests)."""
         self.total = len(items)
         for item in items:
@@ -273,7 +274,7 @@ def _find_adapter_instantiations(
 
 def test_inline_adapter_construction_budget(
     src_dir: Path,
-    source_ast_cache: dict,
+    source_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """Adapter classes must only be instantiated in composition layer."""
     violations = _find_adapter_instantiations(src_dir, source_ast_cache)
@@ -420,7 +421,7 @@ GROUP_EDGE_TOTAL_BUDGET = 250  # ratchet: full graph coupling budget (baseline: 
 _dep_map_module = None
 
 
-def _load_dep_map_module():  # type: ignore[no-untyped-def]
+def _load_dep_map_module() -> Any | None:
     """Load dependency map generator script as a module (cached)."""
     global _dep_map_module
     if _dep_map_module is not None:
@@ -614,7 +615,20 @@ def test_scorecard_baseline_matches_registry() -> None:
         actual_by_registry[reg_name] = count
         actual_total += count
 
-    baseline = scorecard.get("baseline", {})
+    governance = scorecard.get("governance", {})
+    baseline_section_name = "baseline"
+    if isinstance(governance, dict):
+        baseline_policy = governance.get("baseline_policy", {})
+        if isinstance(baseline_policy, dict):
+            sync_source = baseline_policy.get("registry_sync_source")
+            assert sync_source == "baseline", (
+                "Registry sync must be anchored to the enforceable baseline "
+                "section, not to historical_baseline"
+            )
+            if isinstance(sync_source, str) and sync_source.strip():
+                baseline_section_name = sync_source
+
+    baseline = scorecard.get(baseline_section_name, {})
     expected_total = baseline.get("total_exemptions", 0)
     expected_by_registry = baseline.get("by_registry", {})
 
@@ -633,5 +647,43 @@ def test_scorecard_baseline_matches_registry() -> None:
     assert not mismatches, (
         "Scorecard baseline drifted from actual exemption registry:\n"
         + "\n".join(f"  - {m}" for m in mismatches)
-        + "\nUpdate configs/quality/debt_scorecard.yaml baseline section."
+        + f"\nUpdate configs/quality/debt_scorecard.yaml {baseline_section_name} section."
+    )
+
+
+def test_scorecard_hotspot_budgets_cover_priority_registries() -> None:
+    """Hotspot budgets must cover the registries declared in burn-down priorities."""
+    if not DEBT_SCORECARD_YAML.exists():
+        pytest.skip("Debt scorecard YAML not found")
+
+    with open(DEBT_SCORECARD_YAML, encoding="utf-8") as f:
+        scorecard = yaml.safe_load(f)
+
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+    burn_down = governance.get("burn_down_priorities", {})
+    assert isinstance(burn_down, dict)
+    priority_registries = burn_down.get("registries", [])
+    assert isinstance(priority_registries, list)
+
+    hotspot_budgets = scorecard.get("hotspot_budgets", [])
+    assert isinstance(hotspot_budgets, list) and hotspot_budgets, (
+        "Debt scorecard must declare non-empty hotspot_budgets"
+    )
+
+    covered_registries = {
+        registry_name
+        for entry in hotspot_budgets
+        if isinstance(entry, dict)
+        for registry_name in entry.get("registry_budgets", {})
+        if isinstance(registry_name, str)
+    }
+    missing = sorted(
+        registry_name
+        for registry_name in priority_registries
+        if isinstance(registry_name, str) and registry_name not in covered_registries
+    )
+    assert not missing, (
+        "hotspot_budgets must cover burn_down_priorities registries: "
+        + ", ".join(missing)
     )

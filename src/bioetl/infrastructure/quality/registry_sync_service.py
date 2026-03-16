@@ -8,6 +8,20 @@ from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 __all__ = ["validate_registry_sync"]
 
 
+def _resolve_sync_baseline_section(scorecard: JsonDict) -> tuple[str, dict[str, object] | None]:
+    """Resolve which scorecard baseline section governs live registry sync."""
+    governance = scorecard.get("governance", {})
+    section_name = "baseline"
+    if isinstance(governance, dict):
+        baseline_policy = governance.get("baseline_policy", {})
+        if isinstance(baseline_policy, dict):
+            configured = baseline_policy.get("registry_sync_source")
+            if isinstance(configured, str) and configured.strip():
+                section_name = configured.strip()
+    section = scorecard.get(section_name)
+    return section_name, section if isinstance(section, dict) else None
+
+
 def _validate_registry_membership(
     *,
     live_names: set[str],
@@ -84,13 +98,13 @@ def validate_registry_sync(
     if not isinstance(raw_registries, dict):
         return ["exemptions.registries: expected mapping"]
 
-    baseline = scorecard.get("baseline", {})
-    if not isinstance(baseline, dict):
-        return ["scorecard.baseline: expected mapping"]
+    baseline_section_name, baseline = _resolve_sync_baseline_section(scorecard)
+    if baseline is None:
+        return [f"scorecard.{baseline_section_name}: expected mapping"]
 
     baseline_by_registry = baseline.get("by_registry", {})
     if not isinstance(baseline_by_registry, dict):
-        return ["scorecard.baseline.by_registry: expected mapping"]
+        return [f"scorecard.{baseline_section_name}.by_registry: expected mapping"]
 
     errors: list[str] = []
     inventory_registry_names = set(raw_registries)

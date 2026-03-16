@@ -150,7 +150,21 @@ class TestValidateGovernanceSection:
         errors: list[str] = []
         allow_rf_only = _validate_governance_section(
             {
+                "hotspot_budgets": [
+                    {
+                        "name": "storage_hotspot",
+                        "rationale": "Track class_size debt in storage subtree.",
+                        "path_prefixes": ["src/bioetl/infrastructure/storage/"],
+                        "registry_budgets": {"class_size": 1},
+                    }
+                ],
                 "governance": {
+                    "baseline_policy": {
+                        "enforceable_section": "baseline",
+                        "historical_section": "historical_baseline",
+                        "registry_sync_source": "baseline",
+                        "rationale": "Keep enforceable and historical baselines distinct.",
+                    },
                     "review_policy": {
                         "new_exemption_requires": [
                             "owner",
@@ -184,7 +198,21 @@ class TestValidateGovernanceSection:
         errors: list[str] = []
         allow_rf_only = _validate_governance_section(
             {
+                "hotspot_budgets": [
+                    {
+                        "name": "storage_hotspot",
+                        "rationale": "Track class_size debt in storage subtree.",
+                        "path_prefixes": ["src/bioetl/infrastructure/storage/"],
+                        "registry_budgets": {"class_size": 1},
+                    }
+                ],
                 "governance": {
+                    "baseline_policy": {
+                        "enforceable_section": "baseline",
+                        "historical_section": "historical_baseline",
+                        "registry_sync_source": "baseline",
+                        "rationale": "Keep enforceable and historical baselines distinct.",
+                    },
                     "review_policy": {
                         "new_exemption_requires": [
                             "owner",

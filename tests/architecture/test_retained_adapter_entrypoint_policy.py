@@ -16,6 +16,12 @@ LEGACY_IMPLEMENTATION_PATHS = frozenset(
         "bioetl.infrastructure.adapters.semanticscholar.adapter",
     }
 )
+RETAINED_ENTRYPOINT_MODULES = frozenset(
+    {
+        "bioetl.infrastructure.adapters.pubmed.client",
+        "bioetl.infrastructure.adapters.semanticscholar.client",
+    }
+)
 ALLOWED_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py",
@@ -26,6 +32,32 @@ ALLOWED_SRC_FILES = frozenset(
         / "adapters"
         / "semanticscholar"
         / "client.py",
+    }
+)
+ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "__init__.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "pubmed"
+        / "pubmed_client.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "semanticscholar"
+        / "__init__.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "semanticscholar"
+        / "adapter.py",
     }
 )
 ALLOWED_TEST_FILES = frozenset(
@@ -60,6 +92,24 @@ def _iter_legacy_path_mentions(
     return violations
 
 
+def _iter_retained_entrypoint_mentions(
+    search_root: Path,
+    *,
+    allowed_files: frozenset[Path],
+) -> list[str]:
+    violations: list[str] = []
+    for py_file in search_root.rglob("*.py"):
+        if py_file in allowed_files or "__pycache__" in py_file.parts:
+            continue
+        rel_path = py_file.relative_to(ROOT).as_posix()
+        lines = py_file.read_text(encoding="utf-8").splitlines()
+        for lineno, line in enumerate(lines, start=1):
+            for module_path in RETAINED_ENTRYPOINT_MODULES:
+                if module_path in line:
+                    violations.append(f"{rel_path}:{lineno} mentions {module_path}")
+    return violations
+
+
 @pytest.mark.architecture
 def test_retained_adapter_entrypoints_keep_legacy_paths_out_of_src() -> None:
     """First-party source must use retained canonical entrypoints, not legacy paths."""
@@ -82,5 +132,31 @@ def test_legacy_adapter_paths_are_confined_to_dedicated_compat_tests() -> None:
     )
     assert not violations, (
         "Legacy adapter implementation paths gained new non-compat test usages:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_retained_adapter_entrypoints_are_confined_to_package_roots_in_src() -> None:
+    """First-party src should import provider package roots, not retained client modules."""
+    violations = _iter_retained_entrypoint_mentions(
+        SRC_ROOT,
+        allowed_files=ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES,
+    )
+    assert not violations, (
+        "Retained adapter client entrypoints leaked into first-party src/ beyond "
+        "provider package roots:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_retained_adapter_entrypoints_are_confined_to_dedicated_tests() -> None:
+    """Ordinary tests should not use retained adapter client modules directly."""
+    violations = _iter_retained_entrypoint_mentions(
+        TESTS_ROOT,
+        allowed_files=ALLOWED_TEST_FILES,
+    )
+    assert not violations, (
+        "Retained adapter client entrypoints gained new non-compat test usages:\n"
         + "\n".join(violations)
     )

@@ -206,6 +206,33 @@ def test_inventory_rows_capture_owner_call_sites_and_lifecycle_metadata() -> Non
 
 
 @pytest.mark.architecture
+def test_retained_adapter_entrypoint_rows_prefer_package_root_imports() -> None:
+    """Retained adapter client rows must document package-root imports as policy."""
+    rows = {
+        row["path"]: row
+        for row in _iter_inventory_cells(INVENTORY_DOC.read_text(encoding="utf-8"))
+    }
+    expected = {
+        "src/bioetl/infrastructure/adapters/pubmed/client.py": (
+            "bioetl.infrastructure.adapters.pubmed"
+        ),
+        "src/bioetl/infrastructure/adapters/semanticscholar/client.py": (
+            "bioetl.infrastructure.adapters.semanticscholar"
+        ),
+    }
+
+    for path, package_root in expected.items():
+        row = rows[path]
+        assert "first-party code imports the provider package root" in row[
+            "allowed_call_sites"
+        ], f"{path} must document package-root policy in allowed call sites"
+        assert package_root in row["migration_path"], (
+            f"{path} migration_path must point new code to package root "
+            f"{package_root}"
+        )
+
+
+@pytest.mark.architecture
 def test_inventory_doc_is_linked_from_discovery_docs() -> None:
     """Inventory should be discoverable from composition and registry docs."""
     inventory_name = "07-compatibility-facade-inventory.md"
