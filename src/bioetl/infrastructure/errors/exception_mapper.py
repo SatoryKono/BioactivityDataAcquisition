@@ -99,6 +99,20 @@ class DomainInfraExceptionMapper:
         self,
         payload: DomainErrorMappingInput,
     ) -> ExternalServiceError:
+        """Map an HTTP-status-bearing failure to a domain exception.
+
+        Routing: 401/403 → CriticalError (auth), 429 → RateLimitExceededError,
+        5xx → ServiceUnavailableError, other → generic ExternalServiceError.
+
+        Args:
+            payload: Normalized error input with a non-None status_code.
+
+        Returns:
+            Decorated domain exception with reason code and causal chain.
+
+        Raises:
+            CriticalError: For authentication failures (401/403).
+        """
         message = str(payload.error)
         status_code = payload.status_code
         assert status_code is not None
@@ -176,6 +190,20 @@ class DomainInfraExceptionMapper:
         self,
         payload: DomainErrorMappingInput,
     ) -> ExternalServiceError:
+        """Map a non-HTTP failure to a domain exception using ErrorType.
+
+        Routing: critical types → CriticalError, RATE_LIMIT → RateLimitExceededError,
+        TIMEOUT → ServiceUnavailableError, other → generic ExternalServiceError.
+
+        Args:
+            payload: Normalized error input without an HTTP status code.
+
+        Returns:
+            Decorated domain exception with reason code and causal chain.
+
+        Raises:
+            CriticalError: For error types classified as critical.
+        """
         message = str(payload.error)
 
         if payload.error_type.is_critical():

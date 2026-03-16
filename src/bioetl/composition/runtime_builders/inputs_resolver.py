@@ -1,4 +1,10 @@
-"""Sub-service for runtime runner input resolution."""
+"""Runtime runner input resolution for pipeline bootstrap.
+
+Resolves and assembles all dependencies required to construct a pipeline
+runner: settings, YAML config, observability, runtime config, filter config,
+and cached Bronze context. Acts as the composition entry point that wires
+CLI arguments and YAML configuration into domain-level ``RunnerInputs``.
+"""
 
 from __future__ import annotations
 
