@@ -40,6 +40,23 @@ class StorageAdapterMaintenanceMixin:
         table_path = writer.get_table_path(table_name)
         return _is_delta_table_dir(table_path)
 
+    def get_table_version(
+        self,
+        table_path: str,
+        *,
+        layer: str = "silver",
+    ) -> int | None:
+        """Return the current Delta table version, or None if table does not exist."""
+        path = Path(table_path)
+        if not _is_delta_table_dir(path):
+            return None
+        try:
+            from deltalake import DeltaTable
+
+            return DeltaTable(table_path).version()
+        except (OSError, RuntimeError, ValueError, ImportError):
+            return None
+
     async def optimize(
         self,
         table_name: str,

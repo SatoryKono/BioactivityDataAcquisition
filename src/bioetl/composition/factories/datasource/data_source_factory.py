@@ -31,6 +31,9 @@ def get_data_source_creator(provider: str) -> DataSourceCreatorProtocol:
 class DataSourceRegistry:
     """Legacy compatibility facade over the canonical provider creator path."""
 
+    # Retained for backward-compatible test fixtures that backup/restore this
+    # dict.  Never populated in production — all delegation goes via
+    # ProviderRegistry.
     _creators: ClassVar[dict[str, DataSourceCreatorProtocol]] = {}
 
     @classmethod

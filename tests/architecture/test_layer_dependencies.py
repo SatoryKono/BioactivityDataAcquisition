@@ -511,6 +511,47 @@ def test_application_layer_no_infrastructure_imports(src_dir: Path) -> None:
     )
 
 
+# I/O libraries that must NOT appear in the application layer.
+# polars is intentionally excluded: it is a data-manipulation library used for
+# in-memory DataFrame operations throughout the application layer, not an I/O
+# or infrastructure concern.
+_APPLICATION_FORBIDDEN_THIRD_PARTY = {
+    "deltalake",
+    "httpx",
+    "requests",
+    "sqlalchemy",
+    "psycopg2",
+    "asyncpg",
+    "motor",
+    "pymongo",
+}
+
+
+def test_application_layer_no_third_party_infrastructure_libs(
+    src_dir: Path,
+) -> None:
+    """Application layer must not import third-party infrastructure libraries.
+
+    REQ-ARCH-APP-003: Libraries like deltalake, httpx, requests belong in the
+    infrastructure layer only. Application code must use domain ports to access
+    their functionality.
+    """
+    application_path = src_dir / "bioetl" / "application"
+    if not application_path.exists():
+        pytest.skip("Application layer not found")
+
+    all_errors = []
+    for py_file in application_path.rglob("*.py"):
+        errors = _check_imports_in_file(py_file, _APPLICATION_FORBIDDEN_THIRD_PARTY)
+        all_errors.extend(errors)
+
+    assert not all_errors, (
+        "Application layer imports third-party infrastructure libraries:\n"
+        + "\n".join(f"  - {e}" for e in all_errors)
+        + "\n\nUse domain ports instead (ARCH-001)."
+    )
+
+
 def test_infrastructure_does_not_import_interfaces(src_dir: Path) -> None:
     """Infrastructure layer must not import from interfaces layer.
 

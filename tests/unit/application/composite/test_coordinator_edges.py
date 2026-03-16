@@ -8,7 +8,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-from bioetl.domain.composite.result import EnrichmentStatus
+from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.exceptions import BioETLError
 
 
@@ -208,14 +208,18 @@ async def test_run_single_enricher_required_bioetl_error_reraises(
 
 
 @pytest.mark.unit
-def test_process_results_converts_exceptions_to_failed_result(
+def test_process_results_maps_names_to_results(
     coordinator: EnrichmentCoordinatorService,
 ) -> None:
+    """With fail-fast, _process_results receives only EnrichmentResult values."""
+    result = EnrichmentResult.failed(
+        enricher_name="crossref_publication",
+        error_message="boom",
+    )
     processed = coordinator._process_results(
         ["crossref_publication"],
-        [RuntimeError("boom")],
+        [result],
     )
 
-    result = processed["crossref_publication"]
-    assert result.status == EnrichmentStatus.FAILED
-    assert result.error_message == "boom"
+    assert processed["crossref_publication"] is result
+    assert processed["crossref_publication"].status == EnrichmentStatus.FAILED

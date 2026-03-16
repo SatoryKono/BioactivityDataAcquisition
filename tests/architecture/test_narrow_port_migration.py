@@ -24,7 +24,7 @@ _APPLICATION_ROOT = (
 # Maximum number of files that may still reference the broad StoragePort
 # in type annotations (field declarations or function parameters).
 # Ratchet this down as migrations proceed.
-_MAX_BROAD_STORAGE_PORT_FILES = 5
+_MAX_BROAD_STORAGE_PORT_FILES = 4
 
 
 def _files_using_broad_storage_port() -> list[str]:
@@ -87,6 +87,7 @@ class TestNarrowPortMigration:
         migrated = [
             "services/bronze_cleanup_service.py",
             "services/medallion_maintenance_mixin.py",
+            "composite/merger.py",
         ]
         for svc in migrated:
             # Normalize path separators

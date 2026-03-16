@@ -61,13 +61,13 @@
 
 **Test Organization:**
 ```
-tests-generated/
-├── conftest.py                     # 5 provider fixtures
-├── unit/
-│   ├── domain/schemas/             # 404 base validation tests
-│   └── application/services/dq/    # 41 structural/logical/semantic tests
-├── integration/validation/         # 16 external verification tests (mocked)
-├── contracts/                      # 10 contract tests
+tests/
+├── contract/
+│   ├── silver-schemas/README.md    # Contract test docs
+│   └── test_publication_schema_contracts.py
+├── unit/domain/schemas/            # Base validation tests
+├── unit/application/services/dq/   # Structural/logical/semantic tests
+├── integration/validation/         # External verification tests (VCR)
 └── test-coverage-matrix.csv        # Coverage report
 ```
 
@@ -118,22 +118,21 @@ external-verification: PubMed/NCBI API
 ### 3. Запустить валидацию
 
 ```bash
-# Режим STRICT (все 5 уровней)
-python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider pubmed --entity publication \
-    --validation-mode strict \
-    --enable-external-verification \
-    --enable-semantic-validation
+# Полный прогон (валидационный профиль)
+bioetl run --pipeline pubmed_publication \
+  --run-type validation \
+  --limit 500
 
-# Режим BALANCED (по умолчанию, без External/Semantic)
-python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider chembl --entity publication \
-    --validation-mode balanced
+# Баланс скорость/качество (дефолтные уровни из pipeline config)
+bioetl run --pipeline chembl_publication \
+  --run-type validation \
+  --limit 1000
 
-# Режим FAST (только Base Validation)
-python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider crossref --entity publication \
-    --validation-mode fast
+# Быстрый сухой прогон схемы (без записи)
+bioetl run --pipeline crossref_publication \
+  --run-type validation \
+  --limit 200 \
+  --dry-run
 ```
 
 ---
@@ -165,10 +164,10 @@ pytest tests/contract/ --cov=src/bioetl --cov-report=html
 open docs/05-operations/runbooks/publication-validation-runbook.md
 
 # Проверить последние ошибки валидации
-journalctl -u bioetl-pipeline --since "1 hour ago" | grep "validation-failed"
+tail -200 logs/bioetl.log | jq 'select(.event == "validation-failed")'
 
 # Топ провайдеров по fail rate
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq -r 'select(.event == "validation-failed") | "\(.provider) \(.validation-level)"' | \
   sort | uniq -c | sort -rn | head -10
 ```
@@ -286,7 +285,6 @@ cat /var/log/bioetl/pipeline.log | \
 
 - **RULES.md** — `docs/00-project/RULES.md` (§8 Testing, §9 Anti-Patterns)
 - **CLAUDE.md** — `docs/00-project/ai/agents/guides/CLAUDE.md` (§7.5 Type Annotations, §9 Anti-Patterns)
-- **Project Wiki** — `https://wiki.company.com/bioetl/validation`
 - **CI/CD Pipeline** — `.github/workflows/tests.yml`
 
 ### Внешние (Upstream Providers)
@@ -340,10 +338,9 @@ cat /var/log/bioetl/pipeline.log | \
 
 ## Контакты
 
-- **Data Engineering Team:** `#bioetl-dev` (Slack)
+- **Maintainers:** см. `CODEOWNERS`
 - **Support:** `#bioetl-support` (Slack)
-- **On-Call:** `bioetl-oncall` (PagerDuty)
-- **Lead:** data-eng-lead@company.com
+- **On-Call:** `#bioetl-oncall` (Slack)
 
 ---
 

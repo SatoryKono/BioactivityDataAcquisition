@@ -522,56 +522,49 @@ sequenceDiagram
 
 ## Примеры использования
 
-### 1. Strict Mode (все проверки)
+### 1. Validation профиль (все уровни, CLI v2)
 
 ```bash
-python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider pubmed \
-    --entity publication \
-    --validation-mode strict \
-    --enable-external-verification \
-    --enable-semantic-validation \
-    --fail-on-warn
+bioetl run --pipeline pubmed_publication \
+  --run-type validation \
+  --limit 500
 ```
 
 **Результат:**
-- Все 5 уровней активны
-- `-dq-warn=True` → запись **отклонена** (из-за `--fail-on-warn`)
-- Максимальное качество, минимальная пропускная способность
+- Активны все уровни, соответствующие конфигу pipeline
+- `-dq-warn=True` → запись попадает в карантин (поведение задаётся конфигом)
+- Используется стандартный логгер CLI (`logs/bioetl.log`)
 
 ---
 
-### 2. Balanced Mode (по умолчанию)
+### 2. Balanced (по умолчанию)
 
 ```bash
-python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider chembl \
-    --entity publication \
-    --validation-mode balanced
+bioetl run --pipeline chembl_publication \
+  --run-type validation \
+  --limit 1000
 ```
 
 **Результат:**
-- Base + Structural + Logical (без External и Semantic)
-- `-dq-warn=True` → запись **в карантине**
-- Хороший баланс качества и производительности
+- Уровни валидации берутся из pipeline config (external/semantic опциональны)
+- `-dq-warn=True` → запись в карантине
+- Баланс производительности и покрытия
 
 ---
 
-### 3. Fast Mode (только Base)
+### 3. Fast Check (dry-run без записи)
 
 ```bash
-python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider crossref \
-    --entity publication \
-    --validation-mode fast \
-    --skip-external \
-    --skip-semantic
+bioetl run --pipeline crossref_publication \
+  --run-type validation \
+  --limit 200 \
+  --dry-run
 ```
 
 **Результат:**
-- Только Base Validation (Pandera)
+- Проверяет схему и валидаторы без записи в Delta
 - Максимальная производительность
-- Подходит для REBUILD с известными чистыми данными
+- Удобно для быстрых проверок после изменений схемы
 
 ---
 
@@ -834,7 +827,7 @@ pytest tests/integration/validation/ --record-mode=once
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
 - **Validation Schema:** `docs/04-reference/schemas/publication-validation-schema-v3.xlsx`
 - **Operational Runbook:** `docs/05-operations/runbooks/publication-validation-runbook.md`
-- **Tests:** `tests-generated/` (471 тест)
+- **Tests:** `tests/contract/` + `tests/unit/` (471 тест)
 
 ---
 

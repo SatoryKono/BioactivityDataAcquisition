@@ -12,7 +12,7 @@
 | **Provider**     | ChEMBL (EBI)                                          |
 | **Entity**       | protein-class                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/protein-class` |
-| **Library**      | `chembl-webresource-client`                           |
+| **Library**      | Built-in ChEMBL adapter (httpx)                       |
 | **Rate Limit**   | None (polite usage recommended)                       |
 | **Health Check** | `/chembl/api/data/status`                             |
 | **Auth Type**    | None (public API)                                     |
@@ -65,11 +65,12 @@ protein-class (self-referential hierarchy)
 ### 3.1. API Request
 
 ```python
-from chembl-webresource-client.new-client import new-client
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
-protein-class = new-client.protein-class
-results = protein-class.filter().only(
-    [
+adapter = ChemblAdapter(config=adapter_config)
+results = adapter.fetch(
+    entity="protein_class",
+    fields=[
         "protein-class-id",
         "parent-id",
         "pref-name",
@@ -80,7 +81,7 @@ results = protein-class.filter().only(
         "sort-order",
         "downgraded",
         "replaced-by",
-    ]
+    ],
 )
 ```
 

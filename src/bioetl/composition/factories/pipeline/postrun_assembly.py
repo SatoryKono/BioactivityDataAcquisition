@@ -47,8 +47,6 @@ _POSTRUN_WARNING_ALLOWLIST = (
     TypeError,
 )
 _METADATA_VERSION_ALLOWLIST = (
-    ImportError,
-    ModuleNotFoundError,
     FileNotFoundError,
     OSError,
     RuntimeError,
@@ -86,6 +84,7 @@ def build_postrun_dependency_context(
         metadata_version_resolver=PostrunMetadataVersionResolver(
             logger=logger_port,
             runtime=runtime,
+            storage=storage,
             warning_allowlist=_METADATA_VERSION_ALLOWLIST,
         ),
         compact_orchestrator=PostrunCompactService(

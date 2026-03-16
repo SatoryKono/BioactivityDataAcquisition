@@ -12,7 +12,7 @@
 | **Provider**     | ChEMBL (EBI)                                     |
 | **Entity**       | document                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/document` |
-| **Library**      | `chembl-webresource-client`                      |
+| **Library**      | Built-in ChEMBL adapter (httpx)                      |
 | **Rate Limit**   | None                                             |
 | **Health Check** | `/chembl/api/data/status.json`                   |
 | **Auth Type**    | None (public API)                                |

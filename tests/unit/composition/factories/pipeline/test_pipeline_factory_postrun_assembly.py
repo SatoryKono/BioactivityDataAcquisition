@@ -268,9 +268,9 @@ class TestBuildPostrunDependencyContext:
         )
         assert mock_metadata_cls.call_args.kwargs["logger"] is logger
         assert mock_metadata_cls.call_args.kwargs["runtime"] is runtime
+        assert mock_metadata_cls.call_args.kwargs["storage"] is storage
         metadata_allowlist = mock_metadata_cls.call_args.kwargs["warning_allowlist"]
-        assert ImportError in metadata_allowlist
-        assert ModuleNotFoundError in metadata_allowlist
+        assert OSError in metadata_allowlist
         assert BioETLError not in metadata_allowlist
         assert mock_compact_cls.call_args.kwargs["config"] is config
         assert mock_compact_cls.call_args.kwargs["storage"] is storage

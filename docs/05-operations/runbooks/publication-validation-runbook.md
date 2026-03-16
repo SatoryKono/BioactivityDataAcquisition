@@ -56,17 +56,17 @@
 1. Проверить логи последних запусков:
    ```bash
    # Посмотреть ошибки за последний час
-   journalctl -u bioetl-pipeline --since "1 hour ago" | grep "validation-failed"
+   tail -200 logs/bioetl.log | jq 'select(.event == "validation-failed")'
 
-   # Или из structlog JSON
-   cat /var/log/bioetl/pipeline.log | \
+   # Фильтр по окну времени (UTC timestamps внутри JSON)
+   cat logs/bioetl.log | \
      jq 'select(.event == "validation-failed") | select(.timestamp > now - 3600)'
    ```
 
 2. Определить провайдера и уровень с наибольшим fail rate:
    ```bash
    # Топ провайдеров по fail rate
-   cat /var/log/bioetl/pipeline.log | \
+   cat logs/bioetl.log | \
      jq -r 'select(.event == "validation-failed") | "\(.provider) \(.validation-level)"' | \
      sort | uniq -c | sort -rn | head -10
    ```
@@ -89,7 +89,7 @@ histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
 1. Проверить, какой уровень валидации медленный:
    ```bash
    # Latency по уровням
-   cat /var/log/bioetl/pipeline.log | \
+   cat logs/bioetl.log | \
      jq 'select(.event == "validation-step-complete") |
          {level: .validator, duration: .duration-seconds}' | \
      jq -s 'group-by(.level) |
@@ -100,7 +100,7 @@ histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
    - Проверить rate limiting:
      ```bash
      # Количество 429 ответов от API
-     grep "rate-limit-exceeded" /var/log/bioetl/pipeline.log | wc -l
+     grep "rate-limit-exceeded" logs/bioetl.log | wc -l
      ```
    - Снизить `batch-size` или увеличить `retry-delay`
 
@@ -128,7 +128,7 @@ histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
 **Действия:**
 1. Проверить топ правил, вызывающих WARN:
    ```bash
-   cat /var/log/bioetl/pipeline.log | \
+   cat logs/bioetl.log | \
      jq -r 'select(.event == "validation-warning") | .rule' | \
      sort | uniq -c | sort -rn | head -10
    ```
@@ -158,17 +158,17 @@ histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
 
 ```bash
 # 1. Посмотреть последние SchemaError
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq 'select(.event == "base-validation-failed") | .error' | tail -20
 
 # 2. Проверить, какие колонки fail чаще всего
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq -r 'select(.event == "base-validation-failed") |
          .error | match("Column \'([^\']+)\'") | .captures[0].string' | \
   sort | uniq -c | sort -rn
 
 # 3. Посмотреть примеры некорректных значений
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq 'select(.event == "base-validation-failed") |
       {column: .column, value: .invalid-value, record-id: .record-id}' | \
   head -10
@@ -273,7 +273,7 @@ print(df[~df['publication-year'].apply(lambda x: isinstance(x, (int, float, type
 
 ```bash
 # 1. Топ структурных правил с WARN
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq -r 'select(.event == "structural-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
@@ -346,13 +346,13 @@ curl -I -w "\n%{http-code}\n" https://api.openalex.org/works/W2124179640
 curl -I -w "\n%{http-code}\n" https://api.semanticscholar.org/graph/v1/paper/649def34f8be52c8b66281af98ae884c09aef38b
 
 # 2. Проверить rate limiting
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq 'select(.event == "external-api-rate-limited") |
       {provider: .provider, timestamp: .timestamp}' | \
   tail -20
 
 # 3. Количество 404 по провайдерам
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq -r 'select(.event == "external-id-not-found") | .provider' | \
   sort | uniq -c
 ```
@@ -462,7 +462,7 @@ curl -v --connect-timeout 5 https://api.crossref.org/
 
 ```bash
 # 1. Топ логических правил с WARN
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq -r 'select(.event == "logical-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
@@ -550,7 +550,7 @@ print(negative-cit[['paper-id', 'citations-received', 'title']].head())
 
 ```bash
 # 1. Топ semantic правил с WARN
-cat /var/log/bioetl/pipeline.log | \
+cat logs/bioetl.log | \
   jq -r 'select(.event == "semantic-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
@@ -634,7 +634,7 @@ print(lang-mismatch[['pmid', 'language', 'title', 'abstract']].head())
 ps aux | grep bioetl
 
 # Проверить последний лог-event
-tail -1 /var/log/bioetl/pipeline.log | jq
+tail -1 logs/bioetl.log | jq
 
 # Если застряло на External Verification — проверить active HTTP connections
 lsof -i -P -n | grep bioetl
@@ -643,7 +643,7 @@ lsof -i -P -n | grep bioetl
 **Решение:**
 ```bash
 # Kill pipeline
-pkill -f "bioetl.interfaces.cli.main run-pipeline"
+pkill -f "bioetl run"
 
 # Перезапустить без External Verification
 bioetl run \
@@ -764,7 +764,6 @@ scrape-configs:
 
 ### Level 4: Data Engineering Lead (4+ hours)
 
-- **Email:** data-eng-lead@company.com
 - **Условия эскалации:**
   - Upstream provider API сломан (требуется связаться с vendor)
   - Архитектурные изменения необходимы
@@ -777,9 +776,9 @@ scrape-configs:
 ### Внутренние ресурсы
 
 - **Slack канал:** `#bioetl-support`
-- **Wiki:** `https://wiki.company.com/bioetl/validation`
-- **Runbook repo:** `https://github.com/company/bioetl/tree/main/docs/runbooks`
-- **Grafana dashboard:** `https://grafana.company.com/d/bioetl-validation`
+- **Wiki:** `docs/00-project/00-map.md`
+- **Runbook repo:** `docs/05-operations/runbooks/`
+- **Grafana dashboard:** internal dashboard (см. ops inventory)
 
 ### Upstream провайдеры
 
@@ -796,7 +795,7 @@ scrape-configs:
 - **ADR-033:** Стратегия валидации (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
-- **Test Suite:** `tests-generated/` (471 тест)
+- **Test Suite:** `tests/contract/` + `tests/unit/` (471 тест)
 
 ---
 

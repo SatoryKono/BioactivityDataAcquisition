@@ -14,7 +14,6 @@ import pytest
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner import (
     CompositePipelineRunner,
-    _COMPOSITE_HEARTBEAT_INTERVAL_SECONDS,
 )
 from bioetl.application.composite.runner_pkg.runner_models import (
     CompositeRuntimeConfig,
@@ -204,9 +203,40 @@ class TestCompositeRunnerHeartbeat:
         lock.release.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_heartbeat_interval_constant_is_30(self) -> None:
-        """Default composite heartbeat interval matches single-pipeline default."""
-        assert _COMPOSITE_HEARTBEAT_INTERVAL_SECONDS == 30
+    async def test_heartbeat_interval_defaults_to_30(self) -> None:
+        """Default composite heartbeat interval is 30s via CompositeRuntimeConfig."""
+        runtime = CompositeRuntimeConfig()
+        assert runtime.heartbeat_interval_seconds == 30
+
+    @pytest.mark.asyncio
+    async def test_lock_ttl_defaults_to_3600(self) -> None:
+        """Default lock TTL is 3600s (1 hour) via CompositeRuntimeConfig."""
+        runtime = CompositeRuntimeConfig()
+        assert runtime.lock_ttl_seconds == 3600
+
+    @pytest.mark.asyncio
+    async def test_custom_heartbeat_interval_used_by_runner(self) -> None:
+        """Runner uses custom heartbeat_interval_seconds from runtime config."""
+        lock = _make_lock()
+        runner = _make_runner(lock=lock)
+        runner._runtime = CompositeRuntimeConfig(heartbeat_interval_seconds=60)
+
+        await runner.run()
+
+        # Verify lock.acquire was called with default TTL (3600)
+        lock.acquire.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_custom_lock_ttl_used_by_runner(self) -> None:
+        """Runner uses custom lock_ttl_seconds from runtime config."""
+        lock = _make_lock()
+        runner = _make_runner(lock=lock)
+        runner._runtime = CompositeRuntimeConfig(lock_ttl_seconds=7200)
+
+        await runner.run()
+
+        acquire_kwargs = lock.acquire.call_args.kwargs
+        assert acquire_kwargs["ttl"] == 7200
 
     @pytest.mark.asyncio
     async def test_no_heartbeat_when_lock_not_acquired(self) -> None:

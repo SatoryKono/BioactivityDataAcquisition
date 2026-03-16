@@ -5,6 +5,11 @@ concurrently using ``asyncio.gather`` bounded by a configurable semaphore.
 Each enricher receives a filtered subset of seed keys and runs independently;
 results are collected into typed ``EnrichmentResult`` objects regardless of
 whether the enricher succeeded, timed out, was skipped by filter, or failed.
+
+**Fail-fast semantics (RF-007.1):** When a *required* enricher fails or times
+out, the exception propagates immediately through ``asyncio.gather`` (no
+``return_exceptions``), cancelling all remaining sibling tasks. Optional
+enricher errors are caught internally and returned as ``FAILED`` results.
 """
 
 from __future__ import annotations
@@ -168,7 +173,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
             count=len(tasks),
             enrichers=enricher_names,
         )
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = await asyncio.gather(*tasks)
         return self._process_results(enricher_names, results)
 
     def _apply_filter(
@@ -262,6 +267,13 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
                     duration=duration,
                 )
             except TimeoutError:
+                if enricher.required:
+                    self._logger.error(
+                        "Required enricher timed out",
+                        enricher=enricher.pipeline,
+                        timeout_seconds=enricher.timeout_seconds,
+                    )
+                    raise
                 return self._build_timeout_result(enricher, records_input, started_at)
             except _ENRICHER_EXECUTION_ERRORS as e:
                 return self._handle_enricher_error(
