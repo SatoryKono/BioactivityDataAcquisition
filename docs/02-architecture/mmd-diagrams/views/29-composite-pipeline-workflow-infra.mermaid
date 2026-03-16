@@ -1,65 +1,14 @@
 %% View: Infrastructure-Mapping | Parent: 29-composite-pipeline-workflow-full.mermaid
-%% @uniform width=140 height=56 max_title_len=4 max_desc_lines=0
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=1
 flowchart TB
+    SB["Seed Silver table"] --> EOUT["Enriched silver outputs"]
+    DOUT["Dependency silver outputs"] --> MS["MergeService"]
+    EOUT --> MS
+    MS --> GT["Gold table"]
+    CKP["CompositeCheckpointService"] -.->|"current or latest matching file"| SB
+    LOCK["LockPort with fixed TTL"] -.-> MS
 
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N6["SP"]
-    end
-
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
-        N1["EC"]
-        N2["KEYS"]
-        N3["KE"]
-        N4["SB"]
-        N5["DC"]
-        N7["BOOT"]
-        N8["PFV"]
-        N9["DEP1"]
-        N10["DEP2"]
-        N11["E1"]
-        N12["E2"]
-        N13["E3"]
-        N14["E4"]
-        N15["ES1"]
-        N16["DD"]
-        N17["ES2"]
-        N18["ES3"]
-        N19["ES4"]
-        N20["MS"]
-    end
-
-    N8 ==> N7
-    N7 --> N6
-    N6 --> N4
-    N4 --> N5
-    N5 --> N9
-    N5 --> N10
-    N4 --> N3
-    N3 --> N2
-    N2 --> N1
-    N1 --> N11
-    N1 --> N12
-    N1 --> N13
-    N1 --> N14
-    N11 --> N15
-    N12 --> N17
-    N13 --> N18
-    N14 --> N19
-    N15 --> N16
-    N17 --> N16
-    N18 --> N16
-    N19 --> N16
-    N16 --> N20
-
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
-    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
-    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
-    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
-
-    linkStyle default stroke:#1E293B,stroke-width:4px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    class MS app;
+    class SB,DOUT,EOUT,GT,CKP,LOCK infra;

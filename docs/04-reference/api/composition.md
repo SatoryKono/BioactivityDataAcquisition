@@ -42,7 +42,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | Class | Description |
 |---|---|
 | `DataSourceFactory` | Creates data source adapters for all providers |
-| `DataSourceRegistry` | Registry of available data sources |
+| `DataSourceRegistry` | Legacy compatibility facade; prefer `DataSourceFactory` or `get_data_source_creator()` |
 | `HttpClientFactory` | Creates configured HTTP clients with retry/rate limiting |
 | `ResolvedHttpConfig` | Resolved HTTP client configuration |
 | `CrossrefAdapterFactory` | CrossRef-specific adapter factory |
@@ -144,12 +144,11 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 | Module | Description |
 |---|---|
-| `registration` | Provider registration orchestration |
-| `registration_bio` | Bio provider registration (ChEMBL, PubChem, UniProt) |
-| `registration_biblio` | Biblio provider registration (PubMed, CrossRef, OpenAlex, S2) |
+| `registration` | Provider registration orchestration over internal config builders |
+| `registration_*` | Internal provider config builders; not a canonical application-facing surface |
 | `decorators` | Provider adapter decorators (circuit breaker, retry) |
 | `factory_loader` | Provider factory loading |
-| `loader` | Provider configuration loading |
+| `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) |
 
 ---
 

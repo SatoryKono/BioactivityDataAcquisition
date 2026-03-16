@@ -42,6 +42,23 @@ class CompositeCheckpointService:
         logger: LoggerPort,
         resume: bool = False,
     ) -> None:
+        """Initialize the composite checkpoint service.
+
+        Args:
+            composite_name: Logical name of the composite pipeline, used to
+                scope checkpoint filenames and log entries.
+            run_id: Unique identifier for the current run, embedded in the
+                checkpoint filename to distinguish parallel executions.
+            storage: Port adapter that handles all filesystem I/O (read,
+                write, list, delete) for checkpoint files.
+            logger: Structured logger for progress and diagnostic output.
+            resume: When ``True``, ``load()`` will attempt to locate and
+                deserialise an existing checkpoint file and return its state
+                instead of creating a fresh one. When ``False`` (default),
+                ``load()`` always starts from a clean state and emits a
+                warning if a checkpoint with prior progress would be silently
+                overwritten.
+        """
         self._composite_name = composite_name
         self._run_id = run_id
         self._storage = storage

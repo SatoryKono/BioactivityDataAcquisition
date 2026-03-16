@@ -1,11 +1,11 @@
 %% BioETL — CLI / Interface Layer
-%% Shows CLI commands, their routing, and interaction with composition.
+%% Shows current CLI routing through registry helpers, composition entrypoints, and bootstrap services.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   24
+%% @nodes   18
 %% @reference  Decomposed into 14a-cli-commands, 14b-cli-routing
 
 %%{init: {
@@ -19,81 +19,53 @@
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-%% @uniform width=248 height=72 max_title_len=26 max_desc_lines=2
+%% @uniform width=248 height=72 max_title_len=25 max_desc_lines=3
 graph LR
-    subgraph User["User"]
-        TERM["Terminal<br/><br/>"]:::size-md
+    TERM["Terminal user"]:::size-md
+
+    subgraph CLI["interfaces/cli"]
+        MAIN["cli.main<br/>Click group"]:::size-md
+        REG["registry_helpers<br/>fresh explicit PipelineRegistry"]:::size-md
+        RUN["run / run-all"]:::size-md
+        RC["run-composite"]:::size-md
+        ADM["health / export / quarantine / checkpoint<br/>config / lock / maintenance"]:::size-lg
     end
 
-    subgraph CLI["CLI Interface (Click)"]
-        MAIN["bioetl<br/>(main group)<br/>"]:::size-md
-        subgraph RunCmds["Run Commands"]
-            RUN["bioetl run<br/>--provider --entity --run-type<br/>--limit --resume --dry-run"]:::size-lg
-            RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]:::size-md
-        end
-
-        subgraph HealthCmds["Health Commands"]
-            HEALTH["bioetl health<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>Check API health"]:::size-md
-        end
-
-        subgraph DataCmds["Data Commands"]
-            EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]:::size-md
-            QUARANTINE["bioetl quarantine<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]:::size-md
-            CHECKPOINT["bioetl checkpoint<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]:::size-md
-        end
-
-        subgraph MaintenanceCmds["Maintenance Commands"]
-            VACUUM["bioetl maintenance vacuum<br/>━━━━━━━━━━━━━━━━━<br/>--table / --all"]:::size-md
-            ARCHIVE["bioetl maintenance archive<br/>━━━━━━━━━━━━━━━━━<br/>Archive old data"]:::size-md
-        end
-
-        subgraph ConfigCmds["Config Commands"]
-            CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]:::size-md
-        end
+    subgraph Composition["composition boundary"]
+        ENTRY["composition.entrypoints<br/>retained public facade"]:::size-md
+        BOOTR["bootstrap.runtime<br/>pipeline + composite execution"]:::size-md
+        BOOTC["bootstrap.cli<br/>admin / maintenance services"]:::size-md
+        PIPE["PipelineRegistry"]:::size-md
     end
 
-    subgraph Composition["Composition Layer"]
-        BOOT["Bootstrap Assembly<br/><br/>"]:::size-md
-        RF["RunnerFactory<br/><br/>"]:::size-md
-        DSR["DataSourceRegistry<br/><br/>"]:::size-md
-        TF["TransformerFactory<br/><br/>"]:::size-md
+    subgraph Runtime["Created runtime services"]
+        PRUN["PipelineRunnerService"]:::size-md
+        CRUN["CompositePipelineRunnerService"]:::size-md
+        ASVC["Admin services<br/>health / export / checkpoint / vacuum"]:::size-md
+        HSRV["HTTP HealthServer<br/>optional command mode"]:::size-md
     end
 
-    subgraph Application["Application Layer"]
-        CPR["CompositePipelineRunner<br/><br/>"]:::size-md
-        HS["HealthService<br/><br/>"]:::size-md
-        ES["ExportService<br/><br/>"]:::size-md
-        QS["QuarantineService<br/><br/>"]:::size-md
-        CS["CheckpointService<br/><br/>"]:::size-md
-        VS["VacuumService<br/><br/>"]:::size-md
-        CFGS["ConfigService<br/><br/>"]:::size-md
-    end
-
-    %% CLI routing
     TERM --> MAIN
-    MAIN --> RUN & RUN_COMP & HEALTH & EXPORT & QUARANTINE & CHECKPOINT & VACUUM & ARCHIVE & CONFIG
+    MAIN --> RUN
+    MAIN --> RC
+    MAIN --> ADM
 
-    %% CLI → Composition
-    RUN --> BOOT
-    RUN_COMP --> BOOT
+    RUN --> REG --> PIPE
+    RUN --> ENTRY
+    RC --> ENTRY
+    ADM --> ENTRY
 
-    %% Composition → Application
-    BOOT --> RF --> PRS
-    BOOT --> DSR
-    BOOT --> TF
-    RUN_COMP --> CPR
+    ENTRY --> BOOTR
+    ENTRY --> BOOTC
 
-    %% Direct CLI → Application
-    HEALTH --> HS
-    EXPORT --> ES
-    QUARANTINE --> QS
-    CHECKPOINT --> CS
-    VACUUM --> VS
-    ARCHIVE --> VS
-    CONFIG --> CFGS
+    BOOTR --> PRUN
+    BOOTR --> CRUN
+    BOOTC --> ASVC
+    ADM -.->|"server mode"| HSRV
+    ENTRY -.->|"health deps"| HSRV
 
-    %% Shutdown
-    MAIN -.->|"SIGINT/SIGTERM"| SS
+    NOTE["CLI main avoids direct composition imports for registry setup;<br/>command modules load composition entrypoints on demand."]:::size-md
+    REG -.-> NOTE
 
     classDef user fill:#f1f5f9,stroke:#64748b
     classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
@@ -101,6 +73,6 @@ graph LR
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class TERM user
-    class MAIN,RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM,ARCHIVE,CONFIG cli
-    class BOOT,RF,DSR,TF comp
-    class PRS,CPR,HS,ES,QS,CS,VS,CFGS,SS app
+    class MAIN,REG,RUN,RC,ADM cli
+    class ENTRY,BOOTR,BOOTC,PIPE comp
+    class PRUN,CRUN,ASVC,HSRV,NOTE app

@@ -19,11 +19,7 @@ SUNSET_DATE = date(2026, 6, 30)
 # ---------------------------------------------------------------------------
 # Category 1: Pipeline factory compat files (facade + helpers)
 # ---------------------------------------------------------------------------
-COMPAT_FILES: dict[str, Path] = {
-    "_registry_compat.py": Path(
-        "src/bioetl/composition/factories/datasource/_registry_compat.py"
-    ),
-}
+COMPAT_FILES: dict[str, Path] = {}
 
 # ---------------------------------------------------------------------------
 # Category 2: Aggregate StoragePort (backward-compat facade over narrow ports)

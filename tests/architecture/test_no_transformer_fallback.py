@@ -173,11 +173,6 @@ class TestTransformerInjectionPath:
         2. create_with_services() passes transformer_class to pipeline creation
         3. construction helpers build transformer and injection reaches pipeline
         """
-        public_factory_file = (
-            _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline"
-            / "pipeline_assembler.py"
-        )
         assembler_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
             / "pipeline"
@@ -193,8 +188,6 @@ class TestTransformerInjectionPath:
             / "pipeline"
             / "construction.py"
         )
-        if not public_factory_file.exists():
-            pytest.skip("pipeline/pipeline_assembler.py not found")
         if not construction_file.exists():
             pytest.skip("pipeline/construction.py not found")
         if not assembler_file.exists():
@@ -202,12 +195,11 @@ class TestTransformerInjectionPath:
         if not service_bundle_file.exists():
             pytest.skip("services/bundle.py not found")
 
-        content = public_factory_file.read_text(encoding="utf-8")
         assembler_content = assembler_file.read_text(encoding="utf-8")
         service_bundle_content = service_bundle_file.read_text(encoding="utf-8")
         construction_content = construction_file.read_text(encoding="utf-8")
         combined_content = (
-            f"{content}\n{assembler_content}\n"
+            f"{assembler_content}\n"
             f"{service_bundle_content}\n{construction_content}"
         )
 

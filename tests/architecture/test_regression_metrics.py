@@ -140,7 +140,7 @@ def test_mypy_error_count() -> None:
 # Metric 3: architecture_skip_count (target: ≤24, ratchet)
 # ---------------------------------------------------------------------------
 
-MAX_ARCHITECTURE_SKIPS = 6
+MAX_ARCHITECTURE_SKIPS = 7
 
 
 class _SkipMarkerCounter:

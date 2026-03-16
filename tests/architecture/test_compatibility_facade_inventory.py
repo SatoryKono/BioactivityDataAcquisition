@@ -32,6 +32,10 @@ REQUIRED_PATHS = frozenset(
         "src/bioetl/domain/value_objects/activity_values.py",
         "src/bioetl/domain/value_objects/publication_field_groups.py",
         "src/bioetl/composition/entrypoints.py",
+        "src/bioetl/interfaces/cli/registry_helpers.py",
+        "src/bioetl/composition/registry.py",
+        "src/bioetl/infrastructure/config_loader.py",
+        "src/bioetl/application/composite/merger.py",
         "src/bioetl/infrastructure/adapters/pubmed/client.py",
         "src/bioetl/infrastructure/adapters/semanticscholar/client.py",
     }
@@ -230,6 +234,122 @@ def test_retained_adapter_entrypoint_rows_prefer_package_root_imports() -> None:
             f"{path} migration_path must point new code to package root "
             f"{package_root}"
         )
+
+
+@pytest.mark.architecture
+def test_retained_composition_and_domain_rows_document_dedicated_test_allowlists() -> (
+    None
+):
+    """Retained composition/domain rows must name the dedicated compat coverage files."""
+    rows = {
+        row["path"]: row
+        for row in _iter_inventory_cells(INVENTORY_DOC.read_text(encoding="utf-8"))
+    }
+    expected_snippets = {
+        "src/bioetl/composition/entrypoints.py": (
+            "tests/unit/composition/test_entrypoints.py",
+            "tests/unit/composition/test_resource_management.py",
+            "tests/unit/composition/test_services_entrypoints.py",
+        ),
+        "src/bioetl/domain/composite/config.py": (
+            "tests/unit/domain/composite/test_composite_config_facade.py",
+            "tests/unit/domain/composite/test_composite_config_edge_cases.py",
+        ),
+        "src/bioetl/domain/value_objects/activity_values.py": (
+            "tests/unit/domain/value_objects/test_value_object_facade_reexports.py",
+        ),
+        "src/bioetl/domain/value_objects/publication_field_groups.py": (
+            "tests/unit/domain/value_objects/test_value_object_facade_reexports.py",
+        ),
+    }
+
+    for path, snippets in expected_snippets.items():
+        row = rows[path]
+        for snippet in snippets:
+            assert snippet in row["allowed_call_sites"], (
+                f"{path} allowed_call_sites must mention dedicated coverage file "
+                f"{snippet}"
+            )
+
+
+@pytest.mark.architecture
+def test_registry_config_and_merge_transition_rows_capture_compatibility_policy() -> None:
+    """Active compatibility rows must document current transition surfaces precisely."""
+    rows = {
+        row["path"]: row
+        for row in _iter_inventory_cells(INVENTORY_DOC.read_text(encoding="utf-8"))
+    }
+    expected = {
+        "src/bioetl/interfaces/cli/registry_helpers.py": {
+            "status": "compat-shim",
+            "migration_snippets": (
+                "bioetl.interfaces.cli.registry_helpers",
+                "get_default_registry()",
+            ),
+            "allowed_call_site_snippets": (
+                "tests/unit/interfaces/cli/test_registry_helpers.py",
+                "tests/unit/interfaces/cli/commands/test_run_helpers.py",
+                "tests/unit/interfaces/cli/test_run_all_service_mock.py",
+                "tests/e2e/test_cli_safety.py",
+                "tests/integration/interfaces/test_cli_exit_code_matrix.py",
+            ),
+        },
+        "src/bioetl/composition/registry.py": {
+            "status": "mixed-module",
+            "migration_snippets": (
+                "bioetl.composition.registry",
+                "get_default_registry()",
+            ),
+            "allowed_call_site_snippets": (
+                "tests/architecture/test_registry_contracts.py",
+                "tests/architecture/test_registry_threading.py",
+                "tests/unit/composition/test_types.py",
+                "tests/unit/composition/factories/pipeline/test_registry.py",
+                "tests/unit/composition/factories/pipeline/test_registry_consistency.py",
+            ),
+        },
+        "src/bioetl/infrastructure/config_loader.py": {
+            "status": "mixed-module",
+            "migration_snippets": (
+                "bioetl.infrastructure.config_loader",
+                "bioetl.infrastructure.config.pipeline_normalizers",
+            ),
+            "allowed_call_site_snippets": (
+                "tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py",
+                "tests/unit/infrastructure/test_config_dynamic.py",
+                "tests/integration/config/test_dq_config_loading.py",
+                "tests/architecture/test_config_golden_master.py",
+                "tests/architecture/test_config_strict_keys.py",
+            ),
+        },
+        "src/bioetl/application/composite/merger.py": {
+            "status": "mixed-module",
+            "migration_snippets": (
+                "bioetl.application.composite.merger",
+                "legacy keyword wiring",
+            ),
+            "allowed_call_site_snippets": (
+                "tests/unit/application/composite/test_merger.py",
+                "tests/unit/application/composite/merge_test_support.py",
+                "tests/unit/composition/bootstrap/runtime/test_composite_support_services_factory.py",
+            ),
+        },
+    }
+
+    for path, constraints in expected.items():
+        row = rows[path]
+        assert row["status"] == constraints["status"], (
+            f"{path} should remain classified as {constraints['status']} during RF-002"
+        )
+        for snippet in constraints["migration_snippets"]:
+            assert snippet in row["migration_path"], (
+                f"{path} migration_path must mention transition target {snippet}"
+            )
+        for snippet in constraints["allowed_call_site_snippets"]:
+            assert snippet in row["allowed_call_sites"], (
+                f"{path} allowed_call_sites must mention dedicated coverage file "
+                f"{snippet}"
+            )
 
 
 @pytest.mark.architecture

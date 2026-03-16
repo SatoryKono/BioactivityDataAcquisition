@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import yaml
 
 from bioetl.infrastructure.quality import (
@@ -30,6 +32,14 @@ def test_exemption_registry_metadata_is_complete() -> None:
     )
     # Expiry enforcement is controlled by CI gate mode (warn/block).
     assert isinstance(expired_entries, list)
+
+
+def test_exemption_registry_does_not_reintroduce_warning_mode_until() -> None:
+    """Legacy warning_mode_until gate must stay removed from live policy."""
+    raw = load_exemptions_registry()
+    policy = raw.get("policy", {})
+    assert isinstance(policy, dict)
+    assert "warning_mode_until" not in policy
 
 
 def test_exemption_registry_file_size_keys_are_normalized() -> None:
@@ -83,7 +93,7 @@ def test_exemption_registries_non_empty_except_allowlist() -> None:
         assert values, f"Registry '{registry_name}' must not be empty"
 
 
-def test_allowlisted_empty_registry_remains_valid(tmp_path) -> None:
+def test_allowlisted_empty_registry_remains_valid(tmp_path: Path) -> None:
     raw = load_exemptions_registry()
     registries = raw.get("registries", {})
     assert isinstance(registries, dict)
@@ -102,7 +112,9 @@ def test_allowlisted_empty_registry_remains_valid(tmp_path) -> None:
     assert values == {}
 
 
-def test_allowlisted_empty_class_method_count_registry_remains_valid(tmp_path) -> None:
+def test_allowlisted_empty_class_method_count_registry_remains_valid(
+    tmp_path: Path,
+) -> None:
     raw = load_exemptions_registry()
     registries = raw.get("registries", {})
     assert isinstance(registries, dict)

@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams With Descriptions
 
-- Generated: 2026-03-13T11:52:01
+- Generated: 2026-03-16T10:12:25
 - Diagram count: 55
 
 ## Table of Contents
@@ -360,13 +360,13 @@
 ![12-local-deployment-architecture](foundation/png/12-local-deployment-architecture.png)
 
 ### Описание
-Диаграмма «Local Deployment Architecture» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §5.6 (Deployment), ADR-010 (Local-Only). На схеме отражено примерно 21 узлов и 23 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: External APIs, Local Machine (Single Instance), CLI Execution, Local Pipeline Workers, In-Process Locking, Local filesystem (data/). Показательные узлы для быстрого чтения: 🌐 ChEMBL API ebi.ac.uk/chembl, 🌐 PubChem API pubchem.ncbi.nlm.nih.gov, 🌐 UniProt API uniprot.org, 🌐 PubMed API eutils.ncbi.nlm.nih.gov, 🖥️ CLI / Manual run PipelineRunner, ⏰ Local scheduler (cron/systemd).
+Диаграмма «Local Deployment Architecture» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: local-only runtime, in-process locking, local filesystem outputs. На схеме отражено примерно 13 узлов и 12 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Local Machine (Single Instance), CLI Execution, Local Pipeline Workers, In-Process Locking, Local filesystem (data/), Local Observability. Показательные узлы для быстрого чтения: 🌐 Provider APIs ChEMBL + PubChem + UniProt + PubMed, 🖥️ CLI / Manual run PipelineRunner, ⏰ Local scheduler (cron/systemd), 📦 Local pipelines chembl_* + pubchem_compound + uniprot_protein, MemoryLock in-process only no cross-process coordination, ("📁 bronze/ JSONL+zstd").
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
-- Узлы (metadata): `21`
+- Дата: `2026-03-16`
+- Узлы (metadata): `13`
 
 \newpage
 
@@ -649,13 +649,13 @@
 ![29-composite-pipeline-workflow](foundation/png/29-composite-pipeline-workflow.png)
 
 ### Описание
-Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.10 (Composite Pipelines), ADR-026. На схеме отражено примерно 34 узлов и 40 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Phase 1: Initialization, Phase 2: Seed Pipeline, Phase 3: Dependencies, Phase 3.5: Key Extraction, Phase 4: Fan-Out Enrichment, Enricher Workers. Показательные узлы для быстрого чтения: [S] Load CompositeConfig from YAML, [S] bootstrap_composite_runner() → CompositePipelineRunner, [S] Run Seed Pipeline (e.g., chembl_publication), ("[D, [S] DependencyCoordinator • run_dependencies(), [S] Dependency 1 (e.g., uniprot_protein).
+Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite runner, checkpoint service, runtime bootstrap. На схеме отражено примерно 17 узлов и 25 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Phase 1: Initialization, Phase 2: Seed Pipeline, Phase 3: Dependencies, Phase 3.5: Key Extraction, Phase 4: Fan-Out Enrichment, Phase 5: Merge. Показательные узлы для быстрого чтения: [S] Load CompositeConfig from YAML, [S] Run seed PipelineRunner (e.g., chembl_publication), ("[D, [S] DependencyCoordinatorService • run_dependencies(), ("[D, [S] KeyExtractorService • extract_keys(seed_silver, join_keys=[doi, pmid]).
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
-- Узлы (metadata): `34`
+- Дата: `2026-03-16`
+- Узлы (metadata): `17`
 
 \newpage
 
@@ -921,13 +921,13 @@
 ![46-yaml-config-resolution](foundation/png/46-yaml-config-resolution.png)
 
 ### Описание
-Диаграмма «YAML Configuration Resolution Chain» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: infrastructure/config_loader.py, infrastructure/config/, domain/config/. На схеме отражено примерно 27 узлов и 27 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML File Hierarchy, DQ Config Hierarchy (DQConfigLoader), Filter Config Hierarchy (FilterConfigLoader), Infrastructure Config Loaders, Domain Config Objects (Frozen), Pydantic Validation Layer. Показательные узлы для быстрого чтения: configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (unified entity config), configs/providers/{provider}.yaml (source config), configs/base/quality.yaml (global DQ defaults), configs/providers/{provider}.yaml#quality (provider DQ).
+Диаграмма «YAML Configuration Resolution Chain» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: unified config path plus still-active normalization compatibility. На схеме отражено примерно 18 узлов и 21 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML File Hierarchy, Infrastructure Config Loaders, Domain Config Objects (Frozen), Pydantic Validation Layer. Показательные узлы для быстрого чтения: configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (unified entity config), configs/providers/{provider}.yaml (source config + legacy-flat fallback), DQ hierarchy base + provider + entity + inline, Filter hierarchy base + provider + entity + inline.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-27`
-- Узлы (metadata): `27`
+- Дата: `2026-03-16`
+- Узлы (metadata): `18`
 
 \newpage
 
@@ -938,13 +938,13 @@
 ![47-publication-merge-sources](foundation/png/47-publication-merge-sources.png)
 
 ### Описание
-Диаграмма «Publication Composite — Merge All Sources» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/merger.py, composite/coordinator.py, composite configs. На схеме отражено примерно 12 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «Publication Composite — Merge All Sources» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/merger.py, composite/coordinator.py, composite configs. На схеме отражено примерно 13 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
 
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
-- Узлы (metadata): `12`
+- Дата: `2026-03-16`
+- Узлы (metadata): `13`
 
 \newpage
 

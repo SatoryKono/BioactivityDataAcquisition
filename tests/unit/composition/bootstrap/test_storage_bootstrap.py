@@ -18,6 +18,7 @@ from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_vacuum_service,
 )
 from bioetl.composition.factories.storage import StorageAdapter
+from bioetl.composition.registry import PipelineRegistry
 
 
 @pytest.mark.unit
@@ -291,3 +292,25 @@ class TestCreateTableCollector:
         # Should be sorted: a_silver before z_silver
         table_names = [t[0] for t in tables]
         assert table_names == sorted(table_names)
+
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
+    def test_explicit_registry_bypasses_default_registry_lookup(
+        self,
+        mock_get_default_registry: MagicMock,
+        mock_load_config: MagicMock,
+    ) -> None:
+        """Explicit registry injection should avoid module-level fallback helper."""
+        registry = MagicMock(spec=PipelineRegistry)
+        registry.list_pipelines.return_value = ["pipeline1"]
+        mock_config = MagicMock()
+        mock_config.silver_table = "silver.table1"
+        mock_config.gold_table = "gold.table1"
+        mock_load_config.return_value = mock_config
+
+        collector = _create_table_collector(registry=registry)
+
+        tables = collector("all")
+
+        assert tables == [("silver.table1", "silver"), ("gold.table1", "gold")]
+        mock_get_default_registry.assert_not_called()

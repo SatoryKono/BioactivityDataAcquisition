@@ -1,6 +1,5 @@
 schema_version: 1
 policy:
-    warning_mode_until: '2026-03-13'
     default_gate_mode: block
     owner_diversification_sync:
         source: configs/quality/debt_scorecard.yaml#governance.owner_diversification

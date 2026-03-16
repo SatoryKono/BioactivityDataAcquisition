@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.services import ConfigService
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
@@ -108,7 +109,9 @@ class TestBootstrapConfigService:
     ) -> None:
         """register_all_pipelines must be called before ConfigService is returned."""
         call_order: list[str] = []
-        mock_register.side_effect = lambda: call_order.append("register")
+        mock_register.side_effect = (
+            lambda *args, **kwargs: call_order.append("register")
+        )
 
         # Monkeypatch ConfigService to track call order
         original_init = ConfigService.__init__
@@ -125,3 +128,16 @@ class TestBootstrapConfigService:
 
         # register must come before init
         assert call_order.index("register") < call_order.index("init")
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_uses_explicit_registry_without_registering(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """Explicit registry injection should bypass bootstrap-time registration."""
+        registry = PipelineRegistry()
+
+        result = bootstrap_config_service(registry=registry)
+
+        assert result._registry_accessor() is registry
+        mock_register.assert_not_called()

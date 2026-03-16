@@ -4,7 +4,7 @@
 
 ## 01-domain-ports — Domain Port Protocols
 
-Диаграмма «Domain Port Protocols» описывает модуль `01-domain-ports` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: All Protocol interfaces defined in domain/ports/ В текущей версии выделено примерно 19 классов и 1 связей. Для быстрого чтения и ревью полезно начать с элементов: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
+Диаграмма «Domain Port Protocols» описывает модуль `01-domain-ports` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: all protocol interfaces defined in `domain/ports`, включая narrow storage ports и backward-compatible aggregate `StoragePort`. В текущей версии выделено примерно 19 классов и 1 связей. Для быстрого чтения и ревью полезно начать с элементов: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
 
 ## 01a-domain-ports-method-catalog — Domain Port Method Catalog (L2)
 
@@ -76,5 +76,4 @@
 
 ## 16-factories-bootstrap — Factories & Bootstrap
 
-Диаграмма «Factories & Bootstrap» описывает модуль `16-factories-bootstrap` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: Composition layer factories and DI assembly. В текущей версии выделено примерно 13 классов и 12 связей. Для быстрого чтения и ревью полезно начать с элементов: DataSourceRegistry, TransformerFactory, RunnerFactory, DQFactory, RuntimeAssembly, RunnerBootstrap.
-
+Диаграмма «Factories & Bootstrap» описывает модуль `16-factories-bootstrap` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: current composition-layer factories, provider registry, and runtime assembly seams. В текущей версии выделено примерно 9 классов и 7 связей. Для быстрого чтения и ревью полезно начать с элементов: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilderService, CompositeSupportServicesFactory.

@@ -350,6 +350,18 @@ class GoldWriterMetadataMixin(
     _GoldWriterMetadataPayloadMixin,
     _GoldWriterMergedMetadataInputMixin,
 ):
+    """Metadata construction and persistence helpers for GoldWriter.
+
+    Composes ``_GoldWriterMetadataPayloadMixin`` (payload assembly via
+    coordinator or fallback builder) with
+    ``_GoldWriterMergedMetadataInputMixin`` (merged-table metadata input
+    construction) into a single mixin consumed by the concrete GoldWriter
+    class.  Provides the public async helpers ``_write_gold_metadata``,
+    ``_write_gold_merged_metadata``, ``_write_gold_metadata_file``,
+    ``_get_delta_version``, and ``_log_gold_audit`` that the host class
+    calls during the Gold write lifecycle.
+    """
+
     logger: LoggerPort
     _audit: AuditPort | None
     _metadata_coordinator: MetadataCoordinatorPort | None

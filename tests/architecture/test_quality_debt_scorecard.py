@@ -11,6 +11,9 @@ from bioetl.infrastructure.quality._primitives import (
     _parse_quarter_label,
     _quarter_label,
 )
+from bioetl.infrastructure.quality.report_formatter import (
+    _is_rollout_cutoff_stale,
+)
 from bioetl.infrastructure.quality import (
     build_exemption_inventory,
     evaluate_debt_scorecard,
@@ -166,6 +169,25 @@ def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:
     max_window_days = temporary.get("max_window_days")
     assert isinstance(max_window_days, int)
     assert 1 <= max_window_days <= 45
+
+
+def test_debt_scorecard_has_no_stale_rollout_cutoffs() -> None:
+    """Live governance rollout cutoffs must be absent once they expire."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+
+    rollout = governance.get("growth_section_gate_rollout", {})
+    assert isinstance(rollout, dict)
+    warn_until = rollout.get("warn_until_by_section", {})
+    assert isinstance(warn_until, dict)
+
+    stale_cutoffs = {
+        section_key: cutoff
+        for section_key, cutoff in warn_until.items()
+        if _is_rollout_cutoff_stale(cutoff, today=date.today())
+    }
+    assert not stale_cutoffs, f"Remove stale rollout cutoffs: {stale_cutoffs}"
 
 
 def test_debt_scorecard_priority_burndown_registries_cover_q2_program() -> None:
@@ -512,9 +534,17 @@ def test_growth_rollout_blocks_registry_section_after_cutoff() -> None:
     assert not warning
 
 
-def test_growth_rollout_warns_group_section_before_cutoff() -> None:
-    """Group section should be warn-level during staged rollout window."""
+def test_growth_rollout_blocks_group_section_without_active_cutoff() -> None:
+    """Group sections must block once the temporary rollout override is removed."""
     scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+    rollout = governance.get("growth_section_gate_rollout", {})
+    assert isinstance(rollout, dict)
+    warn_until = rollout.get("warn_until_by_section", {})
+    assert isinstance(warn_until, dict)
+    assert "group:*" not in warn_until
+
     violations = ["group 'size_shape' count 400 exceeds budget 300"]
 
     blocking, warning = split_growth_violations_by_severity(
@@ -524,8 +554,8 @@ def test_growth_rollout_warns_group_section_before_cutoff() -> None:
         fallback_mode="block",
     )
 
-    assert not blocking
-    assert warning == violations
+    assert blocking == violations
+    assert not warning
 
 
 def test_growth_rollout_blocks_group_section_after_cutoff() -> None:

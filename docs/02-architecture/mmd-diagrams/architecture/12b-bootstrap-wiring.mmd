@@ -1,14 +1,14 @@
-%% BioETL — Bootstrap: Wiring Graph
-%% Covers runtime assembly sequence and main dependency injection graph.
+%% BioETL — Bootstrap: Runtime and Admin Wiring
+%% Covers the current runtime/admin assembly outputs created from composition bootstrap.
 
-%% @version 1.0.0
-%% @date    2026-02-25
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   System / Component
 %% @view    bootstrap-wiring
 %% @parent  12-bootstrap-di-container.mmd
 %% @nodes   15
-%% @uniform width=400 height=56 max_title_len=40 max_desc_lines=1
+%% @uniform width=400 height=56 max_title_len=34 max_desc_lines=2
 
 %%{init: {
   'flowchart': {
@@ -22,57 +22,47 @@
   }
 }}%%
 graph TB
-    subgraph Composition["Composition Layer"]
-        RA["bootstrap_pipeline_runner"]:::size-sm
-        RBA["RunnerBootstrap"]:::size-sm
-        SBA["StorageBootstrap"]:::size-sm
-        CBA["CheckpointBootstrap"]:::size-sm
-        LBA["LockBootstrap"]:::size-sm
+    subgraph Composition["Composition bootstrap"]
+        BOOTR["bootstrap.runtime"]:::size-sm
+        BOOTC["bootstrap.cli"]:::size-sm
+        ASSEMBLY["bootstrap.assembly"]:::size-sm
+        RFB["RunnerFactoryBuilderService"]:::size-sm
+        CSS["CompositeSupportServicesFactory"]:::size-sm
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTER["Provider Adapter (DataSourcePort)"]:::size-sm
-        STORAGE["BronzeWriter / SilverWriter / GoldWriter"]:::size-sm
-        LOGGER["UnifiedLogger (LoggerPort)"]:::size-sm
-        METRICS["PrometheusMetrics (MetricsPort)"]:::size-sm
-        TRACER["OpenTelemetryTracer (TracingPort)"]:::size-sm
-        LOCK["MemoryLock (LockPort)"]:::size-sm
-        CHKPT["LocalCheckpoint (CheckpointPort)"]:::size-sm
-        QUAR["UnifiedQuarantine (QuarantinePort)"]:::size-sm
+    subgraph Infrastructure["Infrastructure collaborators"]
+        ADAPTER["Provider adapter<br/>DataSourcePort"]:::size-sm
+        STORAGE["StorageAdapter"]:::size-sm
+        OBS["Observability bundle<br/>logger / metrics / tracer"]:::size-sm
+        LOCK["Lock + checkpoint / quarantine ports"]:::size-sm
     end
 
-    subgraph Application["Application Layer"]
-        PS["PipelineServices"]:::size-sm
-        RUNNER["PipelineRunner"]:::size-sm
+    subgraph Application["Created services"]
+        PRUN["PipelineRunnerService"]:::size-sm
+        CRUN["CompositePipelineRunnerService"]:::size-sm
+        ADM["Health / export / checkpoint<br/>vacuum / quarantine services"]:::size-sm
     end
 
-    RA --> RBA
-    RA --> SBA
-    RA --> CBA
-    RA --> LBA
-    RA -.-> ADAPTER
-    SBA --> STORAGE
-    RA --> LOGGER
-    RA --> METRICS
-    RA --> TRACER
-    LBA --> LOCK
-    CBA --> CHKPT
-    RA --> QUAR
-    ADAPTER --> PS
-    STORAGE --> PS
-    LOGGER --> PS
-    METRICS --> PS
-    TRACER --> PS
-    LOCK --> PS
-    CHKPT --> PS
-    QUAR --> PS
-    RBA --> RUNNER
-    PS --> RUNNER
+    BOOTR --> RFB
+    BOOTR --> CSS
+    BOOTR --> ADAPTER
+    ASSEMBLY --> STORAGE
+    ASSEMBLY --> LOCK
+    BOOTR --> OBS
+    BOOTC --> ADM
+    RFB --> PRUN
+    CSS --> CRUN
+    ADAPTER --> PRUN
+    STORAGE --> PRUN
+    OBS --> PRUN
+    STORAGE --> CRUN
+    OBS --> CRUN
+    LOCK --> CRUN
 
-    classDef app fill:#f0fdf4,stroke:#16a34a
-    classDef infra fill:#fff1f2,stroke:#dc2626
     classDef comp fill:#fff7ed,stroke:#f59e0b
+    classDef infra fill:#fff1f2,stroke:#dc2626
+    classDef app fill:#f0fdf4,stroke:#16a34a
 
-    class RA,RBA,SBA,CBA,LBA comp
-    class ADAPTER,STORAGE,LOGGER,METRICS,TRACER,LOCK,CHKPT,QUAR infra
-    class PS,RUNNER app
+    class BOOTR,BOOTC,ASSEMBLY,RFB,CSS comp
+    class ADAPTER,STORAGE,OBS,LOCK infra
+    class PRUN,CRUN,ADM app

@@ -11,6 +11,18 @@ from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
+from bioetl.application.core.batch_execution_lifecycle import (
+    BatchExecutionLifecycleService,
+)
+from bioetl.application.core.batch_execution_run_service import (
+    BatchExecutionRunService,
+)
+from bioetl.application.core.batch_execution_state_service import (
+    BatchExecutionStateService,
+)
+from bioetl.application.core.batch_extraction_loop_service import (
+    BatchExtractionLoopService,
+)
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_processing_service import BatchProcessingService
 from bioetl.application.core.batch_progress_service import BatchProgressService
@@ -183,21 +195,37 @@ def _create_batch_executor(
         tracing_manager=tracing_manager,
         batch_id_factory=batch_id_factory,
     )
+    execution_lifecycle_service = BatchExecutionLifecycleService(
+        progress_service=progress_service,
+        tracing_manager=tracing_manager,
+        checkpoint_recovery_service=checkpoint_recovery_service,
+    )
+    execution_run_service = BatchExecutionRunService(
+        execution_lifecycle_service=execution_lifecycle_service
+    )
+    execution_state_service = BatchExecutionStateService(
+        batch_processing_service=batch_processing_service
+    )
 
     return BatchExecutor(
         services=services,
         context=context,
         config=config,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=shutdown_signal,
         batch_metrics=components.batch_metrics,
         transformer=components.transformer,
         writer=components.writer,
-        tracing_manager=tracing_manager,
         memory_manager=mem_manager,
-        progress_service=progress_service,
-        checkpoint_recovery_service=checkpoint_recovery_service,
-        batch_processing_service=batch_processing_service,
+        execution_run_service=execution_run_service,
+        extraction_loop_service=BatchExtractionLoopService(
+            batch_processing_service=batch_processing_service,
+            shutdown_signal=shutdown_signal,
+            memory_manager=mem_manager,
+            progress_service=progress_service,
+            checkpoint_recovery_service=checkpoint_recovery_service,
+            checkpoint_interval=checkpoint_interval
+            or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
+        ),
+        execution_state_service=execution_state_service,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
     )

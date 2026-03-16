@@ -1,11 +1,11 @@
 %% BioETL — Locking, Checkpoint, and Graceful Shutdown
-%% Shows distributed safety mechanisms.
+%% Distinguishes general pipeline lifecycle from composite runtime specifics.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   22
+%% @nodes   20
 %% @reference  Decomposed into 18a-lock-system, 18b-checkpoint-shutdown
 
 %%{init: {
@@ -25,12 +25,12 @@ graph TB
     subgraph Ports["Domain Ports"]
         LKP["LockPort (Protocol)<br/>acquire/release/heartbeat<br/>validate_owner + validate_token"]:::size-lg
         CKP["CheckpointPort (Protocol)<br/>save/load/list/delete"]:::size-lg
+        CCP["CompositeCheckpointPort<br/>(composite phase checkpoints)"]:::size-lg
         SHP["ShutdownPort<br/>(Protocol)"]:::size-lg
     end
 
     subgraph DomainLock["Domain Lock Types"]
-        FT["FencingToken<br/>sequence + key + owner_id + issued_at"]:::size-lg
-        LNHE["LockNotHeldError"]:::size-lg
+        LTYPE["FencingToken +<br/>LockNotHeldError"]:::size-lg
     end
 
     subgraph AppLock["Application: LockCoordinator"]
@@ -38,13 +38,13 @@ graph TB
         HB["HeartbeatTask<br/>━━━━━━━━━━━━━━━━━<br/>Background async task<br/>periodically calls<br/>lock.heartbeat()"]:::size-lg
     end
 
-    subgraph AppCheckpoint["Application: CheckpointManager"]
-        CM["CheckpointManager<br/>checkpoint + pipeline_name + run_id<br/>load/save/delete checkpoint"]:::size-lg
+    subgraph AppCheckpoint["Application: Checkpoint Services"]
+        CM["CheckpointManagerService<br/>standard pipeline checkpoints"]:::size-lg
+        CCS["CompositeCheckpointService<br/>current run-id checkpoint file<br/>or latest matching resume file"]:::size-lg
     end
 
     subgraph AppShutdown["Application: Shutdown"]
-        SS["ShutdownSignal<br/>is_requested + reason<br/>request(reason) + reset()"]:::size-lg
-        SR["ShutdownReason<br/>SIGINT | SIGTERM | LOCK_LOST<br/>MEMORY_PRESSURE | DQ_THRESHOLD"]:::size-lg
+        SHUT["Shutdown control<br/>signal + reason enum"]:::size-lg
     end
 
     subgraph InfraLock["Infrastructure: MemoryLock"]
@@ -59,32 +59,37 @@ graph TB
         SG["validate_lock()<br/>pre-write lock+token check<br/>raise LockNotHeldError<br/>prevent split-brain"]:::size-lg
     end
 
+    subgraph CompositePath["Composite runtime caveat"]
+        CPR["CompositePipelineRunnerService"]:::size-lg
+        NOTE["Composite path acquires LockPort directly<br/>and does not use LockCoordinator heartbeat"]:::size-lg
+    end
+
     subgraph Lifecycle["Pipeline Lifecycle Integration"]
         direction LR
-        START["Pipeline Start"]:::size-lg
-        ACQ["Acquire Lock<br/>+ start heartbeat"]:::size-lg
-        EXEC["Execute Batches<br/>+ save checkpoints"]:::size-lg
-        SIG["Signal received?"]:::size-lg
-        GRACEFUL["Graceful shutdown<br/>finish batch + save checkpoint<br/>release lock"]:::size-lg
-        REL["Release Lock<br/>+ delete checkpoint"]:::size-lg
+        START["Pipeline start"]:::size-lg
+        RUN["Acquire lock + heartbeat<br/>execute batches + save checkpoints"]:::size-lg
+        STOP["Graceful shutdown / release lock<br/>or clean finish + checkpoint cleanup"]:::size-lg
         END["Pipeline End"]:::size-lg
-        START --> ACQ --> EXEC --> SIG
-        SIG -->|"yes"| GRACEFUL --> END
-        SIG -->|"no"| REL --> END
+        START --> RUN --> STOP --> END
     end
 
     %% Port implementations
     LKP -.-> ML
     CKP -.-> LCP
+    CCP -.-> LCP
 
     %% Application composition
     LM --> LKP
     LM --> HB
-    LM --> FT & LC & LCH
+    LM --> LTYPE
     CM --> CKP
+    CCS --> CCP
+    CPR --> LKP
+    CPR --> CCS
+    CPR -.-> NOTE
 
     %% Shutdown
-    SS --> SR
+    SHUT --> LM
 
     %% Safety guard
     SG --> LM
@@ -96,9 +101,9 @@ graph TB
     classDef safety fill:#fff1f2,stroke:#dc2626,stroke-width:2px
     classDef lifecycle fill:#f1f5f9,stroke:#64748b
 
-    class LKP,CKP,SHP port
-    class FT,LC,LCH,LNHE domain
-    class LM,HB,CM,SS,SR app
+    class LKP,CKP,CCP,SHP port
+    class LTYPE domain
+    class LM,HB,CM,CCS,SHUT,CPR app
     class ML,LCP infra
-    class SG safety
-    class START,ACQ,EXEC,SIG,GRACEFUL,REL,END lifecycle
+    class SG,NOTE safety
+    class START,RUN,STOP,END lifecycle

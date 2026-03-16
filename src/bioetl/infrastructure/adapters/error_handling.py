@@ -15,9 +15,9 @@ from bioetl.infrastructure.adapters.adapter_error_classifier import (
     AdapterErrorClassifier,
     ErrorCategory,
 )
-from bioetl.infrastructure.adapters.adapter_error_mapper import (
-    AdapterErrorMapper,
+from bioetl.infrastructure.errors import (
     DomainErrorMappingInput,
+    DomainInfraExceptionMapper,
 )
 
 if TYPE_CHECKING:
@@ -60,7 +60,7 @@ class ErrorService:
         classifier: ErrorClassifierPort | None = None,
         metrics: MetricsPort | None = None,
         adapter_classifier: AdapterErrorClassifier | None = None,
-        error_mapper: AdapterErrorMapper | None = None,
+        error_mapper: DomainInfraExceptionMapper | None = None,
     ) -> None:
         """Initialize service with logging, optional classifier, and metrics."""
         self._logger = logger
@@ -69,7 +69,7 @@ class ErrorService:
             classifier=self._classifier,
             logger=self._logger,
         )
-        self._error_mapper = error_mapper or AdapterErrorMapper(logger=self._logger)
+        self._error_mapper = error_mapper or DomainInfraExceptionMapper(logger=self._logger)
         self._metrics = metrics if metrics is not None else NoOpMetrics()
 
     def classify_http_error(

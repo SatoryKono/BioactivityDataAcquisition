@@ -1,13 +1,13 @@
 %% BioETL — Lock System
-%% Lock ports, domain types, application manager, infrastructure implementation, and safety guard.
+%% Distinguishes the general LockCoordinator path from the composite runner's direct LockPort path.
 
-%% @version 1.0.0
-%% @date    2026-02-27
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   System / Component
 %% @view    lock-system
 %% @parent  18-lock-checkpoint-shutdown.mmd
-%% @nodes   8
+%% @nodes   10
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -20,48 +20,38 @@
   }
 }}%%
 graph TB
-%% keep-orphan: LNHE
-    subgraph Ports["Domain Port"]
-        LKP["fa:fa-lock LockPort"]:::size-sm
-    end
-
-    subgraph DomainLock["Domain Lock Types"]
+    subgraph Ports["Domain lock contracts"]
+        LKP["LockPort"]:::size-sm
         FT["FencingToken"]:::size-sm
         LNHE["LockNotHeldError"]:::size-sm
     end
 
-    subgraph AppLock["Application: LockCoordinator"]
-        LM["LockCoordinator"]:::size-sm
+    subgraph General["General pipeline lifecycle"]
+        LC["LockCoordinator"]:::size-sm
         HB["HeartbeatTask"]:::size-sm
     end
 
-    subgraph InfraLock["Infrastructure: MemoryLock"]
+    subgraph Composite["Composite runtime path"]
+        CPR["CompositePipelineRunnerService"]:::size-sm
+        TTL["Direct acquire / release<br/>fixed TTL"]:::size-sm
+    end
+
+    subgraph Infra["Infrastructure"]
         ML["MemoryLock"]:::size-sm
     end
 
-    subgraph SafetyGuard["Safety Guard"]
-        SG["BatchWriter._validate_lock"]:::size-sm
-    end
-
-    %% Port implementation
     LKP -.-> ML
-
-    %% Application composition
-    LM --> LKP
-    LM --> HB
-    LM --> FT
-
-    %% Safety guard
-    SG --> LM
+    LC --> LKP
+    LC --> HB
+    LC --> FT
+    CPR --> LKP
+    CPR --> TTL
+    FT -.-> LNHE
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    classDef domain fill:#f5f3ff,stroke:#7c3aed
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    classDef safety fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    class LKP port
-    class FT,LNHE domain
-    class LM,HB app
+    class LKP,FT,LNHE port
+    class LC,HB,CPR,TTL app
     class ML infra
-    class SG safety

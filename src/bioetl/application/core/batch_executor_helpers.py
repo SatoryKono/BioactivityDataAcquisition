@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, TypeVar
 
 if TYPE_CHECKING:
-    from bioetl.application.core.batch_executor import BatchResult
     from bioetl.application.core.batch_processing_service import BatchProcessingOutput
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
@@ -21,6 +20,8 @@ __all__ = [
     "build_processed_batch_outcome",
     "build_run_statistics",
 ]
+
+_BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,6 +73,19 @@ class _BatchProcessedOutcomePort(_BatchExecutionStatePort, Protocol):
         silver_records: list[BronzeRecord],
         gold_records: list[GoldRecord],
     ) -> None: ...
+
+
+class _BatchResultBuilder(Protocol[_BatchResultT]):
+    """Callable result factory used to project cumulative batch counters."""
+
+    def __call__(
+        self,
+        *,
+        bronze_count: int,
+        silver_count: int,
+        gold_count: int,
+        quarantined_count: int,
+    ) -> _BatchResultT: ...
 
 
 def build_batch_execution_state_update(
@@ -146,12 +160,12 @@ def apply_processed_batch_outcome(
 
 def build_batch_result_snapshot(
     *,
-    batch_result_type: type[BatchResult],
+    batch_result_type: _BatchResultBuilder[_BatchResultT],
     records_bronze: int,
     records_silver: int,
     records_gold: int,
     records_quarantined: int,
-) -> BatchResult:
+) -> _BatchResultT:
     """Build the public batch-result snapshot from cumulative executor counters."""
     return batch_result_type(
         bronze_count=records_bronze,

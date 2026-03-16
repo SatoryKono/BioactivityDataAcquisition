@@ -24,7 +24,8 @@
 
 Содержит адаптеры для конкретных источников данных (ChEMBL, PubChem, UniProt и т.д.). Каждый адаптер — это класс, реализующий `DataSourcePort`.
 
-Создание и настройка адаптеров централизованы в [DataSourceRegistry](05-composition-layer.md#22-factories--фабрики-компонентов) слоя Composition.
+Создание и настройка адаптеров централизованы в каноническом composition-path через
+`DataSourceFactory`, `get_data_source_creator()` и `ProviderRegistry`.
 
 **Обязанности адаптера:**
 

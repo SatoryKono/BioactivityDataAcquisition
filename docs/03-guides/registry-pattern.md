@@ -7,8 +7,8 @@ runtime shape.
   `src/bioetl/composition/registry.py`.
 - `ProviderRegistry` is the canonical class-based provider registry in
   `src/bioetl/composition/providers/provider_registry.py`.
-- `DataSourceRegistry` is a backward-compatible facade over `ProviderRegistry`
-  in `src/bioetl/composition/factories/datasource/factory.py`.
+- `get_data_source_creator()` and `DataSourceFactory` are the canonical data-source
+  assembly path over `ProviderRegistry`.
 
 ## Canonical Surfaces
 
@@ -16,17 +16,17 @@ runtime shape.
 |---------|------|------------------|-------|
 | `PipelineRegistry` | Instance-based | `bioetl.composition.registry` | Prefer `create_registry()` for tests and isolated flows. |
 | `ProviderRegistry` | Class-based | `bioetl.composition.providers` | Canonical registry for provider metadata and creation. |
-| `DataSourceRegistry` | Compatibility facade | `bioetl.composition.factories.datasource.factory` | Keep for compatibility; new registrations go through `ProviderRegistry`. |
+| `get_data_source_creator()` / `DataSourceFactory` | Canonical creator path | `bioetl.composition.factories.datasource.data_source_factory` | Preferred for data-source assembly; backed by `ProviderRegistry`. |
 
 ## Common Operations
 
-| Goal | `PipelineRegistry` | `ProviderRegistry` | `DataSourceRegistry` |
+| Goal | `PipelineRegistry` | `ProviderRegistry` | Data-source assembly |
 |------|--------------------|--------------------|----------------------|
-| Register | `registry.register(key, factory)` or `registry.register_factory(factory)` | `ProviderRegistry.register(name, config)` | Removed; use `ProviderRegistry.register(...)` |
-| Get | `registry.get(name)` | `ProviderRegistry.get(name)` | `DataSourceRegistry.get(name)` |
-| List | `registry.list_keys()` or `registry.list_pipelines()` | `ProviderRegistry.list_providers()` | `DataSourceRegistry.list_keys()` or `list_providers()` |
-| Contains | `registry.contains(name)` | `ProviderRegistry.is_registered(name)` | `DataSourceRegistry.contains(name)` |
-| Clear (tests only) | `registry.clear()` | `ProviderRegistry.clear()` | `DataSourceRegistry.clear()` clears only its local facade cache |
+| Register | `registry.register(key, factory)` or `registry.register_factory(factory)` | `ProviderRegistry.register(name, config)` | Register provider config in `ProviderRegistry` |
+| Get | `registry.get(name)` | `ProviderRegistry.get(name)` | `get_data_source_creator(name)` |
+| List | `registry.list_keys()` or `registry.list_pipelines()` | `ProviderRegistry.list_providers()` | `DataSourceFactory.list_providers()` |
+| Contains | `registry.contains(name)` | `ProviderRegistry.is_registered(name)` | `ProviderRegistry.has_data_source_creator(name)` |
+| Create | — | `ProviderRegistry.create_adapter(...)` | `DataSourceFactory.create(...)` |
 
 ## PipelineRegistry
 
@@ -104,22 +104,25 @@ data_source = ProviderRegistry.create_data_source(
 )
 ```
 
-## DataSourceRegistry
+## Legacy DataSourceRegistry Compatibility
 
-`DataSourceRegistry` remains available for backward compatibility, but new code
-should prefer `ProviderRegistry`.
+`DataSourceRegistry` remains available only for explicit backward-compatibility
+coverage. New code should use `get_data_source_creator()`, `DataSourceFactory`,
+or `ProviderRegistry`.
 
 ```python
-from bioetl.composition.factories.datasource.factory import DataSourceRegistry
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceFactory,
+    get_data_source_creator,
+)
 
-providers = DataSourceRegistry.list_providers()
-
-if DataSourceRegistry.contains("chembl"):
-    creator = DataSourceRegistry.get("chembl")
+providers = DataSourceFactory.list_providers()
+creator = get_data_source_creator("chembl")
 ```
 
 `DataSourceRegistry.register()` is no longer part of the supported API. Register
-new providers through `ProviderRegistry.register(...)`.
+new providers through `ProviderRegistry.register(...)`; keep the legacy facade
+only where compatibility tests explicitly require it.
 
 The broader module-level status and deprecation plan for compatibility facades
 is tracked in
@@ -148,7 +151,7 @@ Registry error behavior is not fully uniform:
   - `RuntimeError` when the registry is empty
   - `ValueError` when the requested pipeline name is unknown
 - `ProviderRegistry.get()` raises `KeyError` for an unknown provider
-- `DataSourceRegistry.get()` raises `KeyError` for an unknown provider
+- `get_data_source_creator()` raises `KeyError` for an unknown provider
 
 Write call sites accordingly instead of assuming every registry raises the same
 exception type.

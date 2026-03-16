@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.core.batch_execution_state_service import (
+    BatchExecutionStateService,
+)
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
@@ -251,7 +254,7 @@ def create_batch_executor_from_pipeline(
         effective_batch_id_factory,
         progress_service,
         checkpoint_recovery_service,
-        execution_lifecycle_service,
+        execution_run_service,
     ) = build_runtime_managers(
         pipeline=pipeline,
         processor_config=processor_config,
@@ -274,21 +277,18 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=effective_batch_id_factory,
         create_batch_processing_components_fn=create_batch_processing_components_fn,
     )
+    execution_state_service = BatchExecutionStateService(
+        batch_processing_service=batch_processing_service
+    )
     return BatchExecutor(
         services=pipeline.services,
         context=pipeline.context,
         config=processor_config,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=shutdown_signal,
         batch_metrics=components.batch_metrics,
         transformer=components.transformer,
         writer=components.writer,
-        tracing_manager=tracing_manager,
         memory_manager=memory_manager,
-        progress_service=progress_service,
-        checkpoint_recovery_service=checkpoint_recovery_service,
-        batch_processing_service=batch_processing_service,
-        execution_lifecycle_service=execution_lifecycle_service,
+        execution_run_service=execution_run_service,
         extraction_loop_service=BatchExtractionLoopService(
             batch_processing_service=batch_processing_service,
             shutdown_signal=shutdown_signal,
@@ -298,6 +298,7 @@ def create_batch_executor_from_pipeline(
             checkpoint_interval=pipeline.config.checkpoint_interval
             or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
         ),
+        execution_state_service=execution_state_service,
         batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
     )

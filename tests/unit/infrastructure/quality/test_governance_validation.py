@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from bioetl.infrastructure.quality._governance_validation import (
     _validate_governance_section,
     _validate_growth_rollout,
@@ -105,10 +107,11 @@ class TestValidateWarnUntilBySection:
     def test_valid_rollout_map(self) -> None:
         errors: list[str] = []
         _validate_warn_until_by_section(
-            {"*": "2025-12-31", "registry:class_size": "2025-11-01"},
+            {"*": "2099-12-31", "registry:class_size": "2099-11-01"},
             baseline_registry_names={"class_size", "function_length"},
             group_names={"size_shape"},
             errors=errors,
+            today=date(2026, 3, 16),
         )
         assert errors == []
 
@@ -121,6 +124,17 @@ class TestValidateWarnUntilBySection:
             errors=errors,
         )
         assert any("unknown section key" in error for error in errors)
+
+    def test_stale_cutoff_is_rejected(self) -> None:
+        errors: list[str] = []
+        _validate_warn_until_by_section(
+            {"registry:class_size": "2026-03-01"},
+            baseline_registry_names={"class_size"},
+            group_names={"size_shape"},
+            errors=errors,
+            today=date(2026, 3, 16),
+        )
+        assert any("stale cutoff date" in error for error in errors)
 
 
 class TestValidateGrowthRollout:
@@ -141,6 +155,23 @@ class TestValidateGrowthRollout:
             errors=errors,
         )
         assert any("expected ISO date" in error for error in errors)
+
+    def test_stale_warn_until_date_is_reported(self) -> None:
+        errors: list[str] = []
+        _validate_growth_rollout(
+            {
+                "growth_gate_default_mode": "block",
+                "growth_section_gate_rollout": {
+                    "default_mode": "block",
+                    "warn_until_by_section": {"*": "2026-03-01"},
+                },
+            },
+            baseline_registry_names={"class_size"},
+            group_names={"size_shape"},
+            errors=errors,
+            today=date(2026, 3, 16),
+        )
+        assert any("stale cutoff date" in error for error in errors)
 
 
 class TestValidateGovernanceSection:
@@ -183,13 +214,14 @@ class TestValidateGovernanceSection:
                     "allow_grace_windows_only_for_rf": True,
                     "growth_section_gate_rollout": {
                         "default_mode": "block",
-                        "warn_until_by_section": {"*": "2025-12-31"},
+                        "warn_until_by_section": {"*": "2099-12-31"},
                     },
                 }
             },
             baseline_registry_names={"class_size"},
             group_names={"size_shape"},
             errors=errors,
+            today=date(2026, 3, 16),
         )
         assert errors == []
         assert allow_rf_only is True
@@ -231,13 +263,14 @@ class TestValidateGovernanceSection:
                     "allow_grace_windows_only_for_rf": "yes",
                     "growth_section_gate_rollout": {
                         "default_mode": "block",
-                        "warn_until_by_section": {"*": "2025-12-31"},
+                        "warn_until_by_section": {"*": "2099-12-31"},
                     },
                 }
             },
             baseline_registry_names={"class_size"},
             group_names={"size_shape"},
             errors=errors,
+            today=date(2026, 3, 16),
         )
         assert allow_rf_only is False
         assert any("allow_grace_windows_only_for_rf" in error for error in errors)

@@ -35,6 +35,12 @@ from bioetl.application.core.batch_checkpoint_recovery_service import (
 from bioetl.application.core.batch_execution_lifecycle import (
     BatchExecutionLifecycleService,
 )
+from bioetl.application.core.batch_execution_run_service import (
+    BatchExecutionRunService,
+)
+from bioetl.application.core.batch_execution_state_service import (
+    BatchExecutionStateService,
+)
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
@@ -249,6 +255,12 @@ def _create_batch_executor(
         tracing_manager=tracing_manager,
         checkpoint_recovery_service=checkpoint_recovery_service,
     )
+    execution_run_service = BatchExecutionRunService(
+        execution_lifecycle_service=execution_lifecycle_service
+    )
+    execution_state_service = BatchExecutionStateService(
+        batch_processing_service=batch_processing_service
+    )
     effective_checkpoint_interval = (
         checkpoint_interval or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL
     )
@@ -257,17 +269,11 @@ def _create_batch_executor(
         services=services,
         context=context,
         config=config,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=shutdown_signal,
         batch_metrics=components.batch_metrics,
         transformer=components.transformer,
         writer=components.writer,
-        tracing_manager=tracing_manager,
         memory_manager=memory_manager,
-        progress_service=progress_service,
-        checkpoint_recovery_service=checkpoint_recovery_service,
-        batch_processing_service=batch_processing_service,
-        execution_lifecycle_service=execution_lifecycle_service,
+        execution_run_service=execution_run_service,
         extraction_loop_service=BatchExtractionLoopService(
             batch_processing_service=batch_processing_service,
             shutdown_signal=shutdown_signal,
@@ -276,6 +282,7 @@ def _create_batch_executor(
             checkpoint_recovery_service=checkpoint_recovery_service,
             checkpoint_interval=effective_checkpoint_interval,
         ),
+        execution_state_service=execution_state_service,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
     )

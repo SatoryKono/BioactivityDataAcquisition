@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quality._baseline_validation import (
     _is_valid_rollout_section_key,
@@ -10,6 +12,9 @@ from bioetl.infrastructure.quality._primitives import (
     _parse_iso_date,
     _validate_gate_mode,
     _validate_non_negative_int,
+)
+from bioetl.infrastructure.quality.report_formatter import (
+    _is_rollout_cutoff_stale,
 )
 
 
@@ -109,6 +114,7 @@ def _validate_warn_until_by_section(
     baseline_registry_names: set[str],
     group_names: set[str],
     errors: list[str],
+    today: date | None = None,
 ) -> None:
     if not isinstance(warn_until, dict):
         errors.append(
@@ -116,6 +122,7 @@ def _validate_warn_until_by_section(
         )
         return
 
+    now = today or date.today()
     for section_key, cutoff in sorted(warn_until.items()):
         if not isinstance(section_key, str) or not section_key.strip():
             errors.append(
@@ -138,6 +145,13 @@ def _validate_warn_until_by_section(
                 "governance.growth_section_gate_rollout.warn_until_by_section."
                 f"{section_key}: expected ISO date (YYYY-MM-DD)"
             )
+            continue
+        if _is_rollout_cutoff_stale(cutoff, today=now):
+            errors.append(
+                "governance.growth_section_gate_rollout.warn_until_by_section."
+                f"{section_key}: stale cutoff date {cutoff!r}; "
+                "remove it or move it into the future"
+            )
 
 
 def _validate_growth_rollout(
@@ -146,6 +160,7 @@ def _validate_growth_rollout(
     baseline_registry_names: set[str],
     group_names: set[str],
     errors: list[str],
+    today: date | None = None,
 ) -> None:
     rollout = governance.get("growth_section_gate_rollout", {})
     if not isinstance(rollout, dict):
@@ -164,6 +179,7 @@ def _validate_growth_rollout(
         baseline_registry_names=baseline_registry_names,
         group_names=group_names,
         errors=errors,
+        today=today,
     )
 
 
@@ -310,6 +326,7 @@ def _validate_governance_section(
     baseline_registry_names: set[str],
     group_names: set[str],
     errors: list[str],
+    today: date | None = None,
 ) -> bool:
     governance = raw.get("governance")
     if not isinstance(governance, dict):
@@ -341,6 +358,7 @@ def _validate_governance_section(
         baseline_registry_names=baseline_registry_names,
         group_names=group_names,
         errors=errors,
+        today=today,
     )
     _validate_hotspot_budgets_section(
         raw,

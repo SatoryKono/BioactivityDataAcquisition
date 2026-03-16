@@ -17,9 +17,6 @@ TARGET_ADAPTERS: dict[str, Path] = {
     ),
     "UniProtAdapter": Path("src/bioetl/infrastructure/adapters/uniprot/client.py"),
     "PubChemAdapter": Path("src/bioetl/infrastructure/adapters/pubchem/client.py"),
-    "AdapterErrorMapper": Path(
-        "src/bioetl/infrastructure/adapters/adapter_error_mapper.py"
-    ),
     "OpenAlexFallbackOrchestrator": Path(
         "src/bioetl/infrastructure/adapters/openalex/fallback_orchestrator.py"
     ),

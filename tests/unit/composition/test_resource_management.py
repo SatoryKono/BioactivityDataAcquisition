@@ -1,8 +1,9 @@
 """Unit tests for public composition resource-management entrypoints.
 
 Tests the resource management entrypoint functions exposed via
-``bioetl.composition.entrypoints``. All external dependencies are mocked via
-public patch points.
+``bioetl.composition.entrypoints``. Dedicated entrypoint-boundary coverage is
+allowed to patch the internal ``bioetl.composition._resource_management`` seam
+directly.
 """
 
 from __future__ import annotations

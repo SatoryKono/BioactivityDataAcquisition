@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from bioetl.composition.factories.datasource.data_source_factory import (
         DataSourceCreatorProtocol,
     )
-    from bioetl.composition.factories.pipeline.pipeline_assembler import (
+    from bioetl.composition.factories.pipeline.assembler import (
         GenericPipelineFactory,
     )
     from bioetl.domain.types import GoldSchemaType
