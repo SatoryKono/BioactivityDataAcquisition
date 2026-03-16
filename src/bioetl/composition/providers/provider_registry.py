@@ -80,9 +80,9 @@ class ProviderRegistry:
             if obj is not None:
                 result: dict[str, ProviderConfig] = obj.__dict__["_providers"]
                 return result
-            return get_default_provider_registry()._providers  # type: ignore[return-value]
+            return get_default_provider_registry()._providers
 
-    _providers = _ProvidersDescriptor()  # type: ignore[assignment]
+    _providers = _ProvidersDescriptor()
 
     # ------------------------------------------------------------------
     # Classmethods — backward-compatible public API.
