@@ -49,6 +49,15 @@ def _valid_scorecard() -> dict[str, object]:
             "grp2": {"registries": ["reg_b"]},
         },
         "governance": {
+            "baseline_policy": {
+                "enforceable_section": "baseline",
+                "historical_section": "historical_baseline",
+                "registry_sync_source": "baseline",
+                "rationale": (
+                    "Keep live sync bound to the enforceable baseline while "
+                    "preserving a frozen historical snapshot."
+                ),
+            },
             "review_policy": {
                 "new_exemption_requires": [
                     "owner",
@@ -77,6 +86,12 @@ def _valid_scorecard() -> dict[str, object]:
                 "registries": ["reg_a"],
             },
         },
+        "historical_baseline": {
+            "snapshot_date": "2025-01-01",
+            "source_report": "docs/reports/quality-debt-scorecard-2025-Q1.md",
+            "total_exemptions": 20,
+            "by_registry": {"reg_a": 12, "reg_b": 8},
+        },
         "quarterly_targets": [
             {
                 "quarter": "2025-Q1",
@@ -98,6 +113,20 @@ def _valid_scorecard() -> dict[str, object]:
                 "min_integral_score": 70.0,
                 "group_budgets": {"grp1": 6, "grp2": 4},
                 "registry_budgets": {"reg_a": 6, "reg_b": 4},
+            },
+        ],
+        "hotspot_budgets": [
+            {
+                "name": "hotspot_a",
+                "rationale": "Track reg_a debt in one concrete source subtree.",
+                "path_prefixes": ["src/bioetl/application/composite/"],
+                "registry_budgets": {"reg_a": 6},
+            },
+            {
+                "name": "hotspot_b",
+                "rationale": "Track reg_b debt in one concrete source subtree.",
+                "path_prefixes": ["src/bioetl/infrastructure/storage/"],
+                "registry_budgets": {"reg_b": 4},
             },
         ],
         "owner_decomposition_targets": [
@@ -224,7 +253,7 @@ class TestValidateScorecardRegistrySync:
         scorecard_file.write_text(yaml.dump(scorecard), encoding="utf-8")
 
         # Write registry
-        registry = {
+        registry: dict[str, object] = {
             "registries": {
                 "reg_a": {},
                 "reg_b": {},
@@ -376,6 +405,7 @@ class TestDebtScorecardResult:
             active_grace_windows=("RF-001",),
             by_registry={"reg_a": 5},
             by_group={"grp1": 5},
+            by_hotspot={"hotspot_a": {"reg_a": 1}},
             by_owner={"alice": 5},
             by_expiry_quarter={"2026-Q4": 5},
             expired_entries=0,
@@ -394,6 +424,7 @@ class TestDebtScorecardResult:
             active_grace_windows=(),
             by_registry={},
             by_group={},
+            by_hotspot={},
             by_owner={},
             by_expiry_quarter={},
             expired_entries=0,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
@@ -14,6 +14,7 @@ from bioetl.infrastructure.quality.budget_evaluator import (
     current_quarter_target,
     evaluate_budget_violations,
     evaluate_governance_violations,
+    evaluate_hotspot_budget_violations,
     resolve_grace_allowances,
 )
 from bioetl.infrastructure.quality.debt_scorecard_validation import (
@@ -47,6 +48,24 @@ class DebtScorecardResult:
     by_owner: dict[str, int]
     by_expiry_quarter: dict[str, int]
     expired_entries: int
+    by_hotspot: dict[str, dict[str, int]] = field(default_factory=dict)
+
+
+def _resolve_enforceable_baseline(scorecard: JsonDict) -> dict[str, object]:
+    """Resolve the baseline section used for scoring/integral debt evaluation."""
+    governance = scorecard.get("governance", {})
+    section_name = "baseline"
+    if isinstance(governance, dict):
+        baseline_policy = governance.get("baseline_policy", {})
+        if isinstance(baseline_policy, dict):
+            configured = baseline_policy.get("enforceable_section")
+            if isinstance(configured, str) and configured.strip():
+                section_name = configured.strip()
+
+    baseline = scorecard.get(section_name, {})
+    if not isinstance(baseline, dict):
+        raise ValueError(f"scorecard.{section_name}: expected mapping")
+    return baseline
 
 
 def _project_root() -> Path:
@@ -108,6 +127,7 @@ def evaluate_debt_scorecard(
 ) -> tuple[list[str], DebtScorecardResult | None]:
     """Evaluate scorecard budgets and return (violations, summary)."""
     now = today or date.today()
+    raw_registry = load_exemptions_registry(registry_path)
     inventory = build_exemption_inventory(registry_path, today=now)
     scorecard = load_debt_scorecard(scorecard_path)
 
@@ -115,7 +135,11 @@ def evaluate_debt_scorecard(
     if validation_errors:
         return validation_errors, None
 
-    baseline_total = int(scorecard["baseline"]["total_exemptions"])
+    enforceable_baseline = _resolve_enforceable_baseline(scorecard)
+    baseline_total_raw = enforceable_baseline.get("total_exemptions")
+    if not isinstance(baseline_total_raw, int):
+        return ["scorecard enforceable baseline missing int total_exemptions"], None
+    baseline_total = baseline_total_raw
 
     target = current_quarter_target(scorecard, today=now)
     if target is None:
@@ -136,6 +160,11 @@ def evaluate_debt_scorecard(
         allowance_by_registry=allowance_by_registry,
         allowance_by_group=allowance_by_group,
     )
+    hotspot_violations, by_hotspot = evaluate_hotspot_budget_violations(
+        raw_registry=raw_registry,
+        scorecard=scorecard,
+    )
+    violations.extend(hotspot_violations)
 
     quarter = str(target["quarter"])
     violations.extend(
@@ -158,6 +187,7 @@ def evaluate_debt_scorecard(
         ),
         by_registry=dict(inventory.by_registry),
         by_group=by_group,
+        by_hotspot=by_hotspot,
         by_owner=dict(inventory.by_owner),
         by_expiry_quarter=dict(inventory.by_expiry_quarter),
         expired_entries=inventory.expired_entries,

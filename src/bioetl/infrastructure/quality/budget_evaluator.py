@@ -32,6 +32,7 @@ __all__ = [
     "current_quarter_target",
     "evaluate_budget_violations",
     "evaluate_governance_violations",
+    "evaluate_hotspot_budget_violations",
     "resolve_grace_allowances",
 ]
 
@@ -196,3 +197,119 @@ def evaluate_governance_violations(
     )
 
     return violations
+
+
+def _iter_hotspot_budget_entries(
+    hotspot_budgets: object,
+) -> list[tuple[str, tuple[str, ...], dict[str, int]]]:
+    """Normalize valid hotspot budget entries into typed tuples."""
+    if not isinstance(hotspot_budgets, list):
+        return []
+
+    typed_entries: list[tuple[str, tuple[str, ...], dict[str, int]]] = []
+    for entry in hotspot_budgets:
+        if not isinstance(entry, dict):
+            continue
+        hotspot_name = entry.get("name")
+        path_prefixes = entry.get("path_prefixes")
+        registry_budgets = entry.get("registry_budgets")
+        if (
+            not isinstance(hotspot_name, str)
+            or not isinstance(path_prefixes, list)
+            or not isinstance(registry_budgets, dict)
+        ):
+            continue
+
+        typed_prefixes = tuple(
+            prefix for prefix in path_prefixes if isinstance(prefix, str) and prefix
+        )
+        if not typed_prefixes:
+            continue
+
+        typed_budgets = {
+            registry_name: int(budget)
+            for registry_name, budget in registry_budgets.items()
+            if isinstance(registry_name, str) and isinstance(budget, int)
+        }
+        typed_entries.append((hotspot_name, typed_prefixes, typed_budgets))
+    return typed_entries
+
+
+def _count_hotspot_registry_entries(
+    *,
+    registries: dict[str, object],
+    typed_prefixes: tuple[str, ...],
+    registry_budgets: dict[str, int],
+) -> Counter[str]:
+    """Count exemption entries that fall under hotspot path prefixes."""
+    counts: Counter[str] = Counter()
+    for registry_name, entries in registries.items():
+        if registry_name not in registry_budgets or not isinstance(entries, dict):
+            continue
+        for entry_key, entry_value in entries.items():
+            if not isinstance(entry_key, str) or not isinstance(entry_value, dict):
+                continue
+            source_path = entry_key.split("::", 1)[0]
+            if any(source_path.startswith(prefix) for prefix in typed_prefixes):
+                counts[registry_name] += 1
+    return counts
+
+
+def _collect_hotspot_budget_violations(
+    *,
+    hotspot_name: str,
+    hotspot_counts: dict[str, int],
+    registry_budgets: dict[str, int],
+) -> list[str]:
+    """Format budget violations for one hotspot."""
+    violations: list[str] = []
+    for registry_name, current_count in hotspot_counts.items():
+        budget = registry_budgets[registry_name]
+        if current_count > budget:
+            violations.append(
+                "hotspot "
+                f"'{hotspot_name}' registry '{registry_name}' count "
+                f"{current_count} exceeds budget {budget}"
+            )
+    return violations
+
+
+def evaluate_hotspot_budget_violations(
+    *,
+    raw_registry: JsonDict,
+    scorecard: JsonDict,
+) -> tuple[list[str], dict[str, dict[str, int]]]:
+    """Evaluate hotspot budgets against concrete exemption entry path prefixes."""
+    typed_hotspot_entries = _iter_hotspot_budget_entries(
+        scorecard.get("hotspot_budgets", [])
+    )
+    if not typed_hotspot_entries:
+        return [], {}
+
+    registries = raw_registry.get("registries", {})
+    if not isinstance(registries, dict):
+        return ["exemptions.registries: expected mapping"], {}
+
+    violations: list[str] = []
+    by_hotspot: dict[str, dict[str, int]] = {}
+
+    for hotspot_name, typed_prefixes, registry_budgets in typed_hotspot_entries:
+        counts = _count_hotspot_registry_entries(
+            registries=registries,
+            typed_prefixes=typed_prefixes,
+            registry_budgets=registry_budgets,
+        )
+        hotspot_counts = {
+            registry_name: counts.get(registry_name, 0)
+            for registry_name in sorted(registry_budgets)
+        }
+        by_hotspot[hotspot_name] = hotspot_counts
+        violations.extend(
+            _collect_hotspot_budget_violations(
+                hotspot_name=hotspot_name,
+                hotspot_counts=hotspot_counts,
+                registry_budgets=registry_budgets,
+            )
+        )
+
+    return violations, by_hotspot

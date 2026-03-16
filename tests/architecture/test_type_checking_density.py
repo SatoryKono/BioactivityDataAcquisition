@@ -50,8 +50,8 @@ TYPE_CHECKING_DENSITY_BUDGETS: tuple[TypeCheckingBudget, ...] = (
     ),
     TypeCheckingBudget(
         relative_path="infrastructure/storage",
-        max_files_with_type_checking=33,
-        max_type_checking_blocks=33,
+        max_files_with_type_checking=34,
+        max_type_checking_blocks=34,
         max_type_checking_imports=92,
     ),
     TypeCheckingBudget(

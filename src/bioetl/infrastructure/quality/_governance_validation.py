@@ -9,6 +9,7 @@ from bioetl.infrastructure.quality._baseline_validation import (
 from bioetl.infrastructure.quality._primitives import (
     _parse_iso_date,
     _validate_gate_mode,
+    _validate_non_negative_int,
 )
 
 
@@ -33,6 +34,31 @@ def _validate_review_policy(review_policy: object, *, errors: list[str]) -> None
                 "governance.review_policy.new_exemption_requires: "
                 f"must include '{field}'"
             )
+
+
+def _validate_baseline_policy(governance: dict[str, object], *, errors: list[str]) -> None:
+    """Require explicit separation between enforceable and historical baselines."""
+    baseline_policy = governance.get("baseline_policy")
+    if not isinstance(baseline_policy, dict):
+        errors.append("governance.baseline_policy: expected mapping")
+        return
+
+    expected_sections = {
+        "enforceable_section": "baseline",
+        "historical_section": "historical_baseline",
+        "registry_sync_source": "baseline",
+    }
+    for key, expected_value in expected_sections.items():
+        actual_value = baseline_policy.get(key)
+        if actual_value != expected_value:
+            errors.append(
+                f"governance.baseline_policy.{key}: expected {expected_value!r}, "
+                f"got {actual_value!r}"
+            )
+
+    rationale = baseline_policy.get("rationale")
+    if not isinstance(rationale, str) or not rationale.strip():
+        errors.append("governance.baseline_policy.rationale: expected non-empty string")
 
 
 def _validate_owner_registry_subsystems(
@@ -141,6 +167,143 @@ def _validate_growth_rollout(
     )
 
 
+def _burn_down_priority_registries(raw: JsonDict) -> set[str]:
+    """Return burn-down priority registries declared in governance config."""
+    governance = raw.get("governance", {})
+    if not isinstance(governance, dict):
+        return set()
+    burn_down = governance.get("burn_down_priorities", {})
+    if not isinstance(burn_down, dict):
+        return set()
+    raw_registries = burn_down.get("registries", [])
+    if not isinstance(raw_registries, list):
+        return set()
+    return {item for item in raw_registries if isinstance(item, str)}
+
+
+def _validate_hotspot_name(
+    *,
+    entry: dict[str, object],
+    prefix: str,
+    seen_names: set[str],
+    errors: list[str],
+) -> None:
+    """Validate hotspot name presence and uniqueness."""
+    hotspot_name = entry.get("name")
+    if not isinstance(hotspot_name, str) or not hotspot_name.strip():
+        errors.append(f"{prefix}.name: expected non-empty string")
+        return
+    cleaned_name = hotspot_name.strip()
+    if cleaned_name in seen_names:
+        errors.append(f"{prefix}.name: duplicate hotspot name '{cleaned_name}'")
+    seen_names.add(cleaned_name)
+
+
+def _validate_hotspot_rationale(
+    *,
+    entry: dict[str, object],
+    prefix: str,
+    errors: list[str],
+) -> None:
+    """Validate hotspot rationale text."""
+    rationale = entry.get("rationale")
+    if not isinstance(rationale, str) or not rationale.strip():
+        errors.append(f"{prefix}.rationale: expected non-empty string")
+
+
+def _validate_hotspot_path_prefixes(
+    *,
+    entry: dict[str, object],
+    prefix: str,
+    errors: list[str],
+) -> None:
+    """Validate hotspot path prefixes point to source-tree locations."""
+    path_prefixes = entry.get("path_prefixes")
+    if not isinstance(path_prefixes, list) or not path_prefixes:
+        errors.append(f"{prefix}.path_prefixes: expected non-empty list")
+        return
+    for item in path_prefixes:
+        if not isinstance(item, str) or not item.startswith("src/bioetl/"):
+            errors.append(
+                f"{prefix}.path_prefixes: entries must start with 'src/bioetl/'"
+            )
+
+
+def _validate_hotspot_registry_budgets(
+    *,
+    entry: dict[str, object],
+    prefix: str,
+    baseline_registry_names: set[str],
+    covered_priority_registries: set[str],
+    errors: list[str],
+) -> None:
+    """Validate hotspot registry budgets against known registry names."""
+    registry_budgets = entry.get("registry_budgets")
+    if not isinstance(registry_budgets, dict) or not registry_budgets:
+        errors.append(f"{prefix}.registry_budgets: expected non-empty mapping")
+        return
+
+    for registry_name, budget in sorted(registry_budgets.items()):
+        if registry_name not in baseline_registry_names:
+            errors.append(
+                f"{prefix}.registry_budgets: unknown registry '{registry_name}'"
+            )
+            continue
+        covered_priority_registries.add(registry_name)
+        _validate_non_negative_int(
+            budget,
+            field_name=f"{prefix}.registry_budgets.{registry_name}",
+            errors=errors,
+        )
+
+
+def _validate_hotspot_budgets_section(
+    raw: JsonDict,
+    *,
+    baseline_registry_names: set[str],
+    errors: list[str],
+) -> None:
+    """Validate hotspot budget declarations tied to concrete source-tree prefixes."""
+    hotspot_budgets = raw.get("hotspot_budgets")
+    if not isinstance(hotspot_budgets, list) or not hotspot_budgets:
+        errors.append("hotspot_budgets: required non-empty list")
+        return
+
+    burn_down_registries = _burn_down_priority_registries(raw)
+    seen_names: set[str] = set()
+    covered_priority_registries: set[str] = set()
+    for index, entry in enumerate(hotspot_budgets):
+        prefix = f"hotspot_budgets[{index}]"
+        if not isinstance(entry, dict):
+            errors.append(f"{prefix}: expected mapping")
+            continue
+
+        _validate_hotspot_name(
+            entry=entry,
+            prefix=prefix,
+            seen_names=seen_names,
+            errors=errors,
+        )
+        _validate_hotspot_rationale(entry=entry, prefix=prefix, errors=errors)
+        _validate_hotspot_path_prefixes(entry=entry, prefix=prefix, errors=errors)
+        _validate_hotspot_registry_budgets(
+            entry=entry,
+            prefix=prefix,
+            baseline_registry_names=baseline_registry_names,
+            covered_priority_registries=covered_priority_registries,
+            errors=errors,
+        )
+
+    missing_priority_coverage = sorted(
+        (burn_down_registries & baseline_registry_names) - covered_priority_registries
+    )
+    if missing_priority_coverage:
+        errors.append(
+            "hotspot_budgets: missing coverage for burn_down_priorities registries "
+            f"{missing_priority_coverage}"
+        )
+
+
 def _validate_governance_section(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
@@ -153,6 +316,7 @@ def _validate_governance_section(
         errors.append("governance: required mapping")
         return False
 
+    _validate_baseline_policy(governance, errors=errors)
     _validate_review_policy(governance.get("review_policy"), errors=errors)
     _validate_owner_registry_subsystems(
         governance.get("owner_registry_q2_subsystems"),
@@ -176,6 +340,11 @@ def _validate_governance_section(
         governance,
         baseline_registry_names=baseline_registry_names,
         group_names=group_names,
+        errors=errors,
+    )
+    _validate_hotspot_budgets_section(
+        raw,
+        baseline_registry_names=baseline_registry_names,
         errors=errors,
     )
 

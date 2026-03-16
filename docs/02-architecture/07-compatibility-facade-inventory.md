@@ -42,8 +42,8 @@ This inventory is also the freeze ledger for compatibility debt in the current c
 | `src/bioetl/domain/composite/config.py` | Canonical public entrypoint for composite config models that shields split config internals. | `bioetl.domain.composite.config` | `retained-entrypoint` | `bioetl.domain.composite` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/composite/`; `tests`: facade coverage in `tests/unit/domain/composite/test_composite_config_facade.py` and ordinary imports may continue using the root config entrypoint | `2026-09-30` | Keep using `bioetl.domain.composite.config`; do not import split `config_*` internals outside the owning package. | Direct imports of split config internals remain confined to the owning package and the root config entrypoint stays the stable public path. |
 | `src/bioetl/domain/value_objects/activity_values.py` | Canonical public entrypoint for activity-related value objects that shields split concentration/type/pChEMBL modules. | `bioetl.domain.value_objects.activity_values` | `retained-entrypoint` | `bioetl.domain.value_objects` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; internal split modules stay inside `src/bioetl/domain/value_objects/`; `tests`: facade coverage in `tests/unit/domain/value_objects/test_value_object_facade_reexports.py` and ordinary imports may continue using the public entrypoint | `2026-09-30` | Keep using `bioetl.domain.value_objects.activity_values`; do not import split value-object internals outside the owning package. | Direct imports of split activity-value internals remain confined to the owning package and the facade stays the stable public path. |
 | `src/bioetl/domain/value_objects/publication_field_groups.py` | Canonical public entrypoint for publication field-group definitions that shields private split config/type modules. | `bioetl.domain.value_objects.publication_field_groups` | `retained-entrypoint` | `bioetl.domain.value_objects` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; private split modules stay inside `src/bioetl/domain/value_objects/`; `tests`: facade coverage in `tests/unit/domain/value_objects/test_value_object_facade_reexports.py` and ordinary imports may continue using the public entrypoint | `2026-09-30` | Keep using `bioetl.domain.value_objects.publication_field_groups`; do not import split value-object internals outside the owning package. | Direct imports of private publication-field-group internals remain confined to the owning package and the facade stays the stable public path. |
-| `src/bioetl/infrastructure/adapters/pubmed/client.py` | Canonical package entrypoint that shields older `pubmed_client` imports while exporting the current adapter surface and public `create_pubmed_adapter` factory alias. | `bioetl.infrastructure.adapters.pubmed.client` | `retained-entrypoint` | `bioetl.infrastructure.adapters.pubmed` | `2026-03 pubmed entrypoint hardening` | `src`: canonical entrypoint usage allowed; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`, `tests/architecture/test_adapter_contracts.py` | `2026-09-30` | Use package-root imports or `bioetl.infrastructure.adapters.pubmed.client` with public `create_pubmed_adapter`; do not import `bioetl.infrastructure.adapters.pubmed.pubmed_client` directly. | RF-035 decision is `retain`: private `_create_pubmed_adapter` stays unexported from the retained entrypoint, and legacy-path references remain reduced to dedicated compatibility coverage. |
-| `src/bioetl/infrastructure/adapters/semanticscholar/client.py` | Canonical package entrypoint that shields older `adapter` imports. | `bioetl.infrastructure.adapters.semanticscholar.client` | `retained-entrypoint` | `bioetl.infrastructure.adapters.semanticscholar` | `legacy-pre-2026-03` | `src`: canonical entrypoint usage allowed; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`, `tests/architecture/test_adapter_contracts.py` | `2026-09-30` | Use package-root imports or `bioetl.infrastructure.adapters.semanticscholar.client`; do not import `bioetl.infrastructure.adapters.semanticscholar.adapter` directly. | RF-035 decision is `retain`: re-review only after the retained client shim no longer carries compatibility value beyond dedicated compatibility coverage. |
+| `src/bioetl/infrastructure/adapters/pubmed/client.py` | Retained client entrypoint that shields older `pubmed_client` imports while exporting the current adapter surface and public `create_pubmed_adapter` factory alias. | `bioetl.infrastructure.adapters.pubmed.client` | `retained-entrypoint` | `bioetl.infrastructure.adapters.pubmed` | `2026-03 pubmed entrypoint hardening` | `src`: direct `bioetl.infrastructure.adapters.pubmed.client` imports stay confined to `src/bioetl/infrastructure/adapters/pubmed/__init__.py`; first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`, `tests/architecture/test_adapter_contracts.py`, `tests/architecture/test_retained_adapter_entrypoint_policy.py` | `2026-09-30` | Use the provider package root `bioetl.infrastructure.adapters.pubmed` in new first-party code; keep `bioetl.infrastructure.adapters.pubmed.client` only as the retained public seam and do not import `bioetl.infrastructure.adapters.pubmed.pubmed_client` directly. | RF-035 decision is `retain`: direct `client.py` imports stay confined to the provider package root plus dedicated compatibility coverage, and private `_create_pubmed_adapter` remains unexported from the retained entrypoint. |
+| `src/bioetl/infrastructure/adapters/semanticscholar/client.py` | Retained client entrypoint that shields older `adapter` imports. | `bioetl.infrastructure.adapters.semanticscholar.client` | `retained-entrypoint` | `bioetl.infrastructure.adapters.semanticscholar` | `legacy-pre-2026-03` | `src`: direct `bioetl.infrastructure.adapters.semanticscholar.client` imports stay confined to `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`; first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`, `tests/architecture/test_adapter_contracts.py`, `tests/architecture/test_retained_adapter_entrypoint_policy.py` | `2026-09-30` | Use the provider package root `bioetl.infrastructure.adapters.semanticscholar` in new first-party code; keep `bioetl.infrastructure.adapters.semanticscholar.client` only as the retained public seam and do not import `bioetl.infrastructure.adapters.semanticscholar.adapter` directly. | RF-035 decision is `retain`: direct `client.py` imports stay confined to the provider package root plus dedicated compatibility coverage, and legacy-path references remain reduced to that retained seam. |
 
 ## Measured Registry
 
@@ -83,14 +83,20 @@ Snapshot after RF-002 controlled removal wave:
 - `src/` direct imports of `bioetl.composition._services` outside `src/bioetl/composition/`: `0`
 - `src/` direct imports of split `bioetl.domain.composite.config_*` internals outside `src/bioetl/domain/composite/`: `0`
 - `src/` direct imports of split activity/publication value-object internals outside `src/bioetl/domain/value_objects/`: `0`
+- `src/` direct imports of `bioetl.infrastructure.adapters.pubmed.client` outside `src/bioetl/infrastructure/adapters/pubmed/__init__.py`: `0`
+- `src/` direct imports of `bioetl.infrastructure.adapters.semanticscholar.client` outside `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`: `0`
 - `src/` direct `DataSourceRegistry` usages outside explicit compatibility re-exports: `0`
 - `tests/` direct `DataSourceRegistry` imports outside dedicated compatibility/contract coverage: `0`
+- `tests/` direct imports of retained adapter client entrypoints outside dedicated compatibility/contract coverage: `0`
 - Dedicated compatibility coverage remains in tests:
 - `tests/unit/composition/factories/datasource/test_data_source_registry.py`
 - `tests/unit/composition/test_registry_protocol.py`
 - `tests/architecture/test_registry_contracts.py`
 - `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`
 - `tests/unit/domain/composite/test_composite_config_facade.py`
+- `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`
+- `tests/architecture/test_adapter_contracts.py`
+- `tests/architecture/test_retained_adapter_entrypoint_policy.py`
 - `tests/unit/composition/test_services_entrypoints.py`
 - `tests/unit/composition/test_entrypoints.py`
 - `tests/unit/composition/test_resource_management.py`
@@ -127,7 +133,7 @@ Measured evidence for `retain`:
 Policy implications:
 
 - Do not start deprecation for these entrypoints in the current cycle.
-- New first-party code may use package roots or the canonical `client.py` entrypoints.
+- New first-party code should use provider package roots; retained `client.py` entrypoints exist for stability and dedicated compatibility coverage only.
 - New first-party code must not import the older implementation modules
   `pubmed.pubmed_client` or `semanticscholar.adapter` directly.
 - Any future deprecation proposal must include a fresh usage inventory and an explicit review
@@ -153,12 +159,14 @@ Review outcome for the remaining curated inventory rows:
   private `_publication_field_group_*` modules remain internal.
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
   because the package root and provider registration still use the canonical client
-  entrypoint and legacy `pubmed_client` references are confined to the retained
-  entrypoint plus dedicated compatibility coverage.
+  entrypoint while direct `client.py` imports are already confined to the package
+  root and dedicated compatibility coverage, and legacy `pubmed_client`
+  references stay confined to the retained entrypoint plus dedicated coverage.
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
-  because the package root still uses the canonical client entrypoint and legacy
-  `adapter` references remain confined to the retained entrypoint plus dedicated
-  compatibility coverage.
+  because the package root still uses the canonical client entrypoint, direct
+  `client.py` imports are already confined to the package root plus dedicated
+  compatibility coverage, and legacy `adapter` references remain confined to the
+  retained entrypoint plus dedicated coverage.
 
 Wave decision:
 
