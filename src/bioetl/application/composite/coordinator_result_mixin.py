@@ -169,22 +169,15 @@ class EnrichmentCoordinatorResultMixin:
     def _process_results(
         self,
         enricher_names: list[str],
-        results: list[EnrichmentResult | BaseException],
+        results: list[EnrichmentResult],
     ) -> dict[str, EnrichmentResult]:
-        """Process gathered results, handling exceptions."""
-        processed: dict[str, EnrichmentResult] = {}
+        """Map gathered enrichment results to a name-keyed dict.
 
-        for name, result in zip(enricher_names, results, strict=True):
-            if isinstance(result, BaseException):
-                # Should not happen for required (already re-raised)
-                processed[name] = EnrichmentResult.failed(
-                    enricher_name=name,
-                    error_message=str(result),
-                )
-            else:
-                processed[name] = result
-
-        return processed
+        With fail-fast semantics (no ``return_exceptions``), required enricher
+        failures propagate immediately and cancel sibling tasks, so all values
+        in *results* are guaranteed to be ``EnrichmentResult`` instances.
+        """
+        return dict(zip(enricher_names, results, strict=True))
 
 
 __all__ = ["EnrichmentCoordinatorResultMixin"]

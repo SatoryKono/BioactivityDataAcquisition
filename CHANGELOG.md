@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`PostrunMetadataVersionResolver` refactored behind `StorageMaintenancePort` (RF-007.3)**: Eliminated direct `deltalake` import in the application layer (`PostrunMetadataVersionResolver`) — ARCH-001 violation. Delta table version resolution is now delegated to `StorageMaintenancePort.get_table_version()`, which is implemented in `StorageAdapterMaintenanceMixin` in the composition/infrastructure layer. `ImportError`/`ModuleNotFoundError` removed from `_METADATA_VERSION_ALLOWLIST` (no longer applicable). Architecture test guard `test_application_layer_no_third_party_infrastructure_libs` added to prevent regressions.
+  - Modified: `src/bioetl/domain/ports/storage_maintenance.py` — added `get_table_version()` to `StorageMaintenancePort` protocol
+  - Modified: `src/bioetl/composition/factories/storage/maintenance_mixin.py` — implemented `get_table_version()` in `StorageAdapterMaintenanceMixin`
+  - Modified: `src/bioetl/application/core/postrun/metadata_version_resolver.py` — refactored to use injected `StorageMaintenancePort`; removed direct `deltalake` import
+  - Modified: `src/bioetl/composition/factories/pipeline/postrun_assembly.py` — passes `storage` port to `PostrunMetadataVersionResolver`; removed `ImportError`/`ModuleNotFoundError` from `_METADATA_VERSION_ALLOWLIST`
+  - Modified: `tests/architecture/test_layer_dependencies.py` — added `test_application_layer_no_third_party_infrastructure_libs` guard (REQ-ARCH-APP-003)
+
 - **CompositeCheckpointService refactored behind CompositeCheckpointPort (RF-002)**: Extracted 18 direct file I/O operations (`Path`, `glob`, `read_text`, `write_text`, `unlink`, `replace`) from `application/composite/checkpoint/service.py` into `infrastructure/storage/composite_checkpoint_writer.py` via new `CompositeCheckpointPort` protocol. Eliminates ARCH-002 violation (no direct I/O in application layer). Atomic write safety preserved.
   - New: `src/bioetl/domain/ports/runtime/composite_checkpoint.py` — `CompositeCheckpointPort` protocol
   - New: `src/bioetl/infrastructure/storage/composite_checkpoint_writer.py` — `FileCompositeCheckpointWriter` adapter
@@ -17,6 +24,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Registry ambient state → explicit DI in CLI (RF-003)**: `PipelineRegistry` now passed through Click `ctx.obj` from `main()`. CLI helpers `validate_pipeline_name()`, `_get_available_providers()`, `_filter_pipelines_by_provider()` accept optional `registry` parameter, falling back to `get_default_registry()` for backward compatibility.
   - Modified: `src/bioetl/interfaces/cli/main.py`, `commands/run_helpers.py`, `commands/run_all.py`
+
+- **`heartbeat_interval_seconds` and `lock_ttl_seconds` made configurable in `CompositeRuntimeConfig` (RF-006.1)**: Previously hardcoded as module-level constants (`_COMPOSITE_HEARTBEAT_INTERVAL_SECONDS = 30`, `DEFAULT_LOCK_TTL_SECONDS = 3600`), these values are now fields on `CompositeRuntimeConfig` with the same defaults, allowing per-run override without code changes.
+  - Modified: `src/bioetl/application/composite/runner_pkg/runner_models.py` — added `heartbeat_interval_seconds` and `lock_ttl_seconds` fields to `CompositeRuntimeConfig`
+  - Modified: `src/bioetl/application/composite/runner_pkg/runner.py` — reads intervals from runtime config instead of module-level constants
+  - Modified: `tests/unit/application/composite/test_runner_heartbeat.py` — updated tests to exercise configurable intervals
+
+- **Fail-fast semantics for required enrichers in `EnrichmentCoordinatorService` (RF-007.1)**: Removed `return_exceptions=True` from `asyncio.gather` in `EnrichmentCoordinatorService.run_enrichers()` — a required enricher failure now immediately cancels sibling tasks instead of collecting all results first. `TimeoutError` for required enrichers is now propagated rather than silently returning a timeout result. `_process_results()` simplified by removing `BaseException` handling (no longer reachable under fail-fast).
+  - Modified: `src/bioetl/application/composite/coordinator.py` — removed `return_exceptions=True`; `TimeoutError` now propagates for required enrichers
+  - Modified: `src/bioetl/application/composite/coordinator_result_mixin.py` — simplified `_process_results()`; removed `BaseException` branch
+  - Modified: `tests/unit/application/composite/test_coordinator_edges.py` — updated tests for fail-fast behavior
+  - Modified: `tests/unit/application/composite/test_coordinator_logging.py` — updated logging assertions for fail-fast path
+
+- **Narrow ports migration: `MergeService` migrated to `MergedStoragePort` (RF-008.2)**: `MergeService.storage` annotation narrowed from broad `StoragePort` to `MergedStoragePort`, reducing the surface area of the injected dependency to only the operations actually used. Ratchet budget in the architecture migration guard reduced from 5 to 4 unmigrated files.
+  - Modified: `src/bioetl/application/composite/merger.py` — `storage` field annotation changed from `StoragePort` to `MergedStoragePort`
+  - Modified: `tests/architecture/test_narrow_port_migration.py` — `merger.py` added to migrated list; ratchet budget reduced from 5 to 4
+
+### Fixed
+
+- **Broad `except Exception` replaced with specific exception types in `StorageAdapterMaintenanceMixin` (RF-006.1)**: `maintenance_mixin.py` catch-all `except Exception` blocks replaced with concrete exception types, improving error observability and preventing silent swallowing of unexpected errors.
+  - Modified: `src/bioetl/composition/factories/storage/maintenance_mixin.py` — replaced `except Exception` with specific exception types
 
 ## [6.1.0] - 2026-03-11
 

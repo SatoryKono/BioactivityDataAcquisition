@@ -30,7 +30,6 @@ from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -39,7 +38,7 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.types import RunID
 
-_COMPOSITE_HEARTBEAT_INTERVAL_SECONDS = 30
+_COMPOSITE_HEARTBEAT_INTERVAL_SECONDS = 30  # deprecated: use CompositeRuntimeConfig.heartbeat_interval_seconds
 
 if TYPE_CHECKING:
     import polars as pl
@@ -227,7 +226,7 @@ class CompositePipelineRunner(
         acquired = await self._lock.acquire(
             key=lock_key,
             owner_id=self._run_id,
-            ttl=DEFAULT_LOCK_TTL_SECONDS,
+            ttl=self._runtime.lock_ttl_seconds,
         )
         if not acquired:
             raise LockAcquisitionError(key=lock_key)
@@ -238,7 +237,7 @@ class CompositePipelineRunner(
             lock_key=lock_key,
             owner_id=self._run_id,
             exclusive=False,
-            interval=_COMPOSITE_HEARTBEAT_INTERVAL_SECONDS,
+            interval=self._runtime.heartbeat_interval_seconds,
             shutdown_signal=shutdown_signal,
             logger=self._logger,
         )

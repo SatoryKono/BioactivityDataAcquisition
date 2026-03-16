@@ -39,7 +39,7 @@ if TYPE_CHECKING:
         MergeConfig,
     )
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, MergedStoragePort
 
 
 def _path_to_table_name(path: str) -> str:
@@ -62,7 +62,7 @@ class MergeService(
     def __init__(
         self,
         merge_config: MergeConfig,
-        storage: StoragePort,
+        storage: MergedStoragePort,
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
         field_group_registry: FieldGroupRegistry | None = None,
@@ -81,7 +81,7 @@ class MergeService(
         Args:
             merge_config: Domain merge configuration (strategy, enricher list, column
                 conflict policy, cross-validation settings).
-            storage: ``StoragePort`` adapter used to persist merged Silver/Gold output.
+            storage: ``MergedStoragePort`` adapter used to persist merged Silver/Gold output.
             logger: Structured logger for progress and diagnostic output.
             delta_reader: Optional ``DeltaReaderPort`` for reading seed and enricher
                 Silver tables; when ``None`` the service falls back to

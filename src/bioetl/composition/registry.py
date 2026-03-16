@@ -209,19 +209,23 @@ class PipelineRegistry:
             self._registry.clear()
 
 
-# Default global instance for backward compatibility
-_default_registry = PipelineRegistry()
+# Lazy default instance – avoids import-time side effects (DI-004).
+_default_registry: PipelineRegistry | None = None
 
 
 def get_default_registry() -> PipelineRegistry:
     """Get the default global registry instance.
 
-    Use this function when you need access to the shared registry.
-    For tests, prefer creating a new PipelineRegistry() instance.
+    The singleton is created lazily on first access to avoid module-level
+    side effects.  For tests, prefer creating a new PipelineRegistry()
+    instance via :func:`create_registry`.
 
     Returns:
         The default global PipelineRegistry instance.
     """
+    global _default_registry
+    if _default_registry is None:
+        _default_registry = PipelineRegistry()
     return _default_registry
 
 

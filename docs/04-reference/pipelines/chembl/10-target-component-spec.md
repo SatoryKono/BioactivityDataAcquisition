@@ -12,7 +12,7 @@
 | **Provider**     | ChEMBL (EBI)                                             |
 | **Entity**       | target-component                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/target-component` |
-| **Library**      | `chembl-webresource-client`                              |
+| **Library**      | Built-in ChEMBL adapter (httpx)                              |
 | **Rate Limit**   | None                                                     |
 | **Health Check** | `/chembl/api/data/status.json`                           |
 | **Auth Type**    | None (public API)                                        |

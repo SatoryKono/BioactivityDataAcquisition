@@ -12,7 +12,7 @@
 | **Provider**     | ChEMBL (EBI)                                     |
 | **Entity**       | molecule                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/molecule` |
-| **Library**      | `chembl-webresource-client`                      |
+| **Library**      | Built-in ChEMBL adapter (httpx)                      |
 | **Rate Limit**   | None (polite usage recommended)                  |
 | **Health Check** | `/chembl/api/data/status`                        |
 | **Auth Type**    | None (public API)                                |
@@ -69,11 +69,11 @@ molecule
 ### 3.1. API Request
 
 ```python
-from chembl-webresource-client.new-client import new-client
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
-molecule = new-client.molecule
-# Filter by input CSV molecule-ids
-results = molecule.filter(molecule-id--in=chembl-ids)
+adapter = ChemblAdapter(config=adapter_config)
+# Filter by input CSV molecule-ids; adapter normalizes fields
+results = adapter.fetch(entity="molecule", filters={"molecule-id": chembl_ids})
 ```
 
 ### 3.2. Complete API Fields (23 поля)

@@ -12,7 +12,7 @@
 | **Provider**     | ChEMBL (EBI)                                      |
 | **Entity**       | cell-line                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/cell-line` |
-| **Library**      | `chembl-webresource-client`                       |
+| **Library**      | Built-in ChEMBL adapter (httpx)                       |
 | **Rate Limit**   | None (polite usage recommended)                   |
 | **Health Check** | `/chembl/api/data/status`                         |
 | **Auth Type**    | None (public API)                                 |
@@ -64,11 +64,11 @@ cell-line
 ### 3.1. API Request
 
 ```python
-from chembl-webresource-client.new-client import new-client
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
-cell-line = new-client.cell-line
-# Filter by input CSV cell-ids
-results = cell-line.filter(cell-id--in=chembl-ids)
+adapter = ChemblAdapter(config=adapter_config)
+# Built-in adapter handles pagination, retries, health checks
+results = adapter.fetch(entity=\"cell_line\", filters={\"cell-id\": chembl_ids})
 ```
 
 ### 3.2. Complete API Fields

@@ -155,5 +155,23 @@ class StorageMaintenancePort(Protocol):
         """
         ...
 
+    def get_table_version(
+        self,
+        table_path: str,
+        *,
+        layer: Literal["silver", "gold"] = "silver",
+    ) -> int | None:
+        """Return the current Delta table version for lineage metadata.
+
+        Args:
+            table_path: Filesystem path to the Delta table directory.
+            layer: Medallion layer name used for diagnostic context. Defaults to ``"silver"``.
+
+        Returns:
+            Integer Delta table version, or ``None`` if the table does not exist
+            or cannot be read.
+        """
+        ...
+
 
 __all__ = ["StorageMaintenancePort"]

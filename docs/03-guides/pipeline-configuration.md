@@ -221,18 +221,18 @@ Pipeline YAML файлы **не должны** явно указывать эт�
 
 ### Авто-пропагация sort-by (ADR-014 compliance)
 
-Параметры `sink.silver.sort-by.columns` и `sink.gold.sort-by.columns` **автоматически вычисляются** из `business-primary-keys`:
+Параметры `sink.silver.sort-by.columns` и `sink.gold.sort-by.columns` **автоматически вычисляются** из `business_primary_keys`:
 
 ```python
 # config_loader.py:154-159
 if "sort-by" not in sink_silver:
     sink_silver["sort-by"] = {
-        "columns": config["business-primary-keys"],
+        "columns": config["business_primary_keys"],
         "ascending": True,
     }
 ```
 
-Это означает, что entity configs **не должны** явно указывать `sort-by` — он пропагируется из `business-primary-keys`:
+Это означает, что entity configs **не должны** явно указывать `sort-by` — он пропагируется из `business_primary_keys`:
 
 ```yaml
 # НЕ нужно указывать sort-by — он auto-computed!

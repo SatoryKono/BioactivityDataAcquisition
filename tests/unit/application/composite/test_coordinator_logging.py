@@ -141,9 +141,9 @@ class TestCoordinatorRequiredEnricherLogging:
     ) -> None:
         """Test that required enricher failures are logged as errors.
 
-        Note: asyncio.gather(return_exceptions=True) catches exceptions,
-        so coordinator returns failed result instead of raising.
-        The actual exception raise happens in runner's _check_required_enrichers.
+        With fail-fast semantics (RF-007.1), the exception propagates through
+        asyncio.gather, cancelling sibling tasks. The error is logged before
+        re-raising.
         """
         enricher_config = MagicMock()
         enricher_config.pipeline = "crossref"
@@ -156,16 +156,16 @@ class TestCoordinatorRequiredEnricherLogging:
             runner.run = AsyncMock(side_effect=RuntimeError("API error"))
             return runner
 
-        # Coordinator catches exceptions via asyncio.gather(return_exceptions=True)
-        # and returns failed results - doesn't raise
-        results = await coordinator.run_enrichers(
-            keys=sample_keys,
-            enrichers=[enricher_config],
-            completed=frozenset(),
-            runner_factory=failing_factory,
-        )
+        # With fail-fast, required enricher failure propagates as exception
+        with pytest.raises(RuntimeError, match="API error"):
+            await coordinator.run_enrichers(
+                keys=sample_keys,
+                enrichers=[enricher_config],
+                completed=frozenset(),
+                runner_factory=failing_factory,
+            )
 
-        # Verify error was logged before exception was caught
+        # Verify error was logged before exception was raised
         error_calls = [
             c
             for c in mock_logger.error.call_args_list
@@ -177,10 +177,6 @@ class TestCoordinatorRequiredEnricherLogging:
         assert any(c.kwargs.get("required") is True for c in error_calls), (
             "Error should indicate required=True"
         )
-
-        # Verify result is failed
-        assert "crossref" in results
-        assert not results["crossref"].is_success
 
 
 @pytest.mark.unit

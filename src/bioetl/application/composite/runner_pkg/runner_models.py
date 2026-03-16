@@ -10,6 +10,7 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
+from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 
 __all__ = [
     "CompositeExecutionContext",
@@ -32,6 +33,8 @@ class CompositeRuntimeConfig:
     cached_bronze_date: str | None = None
     cached_bronze_enrichers: bool | None = None
     cached_bronze_dependencies: bool = False
+    heartbeat_interval_seconds: int = 30
+    lock_ttl_seconds: int = DEFAULT_LOCK_TTL_SECONDS
 
     def __post_init__(self) -> None:
         """Normalize mutable values into immutable runtime fields."""
