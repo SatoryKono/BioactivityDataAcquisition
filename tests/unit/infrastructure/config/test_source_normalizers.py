@@ -9,7 +9,6 @@ from bioetl.infrastructure.config.source_normalizers.source import (
     _get_dict_or_empty,
     _normalize_health_check,
     _normalize_rate_limit,
-    _promote_top_level_source_sections,
     _sync_timeout_aliases,
     normalize_source_config,
 )
@@ -189,41 +188,6 @@ class TestApplyBatchToPagination:
         _apply_batch_to_pagination(None, provider_config, pagination)
         assert provider_config == {}
         assert pagination == {}
-
-
-class TestPromoteTopLevelSourceSections:
-    """Tests for _promote_top_level_source_sections."""
-
-    def test_already_has_source(self) -> None:
-        """Should return as-is when source is already present."""
-        raw = {"source": {"type": "api"}}
-        result = _promote_top_level_source_sections(raw)
-        assert result is raw
-
-    def test_promotes_api_to_source(self) -> None:
-        """Should wrap api section under source."""
-        raw = {"api": {"base_url": "https://api.example.com"}}
-        result = _promote_top_level_source_sections(raw)
-        assert "source" in result
-        assert result["source"]["type"] == "api"
-        assert result["source"]["api"]["base_url"] == "https://api.example.com"
-
-    def test_promotes_with_client_and_batch(self) -> None:
-        """Should include client, batch, rate_limit under source."""
-        raw = {
-            "api": {"base_url": "https://api.example.com"},
-            "client": {"timeout": 30},
-            "batch": {"size": 100},
-        }
-        result = _promote_top_level_source_sections(raw)
-        assert result["source"]["client"] == {"timeout": 30}
-        assert result["source"]["batch"] == {"size": 100}
-
-    def test_no_api_key_returns_unchanged(self) -> None:
-        """Should return unchanged when no api section present."""
-        raw = {"provider": "test"}
-        result = _promote_top_level_source_sections(raw)
-        assert result is raw
 
 
 class TestNormalizeSourceConfig:

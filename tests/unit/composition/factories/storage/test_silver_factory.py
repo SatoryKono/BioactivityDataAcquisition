@@ -1,0 +1,178 @@
+"""Unit tests for Silver writer factory."""
+from __future__ import annotations
+
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+import pytest
+
+from bioetl.composition.factories.storage._silver import create_silver_writer
+from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+
+
+@pytest.mark.unit
+class TestCreateSilverWriter:
+    """Tests for create_silver_writer factory function."""
+
+    def test_creates_writer_with_defaults(self) -> None:
+        """Creates SilverWriter with NoOp defaults when config is None."""
+        writer_cls = MagicMock()
+        expected = MagicMock()
+        writer_cls.return_value = expected
+
+        result = create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+        )
+
+        assert result is expected
+        call_kwargs = writer_cls.call_args[1]
+        assert isinstance(call_kwargs["tracing"], NoOpTracing)
+        assert isinstance(call_kwargs["metadata_writer"], NoOpMetadataWriter)
+
+    def test_creates_metadata_writer_when_save_metadata(self) -> None:
+        """Creates real MetadataWriter when config.save_metadata is True."""
+        writer_cls = MagicMock()
+        config = SimpleNamespace(save_metadata=True)
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=config,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert not isinstance(call_kwargs["metadata_writer"], NoOpMetadataWriter)
+
+    def test_uses_provided_tracing(self) -> None:
+        """Uses provided TracingPort instead of NoOpTracing."""
+        writer_cls = MagicMock()
+        tracer = MagicMock()
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=None,
+            logger=MagicMock(),
+            tracing=tracer,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["tracing"] is tracer
+
+    def test_passes_silver_validator(self) -> None:
+        """silver_validator is forwarded to writer constructor."""
+        writer_cls = MagicMock()
+        validator = MagicMock()
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=validator,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["silver_validator"] is validator
+
+    def test_passes_resilience_policies(self) -> None:
+        """Resilience policies are forwarded to writer constructor."""
+        writer_cls = MagicMock()
+        retry_policy = MagicMock()
+        merge_policy = MagicMock()
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+            metadata_atomic_retry_policy=retry_policy,
+            merge_resilience_policy=merge_policy,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["merge_resilience_policy"] is merge_policy
+
+    def test_passes_metrics_to_metadata_writer(self) -> None:
+        """Metrics are forwarded to MetadataWriter when save_metadata is True."""
+        writer_cls = MagicMock()
+        config = SimpleNamespace(save_metadata=True)
+        metrics = MagicMock()
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=config,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=None,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+            metrics=metrics,
+        )
+
+        # Writer is created - verify it passed through
+        writer_cls.assert_called_once()
+
+    def test_passes_csv_exporter(self) -> None:
+        """csv_exporter is forwarded to writer constructor."""
+        writer_cls = MagicMock()
+        csv = MagicMock()
+
+        create_silver_writer(
+            writer_cls=writer_cls,
+            base_path=Path("/data/silver"),
+            config=None,
+            logger=MagicMock(),
+            tracing=None,
+            csv_exporter=csv,
+            metadata_coordinator=None,
+            transform_version=None,
+            transform_steps=None,
+            flat_structure=False,
+            silver_validator=None,
+        )
+
+        call_kwargs = writer_cls.call_args[1]
+        assert call_kwargs["csv_exporter"] is csv

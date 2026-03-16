@@ -61,7 +61,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: compound_record
-  field_validations:
+  entity_field_validations:
   - field: record_id
     type: range
     min: 1
@@ -81,14 +81,14 @@ quality:
     type: range
     min: 1
     nullable: true
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: record_linkage
     fields:
     - molecule_id
     - publication_id
     condition: all_present
     error_message: Both molecule and document IDs are required
-  conditional_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: record_id
     key_type: merge

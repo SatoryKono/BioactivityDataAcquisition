@@ -17,7 +17,6 @@ from bioetl.application.core.protocols import (
     GoldFilterCallback,
     GoldTransformCallback,
     TransformCallback,
-    TransformerPort,
     TransformerProtocol,
 )
 from bioetl.domain.context import PipelineContext
@@ -213,9 +212,6 @@ class TestProtocolCompatibility:
         # and returning SilverRecord | None
         assert TransformerProtocol is not None
 
-    def test_legacy_transformer_port_alias(self) -> None:
-        """Legacy TransformerPort alias resolves to TransformerProtocol."""
-        assert TransformerPort is TransformerProtocol
 
 
 class TestProtocolDocumentation:

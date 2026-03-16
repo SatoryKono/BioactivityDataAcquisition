@@ -47,18 +47,18 @@ class TestExtractFieldFromQualified:
     def test_three_parts_returns_field(self, merge_service: MergeService) -> None:
         """Extract field from three-part qualified name."""
         assert (
-            merge_service._extract_field_from_qualified("chembl.publication.title")
+            merge_service._coalesce_policy.extract_field_from_qualified("chembl.publication.title")
             == "title"
         )
 
     def test_one_part_returns_original(self, merge_service: MergeService) -> None:
         """Return original for non-qualified name."""
-        assert merge_service._extract_field_from_qualified("title") == "title"
+        assert merge_service._coalesce_policy.extract_field_from_qualified("title") == "title"
 
     def test_two_parts_returns_original(self, merge_service: MergeService) -> None:
         """Return original for two-part name (not valid qualified)."""
         assert (
-            merge_service._extract_field_from_qualified("crossref.title")
+            merge_service._coalesce_policy.extract_field_from_qualified("crossref.title")
             == "crossref.title"
         )
 
@@ -86,8 +86,8 @@ class TestCoalescePreferSeed:
                 "_run_id": ["r1"],
             }
         )
-        result = merge_service._coalesce_prefer_seed(
-            df, enrichers=[], seed_pipeline="chembl_publication"
+        result = merge_service._coalesce_policy.coalesce_prefer_seed(
+            df, _enrichers=[], seed_pipeline="chembl_publication"
         )
 
         assert "chembl.publication.title" in result.columns
@@ -107,8 +107,8 @@ class TestCoalescePreferSeed:
                 "semanticscholar.publication.title": ["SS 1", "SS 2"],
             }
         )
-        result = merge_service._coalesce_prefer_seed(
-            df, enrichers=[], seed_pipeline="chembl_publication"
+        result = merge_service._coalesce_policy.coalesce_prefer_seed(
+            df, _enrichers=[], seed_pipeline="chembl_publication"
         )
 
         titles = result["chembl.publication.title"].to_list()
@@ -128,8 +128,8 @@ class TestCoalescePreferEnricher:
                 "crossref.publication.title": ["Enricher Title"],
             }
         )
-        result = merge_service._coalesce_prefer_enricher(
-            df, enrichers=[], seed_pipeline="chembl_publication"
+        result = merge_service._coalesce_policy.coalesce_prefer_enricher(
+            df, _enrichers=[], seed_pipeline="chembl_publication"
         )
 
         assert "crossref.publication.title" in result.columns

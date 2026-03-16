@@ -17,10 +17,6 @@ from bioetl.application.composite.join_planner_helpers import (
 )
 from bioetl.application.composite.merger_collaborators import (
     MergeCollaboratorGroup,
-    build_merge_collaborators,
-)
-from bioetl.application.composite.merger_compatibility_mixin import (
-    MergeCompatibilityMixin,
 )
 from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
@@ -52,7 +48,6 @@ def _path_to_table_name(path: str) -> str:
 
 
 class MergeService(
-    MergeCompatibilityMixin,
     MergeIOMixin,
     MergeMetricsRecorderMixin,
 ):
@@ -74,8 +69,7 @@ class MergeService(
         cross_validator: EnrichmentCrossValidator | None = None,
         gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
         *,
-        collaborators: MergeCollaboratorGroup | None = None,
-        **legacy_collaborators: Any,  # Any: phased legacy keyword bridge
+        collaborators: MergeCollaboratorGroup,
     ) -> None:
         """Initialise the MergeService with all required and optional collaborators.
 
@@ -99,14 +93,9 @@ class MergeService(
             gold_schema: Optional Pandera ``DataFrameModel`` class used to validate
                 the Gold-layer output schema; type is ``Any`` because it is a class
                 reference rather than an instance.
-            collaborators: Optional dependency bundle containing the merge-time
-                collaborator services. When omitted, the legacy keyword-only
-                collaborators remain accepted for phased migration.
+            collaborators: Dependency bundle containing the merge-time collaborator
+                services.
         """
-        collaborator_bundle = build_merge_collaborators(
-            collaborators=collaborators,
-            legacy_collaborators=legacy_collaborators,
-        )
         self._config = merge_config
         self._storage = storage
         self._logger = logger
@@ -115,14 +104,14 @@ class MergeService(
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema
 
-        self._deduplicator = collaborator_bundle.deduplicator
-        self._aggregator = collaborator_bundle.aggregator
-        self._renamer = collaborator_bundle.renamer
-        self._orderer = collaborator_bundle.orderer
-        self._priority_orderer = collaborator_bundle.priority_orderer
-        self._coalesce_policy = collaborator_bundle.coalesce_policy
-        self._conflict_resolver = collaborator_bundle.conflict_resolver
-        self._join_planner = collaborator_bundle.join_planner
+        self._deduplicator = collaborators.deduplicator
+        self._aggregator = collaborators.aggregator
+        self._renamer = collaborators.renamer
+        self._orderer = collaborators.orderer
+        self._priority_orderer = collaborators.priority_orderer
+        self._coalesce_policy = collaborators.coalesce_policy
+        self._conflict_resolver = collaborators.conflict_resolver
+        self._join_planner = collaborators.join_planner
 
     async def merge(
         self,

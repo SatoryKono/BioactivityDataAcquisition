@@ -160,8 +160,8 @@ thresholds:
   hard_fail: 0.19
 strict_validation: false
 invalid_record_policy: quarantine
-field_validations: []
-cross_field_validations: []
+common_field_validations: []
+common_cross_field_validations: []
 """
         )
 
@@ -184,8 +184,8 @@ thresholds:
   hard_fail: 0.20
 strict_validation: false
 invalid_record_policy: quarantine
-field_validations: []
-cross_field_validations: []
+common_field_validations: []
+common_cross_field_validations: []
 """
         )
 
@@ -198,7 +198,7 @@ provider: test_provider
 quality:
   thresholds:
     hard_fail: 0.12
-  field_validations:
+  provider_field_validations:
     - field: provider_field
       type: required
       nullable: true
@@ -235,7 +235,7 @@ version: "1.0.0"
 provider: test_provider
 entity: test_entity
 quality:
-  field_validations:
+  entity_field_validations:
     - field: entity_field
       type: required
       nullable: false
@@ -324,7 +324,7 @@ class TestDQConfigLoaderInlineOverrides:
             "test_provider",
             "test_entity",
             inline_overrides={
-                "field_validations": [
+                "entity_field_validations": [
                     {"field": "inline_field", "type": "required", "nullable": False}
                 ]
             },
@@ -341,7 +341,7 @@ class TestDQConfigLoaderInlineOverrides:
             "test_provider",
             "test_entity",
             inline_overrides={
-                "key_nullability_rules": [
+                "key_nullability": [
                     {
                         "field": "partition_col",
                         "key_type": "partition",
@@ -615,38 +615,36 @@ class TestNormalizeToFileFormat:
         assert result["thresholds"]["hard_fail"] == 0.15
 
     def test_flat_validations_to_entity(self, loader: DQConfigLoader) -> None:
-        """Flat field_validations should be moved to entity level."""
+        """Canonical entity-level field validations are preserved."""
         merged: dict[str, Any] = {
-            "field_validations": [{"field": "test", "type": "required"}]
+            "entity_field_validations": [{"field": "test", "type": "required"}]
         }
 
         result = loader._normalize_to_file_format(merged)
 
-        assert "field_validations" not in result
         assert len(result["entity_field_validations"]) == 1
 
     def test_preserve_existing_entity_validations(self, loader: DQConfigLoader) -> None:
         """Existing entity validations should be preserved when adding flat ones."""
         merged: dict[str, Any] = {
             "entity_field_validations": [{"field": "existing", "type": "range"}],
-            "field_validations": [{"field": "new", "type": "required"}],
         }
+        merged["entity_field_validations"].append({"field": "new", "type": "required"})
 
         result = loader._normalize_to_file_format(merged)
 
         assert len(result["entity_field_validations"]) == 2
 
     def test_cross_field_normalization(self, loader: DQConfigLoader) -> None:
-        """Flat cross_field_validations should be normalized."""
+        """Cross-field validations are preserved at entity level."""
         merged: dict[str, Any] = {
-            "cross_field_validations": [
+            "entity_cross_field_validations": [
                 {"name": "rule", "fields": ["a", "b"], "condition": "all_present"}
             ]
         }
 
         result = loader._normalize_to_file_format(merged)
 
-        assert "cross_field_validations" not in result
         assert len(result["entity_cross_field_validations"]) == 1
 
 

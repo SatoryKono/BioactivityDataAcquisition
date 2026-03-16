@@ -54,7 +54,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: tissue
-  field_validations:
+  entity_field_validations:
   - field: tissue_id
     type: pattern
     pattern: ^CHEMBL\d+$
@@ -85,8 +85,8 @@ quality:
     pattern: ^UBERON:\d{7}$
     nullable: true
     error_message: uberon_id must match UBERON format (UBERON:0000000)
-  cross_field_validations: []
-  conditional_validations: []
+  entity_cross_field_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: tissue_id
     key_type: merge

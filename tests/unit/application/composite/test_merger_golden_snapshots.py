@@ -40,9 +40,9 @@ def test_conflict_resolution_seed_priority_golden_snapshot() -> None:
     merge_service = _build_merge_service()
     df = pl.DataFrame(fixture["input_rows"])
 
-    result = merge_service._resolve_conflicts(
+    result = merge_service._conflict_resolver.resolve_conflicts(
         df=df,
-        enricher_dfs={},
+        _enricher_dfs={},
         enrichers=[],
         seed_pipeline=fixture["seed_pipeline"],
     )

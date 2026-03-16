@@ -114,7 +114,7 @@ quality:
     version: 1.0.0
     provider: chembl
     entity: publication
-    field_validations:
+    entity_field_validations:
         -   field: publication_id
             type: pattern
             pattern: ^CHEMBL\d+$
@@ -184,7 +184,7 @@ quality:
             min: 0
             nullable: true
             error_message: Reference count must be non-negative
-    cross_field_validations:
+    entity_cross_field_validations:
         -   name: publication_identifiable
             fields:
                 - publication_id
@@ -200,7 +200,7 @@ quality:
             severity: warn
             error_message: Publication should have at least one external identifier (PMID
                 or DOI)
-    conditional_validations:
+    entity_conditional_validations:
         -   name: publication_requires_title
             condition_field: publication_type
             condition_value: journal-article

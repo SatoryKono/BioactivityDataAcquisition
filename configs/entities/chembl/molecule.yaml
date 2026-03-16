@@ -109,7 +109,7 @@ quality:
     version: 1.1.0
     provider: chembl
     entity: molecule
-    field_validations:
+    entity_field_validations:
         -   field: molecule_id
             type: required
             nullable: false
@@ -165,7 +165,7 @@ quality:
             min: 0
             max: 1000
             nullable: true
-    cross_field_validations:
+    entity_cross_field_validations:
         -   name: structure_completeness
             fields:
                 - canonical_smiles
@@ -173,7 +173,7 @@ quality:
                 - inchi_key
             condition: any_present
             error_message: At least one structure identifier required
-    conditional_validations: []
+    entity_conditional_validations: []
     key_nullability:
         -   field: molecule_id
             key_type: merge

@@ -77,7 +77,7 @@ quality:
     version: 1.1.0
     provider: chembl
     entity: target
-    field_validations:
+    entity_field_validations:
         -   field: target_id
             type: required
             nullable: false
@@ -114,14 +114,14 @@ quality:
             min: 1
             max: 10000000
             nullable: true
-    cross_field_validations:
+    entity_cross_field_validations:
         -   name: target_identifiable
             fields:
                 - target_id
                 - pref_name
             condition: all_present
             error_message: Target must have ID and preferred name
-    conditional_validations: []
+    entity_conditional_validations: []
     key_nullability:
         -   field: target_id
             key_type: merge

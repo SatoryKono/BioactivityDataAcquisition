@@ -259,14 +259,42 @@ def map_pipeline_config(validated_config: PipelineYamlConfig) -> PipelineYamlCon
     return validated_config
 
 
+def _configs_root_cache_key() -> str:
+    """Build a stable cache key for configuration root resolution.
+
+    The loader depends on the current working directory because it resolves
+    relative paths under ``configs/``. Including this key prevents stale cache
+    reuse across working-directory changes in tests and tooling.
+    """
+    return str(Path("configs").resolve())
+
+
 @lru_cache(maxsize=10)
-def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
+def _load_pipeline_config_cached(
+    pipeline_name: str,
+    _configs_root_key: str,
+) -> PipelineYamlConfig:
     """Load pipeline configuration using read -> normalize -> validate -> map.
 
     Returns:
         PipelineYamlConfig instance for the given pipeline name.
     """
     return load_pipeline_config_uncached(pipeline_name)
+
+
+def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
+    """Load pipeline configuration using read -> normalize -> validate -> map.
+
+    The call is cached by ``pipeline_name`` and the resolved configs-root context
+    to avoid leaking results between different working directories.
+    """
+    return _load_pipeline_config_cached(pipeline_name, _configs_root_cache_key())
+
+
+# Preserve legacy cache management API used by tests and callers.
+load_pipeline_config.cache_clear = _load_pipeline_config_cached.cache_clear
+load_pipeline_config.cache_info = _load_pipeline_config_cached.cache_info
+load_pipeline_config.__wrapped__ = _load_pipeline_config_cached
 
 
 def load_pipeline_config_uncached(

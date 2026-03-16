@@ -9,7 +9,7 @@ dq_overrides:
     - publication_id
     - title
 
-  field_validations:
+  entity_field_validations:
     # === Quality Indicators (CRITICAL) ===
     is_retracted:
       type: boolean

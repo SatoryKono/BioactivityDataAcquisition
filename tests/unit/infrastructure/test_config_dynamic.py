@@ -429,64 +429,21 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
     assert source["provider_config"]["batch_size"] == 30
 
 
-def test_normalize_source_config_supports_top_level_flat_format() -> None:
-    """Normalizer should promote top-level api/client/batch into source section."""
-    raw = {
-        "api": {
-            "base_url": "https://example.chembl/api",
-            "auth_type": "public",
-            "api_version": "v1",
-        },
-        "client": {"timeout_sec": 33.0, "max_retries": 4},
-        "batch": {"api_batch_size": 77, "page_size": 500},
-        "rate_limit": {"requests_per_second": 2.0, "burst": 5},
-        "circuit_breaker": {"failure_threshold": 6, "recovery_timeout": 120},
-        "health_check": {"endpoint": "/health", "timeout": 4},
-    }
-
-    normalized = normalize_source_config(raw)
-    source = normalized["source"]
-
-    assert source["provider_config"]["base_url"] == "https://example.chembl/api"
-    assert source["provider_config"]["auth_type"] == "public"
-    assert source["provider_config"]["api_version"] == "v1"
-    assert source["provider_config"]["client"]["timeout_sec"] == 33.0
-    assert source["provider_config"]["batch_size"] == 77
-    assert source["provider_config"]["page_size"] == 500
-    assert source["rate_limit"]["requests_per_second"] == 2.0
-    assert source["circuit_breaker"]["failure_threshold"] == 6
-    assert source["health_check"]["timeout_sec"] == 4
-
-
-def test_load_source_config_top_level_flat_format(tmp_path, monkeypatch) -> None:
-    """Flat top-level source config should load through SourceYamlConfig."""
+def test_load_source_config_rejects_missing_source_section(tmp_path, monkeypatch) -> None:
+    """Loader should reject provider files without a source section."""
     load_source_config.cache_clear()
 
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
-    flat = {
-        "api": {
-            "base_url": "https://example.pubmed/api",
-            "auth_type": "api_key",
-            "api_key": "${BIOETL_PUBMED_API_KEY}",
-        },
-        "client": {"timeout": 45.0, "max_retries": 3},
-        "batch": {"api_batch_size": 120},
-        "rate_limit": {"requests_per_second": 5.0, "burst": 12},
-        "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
-    }
+    malformed_provider = {"version": "1.0.0", "provider": "pubmed"}
+    (providers_dir / "pubmed.yaml").write_text(yaml.dump(malformed_provider))
 
     monkeypatch.chdir(tmp_path)
-    (providers_dir / "pubmed_flat.yaml").write_text(yaml.dump(flat))
-
-    cfg = load_source_config("pubmed_flat")
-
-    assert cfg.base_url == "https://example.pubmed/api"
-    assert cfg.timeout_sec == 45.0
-    assert cfg.max_retries == 3
-    assert cfg.batch_size == 120
-    assert cfg.rate_limit.requests_per_second == 5.0
+    with pytest.raises(
+        ValueError, match="requires a top-level 'source' section"
+    ):
+        load_source_config("pubmed")
 
 
 def test_dq_thresholds_are_validated_once(setup_configs):
@@ -552,7 +509,7 @@ def test_gold_filters_loading(setup_configs):
 
 
 def test_convention_based_source_file(setup_configs, tmp_path):
-    """Verify source_file is auto-computed from provider when not specified."""
+    """Verify source/filter file refs are auto-computed from provider when not specified."""
     entities_dir = setup_configs
 
     # Create a config without source_file
@@ -570,13 +527,29 @@ def test_convention_based_source_file(setup_configs, tmp_path):
         "entity",
         config_data,
     )
+    providers_dir = Path("configs/providers")
+    providers_dir.mkdir(parents=True, exist_ok=True)
+    (providers_dir / "testprovider.yaml").write_text(
+        yaml.dump(
+            {
+                "version": "1.0.0",
+                "provider": "testprovider",
+                "source": {
+                    "provider_config": {"provider": "testprovider"},
+                    "pagination": {"id_batch_size": 20},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
 
     config = load_pipeline_config("testprovider_entity")
 
     # source_file should be auto-computed
     assert config.dq_config_file == "../../entities/testprovider/entity.yaml"
     assert config.filter_config_file == "../../entities/testprovider/entity.yaml"
-    assert config.schema_file == "../../schemas/testprovider/entity.yaml"
+    assert config.source is not None
+    assert config.schema_file is None
 
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):

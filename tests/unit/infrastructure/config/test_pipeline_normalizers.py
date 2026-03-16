@@ -8,52 +8,11 @@ import pytest
 import yaml
 
 from bioetl.infrastructure.config.pipeline_normalizers import (
-    _load_column_groups_config,
     _load_data_schema_config,
     _merge_data_schema_into_config,
     _validate_schema_config,
     apply_pipeline_schema_normalization,
 )
-
-
-class TestLoadColumnGroupsConfig:
-    """Tests for _load_column_groups_config."""
-
-    def test_missing_file_returns_none(self, tmp_path: Path) -> None:
-        """Should return None when column_groups file is missing."""
-        config_path = tmp_path / "config.yaml"
-        result = _load_column_groups_config(config_path, "groups.yaml")
-        assert result is None
-
-    def test_file_with_list_format(self, tmp_path: Path) -> None:
-        """Should return list when file contains a list."""
-        groups = [{"name": "system", "columns": ["id"]}]
-        (tmp_path / "groups.yaml").write_text(yaml.safe_dump(groups))
-        config_path = tmp_path / "config.yaml"
-        result = _load_column_groups_config(config_path, "groups.yaml")
-        assert result == groups
-
-    def test_file_with_dict_format(self, tmp_path: Path) -> None:
-        """Should extract column_groups from dict format."""
-        groups = [{"name": "system", "columns": ["id"]}]
-        (tmp_path / "groups.yaml").write_text(yaml.safe_dump({"column_groups": groups}))
-        config_path = tmp_path / "config.yaml"
-        result = _load_column_groups_config(config_path, "groups.yaml")
-        assert result == groups
-
-    def test_file_with_dict_no_column_groups_key(self, tmp_path: Path) -> None:
-        """Should return None when dict has no column_groups key."""
-        (tmp_path / "groups.yaml").write_text(yaml.safe_dump({"other": "value"}))
-        config_path = tmp_path / "config.yaml"
-        result = _load_column_groups_config(config_path, "groups.yaml")
-        assert result is None
-
-    def test_empty_file_returns_none(self, tmp_path: Path) -> None:
-        """Should return None for empty file."""
-        (tmp_path / "groups.yaml").write_text("")
-        config_path = tmp_path / "config.yaml"
-        result = _load_column_groups_config(config_path, "groups.yaml")
-        assert result is None
 
 
 class TestLoadDataSchemaConfig:
@@ -218,12 +177,15 @@ class TestValidateSchemaConfig:
 class TestApplyPipelineSchemaNormalization:
     """Tests for apply_pipeline_schema_normalization."""
 
-    def test_entity_config_has_column_groups_returns_early(self) -> None:
-        """Should return early when entity_config already has column_groups."""
+    def test_entity_config_column_groups_no_longer_short_circuit(self) -> None:
+        """Entity schema in entity_config does not bypass unified schema normalization."""
         config: dict = {}
-        entity_config = {"column_groups": [{"name": "system"}]}
+        entity_config = {"column_groups": [{"name": "system", "columns": ["id"]}]}
         apply_pipeline_schema_normalization(
-            config, entity_config=entity_config, config_path=Path(".")
+            config,
+            entity_config=entity_config,
+            config_path=Path("."),
+            unified_schema=None,
         )
         assert "column_groups" not in config
 
@@ -245,56 +207,8 @@ class TestApplyPipelineSchemaNormalization:
             unified_schema=unified_schema,
         )
         assert config["column_groups"] == unified_schema["column_groups"]
-
-    def test_loads_from_data_schema_file(self, tmp_path: Path) -> None:
-        """Should load schema from data_schema_file when present."""
-        schema = {
-            "column_groups": [
-                {"name": "system", "columns": ["id"]},
-                {"name": "business", "columns": ["name"]},
-            ],
-            "silver": {"include_groups": ["system", "business"]},
-            "gold": {"include_groups": ["system", "business"]},
-        }
-        (tmp_path / "schema.yaml").write_text(yaml.safe_dump(schema))
-        config_path = tmp_path / "config.yaml"
-        config: dict = {"data_schema_file": "schema.yaml"}
-        apply_pipeline_schema_normalization(
-            config, entity_config={}, config_path=config_path
-        )
-        assert "column_groups" in config
-
-    def test_loads_from_schema_file_fallback(self, tmp_path: Path) -> None:
-        """Should load schema from schema_file when data_schema_file is absent."""
-        schema = {
-            "column_groups": [
-                {"name": "system", "columns": ["id"]},
-                {"name": "business", "columns": ["name"]},
-            ],
-            "silver": {"include_groups": ["system", "business"]},
-            "gold": {"include_groups": ["system", "business"]},
-        }
-        (tmp_path / "schema.yaml").write_text(yaml.safe_dump(schema))
-        config_path = tmp_path / "config.yaml"
-        config: dict = {"schema_file": "schema.yaml"}
-        apply_pipeline_schema_normalization(
-            config, entity_config={}, config_path=config_path
-        )
-        assert "column_groups" in config
-
-    def test_loads_column_groups_file_fallback(self, tmp_path: Path) -> None:
-        """Should load from column_groups_file as last fallback."""
-        groups = [
-            {"name": "system", "columns": ["id"]},
-            {"name": "business", "columns": ["name"]},
-        ]
-        (tmp_path / "groups.yaml").write_text(yaml.safe_dump(groups))
-        config_path = tmp_path / "config.yaml"
-        config: dict = {"column_groups_file": "groups.yaml"}
-        apply_pipeline_schema_normalization(
-            config, entity_config={}, config_path=config_path
-        )
-        assert config["column_groups"] == groups
+        assert config["data_schema"]["silver"] == unified_schema["silver"]
+        assert config["data_schema"]["gold"] == unified_schema["gold"]
 
     def test_no_schema_sources_does_nothing(self) -> None:
         """Should do nothing when no schema sources are available."""

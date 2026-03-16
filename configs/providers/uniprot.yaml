@@ -57,7 +57,7 @@ quality:
     thresholds:
         soft_fail: 0.03
         hard_fail: 0.1
-    field_validations:
+    provider_field_validations:
         -   field: accession
             type: pattern
             pattern: ^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$

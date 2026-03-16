@@ -62,7 +62,7 @@ quality:
     thresholds:
         soft_fail: 0.15
         hard_fail: 0.4
-    field_validations:
+    provider_field_validations:
         -   field: paper_id
             type: pattern
             pattern: ^[a-f0-9]{40}$

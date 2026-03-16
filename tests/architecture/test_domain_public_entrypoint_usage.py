@@ -8,8 +8,6 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = ROOT / "src"
-TESTS_ROOT = ROOT / "tests"
 
 SPLIT_CONFIG_MODULES = frozenset(
     {
@@ -60,15 +58,12 @@ ALLOWED_VALUE_OBJECT_TEST_FILES = frozenset(
 
 
 def _iter_import_records(
-    search_root: Path,
+    ast_cache: dict[Path, ast.Module],
     *,
     module_names: frozenset[str],
 ) -> list[tuple[Path, int, str]]:
     records: list[tuple[Path, int, str]] = []
-    for py_file in search_root.rglob("*.py"):
-        if "__pycache__" in py_file.parts:
-            continue
-        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    for py_file, tree in sorted(ast_cache.items()):
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module in module_names:
                 records.append((py_file, node.lineno, node.module))
@@ -97,10 +92,12 @@ def _format_prefix_confined_violations(
 
 
 @pytest.mark.architecture
-def test_split_composite_config_modules_are_confined_to_domain_composite() -> None:
+def test_split_composite_config_modules_are_confined_to_domain_composite(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """First-party code outside domain.composite must use the public config entrypoint."""
     violations = _format_prefix_confined_violations(
-        _iter_import_records(SRC_ROOT, module_names=SPLIT_CONFIG_MODULES),
+        _iter_import_records(source_ast_cache, module_names=SPLIT_CONFIG_MODULES),
         allowed_prefix=ROOT / "src" / "bioetl" / "domain" / "composite",
     )
     assert not violations, (
@@ -110,10 +107,12 @@ def test_split_composite_config_modules_are_confined_to_domain_composite() -> No
 
 
 @pytest.mark.architecture
-def test_split_composite_config_modules_are_only_used_by_facade_test() -> None:
+def test_split_composite_config_modules_are_only_used_by_facade_test(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Split config internals must stay confined to dedicated composite-config tests."""
     violations = _format_prefix_confined_violations(
-        _iter_import_records(TESTS_ROOT, module_names=SPLIT_CONFIG_MODULES),
+        _iter_import_records(test_ast_cache, module_names=SPLIT_CONFIG_MODULES),
         allowed_prefix=ROOT / "tests" / "__never__",
         allowed_test_files=ALLOWED_CONFIG_TEST_FILES,
     )
@@ -124,10 +123,12 @@ def test_split_composite_config_modules_are_only_used_by_facade_test() -> None:
 
 
 @pytest.mark.architecture
-def test_split_value_object_modules_are_confined_to_domain_value_objects() -> None:
+def test_split_value_object_modules_are_confined_to_domain_value_objects(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """First-party code outside domain.value_objects must use the public facades."""
     violations = _format_prefix_confined_violations(
-        _iter_import_records(SRC_ROOT, module_names=SPLIT_VALUE_OBJECT_MODULES),
+        _iter_import_records(source_ast_cache, module_names=SPLIT_VALUE_OBJECT_MODULES),
         allowed_prefix=ROOT / "src" / "bioetl" / "domain" / "value_objects",
     )
     assert not violations, (
@@ -137,10 +138,12 @@ def test_split_value_object_modules_are_confined_to_domain_value_objects() -> No
 
 
 @pytest.mark.architecture
-def test_split_value_object_modules_are_not_imported_from_tests() -> None:
+def test_split_value_object_modules_are_not_imported_from_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Tests should exercise public value-object facades, not split internals."""
     violations = _format_prefix_confined_violations(
-        _iter_import_records(TESTS_ROOT, module_names=SPLIT_VALUE_OBJECT_MODULES),
+        _iter_import_records(test_ast_cache, module_names=SPLIT_VALUE_OBJECT_MODULES),
         allowed_prefix=ROOT / "tests" / "__never__",
         allowed_test_files=ALLOWED_VALUE_OBJECT_TEST_FILES,
     )

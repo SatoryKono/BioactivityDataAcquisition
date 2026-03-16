@@ -166,7 +166,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             return
         if self._finalizer is not None and self._finalizer.alive:
             self._finalizer.detach()
-        self.thread_pool.shutdown(wait=True)
+        await asyncio.to_thread(self.thread_pool.shutdown, wait=True)
 
     async def aclose(self) -> None:
         """Gracefully close resources."""

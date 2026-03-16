@@ -104,8 +104,3 @@ class TransformerProtocol(Protocol):
 
         """
         ...
-
-
-# Backward-compatible alias kept while internal call sites migrate to the
-# canonical *Protocol naming used outside the domain layer.
-TransformerPort = TransformerProtocol

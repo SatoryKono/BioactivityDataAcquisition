@@ -22,23 +22,38 @@ from bioetl.infrastructure.config_loader import (
 
 @pytest.mark.unit
 class TestSchemaFileDefault:
-    """Verify convention-based default for schema_file."""
+    """Verify deprecated schema-file aliases are no longer injected."""
 
-    def test_default_path_uses_two_parent_levels(self) -> None:
-        """Default schema_file must be ../../schemas/{provider}/{entity}.yaml."""
+    def test_no_legacy_schema_file_defaults(self) -> None:
+        """Legacy schema-file default aliases are not injected by convention defaults."""
         config: dict[str, Any] = {}
         _apply_file_reference_defaults(config, "chembl", "molecule")
 
-        assert config["schema_file"] == "../../schemas/chembl/molecule.yaml"
+        assert "schema_file" not in config
+        assert "column_groups_file" not in config
+        assert "data_schema_file" not in config
+
+    def test_defaults_still_include_source_and_filter_references(self) -> None:
+        """Core convention defaults still inject source/filter refs."""
+        config: dict[str, Any] = {}
+        _apply_file_reference_defaults(config, "chembl", "molecule")
+
+        assert config["source_file"] == "../../providers/chembl.yaml"
+        assert config["dq_config_file"] == "../../entities/chembl/molecule.yaml"
+        assert config["filter_config_file"] == "../../entities/chembl/molecule.yaml"
 
     def test_explicit_override_not_overwritten(self) -> None:
-        """Explicit schema_file in config must not be overwritten by default."""
+        """Explicit legacy aliases are left untouched if present."""
         config: dict[str, Any] = {
             "schema_file": "custom/path/schema.yaml",
+            "column_groups_file": "custom/path/groups.yaml",
+            "data_schema_file": "custom/path/data_schema.yaml",
         }
         _apply_file_reference_defaults(config, "chembl", "molecule")
 
         assert config["schema_file"] == "custom/path/schema.yaml"
+        assert config["column_groups_file"] == "custom/path/groups.yaml"
+        assert config["data_schema_file"] == "custom/path/data_schema.yaml"
 
 
 @pytest.mark.unit

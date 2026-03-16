@@ -8,8 +8,6 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = ROOT / "src"
-TESTS_ROOT = ROOT / "tests"
 COMPAT_PARENT_IMPORTS: dict[str, frozenset[str]] = {}
 ALLOWED_SRC_IMPORTS: dict[str, frozenset[Path]] = {}
 ALLOWED_TEST_IMPORTS: dict[str, frozenset[Path]] = {}
@@ -55,12 +53,11 @@ REMOVED_COMPAT_FILES = frozenset(
 )
 
 
-def _iter_import_records(search_root: Path) -> list[tuple[Path, int, str]]:
+def _iter_import_records(
+    ast_cache: dict[Path, ast.Module],
+) -> list[tuple[Path, int, str]]:
     records: list[tuple[Path, int, str]] = []
-    for py_file in search_root.rglob("*.py"):
-        if "__pycache__" in py_file.parts:
-            continue
-        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    for py_file, tree in sorted(ast_cache.items()):
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module in ALLOWED_SRC_IMPORTS:
                 records.append((py_file, node.lineno, node.module))
@@ -99,12 +96,11 @@ def _format_violations(
     return violations
 
 
-def _iter_removed_import_records(search_root: Path) -> list[tuple[Path, int, str]]:
+def _iter_removed_import_records(
+    ast_cache: dict[Path, ast.Module],
+) -> list[tuple[Path, int, str]]:
     records: list[tuple[Path, int, str]] = []
-    for py_file in search_root.rglob("*.py"):
-        if "__pycache__" in py_file.parts:
-            continue
-        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    for py_file, tree in sorted(ast_cache.items()):
         for node in ast.walk(tree):
             if (
                 isinstance(node, ast.ImportFrom)
@@ -133,10 +129,12 @@ def _iter_removed_import_records(search_root: Path) -> list[tuple[Path, int, str
 
 
 @pytest.mark.architecture
-def test_application_composite_compat_surfaces_are_confined_in_src() -> None:
+def test_application_composite_compat_surfaces_are_confined_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """First-party src must not grow new imports of active composite compat modules."""
     violations = _format_violations(
-        _iter_import_records(SRC_ROOT),
+        _iter_import_records(source_ast_cache),
         allowed_imports=ALLOWED_SRC_IMPORTS,
     )
     assert not violations, (
@@ -146,10 +144,12 @@ def test_application_composite_compat_surfaces_are_confined_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_application_composite_compat_surfaces_are_confined_in_tests() -> None:
+def test_application_composite_compat_surfaces_are_confined_in_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Ordinary tests must not accumulate new imports of active composite compat modules."""
     violations = _format_violations(
-        _iter_import_records(TESTS_ROOT),
+        _iter_import_records(test_ast_cache),
         allowed_imports=ALLOWED_TEST_IMPORTS,
     )
     assert not violations, (
@@ -173,10 +173,13 @@ def test_removed_application_composite_compat_shim_files_stay_absent() -> None:
 
 
 @pytest.mark.architecture
-def test_removed_application_composite_compat_shims_are_not_imported() -> None:
+def test_removed_application_composite_compat_shims_are_not_imported(
+    source_ast_cache: dict[Path, ast.Module],
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Removed application.composite compat shims must not be imported."""
-    records = _iter_removed_import_records(SRC_ROOT)
-    records.extend(_iter_removed_import_records(TESTS_ROOT))
+    records = _iter_removed_import_records(source_ast_cache)
+    records.extend(_iter_removed_import_records(test_ast_cache))
     violations = [
         f"{py_file.relative_to(ROOT).as_posix()}:{lineno} imports {module_name}"
         for py_file, lineno, module_name in records

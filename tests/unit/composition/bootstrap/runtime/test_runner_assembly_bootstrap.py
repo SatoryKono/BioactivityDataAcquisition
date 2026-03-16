@@ -1,0 +1,220 @@
+"""Unit tests for runner_assembly composite bootstrap helpers."""
+from __future__ import annotations
+
+import warnings
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+from uuid import UUID
+
+import pytest
+
+_VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
+
+from bioetl.composition.bootstrap.runtime.runner_assembly import (
+    bootstrap_composite_runner,
+    create_composite_runner,
+    create_composite_runner_with_legacy_fsm_adapter,
+)
+
+
+@pytest.mark.unit
+class TestCreateCompositeRunnerWithLegacyFsmAdapter:
+    """Tests for create_composite_runner_with_legacy_fsm_adapter."""
+
+    def test_returns_runner_service(self) -> None:
+        """Creates CompositePipelineRunnerService with all provided deps."""
+        config = MagicMock()
+        runtime = MagicMock()
+        logger = MagicMock()
+        lock = MagicMock()
+        fsm = MagicMock()
+
+        result = create_composite_runner_with_legacy_fsm_adapter(
+            config=config,
+            runtime=runtime,
+            seed_runner_factory=MagicMock(),
+            enricher_runner_factory=MagicMock(),
+            key_extractor=MagicMock(),
+            coordinator=MagicMock(),
+            merger=MagicMock(),
+            checkpoint_manager=MagicMock(),
+            logger=logger,
+            lock=lock,
+            fsm_state_helper=fsm,
+            run_id=_VALID_RUN_ID,
+        )
+
+        assert result is not None
+
+    def test_generates_run_id_when_none(self) -> None:
+        """When run_id is None a UUID is generated."""
+        result = create_composite_runner_with_legacy_fsm_adapter(
+            config=MagicMock(),
+            runtime=MagicMock(),
+            seed_runner_factory=MagicMock(),
+            enricher_runner_factory=MagicMock(),
+            key_extractor=MagicMock(),
+            coordinator=MagicMock(),
+            merger=MagicMock(),
+            checkpoint_manager=MagicMock(),
+            logger=MagicMock(),
+            lock=MagicMock(),
+            fsm_state_helper=MagicMock(),
+            run_id=None,
+        )
+
+        assert result is not None
+
+    def test_warns_when_fsm_state_helper_is_none(self) -> None:
+        """Emits DeprecationWarning when fsm_state_helper not provided."""
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            create_composite_runner_with_legacy_fsm_adapter(
+                config=MagicMock(),
+                runtime=MagicMock(),
+                seed_runner_factory=MagicMock(),
+                enricher_runner_factory=MagicMock(),
+                key_extractor=MagicMock(),
+                coordinator=MagicMock(),
+                merger=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                logger=MagicMock(),
+                lock=MagicMock(),
+                fsm_state_helper=None,
+                run_id=_VALID_RUN_ID,
+            )
+
+        deprecation_warnings = [
+            x for x in w if issubclass(x.category, DeprecationWarning)
+        ]
+        assert len(deprecation_warnings) >= 1
+        assert "fsm_state_helper" in str(deprecation_warnings[0].message)
+
+
+@pytest.mark.unit
+class TestCreateCompositeRunner:
+    """Tests for create_composite_runner."""
+
+    def test_delegates_to_runner_factory(self) -> None:
+        """create_composite_runner calls the provided runner_factory callable."""
+        expected_runner = MagicMock()
+        runner_factory = MagicMock(return_value=expected_runner)
+        support_services = SimpleNamespace(
+            key_extractor=MagicMock(),
+            dependency_coordinator=MagicMock(),
+            coordinator=MagicMock(),
+            merger=MagicMock(),
+            checkpoint_manager=MagicMock(),
+            fsm_state_helper=MagicMock(),
+            dq_report_service=MagicMock(),
+            quarantine_port=MagicMock(),
+        )
+
+        result = create_composite_runner(
+            config=MagicMock(),
+            runtime=MagicMock(),
+            run_id=_VALID_RUN_ID,
+            logger=MagicMock(),
+            lock=MagicMock(),
+            seed_runner_factory=MagicMock(),
+            dependencies_runner_factory=MagicMock(),
+            enricher_runner_factory=MagicMock(),
+            support_services=support_services,
+            runner_factory=runner_factory,
+        )
+
+        assert result is expected_runner
+        runner_factory.assert_called_once()
+
+    def test_passes_support_services_fields(self) -> None:
+        """Support service attributes are forwarded to the runner_factory."""
+        runner_factory = MagicMock(return_value=MagicMock())
+        key_extractor = MagicMock()
+        support_services = SimpleNamespace(
+            key_extractor=key_extractor,
+            dependency_coordinator=MagicMock(),
+            coordinator=MagicMock(),
+            merger=MagicMock(),
+            checkpoint_manager=MagicMock(),
+            fsm_state_helper=MagicMock(),
+            dq_report_service=MagicMock(),
+            quarantine_port=MagicMock(),
+        )
+
+        create_composite_runner(
+            config=MagicMock(),
+            runtime=MagicMock(),
+            run_id=_VALID_RUN_ID,
+            logger=MagicMock(),
+            lock=MagicMock(),
+            seed_runner_factory=MagicMock(),
+            dependencies_runner_factory=MagicMock(),
+            enricher_runner_factory=MagicMock(),
+            support_services=support_services,
+            runner_factory=runner_factory,
+        )
+
+        call_kwargs = runner_factory.call_args[1]
+        assert call_kwargs["key_extractor"] is key_extractor
+
+
+@pytest.mark.unit
+class TestBootstrapCompositeRunner:
+    """Tests for bootstrap_composite_runner."""
+
+    def test_orchestrates_all_steps(self) -> None:
+        """bootstrap_composite_runner chains basics -> factories -> services -> runner."""
+        settings = SimpleNamespace()
+        logger = MagicMock()
+        storage = MagicMock()
+        lock = MagicMock()
+
+        bootstrap_basics = MagicMock(
+            return_value=("rid", settings, logger, storage, lock)
+        )
+        seed_f = MagicMock()
+        dep_f = MagicMock()
+        enr_f = MagicMock()
+        build_factories = MagicMock(return_value=(seed_f, dep_f, enr_f))
+        support = SimpleNamespace()
+        build_support = MagicMock(return_value=support)
+        expected = MagicMock()
+        create_runner = MagicMock(return_value=expected)
+
+        result = bootstrap_composite_runner(
+            config=MagicMock(),
+            runtime=MagicMock(),
+            run_id=None,
+            bootstrap_runtime_basics_fn=bootstrap_basics,
+            build_runner_factories_fn=build_factories,
+            build_support_services_fn=build_support,
+            create_composite_runner_fn=create_runner,
+        )
+
+        assert result is expected
+        bootstrap_basics.assert_called_once()
+        build_factories.assert_called_once()
+        build_support.assert_called_once()
+        create_runner.assert_called_once()
+
+    def test_passes_run_id_downstream(self) -> None:
+        """Effective run_id from basics is forwarded to create_runner."""
+        bootstrap_basics = MagicMock(
+            return_value=("effective-rid", SimpleNamespace(), MagicMock(), MagicMock(), MagicMock())
+        )
+        create_runner = MagicMock(return_value=MagicMock())
+
+        bootstrap_composite_runner(
+            config=MagicMock(),
+            runtime=MagicMock(),
+            run_id=None,
+            bootstrap_runtime_basics_fn=bootstrap_basics,
+            build_runner_factories_fn=MagicMock(
+                return_value=(MagicMock(), MagicMock(), MagicMock())
+            ),
+            build_support_services_fn=MagicMock(return_value=SimpleNamespace()),
+            create_composite_runner_fn=create_runner,
+        )
+
+        call_kwargs = create_runner.call_args[1]
+        assert call_kwargs["run_id"] == "effective-rid"

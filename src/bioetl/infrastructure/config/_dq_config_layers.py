@@ -11,15 +11,14 @@ LoadYamlFn = Callable[[Path], JsonDict]
 
 _PROVIDER_FALLBACK_KEYS = (
     "thresholds",
-    "field_validations",
     "provider_field_validations",
-    "cross_field_validations",
 )
 _ENTITY_FALLBACK_KEYS = (
     "thresholds",
-    "field_validations",
     "entity_field_validations",
-    "cross_field_validations",
+    "entity_cross_field_validations",
+    "entity_conditional_validations",
+    "key_nullability",
 )
 
 

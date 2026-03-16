@@ -213,6 +213,8 @@ jobs:
                         path: tests/integration/
                     -   name: architecture
                         path: tests/architecture/
+                    -   name: security
+                        path: tests/security/
 
         steps:
             -   name: Checkout code

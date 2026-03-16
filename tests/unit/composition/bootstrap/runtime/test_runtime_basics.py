@@ -1,0 +1,169 @@
+"""Unit tests for runtime_basics bootstrap helpers."""
+from __future__ import annotations
+
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+from uuid import UUID
+
+import pytest
+
+from bioetl.composition.bootstrap.runtime.runtime_basics import (
+    bootstrap_runtime_basics,
+    build_runner_factories,
+    build_support_services,
+)
+
+
+_FIXED_UUID = UUID("12345678-1234-5678-1234-567812345678")
+
+
+@pytest.mark.unit
+class TestBootstrapRuntimeBasics:
+    """Tests for bootstrap_runtime_basics."""
+
+    def test_returns_five_element_tuple(self) -> None:
+        """bootstrap_runtime_basics returns (run_id, settings, logger, storage, lock)."""
+        config = SimpleNamespace(name="test_pipeline")
+        settings = SimpleNamespace()
+        logger = MagicMock()
+        storage = MagicMock()
+        lock = MagicMock()
+
+        result = bootstrap_runtime_basics(
+            config=config,
+            run_id=None,
+            settings_provider=lambda: settings,
+            logger_bootstrapper=lambda _n, _u, _l: logger,
+            storage_bootstrapper=lambda **kw: storage,
+            lock_factory=lambda: lock,
+            uuid_factory=lambda: _FIXED_UUID,
+        )
+
+        assert len(result) == 5
+        run_id, s, lg, st, lk = result
+        assert run_id == str(_FIXED_UUID)
+        assert s is settings
+        assert lg is logger
+        assert st is storage
+        assert lk is lock
+
+    def test_uses_provided_run_id(self) -> None:
+        """When run_id is provided, it is used instead of generating a new one."""
+        config = SimpleNamespace(name="test_pipeline")
+        provided_run_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+
+        result = bootstrap_runtime_basics(
+            config=config,
+            run_id=provided_run_id,
+            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
+            storage_bootstrapper=lambda **kw: MagicMock(),
+            lock_factory=MagicMock(return_value=MagicMock()),
+            uuid_factory=MagicMock(),
+        )
+
+        assert result[0] == provided_run_id
+
+    def test_generates_run_id_when_none(self) -> None:
+        """When run_id is None, uuid_factory is called to generate one."""
+        uuid_factory = MagicMock(return_value=_FIXED_UUID)
+
+        result = bootstrap_runtime_basics(
+            config=SimpleNamespace(name="p"),
+            run_id=None,
+            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
+            storage_bootstrapper=lambda **kw: MagicMock(),
+            lock_factory=MagicMock(return_value=MagicMock()),
+            uuid_factory=uuid_factory,
+        )
+
+        uuid_factory.assert_called_once()
+        assert result[0] == str(_FIXED_UUID)
+
+    def test_storage_bootstrapper_called_with_csv_export(self) -> None:
+        """storage_bootstrapper is called with enable_csv_export=True."""
+        storage_bootstrapper = MagicMock(return_value=MagicMock())
+
+        bootstrap_runtime_basics(
+            config=SimpleNamespace(name="p"),
+            run_id=str(_FIXED_UUID),
+            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
+            storage_bootstrapper=storage_bootstrapper,
+            lock_factory=MagicMock(return_value=MagicMock()),
+            uuid_factory=MagicMock(),
+        )
+
+        storage_bootstrapper.assert_called_once_with(enable_csv_export=True)
+
+    def test_logger_bootstrapper_receives_pipeline_name(self) -> None:
+        """logger_bootstrapper receives config.name as the first argument."""
+        captured: list[str] = []
+
+        def _logger_bootstrapper(name: str, uid: UUID, level: str) -> MagicMock:
+            captured.append(name)
+            return MagicMock()
+
+        bootstrap_runtime_basics(
+            config=SimpleNamespace(name="my_composite"),
+            run_id=str(_FIXED_UUID),
+            settings_provider=MagicMock(return_value=SimpleNamespace()),
+            logger_bootstrapper=_logger_bootstrapper,
+            storage_bootstrapper=lambda **kw: MagicMock(),
+            lock_factory=MagicMock(return_value=MagicMock()),
+            uuid_factory=MagicMock(),
+        )
+
+        assert captured == ["my_composite"]
+
+
+@pytest.mark.unit
+class TestBuildSupportServices:
+    """Tests for build_support_services."""
+
+    def test_delegates_to_factory_cls_build(self) -> None:
+        """build_support_services calls factory_cls(...).build()."""
+        expected_services = SimpleNamespace(key_extractor=MagicMock())
+        mock_instance = MagicMock()
+        mock_instance.build.return_value = expected_services
+        mock_cls = MagicMock(return_value=mock_instance)
+
+        result = build_support_services(
+            config=SimpleNamespace(),
+            runtime=SimpleNamespace(),
+            settings=SimpleNamespace(),
+            logger=MagicMock(),
+            storage=MagicMock(),
+            run_id="rid",
+            support_services_factory_cls=mock_cls,
+            resolve_gold_schema_fn=MagicMock(),
+            load_field_group_registry_fn=MagicMock(),
+            create_dq_report_service_fn=MagicMock(),
+        )
+
+        assert result is expected_services
+        mock_instance.build.assert_called_once()
+
+    def test_factory_cls_receives_config(self) -> None:
+        """Factory class receives config kwarg."""
+        mock_instance = MagicMock()
+        mock_instance.build.return_value = SimpleNamespace()
+        mock_cls = MagicMock(return_value=mock_instance)
+        config = SimpleNamespace(name="test")
+
+        build_support_services(
+            config=config,
+            runtime=SimpleNamespace(),
+            settings=SimpleNamespace(),
+            logger=MagicMock(),
+            storage=MagicMock(),
+            run_id="rid",
+            support_services_factory_cls=mock_cls,
+            resolve_gold_schema_fn=MagicMock(),
+            load_field_group_registry_fn=MagicMock(),
+            create_dq_report_service_fn=MagicMock(),
+        )
+
+        call_kwargs = mock_cls.call_args[1]
+        assert call_kwargs["config"] is config

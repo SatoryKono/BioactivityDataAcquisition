@@ -419,7 +419,7 @@ class TestManyToOneAggregation:
             ),
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"chembl_publication_term": enricher_df},
             enrichers=[enricher_config],

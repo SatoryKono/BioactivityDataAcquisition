@@ -44,14 +44,6 @@ def _apply_file_reference_defaults(
         "filter_config_file",
         f"../../entities/{provider}/{entity_type}.yaml",
     )
-    config.setdefault(
-        "schema_file",
-        f"../../schemas/{provider}/{entity_type}.yaml",
-    )
-    config.setdefault(
-        "column_groups_file",
-        f"../data_schema/{provider}/{entity_type}.yaml",
-    )
 
 
 def _apply_layer_defaults(
@@ -146,6 +138,8 @@ def normalize_pipeline_payload(
     load_source_section(config, payload.config_path)
 
     for key in ("source_file", "data_schema", "filter_defaults", "contract_defaults"):
+        config.pop(key, None)
+    for key in ("schema_file", "data_schema_file", "column_groups_file"):
         config.pop(key, None)
     return config
 
