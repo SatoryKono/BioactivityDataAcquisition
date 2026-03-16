@@ -18,7 +18,7 @@ report:
   sample_size: 10
   output_path: null
 
-field_validations:
+common_field_validations:
   - field: _content_hash
     type: required
     nullable: false
@@ -30,4 +30,4 @@ field_validations:
     nullable: false
     error_message: "Ingestion timestamp must be ISO 8601 format"
 
-cross_field_validations: []
+common_cross_field_validations: []

@@ -69,7 +69,7 @@ quality:
     thresholds:
         soft_fail: 0.05
         hard_fail: 0.15
-    field_validations:
+    provider_field_validations:
         -   field: molecule_id
             type: pattern
             pattern: ^CHEMBL\d+$

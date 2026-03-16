@@ -70,7 +70,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: assay_parameters
-  field_validations:
+  entity_field_validations:
   - field: assay_param_id
     type: range
     min: 1
@@ -86,14 +86,14 @@ quality:
     pattern: ^.{1,100}$
     nullable: false
     error_message: Parameter type is required
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: param_linkage
     fields:
     - assay_param_id
     - assay_id
     condition: all_present
     error_message: Both param ID and assay ID are required
-  conditional_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: assay_param_id
     key_type: merge

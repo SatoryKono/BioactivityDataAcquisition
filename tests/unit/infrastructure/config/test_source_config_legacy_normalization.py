@@ -82,50 +82,8 @@ _CASE_CHEMBL_NEW: dict[str, Any] = {
     }
 }
 
-_CASE_PUBMED_LEGACY_FLAT: dict[str, Any] = {
-    "api": {
-        "base_url": "https://example.pubmed/api",
-        "auth_type": "api_key",
-        "api_key": "${BIOETL_PUBMED_API_KEY}",
-        "api_version": "v2",
-    },
-    "client": {"timeout": 45.0, "max_retries": 3},
-    "batch": {"api_batch_size": 120},
-    "rate_limit": {
-        "requests_per_second": 5.0,
-        "burst": 12,
-        "with_api_key": {"requests_per_second": 7.5, "burst": 20},
-    },
-    "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
-    "health_check": {"endpoint": "/health", "timeout": 7},
-}
-
-_CASE_PUBMED_NEW: dict[str, Any] = {
-    "source": {
-        "type": "api",
-        "load_strategy": "full",
-        "api": {
-            "base_url": "https://example.pubmed/api",
-            "auth_type": "api_key",
-            "api_key": "${BIOETL_PUBMED_API_KEY}",
-            "api_version": "v2",
-        },
-        "client": {"timeout_sec": 45.0, "max_retries": 3},
-        "batch": {"size": 120},
-        "provider_config": {},
-        "rate_limit": {
-            "requests_per_second": 5.0,
-            "burst": 12,
-            "authenticated": {"requests_per_second": 7.5, "burst": 20},
-        },
-        "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
-        "health_check": {"endpoint": "/health", "timeout_sec": 7},
-    }
-}
-
 _GOLDEN_CASES: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {
     "chembl_aliases": (_CASE_CHEMBL_LEGACY, _CASE_CHEMBL_NEW),
-    "pubmed_flat_payload": (_CASE_PUBMED_LEGACY_FLAT, _CASE_PUBMED_NEW),
 }
 
 

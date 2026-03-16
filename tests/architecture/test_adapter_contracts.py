@@ -212,18 +212,18 @@ class TestAdapterMixinPolicy:
         )
 
     def test_src_does_not_import_legacy_adapter_mixin_modules(
-        self, src_dir: Path
+        self,
+        src_dir: Path,
+        source_ast_cache: dict[Path, ast.Module],
+        test_ast_cache: dict[Path, ast.Module],
     ) -> None:
         """Removed legacy adapter-mixin module paths must stay absent everywhere."""
         violations: list[str] = []
-        search_roots = [src_dir / "bioetl", src_dir.parent / "tests"]
+        root = src_dir.parent
 
-        for root in search_roots:
-            if not root.exists():
-                continue
-            for py_file in root.rglob("*.py"):
-                rel_path = py_file.relative_to(src_dir.parent).as_posix()
-                tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=rel_path)
+        for ast_cache in (source_ast_cache, test_ast_cache):
+            for py_file, tree in sorted(ast_cache.items()):
+                rel_path = py_file.relative_to(root).as_posix()
                 for node in ast.walk(tree):
                     if (
                         isinstance(node, ast.ImportFrom)
@@ -244,16 +244,15 @@ class TestAdapterMixinPolicy:
             + "\n".join(f"  - {v}" for v in violations)
         )
 
-    def test_src_does_not_use_legacy_adapter_mixin_symbols(self, src_dir: Path) -> None:
+    def test_src_does_not_use_legacy_adapter_mixin_symbols(
+        self,
+        src_dir: Path,
+        source_content_cache: dict[Path, str],
+    ) -> None:
         """Production source must not reference legacy shim symbol names."""
-        src_root = src_dir / "bioetl"
-        if not src_root.exists():
-            pytest.skip("bioetl source not found")
-
         violations: list[str] = []
-        for py_file in src_root.rglob("*.py"):
+        for py_file, content in sorted(source_content_cache.items()):
             rel_path = py_file.relative_to(src_dir).as_posix()
-            content = py_file.read_text(encoding="utf-8")
             for symbol in LEGACY_SHIM_SYMBOLS:
                 if re.search(rf"\b{re.escape(symbol)}\b", content):
                     violations.append(
@@ -417,7 +416,10 @@ class TestAdapterPortCompliance:
         )
 
     def test_primary_adapter_classes_use_package_root_imports(
-        self, src_dir: Path
+        self,
+        src_dir: Path,
+        source_ast_cache: dict[Path, ast.Module],
+        test_ast_cache: dict[Path, ast.Module],
     ) -> None:
         """Primary adapter classes should be imported from provider package roots."""
         disallowed_modules = {
@@ -491,16 +493,11 @@ class TestAdapterPortCompliance:
         }
 
         violations: list[str] = []
-        search_roots = [src_dir / "bioetl", src_dir.parent / "tests"]
+        root = src_dir.parent
 
-        for root in search_roots:
-            for py_file in root.rglob("*.py"):
+        for ast_cache in (source_ast_cache, test_ast_cache):
+            for py_file, tree in sorted(ast_cache.items()):
                 if py_file in allowed_files:
-                    continue
-
-                try:
-                    tree = ast.parse(py_file.read_text(encoding="utf-8"))
-                except SyntaxError:
                     continue
                 for node in ast.walk(tree):
                     if not isinstance(node, ast.ImportFrom) or node.module is None:
@@ -512,7 +509,7 @@ class TestAdapterPortCompliance:
                         continue
 
                     violations.append(
-                        f"{py_file.relative_to(src_dir.parent)}:{node.lineno} imports "
+                        f"{py_file.relative_to(root)}:{node.lineno} imports "
                         f"{expected_name} from {node.module}; use the provider "
                         "package root instead"
                     )

@@ -8,8 +8,6 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC_ROOT = ROOT / "src"
-TESTS_ROOT = ROOT / "tests"
 LEGACY_DATASOURCE_FACTORY_MODULE = "bioetl.composition.factories.datasource.factory"
 INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
     "bioetl.composition._pipeline_execution",
@@ -228,18 +226,17 @@ def _normalized_allowed_rel_paths(allowed_files: frozenset[Path]) -> frozenset[s
 
 
 def _iter_module_import_violations(
-    search_root: Path,
+    ast_cache: dict[Path, ast.Module],
     *,
     module_name: str,
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file in search_root.rglob("*.py"):
+    for py_file, tree in sorted(ast_cache.items()):
         rel_path = py_file.resolve().relative_to(ROOT).as_posix()
-        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
+        if rel_path in allowed_rel_paths:
             continue
-        tree = ast.parse(py_file.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module is not None:
                 is_absolute_match = node.module == module_name
@@ -272,40 +269,36 @@ def _iter_module_import_violations(
 
 
 def _iter_symbol_mentions(
-    search_root: Path,
+    content_cache: dict[Path, str],
     *,
     symbol: str,
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file in search_root.rglob("*.py"):
+    for py_file, content in sorted(content_cache.items()):
         rel_path = py_file.resolve().relative_to(ROOT).as_posix()
-        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
+        if rel_path in allowed_rel_paths:
             continue
-        for lineno, line in enumerate(
-            py_file.read_text(encoding="utf-8").splitlines(), 1
-        ):
+        for lineno, line in enumerate(content.splitlines(), 1):
             if symbol in line:
                 violations.append(f"{rel_path}:{lineno} mentions {symbol}")
     return violations
 
 
 def _iter_string_mentions(
-    search_root: Path,
+    content_cache: dict[Path, str],
     *,
     needle: str,
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file in search_root.rglob("*.py"):
+    for py_file, content in sorted(content_cache.items()):
         rel_path = py_file.resolve().relative_to(ROOT).as_posix()
-        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
+        if rel_path in allowed_rel_paths:
             continue
-        for lineno, line in enumerate(
-            py_file.read_text(encoding="utf-8").splitlines(), 1
-        ):
+        for lineno, line in enumerate(content.splitlines(), 1):
             if needle in line:
                 violations.append(f"{rel_path}:{lineno} mentions {needle}")
     return violations
@@ -328,7 +321,7 @@ def _iter_text_symbol_mentions(
 
 
 def _iter_imported_symbol_violations(
-    search_root: Path,
+    ast_cache: dict[Path, ast.Module],
     *,
     module_names: frozenset[str],
     symbol: str,
@@ -336,11 +329,10 @@ def _iter_imported_symbol_violations(
 ) -> list[str]:
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file in search_root.rglob("*.py"):
+    for py_file, tree in sorted(ast_cache.items()):
         rel_path = py_file.resolve().relative_to(ROOT).as_posix()
-        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
+        if rel_path in allowed_rel_paths:
             continue
-        tree = ast.parse(py_file.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if not isinstance(node, ast.ImportFrom):
                 continue
@@ -356,7 +348,7 @@ def _iter_imported_symbol_violations(
 
 
 def _iter_call_keyword_violations(
-    search_root: Path,
+    ast_cache: dict[Path, ast.Module],
     *,
     call_name: str,
     keyword_names: frozenset[str],
@@ -364,11 +356,10 @@ def _iter_call_keyword_violations(
 ) -> list[str]:
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file in search_root.rglob("*.py"):
+    for py_file, tree in sorted(ast_cache.items()):
         rel_path = py_file.resolve().relative_to(ROOT).as_posix()
-        if rel_path in allowed_rel_paths or "__pycache__" in py_file.parts:
+        if rel_path in allowed_rel_paths:
             continue
-        tree = ast.parse(py_file.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue
@@ -401,10 +392,12 @@ def test_transformer_dependency_compat_shim_file_has_been_removed() -> None:
 
 
 @pytest.mark.architecture
-def test_transformer_dependency_compat_shim_is_not_used_in_src() -> None:
+def test_transformer_dependency_compat_shim_is_not_used_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """First-party src must use canonical base-transformer dependency types directly."""
     violations = _iter_module_import_violations(
-        SRC_ROOT,
+        source_ast_cache,
         module_name=TRANSFORMER_DEPENDENCY_SHIM,
         allowed_files=frozenset(),
     )
@@ -415,10 +408,12 @@ def test_transformer_dependency_compat_shim_is_not_used_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_transformer_dependency_compat_shim_is_not_used_in_tests() -> None:
+def test_transformer_dependency_compat_shim_is_not_used_in_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Tests must not keep importing the removed dependency shim."""
     violations = _iter_module_import_violations(
-        TESTS_ROOT,
+        test_ast_cache,
         module_name=TRANSFORMER_DEPENDENCY_SHIM,
         allowed_files=frozenset(),
     )
@@ -429,10 +424,12 @@ def test_transformer_dependency_compat_shim_is_not_used_in_tests() -> None:
 
 
 @pytest.mark.architecture
-def test_cli_registry_helper_module_is_confined_to_cli_src_entrypoints() -> None:
+def test_cli_registry_helper_module_is_confined_to_cli_src_entrypoints(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Compatibility CLI registry helper must not leak outside the CLI perimeter."""
     violations = _iter_module_import_violations(
-        SRC_ROOT,
+        source_ast_cache,
         module_name=CLI_REGISTRY_HELPER_MODULE,
         allowed_files=ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES,
     )
@@ -443,10 +440,12 @@ def test_cli_registry_helper_module_is_confined_to_cli_src_entrypoints() -> None
 
 
 @pytest.mark.architecture
-def test_default_registry_import_is_confined_to_known_src_compatibility_seams() -> None:
+def test_default_registry_import_is_confined_to_known_src_compatibility_seams(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Shared default-registry access must stay frozen to the current src seams."""
     violations = _iter_imported_symbol_violations(
-        SRC_ROOT,
+        source_ast_cache,
         module_names=frozenset({"bioetl.composition.registry"}),
         symbol="get_default_registry",
         allowed_files=ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES,
@@ -464,10 +463,12 @@ def test_default_registry_import_is_confined_to_known_src_compatibility_seams() 
 )
 def test_config_loader_private_compat_helpers_are_confined(
     symbol: str,
+    source_ast_cache: dict[Path, ast.Module],
+    test_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """Private config-loader compatibility helpers should not become general APIs."""
     src_violations = _iter_imported_symbol_violations(
-        SRC_ROOT,
+        source_ast_cache,
         module_names=frozenset({CONFIG_LOADER_MODULE}),
         symbol=symbol,
         allowed_files=frozenset(),
@@ -478,7 +479,7 @@ def test_config_loader_private_compat_helpers_are_confined(
     )
 
     test_violations = _iter_imported_symbol_violations(
-        TESTS_ROOT,
+        test_ast_cache,
         module_names=frozenset({CONFIG_LOADER_MODULE}),
         symbol=symbol,
         allowed_files=ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES,
@@ -490,10 +491,12 @@ def test_config_loader_private_compat_helpers_are_confined(
 
 
 @pytest.mark.architecture
-def test_merge_service_legacy_keyword_wiring_does_not_expand_in_src() -> None:
+def test_merge_service_legacy_keyword_wiring_does_not_expand_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Legacy MergeService keyword wiring must stay confined to the owning module."""
     violations = _iter_call_keyword_violations(
-        SRC_ROOT,
+        source_ast_cache,
         call_name="MergeService",
         keyword_names=LEGACY_MERGE_SERVICE_KEYWORDS,
         allowed_files=ALLOWED_MERGE_SERVICE_SRC_FILES,
@@ -505,10 +508,12 @@ def test_merge_service_legacy_keyword_wiring_does_not_expand_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_datasource_registry_symbol_is_confined_to_compat_exports_in_src() -> None:
+def test_datasource_registry_symbol_is_confined_to_compat_exports_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
     """New first-party src must use canonical datasource paths, not DataSourceRegistry."""
     violations = _iter_symbol_mentions(
-        SRC_ROOT,
+        source_content_cache,
         symbol="DataSourceRegistry",
         allowed_files=ALLOWED_DATASOURCE_REGISTRY_SRC_FILES,
     )
@@ -519,10 +524,12 @@ def test_datasource_registry_symbol_is_confined_to_compat_exports_in_src() -> No
 
 
 @pytest.mark.architecture
-def test_datasource_registry_symbol_is_confined_to_compat_tests() -> None:
+def test_datasource_registry_symbol_is_confined_to_compat_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Ordinary tests must not treat DataSourceRegistry as a normal factory API."""
     violations = _iter_imported_symbol_violations(
-        TESTS_ROOT,
+        test_ast_cache,
         module_names=frozenset(
             {
                 "bioetl.composition.factories",
@@ -555,12 +562,14 @@ def test_datasource_registry_symbol_is_absent_from_canonical_docs_and_diagrams()
 
 
 @pytest.mark.architecture
-def test_register_all_providers_symbol_is_confined_to_provider_loading_modules() -> (
+def test_register_all_providers_symbol_is_confined_to_provider_loading_modules(
+    source_content_cache: dict[Path, str],
+) -> (
     None
 ):
     """Canonical provider lifecycle must use ensure_providers_loaded outside loaders."""
     violations = _iter_symbol_mentions(
-        SRC_ROOT,
+        source_content_cache,
         symbol="register_all_providers",
         allowed_files=ALLOWED_REGISTER_ALL_PROVIDERS_SRC_FILES,
     )
@@ -571,10 +580,12 @@ def test_register_all_providers_symbol_is_confined_to_provider_loading_modules()
 
 
 @pytest.mark.architecture
-def test_registration_biblio_module_is_confined_to_provider_registration() -> None:
+def test_registration_biblio_module_is_confined_to_provider_registration(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Private provider registration builders must not become ordinary src imports."""
     violations = _iter_module_import_violations(
-        SRC_ROOT,
+        source_ast_cache,
         module_name="bioetl.composition.providers.registration_biblio",
         allowed_files=ALLOWED_REGISTRATION_BIBLIO_SRC_FILES,
     )
@@ -617,10 +628,12 @@ def test_legacy_datasource_factory_module_file_has_been_removed() -> None:
 
 
 @pytest.mark.architecture
-def test_legacy_datasource_factory_module_is_not_used_in_src() -> None:
+def test_legacy_datasource_factory_module_is_not_used_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """First-party src must use canonical datasource module paths."""
     violations = _iter_module_import_violations(
-        SRC_ROOT,
+        source_ast_cache,
         module_name=LEGACY_DATASOURCE_FACTORY_MODULE,
         allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_SRC_FILES,
     )
@@ -631,10 +644,12 @@ def test_legacy_datasource_factory_module_is_not_used_in_src() -> None:
 
 
 @pytest.mark.architecture
-def test_legacy_datasource_factory_module_is_only_used_by_compat_tests() -> None:
+def test_legacy_datasource_factory_module_is_only_used_by_compat_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Tests must not keep importing the removed legacy datasource module."""
     violations = _iter_module_import_violations(
-        TESTS_ROOT,
+        test_ast_cache,
         module_name=LEGACY_DATASOURCE_FACTORY_MODULE,
         allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES,
     )
@@ -645,12 +660,15 @@ def test_legacy_datasource_factory_module_is_only_used_by_compat_tests() -> None
 
 
 @pytest.mark.architecture
-def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat_tests() -> (
+def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat_tests(
+    test_content_cache: dict[Path, str],
+) -> (
     None
 ):
     """Tests must not reintroduce string patch targets for removed datasource module."""
+    # Note: this test needs fresh content_cache including self-file; use test_content_cache
     violations = _iter_string_mentions(
-        TESTS_ROOT,
+        test_content_cache,
         needle=LEGACY_DATASOURCE_FACTORY_MODULE,
         allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES
         | frozenset({Path(__file__).resolve()}),
@@ -665,10 +683,15 @@ def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat
 @pytest.mark.parametrize("module_name", INTERNAL_COMPOSITION_ENTRYPOINT_MODULES)
 def test_internal_composition_entrypoint_modules_are_not_imported_in_unit_tests(
     module_name: str,
+    test_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """Unit tests must patch public composition.entrypoints instead of internals."""
+    unit_root = ROOT / "tests" / "unit"
+    unit_ast_cache = {
+        p: t for p, t in test_ast_cache.items() if p.is_relative_to(unit_root)
+    }
     violations = _iter_module_import_violations(
-        TESTS_ROOT / "unit",
+        unit_ast_cache,
         module_name=module_name,
         allowed_files=ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE[module_name],
     )
@@ -682,10 +705,15 @@ def test_internal_composition_entrypoint_modules_are_not_imported_in_unit_tests(
 @pytest.mark.parametrize("module_name", INTERNAL_COMPOSITION_ENTRYPOINT_MODULES)
 def test_internal_composition_entrypoint_module_strings_are_not_used_in_unit_tests(
     module_name: str,
+    test_content_cache: dict[Path, str],
 ) -> None:
     """Unit tests must not reintroduce string patch targets for internal entrypoints."""
+    unit_root = ROOT / "tests" / "unit"
+    unit_content_cache = {
+        p: c for p, c in test_content_cache.items() if p.is_relative_to(unit_root)
+    }
     violations = _iter_string_mentions(
-        TESTS_ROOT / "unit",
+        unit_content_cache,
         needle=module_name,
         allowed_files=ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE[module_name],
     )

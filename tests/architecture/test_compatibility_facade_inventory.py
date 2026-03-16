@@ -324,10 +324,10 @@ def test_registry_config_and_merge_transition_rows_capture_compatibility_policy(
             ),
         },
         "src/bioetl/application/composite/merger.py": {
-            "status": "mixed-module",
+            "status": "retained-entrypoint",
             "migration_snippets": (
                 "bioetl.application.composite.merger",
-                "legacy keyword wiring",
+                "MergeCollaboratorGroup",
             ),
             "allowed_call_site_snippets": (
                 "tests/unit/application/composite/test_merger.py",

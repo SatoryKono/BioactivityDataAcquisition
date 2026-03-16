@@ -239,7 +239,7 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._normalize_join_key_columns(df, ["doi"])
+        result = merge_service._join_planner.normalize_join_key_columns(df, ["doi"], None)
 
         assert result["doi"].to_list() == ["10.1038/nature12373", "10.1000/abc.def"]
         # Non-normalized columns should be unchanged
@@ -256,7 +256,7 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._normalize_join_key_columns(df, ["pmid"])
+        result = merge_service._join_planner.normalize_join_key_columns(df, ["pmid"], None)
 
         assert result["pmid"].to_list() == ["12345678", "pmc1234567"]
 
@@ -270,7 +270,7 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._normalize_join_key_columns(df, ["pmc_id"])
+        result = merge_service._join_planner.normalize_join_key_columns(df, ["pmc_id"], None)
 
         assert result["pmc_id"].to_list() == ["pmc1234567", "pmc7654321"]
 
@@ -285,7 +285,7 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._normalize_join_key_columns(df, ["title", "doi"])
+        result = merge_service._join_planner.normalize_join_key_columns(df, ["title", "doi"], None)
 
         # title is not in _NORMALIZE_JOIN_KEYS, so it should be unchanged
         assert result["title"].to_list() == ["UPPERCASE TITLE", "Another TITLE"]
@@ -302,7 +302,7 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._normalize_join_key_columns(df, ["doi"])
+        result = merge_service._join_planner.normalize_join_key_columns(df, ["doi"], None)
 
         assert result["doi"].to_list() == ["10.1038/nature", None, "10.1000/abc"]
 
@@ -317,7 +317,7 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._normalize_join_key_columns(df, ["id", "name"])
+        result = merge_service._join_planner.normalize_join_key_columns(df, ["id", "name"], None)
 
         # Neither id nor name are in _NORMALIZE_JOIN_KEYS
         assert result["id"].to_list() == ["ID1", "ID2"]
@@ -334,7 +334,7 @@ class TestMergeServiceJoinKeyNormalization:
         )
 
         # Request normalization of doi which doesn't exist
-        result = merge_service._normalize_join_key_columns(df, ["doi", "title"])
+        result = merge_service._join_planner.normalize_join_key_columns(df, ["doi", "title"], None)
 
         # Should return unchanged since doi doesn't exist
         assert result["title"].to_list() == ["Title 1"]
@@ -371,7 +371,7 @@ class TestMergeServiceJoinKeyNormalization:
         )
 
         # When seed_pipeline is provided, uses smart prefix (crossref.)
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -467,103 +467,6 @@ class TestMergeServiceMergeOperation:
         assert result.records_from_seed == 1
         assert "test_enricher" in result.sources_used
 
-    @pytest.mark.asyncio
-    async def test_merge_runtime_path_does_not_use_compatibility_helpers(
-        self, merge_service, mock_storage
-    ) -> None:
-        """Active merge runtime should not depend on legacy MergeService helper wrappers."""
-
-        async def read_side_effect(table_name: str) -> list[dict[str, object]]:
-            if table_name == "seed/table":
-                return [{"doi": "10.1/a", "seed_val": "A"}]
-            if table_name == "crossref/publication":
-                return [{"doi": "10.1/a", "title": "Crossref Title"}]
-            if table_name == "pubmed/publication":
-                return [{"doi": "10.1/a", "pmid": "12345"}]
-            raise AssertionError(f"Unexpected table read: {table_name}")
-
-        def _unexpected(name: str):
-            def _raiser(*args, **kwargs):
-                raise AssertionError(
-                    f"Active merge runtime unexpectedly used compatibility helper {name}"
-                )
-
-            return _raiser
-
-        mock_storage.read_silver.side_effect = read_side_effect
-
-        merge_service._apply_joins = AsyncMock(side_effect=_unexpected("_apply_joins"))
-        merge_service._normalize_join_key_columns = MagicMock(
-            side_effect=_unexpected("_normalize_join_key_columns")
-        )
-        merge_service._drop_system_columns = MagicMock(
-            side_effect=_unexpected("_drop_system_columns")
-        )
-        merge_service._detect_and_resolve_conflicts = MagicMock(
-            side_effect=_unexpected("_detect_and_resolve_conflicts")
-        )
-        merge_service._resolve_conflicts = MagicMock(
-            side_effect=_unexpected("_resolve_conflicts")
-        )
-        merge_service._parse_pipeline_name = MagicMock(
-            side_effect=_unexpected("_parse_pipeline_name")
-        )
-        merge_service._infer_pipeline_from_table = MagicMock(
-            side_effect=_unexpected("_infer_pipeline_from_table")
-        )
-        merge_service._infer_silver_table = MagicMock(
-            side_effect=_unexpected("_infer_silver_table")
-        )
-        merge_service._get_field_aliases = MagicMock(
-            side_effect=_unexpected("_get_field_aliases")
-        )
-
-        enrichers = [
-            EnricherConfig(
-                pipeline="crossref_publication",
-                join_keys=("doi",),
-                required=False,
-                silver_table="silver/crossref/publication",
-            )
-        ]
-        enrichment_results = {
-            "crossref_publication": EnrichmentResult(
-                enricher_name="crossref_publication",
-                status=EnrichmentStatus.SUCCESS,
-                records_input=1,
-                records_enriched=1,
-            )
-        }
-        dependencies = [
-            DependencyConfig(
-                pipeline="pubmed_publication",
-                join_keys=("doi",),
-                silver_table="silver/pubmed/publication",
-                required=False,
-            )
-        ]
-        dependency_results = {
-            "pubmed_publication": DependencyResult(
-                pipeline_name="pubmed_publication",
-                status=DependencyStatus.SUCCESS,
-                records_extracted=1,
-                records_silver=1,
-            )
-        }
-
-        result = await merge_service.merge(
-            seed_table="silver/seed/table",
-            enrichers=enrichers,
-            enrichment_results=enrichment_results,
-            run_id="test-run-compat-free",
-            dependencies=dependencies,
-            dependency_results=dependency_results,
-        )
-
-        assert result.records_from_seed == 1
-        assert result.records_merged == 1
-        assert "crossref_publication" in result.sources_used
-        assert "pubmed_publication" in result.sources_used
 
 
 @pytest.mark.unit
@@ -676,7 +579,7 @@ class TestDetectAndResolveConflicts:
         seed = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
         enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.author": ["A1"]})
 
-        seed_out, enricher_out = merge_service._detect_and_resolve_conflicts(
+        seed_out, enricher_out = merge_service._conflict_resolver.detect_and_resolve_conflicts(
             seed, enricher, {"doi"}
         )
 
@@ -690,7 +593,7 @@ class TestDetectAndResolveConflicts:
         seed = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T1"]})
         enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T2"]})
 
-        seed_out, enricher_out = merge_service._detect_and_resolve_conflicts(
+        seed_out, enricher_out = merge_service._conflict_resolver.detect_and_resolve_conflicts(
             seed, enricher, {"doi"}
         )
 
@@ -708,7 +611,7 @@ class TestDetectAndResolveConflicts:
         enricher = pl.DataFrame({"doi": ["10.1/a"], "value": ["V2"]})
 
         # doi is join key, value is a conflict
-        seed_out, enricher_out = merge_service._detect_and_resolve_conflicts(
+        seed_out, enricher_out = merge_service._conflict_resolver.detect_and_resolve_conflicts(
             seed, enricher, {"doi"}
         )
 
@@ -722,12 +625,12 @@ class TestDetectAndResolveConflicts:
     def test_find_next_suffix_basic(self, merge_service):
         """Test _find_next_suffix returns first available suffix."""
         # No existing suffixes → returns A
-        assert merge_service._find_next_suffix("title", {"title"}) == "A"
+        assert merge_service._conflict_resolver.find_next_suffix("title", {"title"}) == "A"
         # A exists → returns B
-        assert merge_service._find_next_suffix("title", {"title", "title.A"}) == "B"
+        assert merge_service._conflict_resolver.find_next_suffix("title", {"title", "title.A"}) == "B"
         # A, B exist → returns C
         assert (
-            merge_service._find_next_suffix("title", {"title", "title.A", "title.B"})
+            merge_service._conflict_resolver.find_next_suffix("title", {"title", "title.A", "title.B"})
             == "C"
         )
 
@@ -740,7 +643,7 @@ class TestDetectAndResolveConflicts:
 
         # First enricher conflict
         enricher1 = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-02-01"]})
-        seed_out1, enricher_out1 = merge_service._detect_and_resolve_conflicts(
+        seed_out1, enricher_out1 = merge_service._conflict_resolver.detect_and_resolve_conflicts(
             seed, enricher1, {"doi"}
         )
         assert "pub_date" in seed_out1.columns  # Seed unchanged
@@ -757,7 +660,7 @@ class TestDetectAndResolveConflicts:
 
         # Second enricher conflict - should get B suffix
         enricher2 = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-03-01"]})
-        merged_out, enricher_out2 = merge_service._detect_and_resolve_conflicts(
+        merged_out, enricher_out2 = merge_service._conflict_resolver.detect_and_resolve_conflicts(
             merged, enricher2, {"doi"}
         )
         assert "pub_date" in merged_out.columns  # Original seed column unchanged
@@ -783,7 +686,7 @@ class TestApplyJoinsSmartColumnRenaming:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -810,7 +713,7 @@ class TestApplyJoinsSmartColumnRenaming:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"chembl_activity": enricher_df},
             enrichers=[enricher_config],
@@ -837,7 +740,7 @@ class TestApplyJoinsSmartColumnRenaming:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"pubchem_compound": enricher_df},
             enrichers=[enricher_config],
@@ -866,7 +769,7 @@ class TestApplyJoinsSmartColumnRenaming:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -896,7 +799,7 @@ class TestApplyJoinsSmartColumnRenaming:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -941,7 +844,7 @@ class TestApplyJoinsSmartColumnRenaming:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1003,7 +906,7 @@ class TestApplyJoinsSmartColumnRenaming:
             ),
         ]
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={
                 "crossref_publication": crossref_df,
@@ -1036,7 +939,7 @@ class TestApplyJoinsSmartColumnRenaming:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1053,28 +956,28 @@ class TestGetEnricherPrefix:
 
     def test_returns_qualified_prefix(self, merge_service):
         """Test prefix uses qualified format {provider}.{entity}."""
-        prefix = merge_service._get_enricher_prefix(
-            "crossref_publication", "chembl_publication"
+        prefix = merge_service._priority_orderer.get_enricher_prefix(
+            "crossref_publication"
         )
         assert prefix == "crossref.publication."
 
     def test_qualified_prefix_same_provider(self, merge_service):
         """Test qualified prefix for same provider different entity."""
-        prefix = merge_service._get_enricher_prefix(
-            "chembl_activity", "chembl_publication"
+        prefix = merge_service._priority_orderer.get_enricher_prefix(
+            "chembl_activity"
         )
         assert prefix == "chembl.activity."
 
     def test_qualified_prefix_different_both(self, merge_service):
         """Test qualified prefix for different provider and entity."""
-        prefix = merge_service._get_enricher_prefix(
-            "pubchem_compound", "chembl_publication"
+        prefix = merge_service._priority_orderer.get_enricher_prefix(
+            "pubchem_compound"
         )
         assert prefix == "pubchem.compound."
 
     def test_fallback_prefix_when_invalid_format(self, merge_service):
         """Test fallback prefix when pipeline name has no underscore."""
-        prefix = merge_service._get_enricher_prefix("invalidpipeline", None)
+        prefix = merge_service._priority_orderer.get_enricher_prefix("invalidpipeline")
         assert prefix == "invalidpipeline_"
 
 
@@ -1411,7 +1314,7 @@ class TestApplyJoinsWithDeduplication:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1457,7 +1360,7 @@ class TestApplyJoinsWithDeduplication:
             required=False,
         )
 
-        await merge_service._apply_joins(
+        await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1491,7 +1394,7 @@ class TestDropSystemColumns:
             }
         )
 
-        result = merge_service._drop_system_columns(enricher_df)
+        result = merge_service._join_planner.drop_system_columns(enricher_df)
 
         # Business columns preserved
         assert "doi" in result.columns
@@ -1515,7 +1418,7 @@ class TestDropSystemColumns:
             }
         )
 
-        result = merge_service._drop_system_columns(enricher_df)
+        result = merge_service._join_planner.drop_system_columns(enricher_df)
 
         assert result.columns == enricher_df.columns
         assert len(result) == len(enricher_df)
@@ -1552,7 +1455,7 @@ class TestDropSystemColumns:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1606,7 +1509,7 @@ class TestDropSystemColumns:
                 )
             )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs=enricher_dfs,
             enrichers=enrichers,
@@ -1655,7 +1558,7 @@ class TestQualifiedJoinKeys:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1701,7 +1604,7 @@ class TestQualifiedJoinKeys:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1742,7 +1645,7 @@ class TestQualifiedJoinKeys:
             ),
         ]
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs=enricher_dfs,
             enrichers=enrichers,
@@ -1782,7 +1685,7 @@ class TestQualifiedJoinKeys:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
@@ -1826,7 +1729,7 @@ class TestQualifiedJoinKeys:
             required=False,
         )
 
-        result = await merge_service._apply_joins(
+        result = await merge_service._join_planner.apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],

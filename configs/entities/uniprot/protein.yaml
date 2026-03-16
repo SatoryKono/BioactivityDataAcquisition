@@ -139,7 +139,7 @@ quality:
   version: 1.0.0
   provider: uniprot
   entity: protein
-  field_validations:
+  entity_field_validations:
   - field: accession
     type: pattern
     pattern: ^[A-Z0-9]{6,10}$
@@ -228,14 +228,14 @@ quality:
     pattern: ^\[.*\]$
     nullable: true
     error_message: reaction_ec_numbers must be JSON array
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: protein_identifiable
     fields:
     - accession
     - entry_name
     condition: all_present
     error_message: Protein must have accession and entry name
-  conditional_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: accession
     key_type: merge

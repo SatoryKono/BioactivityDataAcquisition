@@ -60,7 +60,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: publication_term
-  field_validations:
+  entity_field_validations:
   - field: entity_id
     type: pattern
     pattern: ^[a-f0-9]{64}$
@@ -85,7 +85,7 @@ quality:
     pattern: ^.{1,500}$
     nullable: false
     error_message: term is required and must not exceed 500 chars
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: term_completeness
     fields:
     - publication_id
@@ -93,7 +93,7 @@ quality:
     - term_type
     condition: all_present
     error_message: All term fields are required
-  conditional_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: entity_id
     key_type: merge

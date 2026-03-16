@@ -58,9 +58,9 @@ def source_ast_cache(
 
 
 @pytest.fixture(scope="session")
-def test_python_files() -> list[Path]:
+def test_python_files(project_root: Path) -> list[Path]:
     """Sorted list of all *.py test files (no __pycache__, no worktrees)."""
-    tests_root = Path("tests")
+    tests_root = project_root / "tests"
     return sorted(
         p
         for p in tests_root.rglob("*.py")

@@ -54,7 +54,7 @@ quality:
     thresholds:
         soft_fail: 0.1
         hard_fail: 0.3
-    field_validations:
+    provider_field_validations:
         -   field: doi
             type: pattern
             pattern: ^10\.\d{4,}/\S+$

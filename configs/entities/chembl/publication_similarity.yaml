@@ -61,7 +61,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: publication_similarity
-  field_validations:
+  entity_field_validations:
   - field: sim_id
     type: range
     min: 1
@@ -89,14 +89,14 @@ quality:
     max: 1
     nullable: true
     error_message: Average Tanimoto must be between 0 and 1
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: similarity_pair
     fields:
     - doc_1
     - doc_2
     condition: all_present
     error_message: Both document IDs are required
-  conditional_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: sim_id
     key_type: merge

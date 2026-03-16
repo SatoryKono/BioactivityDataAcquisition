@@ -46,8 +46,10 @@ def read_source_config_payload(
                 payload[key] = value
         return payload
 
-    # Accept legacy-flat provider payload for compatibility with test fixtures.
-    return unified_raw
+    raise ValueError(
+        "Provider configuration requires a top-level 'source' section: "
+        f"{unified_path}"
+    )
 
 
 def normalize_source_config_payload(

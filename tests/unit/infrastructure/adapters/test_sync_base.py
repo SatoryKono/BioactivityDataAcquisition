@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -358,3 +358,33 @@ class TestHealthCheckLogging:
         await adapter.close()
 
         assert owned_pool._shutdown is True
+
+    async def test_close_uses_to_thread_for_owned_pool_shutdown(
+        self,
+        mock_logger: MagicMock,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
+    ) -> None:
+        """Async close should offload thread-pool shutdown away from the event loop."""
+        owned_pool = ThreadPoolExecutor(max_workers=1)
+        adapter = StubSyncAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=owned_pool,
+            owns_thread_pool=True,
+        )
+
+        with patch(
+            "bioetl.infrastructure.adapters.sync_base.asyncio.to_thread",
+            new=AsyncMock(
+                side_effect=lambda func, *args, **kwargs: func(*args, **kwargs)
+            ),
+        ) as mock_to_thread:
+            with patch.object(
+                owned_pool, "shutdown", wraps=owned_pool.shutdown
+            ) as mock_shutdown:
+                await adapter.close()
+
+        mock_to_thread.assert_awaited_once()
+        mock_shutdown.assert_called_once_with(wait=True)

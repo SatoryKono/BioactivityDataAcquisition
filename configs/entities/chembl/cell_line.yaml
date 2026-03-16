@@ -65,7 +65,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: cell_line
-  field_validations:
+  entity_field_validations:
   - field: cell_id
     type: pattern
     pattern: ^CHEMBL\d+$
@@ -86,8 +86,8 @@ quality:
     min: 1
     max: 10000000
     nullable: true
-  cross_field_validations: []
-  conditional_validations: []
+  entity_cross_field_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: cell_id
     key_type: merge

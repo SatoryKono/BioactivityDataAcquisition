@@ -169,7 +169,7 @@ quality:
   version: 1.0.0
   provider: pubmed
   entity: publication
-  field_validations:
+  entity_field_validations:
   - field: pmid
     type: range
     min: 1
@@ -233,7 +233,7 @@ quality:
     min: 0
     nullable: true
     error_message: Reference count must be non-negative
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: publication_identifiable
     fields:
     - pmid
@@ -247,7 +247,7 @@ quality:
     - pmc_id
     condition: any_present
     error_message: At least one identifier required
-  conditional_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: pmid
     key_type: merge

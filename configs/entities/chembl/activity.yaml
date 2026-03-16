@@ -108,7 +108,7 @@ quality:
     version: 1.1.0
     provider: chembl
     entity: activity
-    field_validations:
+    entity_field_validations:
         -   field: activity_id
             type: required
             nullable: false
@@ -155,7 +155,7 @@ quality:
                 - mg.kg-1
             nullable: true
             error_message: Invalid standard_units value
-    cross_field_validations:
+    entity_cross_field_validations:
         -   name: value_requires_units
             fields:
                 - standard_value
@@ -171,7 +171,7 @@ quality:
                 - standard_type
             condition: all_present
             error_message: Complete activity data requires value, units, and type
-    conditional_validations:
+    entity_conditional_validations:
         -   name: binding_requires_target
             condition_field: assay_type
             condition_value: B

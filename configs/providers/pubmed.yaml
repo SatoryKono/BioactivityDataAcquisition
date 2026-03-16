@@ -53,7 +53,7 @@ quality:
     thresholds:
         soft_fail: 0.05
         hard_fail: 0.15
-    field_validations:
+    provider_field_validations:
         -   field: pmid
             type: range
             min: 1

@@ -95,7 +95,7 @@ quality:
     version: 1.1.0
     provider: chembl
     entity: assay
-    field_validations:
+    entity_field_validations:
         -   field: assay_id
             type: required
             nullable: false
@@ -126,14 +126,14 @@ quality:
                 - S
                 - U
             nullable: true
-    cross_field_validations:
+    entity_cross_field_validations:
         -   name: assay_identifiable
             fields:
                 - assay_id
                 - description
             condition: all_present
             error_message: Assay must have ID and description
-    conditional_validations: []
+    entity_conditional_validations: []
     key_nullability:
         -   field: assay_id
             key_type: merge

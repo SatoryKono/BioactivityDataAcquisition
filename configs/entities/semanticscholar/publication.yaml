@@ -142,7 +142,7 @@ quality:
   version: 1.0.0
   provider: semanticscholar
   entity: publication
-  field_validations:
+  entity_field_validations:
   - field: paper_id
     type: pattern
     pattern: ^[a-f0-9]{40}$
@@ -204,14 +204,14 @@ quality:
     min: 0
     nullable: true
     error_message: Influential citation count must be non-negative
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: publication_identifiable
     fields:
     - paper_id
     - title
     condition: all_present
     error_message: Publication must have paper_id and title
-  conditional_validations:
+  entity_conditional_validations:
   - name: journal_article_requires_title
     condition_field: publication_type
     condition_value: journal-article

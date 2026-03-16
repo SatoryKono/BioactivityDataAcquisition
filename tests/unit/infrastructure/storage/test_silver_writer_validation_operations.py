@@ -1,0 +1,173 @@
+"""Unit tests for Silver writer validation operations."""
+
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, MagicMock
+
+import pyarrow as pa
+import pytest
+
+from bioetl.domain.exceptions import PolicyViolationError, SchemaViolationError
+from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
+from bioetl.infrastructure.storage.silver_writer_validation_operations import (
+    _SilverSchemaPolicyRequest,
+    _deduplicate_by_primary_keys_impl,
+    _enforce_write_policy,
+    _to_policy_write_mode_impl,
+    _validate_records,
+    _validate_silver_pandera,
+    _validate_write_mode_impl,
+)
+
+
+@pytest.mark.unit
+class TestValidateWriteModeImpl:
+    """Tests for Silver write mode validation."""
+
+    def test_valid_merge_mode(self) -> None:
+        """Should return SilverWriteMode.MERGE for 'merge' string."""
+        assert _validate_write_mode_impl("merge") == SilverWriteMode.MERGE
+
+    def test_valid_append_mode(self) -> None:
+        """Should return SilverWriteMode.APPEND for 'append' string."""
+        assert _validate_write_mode_impl("append") == SilverWriteMode.APPEND
+
+    def test_invalid_mode_raises(self) -> None:
+        """Should raise ValueError for unrecognized mode."""
+        with pytest.raises(ValueError, match="Invalid Silver write mode"):
+            _validate_write_mode_impl("invalid")
+
+
+@pytest.mark.unit
+class TestDeduplicateByPrimaryKeysImpl:
+    """Tests for batch-level record deduplication."""
+
+    def test_deduplicates_by_keys(self) -> None:
+        """Should keep last occurrence for duplicate primary keys."""
+        records = [
+            {"id": 1, "name": "first"},
+            {"id": 2, "name": "only"},
+            {"id": 1, "name": "second"},
+        ]
+        result = _deduplicate_by_primary_keys_impl(records, ["id"])
+        assert len(result) == 2
+        id_to_name = {r["id"]: r["name"] for r in result}
+        assert id_to_name[1] == "second"  # last wins
+
+    def test_empty_primary_keys_returns_original(self) -> None:
+        """Should return records unchanged when no primary keys."""
+        records = [{"id": 1}, {"id": 1}]
+        result = _deduplicate_by_primary_keys_impl(records, [])
+        assert len(result) == 2
+
+    def test_empty_records_returns_empty(self) -> None:
+        """Should return empty list for empty input."""
+        result = _deduplicate_by_primary_keys_impl([], ["id"])
+        assert result == []
+
+
+@pytest.mark.unit
+class TestToPolicyWriteModeImpl:
+    """Tests for Silver to policy write mode mapping."""
+
+    def test_merge_maps_to_merge(self) -> None:
+        """SilverWriteMode.MERGE should map to WriteMode.MERGE."""
+        assert _to_policy_write_mode_impl(SilverWriteMode.MERGE) == WriteMode.MERGE
+
+    def test_append_maps_to_append(self) -> None:
+        """SilverWriteMode.APPEND should map to WriteMode.APPEND."""
+        assert _to_policy_write_mode_impl(SilverWriteMode.APPEND) == WriteMode.APPEND
+
+    def test_delete_maps_to_overwrite(self) -> None:
+        """SilverWriteMode.DELETE should map to WriteMode.OVERWRITE."""
+        assert _to_policy_write_mode_impl(SilverWriteMode.DELETE) == WriteMode.OVERWRITE
+
+
+@pytest.mark.unit
+class TestEnforceWritePolicy:
+    """Tests for write mode policy enforcement."""
+
+    def test_allowed_mode_passes(self) -> None:
+        """Should not raise when policy allows the mode."""
+        host = MagicMock()
+        host._write_policy = WriteModePolicy()
+        host._to_policy_write_mode.return_value = WriteMode.MERGE
+        _enforce_write_policy(host, SilverWriteMode.MERGE, "test_table")
+
+    def test_disallowed_mode_raises_and_logs(self) -> None:
+        """Should raise PolicyViolationError and log error for disallowed mode."""
+        host = MagicMock()
+        host._write_policy = MagicMock()
+        host._write_policy.validate.side_effect = PolicyViolationError(
+            "OVERWRITE not allowed for Silver"
+        )
+        host._to_policy_write_mode.return_value = WriteMode.OVERWRITE
+        host._metrics = MagicMock()
+
+        with pytest.raises(PolicyViolationError):
+            _enforce_write_policy(host, SilverWriteMode.DELETE, "test_table")
+        host.logger.error.assert_called_once()
+        host._metrics.increment_counter.assert_called_once()
+
+
+@pytest.mark.unit
+class TestValidateRecords:
+    """Tests for Silver record validation."""
+
+    def test_empty_records_raises(self) -> None:
+        """Should raise ValueError when records list is empty."""
+        host = MagicMock()
+        schema = pa.schema([("id", pa.int64())])
+        with pytest.raises(ValueError, match="No records to write"):
+            _validate_records(host, [], "test_table", schema)
+
+    def test_missing_metadata_fields_raises(self) -> None:
+        """Should raise ValueError when required metadata fields are missing."""
+        host = MagicMock()
+        schema = pa.schema([("id", pa.int64())])
+        records = [{"id": 1, "_run_id": "r1"}]  # missing _run_type, _source_batch_id, _ingestion_ts
+        with pytest.raises(ValueError, match="missing required metadata fields"):
+            _validate_records(host, records, "test_table", schema)
+
+    def test_valid_records_pass(self) -> None:
+        """Should pass when all metadata fields are present."""
+        host = MagicMock()
+        schema = pa.schema([("id", pa.int64())])
+        records = [
+            {
+                "id": 1,
+                "_run_id": "r1",
+                "_run_type": "incremental",
+                "_source_batch_id": "b1",
+                "_ingestion_ts": "2025-01-01T00:00:00Z",
+            }
+        ]
+        _validate_records(host, records, "test_table", schema)
+
+
+@pytest.mark.unit
+class TestValidateSilverPandera:
+    """Tests for Pandera schema validation of Silver records."""
+
+    def test_valid_records_pass(self) -> None:
+        """Should pass when validator returns valid result."""
+        host = MagicMock()
+        host._silver_validator.validate.return_value = MagicMock(valid=True)
+        records = [{"id": 1, "_state": "active"}]
+        _validate_silver_pandera(host, records, "test_table")
+        # _state should be stripped before validation
+        call_args = host._silver_validator.validate.call_args.args[0]
+        assert all("_state" not in r for r in call_args)
+
+    def test_invalid_records_raise_schema_violation(self) -> None:
+        """Should raise SchemaViolationError when validation fails."""
+        host = MagicMock()
+        host._silver_validator.validate.return_value = MagicMock(
+            valid=False, errors=["col 'x' is null"]
+        )
+        host._metrics = MagicMock()
+        records = [{"id": 1}]
+        with pytest.raises(SchemaViolationError):
+            _validate_silver_pandera(host, records, "test_table")
+        host.logger.error.assert_called_once()
+        host._metrics.increment_counter.assert_called_once()

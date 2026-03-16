@@ -12,31 +12,6 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 
 
-def _load_column_groups_config(
-    config_path: Path, column_groups_file: str
-) -> list[JsonDict] | None:  # Any: YAML config has heterogeneous values
-    """Load column group configuration from column_groups_file.
-
-    Returns:
-        List of column group dicts if found, None if file is missing or has no valid groups.
-    """
-    column_groups_path = config_path.parent / column_groups_file
-    if not column_groups_path.exists():
-        return None
-
-    data = _load_yaml_file(column_groups_path)
-
-    if isinstance(data, list):
-        return data
-
-    if isinstance(data, dict):
-        groups = data.get("column_groups")
-        if isinstance(groups, list):
-            return groups
-
-    return None
-
-
 def _load_data_schema_config(
     config_path: Path, schema_file: str
 ) -> JsonDict | None:  # Any: YAML config has heterogeneous values
@@ -148,23 +123,6 @@ def _validate_schema_config(
         _validate_layer_include_groups(data_schema, layer, schema_file)
 
 
-def _try_load_and_merge_schema(
-    config: JsonDict,
-    config_path: Path,
-    file_key: str,
-) -> bool:
-    """Try loading a schema file from config[file_key] and merge into config."""
-    schema_file = config.get(file_key)
-    if not isinstance(schema_file, str) or not schema_file.strip():
-        return False
-    data_schema = _load_data_schema_config(config_path, schema_file)
-    if not data_schema:
-        return False
-    _validate_schema_config(data_schema, schema_file)
-    _merge_data_schema_into_config(config, data_schema)
-    return True
-
-
 def apply_pipeline_schema_normalization(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     *,
@@ -172,24 +130,13 @@ def apply_pipeline_schema_normalization(
     config_path: Path,
     unified_schema: JsonDict | None = None,  # Any: YAML values are heterogeneous
 ) -> None:
-    """Normalize schema references across new and legacy pipeline formats."""
-    if "column_groups" in entity_config:
-        return
+    """Normalize pipeline schema from canonical `unified_schema`."""
+    _ = entity_config
 
     if unified_schema:
         _validate_schema_config(unified_schema, "entities/*/*:schema")
         _merge_data_schema_into_config(config, unified_schema)
         return
-
-    for key in ("data_schema_file", "schema_file"):
-        if _try_load_and_merge_schema(config, config_path, key):
-            return
-
-    column_groups_file = config.get("column_groups_file")
-    if isinstance(column_groups_file, str) and column_groups_file.strip():
-        column_groups = _load_column_groups_config(config_path, column_groups_file)
-        if column_groups is not None:
-            config["column_groups"] = column_groups
 
 
 __all__ = ["apply_pipeline_schema_normalization"]

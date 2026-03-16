@@ -78,7 +78,7 @@ quality:
   thresholds:
     soft_fail: 0.3
     hard_fail: 0.8
-  field_validations:
+  entity_field_validations:
   - field: target_id
     type: pattern
     pattern: ^CHEMBL\d+$
@@ -97,8 +97,8 @@ quality:
     pattern: ^[A-Z0-9]{6,10}$
     nullable: true
     error_message: UniProt accession must be 6-10 alphanumeric chars
-  cross_field_validations: []
-  conditional_validations:
+  entity_cross_field_validations: []
+  entity_conditional_validations:
   - name: found_has_accession
     condition_field: mapping_status
     condition_value: found

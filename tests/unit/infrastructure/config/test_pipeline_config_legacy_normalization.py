@@ -19,10 +19,17 @@ from bioetl.infrastructure.config.pipeline_normalizers import (
 def _schema_signature(config: Any) -> dict[str, Any]:
     dumped = config.model_dump(mode="json", exclude_none=True)
     return {
-        "column_groups": dumped.get("column_groups"),
+        "column_groups": _normalize_column_groups(dumped.get("column_groups")),
         "data_schema": dumped.get("data_schema"),
         "content_hash": dumped.get("content_hash"),
     }
+
+
+def _normalize_column_groups(groups: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """Strip non-semantic defaults to compare canonical schema intent."""
+    if groups is None:
+        return []
+    return [{"name": g.get("name"), "fields": g.get("fields"), "pattern": g.get("pattern")} for g in groups]
 
 
 def _write_unified_pipeline(
@@ -50,7 +57,7 @@ def test_pipeline_legacy_and_new_schema_file_aliases_are_equivalent(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Full loader must produce equivalent schema payload for old/new aliases."""
+    """Full loader should load unified schema from the `schema` section."""
     load_pipeline_config.cache_clear()
 
     schema_path = tmp_path / "configs" / "schemas" / "demo" / "common.yaml"
@@ -60,7 +67,7 @@ def test_pipeline_legacy_and_new_schema_file_aliases_are_equivalent(
             {"name": "system", "fields": ["_etl_ts"]},
             {"name": "business", "fields": ["id"]},
         ],
-        "content_hash": {"exclude_fields": ["_etl_ts"]},
+        "content_hash": {"include": [], "exclude": ["_etl_ts"]},
         "silver": {"include_groups": ["system", "business"]},
         "gold": {"include_groups": ["business"]},
     }
@@ -79,50 +86,34 @@ def test_pipeline_legacy_and_new_schema_file_aliases_are_equivalent(
         },
     }
 
-    legacy_pipeline = copy.deepcopy(common_pipeline)
-    legacy_pipeline.update(
+    canonical_pipeline = copy.deepcopy(common_pipeline)
+    canonical_pipeline.update(
         {
-            "pipeline_name": "demo_legacy_alias",
-            "entity_type": "legacy_alias",
-            "data_schema_file": "../../schemas/demo/common.yaml",
+            "pipeline_name": "demo_canonical_schema",
+            "entity_type": "canonical_schema",
         }
     )
     _write_unified_pipeline(
         entities_dir=entities_dir,
         provider="demo",
-        entity="legacy_alias",
-        pipeline=legacy_pipeline,
-        schema={},
-    )
-
-    new_pipeline = copy.deepcopy(common_pipeline)
-    new_pipeline.update(
-        {
-            "pipeline_name": "demo_new_alias",
-            "entity_type": "new_alias",
-            "schema_file": "../../schemas/demo/common.yaml",
-        }
-    )
-    _write_unified_pipeline(
-        entities_dir=entities_dir,
-        provider="demo",
-        entity="new_alias",
-        pipeline=new_pipeline,
-        schema={},
+        entity="canonical_schema",
+        pipeline=canonical_pipeline,
+        schema=schema_payload,
     )
 
     monkeypatch.chdir(tmp_path)
-    legacy = load_pipeline_config("demo_legacy_alias")
-    load_pipeline_config.cache_clear()
-    new = load_pipeline_config("demo_new_alias")
-
-    assert _schema_signature(legacy) == _schema_signature(new)
+    loaded = load_pipeline_config("demo_canonical_schema")
+    assert _schema_signature(loaded) == {
+        "column_groups": _normalize_column_groups(schema_payload["column_groups"]),
+        "data_schema": None,
+        "content_hash": schema_payload["content_hash"],
+    }
 
 
 def test_pipeline_schema_normalizer_golden_vector(
     tmp_path: Path,
 ) -> None:
-    """Legacy data_schema_file and new schema_file must normalize identically."""
+    """Unified schema should be normalized to the expected pipeline shape."""
     config_path = tmp_path / "configs" / "entities" / "demo" / "item.yaml"
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text("version: 1.0.0\n", encoding="utf-8")
@@ -135,23 +126,16 @@ def test_pipeline_schema_normalizer_golden_vector(
             {"name": "system", "fields": ["_etl_ts"]},
             {"name": "business", "fields": ["id"]},
         ],
-        "content_hash": {"exclude_fields": ["_etl_ts"]},
+        "content_hash": {"exclude": ["_etl_ts"]},
         "silver": {"include_groups": ["system", "business"]},
         "gold": {"include_groups": ["business"]},
     }
     schema_path.write_text(yaml.dump(schema_payload), encoding="utf-8")
 
-    legacy_cfg = {"data_schema_file": schema_rel}
-    new_cfg = {"schema_file": schema_rel}
+    unified_cfg = {"schema_file": schema_rel}
 
     apply_pipeline_schema_normalization(
-        legacy_cfg,
-        entity_config={},
-        config_path=config_path,
-        unified_schema=None,
-    )
-    apply_pipeline_schema_normalization(
-        new_cfg,
+        unified_cfg,
         entity_config={},
         config_path=config_path,
         unified_schema=None,
@@ -165,8 +149,68 @@ def test_pipeline_schema_normalizer_golden_vector(
             "gold": schema_payload["gold"],
         },
     }
-    assert {k: legacy_cfg.get(k) for k in expected} == expected
-    assert {k: new_cfg.get(k) for k in expected} == expected
+
+    # schema_file is no longer used as a runtime alias; canonical normalization
+    # is driven by the explicit `unified_schema` input.
+    assert {k: unified_cfg.get(k) for k in expected} != expected
+
+    unified_cfg = {
+        "schema_file": schema_rel,
+    }
+    apply_pipeline_schema_normalization(
+        unified_cfg,
+        entity_config={},
+        config_path=config_path,
+        unified_schema=schema_payload,
+    )
+    assert {k: unified_cfg.get(k) for k in expected} == expected
+
+
+def test_load_pipeline_config_cache_isolated_by_working_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Cache key must include cwd context for the same logical pipeline name."""
+    load_pipeline_config.cache_clear()
+
+    def write_pipeline(root: Path, *, extra_hash: str) -> None:
+        schema_payload = {
+            "column_groups": [
+                {"name": "system", "fields": ["_etl_ts"]},
+                {"name": "business", "fields": ["id"]},
+            ],
+            "content_hash": {"exclude": [extra_hash]},
+            "silver": {"include_groups": ["system", "business"]},
+            "gold": {"include_groups": ["business"]},
+        }
+        _write_unified_pipeline(
+            entities_dir=root / "configs" / "entities",
+            provider="demo",
+            entity="item",
+            pipeline={
+                "pipeline_name": "demo_item",
+                "entity_type": "item",
+                "provider": "demo",
+                "business_primary_keys": ["id"],
+                "silver_table": "demo_item",
+                "gold_table": "demo_item",
+            },
+            schema=schema_payload,
+        )
+
+    dir_one = tmp_path / "context_one"
+    dir_two = tmp_path / "context_two"
+    write_pipeline(dir_one, extra_hash="_one")
+    write_pipeline(dir_two, extra_hash="_two")
+
+    monkeypatch.chdir(dir_one)
+    config_one = load_pipeline_config("demo_item")
+    monkeypatch.chdir(dir_two)
+    config_two = load_pipeline_config("demo_item")
+
+    assert config_one.content_hash.exclude == ["_one"]
+    assert config_two.content_hash.exclude == ["_two"]
+    assert config_one.content_hash != config_two.content_hash
 
 
 def test_load_pipeline_config_runs_read_normalize_validate_map_in_order(

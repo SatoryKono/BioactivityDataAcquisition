@@ -167,7 +167,7 @@ quality:
   version: 1.0.0
   provider: openalex
   entity: publication
-  field_validations:
+  entity_field_validations:
   - field: openalex_id
     type: pattern
     pattern: ^W\d+$
@@ -242,14 +242,14 @@ quality:
     min: 0
     nullable: true
     error_message: Reference count must be non-negative
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: publication_identifiable
     fields:
     - openalex_id
     - title
     condition: all_present
     error_message: Publication must have OpenAlex ID and title
-  conditional_validations:
+  entity_conditional_validations:
   - name: article_requires_title
     condition_field: publication_type
     condition_value:

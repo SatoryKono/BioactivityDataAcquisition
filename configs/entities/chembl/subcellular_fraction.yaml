@@ -61,7 +61,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: subcellular_fraction
-  field_validations:
+  entity_field_validations:
   - field: entity_id
     type: pattern
     pattern: ^[a-f0-9]{16}$
@@ -82,8 +82,8 @@ quality:
     pattern: ^CHEMBL\d+$
     nullable: true
     error_message: example_assay_id must match CHEMBL format if present
-  cross_field_validations: []
-  conditional_validations: []
+  entity_cross_field_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: entity_id
     key_type: merge

@@ -68,7 +68,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: target_component
-  field_validations:
+  entity_field_validations:
   - field: component_id
     type: range
     min: 1
@@ -92,14 +92,14 @@ quality:
     max: 10000000
     nullable: true
     error_message: Taxonomy ID must be between 1 and 10,000,000
-  cross_field_validations:
+  entity_cross_field_validations:
   - name: component_identifiable
     fields:
     - component_id
     - accession
     condition: any_present
     error_message: Component must have ID or accession
-  conditional_validations: []
+  entity_conditional_validations: []
   key_nullability:
   - field: component_id
     key_type: merge
