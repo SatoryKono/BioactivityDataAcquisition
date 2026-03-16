@@ -32,15 +32,14 @@ __all__ = [
 class DataNormalizationPort(Protocol):
     """Port for text and data normalization operations.
 
-        Provides a unified interface for normalizing publication metadata,
-        identifiers, and text content from various data sources.
+    Provides a unified interface for normalizing publication metadata,
+    identifiers, and text content from various data sources.
 
-        Example:
-            >>> from bioetl.domain.services import DataNormalizationService
-    from bioetl.domain.types import JsonDict
-            >>> normalizer = DataNormalizationService()
-            >>> normalizer.normalize_doi("10.1038/NATURE12373")
-            '10.1038/nature12373'
+    Example:
+        >>> from bioetl.domain.services import DataNormalizationService
+        >>> normalizer = DataNormalizationService()
+        >>> normalizer.normalize_doi("10.1038/NATURE12373")
+        '10.1038/nature12373'
     """
 
     def normalize_doi(self, doi: str | None) -> str | None:
@@ -70,13 +69,12 @@ class DataNormalizationPort(Protocol):
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
         """Validate publication year against range [1500, 2100].
 
-        Returns (year, is_warning). Warning is True if year is outside valid range.
-
         Args:
-            year: Year.
+            year: Publication year to validate.
 
         Returns:
-            Normalized value.
+            Tuple of (year, is_warning). Warning is True if year is outside
+            valid range; year is set to None in that case.
         """
         ...
 
@@ -100,10 +98,10 @@ class DataNormalizationPort(Protocol):
         """Remove HTML tags, decode entities, normalize whitespace.
 
         Args:
-            text: Input text string.
+            text: Input text string (may contain HTML tags and entities).
 
         Returns:
-            The str | None result.
+            Cleaned plain text, or None if input is None/empty.
         """
         ...
 
@@ -150,10 +148,11 @@ class DataNormalizationPort(Protocol):
         """Parse author input (list, JSON, or delimited string) into a list of names.
 
         Args:
-            authors: Authors.
+            authors: Author data as list of strings, JSON string, or
+                delimited string (pipe/semicolon/comma).
 
         Returns:
-            Parsed result.
+            List of individual author name strings. Empty list if input is None.
         """
         ...
 
@@ -179,10 +178,11 @@ class DataNormalizationPort(Protocol):
         Partial dates: [year,month]->YYYY-MM-30, [year]->YYYY-12-31.
 
         Args:
-            date_parts: Date parts.
+            date_parts: Nested sequences ``[[year, month, day]]`` as returned
+                by CrossRef API.
 
         Returns:
-            The str | None result.
+            Formatted date string in YYYY-MM-DD format, or None if input is None.
         """
         ...
 
@@ -215,10 +215,11 @@ class DataNormalizationPort(Protocol):
         """Parse and normalize author names to JSON string.
 
         Args:
-            authors: Authors.
+            authors: Author data as list of strings, list of dicts with
+                name fields, or JSON/delimited string.
 
         Returns:
-            Normalized value.
+            JSON string of normalized author names, or None if no authors found.
         """
         ...
 
@@ -229,10 +230,11 @@ class DataNormalizationPort(Protocol):
         """Normalize author names to short Surname_F keys (pipe-delimited).
 
         Args:
-            authors: Authors.
+            authors: Author data as list of strings, list of dicts with
+                name fields, or JSON/delimited string.
 
         Returns:
-            Normalized value.
+            Pipe-delimited string of ``Surname_F`` keys, or None if empty.
         """
         ...
 
@@ -243,10 +245,11 @@ class DataNormalizationPort(Protocol):
         """Extract, normalize, deduplicate affiliations to JSON string.
 
         Args:
-            affiliations: Affiliations.
+            affiliations: Affiliation data as list of strings or list of
+                dicts with affiliation fields.
 
         Returns:
-            Normalized value.
+            JSON string of unique normalized affiliations, or None if empty.
         """
         ...
 
@@ -257,9 +260,10 @@ class DataNormalizationPort(Protocol):
         """Extract unique affiliations from author objects.
 
         Args:
-            authors: Authors.
+            authors: List of author dicts, each potentially containing
+                an ``affiliations`` key with affiliation data.
 
         Returns:
-            Extracted value.
+            Deduplicated list of affiliation strings extracted from authors.
         """
         ...

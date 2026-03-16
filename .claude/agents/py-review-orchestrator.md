@@ -73,7 +73,7 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - Тесты: ~620 файлов в `tests/`
 - Конфигурации: ~38 YAML в `configs/`
 - Документация: ~600 файлов в `docs/`
-- Правила: `docs/00-project/RULES.md` (v5.23), `.claude/rules/ai-selfreview-rules.md`
+- Правила: `docs/00-project/RULES.md` (v5.24), `.claude/rules/ai-selfreview-rules.md`
 - ADR: 40 решений в `docs/02-architecture/decisions/`
 
 ## ПЛАН СЕКТОРОВ
@@ -703,7 +703,7 @@ L1 собирает все → FINAL-REVIEW.md
 
 ## 8. References
 
-- **RULES.md** — `docs/00-project/RULES.md` (v5.23)
+- **RULES.md** — `docs/00-project/RULES.md` (v5.24)
 - **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
 - **Orchestration** — `.claude/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`

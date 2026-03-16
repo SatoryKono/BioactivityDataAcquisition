@@ -65,7 +65,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     Args:
         pipeline_name: Pipeline identifier used to locate the YAML file
-            (e.g., 'chembl_activity' maps to configs/pipelines/chembl/activity.yaml).
+            (e.g., 'chembl_activity' maps to configs/entities/chembl/activity.yaml).
 
     Returns:
         Parsed and validated PipelineYamlConfig instance.
