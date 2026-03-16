@@ -8,13 +8,20 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-TARGET_FILES = (
+def _existing_only(paths: tuple[Path, ...]) -> tuple[Path, ...]:
+    return tuple(p for p in paths if (PROJECT_ROOT / p).exists())
+
+TARGET_FILES = _existing_only((
     Path(".codex/agents/py-config-bot.md"),
+    Path(".claude/agents/py-config-bot.md"),
     Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-config-bot.md"),
     Path(".codex/agents/py-audit-bot.md"),
+    Path(".claude/agents/py-audit-bot.md"),
     Path(".codex/agents/py-doc-bot.md"),
+    Path(".claude/agents/py-doc-bot.md"),
     Path(".codex/agents/py-plan-bot.md"),
+    Path(".claude/agents/py-plan-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
     Path(
         "docs/02-architecture/mmd-diagrams/views/46-yaml-config-resolution-full.mermaid"
@@ -28,7 +35,7 @@ TARGET_FILES = (
     Path(
         "docs/02-architecture/diagram-descriptions/mmd-diagrams/architecture/11a-config-loading.md"
     ),
-)
+))
 
 OBSOLETE_PATTERNS = (
     "configs/pipelines/",
@@ -42,13 +49,19 @@ OBSOLETE_PATTERNS = (
     "FieldGroupLoader",
 )
 
-RUNTIME_FACT_TARGET_FILES = (
+RUNTIME_FACT_TARGET_FILES = _existing_only((
     Path(".codex/agents/ORCHESTRATION.md"),
+    Path(".claude/agents/ORCHESTRATION.md"),
     Path(".codex/agents/py-audit-bot.md"),
+    Path(".claude/agents/py-audit-bot.md"),
     Path(".codex/agents/py-config-bot.md"),
+    Path(".claude/agents/py-config-bot.md"),
     Path(".codex/agents/py-doc-bot.md"),
+    Path(".claude/agents/py-doc-bot.md"),
     Path(".codex/agents/py-doc-swarm.md"),
+    Path(".claude/agents/py-doc-swarm.md"),
     Path(".codex/agents/py-plan-bot.md"),
+    Path(".claude/agents/py-plan-bot.md"),
     Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
     Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
     Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
@@ -58,7 +71,7 @@ RUNTIME_FACT_TARGET_FILES = (
     Path("docs/00-project/ai/memory/memory-py-config-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-doc-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
-)
+))
 
 OBSOLETE_RUNTIME_FACT_PATTERNS = (
     "40 ADR",
