@@ -9,10 +9,10 @@ from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
-from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_execution_lifecycle import (
     BatchExecutionLifecycleService,
 )
+from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
