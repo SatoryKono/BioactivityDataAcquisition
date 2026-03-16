@@ -6,13 +6,16 @@ from collections import Counter
 from pathlib import Path
 
 import pytest
+import sys
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts.ci._compatibility_telemetry import (
     collect_compatibility_surface_snapshot,
     render_compatibility_surface_section,
 )
-
-ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_DOC = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
 )
