@@ -17,7 +17,7 @@
 | Naming | MEDIUM/HIGH | NAME-001...NAME-009 |
 | Types | HIGH | TYPE-001...TYPE-004 |
 | Testing | HIGH | TEST-001...TEST-005 |
-| Exceptions | INFO | EXC-001...EXC-016 |
+| Exceptions | INFO | EXC-001...EXC-017 |
 
 ---
 
@@ -931,6 +931,27 @@ class SemanticScholarHTTPClientProtocol(Protocol):
 ```bash
 # Перечислить Protocol-классы вне domain/ports/ (для ревью, не для блокировки)
 grep -rn "class \w\+Protocol\b" src/bioetl/ --include="*.py" | grep -v "domain/ports/"
+```
+
+---
+
+### EXC-017: Classification Module Initialization
+
+Module-level mutable containers in `domain/mapping/publication_type_classification.py`
+**НЕ являются нарушением** DI-004, потому что:
+
+1. Domain purity (ARCH-002) запрещает I/O — lazy init невозможен
+2. Данные immutable после `initialize_classification()` (containers populated once)
+3. Bootstrap гарантирован: composition layer (`classification_init.py`) + test conftest (session fixture)
+4. `is_initialized()` guard позволяет проверить состояние
+
+```python
+# domain/mapping/publication_type_classification.py
+_ENTRY_BY_SPECIFICITY: list[PublicationTypeEntry] = []  # ✅ OK — populated once at startup
+_PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {}  # ✅ OK — immutable after init
+
+def is_initialized() -> bool:  # ✅ OK — guard function
+    return bool(_PROVIDER_LOOKUPS)
 ```
 
 ---

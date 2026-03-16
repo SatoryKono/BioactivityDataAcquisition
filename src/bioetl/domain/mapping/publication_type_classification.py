@@ -86,9 +86,10 @@ def initialize_classification(data: ClassificationData) -> None:
     """Initialize classification lookups from loaded data.
 
     Must be called once at application startup before any calls to
-    ``classify_publication_type()``.  Containers are mutated in-place so
-    that references obtained via ``from … import _PROVIDER_LOOKUPS`` at
-    module collection time see the populated data.
+    ``classify_publication_type()``.  Safe to call multiple times
+    (idempotent).  Containers are mutated in-place so that references
+    obtained via ``from … import _PROVIDER_LOOKUPS`` at module collection
+    time see the populated data.
 
     Args:
         data: ClassificationData loaded from the JSON asset file.

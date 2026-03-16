@@ -9,6 +9,7 @@ from bioetl.domain.mapping.publication_type_classification import (
     _PROVIDER_LOOKUPS,
     classify_publication_type,
     get_classification_table_size,
+    is_initialized,
 )
 
 
@@ -280,3 +281,30 @@ class TestEdgeCases:
         entry = s2_lookup.get("lettersandcomments")
         assert entry is not None
         assert entry.unified_type == "Letter"
+
+
+class TestInitializationGuard:
+    """Tests for is_initialized() guard and idempotency."""
+
+    def test_is_initialized_returns_true(self) -> None:
+        """Session fixture guarantees initialization before tests run."""
+        assert is_initialized() is True
+
+    def test_initialize_classification_is_idempotent(self) -> None:
+        """Calling initialize_classification() twice must not corrupt state."""
+        from bioetl.domain.mapping.publication_type_classification import (
+            initialize_classification,
+        )
+
+        size_before = get_classification_table_size()
+        lookups_before = dict(_PROVIDER_LOOKUPS)
+
+        # Re-initialize with same data (loaded by session fixture)
+        from bioetl.domain.mapping.publication_type_classification import _data
+
+        assert _data is not None
+        initialize_classification(_data)
+
+        assert get_classification_table_size() == size_before
+        assert set(_PROVIDER_LOOKUPS.keys()) == set(lookups_before.keys())
+        assert is_initialized() is True
