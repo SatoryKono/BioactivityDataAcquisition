@@ -9,7 +9,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
     get_data_source_creator,
 )
-from bioetl.composition.factories.pipeline.dq_helpers import (
+from bioetl.composition.factories.dq.context_resolver import (
     extract_dq_configs as _extract_dq_configs,
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (

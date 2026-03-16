@@ -1,13 +1,9 @@
-"""Canonical data-source factory module."""
+"""Canonical data-source factory module with a retained legacy compat facade."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, ClassVar, cast
 
-from bioetl.composition.factories.datasource._registry_compat import (
-    DataSourceRegistry,
-    _build_data_source_creator,
-)
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
@@ -28,8 +24,41 @@ DataSourceCreatorPort = DataSourceCreatorProtocol
 
 
 def get_data_source_creator(provider: str) -> DataSourceCreatorProtocol:
-    """Return the canonical provider-bound data-source creator."""
-    return _build_data_source_creator(provider)
+    """Return the canonical provider-bound data-source creator callback."""
+    return ProviderRegistry.build_data_source_creator(provider)
+
+
+class DataSourceRegistry:
+    """Legacy compatibility facade over the canonical provider creator path."""
+
+    _creators: ClassVar[dict[str, DataSourceCreatorProtocol]] = {}
+
+    @classmethod
+    def get(cls, provider: str) -> DataSourceCreatorProtocol:
+        """Get creator function for provider via the canonical creator path."""
+        return get_data_source_creator(provider)
+
+    @classmethod
+    def list_providers(cls) -> list[str]:
+        """List providers that expose data-source creators."""
+        ProviderRegistry.ensure_loaded()
+        return ProviderRegistry.list_providers()
+
+    @classmethod
+    def list_keys(cls) -> list[str]:
+        """Alias for list_providers()."""
+        return cls.list_providers()
+
+    @classmethod
+    def contains(cls, key: str) -> bool:
+        """Check if provider is registered and has a data-source creator."""
+        ProviderRegistry.ensure_loaded()
+        return ProviderRegistry.has_data_source_creator(key)
+
+    @classmethod
+    def clear(cls) -> None:
+        """Clear the local legacy facade cache used only by compatibility tests."""
+        cls._creators.clear()
 
 
 class DataSourceFactory:

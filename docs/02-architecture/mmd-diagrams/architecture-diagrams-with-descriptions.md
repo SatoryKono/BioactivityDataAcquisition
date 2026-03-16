@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams With Descriptions
 
-- Generated: 2026-03-13T11:52:02
+- Generated: 2026-03-16T10:12:25
 - Diagram count: 52
 
 ## Table of Contents
@@ -34,8 +34,8 @@
 - [11a-config-loading — Configuration: Loading Pipeline](#11a-config-loading)
 - [11b-config-domain — Configuration: Domain & Application Config](#11b-config-domain)
 - [12-bootstrap-di-container — Bootstrap / DI Container (Composition Root)](#12-bootstrap-di-container)
-- [12a-bootstrap-factories — Bootstrap: Factories and Registries](#12a-bootstrap-factories)
-- [12b-bootstrap-wiring — Bootstrap: Wiring Graph](#12b-bootstrap-wiring)
+- [12a-bootstrap-factories — Bootstrap: Registries and Factory Seams](#12a-bootstrap-factories)
+- [12b-bootstrap-wiring — Bootstrap: Runtime and Admin Wiring](#12b-bootstrap-wiring)
 - [13-port-protocol-contracts — Port/Protocol Contracts (Full Map)](#13-port-protocol-contracts)
 - [13a-data-storage-ports — DataSource and Storage Ports](#13a-data-storage-ports)
 - [13a-port-contracts-data-sources — Port Contracts: Data Sources](#13a-port-contracts-data-sources)
@@ -48,7 +48,7 @@
 - [13f-operational-ports-infra — Infrastructure Operational Implementations](#13f-operational-ports-infra)
 - [14-cli-interface-layer — CLI / Interface Layer](#14-cli-interface-layer)
 - [14a-cli-commands — CLI: Command Structure](#14a-cli-commands)
-- [14b-cli-routing — CLI: Routing to Composition & Application](#14b-cli-routing)
+- [14b-cli-routing — CLI: Routing to Composition Boundary](#14b-cli-routing)
 - [15-batch-executor-internals — BatchExecutor Internal Architecture](#15-batch-executor-internals)
 - [16-transformer-hierarchy — Transformer Hierarchy](#16-transformer-hierarchy)
 - [16a-transformer-base — Base Transformer and ChEMBL Transformers](#16a-transformer-base)
@@ -493,13 +493,13 @@
 ![11-configuration-system](architecture/png/11-configuration-system.png)
 
 ### Описание
-Диаграмма «Configuration System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how YAML configs are loaded, validated, and used across the system.. На схеме отражено примерно 29 узлов и 20 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML Config Files, Infrastructure Config Loaders, Infrastructure Schemas (Pydantic), Domain Configuration, Composite Domain Config, Application Config. Показательные узлы для быстрого чтения: configs/entities/*/*.yaml pipeline configs, configs/quality/*.yaml DQ rules, configs/filters/*.yaml filter configs, configs/composites/*.yaml composite configs, configs/field_groups/*.yaml field groups, PipelineConfigLoader load(path) -> PipelineConfig. Примечание: Decomposed into 11a-config-loading, 11b-config-domain.
+Диаграмма «Configuration System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how YAML configs are loaded, validated, and used across the system.. На схеме отражено примерно 27 узлов и 25 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML Config Files, Infrastructure Config Loaders, Infrastructure Schemas (Pydantic), Domain Configuration, Composite Domain Config, Application Config. Показательные узлы для быстрого чтения: configs/base/*.yaml pipeline and quality defaults, configs/providers/*.yaml source plus provider defaults, configs/entities/*/*.yaml unified entity configs, configs/composites/*.yaml composite configs, PipelineConfigLoader load(path) -> PipelineConfig, DQConfigLoader load(path) -> DQConfig. Примечание: Decomposed into 11a-config-loading, 11b-config-domain.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата: `2026-02-27`
-- Узлы (metadata): `29`
+- Узлы (metadata): `27`
 
 \newpage
 
@@ -510,13 +510,13 @@
 ![11a-config-loading](architecture/png/11a-config-loading.png)
 
 ### Описание
-Диаграмма «Configuration: Loading Pipeline» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: YAML files, config loaders, and infrastructure schemas (Pydantic validation).. На схеме отражено примерно 13 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML Config Files, Infrastructure Config Loaders, Infrastructure Schemas (Pydantic). Показательные узлы для быстрого чтения: configs/entities/*/*.yaml, configs/quality/*.yaml, configs/filters/*.yaml, configs/composites/*.yaml, configs/field_groups/*.yaml, BaseConfigLoader.
+Диаграмма «Configuration: Loading Pipeline» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: YAML files, config loaders, and infrastructure schemas (Pydantic validation).. На схеме отражено примерно 11 узлов и 16 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML Config Files, Infrastructure Config Loaders, Infrastructure Schemas (Pydantic). Показательные узлы для быстрого чтения: configs/base/*.yaml, configs/providers/*.yaml, configs/entities/*/*.yaml, configs/composites/*.yaml, BaseConfigLoader, PipelineConfigLoader.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата: `2026-02-27`
-- Узлы (metadata): `13`
+- Узлы (metadata): `11`
 
 \newpage
 
@@ -544,46 +544,46 @@
 ![12-bootstrap-di-container](architecture/png/12-bootstrap-di-container.png)
 
 ### Описание
-Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how dependencies are assembled and wired together.. На схеме отражено примерно 29 узлов и 38 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Entry Points, composition layer, Bootstrap Assembly, Factories, Provider Registry, Runtime Builders. Показательные узлы для быстрого чтения: CLI Commands (Click), HTTP Interface, RuntimeAssembly central DI wiring point creates infra + app components, RunnerBootstrap ━━━━━━━━━━━━━━━━━ + assemble_runner(), StorageBootstrap ━━━━━━━━━━━━━━━━━ + assemble_storage(), HealthBootstrap ━━━━━━━━━━━━━━━━━ + assemble_health(). Примечание: Decomposed into 12a, 12b sub-diagrams.
+Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the current composition-root seams used to assemble runtime and admin services.. На схеме отражено примерно 20 узлов и 26 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Public composition seams, Internal composition modules, Registries + factories, Runtime bootstrap, CLI/bootstrap services, Created collaborators. Показательные узлы для быстрого чтения: Entry callers CLI + tests/scripts + future API, composition.entrypoints canonical retained facade, composition.bootstrap runtime / cli / assembly, ProviderRegistry provider configs + creators, PipelineRegistry pipeline definitions, DataSourceFactory canonical provider adapter path. Примечание: Decomposed into 12a, 12b sub-diagrams.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-24`
-- Узлы (metadata): `29`
+- Дата: `2026-03-16`
+- Узлы (metadata): `20`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-## 12a-bootstrap-factories — Bootstrap: Factories and Registries
+## 12a-bootstrap-factories — Bootstrap: Registries and Factory Seams
 
 ![12a-bootstrap-factories](architecture/png/12a-bootstrap-factories.png)
 
 ### Описание
-Диаграмма «Bootstrap: Factories and Registries» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers composition root factories, provider registry, and builder assembly.. На схеме отражено примерно 10 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Interfaces Layer, Composition Layer. Показательные узлы для быстрого чтения: CLI Commands (Click), HTTP Interface, bootstrap_pipeline_runner, DataSourceRegistry, GenericPipelineFactory, RunnerFactory.
+Диаграмма «Bootstrap: Registries and Factory Seams» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Focuses on current registries, provider wiring, and canonical factory seams.. На схеме отражено примерно 8 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Registries + factories. Показательные узлы для быстрого чтения: composition.entrypoints, composition.bootstrap, ProviderRegistry, PipelineRegistry, DataSourceFactory, RunnerFactory.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-25`
-- Узлы (metadata): `10`
+- Дата: `2026-03-16`
+- Узлы (metadata): `8`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-## 12b-bootstrap-wiring — Bootstrap: Wiring Graph
+## 12b-bootstrap-wiring — Bootstrap: Runtime and Admin Wiring
 
 ![12b-bootstrap-wiring](architecture/png/12b-bootstrap-wiring.png)
 
 ### Описание
-Диаграмма «Bootstrap: Wiring Graph» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers runtime assembly sequence and main dependency injection graph.. На схеме отражено примерно 15 узлов и 22 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composition Layer, Infrastructure Layer, Application Layer. Показательные узлы для быстрого чтения: bootstrap_pipeline_runner, RunnerBootstrap, StorageBootstrap, CheckpointBootstrap, LockBootstrap, Provider Adapter (DataSourcePort).
+Диаграмма «Bootstrap: Runtime and Admin Wiring» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers the current runtime/admin assembly outputs created from composition bootstrap.. На схеме отражено примерно 15 узлов и 15 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composition bootstrap, Infrastructure collaborators, Created services. Показательные узлы для быстрого чтения: bootstrap.runtime, bootstrap.cli, bootstrap.assembly, RunnerFactoryBuilderService, CompositeSupportServicesFactory, Provider adapter DataSourcePort.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-25`
+- Дата: `2026-03-16`
 - Узлы (metadata): `15`
 
 \newpage
@@ -765,13 +765,13 @@
 ![14-cli-interface-layer](architecture/png/14-cli-interface-layer.png)
 
 ### Описание
-Диаграмма «CLI / Interface Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: CLI commands, their routing, and interaction with composition.. На схеме отражено примерно 24 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: User, CLI Interface (Click), Run Commands, Health Commands, Data Commands, Maintenance Commands. Показательные узлы для быстрого чтения: Terminal, bioetl (main group), bioetl run --provider --entity --run-type --limit --resume --dry-run, bioetl run-composite ━━━━━━━━━━━━━━━━━ --config --run-type --resume, bioetl health ━━━━━━━━━━━━━━━━━ --provider Check API health, bioetl export ━━━━━━━━━━━━━━━━━ --table --format csv. Примечание: Decomposed into 14a-cli-commands, 14b-cli-routing.
+Диаграмма «CLI / Interface Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: current CLI routing through registry helpers, composition entrypoints, and bootstrap services.. На схеме отражено примерно 18 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: interfaces/cli, composition boundary, Created runtime services. Показательные узлы для быстрого чтения: Terminal user, cli.main Click group, registry_helpers fresh explicit PipelineRegistry, run / run-all, run-composite, health / export / quarantine / checkpoint config / lock / maintenance. Примечание: Decomposed into 14a-cli-commands, 14b-cli-routing.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-24`
-- Узлы (metadata): `24`
+- Дата: `2026-03-16`
+- Узлы (metadata): `18`
 
 \newpage
 
@@ -782,30 +782,30 @@
 ![14a-cli-commands](architecture/png/14a-cli-commands.png)
 
 ### Описание
-Диаграмма «CLI: Command Structure» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Terminal entry point, main group, and all CLI commands with shutdown signal.. На схеме отражено примерно 12 узлов и 3 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: User, CLI Interface (Click), Run Commands, Health Commands, Data Commands, Maintenance Commands. Показательные узлы для быстрого чтения: Terminal, bioetl group, bioetl run, bioetl run-composite, bioetl health, bioetl export.
+Диаграмма «CLI: Command Structure» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Terminal entrypoint, main group, and the current command families registered in cli.main.. На схеме отражено примерно 12 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: cli.main command groups. Показательные узлы для быстрого чтения: Terminal, bioetl group, run / run-all, run-composite, health / export / quarantine checkpoint / config / lock, maintenance vacuum / vacuum-all / archive bronze-cleanup / cleanup-preview.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
+- Дата: `2026-03-16`
 - Узлы (metadata): `12`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-## 14b-cli-routing — CLI: Routing to Composition & Application
+## 14b-cli-routing — CLI: Routing to Composition Boundary
 
 ![14b-cli-routing](architecture/png/14b-cli-routing.png)
 
 ### Описание
-Диаграмма «CLI: Routing to Composition & Application» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: How CLI commands route through composition bootstrap to application services.. На схеме отражено примерно 12 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composition Layer, Application Layer. Показательные узлы для быстрого чтения: bioetl run, bioetl run-composite, bioetl health, bioetl export, bioetl quarantine, bioetl checkpoint.
+Диаграмма «CLI: Routing to Composition Boundary» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how command families route through registry helpers, composition.entrypoints, and bootstrap services.. На схеме отражено примерно 13 узлов и 13 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: interfaces/cli helpers, composition boundary, Runtime services. Показательные узлы для быстрого чтения: run / run-all, run-composite, health / export / quarantine checkpoint / config / lock / maintenance, registry_helpers, composition.entrypoints, bootstrap.runtime.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
-- Узлы (metadata): `12`
+- Дата: `2026-03-16`
+- Узлы (metadata): `13`
 
 \newpage
 
@@ -901,13 +901,13 @@
 ![18-lock-checkpoint-shutdown](architecture/png/18-lock-checkpoint-shutdown.png)
 
 ### Описание
-Диаграмма «Locking, Checkpoint, and Graceful Shutdown» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: distributed safety mechanisms.. На схеме отражено примерно 22 узлов и 15 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Domain Lock Types, Application: LockCoordinator, Application: CheckpointManager, Application: Shutdown, Infrastructure: MemoryLock. Показательные узлы для быстрого чтения: LockPort (Protocol) acquire/release/heartbeat validate_owner + validate_token, CheckpointPort (Protocol) save/load/list/delete, ShutdownPort (Protocol), FencingToken sequence + key + owner_id + issued_at, LockNotHeldError, LockCoordinator lock + run_id + shutdown_signal acquire/release/validate. Примечание: Decomposed into 18a-lock-system, 18b-checkpoint-shutdown.
+Диаграмма «Locking, Checkpoint, and Graceful Shutdown» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Distinguishes general pipeline lifecycle from composite runtime specifics.. На схеме отражено примерно 20 узлов и 16 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Domain Lock Types, Application: LockCoordinator, Application: Checkpoint Services, Application: Shutdown, Infrastructure: MemoryLock. Показательные узлы для быстрого чтения: LockPort (Protocol) acquire/release/heartbeat validate_owner + validate_token, CheckpointPort (Protocol) save/load/list/delete, CompositeCheckpointPort (composite phase checkpoints), ShutdownPort (Protocol), FencingToken + LockNotHeldError, LockCoordinator lock + run_id + shutdown_signal acquire/release/validate. Примечание: Decomposed into 18a-lock-system, 18b-checkpoint-shutdown.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-24`
-- Узлы (metadata): `22`
+- Дата: `2026-03-16`
+- Узлы (metadata): `20`
 
 \newpage
 
@@ -918,13 +918,13 @@
 ![18a-lock-system](architecture/png/18a-lock-system.png)
 
 ### Описание
-Диаграмма «Lock System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Lock ports, domain types, application manager, infrastructure implementation, and safety guard.. На схеме отражено примерно 8 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Domain Lock Types, Application: LockCoordinator, Infrastructure: MemoryLock, Safety Guard. Показательные узлы для быстрого чтения: fa:fa-lock LockPort, FencingToken, LockNotHeldError, LockCoordinator, HeartbeatTask, MemoryLock.
+Диаграмма «Lock System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Distinguishes the general LockCoordinator path from the composite runner's direct LockPort path.. На схеме отражено примерно 10 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain lock contracts, General pipeline lifecycle, Composite runtime path, Infrastructure. Показательные узлы для быстрого чтения: LockPort, FencingToken, LockNotHeldError, LockCoordinator, HeartbeatTask, CompositePipelineRunnerService.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
-- Узлы (metadata): `8`
+- Дата: `2026-03-16`
+- Узлы (metadata): `10`
 
 \newpage
 
@@ -935,10 +935,10 @@
 ![18b-checkpoint-shutdown](architecture/png/18b-checkpoint-shutdown.png)
 
 ### Описание
-Диаграмма «Checkpoint and Shutdown System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Checkpoint and shutdown ports, managers, and pipeline lifecycle integration.. На схеме отражено примерно 14 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application: CheckpointManager, Application: Shutdown, Infrastructure: LocalCheckpoint, Pipeline Lifecycle. Показательные узлы для быстрого чтения: fa:fa-flag CheckpointPort, fa:fa-power-off ShutdownPort, CheckpointManager, ShutdownSignal, ShutdownReason, LocalCheckpoint.
+Диаграмма «Checkpoint and Shutdown System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Separates general checkpoint/shutdown services from the composite checkpoint path.. На схеме отражено примерно 12 узлов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain ports, Application services, Infrastructure, Lifecycle integration. Показательные узлы для быстрого чтения: CheckpointPort, CompositeCheckpointPort, ShutdownPort, CheckpointManagerService, CompositeCheckpointService, ShutdownSignal / ShutdownReason.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
-- Узлы (metadata): `14`
+- Дата: `2026-03-16`
+- Узлы (metadata): `12`

@@ -1,8 +1,8 @@
 %% BioETL — CLI: Command Structure
-%% Terminal entry point, main group, and all CLI commands with shutdown signal.
+%% Terminal entrypoint, main group, and the current command families registered in cli.main.
 
-%% @version 1.0.0
-%% @date    2026-02-27
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   System / Component
 %% @view    cli-commands
@@ -20,51 +20,29 @@
   }
 }}%%
 graph LR
-    subgraph User["User"]
-        TERM["Terminal"]:::size-sm
-    end
+    TERM["Terminal"]:::size-sm
 
-    subgraph CLI["CLI Interface (Click)"]
+    subgraph CLI["cli.main command groups"]
         MAIN["bioetl group"]:::size-sm
-
-        subgraph RunCmds["Run Commands"]
-            RUN["bioetl run"]:::size-sm
-            RUN_COMP["bioetl run-composite"]:::size-sm
-        end
-
-        subgraph HealthCmds["Health Commands"]
-            HEALTH["bioetl health"]:::size-sm
-        end
-
-        subgraph DataCmds["Data Commands"]
-            EXPORT["bioetl export"]:::size-sm
-            QUARANTINE["bioetl quarantine"]:::size-sm
-            CHECKPOINT["bioetl checkpoint"]:::size-sm
-        end
-
-        subgraph MaintenanceCmds["Maintenance Commands"]
-            VACUUM["bioetl vacuum"]:::size-sm
-            ARCHIVE["bioetl archive"]:::size-sm
-        end
-
-        subgraph ConfigCmds["Config Commands"]
-            CONFIG["bioetl config"]:::size-sm
-        end
+        RUN["run / run-all"]:::size-sm
+        RC["run-composite"]:::size-sm
+        ADM["health / export / quarantine<br/>checkpoint / config / lock"]:::size-sm
+        MAINT["maintenance<br/>vacuum / vacuum-all / archive<br/>bronze-cleanup / cleanup-preview"]:::size-md
+        AUX["adr / debug"]:::size-sm
     end
 
-    SS["ShutdownSignal"]:::size-sm
+    NOTE["Main CLI builds a fresh explicit registry instance<br/>before command dispatch."]:::size-sm
 
-    %% User → CLI
     TERM --> MAIN
-    MAIN --> RUN & RUN_COMP & HEALTH & EXPORT & QUARANTINE & CHECKPOINT & VACUUM & ARCHIVE & CONFIG
-
-    %% Shutdown
-    MAIN -.->|"SIGINT/SIGTERM"| SS
+    MAIN --> RUN
+    MAIN --> RC
+    MAIN --> ADM
+    MAIN --> MAINT
+    MAIN --> AUX
+    MAIN -.-> NOTE
 
     classDef user fill:#f1f5f9,stroke:#64748b
     classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class TERM user
-    class MAIN,RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM,ARCHIVE,CONFIG cli
-    class SS app
+    class MAIN,RUN,RC,ADM,MAINT,AUX,NOTE cli

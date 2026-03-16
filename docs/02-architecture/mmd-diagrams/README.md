@@ -45,13 +45,13 @@ These artifacts are intentionally outside primary nav but linked here for discov
 | 9 | Observability Stack | `architecture/09-observability-stack.mmd` | Logging, metrics, tracing: ports and implementations |
 | 10 | Resilience Patterns | `architecture/10-resilience-patterns.mmd` | Circuit breaker, rate limiter, retry, health checks |
 | 11 | Configuration System | `architecture/11-configuration-system.mmd` | YAML configs → loaders → Pydantic schemas → domain config |
-| 12 | Bootstrap / DI Container | `architecture/12-bootstrap-di-container.mmd` | Composition root: factories, assembly, wiring |
+| 12 | Bootstrap / DI Container | `architecture/12-bootstrap-di-container.mmd` | Composition root: entrypoints, bootstrap seams, runtime/admin assembly |
 | 13 | Port/Protocol Contracts | `architecture/13-port-protocol-contracts.mmd` | All 29 domain ports mapped to their implementations |
-| 14 | CLI / Interface Layer | `architecture/14-cli-interface-layer.mmd` | CLI commands, routing to application services |
+| 14 | CLI / Interface Layer | `architecture/14-cli-interface-layer.mmd` | CLI routing through registry helpers, composition entrypoints, and bootstrap services |
 | 15 | BatchExecutor Internals | `architecture/15-batch-executor-internals.mmd` | Executor composition: transformer, writer, memory, metrics |
 | 16 | Transformer Hierarchy | `architecture/16-transformer-hierarchy.mmd` | Template Method pattern, all provider transformers, extractors |
 | 17 | Security, PII & Audit | `architecture/17-security-pii-audit.mmd` | PII hashing, salt rotation, audit trail |
-| 18 | Lock, Checkpoint & Shutdown | `architecture/18-lock-checkpoint-shutdown.mmd` | Fencing tokens, safety guard, graceful shutdown |
+| 18 | Lock, Checkpoint & Shutdown | `architecture/18-lock-checkpoint-shutdown.mmd` | General lifecycle vs composite-specific lock/checkpoint semantics |
 
 ## Decomposed Architecture Diagrams
 
@@ -81,7 +81,7 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 
 | # | Family | File | Description |
 |---|--------|------|-------------|
-| 1 | Domain Ports | `class-diagrams/01-domain-ports.mmd` | All 29 Protocol interfaces with method signatures |
+| 1 | Domain Ports | `class-diagrams/01-domain-ports.mmd` | Domain port overview with narrow storage ports plus aggregate compat facade |
 | 2 | Domain Ports (L2 Methods) | `class-diagrams/01a-domain-ports-method-catalog.mmd` | Method-level catalog for key port protocols |
 | 3 | Entities & Aggregates | `class-diagrams/02-entities-aggregates.mmd` | BaseEntity, Batch, PipelineRun, BatchRecord |
 | 4 | Value Objects | `class-diagrams/03-value-objects.mmd` | BronzeWriteResult, SilverWriteResult, FencingToken, etc. |
@@ -99,7 +99,7 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | 16 | Observability | `class-diagrams/14-observability.mmd` | Logger, Metrics, Tracing implementations |
 | 17 | Observability (L2 Methods) | `class-diagrams/14a-observability-method-catalog.mmd` | Method-level catalog for logging/metrics/tracing |
 | 18 | Extractors | `class-diagrams/15-extractors.mmd` | BaseFieldExtractor, PubMed & UniProt extractors |
-| 19 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | DataSourceRegistry, TransformerFactory, RunnerBuilder |
+| 19 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | Current composition factories, registries, and runtime assembly seams |
 
 ## Foundation Diagrams (55)
 
@@ -148,7 +148,7 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | 26 | `foundation/26-hexagonal-ports-adapters.mmd` | flowchart | Hexagonal Architecture — all 24 ports mapped to adapters |
 | 27 | `foundation/27-import-matrix-enforcement.mmd` | flowchart | ARCH-001 Import Matrix — 5-layer dependency rules |
 | 28 | `foundation/28-composition-root-di-graph.mmd` | flowchart | Composition Root DI Graph — full DI assembly |
-| 29 | `foundation/29-composite-pipeline-workflow.mmd` | sequence | Composite Pipeline (ADR-026) — Seed→Deps→FanOut→Merge→Gold |
+| 29 | `foundation/29-composite-pipeline-workflow.mmd` | sequence | Composite Pipeline (ADR-026) — seed/deps/fan-out/merge with current checkpoint + lock path |
 | 30 | `foundation/30-port-adapter-mapping.mmd` | flowchart | Port → Adapter Reference — all 24 ports |
 | 31 | `foundation/31-pipeline-run-lifecycle.mmd` | state | PipelineRun Aggregate FSM |
 | 32 | `foundation/32-single-record-journey.mmd` | flowchart | Single Record Journey — API→Bronze→Transform→Silver→Gold |
@@ -164,8 +164,8 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | 42 | `foundation/42-pipeline-runner-class.mmd` | class | PipelineRunner Class — all 14 DI dependencies |
 | 43 | `foundation/43-fan-out-fan-in-pattern.mmd` | sequence | Fan-Out/Fan-In — asyncio.gather parallel enrichment |
 | 44 | `foundation/44-cross-provider-enrichment.mmd` | flowchart | Cross-Provider Enrichment — 5-provider publication flow |
-| 46 | `foundation/46-yaml-config-resolution.mmd` | flowchart | YAML Config Resolution — hierarchical merge |
-| 47 | `foundation/47-publication-merge-sources.mmd` | sequence | Publication Composite — multi-source merge |
+| 46 | `foundation/46-yaml-config-resolution.mmd` | flowchart | YAML Config Resolution — unified path plus active compatibility normalization |
+| 47 | `foundation/47-publication-merge-sources.mmd` | sequence | Publication Composite — optional enrichers, field priorities, alias compatibility |
 | 48 | `foundation/48-composite-phase-lifecycle.mmd` | state | Composite Pipeline FSM — 10-state lifecycle |
 | 49 | `foundation/49-composite-runner-class.mmd` | class | CompositePipelineRunner — component diagram |
 | 50 | `foundation/50-exception-hierarchy.mmd` | flowchart | Exception Hierarchy — BioETLError full tree |

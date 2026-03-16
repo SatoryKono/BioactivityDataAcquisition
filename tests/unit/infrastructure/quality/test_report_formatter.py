@@ -9,6 +9,8 @@ from bioetl.infrastructure.quality.report_formatter import (
     _collect_allowances,
     _extract_growth_violation_section,
     _is_active_grace_window,
+    _is_rollout_cutoff_active,
+    _is_rollout_cutoff_stale,
     _resolve_rollout_mode_for_section,
     split_growth_violations_by_severity,
 )
@@ -158,6 +160,16 @@ class TestCollectAllowances:
         assert total == 5
         assert "reg_a" not in by_registry
         assert "grp1" not in by_group
+
+
+class TestRolloutCutoffHelpers:
+    """Tests for rollout cutoff helper predicates."""
+
+    def test_active_cutoff_in_future_returns_true(self) -> None:
+        assert _is_rollout_cutoff_active("2026-12-31", today=date(2026, 3, 16))
+
+    def test_stale_cutoff_in_past_returns_true(self) -> None:
+        assert _is_rollout_cutoff_stale("2026-03-01", today=date(2026, 3, 16))
 
 
 class TestExtractGrowthViolationSection:

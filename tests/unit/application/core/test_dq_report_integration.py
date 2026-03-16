@@ -16,6 +16,18 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_execution_lifecycle import (
+    BatchExecutionLifecycleService,
+)
+from bioetl.application.core.batch_execution_run_service import (
+    BatchExecutionRunService,
+)
+from bioetl.application.core.batch_execution_state_service import (
+    BatchExecutionStateService,
+)
+from bioetl.application.core.batch_extraction_loop_service import (
+    BatchExtractionLoopService,
+)
 from bioetl.application.core.batch_processing_service import BatchProcessingOutput
 from bioetl.application.services.dq_report_service import (
     DQReportContext,
@@ -374,21 +386,34 @@ class TestBatchExecutorDQCollection:
         )
         context = SimpleNamespace(run_id="run-123")
         batch_processing_service = MagicMock()
+        execution_lifecycle_service = BatchExecutionLifecycleService(
+            progress_service=MagicMock(),
+            tracing_manager=MagicMock(),
+            checkpoint_recovery_service=MagicMock(),
+        )
 
         return BatchExecutor(
             services=services,
             context=context,
             config=config,
-            checkpoint_manager=MagicMock(),
-            shutdown_signal=MagicMock(),
             batch_metrics=MagicMock(),
             transformer=MagicMock(),
             writer=MagicMock(),
-            tracing_manager=MagicMock(),
             memory_manager=MagicMock(),
-            progress_service=MagicMock(),
-            checkpoint_recovery_service=MagicMock(),
-            batch_processing_service=batch_processing_service,
+            execution_run_service=BatchExecutionRunService(
+                execution_lifecycle_service=execution_lifecycle_service
+            ),
+            extraction_loop_service=BatchExtractionLoopService(
+                batch_processing_service=batch_processing_service,
+                shutdown_signal=MagicMock(),
+                memory_manager=MagicMock(),
+                progress_service=MagicMock(),
+                checkpoint_recovery_service=MagicMock(),
+                checkpoint_interval=BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
+            ),
+            execution_state_service=BatchExecutionStateService(
+                batch_processing_service=batch_processing_service
+            ),
             logger=MagicMock(),
         )
 
@@ -445,7 +470,8 @@ class TestBatchExecutorDQCollection:
         executor = self._make_executor(dq_report_service=MagicMock())
         bronze_result = SimpleNamespace(path="bronze/file.jsonl.zst")
         records = [{"activity_id": "A1"}]
-        executor._batch_processing_service.process_batch = AsyncMock(
+        executor._execution_state_service._batch_processing_service.process_batch = (
+            AsyncMock(
             return_value=BatchProcessingOutput(
                 batch_id="batch-001",
                 bronze_result=bronze_result,
@@ -454,6 +480,7 @@ class TestBatchExecutorDQCollection:
                 quarantined_count=2,
                 filtered_out_count=0,
             )
+        )
         )
 
         result = await executor.process(records=records, start_index=0)

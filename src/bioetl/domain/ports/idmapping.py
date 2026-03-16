@@ -22,17 +22,11 @@ __all__ = [
 class IDMappingPort(Protocol):
     """Port for ID mapping between databases.
 
-        This interface abstracts ID mapping services that convert identifiers
-        from one database format to another (e.g., ChEMBL → UniProt).
+    This interface abstracts ID mapping services that convert identifiers
+    from one database format to another (e.g., ChEMBL → UniProt).
 
-    __all__ = [
-        "IDMappingPort",
-        "IDMappingSourceReaderPort",
-    ]
-
-
-        Implementations may use REST APIs (UniProt ID Mapping), local databases,
-        or other mapping services.
+    Implementations may use REST APIs (UniProt ID Mapping), local databases,
+    or other mapping services.
     """
 
     @property

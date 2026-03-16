@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
-from bioetl.composition.factories.dq.dq_services_factory import DQServicesFactory
+from bioetl.composition.factories.dq.factory import DQServicesFactory
 
 if TYPE_CHECKING:
     from pydantic import BaseModel

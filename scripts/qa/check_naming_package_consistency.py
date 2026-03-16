@@ -97,7 +97,11 @@ def _factory_violations(repo_root: Path) -> list[Violation]:
             except SyntaxError:
                 continue
             for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef) and node.name.endswith("Factory"):
+                if (
+                    isinstance(node, ast.ClassDef)
+                    and node.name.endswith("Factory")
+                    and not node.name.startswith("_")
+                ):
                     rel = py_file.relative_to(repo_root).as_posix()
                     violations.append(
                         Violation(

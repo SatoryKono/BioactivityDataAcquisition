@@ -126,31 +126,33 @@ composition/bootstrap/
 
 | Пакет              | Ключевые модули                                         | Назначение                                           |
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------- |
-| `providers/`       | `provider_registry.py`, `registration.py`, `registration_biblio.py`, `registration_bio.py`, `factory_loader.py`, `loader.py` | Реестр провайдеров, авто-регистрация, загрузка фабрик |
+| `providers/`       | `provider_registry.py`, `loader.py`, `registration.py`, internal provider config builders | Реестр провайдеров, canonical loader lifecycle и internal registration helpers |
 | `services/`        | `__init__.py`, `versioning.py` | Composition-level re-exports для metadata coordination и versioning utilities |
 | `runtime_builders/`| `runner_builder.py`, `observability_builder.py`, `inputs_resolver.py` | Builders для runtime assembly                        |
 
-### 2.3. Реестр провайдеров и DataSourceRegistry
+### 2.3. ProviderRegistry и канонический data-source creator path
 
-**Расположение:** `src/bioetl/composition/factories/datasource/` (`DataSourceRegistry`, `DataSourceFactory`) и `src/bioetl/composition/providers/` (`ProviderRegistry`).
+**Расположение:** `src/bioetl/composition/factories/datasource/` (`DataSourceFactory`, `get_data_source_creator`) и `src/bioetl/composition/providers/` (`ProviderRegistry`).
 
 Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
 
 - **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
-- **`DataSourceRegistry`**: Лёгкий реестр-адаптер, экспортируемый из `bioetl.composition.factories.datasource`. Делегирует создание в `ProviderRegistry`.
+- **`get_data_source_creator()`**: Каноническая точка получения provider-bound creator callback для data source assembly.
+- **`DataSourceFactory`**: Канонический façade для создания `DataSourcePort` через `ProviderRegistry`.
 
-Полная deprecation/inventory картина по `DataSourceRegistry` и соседним compat-модулям описана в
+Legacy registry façade сохраняется только для explicit compatibility coverage.
+Полная deprecation/inventory картина по этому compatibility surface и соседним compat-модулям описана в
 [Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
 
 **Пример использования:**
 
 ```python
-# Получение data source creator
-creator = DataSourceRegistry.get("chembl")
+# Получение канонического data source creator
+creator = get_data_source_creator("chembl")
 data_source = creator(settings, config, logger)
 
-# Или напрямую через ProviderRegistry
-data_source = ProviderRegistry.create_data_source("chembl", settings, config, logger)
+# Или напрямую через DataSourceFactory / ProviderRegistry
+data_source = DataSourceFactory.create("chembl", settings=settings, logger=logger)
 ```
 
 **Зарегистрированные провайдеры (8 шт, включая uniprot_idmapping):**

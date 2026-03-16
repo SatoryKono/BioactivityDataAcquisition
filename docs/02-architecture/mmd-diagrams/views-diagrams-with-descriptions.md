@@ -1,6 +1,6 @@
 # BioETL Views Diagrams With Descriptions
 
-- Generated: 2026-03-13T11:52:02
+- Generated: 2026-03-16T10:12:25
 - Diagram count: 162
 
 ## Table of Contents
@@ -1070,7 +1070,7 @@
 ![12-local-deployment-architecture-dataflow](views/png/12-local-deployment-architecture-dataflow.png)
 
 ### Описание
-Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 12 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Bronze, Silver, Gold, chembl_activity, pubchem_compound, uniprot_protein.
+Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 2 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: External APIs, CLI.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1085,7 +1085,7 @@
 ![12-local-deployment-architecture-domain](views/png/12-local-deployment-architecture-domain.png)
 
 ### Описание
-Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 20 узлов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: chembl_activity, pubchem_compound, uniprot_protein, ChEMBL_API, PubChem_API, UniProt_API.
+Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 1 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: Local scheduler.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1100,12 +1100,12 @@
 ![12-local-deployment-architecture-full](views/png/12-local-deployment-architecture-full.png)
 
 ### Описание
-Диаграмма «Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §5.6 (Deployment), ADR-010 (Local-Only). На схеме отражено примерно 21 узлов и 23 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: External APIs, Local Machine (Single Instance), CLI Execution, Local Pipeline Workers, In-Process Locking, Local filesystem (data/). Показательные узлы для быстрого чтения: 🌐 ChEMBL API ebi.ac.uk/chembl, 🌐 PubChem API pubchem.ncbi.nlm.nih.gov, 🌐 UniProt API uniprot.org, 🌐 PubMed API eutils.ncbi.nlm.nih.gov, 🖥️ CLI / Manual run PipelineRunner, ⏰ Local scheduler (cron/systemd).
+Диаграмма «Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: local-only runtime, in-process locking, local filesystem outputs. На схеме отражено примерно 21 узлов и 25 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: External APIs, Local Machine (Single Instance), CLI Execution, Local Pipeline Workers, In-Process Locking, Local filesystem (data/). Показательные узлы для быстрого чтения: ChEMBL API, PubChem API, UniProt API, PubMed API, CLI / Manual run, Local scheduler.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Дата: `2026-03-16`
 - Представление: `Full`
 
 \newpage
@@ -1117,7 +1117,7 @@
 ![12-local-deployment-architecture-infra](views/png/12-local-deployment-architecture-infra.png)
 
 ### Описание
-Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 20 узлов и 18 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Quarantine, Checkpoints, Metrics, MemoryLock, chembl_activity, pubchem_compound.
+Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 2 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: Local workers, No cross-process coordination; lock is in-process only..
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1132,7 +1132,7 @@
 ![12-local-deployment-architecture-overview](views/png/12-local-deployment-architecture-overview.png)
 
 ### Описание
-Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 15 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: chembl_activity, ChEMBL_API, PubMed_API, Lineage, Logs, pubchem_compound.
+Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. На схеме отражено примерно 2 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: CLI / scheduler, External APIs.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1592,7 +1592,7 @@
 ![29-composite-pipeline-workflow-dataflow](views/png/29-composite-pipeline-workflow-dataflow.png)
 
 ### Описание
-Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 12 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: SP, Merge, Gold, CCM, Deps, Enrich.
+Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 1 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: Seed Silver.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1607,7 +1607,7 @@
 ![29-composite-pipeline-workflow-domain](views/png/29-composite-pipeline-workflow-domain.png)
 
 ### Описание
-Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 20 узлов и 22 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: EC, KEYS, KE, SB, DC, SP.
+Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 1 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: bootstrap + legacy FSM adapter.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1622,12 +1622,12 @@
 ![29-composite-pipeline-workflow-full](views/png/29-composite-pipeline-workflow-full.png)
 
 ### Описание
-Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.10 (Composite Pipelines), ADR-026. На схеме отражено примерно 25 узлов и 40 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Phase 1: Initialization, Phase 2: Seed Pipeline, Phase 3: Dependencies, Phase 3.5: Key Extraction, Phase 4: Fan-Out Enrichment, Enricher Workers. Показательные узлы для быстрого чтения: [S] Load CompositeConfig from YAML, [S] bootstrap_composite_runner() → CompositePipelineRunner, [S] Run Seed Pipeline (e.g., chembl_publication), ("[D, [S] DependencyCoordinator • run_dependencies(), [S] Dependency 1 (e.g., uniprot_protein).
+Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: application/composite runner, checkpoint service, runtime bootstrap. На схеме отражено примерно 4 узлов и 23 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: Load CompositeConfig, CompositeCheckpointService, Direct LockPort acquire / release fixed TTL, Legacy FSM adapter.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Дата: `2026-03-16`
 - Представление: `Full`
 
 \newpage
@@ -1639,7 +1639,7 @@
 ![29-composite-pipeline-workflow-infra](views/png/29-composite-pipeline-workflow-infra.png)
 
 ### Описание
-Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 20 узлов и 22 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: SP, EC, KEYS, KE, SB, DC.
+Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 4 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: Seed Silver table, Dependency silver outputs, CompositeCheckpointService, LockPort with fixed TTL.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1654,7 +1654,7 @@
 ![29-composite-pipeline-workflow-overview](views/png/29-composite-pipeline-workflow-overview.png)
 
 ### Описание
-Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 2 узлов и 15 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: [S] CompositeConfig, [S] CheckpointManager.
+Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. На схеме отражено примерно 3 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: Config + preflight, Checkpoint service, Direct lock path.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2439,7 +2439,7 @@
 ![46-yaml-config-resolution-dataflow](views/png/46-yaml-config-resolution-dataflow.png)
 
 ### Описание
-Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 12 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: PIPELINE_CONFIG, TABLE_CONFIG, dq_config_file, override, PIPELINE, PIPELINE_YAML_CFG.
+Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 2 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: base/provider/entity YAML, source config.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2454,7 +2454,7 @@
 ![46-yaml-config-resolution-domain](views/png/46-yaml-config-resolution-domain.png)
 
 ### Описание
-Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 20 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Application Layer, Composition Layer. Показательные узлы для быстрого чтения: PIPELINE_CONFIG, TABLE_CONFIG, dq_config_file, DQ_DEFAULTS, DQ_ENTITY, DQ_INLINE.
+Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 3 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: PipelineYamlConfig, DQConfigFile, FilterConfigFile.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2469,12 +2469,12 @@
 ![46-yaml-config-resolution-full](views/png/46-yaml-config-resolution-full.png)
 
 ### Описание
-Диаграмма «YAML Configuration Resolution Chain» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: infrastructure/config_loader.py, infrastructure/config/, domain/config/. На схеме отражено примерно 27 узлов и 27 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML File Hierarchy, DQ Config Hierarchy (DQConfigLoader), Filter Config Hierarchy (FilterConfigLoader), Infrastructure Config Loaders, Domain Config Objects (Frozen), Pydantic Validation Layer. Показательные узлы для быстрого чтения: configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (unified entity config), configs/providers/{provider}.yaml (source config), configs/base/quality.yaml (global DQ defaults), configs/providers/{provider}.yaml#quality (provider DQ).
+Диаграмма «YAML Configuration Resolution Chain» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: unified config path plus still-active normalization compatibility. На схеме отражено примерно 4 узлов и 13 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: base + provider + entity YAML, provider source config, DQ hierarchy base + provider + entity + inline, Filter hierarchy base + provider + entity + inline.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-27`
+- Дата: `2026-03-16`
 - Представление: `Full`
 
 \newpage
@@ -2486,7 +2486,7 @@
 ![46-yaml-config-resolution-infra](views/png/46-yaml-config-resolution-infra.png)
 
 ### Описание
-Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 20 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer. Показательные узлы для быстрого чтения: dq_config_file, DQ_CONFIG_FILE, FILTER_CONFIG_FILE, override, PIPELINE_CONFIG, TABLE_CONFIG.
+Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 4 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: base / provider / entity YAML, DQ hierarchy, Filter hierarchy, legacy-flat source payload.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2501,7 +2501,7 @@
 ![46-yaml-config-resolution-overview](views/png/46-yaml-config-resolution-overview.png)
 
 ### Описание
-Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 15 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Application Layer, Composition Layer. Показательные узлы для быстрого чтения: dq_config_file, override, PIPELINE_CONFIG, TABLE_CONFIG, DQ_ENTITY, PIPELINE.
+Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. На схеме отражено примерно 2 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: Base / provider / entity YAML, Legacy-flat source config.
 
 ### Метаданные
 - Тип: `flowchart`

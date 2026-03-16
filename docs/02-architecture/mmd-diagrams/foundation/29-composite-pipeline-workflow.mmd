@@ -1,22 +1,22 @@
 %% Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
-%% Covers: RULES.md §2.10 (Composite Pipelines), ADR-026
+%% Covers: application/composite runner, checkpoint service, runtime bootstrap
 %% Rank: 4 (Score 8.88) — Most complex architectural feature
-%% Updated: 2026-02-17
+%% Updated: 2026-03-16
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-%% @nodes   34
+%% @nodes   17
 %% Legend: docs/02-architecture/mmd-diagrams/views/00-legend.mermaid
 %% @uniform-group init   nodes=CFG,PFV,BOOT
 %% @uniform-group seed   nodes=SP,SB
-%% @uniform-group deps   nodes=DC,DEP1,DEP2
+%% @uniform-group deps   nodes=DC,DOUT
 %% @uniform-group keys   nodes=KE,KEYS
-%% @uniform-group enrich nodes=EC,E1,E2,E3,E4,ES1,ES2,ES3,ES4
-%% @uniform-group merge  nodes=DD,MS,CO,CR
-%% @uniform-group gold   nodes=XV,GW,GT
-%% @uniform-group ckp    nodes=CCM
+%% @uniform-group enrich nodes=EC,ER,ES
+%% @uniform-group merge  nodes=MS,SHAPE
+%% @uniform-group gold   nodes=GW,GT
+%% @uniform-group ckp    nodes=GUARD
 %% @uniform-width group
 
 %% @uniform width=280 groups=8 width_strategy=group
@@ -33,19 +33,17 @@ flowchart TB
     subgraph Init["Phase 1: Initialization"]
         CFG["[S] Load CompositeConfig<br/>from YAML<br/><br/>"]
         PFV["[S] CompositePreflightValidator<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
-        BOOT["[S] bootstrap_composite_runner()<br/>→ CompositePipelineRunner<br/><br/>"]
+        BOOT["[S] bootstrap_composite_runner()<br/>default assembly still passes through<br/>legacy FSM adapter path"]
     end
 
     subgraph Seed["Phase 2: Seed Pipeline"]
-        SP["[S] Run Seed Pipeline<br/>(e.g., chembl_publication)<br/>"]
+        SP["[S] Run seed PipelineRunner<br/>(e.g., chembl_publication)<br/>"]
         SB[("[D] Seed Silver Table<br/>silver/chembl/publication/"<br/>)]
     end
 
     subgraph Deps["Phase 3: Dependencies"]
-        direction LR
-        DC["[S] DependencyCoordinator<br/>• run_dependencies()<br/>"]
-        DEP1["[S] Dependency 1<br/>(e.g., uniprot_protein)<br/>"]
-        DEP2["[S] Dependency 2<br/>(optional)<br/>"]
+        DC["[S] DependencyCoordinatorService<br/>• run_dependencies()<br/>"]
+        DOUT[("[D] Dependency silver outputs<br/>(optional)")]
     end
 
     subgraph Keys["Phase 3.5: Key Extraction"]
@@ -56,73 +54,49 @@ flowchart TB
     subgraph Enrich["Phase 4: Fan-Out Enrichment"]
         direction LR
         EC["[S] EnrichmentCoordinator<br/>• asyncio.gather(*enrichers,<br/>return_exceptions=True)<br/>"]
-        subgraph EnricherWorkers["Enricher Workers"]
-            direction TB
-            E1["[S] CrossRef Enricher<br/>filter_ids=DOIs<br/><br/>"]
-            E2["[S] PubMed Enricher<br/>filter_ids=PMIDs<br/><br/>"]
-            E3["[S] OpenAlex Enricher<br/>filter_ids=DOIs<br/><br/>"]
-            E4["[S] SemanticScholar Enricher<br/>filter_ids=DOIs<br/><br/>"]
-        end
-        subgraph EnricherOutputs["Enriched Silver Outputs"]
-            direction TB
-            ES1[("[D] crossref/publication/"<br/>)]
-            ES2[("[D] pubmed/publication/"<br/>)]
-            ES3[("[D] openalex/publication/"<br/>)]
-            ES4[("[D] semanticscholar/publication/"<br/>)]
-        end
+        ER["[S] Enricher runners<br/>CrossRef + PubMed + OpenAlex +<br/>SemanticScholar"]:::size-md
+        ES[("[D] Enriched silver outputs<br/>crossref/pubmed/openalex/<br/>semanticscholar publication tables")]:::size-md
     end
 
     subgraph Merge["Phase 5: Merge"]
         direction LR
-        DD["[S] EnricherDeduplicator<br/>• deduplicate across sources<br/><br/>"]
-        MS["[S] MergeService<br/>• LEFT OUTER JOIN<br/>• conflict_resolution<br/>• column_ordering"]
-        CO["[S] ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>"]
-        CR["[S] ColumnRenamer<br/>• qualified names<br/>• e.g., crossref.publication.title<br/>"]
+        MS["[S] MergeService<br/>• deduplicate + LEFT OUTER JOIN<br/>• conflict resolution"]:::size-md
+        SHAPE["[S] Output shaping<br/>column ordering + qualified renames"]:::size-md
     end
 
     subgraph Gold["Phase 6: Gold Write"]
         direction LR
-        XV["[S] EnrichmentCrossValidator<br/>• check join coverage<br/>• detect orphans<br/>"]
-        GW["[S] GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/>"]
+        GW["[S] Gold validation + write<br/>cross-validate coverage<br/>GoldWriter.write_gold()"]:::size-md
         GT[("[D] Gold Table<br/>gold/composite/publication/"<br/>)]
     end
 
     subgraph CKP["Checkpointing (each phase)"]
-        CCM["[S] CompositeCheckpointManager<br/>• save after each phase<br/>• resume from any phase<br/>"]
+        GUARD["[S] Runtime guardrails<br/>checkpoint service + direct lock<br/>legacy FSM adapter on assembly path"]:::size-md
     end
 
     %% Flow
     CFG ==> PFV ==> BOOT
     BOOT ==> SP ==> SB
 
-    SB -.-> DC
-    DC -.-> DEP1 --> DS1
-    DC -.-> DEP2 --> DS2
+    SB -.-> DC ==> DOUT
 
     SB ==> KE
     KE ==> KEYS
 
     KEYS ==> EC
-    EC ==> E1 & E2 & E3 & E4
-    E1 ==> ES1
-    E2 ==> ES2
-    E3 ==> ES3
-    E4 ==> ES4
+    EC ==> ER ==> ES
 
-    ES1 & ES2 & ES3 & ES4 ==> DD
-    DD ==> MS
+    ES ==> MS
     SB -.->|"seeds"| MS
-    MS ==> CO ==> CR
+    MS ==> SHAPE
 
-    CR ==> XV ==> GW ==> GT
+    SHAPE ==> GW ==> GT
 
-    CCM -.->|"save"| Seed & Deps & Enrich & Merge & Gold
+    GUARD -.->|"save / resume"| Seed & Deps & Enrich & Merge & Gold
+    GUARD -.-> BOOT
 
     %% Layout constraints
     Init ~~~ Seed ~~~ Deps ~~~ Keys ~~~ Enrich ~~~ Merge ~~~ Gold ~~~ CKP
-    DEP1 ~~~ DEP2
-    E1 ~~~ E2 ~~~ E3 ~~~ E4
-    ES1 ~~~ ES2 ~~~ ES3 ~~~ ES4
 
     %% Styling
     style Seed fill:#fff7ed,stroke:#f59e0b
@@ -136,7 +110,11 @@ flowchart TB
     classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
     classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
 
-    class CFG,PFV,BOOT,SP,DC,DEP1,DEP2,KE,KEYS,EC,E1,E2,E3,E4,DD,MS,CO,CR,XV,CCM layer_application;
-    class SB,DS1,DS2,ES1,ES2,ES3,ES4,GW,GT layer_infrastructure;
+    class CFG,PFV,SP,DC,KE,KEYS,EC,ER,MS,SHAPE,GUARD layer_application;
+    class BOOT layer_composition;
+    class SB,DOUT,ES,GW,GT layer_infrastructure;
 
-    %% Click tooltips    click CCM ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Saves phase checkpoints + resume"    click MS ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Merges seed + enricher outputs"    click KE ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Extracts join keys for fan-out"
+    %% Click tooltips
+    click GUARD ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Composite checkpoints + direct lock path"
+    click MS ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Merges seed + enricher outputs"
+    click KE ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Extracts join keys for fan-out"

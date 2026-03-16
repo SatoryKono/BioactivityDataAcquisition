@@ -39,6 +39,12 @@ ALLOWED_CONFIG_TEST_FILES = frozenset(
         / "domain"
         / "composite"
         / "test_composite_config_facade.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "domain"
+        / "composite"
+        / "test_composite_config_edge_cases.py",
     }
 )
 ALLOWED_VALUE_OBJECT_TEST_FILES = frozenset(
@@ -105,14 +111,14 @@ def test_split_composite_config_modules_are_confined_to_domain_composite() -> No
 
 @pytest.mark.architecture
 def test_split_composite_config_modules_are_only_used_by_facade_test() -> None:
-    """Ordinary tests must not accumulate new direct imports of split config internals."""
+    """Split config internals must stay confined to dedicated composite-config tests."""
     violations = _format_prefix_confined_violations(
         _iter_import_records(TESTS_ROOT, module_names=SPLIT_CONFIG_MODULES),
-        allowed_prefix=ROOT / "tests" / "unit" / "domain" / "composite",
+        allowed_prefix=ROOT / "tests" / "__never__",
         allowed_test_files=ALLOWED_CONFIG_TEST_FILES,
     )
     assert not violations, (
-        "Split composite-config internals gained new non-facade test imports:\n"
+        "Split composite-config internals gained new non-dedicated test imports:\n"
         + "\n".join(violations)
     )
 

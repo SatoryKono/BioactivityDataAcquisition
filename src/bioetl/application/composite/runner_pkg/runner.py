@@ -107,7 +107,53 @@ class CompositePipelineRunner(
         quarantine_port: QuarantinePort | None = None,
         metrics: MetricsPort | None = None,
     ) -> None:
-        """Initialize composite pipeline orchestrator with injected dependencies."""
+        """Initialize composite pipeline orchestrator with injected dependencies.
+
+        Args:
+            config: Composite pipeline domain configuration, including seed
+                and enricher pipeline names, merge settings, and the
+                distributed lock key.
+            runtime: Run-time flags such as ``resume``, ``run_type``, and
+                ``dry_run`` that control execution behaviour without changing
+                domain configuration.
+            seed_runner_factory: Zero-argument factory that creates the
+                metrics-readable runner for the seed pipeline on demand.
+            enricher_runner_factory: Two-argument factory ``(pipeline_name,
+                keys_df)`` that creates a runner for one enricher pipeline
+                scoped to the given key DataFrame.
+            key_extractor: Service that reads extracted join keys from the
+                seed Silver table after the seed phase completes.
+            coordinator: Service that fans out enricher pipelines
+                concurrently and collects typed ``EnrichmentResult`` values.
+            merger: Service that joins seed, dependency, and enricher Silver
+                tables into unified Gold output.
+            checkpoint_manager: Service responsible for persisting and
+                loading mid-run checkpoint state.
+            logger: Structured logger for pipeline lifecycle events and
+                diagnostic output.
+            lock: Distributed lock adapter used to prevent concurrent
+                executions of the same composite pipeline.
+            fsm_state_helper: Helper that encapsulates FSM state-transition
+                logic and resume-from-failed semantics.
+            run_id: Optional explicit run identifier; a UUID is generated
+                automatically when omitted.
+            dq_report_service: Optional service that writes a DQ report
+                artefact after the merge phase; ``None`` disables reporting.
+            preflight_validator: Optional service that validates composite
+                configuration consistency before pipeline execution begins;
+                ``None`` skips preflight validation.
+            dependencies_runner_factory: Optional two-argument factory for
+                dependency pipelines, mirroring ``enricher_runner_factory``;
+                ``None`` disables the dependency phase.
+            dependency_coordinator: Optional service that orchestrates
+                dependency pipeline execution; required when
+                ``dependencies_runner_factory`` is provided.
+            quarantine_port: Optional adapter for persisting quarantined
+                records that fail cross-validation or DQ checks; ``None``
+                disables quarantine writes.
+            metrics: Optional metrics adapter for emitting pipeline-level
+                counters and histograms; ``None`` disables metric emission.
+        """
         self._config = config
         self._runtime = runtime
         self._seed_runner_factory = seed_runner_factory

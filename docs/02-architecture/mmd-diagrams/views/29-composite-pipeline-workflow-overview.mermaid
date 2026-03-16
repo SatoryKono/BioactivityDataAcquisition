@@ -1,31 +1,20 @@
 %% View: Overview | Parent: 29-composite-pipeline-workflow-full.mermaid
-%% Decomposed overview for composite pipeline happy-path.
+%% Decomposed overview for the current composite workflow.
 %% @uniform width=228 height=64 max_title_len=24 max_desc_lines=1
 %%{init: {'layout':'elk','theme':'base','flowchart':{'nodeSpacing':52,'rankSpacing':66,'curve':'linear'},'elk':{'mergeEdges':true,'edgeRouting':'ORTHOGONAL','nodePlacementStrategy':'BRANDES_KOEPF'}}}%%
 flowchart LR
-    CFG["[S] CompositeConfig"] --> PFV["[S] Preflight"]
-    PFV --> SEED["[S] Seed Pipeline"]
-    SEED ==> SS["[D] Seed Silver"]
+    CFG["Config + preflight"] --> BOOT["Bootstrap"]
+    BOOT --> SEED["Seed pipeline"]
+    SEED --> DEPS["Dependencies"]
+    SEED --> KEYS["Key extraction"]
+    KEYS --> ENR["Enrichment fan-out"]
+    ENR --> MERGE["Merge"]
+    MERGE --> GOLD["Gold write"]
+    CKP["Checkpoint service"] -.->|"save / resume"| SEED
+    CKP -.-> ENR
+    LOCK["Direct lock path"] -.-> BOOT
 
-    SS --> DEP["[S] Dependencies"]
-    DEP --> KEYS["[S] Key Extraction"]
-    KEYS ==> ENR["[S] Enrichment Fan-Out"]
-    ENR ==> MERGE["[S] DataMerge"]
-
-    MERGE ==> CONTRACT["[S] Contract Resolver"]
-    CONTRACT --> GW["[S] GoldWriter"]
-    GW ==> GOLD["[D] Gold Table"]
-
-    CKP["[S] CheckpointManager"] -.->|save/resume| SEED
-    CKP -.->|save/resume| DEP
-    CKP -.->|save/resume| ENR
-    CKP -.->|save/resume| MERGE
-    CKP -.->|save/resume| GW
-
-    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
-    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
-    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:1.6px;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1.4px,stroke-dasharray:3 2;
-
-    class CFG,PFV,SEED,DEP,KEYS,ENR,MERGE,CONTRACT,GW,CKP layer_application;
-    class SS,GOLD layer_infrastructure;
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    class CFG,BOOT,SEED,DEPS,KEYS,ENR,MERGE,CKP,LOCK app;
+    class GOLD infra;

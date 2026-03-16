@@ -134,6 +134,16 @@ class BatchExecutionLifecycleService:
         tracing_manager: _BatchTracingLifecyclePort,
         checkpoint_recovery_service: _BatchCheckpointRecoveryLifecyclePort,
     ) -> None:
+        """Initialize execution lifecycle service.
+
+        Args:
+            progress_service: Initializes per-run progress tracking with the
+                expected record limit before the extraction loop starts.
+            tracing_manager: Creates and finalizes OpenTelemetry spans, attaching
+                execution statistics on successful completion.
+            checkpoint_recovery_service: Saves resume offsets when execution ends
+                via shutdown signal or unhandled exception.
+        """
         self._progress_service = progress_service
         self._tracing_manager = tracing_manager
         self._checkpoint_recovery_service = checkpoint_recovery_service

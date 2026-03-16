@@ -1,4 +1,11 @@
-"""Enrichment Coordinator."""
+"""Enrichment Coordinator.
+
+Provides ``EnrichmentCoordinatorService``, which fans out enricher pipelines
+concurrently using ``asyncio.gather`` bounded by a configurable semaphore.
+Each enricher receives a filtered subset of seed keys and runs independently;
+results are collected into typed ``EnrichmentResult`` objects regardless of
+whether the enricher succeeded, timed out, was skipped by filter, or failed.
+"""
 
 from __future__ import annotations
 
@@ -96,7 +103,21 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         max_concurrency: int = 4,
         semaphore_factory: Callable[[int], asyncio.Semaphore] | None = None,
     ) -> None:
-        """Initialize enrichment coordinator."""
+        """Initialize enrichment coordinator.
+
+        Args:
+            logger: Structured logger for per-enricher progress, skip, and
+                error events.
+            dq_config: Composite data-quality configuration that governs
+                DQ thresholds applied to enricher outputs.
+            max_concurrency: Maximum number of enricher pipelines that may
+                run simultaneously; defaults to 4. Controls the semaphore
+                capacity used to throttle ``asyncio`` tasks.
+            semaphore_factory: Optional callable that creates the concurrency
+                semaphore from ``max_concurrency``; defaults to
+                ``asyncio.Semaphore``. Inject a custom factory in tests to
+                control scheduling behaviour.
+        """
         self._logger = logger
         self._dq_config = dq_config
         self._max_concurrency = max_concurrency

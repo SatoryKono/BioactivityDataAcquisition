@@ -29,7 +29,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 )
 
 # DQ services factory
-from bioetl.composition.factories.dq.dq_services_factory import DQServicesFactory
+from bioetl.composition.factories.dq.factory import DQServicesFactory
 
 # Pipeline factory and runner assembly
 from bioetl.composition.factories.pipeline import (

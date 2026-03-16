@@ -43,7 +43,12 @@ _LIFECYCLE_OPERATION_ERRORS = (
 
 
 class _MedallionClearMixin:
-    """Policy-driven clear operations for Silver/Gold layers."""
+    """Policy-driven clear operations for Silver/Gold layers.
+
+    Enforces medallion architecture invariants by delegating clear decisions
+    to a MedallionPolicy rather than accepting run type directly. All clearing
+    is logged for observability and supports a dry-run mode.
+    """
 
     storage: StoragePort
     logger: LoggerPort
@@ -129,7 +134,13 @@ class _MedallionClearMixin:
 
 
 class _MedallionRunLifecycleMixin(_MedallionClearMixin):
-    """High-level run orchestration for pre/post lifecycle operations."""
+    """High-level run orchestration for pre/post lifecycle operations.
+
+    Extends _MedallionClearMixin with pipeline-level prepare and finalize
+    hooks. prepare_for_run() derives the correct MedallionPolicy from run
+    type and clears layers accordingly. finalize_run() triggers storage
+    optimization (vacuum/compact) when configured.
+    """
 
     storage: StoragePort
     logger: LoggerPort

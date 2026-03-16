@@ -482,7 +482,7 @@ graph TD
 |--------------------------|--------------|------------------------------|
 | RULES.md                 | 2026-03-13   | v5.24 (Latest)               |
 | REQUIREMENTS.md          | 2026-03-13   | v1.8 (docs governance sync)  |
-| glossary.md              | 2026-02-25   | v2.6 (Ubiquitous Language)   |
+| glossary.md              | 2026-03-08   | v2.7 (Ubiquitous Language)   |
 | 00-map.md                | 2026-03-13   | v8.1 Legacy index synced |
 | rules-summary.md         | 2026-03-13   | v5.24 Synced                 |
 | TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |

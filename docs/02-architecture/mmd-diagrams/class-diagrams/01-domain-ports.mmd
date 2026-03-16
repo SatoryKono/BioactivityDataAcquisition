@@ -1,8 +1,8 @@
 %% BioETL — Class Diagram: Domain Port Protocols
 %% All Protocol interfaces defined in domain/ports/
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   19
@@ -35,19 +35,21 @@ classDiagram
     }
 
     class StoragePort {
-        <<Protocol>>
+        <<Protocol / compat facade>>
         +write_bronze(records, config, metadata): BronzeWriteResult
         +write_silver(records, config): SilverWriteResult
         +write_gold(records, config): None
-        +read_silver(table_name, columns, limit): DataFrame
-        +vacuum(table_name, retention_hours): None
+        +preview_cleanup(silver_table, gold_table): MetaDict
+        +aggregates narrow storage ports
     }
 
     class LockPort {
         <<Protocol>>
         +acquire(key, owner_id, ttl): FencingToken
-        +release(key, owner_id): None
-        +heartbeat(key, owner_id): None
+        +release(key, owner_id): bool
+        +heartbeat(key, owner_id): bool
+        +validate_owner(key, owner_id): bool
+        +validate_fencing_token(key, token): bool
         
         
         
@@ -236,7 +238,7 @@ classDiagram
 
     DataSourcePort <|-- FilterableDataSourcePort
 
-    note for StoragePort "L2: 01a port method catalog"
+    note for StoragePort "Backward-compatible aggregate facade. New consumers SHOULD use narrow storage ports."
     note for QuarantinePort "See L2 for secondary ops"
     note for LoggerPort "See L2 for extra log methods"
     note for InputFilterPort "See L2 for multi-column helpers"

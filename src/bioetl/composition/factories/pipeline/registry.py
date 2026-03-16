@@ -1,11 +1,10 @@
-# src/bioetl/composition/factories/pipeline_factories.py
 """Consolidated pipeline factory definitions.
 
 This module creates all pipeline factories using the GenericPipelineFactory
 pattern with GenericPipeline as the unified pipeline class.
 
-Pipeline configurations are defined in pipeline_configs.py.
-Contract validation logic is in pipeline_contract_validator.py.
+Pipeline configurations are defined in configs.py.
+Contract validation logic is in contract_validator.py.
 
 Thread-safety: Registration uses a module-level lock to prevent TOCTOU race conditions.
 
@@ -30,13 +29,13 @@ import threading
 from typing import cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
+from bioetl.composition.factories.pipeline.assembler import (
+    GenericPipelineFactory,
+)
 from bioetl.composition.factories.pipeline.configs import (
     PIPELINE_CONFIGS,
 )
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
-from bioetl.composition.factories.pipeline.pipeline_assembler import (
-    GenericPipelineFactory,
-)
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
 

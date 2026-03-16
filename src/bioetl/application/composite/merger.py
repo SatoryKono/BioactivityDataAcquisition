@@ -5,10 +5,7 @@ from __future__ import annotations
 __all__ = ["MergeCollaboratorGroup", "MergeService"]
 
 from collections.abc import Sequence
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
-
-import polars as pl
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.composite.join_planner_helpers import (
     extract_base_column,
@@ -17,6 +14,13 @@ from bioetl.application.composite.join_planner_helpers import (
     parse_pipeline_name,
     resolve_field_aliases_from_registry,
     table_path_to_name,
+)
+from bioetl.application.composite.merger_collaborators import (
+    MergeCollaboratorGroup,
+    build_merge_collaborators,
+)
+from bioetl.application.composite.merger_compatibility_mixin import (
+    MergeCompatibilityMixin,
 )
 from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
@@ -30,19 +34,9 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.aggregator import EnricherAggregator
-    from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-    from bioetl.application.composite.column_orderer import ColumnOrderer
-    from bioetl.application.composite.column_priority_orderer import (
-        ColumnPriorityOrderer,
-    )
-    from bioetl.application.composite.column_renamer import ColumnRenamer
-    from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidator,
     )
-    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-    from bioetl.application.composite.join_planner import JoinPlannerService
     from bioetl.domain.composite.config import (
         DependencyConfig,
         EnricherConfig,
@@ -57,75 +51,11 @@ def _path_to_table_name(path: str) -> str:
     return table_path_to_name(path)
 
 
-@dataclass(frozen=True, slots=True)
-class MergeCollaboratorGroup:
-    """Bundle of merge-time collaborators wired in composition."""
-
-    deduplicator: EnricherDeduplicatorService
-    aggregator: EnricherAggregator
-    renamer: ColumnRenamer
-    orderer: ColumnOrderer
-    priority_orderer: ColumnPriorityOrderer
-    coalesce_policy: CoalescePolicyService
-    conflict_resolver: ConflictResolverService
-    join_planner: JoinPlannerService
-
-
-_LEGACY_COLLABORATOR_KEYS = frozenset(
-    {
-        "deduplicator",
-        "aggregator",
-        "renamer",
-        "orderer",
-        "priority_orderer",
-        "coalesce_policy",
-        "conflict_resolver",
-        "join_planner",
-    }
-)
-
-
-def _build_merge_collaborators(
-    *,
-    collaborators: MergeCollaboratorGroup | None,
-    legacy_collaborators: dict[str, Any],  # Any: phased compatibility bridge
-) -> MergeCollaboratorGroup:
-    """Normalize new bundle-style wiring and legacy keyword collaborators."""
-    if collaborators is not None:
-        if legacy_collaborators:
-            unexpected = sorted(legacy_collaborators)
-            raise TypeError(
-                "MergeService received both collaborator group and legacy "
-                f"keyword collaborators: {unexpected}"
-            )
-        return collaborators
-
-    missing = sorted(_LEGACY_COLLABORATOR_KEYS.difference(legacy_collaborators))
-    unexpected = sorted(set(legacy_collaborators).difference(_LEGACY_COLLABORATOR_KEYS))
-    if missing or unexpected:
-        details: list[str] = []
-        if missing:
-            details.append(f"missing={missing}")
-        if unexpected:
-            details.append(f"unexpected={unexpected}")
-        raise TypeError(
-            "MergeService requires collaborators=MergeCollaboratorGroup(...) or the "
-            f"full legacy collaborator keyword set ({', '.join(details)})"
-        )
-
-    return MergeCollaboratorGroup(
-        deduplicator=legacy_collaborators["deduplicator"],
-        aggregator=legacy_collaborators["aggregator"],
-        renamer=legacy_collaborators["renamer"],
-        orderer=legacy_collaborators["orderer"],
-        priority_orderer=legacy_collaborators["priority_orderer"],
-        coalesce_policy=legacy_collaborators["coalesce_policy"],
-        conflict_resolver=legacy_collaborators["conflict_resolver"],
-        join_planner=legacy_collaborators["join_planner"],
-    )
-
-
-class MergeService(MergeIOMixin, MergeMetricsRecorderMixin):
+class MergeService(
+    MergeCompatibilityMixin,
+    MergeIOMixin,
+    MergeMetricsRecorderMixin,
+):
     """Facade/orchestrator for seed+dependency+enricher merge workflow."""
 
     _infer_silver_table = staticmethod(infer_silver_table)
@@ -173,7 +103,7 @@ class MergeService(MergeIOMixin, MergeMetricsRecorderMixin):
                 collaborator services. When omitted, the legacy keyword-only
                 collaborators remain accepted for phased migration.
         """
-        collaborator_bundle = _build_merge_collaborators(
+        collaborator_bundle = build_merge_collaborators(
             collaborators=collaborators,
             legacy_collaborators=legacy_collaborators,
         )
@@ -193,145 +123,6 @@ class MergeService(MergeIOMixin, MergeMetricsRecorderMixin):
         self._coalesce_policy = collaborator_bundle.coalesce_policy
         self._conflict_resolver = collaborator_bundle.conflict_resolver
         self._join_planner = collaborator_bundle.join_planner
-
-    def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
-        """Compatibility wrapper for suffix allocation."""
-        return self._conflict_resolver.find_next_suffix(base_col, existing_cols)
-
-    def _detect_and_resolve_conflicts(
-        self,
-        seed_df: pl.DataFrame,
-        enricher_df: pl.DataFrame,
-        join_keys: set[str],
-    ) -> tuple[pl.DataFrame, pl.DataFrame]:
-        """Compatibility wrapper for conflict detection and renaming."""
-        return self._conflict_resolver.detect_and_resolve_conflicts(
-            seed_df,
-            enricher_df,
-            join_keys,
-        )
-
-    def _extract_field_from_qualified(self, column: str) -> str:
-        """Extract field name from qualified column (x.y.z -> z)."""
-        return self._coalesce_policy.extract_field_from_qualified(column)
-
-    def _get_enricher_prefix(
-        self,
-        enricher_pipeline: str,
-        seed_pipeline: str | None = None,
-    ) -> str:
-        """Compatibility helper for enricher prefix resolution."""
-        _ = seed_pipeline
-        return self._priority_orderer.get_enricher_prefix(enricher_pipeline)
-
-    def _resolve_conflicts(
-        self,
-        df: pl.DataFrame,
-        enricher_dfs: dict[str, pl.DataFrame],
-        enrichers: Sequence[EnricherConfig],
-        seed_pipeline: str | None = None,
-    ) -> pl.DataFrame:
-        """Compatibility wrapper for policy-based conflict resolution."""
-        return self._conflict_resolver.resolve_conflicts(
-            df,
-            enricher_dfs,
-            enrichers,
-            seed_pipeline,
-        )
-
-    def _coalesce_prefer_seed(
-        self,
-        df: pl.DataFrame,
-        enrichers: Sequence[EnricherConfig],
-        seed_pipeline: str | None = None,
-    ) -> pl.DataFrame:
-        """Compatibility wrapper for seed-priority coalesce policy."""
-        return self._coalesce_policy.coalesce_prefer_seed(
-            df,
-            enrichers,
-            seed_pipeline,
-        )
-
-    def _coalesce_prefer_enricher(
-        self,
-        df: pl.DataFrame,
-        enrichers: Sequence[EnricherConfig],
-        seed_pipeline: str | None = None,
-    ) -> pl.DataFrame:
-        """Compatibility wrapper for enricher-priority coalesce policy."""
-        return self._coalesce_policy.coalesce_prefer_enricher(
-            df,
-            enrichers,
-            seed_pipeline,
-        )
-
-    def _delegate_join_planner(
-        self,
-        method_name: str,
-        *args: object,
-    ) -> Any:  # Any: getattr-based dispatch returns heterogeneous join-planner callables
-        """Route sync helper calls to the canonical join planner."""
-        method = cast(
-            Any,  # Any: dynamic bridge preserves typed wrappers over service dispatch
-            getattr(self._join_planner, method_name),
-        )
-        return method(*args)
-
-    async def _delegate_join_planner_async(
-        self,
-        method_name: str,
-        *args: object,
-        **kwargs: object,
-    ) -> Any:  # Any: getattr-based dispatch returns heterogeneous async callables
-        """Route async helper calls to the canonical join planner."""
-        method = cast(
-            Any,  # Any: dynamic bridge preserves typed wrappers over service dispatch
-            getattr(self._join_planner, method_name),
-        )
-        return await method(*args, **kwargs)
-
-    def _normalize_join_key_columns(
-        self,
-        df: pl.DataFrame,
-        join_keys: list[str],
-        pipeline: str | None = None,
-    ) -> pl.DataFrame:
-        """Compatibility wrapper for join-key normalization."""
-        return cast(
-            pl.DataFrame,
-            self._delegate_join_planner(
-                "normalize_join_key_columns",
-                df,
-                join_keys,
-                pipeline,
-            ),
-        )
-
-    async def _apply_joins(
-        self,
-        seed_df: pl.DataFrame,
-        enricher_dfs: dict[str, pl.DataFrame],
-        enrichers: Sequence[EnricherConfig],
-        seed_pipeline: str | None = None,
-    ) -> pl.DataFrame:
-        """Compatibility wrapper for enricher joins."""
-        return cast(
-            pl.DataFrame,
-            await self._delegate_join_planner_async(
-                "apply_joins",
-                seed_df=seed_df,
-                enricher_dfs=enricher_dfs,
-                enrichers=enrichers,
-                seed_pipeline=seed_pipeline,
-            ),
-        )
-
-    def _drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Compatibility wrapper for system-column cleanup."""
-        return cast(
-            pl.DataFrame,
-            self._delegate_join_planner("drop_system_columns", df),
-        )
 
     async def merge(
         self,

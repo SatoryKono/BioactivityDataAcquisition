@@ -132,7 +132,6 @@ class BronzeWriterMetadataMixin:
         import platform
         import socket
 
-        from bioetl.domain.version import get_version
         from bioetl.domain.models.metadata import (
             BaseOutputMetadata,
             BronzeOutputExt,
@@ -143,6 +142,7 @@ class BronzeWriterMetadataMixin:
             RunTypeEnum,
         )
         from bioetl.domain.models.metadata import SourceMetadata as SourceMetadataModel
+        from bioetl.domain.version import get_version
 
         run_type_map = {
             RunType.INCREMENTAL: RunTypeEnum.INCREMENTAL,

@@ -15,7 +15,7 @@ from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
-from bioetl.composition.factories.pipeline.dq_helpers import (
+from bioetl.composition.factories.dq.context_resolver import (
     extract_dq_output_paths,
 )
 from bioetl.composition.factories.pipeline.postrun_assembly import (

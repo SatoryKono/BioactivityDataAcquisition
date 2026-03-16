@@ -224,7 +224,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         """Orchestrate the Silver write pipeline stages.
 
         Args:
-            records: Normalized Bronze records to process and write.
+            invocation: Silver write invocation with records and parameters.
             ctx: Immutable execution context with write parameters and span.
 
         Returns:

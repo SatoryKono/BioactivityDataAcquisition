@@ -118,11 +118,6 @@ class InputFilterPort(Protocol):
 
                         from bioetl.domain.filtering import FilterColumn
 
-        __all__ = [
-            "InputFilterPort",
-        ]
-
-
                         columns = [
                             FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
                             FilterColumn(column_name="molecule_id", filter_field="molecule_chembl_id"),

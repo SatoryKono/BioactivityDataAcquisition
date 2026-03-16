@@ -1,6 +1,6 @@
 # BioETL Class Diagrams With Descriptions
 
-- Generated: 2026-03-13T11:52:02
+- Generated: 2026-03-16T10:12:25
 - Diagram count: 19
 
 ## Table of Contents
@@ -39,7 +39,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
-- Дата: `2026-02-24`
+- Дата: `2026-03-16`
 - Узлы (metadata): `19`
 
 \newpage
@@ -340,10 +340,10 @@
 ![16-factories-bootstrap](class-diagrams/png/16-factories-bootstrap.png)
 
 ### Описание
-Диаграмма «Class Diagram: Factories & Bootstrap» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Composition layer factories and DI assembly.. На схеме отражено примерно 13 узлов и 12 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: DataSourceRegistry, TransformerFactory, RunnerFactory, DQFactory, RuntimeAssembly, RunnerBootstrap.
+Диаграмма «Class Diagram: Factories & Bootstrap» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Current composition-layer factories, provider registry, and runtime assembly.. На схеме отражено примерно 9 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilderService, CompositeSupportServicesFactory.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
-- Дата: `2026-02-24`
-- Узлы (metadata): `13`
+- Дата: `2026-03-16`
+- Узлы (metadata): `9`

@@ -1,4 +1,7 @@
-"""Golden matrix tests for adapter -> domain error mapping."""
+"""Golden matrix tests for adapter -> domain error mapping.
+
+Tests DomainInfraExceptionMapper directly (adapter_error_mapper.py facade removed).
+"""
 
 from __future__ import annotations
 
@@ -13,22 +16,22 @@ from bioetl.domain.exceptions import (
     ServiceUnavailableError,
 )
 from bioetl.domain.types import ErrorType
-from bioetl.infrastructure.adapters.adapter_error_mapper import (
-    AdapterErrorMapper,
+from bioetl.infrastructure.errors import (
     DomainErrorMappingInput,
+    DomainInfraExceptionMapper,
 )
 
 _PROVIDERS = ["chembl", "pubchem", "uniprot", "crossref"]
 
 
 @pytest.fixture
-def mapper() -> AdapterErrorMapper:
-    return AdapterErrorMapper(logger=MagicMock())
+def mapper() -> DomainInfraExceptionMapper:
+    return DomainInfraExceptionMapper(logger=MagicMock())
 
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
 def test_map_auth_status_to_critical(
-    mapper: AdapterErrorMapper,
+    mapper: DomainInfraExceptionMapper,
     provider: str,
 ) -> None:
     payload = DomainErrorMappingInput(
@@ -44,7 +47,7 @@ def test_map_auth_status_to_critical(
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
 def test_map_rate_limit_status_to_domain_error(
-    mapper: AdapterErrorMapper,
+    mapper: DomainInfraExceptionMapper,
     provider: str,
 ) -> None:
     payload = DomainErrorMappingInput(
@@ -63,7 +66,7 @@ def test_map_rate_limit_status_to_domain_error(
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
 def test_map_server_status_to_service_unavailable(
-    mapper: AdapterErrorMapper,
+    mapper: DomainInfraExceptionMapper,
     provider: str,
 ) -> None:
     payload = DomainErrorMappingInput(
@@ -82,7 +85,7 @@ def test_map_server_status_to_service_unavailable(
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
 def test_map_timeout_type_without_status(
-    mapper: AdapterErrorMapper,
+    mapper: DomainInfraExceptionMapper,
     provider: str,
 ) -> None:
     payload = DomainErrorMappingInput(
@@ -100,7 +103,7 @@ def test_map_timeout_type_without_status(
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
 def test_map_generic_type_without_status(
-    mapper: AdapterErrorMapper,
+    mapper: DomainInfraExceptionMapper,
     provider: str,
 ) -> None:
     payload = DomainErrorMappingInput(

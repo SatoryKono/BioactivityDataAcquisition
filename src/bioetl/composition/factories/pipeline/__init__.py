@@ -10,7 +10,7 @@ Canonical import paths::
 
 from __future__ import annotations
 
-from bioetl.composition.factories.pipeline.pipeline_assembler import (
+from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,
     assemble_runner,
     create_pipeline_factory,

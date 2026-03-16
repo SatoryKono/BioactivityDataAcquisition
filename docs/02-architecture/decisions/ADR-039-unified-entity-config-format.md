@@ -125,8 +125,6 @@ hash_policy:
 Base defaults (configs/base/pipeline.yaml)
     ↓ deep-merge
 Unified entity pipeline section (configs/entities/{p}/{e}.yaml → pipeline:)
-    ↓ deep-merge (legacy has priority if exists)
-Legacy pipeline config (legacy layout path, removed in RF-CFG-035)
     ↓
 Convention defaults (ADR-029): paths, table names, file references
     ↓
@@ -135,46 +133,75 @@ Hierarchical filter config (ADR-028)
 Column groups: unified schema section OR schema_file
     ↓
 Source section: configs/providers/{provider}.yaml
+    ↓
+Payload normalization before validation (legacy/new shape coercion only)
 ```
 
-**Правило слияния**: если оба файла существуют (legacy и unified), unified section
-предоставляет defaults, legacy — overrides. Legacy имеет приоритет.
+**Текущее правило слияния**: `load_pipeline_config()` читает только canonical unified path
+`configs/entities/{provider}/{entity}.yaml`. Legacy file-path fallback удалён; оставшаяся
+обратная совместимость находится на уровне нормализации payload и alias/coercion правил
+перед валидацией.
 
-### 4. Изменения в `config_loader.py`
+### 4. Изменения в loader/normalization boundary
 
-#### Новые вспомогательные функции
+#### Read-stage helpers в `config_loader.py`
 
 ```python
-def load_unified_entity_raw(path: Path) -> dict[str, Any]:
+def _load_unified_entity_raw(path: Path) -> dict[str, Any]:
     """Load unified entity YAML file, returning empty dict when absent."""
 
-def get_unified_section(
+def _get_unified_section(
     unified_raw: dict[str, Any], section: str
 ) -> dict[str, Any] | None:
     """Get a dict section from unified entity config if present."""
 ```
 
-#### Обновлённые функции
+`config_loader.py` остаётся orchestration boundary для стадий:
 
-- `load_column_groups_section()`: принимает `unified_schema` параметр для инлайн-схемы
-- `deep_merge()`: делегирует в `config_merge()` (ADR-037)
-- `load_base_config()`: упрощён, только один canonical путь
+- `read_pipeline_config_payload()`
+- `validate_pipeline_config_payload()`
+- `map_pipeline_config()`
+- `load_pipeline_config()` / `load_pipeline_config_uncached()`
+
+#### Extracted normalization module
+
+Normalization concerns вынесены в
+`src/bioetl/infrastructure/config/pipeline_payload_normalization.py`.
+
+Этот модуль теперь владеет:
+
+- convention defaults для file references / layer paths;
+- hierarchical filter merge;
+- schema normalization bridge через `pipeline_normalizers.py`;
+- source section merge;
+- transitional payload normalization для legacy/new field shapes.
+
+`config_loader.py` сохраняет compatibility wrappers для test-facing private helpers
+(`_apply_file_reference_defaults()`, `_apply_layer_defaults()`,
+`_load_source_section()`, `normalize_pipeline_config_payload()`), но их
+реализация делегирована в extracted normalization module.
 
 #### Алгоритм `load_pipeline_config()`
 
 ```python
-unified_raw = load_unified_entity_raw(unified_path)      # configs/entities/
-unified_pipeline = get_unified_section(unified_raw, "pipeline")
-unified_schema = get_unified_section(unified_raw, "schema")
+config_path = Path(f"configs/entities/{provider}/{entity}.yaml")
+unified_raw = _load_unified_entity_raw(config_path)
+unified_pipeline = _get_unified_section(unified_raw, "pipeline")
+unified_schema = _get_unified_section(unified_raw, "schema")
 
-if legacy_path.exists():
-    # Legacy present — legacy overrides unified
-    entity_config = deep_merge(unified_pipeline, legacy-entity_config)
-elif unified_pipeline:
-    # No legacy — unified is sole source
-    entity_config = unified_pipeline
-else:
+if not unified_pipeline:
     raise ValueError(...)
+
+defaults = _load_base_config(config_path)
+merged = _deep_merge(defaults, unified_pipeline)
+payload = PipelineConfigReadPayload(
+    config=merged,
+    entity_config=unified_pipeline,
+    config_path=config_path,
+    unified_schema=unified_schema,
+)
+
+normalized = normalize_pipeline_config_payload(payload, filter_loader=...)
 ```
 
 ### 5. Архитектура директорий после рефакторинга
@@ -222,27 +249,25 @@ configs/
 
 ### 6. Test Guard (`test_pipeline_external_schema_non_empty.py`)
 
-Архитектурный тест обновлён для поддержки обоих форматов:
+Архитектурный тест использует только canonical unified location:
 
 ```python
-def find_pipeline_config(provider: str, entity_type: str) -> tuple[Path | None, str]:
-    """Find pipeline config in legacy or unified location."""
-    legacy = Path("<legacy-removed-layout>") / provider / f"{entity_type}.yaml"
-    if legacy.exists():
-        return legacy, "legacy"
+def _find_pipeline_config(provider: str, entity_type: str) -> Path | None:
+    """Find pipeline config in canonical unified location."""
     unified = Path("configs/entities") / provider / f"{entity_type}.yaml"
     if unified.exists():
-        return unified, "unified"
-    return None, ""
+        return unified
+    return None
 ```
 
 Для unified формата тест проверяет инлайн `schema:` секцию вместо external schema file.
 
 ### 7. LOC Exemption
 
-`config_loader.py` освобождён от архитектурного лимита до **725 LOC** (было 680) в
-`tests/architecture/test_code_metrics.py` — рост обусловлен добавлением `load_unified_entity_raw()`,
-`get_unified_section()` и обновлённой логики `load_pipeline_config()`.
+Исторически `config_loader.py` рос во время миграции unified configs, но текущая
+реализация уже существенно компактнее и больше не содержит dual file-path lookup.
+После extraction-шагов orchestration осталось в `config_loader.py`, а payload
+normalization и schema/filter/source assembly вынесены в отдельный infra-module.
 
 ## Consequences
 
@@ -251,7 +276,8 @@ def find_pipeline_config(provider: str, entity_type: str) -> tuple[Path | None, 
 1. **5-в-1**: Один unified entity config заменяет 5–6 отдельных файлов (pipeline, schema, quality, filters, contracts)
 2. **Навигация**: Изменение entity требует редактирования одного файла вместо поиска по 9 директориям
 3. **Atomic changes**: PR для добавления поля — один файл с изменениями schema + DQ + filters
-4. **Backward compatible**: Fallback на legacy paths сохраняет обратную совместимость для composites
+4. **Backward compatible**: Transitional payload normalization сохраняет совместимость
+   для legacy key shapes без возврата к legacy file-path lookup
 5. **DRY**: `provider` и `entity` объявляются один раз на уровне файла
 6. **Тестируемость**: Фикстуры для теста одного pipeline в одном файле
 
@@ -259,13 +285,17 @@ def find_pipeline_config(provider: str, entity_type: str) -> tuple[Path | None, 
 
 1. **Большие файлы**: Unified entity config может достигать 400+ строк для сложных entity (activity: ~350 строк)
 2. **Секционный конфликт**: При merge из нескольких источников приоритет секций требует понимания алгоритма
-3. **`config_loader.py` растёт**: Поддержка двух форматов увеличивает LOC до 721
+3. **Нормализация остаётся сложной**: Поддержка legacy/new payload shapes всё ещё
+   увеличивает когнитивную нагрузку на normalization module и schema normalizers,
+   хотя сам `config_loader.py` после extraction стал проще
 
 ### Neutral
 
-1. **Legacy fallback остаётся**: `load_pipeline_config()` продолжает проверять legacy layout перед `configs/entities/` для composites и нестандартных конфигов
+1. **Legacy file-path fallback удалён**: `load_pipeline_config()` использует только
+   `configs/entities/{provider}/{entity}.yaml`; transitional compatibility остаётся
+   в payload normalization, alias handling и provider/source coercion
 2. **21 standard pipelines** полностью переведены на unified format; composite pipelines (5) используют `configs/composites/` (ADR-026)
-3. **`deep_merge()` делегирует в `config_merge()`** — унифицировано с ADR-037
+3. **`_deep_merge()` делегирует в `config_merge()`** — унифицировано с ADR-037
 
 ## Alternatives Considered
 
@@ -300,9 +330,10 @@ includes:
 
 | Файл | Изменение |
 |------|-----------|
-| `src/bioetl/infrastructure/config_loader.py` | Добавлены `load_unified_entity_raw()`, `get_unified_section()`; обновлены `load_pipeline_config()`, `load_column_groups_section()`, `load_base_config()`, `deep_merge()` |
+| `src/bioetl/infrastructure/config_loader.py` | Сохраняет read/validate/map orchestration и compatibility wrappers для test-facing private helpers |
+| `src/bioetl/infrastructure/config/pipeline_payload_normalization.py` | Новый normalization boundary: convention defaults, filter/source merge, schema bridge, legacy/new payload coercion |
 | `tests/architecture/test_pipeline_external_schema_non_empty.py` | Добавлена `find_pipeline_config()`, поддержка unified формата |
-| `tests/architecture/test_code_metrics.py` | Exemption для `config_loader.py`: 680 → 725 LOC |
+| `tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py` | Закрепляет явный `read -> normalize -> validate -> map` pipeline и compatibility surface |
 | `configs/entities/{p}/{e}.yaml` | 21 unified entity configs (all standard pipelines) |
 
 ### Deleted Directories (RF-CFG-035)

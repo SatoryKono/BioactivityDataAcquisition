@@ -3,7 +3,7 @@
 - Исходная диаграмма: `mmd-diagrams/class-diagrams/16-factories-bootstrap.mmd`
 
 ## Описание
-Диаграмма Factories & Bootstrap показывает архитектурную модель модуля `16-factories-bootstrap` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Composition layer factories and DI assembly. На схеме отражено примерно 13 классов и 12 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: DataSourceRegistry, TransformerFactory, RunnerFactory, DQFactory, RuntimeAssembly, RunnerBootstrap.
+Диаграмма Factories & Bootstrap показывает архитектурную модель модуля `16-factories-bootstrap` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Composition layer factories and DI assembly. На схеме отражено примерно 9 классов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilderService, CompositeSupportServicesFactory.
 
 ## Метаданные
 - Тип: `classDiagram`

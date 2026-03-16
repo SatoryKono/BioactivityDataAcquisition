@@ -1,11 +1,11 @@
 %% BioETL — Bootstrap / DI Container (Composition Root)
-%% Shows how dependencies are assembled and wired together.
+%% Shows the current composition-root seams used to assemble runtime and admin services.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   29
+%% @nodes   17
 %% @reference  Decomposed into 12a, 12b sub-diagrams
 
 %%{init: {
@@ -19,122 +19,82 @@
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-%% @uniform width=192 height=108 max_title_len=19 max_desc_lines=4
+%% @uniform width=192 height=108 max_title_len=20 max_desc_lines=4
 graph TB
-    subgraph Entry["Entry Points"]
-        CLI["CLI Commands<br/>(Click)"]:::size-md
-        HTTP["HTTP Interface"]:::size-md
+    CALLERS["Entry callers<br/>CLI + tests/scripts + future API"]:::size-md
+
+    subgraph Public["Public composition seams"]
+        ENTRY["composition.entrypoints<br/>canonical retained facade"]:::size-md
+        BOOT["composition.bootstrap<br/>runtime / cli / assembly"]:::size-md
     end
 
-    subgraph Composition["composition layer"]
-        subgraph Bootstrap["Bootstrap Assembly"]
-            RA["RuntimeAssembly<br/>central DI wiring point<br/>creates infra + app components"]:::size-md
-            RBA["RunnerBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_runner()"]:::size-md
-            SBA["StorageBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_storage()"]:::size-md
-            HBA["HealthBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_health()"]:::size-md
-            CBA["CheckpointBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_checkpoint()"]:::size-md
-            LBA["LockBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_lock()"]:::size-md
+    subgraph Composition["Internal composition modules"]
+        subgraph Registries["Registries + factories"]
+            PR["ProviderRegistry<br/>provider configs + creators"]:::size-md
+            PIPE["PipelineRegistry<br/>pipeline definitions"]:::size-md
+            DSF["DataSourceFactory<br/>canonical provider adapter path"]:::size-md
+            RF["RunnerFactory<br/>pipeline runner creation"]:::size-md
         end
 
-        subgraph Factories["Factories"]
-            DSR["DataSourceRegistry<br/>━━━━━━━━━━━━━━━━━<br/>Maps provider+entity →<br/>DataSourcePort factory"]:::size-md
-            TF["TransformerFactory<br/>━━━━━━━━━━━━━━━━━<br/>Maps provider+entity →<br/>BaseTransformer factory"]:::size-md
-            RF["RunnerFactory<br/>━━━━━━━━━━━━━━━━━<br/>+ create_runner()"]:::size-md
-            DQF["DQFactory<br/>━━━━━━━━━━━━━━━━━<br/>+ create_dq_analyzers()"]:::size-md
+        subgraph Runtime["Runtime bootstrap"]
+            RUNTIME["bootstrap.runtime<br/>pipeline / composite bootstrap"]:::size-md
+            RH["Runtime assembly helpers<br/>RunnerFactoryBuilderService +<br/>CompositeSupportServicesFactory"]:::size-md
         end
 
-        subgraph Providers["Provider Registry"]
-            PR["ProviderRegistry<br/>registers provider pipelines<br/>and extraction params"]:::size-md
-            EP["ExtractionParams<br/>Registration"]:::size-md
-        end
-
-        subgraph Builders["Runtime Builders"]
-            RB["RunnerBuilder<br/>━━━━━━━━━━━━━━━━━<br/>Fluent builder for<br/>PipelineRunner creation"]:::size-md
+        subgraph Admin["CLI/bootstrap services"]
+            SUPPORT["bootstrap.cli + bootstrap.assembly<br/>admin commands + shared ports"]:::size-md
         end
     end
 
-    subgraph Created["Created Components"]
-        subgraph InfraCreated["Infrastructure"]
-            ADAPTER["Provider Adapter<br/>(DataSourcePort)"]:::size-md
-            STORAGE["BronzeWriter +<br/>SilverWriter +<br/>GoldWriter"]:::size-md
-            LOGGER["UnifiedLogger<br/>(LoggerPort)"]:::size-md
-            METRICS["PrometheusMetrics<br/>(MetricsPort)"]:::size-md
-            TRACER["OpenTelemetryTracer<br/>(TracingPort)"]:::size-md
-            LOCK["MemoryLock<br/>(LockPort)"]:::size-md
-            CHKPT["LocalCheckpoint<br/>(CheckpointPort)"]:::size-md
-            QUAR["UnifiedQuarantine<br/>(QuarantinePort)"]:::size-md
-        end
-
-        subgraph AppCreated["Application"]
-            PS["PipelineServices<br/>(frozen dataclass<br/>with all injected ports)"]:::size-md
-            RUNNER["PipelineRunner"]:::size-md
-            TRANSFORMER["BaseTransformer<br/>(provider-specific)"]:::size-md
-            OBSERVER["PipelineObserver"]:::size-md
-        end
+    subgraph Created["Created collaborators"]
+        ADAPTER["Provider adapter<br/>DataSourcePort"]:::size-md
+        STORAGE["StorageAdapter<br/>Bronze / Silver / Gold"]:::size-md
+        OBS["Observability bundle<br/>logger / metrics / tracer"]:::size-md
+        LOCK["LockPort + checkpoint / quarantine ports"]:::size-md
+        RUNNER["PipelineRunner"]:::size-md
+        COMPOSITE["CompositePipelineRunnerService"]:::size-md
+        ADMINSVC["Admin services<br/>health / export / vacuum / checkpoint"]:::size-md
     end
 
-    %% Entry → Composition
-    CLI ==> RA
-    HTTP --> RA
+    CALLERS ==> ENTRY
+    ENTRY --> BOOT
 
-    %% Assembly wiring
-    RA --> RBA
-    RA --> SBA
-    RA --> HBA
-    RA --> CBA
-    RA --> LBA
+    BOOT --> RUNTIME
+    BOOT --> SUPPORT
 
-    %% Factories
-    RA --> DSR
-    RA --> TF
-    RA --> RF
-    RA --> DQF
+    RUNTIME --> PR
+    RUNTIME --> PIPE
+    RUNTIME --> DSF
+    RUNTIME --> RF
+    RUNTIME --> RH
 
-    %% Provider registration
-    PR --> DSR
-    PR --> TF
-    EP --> PR
+    PR --> DSF
+    PIPE --> RF
 
-    %% Builder
-    RF --> RB
+    DSF -->|creates| ADAPTER
+    SUPPORT -->|creates| STORAGE
+    SUPPORT -->|creates| LOCK
+    RUNTIME -->|creates| OBS
+    RF -->|creates| RUNNER
+    RH --> RUNNER
+    RH -->|creates| COMPOSITE
+    SUPPORT -->|creates| ADMINSVC
 
-    %% Created components
-    DSR -->|creates| ADAPTER
-    SBA -->|creates| STORAGE
-    RA -->|creates| LOGGER
-    RA -->|creates| METRICS
-    RA -->|creates| TRACER
-    LBA -->|creates| LOCK
-    CBA -->|creates| CHKPT
-    RA -->|creates| QUAR
-    RA -->|creates| AUDIT
-    RA -->|creates| PII
-
-    TF -->|creates| TRANSFORMER
-    RBA -->|creates| RUNNER
-
-    %% PipelineServices aggregation
-    ADAPTER --> PS
-    STORAGE --> PS
-    LOGGER --> PS
-    METRICS --> PS
-    TRACER --> PS
-    LOCK --> PS
-    CHKPT --> PS
-    QUAR --> PS
-
-    PS --> RUNNER
-    TRANSFORMER --> RUNNER
-    OBSERVER --> RUNNER
+    ADAPTER --> RUNNER
+    STORAGE --> RUNNER
+    OBS --> RUNNER
+    LOCK --> COMPOSITE
+    STORAGE --> COMPOSITE
+    OBS --> COMPOSITE
 
     classDef entry fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef public fill:#f8fafc,stroke:#475569,stroke-width:2px
     classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
-    classDef factory fill:#fff7ed,stroke:#f59e0b
     classDef infra fill:#fff1f2,stroke:#dc2626
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
-    class CLI,HTTP entry
-    class RA,RBA,SBA,HBA,CBA,LBA comp
-    class DSR,TF,RF,DQF,PR,EP,RB factory
-    class ADAPTER,STORAGE,LOGGER,METRICS,TRACER,LOCK,CHKPT,QUAR,AUDIT,PII infra
-    class PS,RUNNER,TRANSFORMER,OBSERVER app
+    class CALLERS entry
+    class ENTRY,BOOT public
+    class PR,PIPE,DSF,RF,RUNTIME,RH,SUPPORT comp
+    class ADAPTER,STORAGE,OBS,LOCK infra
+    class RUNNER,COMPOSITE,ADMINSVC app

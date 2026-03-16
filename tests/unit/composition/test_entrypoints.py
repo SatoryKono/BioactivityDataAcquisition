@@ -4,6 +4,9 @@ Tests the unified pipeline execution interface including:
 - RunOptions configuration
 - RunResult metrics and status
 - run_pipeline() execution flow
+
+This is dedicated entrypoint-boundary coverage and may patch
+``bioetl.composition._pipeline_execution`` directly.
 """
 
 from __future__ import annotations

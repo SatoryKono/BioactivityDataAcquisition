@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupService
 from bioetl.application.services import (
@@ -25,7 +26,8 @@ from bioetl.application.services import (
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.registry import get_default_registry
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+from bioetl.composition.registry import create_registry
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -37,6 +39,16 @@ __all__ = [
     "bootstrap_lifecycle_service",
     "bootstrap_vacuum_service",
 ]
+
+if TYPE_CHECKING:
+    from bioetl.composition.registry import PipelineRegistry
+
+
+def get_default_registry() -> PipelineRegistry:
+    """Compatibility helper returning an explicit registered registry."""
+    registry = create_registry()
+    register_all_pipelines(registry=registry)
+    return registry
 
 
 def bootstrap_cleanup_service() -> CleanupService:
@@ -86,11 +98,18 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     return BronzeCleanupService(storage=storage, logger=noop_logger)
 
 
-def bootstrap_vacuum_service() -> VacuumService:
+def bootstrap_vacuum_service(
+    *,
+    registry: PipelineRegistry | None = None,
+) -> VacuumService:
     """Bootstrap VacuumService for CLI maintenance commands.
 
     Creates a VacuumService for batch vacuum operations.
     Used by CLI for `maintenance vacuum-all` command.
+
+    Args:
+        registry: Optional explicit registry. When omitted, a fresh registered
+            registry is built for the table collector.
 
     Returns:
         VacuumService configured for the current environment.
@@ -99,7 +118,7 @@ def bootstrap_vacuum_service() -> VacuumService:
     noop_logger = create_noop_logger()
 
     # Create table collector that queries the registry (DI pattern)
-    table_collector = _create_table_collector()
+    table_collector = _create_table_collector(registry=registry)
 
     return VacuumService(
         lifecycle=lifecycle,
@@ -108,13 +127,16 @@ def bootstrap_vacuum_service() -> VacuumService:
     )
 
 
-def _create_table_collector() -> Callable[[str], list[tuple[str, str]]]:
+def _create_table_collector(
+    *,
+    registry: PipelineRegistry | None = None,
+) -> Callable[[str], list[tuple[str, str]]]:
     """Create a callable that gathers Silver/Gold table names from registry configs."""
+    effective_registry = registry if registry is not None else get_default_registry()
 
     def collect_tables(layer: str) -> list[tuple[str, str]]:
         """Collect `(table_name, layer)` pairs for requested layer scope."""
-        registry = get_default_registry()
-        pipelines = registry.list_pipelines()
+        pipelines = effective_registry.list_pipelines()
 
         silver_tables: set[str] = set()
         gold_tables: set[str] = set()

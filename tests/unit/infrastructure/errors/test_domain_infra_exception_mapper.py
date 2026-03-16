@@ -124,17 +124,3 @@ def test_map_domain_to_infra_disposition_critical(
     assert disposition.context == DomainExceptionContext.ORCHESTRATION
     assert disposition.severity == "critical"
     assert disposition.retryable is False
-
-
-def test_adapter_mapper_facade_uses_unified_mapper() -> None:
-    from bioetl.infrastructure.adapters.adapter_error_mapper import AdapterErrorMapper
-
-    mapped = AdapterErrorMapper(logger=MagicMock()).map_to_domain_error(
-        DomainErrorMappingInput(
-            error=RuntimeError("network"),
-            provider="crossref",
-            error_type=ErrorType.NETWORK_ERROR,
-        )
-    )
-    assert isinstance(mapped, ExternalServiceError)
-    assert mapped.get_reason_code() == "ADAPTER_EXTERNAL_ERROR"

@@ -1,6 +1,6 @@
 # AI Self-Review Rules
 
-*Версия: 1.3.0 | Синхронизировано с RULES.md v5.23 (2026-03-02)*
+*Версия: 1.3.0 | Синхронизировано с RULES.md v5.24 (2026-03-13)*
 
 Правила для автоматической самопроверки кода в проекте BioETL.
 Использует RFC 2119 keywords: **MUST**, **SHOULD**, **MAY**.
@@ -458,6 +458,9 @@ runner = PipelineFactory.create()
 | Reader | `*Reader` | `DeltaReader` |
 | Hasher | `*Hasher` | `Sha256PiiHasher` |
 | Encoder | `*Encoder` | `StdLibJsonEncoder` |
+| Flow | `*Flow` | `CrossRefFetchFlow` |
+| Builder | `*Builder` | `CrossRefQueryBuilder` |
+| Orchestrator | `*Orchestrator` | `FallbackFetchOrchestratorService` |
 
 > **Value Object suffixes** (не требуют проверки — исключены из NAME-001):
 > `*Record`, `*Options`, `*Status`, `*Preview`, `*Phase`, `*Issue`,

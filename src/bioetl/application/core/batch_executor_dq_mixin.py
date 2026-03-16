@@ -31,7 +31,14 @@ _ReservoirT = TypeVar("_ReservoirT")
 
 
 class _BatchExecutorDQMixin:
-    """Provides DQ data collection and report context construction."""
+    """Provides DQ data collection and report context construction.
+
+    Accumulates Bronze/Silver/Gold record samples during pipeline execution using
+    reservoir sampling (Algorithm R) to keep memory bounded at ``_DQ_MAX_SAMPLE_SIZE``
+    records. Once the reservoir is full, new records replace existing ones with
+    decreasing probability, maintaining a statistically representative subset
+    for post-run DQ report generation.
+    """
 
     _services: PipelineService
     _context: PipelineContext

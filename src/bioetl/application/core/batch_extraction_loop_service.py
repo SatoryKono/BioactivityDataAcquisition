@@ -72,6 +72,16 @@ class BatchExtractionLoopService:
         checkpoint_recovery_service: BatchCheckpointRecoveryService,
         checkpoint_interval: int,
     ) -> None:
+        """Initialize extraction loop service.
+
+        Args:
+            batch_processing_service: Source adapter that yields raw Bronze records.
+            shutdown_signal: Checked each iteration to honor graceful shutdown requests.
+            memory_manager: Provides memory check interval for adaptive batch sizing.
+            progress_service: Reports per-record and per-batch progress to observers.
+            checkpoint_recovery_service: Persists resume offsets after each checkpoint.
+            checkpoint_interval: Number of records between checkpoint saves.
+        """
         self._batch_processing_service = batch_processing_service
         self._shutdown_signal = shutdown_signal
         self._memory_manager = memory_manager

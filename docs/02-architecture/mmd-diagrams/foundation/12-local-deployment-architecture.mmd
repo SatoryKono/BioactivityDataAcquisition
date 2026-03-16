@@ -1,22 +1,17 @@
 %% Title: Local Deployment Architecture
-%% Covers: RULES.md §5.6 (Deployment), ADR-010 (Local-Only)
-%% Updated: 2026-02-17
-%% Components: CLI, MemoryLock, Data Lake directories, Observability stack
+%% Covers: local-only runtime, in-process locking, local filesystem outputs
+%% Updated: 2026-03-16
+%% Components: CLI, MemoryLock, local filesystem, observability
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-%% @nodes   21
+%% @nodes   13
 %%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=200 height=72 max_title_len=20 max_desc_lines=2
 flowchart TB
-    subgraph External["External APIs"]
-        ChEMBL_API["🌐 ChEMBL API<br/>ebi.ac.uk/chembl"]
-        PubChem_API["🌐 PubChem API<br/>pubchem.ncbi.nlm.nih.gov"]
-        UniProt_API["🌐 UniProt API<br/>uniprot.org"]
-        PubMed_API["🌐 PubMed API<br/>eutils.ncbi.nlm.nih.gov"]
-    end
+    ProviderAPIs["🌐 Provider APIs<br/>ChEMBL + PubChem + UniProt + PubMed"]:::size-md
 
     subgraph Local["Local Machine (Single Instance)"]
         subgraph Orchestration["CLI Execution"]
@@ -25,15 +20,11 @@ flowchart TB
         end
 
         subgraph Runtime["Local Pipeline Workers"]
-            chembl_activity["📦 chembl_activity<br/>local pipeline"]
-            chembl_assay["📦 chembl_assay<br/>local pipeline"]
-            chembl_target["📦 chembl_target<br/>local pipeline"]
-            chembl_molecule["📦 chembl_molecule<br/>local pipeline"]
-            pubchem_compound["📦 pubchem_compound<br/>local pipeline"]
-            uniprot_protein["📦 uniprot_protein<br/>local pipeline"]
+            Workers["📦 Local pipelines<br/>chembl_* + pubchem_compound +<br/>uniprot_protein"]:::size-md
         end
 
         subgraph Locking["In-Process Locking"]
+            MemoryLock["MemoryLock<br/>in-process only<br/>no cross-process coordination"]
         end
 
         subgraph Data["Local filesystem (data/)"]
@@ -52,37 +43,26 @@ flowchart TB
     end
 
     %% External API connections
-    ChEMBL_API --> chembl_activity
-    PubChem_API --> pubchem_compound
-    UniProt_API --> uniprot_protein
-    PubMed_API --> chembl_activity
+    ProviderAPIs --> Workers
 
     %% Orchestration to runtime
-    CLI --> chembl_activity
-    CLI --> chembl_assay
-    CLI --> chembl_target
-    CLI --> chembl_molecule
-    CLI --> pubchem_compound
-    CLI --> uniprot_protein
+    CLI --> Workers
     Schedule --> CLI
 
     %% Runtime to MemoryLock
-    chembl_activity -.->|lock| MemoryLock
-    chembl_assay -.->|lock| MemoryLock
-    chembl_target -.->|lock| MemoryLock
-    chembl_molecule -.->|lock| MemoryLock
+    Workers -.->|lock| MemoryLock
 
     %% Runtime to local filesystem
-    chembl_activity --> Bronze
-    chembl_activity --> Silver
-    chembl_activity --> Gold
-    chembl_activity --> Quarantine
-    chembl_activity --> Checkpoints
-    chembl_activity --> Lineage
+    Workers --> Bronze
+    Workers --> Silver
+    Workers --> Gold
+    Workers --> Quarantine
+    Workers --> Checkpoints
+    Workers --> Lineage
 
     %% Runtime to local observability
-    chembl_activity --> Logs
-    chembl_activity --> Metrics
+    Workers --> Logs
+    Workers --> Metrics
 
     %% Styling
     style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121

@@ -19,6 +19,26 @@ _INTEGRAL_SCORE_VIOLATION_RE = re.compile(
 )
 
 
+def _is_rollout_cutoff_active(
+    raw_cutoff: object,
+    *,
+    today: date,
+) -> bool:
+    """Return True when a rollout cutoff still keeps a section in warn mode."""
+    cutoff = _parse_iso_date(raw_cutoff)
+    return cutoff is not None and today <= cutoff
+
+
+def _is_rollout_cutoff_stale(
+    raw_cutoff: object,
+    *,
+    today: date,
+) -> bool:
+    """Return True when a rollout cutoff exists but is already in the past."""
+    cutoff = _parse_iso_date(raw_cutoff)
+    return cutoff is not None and cutoff < today
+
+
 def _is_active_grace_window(
     window: object,
     *,
@@ -122,8 +142,7 @@ def _resolve_rollout_mode_for_section(
 
     for key in rollout_keys:
         raw_cutoff = warn_until_by_section.get(key)
-        cutoff = _parse_iso_date(raw_cutoff)
-        if cutoff is not None and today <= cutoff:
+        if _is_rollout_cutoff_active(raw_cutoff, today=today):
             return "warn"
 
     return default_mode_str
@@ -167,6 +186,8 @@ __all__ = [
     "_collect_allowances",
     "_extract_growth_violation_section",
     "_is_active_grace_window",
+    "_is_rollout_cutoff_active",
+    "_is_rollout_cutoff_stale",
     "_resolve_rollout_mode_for_section",
     "split_growth_violations_by_severity",
 ]

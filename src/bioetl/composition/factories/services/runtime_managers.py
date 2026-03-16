@@ -9,10 +9,13 @@ from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
-from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_execution_lifecycle import (
     BatchExecutionLifecycleService,
 )
+from bioetl.application.core.batch_execution_run_service import (
+    BatchExecutionRunService,
+)
+from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
@@ -46,7 +49,7 @@ def build_runtime_managers(
     BatchIdGeneratorPort,
     BatchProgressService,
     BatchCheckpointRecoveryService,
-    BatchExecutionLifecycleService,
+    BatchExecutionRunService,
 ]:
     """Build runtime manager instances for BatchExecutor."""
     initial_batch_size = pipeline.config.batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
@@ -74,11 +77,14 @@ def build_runtime_managers(
         tracing_manager=tracing_manager,
         checkpoint_recovery_service=checkpoint_recovery_service,
     )
+    execution_run_service = BatchExecutionRunService(
+        execution_lifecycle_service=execution_lifecycle_service
+    )
     return (
         memory_manager,
         tracing_manager,
         batch_id_factory or UuidBatchIdGenerator(),
         progress_service,
         checkpoint_recovery_service,
-        execution_lifecycle_service,
+        execution_run_service,
     )

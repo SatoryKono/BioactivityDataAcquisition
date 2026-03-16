@@ -56,15 +56,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Unified Entity Configuration Format (ADR-039)**: All 21 standard pipeline configs consolidated from 5–6 separate files into one `configs/entities/{provider}/{entity}.yaml` per entity
   - Unified format combines `pipeline`, `schema`, `quality`, `filters`, `contracts`, and `hash_policy` sections in a single file
-  - `load_pipeline_config()` supports both unified (`configs/entities/`) and legacy (`configs/pipelines/`) locations with automatic fallback
+  - `load_pipeline_config()` reads the canonical unified path `configs/entities/{provider}/{entity}.yaml`; remaining backward compatibility is handled in payload normalization, not file-path fallback
   - New helper functions: `_load_unified_entity_raw()`, `_get_unified_section()`
   - `_load_column_groups_section()` accepts `unified_schema` parameter for inline schema sections
   - `_deep_merge()` now delegates to `config_merge()` (ADR-037 compliance)
   - `_load_base_config()` simplified to single canonical path (`configs/base/pipeline.yaml`)
   - Files: `src/bioetl/infrastructure/config_loader.py`
 
-- **Architecture test updated for dual config format** (`test_pipeline_external_schema_non_empty.py`):
-  - Added `_find_pipeline_config()` to search both `configs/pipelines/` and `configs/entities/`
+- **Architecture test updated for canonical unified config format** (`test_pipeline_external_schema_non_empty.py`):
+  - Added `_find_pipeline_config()` to resolve the canonical `configs/entities/` location
   - Unified format: validates inline `schema:` section instead of external schema file reference
   - File: `tests/architecture/test_pipeline_external_schema_non_empty.py`
 

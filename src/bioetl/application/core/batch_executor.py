@@ -6,48 +6,33 @@ __all__ = ["BatchExecutor", "BatchResult"]
 
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
-from bioetl.application.core.batch_checkpoint_recovery_service import (
-    BatchCheckpointRecoveryService,
-)
 from bioetl.application.core.batch_execution_lifecycle import (
     BatchExecutionContext,
-    BatchExecutionLifecycleContext,
-    BatchExecutionLifecycleService,
     prepare_execution_context,
 )
-from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
-from bioetl.application.core.batch_executor_helpers import (
-    apply_processed_batch_outcome,
-    build_batch_result_snapshot,
-    build_processed_batch_outcome,
-    build_run_statistics,
+from bioetl.application.core.batch_execution_run_service import (
+    BatchExecutionRunService,
 )
+from bioetl.application.core.batch_execution_state_service import (
+    BatchExecutionStateService,
+)
+from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
-    BatchProcessingServicePort,
 )
-from bioetl.application.core.batch_progress_service import BatchProgressService
-from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.constants import (
     DEFAULT_CHECKPOINT_INTERVAL as _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL,
 )
-from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.batch_processing_service import BatchProcessingOutput
-    from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
-    )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
@@ -63,59 +48,49 @@ class BatchResult:
     quarantined_count: int
 
 
-class _BatchProcessingStateUpdaterPort(BatchProcessingServicePort, Protocol):
-    """Processing contract required by BatchExecutor across loop and batch update."""
-
-    async def process_batch(
-        self,
-        *,
-        records: list[BronzeRecord],
-        start_index: int,
-        query_string: str | None,
-    ) -> BatchProcessingOutput: ...
 class BatchExecutor(_BatchExecutorDQMixin):
     """Unified executor for ETL batches: fetch -> transform -> write with tracing."""
 
     DEFAULT_BATCH_SIZE = 1000
     DEFAULT_CHECKPOINT_INTERVAL = _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL
-    _PIPELINE_EXECUTION_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-    )
 
     def __init__(
         self,
         services: PipelineService,
         context: PipelineContext,
         config: RecordProcessorConfig,
-        checkpoint_manager: CheckpointManagerService,
-        shutdown_signal: ShutdownSignal,
         batch_metrics: BatchMetricsRecorderService,
         transformer: BatchTransformer,
         writer: BatchWriter,
-        tracing_manager: BatchTracingManagerService,
         memory_manager: BatchMemoryManagerService,
-        progress_service: BatchProgressService,
-        checkpoint_recovery_service: BatchCheckpointRecoveryService,
-        batch_processing_service: _BatchProcessingStateUpdaterPort,
-        execution_lifecycle_service: BatchExecutionLifecycleService,
+        execution_run_service: BatchExecutionRunService,
         extraction_loop_service: BatchExtractionLoopService,
+        execution_state_service: BatchExecutionStateService,
         *,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
-        """Initialize batch executor."""
+        """Initialize batch executor.
+
+        Args:
+            services: Shared pipeline services (logger, DQ report service, etc.).
+            context: Pipeline-level context carrying run metadata and identifiers.
+            config: Record processor configuration (entity type, table names, DQ config).
+            batch_metrics: Recorder for per-batch and per-run metrics.
+            transformer: Handles Bronze→Silver→Gold record transformation.
+            writer: Writes transformed records to storage layers.
+            memory_manager: Monitors memory pressure and adjusts batch sizing.
+            execution_run_service: Coordinates start/finalize lifecycle for one run.
+            extraction_loop_service: Drives the async record extraction loop.
+            execution_state_service: Applies processed-batch outcomes to executor state.
+            batch_size: Initial number of records per batch; defaults to DEFAULT_BATCH_SIZE.
+            checkpoint_interval: Number of records between checkpoint saves; defaults to domain default.
+            logger: Logger override; falls back to services.logger if not provided.
+        """
         self._services = services
         self._context = context
         self._config = config
-        self._checkpoint_manager = checkpoint_manager
-        self._shutdown_signal = shutdown_signal
         self._logger = logger or services.logger
 
         self._initial_batch_size = batch_size or self.DEFAULT_BATCH_SIZE
@@ -140,16 +115,19 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._source_batch_ids: list[str] = []
         self._last_bronze_path: str | None = None
 
+        # Kept for compatibility and test visibility; execution services use them upstream.
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer
-        self._tracing = tracing_manager
 
-        self._progress_service = progress_service
-        self._checkpoint_recovery_service = checkpoint_recovery_service
-        self._batch_processing_service = batch_processing_service
-        self._execution_lifecycle = execution_lifecycle_service
+        self._execution_run_service = execution_run_service
         self._extraction_loop_service = extraction_loop_service
+        self._execution_state_service = execution_state_service
+        # Retained compatibility seam for tests/helpers that still inspect the
+        # delegated batch-processing service through BatchExecutor directly.
+        self._batch_processing_service = (
+            self._execution_state_service._batch_processing_service
+        )
 
         self._resume_offset = 0
         self._query_string: str | None = None
@@ -163,47 +141,16 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self, limit: int | None, query: str | None = None, offset: int | None = None
     ) -> None:
         """Execute the pipeline for the provided limit/query/offset inputs."""
-        lifecycle_context = await self._start_execution(
-            limit=limit, query=query, offset=offset
-        )
-
-        try:
-            await self._run_extraction_loop(lifecycle_context.execution_context)
-        except PipelineShutdownError:
-            await self._execution_lifecycle.finalize_execution(
-                self,
-                lifecycle_context,
-                batch_size_reductions=self._memory.batch_size_reductions,
-                min_batch_size_used=self._memory.min_batch_size_used,
-                shutdown=True,
-            )
-            raise
-        except self._PIPELINE_EXECUTION_ERRORS as error:
-            await self._execution_lifecycle.finalize_execution(
-                self,
-                lifecycle_context,
-                batch_size_reductions=self._memory.batch_size_reductions,
-                min_batch_size_used=self._memory.min_batch_size_used,
-                error=error,
-            )
-            raise
-        else:
-            await self._execution_lifecycle.finalize_execution(
-                self,
-                lifecycle_context,
-                batch_size_reductions=self._memory.batch_size_reductions,
-                min_batch_size_used=self._memory.min_batch_size_used,
-            )
-
-    async def _start_execution(
-        self, *, limit: int | None, query: str | None, offset: int | None
-    ) -> BatchExecutionLifecycleContext:
-        """Initialize progress tracking and tracing for one executor run."""
         execution_context = self._prepare_execution_context(
-            limit=limit, query=query, offset=offset
+            limit=limit,
+            query=query,
+            offset=offset,
         )
-        return await self._execution_lifecycle.start_execution(
+        await self._execution_run_service.execute(
             execution_context=execution_context,
+            run_loop=self._run_extraction_loop,
+            execution_state=self,
+            memory_state=self._memory,
         )
 
     def _prepare_execution_context(
@@ -236,22 +183,11 @@ class BatchExecutor(_BatchExecutorDQMixin):
         records: list[BronzeRecord],
         start_index: int = 0,
     ) -> BatchResult:
-        """Public API for processing one explicit batch.
-
-        Args:
-            records: List of raw Bronze records to process.
-            start_index: Absolute record index of the first record in this batch.
-
-        Returns:
-            BatchResult with cumulative bronze, silver, gold, and quarantined counts.
-        """
+        """Public API for processing one explicit batch."""
         await self._process_batch_and_update_state(records, start_index)
-        return build_batch_result_snapshot(
+        return self._execution_state_service.build_batch_result(
+            state=self,
             batch_result_type=BatchResult,
-            records_bronze=self.records_bronze,
-            records_silver=self.records_silver,
-            records_gold=self.records_gold,
-            records_quarantined=self.records_quarantined,
         )
 
     async def _process_batch_and_update_state(
@@ -260,32 +196,15 @@ class BatchExecutor(_BatchExecutorDQMixin):
         start_index: int,
     ) -> None:
         """Process one batch and apply results to executor-level counters/state."""
-        output = await self._batch_processing_service.process_batch(
+        await self._execution_state_service.process_batch_and_update_state(
+            state=self,
             records=records,
             start_index=start_index,
             query_string=self._query_string,
         )
-        apply_processed_batch_outcome(
-            state=self,
-            outcome=build_processed_batch_outcome(
-                records=records,
-                output=output,
-            )
-        )
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:
-        """Get aggregated statistics for the entire pipeline run.
-
-        Returns:
-            Dictionary with fetched, bronze, silver, gold, quarantined, filtered_out
-            record counts and the deduplicated list of source batch IDs.
-        """
-        return build_run_statistics(
-            records_fetched=self.records_fetched,
-            records_bronze=self.records_bronze,
-            records_silver=self.records_silver,
-            records_gold=self.records_gold,
-            records_quarantined=self.records_quarantined,
-            records_filtered_out=self.records_filtered_out,
-            source_batch_ids=self._source_batch_ids,
+        """Get aggregated statistics for the entire pipeline run."""
+        return self._execution_state_service.build_run_statistics(
+            state=self,
         )

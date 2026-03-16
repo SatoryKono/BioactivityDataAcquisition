@@ -1,144 +1,77 @@
 %% BioETL — Class Diagram: Factories & Bootstrap
-%% Composition layer factories and DI assembly.
+%% Current composition-layer factories, provider registry, and runtime assembly.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-16
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @nodes   13
-%% @uniform class width=192 height=126 max_title_len=19 max_desc_lines=5
+%% @nodes   9
+%% @uniform class width=208 height=138 max_title_len=22 max_desc_lines=6
 
 classDiagram
     direction LR
-    class DataSourceRegistry {
-        -_registry: dict~str, Callable~
-        +register(provider, entity_type, factory): None
-        +create(provider, entity_type, **kwargs): DataSourcePort
+    class ProviderRegistry {
+        +ensure_loaded(): None
+        +create_adapter(provider, **kwargs): DataSourcePort
+        +build_data_source_creator(provider): DataSourceCreatorProtocol
         +list_providers(): list~str~
-        +list_entities(provider): list~str~
     }
 
-    class TransformerFactory {
-        -_registry: dict~str, Callable~
-        +register(provider, entity_type, factory): None
-        +create(provider, entity_type, **kwargs): BaseTransformer
-        
-        
+    class DataSourceFactory {
+        +create(provider, **kwargs): DataSourcePort
+        +list_providers(): list~str~
+    }
+
+    class PipelineRegistry {
+        +list_pipelines(): list~str~
+        +contains(name): bool
     }
 
     class RunnerFactory {
-        -_data_source_registry: DataSourceRegistry
-        -_transformer_factory: TransformerFactory
-        +create_runner(config, runtime): PipelineRunner
-        
-        
+        +create(context): ExecutionMetricsRunnerPort
+        +list_pipelines(): list~str~
+        +contains(name): bool
     }
 
-    class DQFactory {
-        +create_dq_analyzers(config): tuple
-        
-        
-        
-        
+    class RunnerFactoryBuilderService {
+        +build_seed_factory(...): Callable
+        +build_enricher_factory(...): Callable
+        +build_dependency_factory(...): Callable
     }
 
-    class RuntimeAssembly {
-        Central DI wiring
-        +assemble(config, runtime): PipelineRunner
-        
-        
-        
+    class CompositeFilterExtractionService {
+        +extract_enricher_filters(...): tuple
+        +extract_dependency_filters(...): tuple
     }
 
-    class RunnerBootstrap {
-        +assemble_runner(config, runtime, services): PipelineRunner
-        
-        
-        
-        
+    class CompositeSupportServices {
+        +checkpoint_manager: CompositeCheckpointService
+        +coordinator: EnrichmentCoordinatorService
+        +merger: MergeService
     }
 
-    class StorageBootstrap {
-        +assemble_storage(settings): StoragePort
-        
-        
-        
-        
+    class CompositeSupportServicesFactory {
+        +create(...): CompositeSupportServices
     }
 
-    class HealthBootstrap {
-        +assemble_health(settings): HealthService
-        
-        
-        
-        
+    class CompositePipelineRunnerService {
+        +run(): CompositeResult
     }
 
-    class CheckpointBootstrap {
-        +assemble_checkpoint(settings): CheckpointPort
-        
-        
-        
-        
-    }
+    DataSourceFactory --> ProviderRegistry : delegates
+    RunnerFactory --> PipelineRegistry : resolves pipelines
+    RunnerFactory ..> ProviderRegistry : ensure providers loaded
+    RunnerFactoryBuilderService --> CompositeFilterExtractionService
+    CompositeSupportServicesFactory --> CompositeSupportServices : builds
+    CompositeSupportServices --> CompositePipelineRunnerService : injects collaborators
+    RunnerFactoryBuilderService --> CompositePipelineRunnerService : runner factories
 
-    class LockBootstrap {
-        +assemble_lock(settings): LockPort
-        
-        
-        
-        
-    }
-
-    class ProviderRegistry {
-        +register_all(): None
-        Registers all provider pipelines
-        
-        
-        
-    }
-
-    class RunnerBuilder {
-        Fluent API for runner creation
-        +with_config(config): Self
-        +with_runtime(runtime): Self
-        +with_services(services): Self
-        +build(): PipelineRunner
-    }
-
-    class GenericFactory {
-        <<Generic T>>
-        +create(**kwargs): T
-        
-        
-        
-    }
-
-    RuntimeAssembly --> RunnerBootstrap
-    RuntimeAssembly --> StorageBootstrap
-    RuntimeAssembly --> HealthBootstrap
-    RuntimeAssembly --> CheckpointBootstrap
-    RuntimeAssembly --> LockBootstrap
-    RuntimeAssembly --> DataSourceRegistry
-    RuntimeAssembly --> TransformerFactory
-
-    RunnerFactory --> DataSourceRegistry
-    RunnerFactory --> TransformerFactory
-    RunnerFactory --> RunnerBuilder
-
-    ProviderRegistry --> DataSourceRegistry
-    ProviderRegistry --> TransformerFactory
-
-    style DataSourceRegistry fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style TransformerFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style RunnerFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style DQFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style RuntimeAssembly fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style RunnerBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style StorageBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style HealthBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style CheckpointBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style LockBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style ProviderRegistry fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style RunnerBuilder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style GenericFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ProviderRegistry fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style DataSourceFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style PipelineRegistry fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style RunnerFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style RunnerFactoryBuilderService fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositeFilterExtractionService fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositeSupportServices fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositeSupportServicesFactory fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style CompositePipelineRunnerService fill:#f0fdf4,stroke:#16a34a,stroke-width:2px

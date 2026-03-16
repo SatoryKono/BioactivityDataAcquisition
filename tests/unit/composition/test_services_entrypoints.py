@@ -1,8 +1,8 @@
 """Unit tests for public composition service entrypoints.
 
 Tests the service entrypoint functions exposed via
-``bioetl.composition.entrypoints``. All external dependencies are mocked via
-public patch points.
+``bioetl.composition.entrypoints``. Dedicated entrypoint-boundary coverage is
+allowed to patch the internal ``bioetl.composition._services`` seam directly.
 """
 
 from __future__ import annotations
