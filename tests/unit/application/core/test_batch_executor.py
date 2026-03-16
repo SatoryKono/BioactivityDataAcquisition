@@ -32,6 +32,12 @@ from bioetl.application.core.batch_executor_loop_helpers import (
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
+from bioetl.application.core.batch_execution_lifecycle import (
+    BatchExecutionLifecycleService,
+)
+from bioetl.application.core.batch_extraction_loop_service import (
+    BatchExtractionLoopService,
+)
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_processing_service import (
     BatchProcessingOutput,
@@ -238,6 +244,14 @@ def _create_batch_executor(
         tracing_manager=tracing_manager,
         batch_id_factory=effective_batch_id_factory,
     )
+    execution_lifecycle_service = BatchExecutionLifecycleService(
+        progress_service=progress_service,
+        tracing_manager=tracing_manager,
+        checkpoint_recovery_service=checkpoint_recovery_service,
+    )
+    effective_checkpoint_interval = (
+        checkpoint_interval or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL
+    )
 
     return BatchExecutor(
         services=services,
@@ -253,6 +267,15 @@ def _create_batch_executor(
         progress_service=progress_service,
         checkpoint_recovery_service=checkpoint_recovery_service,
         batch_processing_service=batch_processing_service,
+        execution_lifecycle_service=execution_lifecycle_service,
+        extraction_loop_service=BatchExtractionLoopService(
+            batch_processing_service=batch_processing_service,
+            shutdown_signal=shutdown_signal,
+            memory_manager=memory_manager,
+            progress_service=progress_service,
+            checkpoint_recovery_service=checkpoint_recovery_service,
+            checkpoint_interval=effective_checkpoint_interval,
+        ),
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
     )

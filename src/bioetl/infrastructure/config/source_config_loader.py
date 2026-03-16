@@ -10,9 +10,8 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-import yaml
-
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 from bioetl.infrastructure.config.source_normalizers.source import (
     normalize_source_config,
 )
@@ -34,8 +33,7 @@ def read_source_config_payload(
             "Create provider config with source/rate_limit/circuit_breaker settings."
         )
 
-    with open(unified_path, encoding="utf-8") as f:
-        unified_raw = yaml.safe_load(f) or {}
+    unified_raw = _load_yaml_file(unified_path)
 
     source_section = unified_raw.get("source")
     if isinstance(source_section, dict):

@@ -8,9 +8,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
 )
@@ -30,10 +29,7 @@ def _load_base_contract_defaults() -> (
     if not base_path.exists():
         return {}
 
-    with open(base_path, encoding="utf-8") as f:
-        base_raw: JsonDict = (  # Any: YAML config has heterogeneous values
-            yaml.safe_load(f) or {}
-        )  # Any: YAML config has heterogeneous values
+    base_raw: JsonDict = _load_yaml_file(base_path)  # Any: YAML config has heterogeneous values
 
     defaults = base_raw.get("contract_defaults")
     return defaults if isinstance(defaults, dict) else {}
@@ -56,10 +52,7 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
     if not unified_entity_path.exists():
         raise ValueError(f"Contract policy file not found: {unified_entity_path}")
 
-    with open(unified_entity_path, encoding="utf-8") as f:
-        unified_raw: JsonDict = (  # Any: YAML config has heterogeneous values
-            yaml.safe_load(f) or {}
-        )  # Any: YAML config has heterogeneous values
+    unified_raw: JsonDict = _load_yaml_file(unified_entity_path)  # Any: YAML config has heterogeneous values
 
     contracts_section = unified_raw.get("contracts")
     if not isinstance(contracts_section, dict):

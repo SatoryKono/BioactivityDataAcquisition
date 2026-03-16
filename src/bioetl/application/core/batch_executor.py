@@ -11,6 +11,12 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
+from bioetl.application.core.batch_execution_lifecycle import (
+    BatchExecutionContext,
+    BatchExecutionLifecycleContext,
+    BatchExecutionLifecycleService,
+    prepare_execution_context,
+)
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_helpers import (
     apply_processed_batch_outcome,
@@ -18,11 +24,9 @@ from bioetl.application.core.batch_executor_helpers import (
     build_processed_batch_outcome,
     build_run_statistics,
 )
-from bioetl.application.core.batch_executor_loop_helpers import (
-    BatchExtractionIterationContext,
-    create_batch_extraction_loop_state,
-    flush_remaining_batch,
-    process_extracted_record_iteration,
+from bioetl.application.core.batch_extraction_loop_service import (
+    BatchExtractionLoopService,
+    BatchProcessingServicePort,
 )
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
@@ -34,10 +38,6 @@ from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
-
-    from opentelemetry.trace import Span
-
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_processing_service import BatchProcessingOutput
@@ -63,56 +63,8 @@ class BatchResult:
     quarantined_count: int
 
 
-@dataclass(frozen=True, slots=True)
-class _BatchExecutionContext:
-    """Execution-scoped inputs shared across the batch executor loop."""
-
-    limit: int | None
-    query: str | None
-    offset: int | None
-    resume_offset: int
-
-
-@dataclass(frozen=True, slots=True)
-class _BatchExecutionLifecycleContext:
-    """Top-level execution state shared across success and failure handlers."""
-
-    execution_context: _BatchExecutionContext
-    root_span: Span | None
-
-
-@dataclass(frozen=True, slots=True)
-class _BatchExecutionFinalizationContext:
-    """Execution snapshot used by success, shutdown, and error finalization."""
-
-    root_span: Span | None
-    resume_offset: int
-    total_fetched: int
-    total_bronze: int
-    total_silver: int
-    total_gold: int
-    total_quarantined: int
-    batch_size_reductions: int
-    min_batch_size_used: int
-
-
-class _BatchProcessingServicePort(Protocol):
-    """Minimal contract required by BatchExecutor for batch processing service."""
-
-    def extract_records(
-        self,
-        *,
-        limit: int | None,
-        query: str | None = None,
-        offset: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Yield raw Bronze records from data source.
-
-        Args:
-            limit: Maximum number of records to yield, or None for all.
-            query: Optional query string forwarded to the data source.
-            offset: Optional pagination offset for resuming extraction.
-        """
+class _BatchProcessingStateUpdaterPort(BatchProcessingServicePort, Protocol):
+    """Processing contract required by BatchExecutor across loop and batch update."""
 
     async def process_batch(
         self,
@@ -120,70 +72,7 @@ class _BatchProcessingServicePort(Protocol):
         records: list[BronzeRecord],
         start_index: int,
         query_string: str | None,
-    ) -> BatchProcessingOutput:
-        """Process one batch and return structured output.
-
-        Args:
-            records: List of raw Bronze records to process.
-            start_index: Absolute record index of the first record in this batch.
-            query_string: Query string used to fetch these records, for logging context.
-        """
-
-
-def _build_execution_finalization_context(
-    executor: BatchExecutor,
-    lifecycle_context: _BatchExecutionLifecycleContext,
-) -> _BatchExecutionFinalizationContext:
-    """Capture one immutable snapshot for execution finalization paths."""
-    return _BatchExecutionFinalizationContext(
-        root_span=lifecycle_context.root_span,
-        resume_offset=lifecycle_context.execution_context.resume_offset,
-        total_fetched=executor.records_fetched,
-        total_bronze=executor.records_bronze,
-        total_silver=executor.records_silver,
-        total_gold=executor.records_gold,
-        total_quarantined=executor.records_quarantined,
-        batch_size_reductions=executor._memory.batch_size_reductions,
-        min_batch_size_used=executor._memory.min_batch_size_used,
-    )
-
-
-async def _finalize_execution(
-    executor: BatchExecutor,
-    finalization_context: _BatchExecutionFinalizationContext,
-    *,
-    error: Exception | None = None,
-    shutdown: bool = False,
-) -> None:
-    """Finalize execution for success, shutdown, or runtime failure."""
-    if shutdown:
-        await executor._checkpoint_recovery_service.save_checkpoint_on_shutdown(
-            records_fetched=finalization_context.total_fetched,
-            resume_offset=finalization_context.resume_offset,
-        )
-        executor._tracing.end_span_with_shutdown(finalization_context.root_span)
-        return
-    if error is not None:
-        await executor._checkpoint_recovery_service.save_checkpoint_on_exception(
-            records_fetched=finalization_context.total_fetched,
-            resume_offset=finalization_context.resume_offset,
-            error=error,
-        )
-        executor._tracing.end_span(finalization_context.root_span, error)
-        return
-    executor._tracing.set_execution_stats(
-        finalization_context.root_span,
-        total_fetched=finalization_context.total_fetched,
-        total_bronze=finalization_context.total_bronze,
-        total_silver=finalization_context.total_silver,
-        total_gold=finalization_context.total_gold,
-        total_quarantined=finalization_context.total_quarantined,
-        batch_size_reductions=finalization_context.batch_size_reductions,
-        min_batch_size_used=finalization_context.min_batch_size_used,
-    )
-    executor._tracing.end_span(finalization_context.root_span)
-
-
+    ) -> BatchProcessingOutput: ...
 class BatchExecutor(_BatchExecutorDQMixin):
     """Unified executor for ETL batches: fetch -> transform -> write with tracing."""
 
@@ -213,7 +102,9 @@ class BatchExecutor(_BatchExecutorDQMixin):
         memory_manager: BatchMemoryManagerService,
         progress_service: BatchProgressService,
         checkpoint_recovery_service: BatchCheckpointRecoveryService,
-        batch_processing_service: _BatchProcessingServicePort,
+        batch_processing_service: _BatchProcessingStateUpdaterPort,
+        execution_lifecycle_service: BatchExecutionLifecycleService,
+        extraction_loop_service: BatchExtractionLoopService,
         *,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
@@ -257,6 +148,8 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._progress_service = progress_service
         self._checkpoint_recovery_service = checkpoint_recovery_service
         self._batch_processing_service = batch_processing_service
+        self._execution_lifecycle = execution_lifecycle_service
+        self._extraction_loop_service = extraction_loop_service
 
         self._resume_offset = 0
         self._query_string: str | None = None
@@ -277,47 +170,50 @@ class BatchExecutor(_BatchExecutorDQMixin):
         try:
             await self._run_extraction_loop(lifecycle_context.execution_context)
         except PipelineShutdownError:
-            await _finalize_execution(
+            await self._execution_lifecycle.finalize_execution(
                 self,
-                _build_execution_finalization_context(self, lifecycle_context),
+                lifecycle_context,
+                batch_size_reductions=self._memory.batch_size_reductions,
+                min_batch_size_used=self._memory.min_batch_size_used,
                 shutdown=True,
             )
             raise
         except self._PIPELINE_EXECUTION_ERRORS as error:
-            await _finalize_execution(
+            await self._execution_lifecycle.finalize_execution(
                 self,
-                _build_execution_finalization_context(self, lifecycle_context),
+                lifecycle_context,
+                batch_size_reductions=self._memory.batch_size_reductions,
+                min_batch_size_used=self._memory.min_batch_size_used,
                 error=error,
             )
             raise
         else:
-            await _finalize_execution(
+            await self._execution_lifecycle.finalize_execution(
                 self,
-                _build_execution_finalization_context(self, lifecycle_context),
+                lifecycle_context,
+                batch_size_reductions=self._memory.batch_size_reductions,
+                min_batch_size_used=self._memory.min_batch_size_used,
             )
 
     async def _start_execution(
         self, *, limit: int | None, query: str | None, offset: int | None
-    ) -> _BatchExecutionLifecycleContext:
+    ) -> BatchExecutionLifecycleContext:
         """Initialize progress tracking and tracing for one executor run."""
         execution_context = self._prepare_execution_context(
             limit=limit, query=query, offset=offset
         )
-        await self._progress_service.initialize_tracking(execution_context.limit)
-        return _BatchExecutionLifecycleContext(
+        return await self._execution_lifecycle.start_execution(
             execution_context=execution_context,
-            root_span=self._tracing.start_execution_span(),
         )
 
     def _prepare_execution_context(
         self, *, limit: int | None, query: str | None, offset: int | None
-    ) -> _BatchExecutionContext:
+    ) -> BatchExecutionContext:
         """Persist execution-scoped inputs and return the explicit loop context."""
-        execution_context = _BatchExecutionContext(
+        execution_context = prepare_execution_context(
             limit=limit,
             query=query,
             offset=offset,
-            resume_offset=offset or 0,
         )
         self._resume_offset = execution_context.resume_offset
         self._query_string = execution_context.query
@@ -325,40 +221,14 @@ class BatchExecutor(_BatchExecutorDQMixin):
 
     async def _run_extraction_loop(
         self,
-        execution_context: _BatchExecutionContext,
+        execution_context: BatchExecutionContext,
     ) -> None:
         """Run the main extraction and processing loop."""
-        loop_state = create_batch_extraction_loop_state(
+        await self._extraction_loop_service.run(
+            execution_context,
             batch_size=self.batch_size,
-            check_interval=self._memory.get_check_interval(),
-        )
-        iteration_context = BatchExtractionIterationContext(
-            checkpoint_recovery_service=self._checkpoint_recovery_service,
-            resume_offset=execution_context.resume_offset,
             process_batch=self._process_batch_and_update_state,
-            memory_manager=self._memory,
-            progress_service=self._progress_service,
             progress_state=self,
-            checkpoint_interval=self.checkpoint_interval,
-        )
-
-        async for raw_record in self._batch_processing_service.extract_records(
-            limit=execution_context.limit,
-            query=execution_context.query,
-            offset=execution_context.offset,
-        ):
-            self.records_fetched = await process_extracted_record_iteration(
-                loop_state=loop_state,
-                raw_record=raw_record,
-                shutdown_requested=self._shutdown_signal.is_requested,
-                records_fetched=self.records_fetched,
-                iteration_context=iteration_context,
-            )
-
-        await flush_remaining_batch(
-            loop_state=loop_state,
-            records_fetched=self.records_fetched,
-            process_batch=self._process_batch_and_update_state,
         )
 
     async def process(

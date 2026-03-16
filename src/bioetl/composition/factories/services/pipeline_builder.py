@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_extraction_loop_service import (
+    BatchExtractionLoopService,
+)
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter
@@ -248,6 +251,7 @@ def create_batch_executor_from_pipeline(
         effective_batch_id_factory,
         progress_service,
         checkpoint_recovery_service,
+        execution_lifecycle_service,
     ) = build_runtime_managers(
         pipeline=pipeline,
         processor_config=processor_config,
@@ -284,6 +288,16 @@ def create_batch_executor_from_pipeline(
         progress_service=progress_service,
         checkpoint_recovery_service=checkpoint_recovery_service,
         batch_processing_service=batch_processing_service,
+        execution_lifecycle_service=execution_lifecycle_service,
+        extraction_loop_service=BatchExtractionLoopService(
+            batch_processing_service=batch_processing_service,
+            shutdown_signal=shutdown_signal,
+            memory_manager=memory_manager,
+            progress_service=progress_service,
+            checkpoint_recovery_service=checkpoint_recovery_service,
+            checkpoint_interval=pipeline.config.checkpoint_interval
+            or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
+        ),
         batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
     )
