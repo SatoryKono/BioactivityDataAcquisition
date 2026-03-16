@@ -35,6 +35,7 @@ class CompositeResult:
     completed_at: datetime | None = None
     lineage: CompositeLineageMetadata | None = None
     had_warnings: bool = False
+    original_run_id: str | None = None
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
     _required_dependencies: frozenset[str] = field(default_factory=frozenset)
 
@@ -142,7 +143,7 @@ class CompositeResult:
 
     def summary(self) -> dict[str, object]:
         """Generate summary dictionary for logging/reporting."""
-        return {
+        result: dict[str, object] = {
             "composite_name": self.composite_name,
             "composite_run_id": self.composite_run_id,
             "is_success": self.is_success,
@@ -162,3 +163,6 @@ class CompositeResult:
             else 0,
             "total_duration_seconds": self.total_duration_seconds,
         }
+        if self.original_run_id is not None:
+            result["original_run_id"] = self.original_run_id
+        return result

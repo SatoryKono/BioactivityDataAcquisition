@@ -47,6 +47,7 @@ class CompositeRunnerSupportMixin:
     _logger: LoggerPort
     _run_id_str: str
     _started_at: datetime | None
+    _original_run_id: str | None
     _preflight_validator: CompositePreflightValidationService | None
     _fsm: FSMStateHelperService
 
@@ -111,6 +112,7 @@ class CompositeRunnerSupportMixin:
             started_at=self._started_at,
             completed_at=context.completed_at,
             had_warnings=context.had_warnings,
+            original_run_id=self._original_run_id,
             _required_enrichers=frozenset(self._config.required_enrichers),
             _required_dependencies=frozenset(self._config.required_dependencies),
         )

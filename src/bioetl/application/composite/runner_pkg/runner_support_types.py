@@ -32,6 +32,7 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
     _logger: LoggerPort
     _run_id_str: str
     _started_at: datetime | None
+    _original_run_id: str | None
     _preflight_validator: CompositePreflightValidationService | None
     _fsm: FSMStateHelperService
 
