@@ -95,8 +95,8 @@ Examples:
     parser.add_argument(
         "--exclude-dirs",
         type=str,
-        default="__pycache__,.git,.venv,node_modules",
-        help="Comma-separated directories to exclude (default: __pycache__,.git,.venv,node_modules)",
+        default="__pycache__,.git,.venv,node_modules,.ai,data",
+        help="Comma-separated directories to exclude (default: __pycache__,.git,.venv,node_modules,.ai,data)",
     )
 
     parser.add_argument(
@@ -499,7 +499,7 @@ def generate_tree_structure(
     # Get all items in directory
     try:
         items = sorted(directory.iterdir(), key=lambda p: (not p.is_dir(), p.name))
-    except PermissionError:
+    except (PermissionError, OSError):
         return lines
 
     # Filter out excluded directories

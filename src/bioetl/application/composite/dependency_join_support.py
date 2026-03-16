@@ -71,6 +71,18 @@ def resolve_left_pipeline(
     dep: DependencyConfig,
     seed_pipeline: str | None,
 ) -> str | None:
+    """Resolve left-side pipeline name for a dependency join.
+
+    If the dependency specifies a ``key_source`` other than ``"seed"``,
+    that source is used; otherwise falls back to the seed pipeline.
+
+    Args:
+        dep: Dependency configuration with optional key_source override.
+        seed_pipeline: Default seed pipeline name.
+
+    Returns:
+        Pipeline name to use as the left side of the join, or None.
+    """
     if dep.key_source and dep.key_source != "seed":
         return dep.key_source
     return seed_pipeline
@@ -81,6 +93,15 @@ def build_composite_join_metadata(
     dep: DependencyConfig,
     seed_pipeline: str | None,
 ) -> CompositeJoinContext:
+    """Build join metadata for a multi-key composite dependency.
+
+    Args:
+        dep: Dependency configuration containing join key definitions.
+        seed_pipeline: Seed pipeline name for left-side resolution.
+
+    Returns:
+        Context with resolved join keys list and left pipeline name.
+    """
     return CompositeJoinContext(
         join_keys_list=list(dep.join_keys),
         left_pipeline=resolve_left_pipeline(dep, seed_pipeline),
@@ -92,6 +113,18 @@ def build_single_key_join_metadata(
     dep: DependencyConfig,
     seed_pipeline: str | None,
 ) -> SingleKeyJoinContext:
+    """Build join metadata for a single-key dependency.
+
+    Resolves primary key, right key (from filter_field or primary key),
+    and right keys list for the join operation.
+
+    Args:
+        dep: Dependency configuration with join key and filter field.
+        seed_pipeline: Seed pipeline name for left-side resolution.
+
+    Returns:
+        Context with resolved primary/right keys and left pipeline.
+    """
     join_keys_list = list(dep.join_keys)
     primary_key = dep.primary_join_key
     right_key = dep.filter_field if dep.filter_field else primary_key
@@ -112,6 +145,14 @@ def log_missing_composite_key_columns(
     missing_left: list[str],
     missing_right: list[str],
 ) -> None:
+    """Log a warning when composite key columns are absent from join frames.
+
+    Args:
+        logger: Structured logger port.
+        dependency: Name of the dependency being joined.
+        missing_left: Column names missing from the left (seed) frame.
+        missing_right: Column names missing from the right (dependency) frame.
+    """
     logger.warning(
         "Composite key join skipped: missing columns",
         dependency=dependency,
@@ -135,6 +176,28 @@ def prepare_dependency_join_frames(
     right_join_keys: list[str],
     seed_pipeline: str | None,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
+    """Prepare left and right DataFrames for a dependency join.
+
+    Delegates to ``prepare_join_frames`` with deduplication, column
+    renaming to qualified format, and system column removal.
+
+    Args:
+        deduplicator: Service for removing duplicate enricher records.
+        join_key_resolver: Resolver for qualified join key names.
+        renamer: Column renamer for qualified (pipeline-prefixed) names.
+        logger: Structured logger port.
+        field_alias_resolver: Resolves field aliases for a pipeline.
+        drop_system_columns: Callable to strip internal system columns.
+        merged_df: Accumulated left-side DataFrame.
+        dep_df: Right-side dependency DataFrame.
+        dep: Dependency configuration.
+        left_join_keys: Join key column names on the left side.
+        right_join_keys: Join key column names on the right side.
+        seed_pipeline: Seed pipeline name for context.
+
+    Returns:
+        Tuple of (prepared_left, prepared_right) DataFrames.
+    """
     return prepare_join_frames(
         merged_df=merged_df,
         right_df=dep_df,
@@ -161,6 +224,21 @@ def resolve_composite_join_context(
     metadata: CompositeJoinContext,
     dependency: str,
 ) -> ResolvedCompositeJoinContext | None:
+    """Resolve qualified join keys for a composite dependency and validate presence.
+
+    Returns None if any required key columns are missing from either frame,
+    logging a warning with the missing column details.
+
+    Args:
+        join_key_resolver: Resolver for qualified composite join key names.
+        logger: Structured logger port.
+        prepared_context: Pre-prepared left and right DataFrames.
+        metadata: Composite join metadata with raw key names.
+        dependency: Name of the dependency being joined.
+
+    Returns:
+        Resolved context with qualified keys, or None if columns are missing.
+    """
     left_keys, right_keys, join_key_set = join_key_resolver.resolve_composite_join_keys(
         metadata.join_keys_list,
         metadata.left_pipeline,
@@ -193,6 +271,20 @@ def resolve_single_key_join_context(
     dependency: str,
     prepared_context: PreparedDependencyJoinContext,
 ) -> ResolvedSingleKeyJoinContext:
+    """Resolve qualified join keys for a single-key dependency.
+
+    Uses asymmetric key resolution to handle cases where left and right
+    key names differ (e.g., when filter_field overrides primary key).
+
+    Args:
+        join_key_resolver: Resolver for qualified join key names.
+        metadata: Single-key join metadata with primary/right keys.
+        dependency: Name of the dependency being joined.
+        prepared_context: Pre-prepared left and right DataFrames.
+
+    Returns:
+        Resolved context with seed/dep join keys and join key set.
+    """
     seed_join_key, dep_join_key, seed_join_key_qualified = (
         join_key_resolver.resolve_join_key_names_asymmetric(
             left_key=metadata.primary_key,
@@ -226,6 +318,25 @@ def execute_dependency_join(
     dependency: str,
     log_fields: Mapping[str, object],
 ) -> pl.DataFrame:
+    """Execute a dependency join with conflict resolution and logging.
+
+    Detects and resolves column name conflicts between frames before
+    delegating to the provided join callable.
+
+    Args:
+        conflict_resolver: Service for detecting/resolving column conflicts.
+        logger: Structured logger port.
+        merged_df: Accumulated left-side DataFrame.
+        dep_df: Right-side dependency DataFrame.
+        join_key_set: Set of join key column names to preserve.
+        execute_join: Callable performing the actual Polars join.
+        log_message: Message template for the debug log entry.
+        dependency: Name of the dependency being joined.
+        log_fields: Additional structured fields for logging.
+
+    Returns:
+        Joined DataFrame with conflicts resolved.
+    """
     resolved_merged, resolved_dep = conflict_resolver.detect_and_resolve_conflicts(
         merged_df,
         dep_df,
