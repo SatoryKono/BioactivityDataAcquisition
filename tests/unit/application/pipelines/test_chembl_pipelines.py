@@ -95,7 +95,9 @@ class TestChEMBLAssayPipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=AssayTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
+            transformer=AssayTransformer(
+                provider="chembl", dependencies=build_test_transformer_dependencies()
+            ),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -147,7 +149,9 @@ class TestChEMBLPublicationPipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=PublicationTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
+            transformer=PublicationTransformer(
+                provider="chembl", dependencies=build_test_transformer_dependencies()
+            ),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -200,7 +204,9 @@ class TestChEMBLMoleculePipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=MoleculeTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
+            transformer=MoleculeTransformer(
+                provider="chembl", dependencies=build_test_transformer_dependencies()
+            ),
         )
 
     def test_pipeline_initialization(self, pipeline):
@@ -252,7 +258,9 @@ class TestChEMBLTargetPipeline:
             services=mock_services,
             run_id=run_id,
             shutdown_signal=ShutdownSignal(),
-            transformer=TargetTransformer(provider="chembl", dependencies=build_test_transformer_dependencies()),
+            transformer=TargetTransformer(
+                provider="chembl", dependencies=build_test_transformer_dependencies()
+            ),
         )
 
     def test_pipeline_initialization(self, pipeline):

@@ -526,14 +526,12 @@ class TestExplicitGoldScd2Policy:
 
         missing = REQUIRED_SCD_CONFIG_KEYS - set(scd_config)
         assert not missing, (
-            f"{_rel(config_path)}: scd_config missing canonical keys "
-            f"{sorted(missing)}"
+            f"{_rel(config_path)}: scd_config missing canonical keys {sorted(missing)}"
         )
 
         legacy = LEGACY_SCD_CONFIG_KEYS & set(scd_config)
         assert not legacy, (
-            f"{_rel(config_path)}: scd_config uses legacy alias keys "
-            f"{sorted(legacy)}"
+            f"{_rel(config_path)}: scd_config uses legacy alias keys {sorted(legacy)}"
         )
 
         blank_values = [

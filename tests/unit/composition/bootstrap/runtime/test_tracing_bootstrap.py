@@ -101,5 +101,3 @@ class TestBootstrapTracerPort:
         settings_on = _make_settings(tracing_enabled=True)
         result_on = bootstrap_tracer_port(settings=settings_on, tracer_factory=factory)
         assert result_on is mock_tracer
-
-

@@ -126,5 +126,3 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
             metadata_coordinator=metadata_coordinator,
         ),
     )
-
-

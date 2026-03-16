@@ -9,7 +9,6 @@ import pytest
 from bioetl.domain.exceptions import (
     CriticalError,
     DomainExceptionContext,
-    ExternalServiceError,
     PolicyViolationError,
     RateLimitExceededError,
     ServiceUnavailableError,

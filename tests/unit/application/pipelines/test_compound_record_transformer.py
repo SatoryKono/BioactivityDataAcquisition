@@ -35,7 +35,9 @@ class TestCompoundRecordTransformer:
     @pytest.fixture
     def transformer(self):
         """Create CompoundRecordTransformer instance."""
-        return CompoundRecordTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return CompoundRecordTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):

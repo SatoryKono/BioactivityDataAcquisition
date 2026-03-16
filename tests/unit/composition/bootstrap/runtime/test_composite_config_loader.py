@@ -283,7 +283,9 @@ class TestCompositeDQExternalization:
             },
         )
 
-        monkeypatch.setattr(composite_runtime, "DEFAULT_COMPOSITE_CONFIG_DIR", composites_dir)
+        monkeypatch.setattr(
+            composite_runtime, "DEFAULT_COMPOSITE_CONFIG_DIR", composites_dir
+        )
 
         config = composite_runtime.load_composite_config("publication")
 
@@ -352,7 +354,9 @@ class TestCompositeDQExternalization:
         _write_yaml(composites_dir / f"{entity}_external.yaml", after_payload)
         _write_yaml(quality_dir / f"{entity}.yaml", external_payload)
 
-        monkeypatch.setattr(composite_runtime, "DEFAULT_COMPOSITE_CONFIG_DIR", composites_dir)
+        monkeypatch.setattr(
+            composite_runtime, "DEFAULT_COMPOSITE_CONFIG_DIR", composites_dir
+        )
 
         before_config = composite_runtime.load_composite_config(f"{entity}_inline")
         after_config = composite_runtime.load_composite_config(f"{entity}_external")

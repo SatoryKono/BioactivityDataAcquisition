@@ -76,7 +76,7 @@ runtime `PipelineRegistry` instance and pass it through the execution path.
 provider-backed creation.
 
 Runtime/bootstrap code should call `ensure_providers_loaded()` instead of
-calling `register_all_providers()` directly. The loader is the lifecycle
+calling the registration function directly. The loader is the lifecycle
 boundary for shared provider registration state: repeated bootstrap calls stay
 idempotent, and stale `_loaded` state is repaired if isolated flows or tests
 clear `ProviderRegistry` after an earlier successful load.

@@ -114,7 +114,6 @@ def create_composite_runner_with_legacy_fsm_adapter(
     )
 
 
-
 def create_composite_runner(
     *,
     config: CompositeConfig,
@@ -217,5 +216,3 @@ def bootstrap_composite_runner(
         enricher_runner_factory=enricher_factory,
         support_services=support_services,
     )
-
-

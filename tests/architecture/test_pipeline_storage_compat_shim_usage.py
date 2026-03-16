@@ -31,16 +31,12 @@ REMOVED_PIPELINE_STORAGE_FILES = frozenset(
         / "factories"
         / "pipeline"
         / "facade.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "factories"
-        / "storage"
-        / "facade.py",
+        ROOT / "src" / "bioetl" / "composition" / "factories" / "storage" / "facade.py",
         ROOT / "src" / "bioetl" / "infrastructure" / "storage" / "delta_writer.py",
     }
 )
+
+
 def _iter_removed_compat_import_violations(search_root: Path) -> list[str]:
     violations: list[str] = []
     for py_file in search_root.rglob("*.py"):
@@ -70,7 +66,9 @@ def _iter_removed_compat_import_violations(search_root: Path) -> list[str]:
                 for alias in node.names:
                     if alias.name in REMOVED_PIPELINE_STORAGE_COMPAT_MODULES:
                         rel_path = py_file.relative_to(ROOT).as_posix()
-                        violations.append(f"{rel_path}:{node.lineno} imports {alias.name}")
+                        violations.append(
+                            f"{rel_path}:{node.lineno} imports {alias.name}"
+                        )
     return violations
 
 

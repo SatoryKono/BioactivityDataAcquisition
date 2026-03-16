@@ -251,9 +251,7 @@ def test_debt_scorecard_current_inventory_within_hotspot_budgets() -> None:
     """Current inventory must stay within declared hotspot budgets."""
     violations, summary = evaluate_debt_scorecard()
     assert summary is not None
-    hotspot_violations = [
-        item for item in violations if item.startswith("hotspot '")
-    ]
+    hotspot_violations = [item for item in violations if item.startswith("hotspot '")]
     assert not hotspot_violations, "Hotspot budget violations:\n" + "\n".join(
         f"  - {item}" for item in hotspot_violations
     )

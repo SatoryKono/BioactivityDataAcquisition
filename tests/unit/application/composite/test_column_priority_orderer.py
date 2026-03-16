@@ -160,9 +160,7 @@ def test_get_enricher_prefix_prefers_provider_entity_format() -> None:
 
 
 def test_get_enricher_prefix_uses_legacy_format_when_pipeline_name_invalid() -> None:
-    assert (
-        ColumnPriorityOrderer.get_enricher_prefix("legacyname") == "legacyname_"
-    )
+    assert ColumnPriorityOrderer.get_enricher_prefix("legacyname") == "legacyname_"
 
 
 def test_parse_pipeline_name_raises_for_invalid_format() -> None:

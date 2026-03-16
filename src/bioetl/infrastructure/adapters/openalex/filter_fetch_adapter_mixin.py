@@ -189,7 +189,9 @@ async def _iterate_fetch_request(
 
     host._validate_entity_type(request.entity_type)
     if not request.query:
-        raise ValueError("OpenAlex requires either filter_ids (DOIs) or query parameter")
+        raise ValueError(
+            "OpenAlex requires either filter_ids (DOIs) or query parameter"
+        )
 
     async for work in host._fetch_by_query(
         query=request.query,

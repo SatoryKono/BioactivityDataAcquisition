@@ -63,10 +63,7 @@ ALLOWED_DATASOURCE_REGISTRY_SRC_FILES = frozenset(
 )
 ALLOWED_DATASOURCE_REGISTRY_TEST_FILES = frozenset(
     {
-        ROOT
-        / "tests"
-        / "architecture"
-        / "test_registry_contracts.py",
+        ROOT / "tests" / "architecture" / "test_registry_contracts.py",
         ROOT
         / "tests"
         / "unit"
@@ -74,16 +71,8 @@ ALLOWED_DATASOURCE_REGISTRY_TEST_FILES = frozenset(
         / "factories"
         / "datasource"
         / "test_data_source_registry.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "test_canonical_module_paths.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "test_registry_protocol.py",
+        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
+        ROOT / "tests" / "unit" / "composition" / "test_registry_protocol.py",
     }
 )
 ALLOWED_REGISTER_ALL_PROVIDERS_SRC_FILES = frozenset(
@@ -130,11 +119,7 @@ CANONICAL_DATASOURCE_DOC_FILES = frozenset(
         / "mmd-diagrams"
         / "architecture"
         / "12-bootstrap-di-container.mmd",
-        ROOT
-        / "docs"
-        / "02-architecture"
-        / "mmd-diagrams"
-        / "diagram-descriptions.md",
+        ROOT / "docs" / "02-architecture" / "mmd-diagrams" / "diagram-descriptions.md",
         ROOT
         / "docs"
         / "02-architecture"
@@ -169,13 +154,7 @@ CANONICAL_DATASOURCE_DOC_FILES = frozenset(
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_SRC_FILES: frozenset[Path] = frozenset()
 LEGACY_DATASOURCE_FACTORY_MODULE_PATH = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "composition"
-    / "factories"
-    / "datasource"
-    / "factory.py"
+    ROOT / "src" / "bioetl" / "composition" / "factories" / "datasource" / "factory.py"
 )
 ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
@@ -199,39 +178,15 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "__init__.py",
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "main.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "run_helpers.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "run_all.py",
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_helpers.py",
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
     }
 )
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "types.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "bootstrap"
-        / "cli"
-        / "config.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "bootstrap"
-        / "cli"
-        / "storage.py",
+        ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py",
+        ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "storage.py",
         ROOT
         / "src"
         / "bioetl"
@@ -292,7 +247,9 @@ def _iter_module_import_violations(
                 if node.level > 0:
                     module_parts = list(py_file.relative_to(ROOT).with_suffix("").parts)
                     current_package_parts = (
-                        module_parts if py_file.stem == "__init__" else module_parts[:-1]
+                        module_parts
+                        if py_file.stem == "__init__"
+                        else module_parts[:-1]
                     )
                     anchor_length = len(current_package_parts) - (node.level - 1)
                     if anchor_length > 0:
@@ -362,7 +319,9 @@ def _iter_text_symbol_mentions(
     violations: list[str] = []
     for file_path in sorted(files):
         rel_path = file_path.resolve().relative_to(ROOT).as_posix()
-        for lineno, line in enumerate(file_path.read_text(encoding="utf-8").splitlines(), 1):
+        for lineno, line in enumerate(
+            file_path.read_text(encoding="utf-8").splitlines(), 1
+        ):
             if symbol in line:
                 violations.append(f"{rel_path}:{lineno} mentions {symbol}")
     return violations
@@ -581,7 +540,9 @@ def test_datasource_registry_symbol_is_confined_to_compat_tests() -> None:
 
 
 @pytest.mark.architecture
-def test_datasource_registry_symbol_is_absent_from_canonical_docs_and_diagrams() -> None:
+def test_datasource_registry_symbol_is_absent_from_canonical_docs_and_diagrams() -> (
+    None
+):
     """Canonical docs/diagrams must present only the provider-backed datasource path."""
     violations = _iter_text_symbol_mentions(
         files=CANONICAL_DATASOURCE_DOC_FILES,
@@ -594,7 +555,9 @@ def test_datasource_registry_symbol_is_absent_from_canonical_docs_and_diagrams()
 
 
 @pytest.mark.architecture
-def test_register_all_providers_symbol_is_confined_to_provider_loading_modules() -> None:
+def test_register_all_providers_symbol_is_confined_to_provider_loading_modules() -> (
+    None
+):
     """Canonical provider lifecycle must use ensure_providers_loaded outside loaders."""
     violations = _iter_symbol_mentions(
         SRC_ROOT,
@@ -622,10 +585,16 @@ def test_registration_biblio_module_is_confined_to_provider_registration() -> No
 
 
 @pytest.mark.architecture
-def test_provider_loading_and_pipeline_config_legacy_symbols_are_absent_from_canonical_docs() -> None:
+def test_provider_loading_and_pipeline_config_legacy_symbols_are_absent_from_canonical_docs() -> (
+    None
+):
     """Canonical docs must not present private loading/config seams as normal extension paths."""
     violations = []
-    for symbol in ("register_all_providers", "registration_biblio", "pipeline_factories.py"):
+    for symbol in (
+        "register_all_providers",
+        "registration_biblio",
+        "pipeline_factories.py",
+    ):
         violations.extend(
             _iter_text_symbol_mentions(
                 files=CANONICAL_PROVIDER_SURFACE_DOC_FILES,

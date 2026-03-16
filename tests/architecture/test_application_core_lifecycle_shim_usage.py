@@ -65,7 +65,9 @@ def _iter_compat_import_violations(search_root: Path) -> list[str]:
             elif isinstance(node, ast.Import):
                 for alias in node.names:
                     if alias.name in COMPAT_MODULES:
-                        violations.append(f"{rel_path}:{node.lineno} imports {alias.name}")
+                        violations.append(
+                            f"{rel_path}:{node.lineno} imports {alias.name}"
+                        )
     return violations
 
 

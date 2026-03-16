@@ -377,7 +377,10 @@ def _validate_priority_registry_burndown(
 
     for registry_name in priority_registries:
         _validate_single_registry_burndown(
-            registry_name, ordered_quarter_names, by_quarter_registry_budgets, errors,
+            registry_name,
+            ordered_quarter_names,
+            by_quarter_registry_budgets,
+            errors,
         )
 
 

@@ -203,7 +203,9 @@ class TestArrowDataConverterConvertRecords:
 
         assert result.column("id").to_pylist() == [1, 2, 3]
 
-    def test_convert_records_with_schema_preserves_schema_order_by_default(self) -> None:
+    def test_convert_records_with_schema_preserves_schema_order_by_default(
+        self,
+    ) -> None:
         """Schema-aware conversion should keep schema order unless ordering is requested."""
         converter = ArrowDataConverter()
         schema = pa.schema(
@@ -308,7 +310,9 @@ class TestArrowSchemaPreparationHelpers:
         assert context.schema_fields == frozenset({"id", "count"})
         assert context.string_fields == frozenset({"id"})
 
-    def test_filter_record_for_schema_serializes_string_backed_complex_values(self) -> None:
+    def test_filter_record_for_schema_serializes_string_backed_complex_values(
+        self,
+    ) -> None:
         """Schema filter should serialize complex values only for string-backed fields."""
         schema = pa.schema(
             [
@@ -329,11 +333,15 @@ class TestArrowSchemaPreparationHelpers:
 
         assert result == {"id": "1", "payload": '{"a":1,"b":2}'}
 
-    def test_serialize_value_for_arrow_schema_keeps_non_string_complex_values(self) -> None:
+    def test_serialize_value_for_arrow_schema_keeps_non_string_complex_values(
+        self,
+    ) -> None:
         """Complex values should only serialize when the schema field is string-like."""
         value = {"a": 1}
 
-        assert serialize_value_for_arrow_schema(value, is_string_field=True) == '{"a":1}'
+        assert (
+            serialize_value_for_arrow_schema(value, is_string_field=True) == '{"a":1}'
+        )
         assert serialize_value_for_arrow_schema(value, is_string_field=False) == value
 
     def test_sort_arrow_table_by_primary_keys_returns_sorted_table(self) -> None:

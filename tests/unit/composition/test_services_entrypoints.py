@@ -38,9 +38,7 @@ class TestGetCheckpointService:
         mock_service = MagicMock(name="CheckpointService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_checkpoint_service",
                 return_value=mock_service,
@@ -69,9 +67,7 @@ class TestGetQuarantineService:
         mock_service = MagicMock(name="QuarantineService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_quarantine_service",
                 return_value=mock_service,
@@ -100,9 +96,7 @@ class TestGetBronzeCleanupService:
         mock_service = MagicMock(name="BronzeCleanupService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_bronze_cleanup_service",
                 return_value=mock_service,
@@ -131,9 +125,7 @@ class TestGetVacuumService:
         mock_service = MagicMock(name="VacuumService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_vacuum_service",
                 return_value=mock_service,
@@ -162,9 +154,7 @@ class TestGetExportService:
         mock_service = MagicMock(name="ExportService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_export_service",
                 return_value=mock_service,
@@ -193,9 +183,7 @@ class TestGetLockService:
         mock_service = MagicMock(name="LockService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_lock_service",
                 return_value=mock_service,
@@ -299,9 +287,7 @@ class TestGetPipelineRunnerService:
         mock_service = MagicMock(name="PipelineRunnerService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_pipeline_runner_service",
                 return_value=mock_service,
@@ -321,9 +307,7 @@ class TestGetPipelineRunnerService:
         registry = PipelineRegistry()
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_pipeline_runner_service",
                 return_value=mock_service,
@@ -352,9 +336,7 @@ class TestGetConfigService:
         mock_service = MagicMock(name="ConfigService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_config_service",
                 return_value=mock_service,
@@ -383,9 +365,7 @@ class TestGetHealthService:
         mock_service = MagicMock(name="HealthService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_health_service",
                 return_value=mock_service,
@@ -414,9 +394,7 @@ class TestGetHealthServerDependencies:
         mock_deps = MagicMock(name="HealthServerDependencies")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_health_server_dependencies",
                 return_value=mock_deps,
@@ -445,9 +423,7 @@ class TestGetMetricsService:
         mock_service = MagicMock(name="MetricsService")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_metrics_service",
                 return_value=mock_service,
@@ -476,9 +452,7 @@ class TestGetAdrService:
         mock_service = MagicMock(name="AdrServicePort")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_adr_service",
                 return_value=mock_service,
@@ -507,9 +481,7 @@ class TestGetQuarantineStore:
         mock_port = MagicMock(name="QuarantinePort")
 
         with (
-            patch(
-                "bioetl.composition._services._ensure_registrations"
-            ) as mock_ensure,
+            patch("bioetl.composition._services._ensure_registrations") as mock_ensure,
             patch(
                 "bioetl.composition._services.bootstrap_quarantine_port",
                 return_value=mock_port,

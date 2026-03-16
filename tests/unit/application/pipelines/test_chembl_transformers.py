@@ -44,7 +44,9 @@ class TestAssayTransformer:
     @pytest.fixture
     def transformer(self):
         """Create AssayTransformer instance."""
-        return AssayTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return AssayTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -170,7 +172,10 @@ class TestAssayTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = AssayTransformer(provider="custom_provider", dependencies=build_test_transformer_dependencies())
+        transformer = AssayTransformer(
+            provider="custom_provider",
+            dependencies=build_test_transformer_dependencies(),
+        )
         record = {"assay_id": "CUSTOM123"}
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -186,7 +191,9 @@ class TestPublicationTransformer:
     @pytest.fixture
     def transformer(self):
         """Create PublicationTransformer instance."""
-        return PublicationTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return PublicationTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -282,7 +289,9 @@ class TestMoleculeTransformer:
     @pytest.fixture
     def transformer(self):
         """Create MoleculeTransformer instance."""
-        return MoleculeTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return MoleculeTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -471,7 +480,9 @@ class TestTargetTransformer:
     @pytest.fixture
     def transformer(self):
         """Create TargetTransformer instance."""
-        return TargetTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return TargetTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -761,7 +772,9 @@ class TestTargetComponentTransformer:
     @pytest.fixture
     def transformer(self):
         """Create TargetComponentTransformer instance."""
-        return TargetComponentTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return TargetComponentTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -876,7 +889,9 @@ class TestPublicationTermTransformer:
     @pytest.fixture
     def transformer(self):
         """Create PublicationTermTransformer instance."""
-        return PublicationTermTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return PublicationTermTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     def test_extract_mesh_terms(self, transformer):
         """Test extraction of MeSH terms from document record."""

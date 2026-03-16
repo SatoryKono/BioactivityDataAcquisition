@@ -22,6 +22,7 @@ __all__ = [
     "classify_publication_type",
     "get_classification_table_size",
     "initialize_classification",
+    "is_initialized",
 ]
 
 
@@ -48,6 +49,15 @@ class PublicationTypeEntry:
 _data: ClassificationData | None = None
 _ENTRY_BY_SPECIFICITY: list[PublicationTypeEntry] = []
 _PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {}
+
+
+def is_initialized() -> bool:
+    """Return whether classification data has been loaded.
+
+    Returns:
+        True if ``initialize_classification()`` has been called successfully.
+    """
+    return bool(_PROVIDER_LOOKUPS)
 
 
 def get_classification_table_size() -> int:

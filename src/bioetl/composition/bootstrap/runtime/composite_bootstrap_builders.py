@@ -78,7 +78,7 @@ def bootstrap_runtime_basics(
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
- ) -> CompositeRuntimeBasics:
+) -> CompositeRuntimeBasics:
     """Build base runtime dependencies shared across composite bootstrap.
 
     Args:

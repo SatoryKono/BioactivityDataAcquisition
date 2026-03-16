@@ -109,8 +109,8 @@ class TestBootstrapConfigService:
     ) -> None:
         """register_all_pipelines must be called before ConfigService is returned."""
         call_order: list[str] = []
-        mock_register.side_effect = (
-            lambda *args, **kwargs: call_order.append("register")
+        mock_register.side_effect = lambda *args, **kwargs: call_order.append(
+            "register"
         )
 
         # Monkeypatch ConfigService to track call order

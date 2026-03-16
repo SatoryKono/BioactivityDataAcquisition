@@ -262,19 +262,13 @@ class TestCrossProviderDoiNormalization:
 
         pubmed_result = await instantiate_test_transformer(
             PubMedPublicationTransformer
-        ).transform(
-            mock_context, pubmed_record, 0
-        )
+        ).transform(mock_context, pubmed_record, 0)
         s2_result = await instantiate_test_transformer(
             SemanticScholarPublicationTransformer
-        ).transform(
-            mock_context, s2_record, 0
-        )
+        ).transform(mock_context, s2_record, 0)
         openalex_result = await instantiate_test_transformer(
             OpenAlexPublicationTransformer
-        ).transform(
-            mock_context, openalex_record, 0
-        )
+        ).transform(mock_context, openalex_record, 0)
 
         assert pubmed_result is not None
         assert s2_result is not None
@@ -336,19 +330,13 @@ class TestCrossProviderDoiNormalization:
 
         pubmed_result = await instantiate_test_transformer(
             PubMedPublicationTransformer
-        ).transform(
-            mock_context, pubmed_record, 0
-        )
+        ).transform(mock_context, pubmed_record, 0)
         s2_result = await instantiate_test_transformer(
             SemanticScholarPublicationTransformer
-        ).transform(
-            mock_context, s2_record, 0
-        )
+        ).transform(mock_context, s2_record, 0)
         openalex_result = await instantiate_test_transformer(
             OpenAlexPublicationTransformer
-        ).transform(
-            mock_context, openalex_record, 0
-        )
+        ).transform(mock_context, openalex_record, 0)
 
         assert pubmed_result is not None, "PubMed URL-prefix transform failed"
         assert s2_result is not None, "Semantic Scholar URL-prefix transform failed"

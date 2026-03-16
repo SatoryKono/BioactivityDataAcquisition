@@ -7,9 +7,7 @@ from pathlib import Path
 
 
 BASE_TRANSFORMER_PATH = Path("src/bioetl/application/core/base_transformer/base.py")
-DEPENDENCIES_MODULE_PATH = Path(
-    "src/bioetl/application/core/base_transformer/types.py"
-)
+DEPENDENCIES_MODULE_PATH = Path("src/bioetl/application/core/base_transformer/types.py")
 FORBIDDEN_CONSTRUCTORS = {
     "NoOpTracing",
     "NoOpMetrics",

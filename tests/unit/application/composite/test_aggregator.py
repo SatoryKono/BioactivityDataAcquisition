@@ -257,9 +257,7 @@ class TestOutputFieldAlias:
         assert "mesh_terms" in result.columns
         assert "term" not in result.columns
 
-    def test_default_output_field_uses_source(
-        self, aggregator: EnricherAggregator
-    ):
+    def test_default_output_field_uses_source(self, aggregator: EnricherAggregator):
         """Test that omitting output_field keeps the source field name."""
         df = pl.DataFrame(
             {
@@ -410,9 +408,7 @@ class TestFilterCondition:
 class TestMultipleFields:
     """Tests for aggregating multiple fields simultaneously."""
 
-    def test_multiple_fields_in_single_config(
-        self, aggregator: EnricherAggregator
-    ):
+    def test_multiple_fields_in_single_config(self, aggregator: EnricherAggregator):
         """Test aggregation with multiple field specs in one config."""
         df = pl.DataFrame(
             {

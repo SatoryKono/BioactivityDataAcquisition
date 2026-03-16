@@ -354,7 +354,9 @@ async def test_postprocess_dependency_results_when_mixed_then_finalizes_with_cou
     harness._complete_dependencies_phase = AsyncMock(return_value=completed_state)
     results = {"dep_a": _success_dep("dep_a"), "dep_b": _failed_dep("dep_b")}
 
-    new_state, dep_results = await harness._postprocess_dependency_results(state, results)
+    new_state, dep_results = await harness._postprocess_dependency_results(
+        state, results
+    )
 
     assert dep_results is results
     assert new_state is completed_state

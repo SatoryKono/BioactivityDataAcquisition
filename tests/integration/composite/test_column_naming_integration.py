@@ -314,9 +314,7 @@ class TestEdgeCases:
 class TestDataPreservation:
     """Tests verifying data integrity through the pipeline."""
 
-    def test_data_values_preserved_through_rename(
-        self, renamer: ColumnRenamer
-    ) -> None:
+    def test_data_values_preserved_through_rename(self, renamer: ColumnRenamer) -> None:
         """Data values are preserved after renaming."""
         df = pl.DataFrame(
             {
@@ -448,9 +446,7 @@ class TestQualifiedColumnHandling:
         # Should not create double-qualified name
         assert "crossref.publication.chembl.publication.title" not in result.columns
 
-    def test_qualified_columns_grouped_by_field(
-        self, orderer: ColumnOrderer
-    ) -> None:
+    def test_qualified_columns_grouped_by_field(self, orderer: ColumnOrderer) -> None:
         """Qualified columns are grouped by their field semantic group."""
         df = pl.DataFrame(
             {

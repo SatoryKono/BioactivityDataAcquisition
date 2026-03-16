@@ -96,47 +96,47 @@ class InputFilterPort(Protocol):
     ) -> FilterLoadResult:
         """Load filter data from multiple columns.
 
-                Returns unique IDs per column for server-side filtering, plus
-                exact row-wise combinations for client-side filtering.
+        Returns unique IDs per column for server-side filtering, plus
+        exact row-wise combinations for client-side filtering.
 
-                Args:
-                    source_path: Path to the filter source (e.g., CSV file path).
-                    columns: List of FilterColumn objects defining columns to load.
+        Args:
+            source_path: Path to the filter source (e.g., CSV file path).
+            columns: List of FilterColumn objects defining columns to load.
 
-                Returns:
-                    FilterLoadResult with:
-                    - column_ids: Per-field unique IDs for API __in filters
-                    - valid_combinations: Exact row-wise value combinations
-                    - filter_fields: Ordered field names for combinations
+        Returns:
+            FilterLoadResult with:
+            - column_ids: Per-field unique IDs for API __in filters
+            - valid_combinations: Exact row-wise value combinations
+            - filter_fields: Ordered field names for combinations
 
-                Raises:
-                    FileNotFoundError: If the source file does not exist.
-                    ValueError: If any column is not found in the source.
+        Raises:
+            FileNotFoundError: If the source file does not exist.
+            ValueError: If any column is not found in the source.
 
-                Example:
-                    Filter by both target AND molecule (AND-logic)::
+        Example:
+            Filter by both target AND molecule (AND-logic)::
 
-                        from bioetl.domain.filtering import FilterColumn
+                from bioetl.domain.filtering import FilterColumn
 
-                        columns = [
-                            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
-                            FilterColumn(column_name="molecule_id", filter_field="molecule_chembl_id"),
-                        ]
-                        result = await filter_reader.load_multi_column_filter(
-                            source_path="data/input/target_molecule_pairs.csv",
-                            columns=columns,
-                        )
+                columns = [
+                    FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+                    FilterColumn(column_name="molecule_id", filter_field="molecule_chembl_id"),
+                ]
+                result = await filter_reader.load_multi_column_filter(
+                    source_path="data/input/target_molecule_pairs.csv",
+                    columns=columns,
+                )
 
-                        # Server-side: Use column_ids for API __in filters
-                        # result.column_ids["target_chembl_id"] -> ('CHEMBL1', 'CHEMBL2')
-                        # result.column_ids["molecule_chembl_id"] -> ('CHEMBL100', 'CHEMBL200')
+                # Server-side: Use column_ids for API __in filters
+                # result.column_ids["target_chembl_id"] -> ('CHEMBL1', 'CHEMBL2')
+                # result.column_ids["molecule_chembl_id"] -> ('CHEMBL100', 'CHEMBL200')
 
-                        # Client-side: Validate exact combinations after fetch
-                        # result.valid_combinations -> frozenset({('CHEMBL1', 'CHEMBL100'), ...})
-                        for record in fetched_records:
-                            combo = (record["target_id"], record["molecule_id"])
-                            if combo in result.valid_combinations:
-                                yield record  # Exact match found
+                # Client-side: Validate exact combinations after fetch
+                # result.valid_combinations -> frozenset({('CHEMBL1', 'CHEMBL100'), ...})
+                for record in fetched_records:
+                    combo = (record["target_id"], record["molecule_id"])
+                    if combo in result.valid_combinations:
+                        yield record  # Exact match found
         """
         ...
 

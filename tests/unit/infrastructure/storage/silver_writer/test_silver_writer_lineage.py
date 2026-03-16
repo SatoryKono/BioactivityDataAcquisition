@@ -523,7 +523,9 @@ class TestSilverWriterLineage:
             version_after=7,
         )
 
-        silver_input = mock_metadata_coordinator.create_silver_metadata.call_args.args[0]
+        silver_input = mock_metadata_coordinator.create_silver_metadata.call_args.args[
+            0
+        ]
         assert silver_input.version_after == 7
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
             "/tmp/silver/chembl/activity",
@@ -662,7 +664,9 @@ class TestSilverWriterLineage:
         )
 
     @pytest.mark.asyncio
-    async def test_metadata_write_paths_preserve_skip_logging_levels(self, valid_records):
+    async def test_metadata_write_paths_preserve_skip_logging_levels(
+        self, valid_records
+    ):
         """Standard and merged metadata writes should share preflight guard semantics."""
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.infrastructure.storage.silver_writer import SilverWriter

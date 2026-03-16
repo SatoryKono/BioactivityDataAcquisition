@@ -197,8 +197,7 @@ def test_inventory_rows_capture_owner_call_sites_and_lifecycle_metadata() -> Non
 
         parsed_date = date.fromisoformat(row["remove_by"])
         assert parsed_date.year >= 2026, (
-            f"Unexpected remove-by/review date for {row['path']}: "
-            f"{row['remove_by']}"
+            f"Unexpected remove-by/review date for {row['path']}: {row['remove_by']}"
         )
 
         referenced_paths = path_pattern.findall(row["allowed_call_sites"])
@@ -227,12 +226,12 @@ def test_retained_adapter_entrypoint_rows_prefer_package_root_imports() -> None:
 
     for path, package_root in expected.items():
         row = rows[path]
-        assert "first-party code imports the provider package root" in row[
-            "allowed_call_sites"
-        ], f"{path} must document package-root policy in allowed call sites"
+        assert (
+            "first-party code imports the provider package root"
+            in row["allowed_call_sites"]
+        ), f"{path} must document package-root policy in allowed call sites"
         assert package_root in row["migration_path"], (
-            f"{path} migration_path must point new code to package root "
-            f"{package_root}"
+            f"{path} migration_path must point new code to package root {package_root}"
         )
 
 
@@ -273,7 +272,9 @@ def test_retained_composition_and_domain_rows_document_dedicated_test_allowlists
 
 
 @pytest.mark.architecture
-def test_registry_config_and_merge_transition_rows_capture_compatibility_policy() -> None:
+def test_registry_config_and_merge_transition_rows_capture_compatibility_policy() -> (
+    None
+):
     """Active compatibility rows must document current transition surfaces precisely."""
     rows = {
         row["path"]: row

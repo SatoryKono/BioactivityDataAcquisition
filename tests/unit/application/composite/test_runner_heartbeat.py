@@ -6,8 +6,7 @@ during execution and properly stops it on completion or failure.
 
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
@@ -21,7 +20,6 @@ from bioetl.application.composite.runner_pkg.runner_models import (
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import MergeResult
-from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import LockAcquisitionError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
@@ -44,7 +42,6 @@ def _make_runner(
     **overrides: object,
 ) -> CompositePipelineRunner:
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.domain.composite.result import MergeResult
 
     run_id = str(uuid4())
 
@@ -88,9 +85,7 @@ def _make_runner(
     seed_runner.execution_metrics = {"records_fetched": 10, "records_silver": 10}
 
     key_extractor = AsyncMock()
-    key_extractor.extract = AsyncMock(
-        return_value=pl.DataFrame({"id": ["1"]})
-    )
+    key_extractor.extract = AsyncMock(return_value=pl.DataFrame({"id": ["1"]}))
 
     coordinator = AsyncMock()
     coordinator.run_enrichers = AsyncMock(return_value={})
@@ -165,9 +160,11 @@ class TestCompositeRunnerHeartbeat:
         acquire_call = lock.acquire.call_args
         heartbeat_call = lock.heartbeat.call_args
 
-        assert heartbeat_call[0][0] == acquire_call.kwargs.get(
-            "key", acquire_call[1].get("key")
-        ) or heartbeat_call[0][0] == "lock:test_composite"
+        assert (
+            heartbeat_call[0][0]
+            == acquire_call.kwargs.get("key", acquire_call[1].get("key"))
+            or heartbeat_call[0][0] == "lock:test_composite"
+        )
         assert heartbeat_call[0][1] == runner._run_id
 
     @pytest.mark.asyncio

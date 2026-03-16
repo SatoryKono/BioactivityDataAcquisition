@@ -201,7 +201,9 @@ class TestAdapterMixinPolicy:
             pytest.skip("Infrastructure adapters not found")
 
         lingering = [
-            rel for rel in sorted(REMOVED_ADAPTER_MIXIN_SHIMS) if (adapters_path / rel).exists()
+            rel
+            for rel in sorted(REMOVED_ADAPTER_MIXIN_SHIMS)
+            if (adapters_path / rel).exists()
         ]
 
         assert not lingering, (

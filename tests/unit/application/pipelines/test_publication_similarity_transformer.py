@@ -35,7 +35,9 @@ class TestPublicationSimilarityTransformer:
     @pytest.fixture
     def transformer(self):
         """Create PublicationSimilarityTransformer instance."""
-        return PublicationSimilarityTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return PublicationSimilarityTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):

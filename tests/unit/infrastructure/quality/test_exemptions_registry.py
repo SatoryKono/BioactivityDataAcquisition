@@ -277,12 +277,15 @@ class TestValidateExemptionsRegistry:
     def test_valid_registry_no_metadata_errors(self, tmp_path: Path) -> None:
         """Valid registry with all required sections should produce no errors."""
         path = _write_registry(tmp_path, self._valid_raw())
-        with patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
-            return_value=[],
-        ), patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
-            return_value=[],
+        with (
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                return_value=[],
+            ),
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                return_value=[],
+            ),
         ):
             meta_errors, expired = validate_exemptions_registry(
                 path, today=date(2025, 6, 15)
@@ -322,12 +325,15 @@ class TestValidateExemptionsRegistry:
         assert isinstance(raw["registries"], dict)
         del raw["registries"]["god_object"]  # type: ignore[attr-defined]
         path = _write_registry(tmp_path, raw)
-        with patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
-            return_value=[],
-        ), patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
-            return_value=[],
+        with (
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                return_value=[],
+            ),
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                return_value=[],
+            ),
         ):
             meta_errors, _ = validate_exemptions_registry(path, today=date(2025, 6, 15))
         assert any("god_object" in e for e in meta_errors)
@@ -348,12 +354,15 @@ class TestValidateExemptionsRegistry:
             }
         }
         path = _write_registry(tmp_path, raw)
-        with patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
-            return_value=[],
-        ), patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
-            return_value=[],
+        with (
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                return_value=[],
+            ),
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                return_value=[],
+            ),
         ):
             _, expired = validate_exemptions_registry(path, today=date(2025, 6, 15))
         assert len(expired) >= 1
@@ -361,12 +370,15 @@ class TestValidateExemptionsRegistry:
     def test_today_defaults_to_date_today(self, tmp_path: Path) -> None:
         """today=None should use date.today() without error."""
         path = _write_registry(tmp_path, self._valid_raw())
-        with patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
-            return_value=[],
-        ), patch(
-            "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
-            return_value=[],
+        with (
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_key_normalization",
+                return_value=[],
+            ),
+            patch(
+                "bioetl.infrastructure.quality.exemptions_registry.validate_exemption_target_references",
+                return_value=[],
+            ),
         ):
             meta_errors, _ = validate_exemptions_registry(path)
         assert isinstance(meta_errors, list)
@@ -387,8 +399,7 @@ class TestValidateExemptionTargetReferences:
         src_dir.mkdir(parents=True)
         module_file = src_dir / "module.py"
         module_file.write_text(
-            "class ExampleService:\n"
-            "    pass\n",
+            "class ExampleService:\n    pass\n",
             encoding="utf-8",
         )
 
@@ -404,9 +415,7 @@ class TestValidateExemptionTargetReferences:
                     "removal_step",
                 ]
             },
-            "registries": {
-                name: {} for name in REQUIRED_EXEMPTION_REGISTRIES
-            },
+            "registries": {name: {} for name in REQUIRED_EXEMPTION_REGISTRIES},
         }
         registries = raw["registries"]
         assert isinstance(registries, dict)
@@ -437,8 +446,7 @@ class TestValidateExemptionTargetReferences:
         src_dir.mkdir(parents=True)
         module_file = src_dir / "module.py"
         module_file.write_text(
-            "class ExampleService:\n"
-            "    pass\n",
+            "class ExampleService:\n    pass\n",
             encoding="utf-8",
         )
 
@@ -454,9 +462,7 @@ class TestValidateExemptionTargetReferences:
                     "removal_step",
                 ]
             },
-            "registries": {
-                name: {} for name in REQUIRED_EXEMPTION_REGISTRIES
-            },
+            "registries": {name: {} for name in REQUIRED_EXEMPTION_REGISTRIES},
         }
         registries = raw["registries"]
         assert isinstance(registries, dict)

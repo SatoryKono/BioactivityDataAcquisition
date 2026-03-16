@@ -17,15 +17,7 @@ registries:
     file_size_limits: { }
     function_complexity: { }
     function_length: { }
-    class_size:
-        src/bioetl/application/composite/join_planner.py::JoinPlannerService:
-            value: 380
-            owner: bioetl.application.composite
-            reason: JoinPlannerService remains a transitional orchestration hotspot while helper extraction continues after the runner facade split.
-            classification: technical_debt
-            linked_rf: QG-002
-            expires_on: '2026-06-30'
-            removal_step: Extract remaining orchestration branches into dedicated join-planning collaborators and ratchet the limit back toward 300.
+    class_size: { }
     class_method_count: { }
     god_object: { }
     domain_complexity: { }

@@ -150,7 +150,7 @@ is provided but deprecated.
 **Factory Updates:**
 
 - `transformer_factory.py` — imports and registrations updated
-- `pipeline_factories.py` — imports, configs, and exports updated
+- `pipeline/registry.py` — imports, configs, and exports updated
 - `registration.py` — import updated
 
 **Test Files (renamed):**

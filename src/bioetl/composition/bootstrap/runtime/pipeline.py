@@ -73,5 +73,3 @@ def bootstrap_pipeline_runner(
         build_observability_bundle_fn=bootstrap_observability_bundle,
         assemble_filter_config_fn=assemble_filter_config,
     )
-
-

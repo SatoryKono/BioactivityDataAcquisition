@@ -94,4 +94,3 @@ def bootstrap_composite_checkpoint_port() -> CompositeCheckpointPort:
         f"got {type(checkpoint)}"
     )
     return checkpoint
-

@@ -40,9 +40,7 @@ def _iter_canonical_markdown_files() -> list[Path]:
         if not root.exists():
             continue
         docs.extend(
-            path
-            for path in root.rglob("*.md")
-            if "generated" not in path.parts
+            path for path in root.rglob("*.md") if "generated" not in path.parts
         )
     return sorted(docs)
 
@@ -50,7 +48,9 @@ def _iter_canonical_markdown_files() -> list[Path]:
 def _iter_internal_doc_links(path: Path) -> list[tuple[int, str, Path]]:
     """Collect internal docs links with resolved absolute targets."""
     records: list[tuple[int, str, Path]] = []
-    for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    for lineno, line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(), start=1
+    ):
         for match in _LINK_TARGET_RE.finditer(line):
             target = match.group(1).strip()
             if not target or re.match(r"^[a-z]+:", target, re.IGNORECASE):
@@ -167,8 +167,7 @@ class TestCanonicalDocCrossrefs:
 
         assert not violations, (
             "Canonical docs reference non-canonical doc zones "
-            "(reports/exports/generated):\n"
-            + "\n".join(violations)
+            "(reports/exports/generated):\n" + "\n".join(violations)
         )
 
     def test_archive_links_in_canonical_docs_are_explicitly_marked(self) -> None:
@@ -187,8 +186,7 @@ class TestCanonicalDocCrossrefs:
 
         assert not violations, (
             "Archive references from canonical docs must be explicitly marked "
-            "as archived/historical:\n"
-            + "\n".join(violations)
+            "as archived/historical:\n" + "\n".join(violations)
         )
 
     def test_reports_index_declares_non_normative_status(self) -> None:

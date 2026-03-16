@@ -46,7 +46,7 @@ Both paths require:
 - `configs/entities/{provider}/{entity}.yaml`
 - transformer under `src/bioetl/application/pipelines/{provider}/`
 - `register_all_transformers()` entry
-- `PIPELINE_CONFIGS` entry in `pipeline_factories.py`
+- `PIPELINE_CONFIGS` entry in `pipeline/registry.py`
 - Silver schema + Gold contract exports
 
 ---
@@ -88,6 +88,6 @@ Then run targeted unit tests for changed provider/pipeline.
 - [ ] Provider config updated (`entities`, `entity_notes`, rate limits).
 - [ ] Transformer implemented with DI and deterministic identity/hash.
 - [ ] `transformer_factory.py` updated.
-- [ ] `pipeline_factories.py` updated (`PIPELINE_CONFIGS`, imports).
+- [ ] `pipeline/registry.py` updated (`PIPELINE_CONFIGS`, imports).
 - [ ] Silver/Gold schemas updated and exported.
 - [ ] Unit/integration docs updated.

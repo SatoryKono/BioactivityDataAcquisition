@@ -120,7 +120,7 @@ Update `src/bioetl/composition/providers/registration.py`:
 1. Add provider-specific creator function:
 - `_create_{provider}_data_source(...) -> DataSourcePort`
 
-2. Register provider inside `register_all_providers()`:
+2. Register provider inside the bootstrap function (`src/bioetl/composition/providers/registration.py`):
 
 ```python
 if not ProviderRegistry.is_registered("myprovider"):
@@ -149,7 +149,7 @@ For the first provider entity, complete all items from
 - transformer: `src/bioetl/application/pipelines/{provider}/...`
 - Pandera Silver schema + Gold contract
 - `register_all_transformers()` entry
-- `PIPELINE_CONFIGS` entry in `pipeline_factories.py`
+- `PIPELINE_CONFIGS` entry in `src/bioetl/composition/factories/pipeline/registry.py`
 
 ---
 

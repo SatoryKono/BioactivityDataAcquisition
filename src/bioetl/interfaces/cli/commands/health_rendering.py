@@ -27,7 +27,9 @@ def build_health_server_info_lines(host: str, port: int) -> list[str]:
 
 def all_health_results_healthy(results: dict[str, dict[str, str]]) -> bool:
     """Return True when every provider result is healthy."""
-    return all(result.get("status", "unknown") == "healthy" for result in results.values())
+    return all(
+        result.get("status", "unknown") == "healthy" for result in results.values()
+    )
 
 
 def render_health_results_json(results: dict[str, dict[str, str]]) -> str:

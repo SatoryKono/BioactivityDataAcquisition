@@ -79,7 +79,9 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer checkpoint save helper."""
         return await self._save_checkpoint_safe(state, operation)
 
-    async def _call_run_seed(self: _CompositeRunnerStageSupportHostProtocol) -> SeedResult:
+    async def _call_run_seed(
+        self: _CompositeRunnerStageSupportHostProtocol,
+    ) -> SeedResult:
         """Invoke support-layer seed runner helper."""
         return await self._run_seed()
 
@@ -97,7 +99,9 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer required-enricher validation helper."""
         self._check_required_enrichers(enrichment_results)
 
-    def _has_dependencies_configured(self: _CompositeRunnerStageSupportHostProtocol) -> bool:
+    def _has_dependencies_configured(
+        self: _CompositeRunnerStageSupportHostProtocol,
+    ) -> bool:
         """Check if dependencies phase is configured and ready."""
         return bool(
             self._config.dependencies

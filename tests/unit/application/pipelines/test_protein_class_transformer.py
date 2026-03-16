@@ -36,7 +36,9 @@ class TestProteinClassTransformer:
     @pytest.fixture
     def transformer(self):
         """Create ProteinClassTransformer instance."""
-        return ProteinClassTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return ProteinClassTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     def test_entity_class_is_protein_classification(self, transformer):
         """Verify entity_class is set correctly."""
@@ -278,7 +280,9 @@ class TestProteinClassTransformerExtractBusinessData:
     @pytest.fixture
     def transformer(self):
         """Create ProteinClassTransformer instance."""
-        return ProteinClassTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return ProteinClassTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     def test_extract_root_node(self, transformer):
         """Test extraction of root node data."""

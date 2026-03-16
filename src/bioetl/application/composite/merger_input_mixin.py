@@ -140,9 +140,7 @@ class _MergeInputLoaderMixin:
             seed_df,
             effective_seed_pipeline,
             exclude_join_keys=False,
-            field_aliases=resolve_field_aliases_from_registry(
-                effective_seed_pipeline
-            ),
+            field_aliases=resolve_field_aliases_from_registry(effective_seed_pipeline),
         )
         self._logger.info(
             "Renamed seed columns to qualified format",

@@ -213,7 +213,9 @@ class TestAssayParametersTransformer:
     @pytest.fixture
     def transformer(self) -> AssayParametersTransformer:
         """Create AssayParametersTransformer instance."""
-        return AssayParametersTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return AssayParametersTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict:

@@ -106,8 +106,7 @@ class TestExplicitGoldScd2Policy:
 
         missing_keys = REQUIRED_SCD_CONFIG_KEYS.difference(scd_config)
         assert not missing_keys, (
-            f"{config_path} is missing required scd_config keys: "
-            f"{sorted(missing_keys)}"
+            f"{config_path} is missing required scd_config keys: {sorted(missing_keys)}"
         )
 
         legacy_keys = LEGACY_SCD_CONFIG_ALIAS_KEYS.intersection(scd_config)

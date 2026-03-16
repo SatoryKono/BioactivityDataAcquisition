@@ -21,6 +21,8 @@ from bioetl.domain.composite.config_models import (
     LayerColumnConfig as ModelsLayerColumnConfig,
 )
 from bioetl.domain.composite.config_models import SeedConfig as ModelsSeedConfig
+
+
 def test_config_facade_keeps_model_reexports() -> None:
     assert facade.SeedConfig is ModelsSeedConfig
     assert facade.DependencyConfig is ModelsDependencyConfig

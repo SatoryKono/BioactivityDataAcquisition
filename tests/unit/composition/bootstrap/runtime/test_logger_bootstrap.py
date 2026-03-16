@@ -127,5 +127,3 @@ class TestBootstrapLoggerPort:
         )
 
         assert captured_run_ids[0] != captured_run_ids[1]
-
-

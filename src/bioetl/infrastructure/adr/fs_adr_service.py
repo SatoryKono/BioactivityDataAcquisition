@@ -82,7 +82,8 @@ def _first_content_line(lines: list[str], start: int) -> str | None:
 
 
 def _match_heading_to_section(
-    heading: str, normalized_names: set[str],
+    heading: str,
+    normalized_names: set[str],
 ) -> tuple[str | None, bool]:
     """Check heading against section names. Returns (inline_value, is_exact_match)."""
     heading_lower = heading.lower()

@@ -27,7 +27,7 @@ For each new pipeline, update these artifacts:
 
 5. Composition registration:
 - `src/bioetl/composition/factories/transformer_factory.py` (`register_all_transformers`)
-- `src/bioetl/composition/factories/pipeline_factories.py` (imports + `PIPELINE_CONFIGS`)
+- `src/bioetl/composition/factories/pipeline/registry.py` (imports + `PIPELINE_CONFIGS`)
 
 6. Tests:
 - `tests/unit/application/pipelines/{provider}/test_{entity}_transformer.py`
@@ -81,7 +81,7 @@ Update `src/bioetl/composition/factories/transformer_factory.py`:
 
 ### 4.2 Pipeline factory registry
 
-Update `src/bioetl/composition/factories/pipeline_factories.py`:
+Update `src/bioetl/composition/factories/pipeline/registry.py`:
 - add imports for transformer/schemas/contracts
 - add new `PipelineFactoryConfig(...)` entry into `PIPELINE_CONFIGS`
 

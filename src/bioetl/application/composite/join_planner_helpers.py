@@ -227,13 +227,11 @@ def build_enricher_join_key_set(
     Returns:
         Tuple of (seed_join_key, enricher_join_key, join_key_set).
     """
-    seed_join_key, enricher_join_key, seed_join_key_qualified = (
-        resolve_join_key_names(
-            primary_key,
-            seed_pipeline,
-            enricher_pipeline,
-            merged_columns,
-        )
+    seed_join_key, enricher_join_key, seed_join_key_qualified = resolve_join_key_names(
+        primary_key,
+        seed_pipeline,
+        enricher_pipeline,
+        merged_columns,
     )
     join_key_set = build_join_key_set(
         left_join_key=seed_join_key,
