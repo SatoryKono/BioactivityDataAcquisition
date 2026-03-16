@@ -132,7 +132,7 @@ class BronzeWriterMetadataMixin:
         import platform
         import socket
 
-        from bioetl import __version__
+        from bioetl.domain.version import get_version
         from bioetl.domain.models.metadata import (
             BaseOutputMetadata,
             BronzeOutputExt,
@@ -185,7 +185,7 @@ class BronzeWriterMetadataMixin:
             "environment": EnvironmentMetadata(
                 hostname=socket.gethostname(),
                 python_version=platform.python_version(),
-                bioetl_version=__version__,
+                bioetl_version=get_version(),
             ),
         }
 

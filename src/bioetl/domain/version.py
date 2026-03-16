@@ -17,4 +17,9 @@ def get_version() -> str:
     try:
         return _pkg_version("bioetl")
     except PackageNotFoundError:
-        return "unknown"
+        try:
+            from bioetl import __version__ as _fallback
+
+            return _fallback
+        except ImportError:
+            return "unknown"

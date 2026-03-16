@@ -8,9 +8,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
-
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 
 
 def _load_column_groups_config(
@@ -25,8 +24,7 @@ def _load_column_groups_config(
     if not column_groups_path.exists():
         return None
 
-    with open(column_groups_path, encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+    data = _load_yaml_file(column_groups_path)
 
     if isinstance(data, list):
         return data
@@ -54,8 +52,7 @@ def _load_data_schema_config(
             f"(resolved from '{schema_file}' relative to {config_path.parent})"
         )
 
-    with open(schema_path, encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+    data = _load_yaml_file(schema_path)
 
     result: JsonDict = {}  # Any: YAML config has heterogeneous values
     if "column_groups" in data:

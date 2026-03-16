@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import click
 
-from bioetl import __version__
+from bioetl.domain.version import get_version
 from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
@@ -48,7 +48,7 @@ def _build_main_registry() -> object:
 
 
 @click.group()
-@click.version_option(version=__version__)
+@click.version_option(version=get_version())
 @click.pass_context
 def cli(ctx: click.Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
