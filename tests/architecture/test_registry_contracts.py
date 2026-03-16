@@ -156,18 +156,21 @@ class TestRegistryInstanceVariables:
             "DataSourceRegistry._creators MUST be ClassVar for singleton pattern"
         )
 
-    def test_provider_registry_uses_classvar(self) -> None:
-        """ProviderRegistry._providers must be ClassVar."""
-        from bioetl.composition.providers.provider_registry import ProviderRegistry
-
-        assert "_providers" in ProviderRegistry.__annotations__, (
-            "ProviderRegistry MUST have _providers annotation"
+    def test_provider_registry_uses_instance_scoped_providers(self) -> None:
+        """ProviderRegistry must use instance-scoped _providers with lazy singleton."""
+        from bioetl.composition.providers.provider_registry import (
+            ProviderRegistry,
+            get_default_provider_registry,
         )
 
-        hint = ProviderRegistry.__annotations__["_providers"]
-        assert "ClassVar" in str(hint), (
-            "ProviderRegistry._providers MUST be ClassVar for singleton pattern"
-        )
+        # Instance-scoped: each new instance gets its own dict
+        reg = ProviderRegistry()
+        assert isinstance(reg._providers, dict)
+        assert len(reg._providers) == 0
+
+        # Class-level access delegates to default singleton (backward compat)
+        default_providers = ProviderRegistry._providers
+        assert default_providers is get_default_provider_registry()._providers
 
 
 class TestRegistryReturnTypes:

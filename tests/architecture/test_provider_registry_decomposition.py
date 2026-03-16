@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "providers" / "provider_registry.py"
 )
-REGISTRY_MAX_LINES = 235
+REGISTRY_MAX_LINES = 260  # bumped: RF-001 added __init__, RLock, lazy singleton
 REQUIRED_HELPER_IMPORTS = {
     "bioetl.composition.providers._creation",
     "bioetl.composition.providers._models",
