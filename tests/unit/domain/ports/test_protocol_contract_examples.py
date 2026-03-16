@@ -195,6 +195,12 @@ class TestStoragePortProtocol:
             ) -> int:
                 return 0
 
+            def get_table_version(
+                self,
+                table_path: str,
+            ) -> int | None:
+                return None
+
         assert isinstance(ValidStorage(), StoragePort)
 
         # Note: @runtime_checkable protocols only check for method presence,

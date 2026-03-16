@@ -10,8 +10,6 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
-from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
-from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
@@ -28,6 +26,8 @@ from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
 from bioetl.application.composite.runner_pkg.runner_support_mixin import (
     CompositeRunnerSupportMixin,
 )
+from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
