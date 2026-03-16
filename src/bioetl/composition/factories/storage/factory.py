@@ -12,12 +12,8 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 from ._helpers import (
-    create_layer_exporters,
+    build_storage_creation_context,
     create_storage_adapter,
-    get_layer_configs,
-    log_configured_export_status,
-    resolve_flat_structure_flags,
-    resolve_storage_paths,
 )
 from .adapter import StorageAdapter
 
@@ -81,72 +77,32 @@ class StorageFactory:
         Returns:
             StorageContext with assembled adapter and resolved layer paths.
         """
-        bronze_config, silver_config, gold_config = get_layer_configs(config)
-        use_yaml_paths, bronze_path, silver_path, gold_path = resolve_storage_paths(
-            settings=settings,
-            bronze_config=bronze_config,
-            silver_config=silver_config,
-            gold_config=gold_config,
+        ctx = build_storage_creation_context(
+            settings=settings, config=config, logger=logger,
         )
         logger.info(
             "Using local storage",
-            bronze_path=str(bronze_path),
-            silver_path=str(silver_path),
-            gold_path=str(gold_path),
-        )
-        silver_csv_exporter, gold_csv_exporter = create_layer_exporters(
-            settings=settings,
-            logger=logger,
-            silver_config=silver_config,
-            gold_config=gold_config,
-            silver_path=silver_path,
-            gold_path=gold_path,
-        )
-        log_configured_export_status(
-            logger=logger,
-            bronze_config=bronze_config,
-            silver_config=silver_config,
-            gold_config=gold_config,
-            silver_csv_exporter=silver_csv_exporter,
-            gold_csv_exporter=gold_csv_exporter,
-        )
-        (
-            bronze_flat_structure,
-            silver_flat_structure,
-            gold_flat_structure,
-        ) = resolve_flat_structure_flags(
-            bronze_config=bronze_config,
-            silver_config=silver_config,
-            gold_config=gold_config,
-            use_yaml_paths=use_yaml_paths,
+            bronze_path=str(ctx.bronze_path),
+            silver_path=str(ctx.silver_path),
+            gold_path=str(ctx.gold_path),
         )
         adapter = create_storage_adapter(
+            ctx=ctx,
             bronze_writer_cls=BronzeWriter,
             silver_writer_cls=SilverWriter,
             gold_writer_cls=GoldWriter,
             settings=settings,
             config=config,
-            bronze_path=bronze_path,
-            silver_path=silver_path,
-            gold_path=gold_path,
-            bronze_config=bronze_config,
-            silver_config=silver_config,
-            gold_config=gold_config,
-            silver_csv_exporter=silver_csv_exporter,
-            gold_csv_exporter=gold_csv_exporter,
             logger=logger,
             metrics=metrics,
             tracing=tracing,
             metadata_coordinator=metadata_coordinator,
             silver_validator=silver_validator,
-            bronze_flat_structure=bronze_flat_structure,
-            silver_flat_structure=silver_flat_structure,
-            gold_flat_structure=gold_flat_structure,
         )
         return StorageContext(
             adapter=adapter,
-            bronze_path=bronze_path,
-            silver_path=silver_path,
-            gold_path=gold_path,
+            bronze_path=ctx.bronze_path,
+            silver_path=ctx.silver_path,
+            gold_path=ctx.gold_path,
             checkpoints_path=settings.checkpoint_path,
         )

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -32,6 +33,27 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+
+@dataclass(frozen=True, slots=True)
+class StorageCreationContext:
+    """Resolved per-layer configuration for storage adapter creation (RF-005a).
+
+    Bundles all layer configs, paths, flat-structure flags and CSV exporters
+    produced by the resolution pipeline (steps 1-4 of StorageFactory.create).
+    """
+
+    bronze_config: SinkLayerConfig | None
+    silver_config: SinkLayerConfig | None
+    gold_config: SinkLayerConfig | None
+    bronze_path: Path
+    silver_path: Path
+    gold_path: Path
+    bronze_flat: bool
+    silver_flat: bool
+    gold_flat: bool
+    silver_csv_exporter: CsvExporter | None
+    gold_csv_exporter: CsvExporter | None
 
 
 def create_csv_exporter_from_config(
@@ -194,29 +216,75 @@ def resolve_flat_structure_flags(
     )
 
 
+def build_storage_creation_context(
+    *,
+    settings: Settings,
+    config: PipelineYamlConfig,
+    logger: LoggerPort,
+) -> StorageCreationContext:
+    """Run the full layer-resolution pipeline and return a bundled context.
+
+    Resolves layer configs, storage paths, CSV exporters, flat-structure
+    flags, and logs export status — encapsulating steps 1-4 of the
+    StorageFactory.create flow into a single parameter object.
+    """
+    bronze_config, silver_config, gold_config = get_layer_configs(config)
+    use_yaml_paths, bronze_path, silver_path, gold_path = resolve_storage_paths(
+        settings=settings,
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+    )
+    silver_csv_exporter, gold_csv_exporter = create_layer_exporters(
+        settings=settings,
+        logger=logger,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        silver_path=silver_path,
+        gold_path=gold_path,
+    )
+    log_configured_export_status(
+        logger=logger,
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        silver_csv_exporter=silver_csv_exporter,
+        gold_csv_exporter=gold_csv_exporter,
+    )
+    bronze_flat, silver_flat, gold_flat = resolve_flat_structure_flags(
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        use_yaml_paths=use_yaml_paths,
+    )
+    return StorageCreationContext(
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        bronze_path=bronze_path,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        bronze_flat=bronze_flat,
+        silver_flat=silver_flat,
+        gold_flat=gold_flat,
+        silver_csv_exporter=silver_csv_exporter,
+        gold_csv_exporter=gold_csv_exporter,
+    )
+
+
 def create_storage_adapter(
     *,
+    ctx: StorageCreationContext,
     bronze_writer_cls: type[BronzeWriter],
     silver_writer_cls: type[SilverWriter],
     gold_writer_cls: type[GoldWriter],
     settings: Settings,
     config: PipelineYamlConfig,
-    bronze_path: Path,
-    silver_path: Path,
-    gold_path: Path,
-    bronze_config: SinkLayerConfig | None,
-    silver_config: SinkLayerConfig | None,
-    gold_config: SinkLayerConfig | None,
-    silver_csv_exporter: CsvExporter | None,
-    gold_csv_exporter: CsvExporter | None,
     logger: LoggerPort,
     metrics: MetricsPort,
     tracing: TracingPort | None,
     metadata_coordinator: MetadataCoordinator | None,
     silver_validator: SilverValidatorPort | None,
-    bronze_flat_structure: bool,
-    silver_flat_structure: bool,
-    gold_flat_structure: bool,
 ) -> StorageAdapter:
     """Create StorageAdapter with Bronze/Silver/Gold writers."""
     metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
@@ -224,25 +292,25 @@ def create_storage_adapter(
 
     bronze_writer = create_bronze_writer(
         writer_cls=bronze_writer_cls,
-        base_path=bronze_path,
-        config=bronze_config,
+        base_path=ctx.bronze_path,
+        config=ctx.bronze_config,
         logger=logger,
         metrics=metrics,
         tracing=tracing,
         metadata_coordinator=metadata_coordinator,
-        flat_structure=bronze_flat_structure,
+        flat_structure=ctx.bronze_flat,
     )
     silver_writer = create_silver_writer(
         writer_cls=silver_writer_cls,
-        base_path=silver_path,
-        config=silver_config,
+        base_path=ctx.silver_path,
+        config=ctx.silver_config,
         logger=logger,
         tracing=tracing,
-        csv_exporter=silver_csv_exporter,
+        csv_exporter=ctx.silver_csv_exporter,
         metadata_coordinator=metadata_coordinator,
         transform_version=config.transform.version,
         transform_steps=tuple(config.transform.steps),
-        flat_structure=silver_flat_structure,
+        flat_structure=ctx.silver_flat,
         silver_validator=silver_validator,
         metrics=metrics,
         metadata_atomic_retry_policy=metadata_atomic_retry_policy,
@@ -250,15 +318,15 @@ def create_storage_adapter(
     )
     gold_writer = create_gold_writer(
         writer_cls=gold_writer_cls,
-        base_path=gold_path,
-        config=gold_config,
+        base_path=ctx.gold_path,
+        config=ctx.gold_config,
         logger=logger,
         tracing=tracing,
-        csv_exporter=gold_csv_exporter,
+        csv_exporter=ctx.gold_csv_exporter,
         metadata_coordinator=metadata_coordinator,
         transform_version=config.transform.version,
         transform_steps=tuple(config.transform.steps),
-        flat_structure=gold_flat_structure,
+        flat_structure=ctx.gold_flat,
     )
     return StorageAdapter(
         bronze_writer=bronze_writer,

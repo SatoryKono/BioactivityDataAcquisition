@@ -30,6 +30,8 @@ from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
     ProviderRegistry,
+    create_provider_registry,
+    get_default_provider_registry,
 )
 from bioetl.composition.providers.registration import register_all_providers
 
@@ -40,7 +42,9 @@ __all__ = [
     "HttpConfig",
     "ProviderConfig",
     "ProviderRegistry",
+    "create_provider_registry",
     "ensure_providers_loaded",
+    "get_default_provider_registry",
     "load_providers",
     "register_all_providers",
     "register_provider",
