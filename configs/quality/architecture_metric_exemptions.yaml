@@ -17,7 +17,15 @@ registries:
     file_size_limits: { }
     function_complexity: { }
     function_length: { }
-    class_size: { }
+    class_size:
+        src/bioetl/application/services/data_quality_service.py::DataQualityService:
+            reason: "Centralizes orchestration logic for all DQ analyzers per entity; naturally large."
+            value: 302
+            owner: core-arch
+            classification: technical_debt
+            linked_rf: RF-999
+            removal_step: refactor analyzer delegation
+            expires_on: "2026-06-30"
     class_method_count: { }
     god_object: { }
     domain_complexity: { }

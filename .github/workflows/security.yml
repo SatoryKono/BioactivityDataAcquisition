@@ -55,6 +55,6 @@ jobs:
 
       - name: Run pip-audit
         run: |
-          uv export --format requirements-txt | grep -v '^-e \.' > requirements-audit.txt
-          uv run pip-audit -r requirements-audit.txt --require-hashes --disable-pip --strict
+          uv export --format requirements-txt | grep -v '^-e \.' > scripts/qa/requirements-audit.txt
+          uv run pip-audit -r scripts/qa/requirements-audit.txt --require-hashes --disable-pip --strict
 
