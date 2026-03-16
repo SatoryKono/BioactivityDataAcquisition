@@ -472,15 +472,15 @@ class TestBatchExecutorDQCollection:
         records = [{"activity_id": "A1"}]
         executor._execution_state_service._batch_processing_service.process_batch = (
             AsyncMock(
-            return_value=BatchProcessingOutput(
-                batch_id="batch-001",
-                bronze_result=bronze_result,
-                silver_records=[{"activity_id": "A1"}],
-                gold_records=[],
-                quarantined_count=2,
-                filtered_out_count=0,
+                return_value=BatchProcessingOutput(
+                    batch_id="batch-001",
+                    bronze_result=bronze_result,
+                    silver_records=[{"activity_id": "A1"}],
+                    gold_records=[],
+                    quarantined_count=2,
+                    filtered_out_count=0,
+                )
             )
-        )
         )
 
         result = await executor.process(records=records, start_index=0)

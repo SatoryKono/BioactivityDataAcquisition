@@ -704,16 +704,12 @@ class TestDeleteOrphaned:
         deleted = await svc.delete_orphaned()
 
         assert deleted == 1
-        storage.delete.assert_called_once_with(
-            "composite_my_composite_run-001.json"
-        )
+        storage.delete.assert_called_once_with("composite_my_composite_run-001.json")
 
     @pytest.mark.asyncio
     async def test_returns_zero_when_no_orphans(self) -> None:
         """delete_orphaned() returns 0 when only current checkpoint exists."""
-        svc, storage, _ = _make_service(
-            composite_name="my_composite", run_id="run-001"
-        )
+        svc, storage, _ = _make_service(composite_name="my_composite", run_id="run-001")
         storage.list_glob.return_value = [
             "composite_my_composite_run-001.json",
         ]

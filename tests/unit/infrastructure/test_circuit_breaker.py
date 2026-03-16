@@ -465,7 +465,13 @@ class TestCircuitBreakerErrorNarrowing:
     @pytest.mark.parametrize(
         "exc_cls",
         [ValueError, TypeError, LookupError, ArithmeticError, AssertionError],
-        ids=["ValueError", "TypeError", "LookupError", "ArithmeticError", "AssertionError"],
+        ids=[
+            "ValueError",
+            "TypeError",
+            "LookupError",
+            "ArithmeticError",
+            "AssertionError",
+        ],
     )
     async def test_excluded_errors_do_not_trip_breaker(
         self, exc_cls: type[Exception]

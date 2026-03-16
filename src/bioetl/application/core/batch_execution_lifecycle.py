@@ -181,9 +181,7 @@ class BatchExecutionLifecycleService:
                 records_fetched=finalization_context.total_fetched,
                 resume_offset=finalization_context.resume_offset,
             )
-            self._tracing_manager.end_span_with_shutdown(
-                finalization_context.root_span
-            )
+            self._tracing_manager.end_span_with_shutdown(finalization_context.root_span)
             return
         if error is not None:
             await self._checkpoint_recovery_service.save_checkpoint_on_exception(

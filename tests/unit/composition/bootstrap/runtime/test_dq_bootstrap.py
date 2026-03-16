@@ -212,5 +212,3 @@ class TestBootstrapDqMonitorPort:
         assert "logger" in kwargs
         assert kwargs["baseline_window"] == 10
         assert kwargs["z_score_threshold"] == 2.0
-
-

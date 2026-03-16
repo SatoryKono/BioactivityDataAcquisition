@@ -280,9 +280,7 @@ class CoalescePolicyService:
             return None
 
         try:
-            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(
-                seed_pipeline
-            )
+            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(seed_pipeline)
             return f"{provider}.{entity}."
         except ValueError:
             return None

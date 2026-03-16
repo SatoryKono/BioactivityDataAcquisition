@@ -35,7 +35,9 @@ def mock_context() -> PipelineContext:
 @pytest.fixture
 def transformer() -> SubcellularFractionTransformer:
     """Create transformer instance."""
-    return SubcellularFractionTransformer(dependencies=build_test_transformer_dependencies())
+    return SubcellularFractionTransformer(
+        dependencies=build_test_transformer_dependencies()
+    )
 
 
 @pytest.mark.unit
@@ -229,7 +231,9 @@ class TestComputeFractionEntityId:
     @pytest.fixture
     def transformer(self) -> SubcellularFractionTransformer:
         """Create transformer instance."""
-        return SubcellularFractionTransformer(dependencies=build_test_transformer_dependencies())
+        return SubcellularFractionTransformer(
+            dependencies=build_test_transformer_dependencies()
+        )
 
     def test_basic_computation(
         self,
@@ -295,7 +299,9 @@ class TestExtractFractionFromAssay:
     @pytest.fixture
     def transformer(self) -> SubcellularFractionTransformer:
         """Create transformer instance."""
-        return SubcellularFractionTransformer(dependencies=build_test_transformer_dependencies())
+        return SubcellularFractionTransformer(
+            dependencies=build_test_transformer_dependencies()
+        )
 
     def test_extract_valid_fraction(
         self,

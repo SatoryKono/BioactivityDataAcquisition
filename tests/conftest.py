@@ -81,7 +81,6 @@ def _init_publication_type_classification() -> None:
     initialize_publication_type_classification(Path("configs"))
 
 
-
 @pytest.fixture(scope="session", autouse=True)
 def _sanitize_bioetl_env_vars() -> None:
     """Strip inline comments from BIOETL_ env vars.

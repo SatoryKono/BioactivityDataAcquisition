@@ -8,7 +8,9 @@ from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 __all__ = ["validate_registry_sync"]
 
 
-def _resolve_sync_baseline_section(scorecard: JsonDict) -> tuple[str, dict[str, object] | None]:
+def _resolve_sync_baseline_section(
+    scorecard: JsonDict,
+) -> tuple[str, dict[str, object] | None]:
     """Resolve which scorecard baseline section governs live registry sync."""
     governance = scorecard.get("governance", {})
     section_name = "baseline"

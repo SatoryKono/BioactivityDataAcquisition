@@ -199,8 +199,7 @@ class TestTransformerInjectionPath:
         service_bundle_content = service_bundle_file.read_text(encoding="utf-8")
         construction_content = construction_file.read_text(encoding="utf-8")
         combined_content = (
-            f"{assembler_content}\n"
-            f"{service_bundle_content}\n{construction_content}"
+            f"{assembler_content}\n{service_bundle_content}\n{construction_content}"
         )
 
         # Check for create_transformer method (public API for direct usage)

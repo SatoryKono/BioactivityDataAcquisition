@@ -130,7 +130,9 @@ class TestGoldWriterPipelineHelpers:
         """Normalization helper should preserve typed ScdConfig instances."""
         scd_config = MagicMock()
 
-        assert normalize_scd_config(scd_config, primary_keys=["entity_id"]) is scd_config
+        assert (
+            normalize_scd_config(scd_config, primary_keys=["entity_id"]) is scd_config
+        )
 
     def test_set_gold_write_span_attributes_sets_standard_fields(self):
         """Span helper should write the standard Gold observability attributes."""

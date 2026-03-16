@@ -69,7 +69,9 @@ class ErrorService:
             classifier=self._classifier,
             logger=self._logger,
         )
-        self._error_mapper = error_mapper or DomainInfraExceptionMapper(logger=self._logger)
+        self._error_mapper = error_mapper or DomainInfraExceptionMapper(
+            logger=self._logger
+        )
         self._metrics = metrics if metrics is not None else NoOpMetrics()
 
     def classify_http_error(

@@ -216,7 +216,7 @@ class TestValidateGovernanceSection:
                         "default_mode": "block",
                         "warn_until_by_section": {"*": "2099-12-31"},
                     },
-                }
+                },
             },
             baseline_registry_names={"class_size"},
             group_names={"size_shape"},
@@ -265,7 +265,7 @@ class TestValidateGovernanceSection:
                         "default_mode": "block",
                         "warn_until_by_section": {"*": "2099-12-31"},
                     },
-                }
+                },
             },
             baseline_registry_names={"class_size"},
             group_names={"size_shape"},

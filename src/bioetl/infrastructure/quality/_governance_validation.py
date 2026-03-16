@@ -41,7 +41,9 @@ def _validate_review_policy(review_policy: object, *, errors: list[str]) -> None
             )
 
 
-def _validate_baseline_policy(governance: dict[str, object], *, errors: list[str]) -> None:
+def _validate_baseline_policy(
+    governance: dict[str, object], *, errors: list[str]
+) -> None:
     """Require explicit separation between enforceable and historical baselines."""
     baseline_policy = governance.get("baseline_policy")
     if not isinstance(baseline_policy, dict):

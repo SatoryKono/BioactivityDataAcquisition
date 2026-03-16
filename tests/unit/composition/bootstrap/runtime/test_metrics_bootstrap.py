@@ -162,5 +162,3 @@ class TestMaybeStartMetricsServer:
 
         with pytest.raises(RuntimeError, match="bind failed"):
             maybe_start_metrics_server(settings=settings, start_server=mock_starter)
-
-

@@ -8334,7 +8334,7 @@ composition/bootstrap/
 | Файл                          | Фабрика                                                                                     | Назначение                                                     |
 | ----------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline_factory.py`         | `GenericPipelineFactory`                                                                    | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline_factories.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
+| `pipeline/registry.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
 | `data_source_factory.py`      | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
 | `http_client_factory.py`      | `HttpClientFactory`                                                                         | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
 | `storage_factory.py`          | `StorageFactory`                                                                            | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
@@ -8392,7 +8392,7 @@ data_source = ProviderRegistry.create_data_source("chembl", settings, config, lo
 
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
 - **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
-- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline_factories.py` без написания шаблонного кода сборки.
+- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline/registry.py` без написания шаблонного кода сборки.
 
 ### 3.1. Composite Pipeline Bootstrap (ADR-026)
 
@@ -14299,7 +14299,7 @@ is provided but deprecated.
 **Factory Updates:**
 
 - `transformer_factory.py` — imports and registrations updated
-- `pipeline_factories.py` — imports, configs, and exports updated
+- `pipeline/registry.py` — imports, configs, and exports updated
 - `registration.py` — import updated
 
 **Test Files (renamed):**
@@ -33114,7 +33114,7 @@ class PubMedPublicationTransformer(BaseTransformer):
 
 ### 4.3 Регистрация пайплайна
 
-Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
+Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline/registry.py`:
 
 ```python
 from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
@@ -33143,7 +33143,7 @@ def register_all_pipelines() -> None:
 - [ ] Трансформер реализован с наследованием от `BaseTransformer`
 - [ ] Пайплайн реализован с наследованием от `BasePipeline`
 - [ ] Провайдер зарегистрирован в `ProviderRegistry` (`registration.py`)
-- [ ] Пайплайн зарегистрирован в `pipeline_factories.py` с `transformer_class`
+- [ ] Пайплайн зарегистрирован в `pipeline/registry.py` с `transformer_class`
 - [ ] Unit-тесты с инъекцией трансформера
 - [ ] Integration-тесты с VCR-кассетами
 
@@ -33256,7 +33256,7 @@ class ChEMBLTargetTransformer(BaseChemblTransformer):
 
 В v5.1 вам больше не нужно вручную менять `bootstrap.py`. Достаточно зарегистрировать новый экземпляр `GenericPipelineFactory`.
 
-Откройте `src/bioetl/composition/factories/pipeline_factories.py` и добавьте определение:
+Откройте `src/bioetl/composition/factories/pipeline/registry.py` и добавьте определение:
 
 ```python
 from bioetl.application.pipelines.chembl.target-transformer import (
@@ -33291,7 +33291,7 @@ python -m bioetl run --pipeline chembl_target
 - [ ] Конфиг YAML создан.
 - [ ] Класс трансформера реализован (Silver трансформация).
 - [ ] Схема Silver (PyArrow) определена в `infrastructure/schemas/silver.py`.
-- [ ] Пайплайн зарегистрирован в `pipeline_factories.py`.
+- [ ] Пайплайн зарегистрирован в `pipeline/registry.py`.
 - [ ] Тесты добавлены.
 
 
@@ -50822,7 +50822,7 @@ bioetl run --pipeline chembl_cell_line --input-csv data/input/cell.csv
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 | Схема | `src/bioetl/domain/schemas/chembl/cell_line.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
-| Фабрика | `src/bioetl/composition/factories/pipeline_factories.py` |
+| Фабрика | `src/bioetl/composition/factories/pipeline/registry.py` |
 
 ---
 

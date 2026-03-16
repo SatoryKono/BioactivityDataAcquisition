@@ -42,7 +42,8 @@ def _reached_limit(fetched: int, limit: int | None) -> bool:
 
 
 async def _fetch_first_record(
-    strategy: _FetchStrategy, fallback_value: str,
+    strategy: _FetchStrategy,
+    fallback_value: str,
 ) -> BronzeRecord | None:
     async for record in strategy(query=fallback_value, limit=1):
         return dict(record)

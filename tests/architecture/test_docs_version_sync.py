@@ -146,8 +146,7 @@ def collect_outdated_version_refs(
                         continue
                     relative_path = md_file.relative_to(project_root)
                     outdated.append(
-                        f"{relative_path}: v{found_version} "
-                        f"(current: v{rules_version})"
+                        f"{relative_path}: v{found_version} (current: v{rules_version})"
                     )
 
     return sorted(set(outdated))

@@ -567,8 +567,7 @@ def test_canonical_observability_builder_uses_noop_when_disabled() -> None:
 
 
 @pytest.mark.unit
-def test_canonical_observability_builder_configures_dq_monitor_thresholds(
-) -> None:
+def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> None:
     logger = MagicMock()
     tracer = MagicMock()
     metrics = MagicMock()

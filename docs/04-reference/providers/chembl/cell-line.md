@@ -116,7 +116,7 @@ bioetl run --pipeline chembl_cell_line --input-csv data/input/cell.csv
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 | Схема | `src/bioetl/domain/schemas/chembl/cell_line.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
-| Фабрика | `src/bioetl/composition/factories/pipeline_factories.py` |
+| Фабрика | `src/bioetl/composition/factories/pipeline/registry.py` |
 
 ---
 

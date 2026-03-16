@@ -56,9 +56,7 @@ class TestColumnRenamer:
         assert "pmc_id" in result.columns
         assert "chembl.publication.title" in result.columns
 
-    def test_include_join_keys_when_disabled(
-        self, renamer: ColumnRenamer
-    ) -> None:
+    def test_include_join_keys_when_disabled(self, renamer: ColumnRenamer) -> None:
         """Join keys are renamed when exclude_join_keys=False."""
         df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
         result = renamer.rename_dataframe(

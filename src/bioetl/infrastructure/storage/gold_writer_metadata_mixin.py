@@ -61,6 +61,7 @@ class _GoldMergedMetadataWriteRequest:
 
 class _GoldMetadataWriteHostProtocol(Protocol):
     _metadata_coordinator: MetadataCoordinatorPort | None
+
     def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]: ...
 
     def _create_gold_metadata_payload(
@@ -95,6 +96,7 @@ class _GoldMetadataWriteHostProtocol(Protocol):
         provider_name: str,
         entity_name: str,
     ) -> None: ...
+
 
 class _GoldMergedMetadataWriteHostProtocol(_GoldMetadataWriteHostProtocol, Protocol):
     logger: LoggerPort
@@ -139,6 +141,7 @@ def _prepare_gold_metadata_write(
         entity_name=entity_name,
         metadata=metadata,
     )
+
 
 async def _persist_gold_metadata_write(
     host: _GoldMetadataWriteHostProtocol,

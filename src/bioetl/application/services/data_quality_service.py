@@ -246,7 +246,9 @@ class DataQualityService:
 
     def _process_anomalies(
         self,
-        anomalies: list[Any],  # Any: DQ anomaly objects with .severity and .anomaly_type attrs
+        anomalies: list[
+            Any
+        ],  # Any: DQ anomaly objects with .severity and .anomaly_type attrs
     ) -> bool:
         """Process detected anomalies and check for critical ones.
 

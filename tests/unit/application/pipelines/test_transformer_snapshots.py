@@ -35,7 +35,10 @@ from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTra
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
-from tests.helpers.transformer_dependencies import build_test_transformer_dependencies, instantiate_test_transformer
+from tests.helpers.transformer_dependencies import (
+    build_test_transformer_dependencies,
+    instantiate_test_transformer,
+)
 
 
 @pytest.fixture
@@ -140,7 +143,9 @@ class TestAssayTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> AssayTransformer:
-        return AssayTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return AssayTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -180,7 +185,9 @@ class TestPublicationTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> PublicationTransformer:
-        return PublicationTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return PublicationTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -226,7 +233,9 @@ class TestMoleculeTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> MoleculeTransformer:
-        return MoleculeTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return MoleculeTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -280,7 +289,9 @@ class TestTargetTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> TargetTransformer:
-        return TargetTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return TargetTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -327,7 +338,9 @@ class TestTargetComponentTransformerSnapshot:
 
     @pytest.fixture
     def transformer(self) -> TargetComponentTransformer:
-        return TargetComponentTransformer(provider="chembl", dependencies=build_test_transformer_dependencies())
+        return TargetComponentTransformer(
+            provider="chembl", dependencies=build_test_transformer_dependencies()
+        )
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:

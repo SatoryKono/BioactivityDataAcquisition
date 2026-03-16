@@ -551,7 +551,9 @@ class TestWriteMetadataPathLogic:
         self, tmp_path: Path
     ) -> None:
         """_write_metadata should pass one prepared operation into the execution helper."""
-        from bioetl.infrastructure.storage.metadata_writer_operations import _MetadataWriteRequest
+        from bioetl.infrastructure.storage.metadata_writer_operations import (
+            _MetadataWriteRequest,
+        )
 
         writer = MetadataWriter(logger=NoOpLogger())
         request = _MetadataWriteRequest(
