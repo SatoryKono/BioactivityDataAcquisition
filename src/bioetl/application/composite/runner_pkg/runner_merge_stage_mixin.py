@@ -71,21 +71,18 @@ class CompositeRunnerMergeStageMixin:
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:
-        """Invoke support-layer checkpoint save helper."""
         return await self._save_checkpoint_safe(state, operation)
 
     async def _call_generate_dq_reports(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
     ) -> None:
-        """Invoke support-layer DQ report generation helper."""
         await self._generate_dq_reports(merge_result)
 
     async def _call_write_cv_quarantine(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
     ) -> None:
-        """Invoke support-layer quarantine write helper."""
         await self._write_cv_quarantine(merge_result)
 
     def _transition_to_merging_state(
@@ -335,5 +332,5 @@ class CompositeRunnerMergeStageMixin:
         await self._delete_checkpoint_safe()
         try:
             await self._checkpoint_manager.delete_orphaned()
-        except Exception:  # noqa: BLE001 — non-critical cleanup
+        except (*CHECKPOINT_NON_FATAL_ERRORS, BioETLError):
             pass

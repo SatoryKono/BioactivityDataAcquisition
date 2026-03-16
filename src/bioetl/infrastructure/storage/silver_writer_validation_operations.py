@@ -10,17 +10,21 @@ import pyarrow as pa
 
 from bioetl.domain.exceptions import (
     PolicyViolationError,
-    SchemaEvolutionError,
     SchemaViolationError,
 )
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode
+from bioetl.infrastructure.storage.silver_writer_schema_drift_operations import (
+    _build_schema_drift_info,
+    _build_silver_schema_drift_diff,
+    _check_schema_drift,
+    _detect_schema_drift,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.medallion import WriteModePolicy
     from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
     from bioetl.domain.types import BronzeRecord
-    from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
 
 __all__ = [
     "_PreparedSilverWritePayload",
@@ -40,7 +44,7 @@ __all__ = [
     "_validate_records",
     "_validate_silver_pandera",
     "_validate_write_mode_impl",
-]
+]  # NOTE: _check_schema_drift, _detect_schema_drift, _build_* re-exported from schema_drift_operations
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,14 +75,6 @@ class _SilverSchemaPolicyRequest:
     on_schema_mismatch: Literal["error", "evolve", "ignore"]
     validated_mode: SilverWriteMode
     arrow_data: pa.Table
-
-
-@dataclass(frozen=True, slots=True)
-class _SilverSchemaDriftDiff:
-    """Normalized schema drift field sets for one Silver batch."""
-
-    new_fields: tuple[str, ...]
-    missing_fields: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -222,62 +218,6 @@ def _validate_key_nullability_impl(
         )
 
 
-def _diff_schema_fields(
-    existing_schema: pa.Schema | None,
-    records: list[BronzeRecord],
-) -> tuple[set[str], set[str]] | None:
-    """Return incoming-only and existing-only fields for one Silver batch."""
-    if existing_schema is None or not records:
-        return None
-
-    incoming_fields = set(records[0].keys())
-    existing_fields = set(existing_schema.names)
-    return incoming_fields - existing_fields, existing_fields - incoming_fields
-
-
-def _build_silver_schema_drift_diff(
-    existing_schema: pa.Schema | None,
-    records: list[BronzeRecord],
-) -> _SilverSchemaDriftDiff | None:
-    """Build a normalized Silver schema drift diff from existing and incoming data."""
-    diff = _diff_schema_fields(existing_schema, records)
-    if diff is None:
-        return None
-
-    new_fields, missing_fields = diff
-    if not new_fields and not missing_fields:
-        return None
-
-    return _SilverSchemaDriftDiff(
-        new_fields=tuple(sorted(new_fields)),
-        missing_fields=tuple(sorted(missing_fields)),
-    )
-
-
-def _build_schema_drift_info(
-    diff: _SilverSchemaDriftDiff,
-) -> SchemaDriftInfo:
-    """Build SchemaDriftInfo from a normalized field diff."""
-    from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
-
-    critical_missing = [
-        field for field in diff.missing_fields if not field.startswith("_")
-    ]
-    status: Literal["info", "warn", "critical"]
-    if critical_missing:
-        status = "critical"
-    elif len(diff.new_fields) > 3:
-        status = "warn"
-    else:
-        status = "info"
-
-    return SchemaDriftInfo(
-        status=status,
-        new_fields=diff.new_fields,
-        missing_fields=diff.missing_fields,
-    )
-
-
 def _build_prepared_silver_write_payload(
     *,
     table_path: str,
@@ -402,47 +342,6 @@ def _validate_silver_pandera(
                 {"table": table_name},
             )
         raise SchemaViolationError(table_name, result.errors)
-
-
-async def _check_schema_drift(
-    host: _SilverWriterValidationHostProtocol,
-    table_name: str,
-    records: list[BronzeRecord],
-    on_schema_mismatch: Literal["error", "evolve", "ignore"],
-) -> None:
-    """Check schema drift and handle according to configured policy."""
-    existing_schema = await host._get_table_schema(table_name)
-    diff = _build_silver_schema_drift_diff(existing_schema, records)
-    if diff is None:
-        return
-
-    host.logger.warning(
-        "Schema drift detected",
-        table=table_name,
-        new_fields=list(diff.new_fields) if diff.new_fields else None,
-        removed_fields=list(diff.missing_fields) if diff.missing_fields else None,
-        action=on_schema_mismatch,
-    )
-
-    if on_schema_mismatch == "error":
-        raise SchemaEvolutionError(
-            table=table_name,
-            new_fields=set(diff.new_fields),
-            removed_fields=set(diff.missing_fields),
-        )
-
-
-async def _detect_schema_drift(
-    host: _SilverWriterValidationHostProtocol,
-    table_name: str,
-    records: list[BronzeRecord],
-) -> SchemaDriftInfo | None:
-    """Detect schema drift between existing table and incoming records."""
-    existing_schema = await host._get_table_schema(table_name)
-    diff = _build_silver_schema_drift_diff(existing_schema, records)
-    if diff is None:
-        return None
-    return _build_schema_drift_info(diff)
 
 
 async def _finalize_silver_write_payload(

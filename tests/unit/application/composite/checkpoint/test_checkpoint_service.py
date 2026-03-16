@@ -567,3 +567,167 @@ class TestListAll:
         result = await svc.list_all()
 
         assert result == []
+
+
+# ---------------------------------------------------------------------------
+# 8. Stale Checkpoint Detection
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestStaleCheckpointDetection:
+    """Tests for _warn_if_checkpoint_stale staleness detection."""
+
+    @pytest.mark.asyncio
+    async def test_stale_checkpoint_emits_warning(self) -> None:
+        """Resuming a 48h-old checkpoint emits a staleness warning."""
+        from datetime import timedelta
+
+        storage = _make_storage()
+        logger = _make_logger()
+        old_time = datetime.now(tz=UTC) - timedelta(hours=48)
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-001",
+            state=CompositePipelineState.ENRICHING,
+            created_at=old_time,
+            updated_at=old_time,
+            seed_completed=True,
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+        storage.list_glob.return_value = ["composite_my_composite_run-001.json"]
+
+        svc = CompositeCheckpointService(
+            composite_name="my_composite",
+            run_id="run-001",
+            storage=storage,
+            logger=logger,
+            resume=True,
+        )
+        await svc.load()
+
+        warning_calls = [str(c) for c in logger.warning.call_args_list]
+        assert any("stale" in c.lower() for c in warning_calls)
+
+    @pytest.mark.asyncio
+    async def test_fresh_checkpoint_no_staleness_warning(self) -> None:
+        """A 1h-old checkpoint does not trigger staleness warning."""
+        from datetime import timedelta
+
+        storage = _make_storage()
+        logger = _make_logger()
+        recent_time = datetime.now(tz=UTC) - timedelta(hours=1)
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-001",
+            state=CompositePipelineState.ENRICHING,
+            created_at=recent_time,
+            updated_at=recent_time,
+            seed_completed=True,
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+        storage.list_glob.return_value = ["composite_my_composite_run-001.json"]
+
+        svc = CompositeCheckpointService(
+            composite_name="my_composite",
+            run_id="run-001",
+            storage=storage,
+            logger=logger,
+            resume=True,
+        )
+        await svc.load()
+
+        warning_calls = [str(c) for c in logger.warning.call_args_list]
+        assert not any("stale" in c.lower() for c in warning_calls)
+
+    @pytest.mark.asyncio
+    async def test_staleness_check_disabled_with_zero_threshold(self) -> None:
+        """Setting threshold to 0 disables staleness warnings."""
+        from datetime import timedelta
+
+        storage = _make_storage()
+        logger = _make_logger()
+        old_time = datetime.now(tz=UTC) - timedelta(hours=48)
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-001",
+            state=CompositePipelineState.ENRICHING,
+            created_at=old_time,
+            updated_at=old_time,
+            seed_completed=True,
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+        storage.list_glob.return_value = ["composite_my_composite_run-001.json"]
+
+        svc = CompositeCheckpointService(
+            composite_name="my_composite",
+            run_id="run-001",
+            storage=storage,
+            logger=logger,
+            resume=True,
+            stale_checkpoint_threshold_hours=0,
+        )
+        await svc.load()
+
+        warning_calls = [str(c) for c in logger.warning.call_args_list]
+        assert not any("stale" in c.lower() for c in warning_calls)
+
+    def test_default_threshold_is_24_hours(self) -> None:
+        """Default stale threshold is 24 hours."""
+        assert CompositeCheckpointService._DEFAULT_STALE_THRESHOLD_HOURS == 24.0
+
+
+# ---------------------------------------------------------------------------
+# 9. Delete Orphaned
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestDeleteOrphaned:
+    """Tests for delete_orphaned() orphan cleanup."""
+
+    @pytest.mark.asyncio
+    async def test_deletes_other_run_checkpoints(self) -> None:
+        """delete_orphaned() deletes checkpoints from other runs."""
+        svc, storage, logger = _make_service(
+            composite_name="my_composite", run_id="run-002"
+        )
+        storage.list_glob.return_value = [
+            "composite_my_composite_run-001.json",
+            "composite_my_composite_run-002.json",
+        ]
+        storage.delete.return_value = True
+
+        deleted = await svc.delete_orphaned()
+
+        assert deleted == 1
+        storage.delete.assert_called_once_with(
+            "composite_my_composite_run-001.json"
+        )
+
+    @pytest.mark.asyncio
+    async def test_returns_zero_when_no_orphans(self) -> None:
+        """delete_orphaned() returns 0 when only current checkpoint exists."""
+        svc, storage, _ = _make_service(
+            composite_name="my_composite", run_id="run-001"
+        )
+        storage.list_glob.return_value = [
+            "composite_my_composite_run-001.json",
+        ]
+
+        deleted = await svc.delete_orphaned()
+
+        assert deleted == 0
+
+    @pytest.mark.asyncio
+    async def test_returns_zero_when_no_checkpoints(self) -> None:
+        """delete_orphaned() returns 0 when no checkpoints exist."""
+        svc, storage, _ = _make_service()
+        storage.list_glob.return_value = []
+
+        deleted = await svc.delete_orphaned()
+
+        assert deleted == 0
