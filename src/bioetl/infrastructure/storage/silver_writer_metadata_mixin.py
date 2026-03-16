@@ -7,8 +7,7 @@ __all__ = ["SilverWriterMetadataMixin"]
 import asyncio
 import time
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
-from typing import ClassVar
+from datetime import datetime
 
 import pyarrow as pa
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -16,9 +15,6 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
-    AuditEntry,
-    AuditLayer,
-    AuditOperation,
     AuditPort,
     LoggerPort,
     MetadataCoordinatorPort,
@@ -29,6 +25,10 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.silver_writer_audit_operations import (
+    _build_silver_audit_entry,
+    _SilverAuditWriteRequest,
+)
 from bioetl.infrastructure.storage.silver_writer_metadata_operations import (
     _build_silver_write_result,
     _execute_silver_metadata_write,
@@ -54,11 +54,6 @@ class SilverWriterMetadataMixin:
     _transform_steps: tuple[str, ...]
     _dq_calculator: DQMetricsCalculator
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
-    _SILVER_AUDIT_OPERATION_MAP: ClassVar[dict[SilverWriteMode, AuditOperation]] = {
-        SilverWriteMode.MERGE: AuditOperation.MERGE,
-        SilverWriteMode.APPEND: AuditOperation.APPEND,
-        SilverWriteMode.DELETE: AuditOperation.DELETE,
-    }
 
     async def _compute_dq_metrics(
         self,
@@ -90,44 +85,16 @@ class SilverWriterMetadataMixin:
         """Log audit entry for Silver write operation."""
         if self._audit is None:
             return
-        from uuid import UUID
-
-        from bioetl.domain.types import RunID
-
-        first_record = records[0]
-        run_id_str = first_record.get("_run_id", "")
-        ingestion_ts = first_record.get("_ingestion_ts")
-
-        try:
-            run_id = RunID(UUID(run_id_str))
-        except (ValueError, TypeError):
-            self.logger.warning(
-                "audit_skipped_invalid_run_id",
-                table=table_name,
-                run_id=run_id_str,
-            )
-            return
-        if isinstance(ingestion_ts, str):
-            timestamp = datetime.fromisoformat(ingestion_ts)
-        elif isinstance(ingestion_ts, datetime):
-            timestamp = ingestion_ts
-        else:
-            timestamp = datetime.fromtimestamp(0, tz=UTC)
-        if timestamp.tzinfo is None:
-            timestamp = timestamp.replace(tzinfo=UTC)
-        operation = self._SILVER_AUDIT_OPERATION_MAP[mode]
-        audit_entry = AuditEntry(
-            run_id=run_id,
-            timestamp=timestamp,
-            layer=AuditLayer.SILVER,
-            table_name=table_name,
-            operation=operation,
-            records_count=len(records),
-            metadata={
-                "run_type": first_record.get("_run_type", ""),
-                "source_batch_id": first_record.get("_source_batch_id", ""),
-            },
+        audit_entry = _build_silver_audit_entry(
+            self,
+            _SilverAuditWriteRequest(
+                table_name=table_name,
+                records=records,
+                mode=mode,
+            ),
         )
+        if audit_entry is None:
+            return
         await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:

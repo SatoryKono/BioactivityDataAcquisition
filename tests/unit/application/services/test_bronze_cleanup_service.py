@@ -38,7 +38,6 @@ def mock_storage():
             "directories_removed": 0,
         }
     )
-    storage.aclose = AsyncMock()
     return storage
 
 
@@ -197,13 +196,3 @@ class TestBronzeCleanupServiceFormatBytes:
         assert result == "0 bytes"
 
 
-@pytest.mark.unit
-class TestBronzeCleanupServiceAclose:
-    """Test BronzeCleanupService.aclose method."""
-
-    @pytest.mark.asyncio
-    async def test_aclose(self, bronze_cleanup_service, mock_storage):
-        """Test closing the service."""
-        await bronze_cleanup_service.aclose()
-
-        mock_storage.aclose.assert_called_once()

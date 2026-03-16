@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, StoragePort
+    from bioetl.domain.ports import LoggerPort, StorageMaintenancePort
 
 
 _MAINTENANCE_OPERATION_ERRORS = (
@@ -21,9 +21,9 @@ _MAINTENANCE_OPERATION_ERRORS = (
 
 
 class _MedallionMaintenanceMixin:
-    """Direct maintenance operations delegated to StoragePort."""
+    """Direct maintenance operations delegated to StorageMaintenancePort."""
 
-    storage: StoragePort
+    storage: StorageMaintenancePort
     logger: LoggerPort
 
     async def vacuum(

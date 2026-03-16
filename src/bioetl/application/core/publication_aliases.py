@@ -11,6 +11,7 @@ __all__ = ["LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE"]
 
 
 # Explicit deprecation window for legacy publication aliases.
+# TODO(RF-008.3): Remove aliases after LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE
 LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE = "2026-06-30"
 
 # Legacy aliases declared in publication schema YAML (`field_aliases`).

@@ -1,7 +1,7 @@
 """Bronze cleanup service for retention operations (Application layer).
 
 Provides high-level Bronze layer cleanup for CLI and other interfaces.
-Uses StoragePort for actual cleanup operations.
+Uses BronzeStoragePort for actual cleanup operations.
 
 Implements RULES.md §2.1 - Bronze layer 90-day retention policy.
 Implements RULES.md §1.1 - Application layer depends only on Domain.
@@ -17,7 +17,7 @@ from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, StoragePort
+    from bioetl.domain.ports import BronzeStoragePort, LoggerPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,8 +44,8 @@ class BronzeCleanupService:
     """Service for Bronze layer cleanup operations.
 
     Provides high-level operations for Bronze cleanup
-    used by CLI and other interfaces. Wraps StoragePort
-    for Application-layer abstraction.
+    used by CLI and other interfaces. Depends on the narrow
+    ``BronzeStoragePort`` (ISP — only Bronze operations needed).
 
     Implements RULES.md §2.1 Bronze layer retention:
     - Default retention: 90 days
@@ -53,7 +53,7 @@ class BronzeCleanupService:
     - Empty directories are cleaned up
 
     Attributes:
-        storage: StoragePort for storage operations.
+        storage: BronzeStoragePort for Bronze storage operations.
         logger: Structured logger for observability.
 
     Example:
@@ -62,7 +62,7 @@ class BronzeCleanupService:
         >>> logger.info("cleanup_complete", files_removed=result.files_removed)
     """
 
-    storage: StoragePort
+    storage: BronzeStoragePort
     logger: LoggerPort
 
     async def cleanup(
@@ -138,6 +138,4 @@ class BronzeCleanupService:
                 return f"{b / div:.2f} {unit}"
         return f"{b} bytes"
 
-    async def aclose(self) -> None:
-        """Close the service and release resources."""
-        await self.storage.aclose()
+

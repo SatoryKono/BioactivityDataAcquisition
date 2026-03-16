@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1072,
-    "total_internal_imports": 4112,
+    "scanned_modules": 1075,
+    "total_internal_imports": 4124,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 245,
@@ -53,13 +53,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 514,
+      "imports": 521,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 636,
+      "imports": 641,
       "allowed": true
     },
     {
@@ -111,7 +111,7 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.ports",
-      "imports": 68
+      "imports": 69
     },
     {
       "source": "application.core",
@@ -136,7 +136,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 41
+      "imports": 42
     },
     {
       "source": "composition.factories",
@@ -146,7 +146,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 38
+      "imports": 39
     },
     {
       "source": "composition.factories",
@@ -214,6 +214,11 @@
       "imports": 21
     },
     {
+      "source": "infrastructure.storage",
+      "target": "domain.medallion",
+      "imports": 20
+    },
+    {
       "source": "application.core",
       "target": "domain.context",
       "imports": 19
@@ -226,11 +231,6 @@
     {
       "source": "composition.factories",
       "target": "domain.types",
-      "imports": 19
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.medallion",
       "imports": 19
     },
     {
