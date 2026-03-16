@@ -114,6 +114,9 @@ def mock_storage():
     """Create a mock storage port."""
     storage = MagicMock()
     storage.get_table_path = MagicMock(return_value="/path/to/table")
+    storage.deduplicate_silver = AsyncMock(return_value=0)
+    storage.optimize = AsyncMock(return_value=None)
+    storage.vacuum = AsyncMock(return_value=0)
     return storage
 
 

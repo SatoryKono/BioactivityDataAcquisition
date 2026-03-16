@@ -14,12 +14,17 @@ def get_version() -> str:
     Returns:
         Version string or 'unknown' if package is not installed.
     """
+    declared_version: str | None = None
     try:
-        return _pkg_version("bioetl")
-    except PackageNotFoundError:
-        try:
-            from bioetl import __version__ as _fallback
+        from bioetl import __version__ as _declared
 
-            return _fallback
-        except ImportError:
-            return "unknown"
+        declared_version = _declared
+    except ImportError:
+        declared_version = None
+
+    try:
+        installed_version = _pkg_version("bioetl")
+    except PackageNotFoundError:
+        installed_version = None
+
+    return declared_version or installed_version or "unknown"

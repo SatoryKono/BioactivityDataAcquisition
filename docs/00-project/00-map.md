@@ -146,6 +146,10 @@ docs/
 | [ADR-037: Canonical Schema Generation](../02-architecture/decisions/ADR-037-canonical-schema-generation.md) | Canonical schema source and generation | §2.8 |
 | [ADR-038: Enum Externalization](../02-architecture/decisions/ADR-038-enum-externalization.md) | ChEMBL enum values externalization | App D |
 | [ADR-039: Unified Entity Config](../02-architecture/decisions/ADR-039-unified-entity-config-format.md) | Unified entity configuration format | App D |
+| [ADR-040: Diagram Governance](../02-architecture/decisions/ADR-040-diagram-governance.md) | Mermaid diagram standards and governance | §7.5 |
+| [ADR-041: Naming Policy Skills/Agents](../02-architecture/decisions/ADR-041-naming-policy-skills-agents.md) | Naming conventions for skills and agents | §7.1 |
+| [ADR-042: Testing Strategy Matrix](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md) | Test categorization and coverage strategy | §5 |
+| [ADR-043: Documentation Knowledge Management](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md) | Documentation governance and knowledge management | §7 |
 
 ### Data Management
 
