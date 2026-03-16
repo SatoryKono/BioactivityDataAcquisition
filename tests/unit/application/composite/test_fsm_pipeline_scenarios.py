@@ -133,6 +133,14 @@ class FakeLockPort:
         )
         return True
 
+    async def heartbeat(
+        self,
+        key: str,
+        owner_id: Any,
+        exclusive: bool = False,
+    ) -> bool:
+        return True
+
 
 class FakeCheckpointManager:
     """In-memory checkpoint manager for testing.
@@ -181,6 +189,10 @@ class FakeCheckpointManager:
         if self.delete_error:
             raise self.delete_error
         self.deleted = True
+
+    async def delete_orphaned(self) -> int:
+        """No-op orphan cleanup for tests."""
+        return 0
 
     def get_state_sequence(self) -> list[CompositePipelineState]:
         """Get the sequence of FSM states saved."""

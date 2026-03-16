@@ -80,6 +80,7 @@ class _SupportMixinHarness(CompositeRunnerSupportMixin):
         self._checkpoint_manager = AsyncMock()
         self._checkpoint_manager.save = AsyncMock()
         self._seed_runner_factory = MagicMock()
+        self._original_run_id: str | None = None
         self._preflight_validator = None
         self._fsm = MagicMock()
 

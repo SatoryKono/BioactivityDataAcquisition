@@ -10,6 +10,8 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
+from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
@@ -36,6 +38,8 @@ from bioetl.domain.exceptions import (
     RunnerAlreadyExecutedError,
 )
 from bioetl.domain.types import RunID
+
+_COMPOSITE_HEARTBEAT_INTERVAL_SECONDS = 30
 
 if TYPE_CHECKING:
     import polars as pl
@@ -169,6 +173,7 @@ class CompositePipelineRunner(
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
+        self._original_run_id: str | None = None
         self._finished = False
         self._final_state: CompositePipelineState | None = None
         self._dq_report_service = dq_report_service
@@ -212,7 +217,12 @@ class CompositePipelineRunner(
         self._logger.error(PipelineEvent.FAILED, **log_kwargs)
 
     async def _run_with_managed_lock(self) -> CompositeResult:
-        """Acquire/release the distributed lock around the canonical run body."""
+        """Acquire/release the distributed lock around the canonical run body.
+
+        A background :class:`HeartbeatTask` keeps the lock alive for the
+        entire duration of the composite pipeline execution, preventing TTL
+        expiration for long-running pipelines (>1 hour).
+        """
         lock_key = self._config.lock_key
         acquired = await self._lock.acquire(
             key=lock_key,
@@ -222,11 +232,23 @@ class CompositePipelineRunner(
         if not acquired:
             raise LockAcquisitionError(key=lock_key)
 
+        shutdown_signal = ShutdownSignal()
+        heartbeat = HeartbeatTask(
+            lock_port=self._lock,
+            lock_key=lock_key,
+            owner_id=self._run_id,
+            exclusive=False,
+            interval=_COMPOSITE_HEARTBEAT_INTERVAL_SECONDS,
+            shutdown_signal=shutdown_signal,
+            logger=self._logger,
+        )
         try:
+            await heartbeat.start()
             result = await self._run_with_lock()
             self._mark_finished(CompositePipelineState.COMPLETED)
             return result
         finally:
+            await heartbeat.stop()
             await self._lock.release(key=lock_key, owner_id=self._run_id)
 
     async def run(self) -> CompositeResult:
@@ -282,6 +304,8 @@ class CompositePipelineRunner(
             state = self._fsm.handle_resume_from_failed(state)
         if self._runtime.resume and state.is_resumable:
             self._fsm.log_resume_context(state)
+            if state.run_id != self._run_id_str:
+                self._original_run_id = state.run_id
 
         return state
 

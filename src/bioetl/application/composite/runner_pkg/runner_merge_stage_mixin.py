@@ -329,7 +329,11 @@ class CompositeRunnerMergeStageMixin:
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> None:
-        """Finalize pipeline: set COMPLETED state and clean checkpoint."""
+        """Finalize pipeline: set COMPLETED state, clean checkpoint, purge orphans."""
         state = self._transition_to_completed_state(state)
         await self._persist_completed_state(state)
         await self._delete_checkpoint_safe()
+        try:
+            await self._checkpoint_manager.delete_orphaned()
+        except Exception:  # noqa: BLE001 — non-critical cleanup
+            pass
