@@ -1,7 +1,7 @@
 # src/bioetl/domain/schemas/semanticscholar/publication.py
 """Pandera schema for Semantic Scholar Publication entity.
 
-Aligned with RULES.md v5.23 and Publication Schema Unification spec.
+Aligned with RULES.md v5.24 and Publication Schema Unification spec.
 Includes lookup metadata fields for DOI/title resolution tracking.
 """
 

@@ -1,6 +1,6 @@
 """PubChem API client adapter.
 
-Implements RULES.md Appendix A - PubChem specifications.
+Implements DataSourcePort for PubChem compound retrieval.
 
 Requirements:
 - Uses pubchempy library (legacy sync)

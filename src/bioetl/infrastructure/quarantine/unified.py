@@ -187,16 +187,16 @@ class UnifiedQuarantineAdapter:
         error_code: str | None = None,
         dq_status: QuarantineRecordStatus | None = None,
     ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
-        """Inspect quarantine records.
+        """Inspect quarantine records matching the given filters.
 
         Args:
-            pipeline: Pipeline.
-            limit: Maximum number of records to process.
-            error_code: Error code.
-            dq_status: Dq status.
+            pipeline: Pipeline name to filter by.
+            limit: Maximum number of records to return.
+            error_code: Optional error code to filter by.
+            dq_status: Optional quarantine status to filter by.
 
         Returns:
-            Result dictionary.
+            List of quarantine record dicts with payload, error, and status fields.
         """
         return inspect_records(
             self.base_path, None, pipeline, limit, error_code, dq_status
@@ -220,7 +220,7 @@ class UnifiedQuarantineAdapter:
                  (single source of time per ADR-014). Required.
 
         Returns:
-            Result dictionary.
+            Iterator yielding individual quarantine record dicts for reprocessing.
         """
         return replay_records(
             self.base_path, None, pipeline, error_code, max_age_days, now=now
@@ -252,11 +252,12 @@ class UnifiedQuarantineAdapter:
         """Update DQ status for a quarantined record.
 
         Args:
-            payload_hash: Payload hash.
-            new_status: New status.
+            payload_hash: SHA-256 hash identifying the quarantined record.
+            new_status: New quarantine status to set.
 
         Returns:
-            True if condition is met, False otherwise.
+            True if a matching record was found and updated, False if no
+            quarantine table exists or no record matches the hash.
         """
         try:
             dt = DeltaTable(self.base_path)
@@ -281,10 +282,10 @@ class UnifiedQuarantineAdapter:
         """Get quarantine statistics for a pipeline.
 
         Args:
-            pipeline: Pipeline.
+            pipeline: Pipeline name to compute statistics for.
 
         Returns:
-            Stats.
+            Dict with counts by error code, status distribution, and totals.
         """
         return get_statistics(self.base_path, None, pipeline)
 

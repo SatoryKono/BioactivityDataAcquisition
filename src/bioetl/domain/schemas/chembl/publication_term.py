@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Publication Term entity.
 
-Aligned with RULES.md v5.23 and ChEMBL 34 schema.
+Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 Renamed from DocumentTermSchema per ADR-024 (Entity Naming Unification).
 
 PublicationTerms are derived entities extracted from Publication (ChEMBL Document)

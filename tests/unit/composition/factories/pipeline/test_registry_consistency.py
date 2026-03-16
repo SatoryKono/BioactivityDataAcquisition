@@ -140,6 +140,13 @@ class TestRegistryNameUniqueness:
 class TestFactoryValidity:
     """Test that all registered factories are valid and callable."""
 
+    def test_factories_mapping_is_read_only(self) -> None:
+        """The module-level factory catalog should not be mutable."""
+        from bioetl.composition.factories.pipeline.registry import _factories
+
+        with pytest.raises(TypeError):
+            _factories["test_pipeline"] = object()  # type: ignore[index]
+
     def test_all_factories_have_pipeline_name(self) -> None:
         """Verify each factory has a pipeline_name attribute."""
         from bioetl.composition.factories.pipeline.registry import _factories

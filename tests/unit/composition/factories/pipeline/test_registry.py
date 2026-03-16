@@ -5,7 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+from bioetl.composition.factories.pipeline.registry import (
+    register_all_pipelines,
+    reset_registration,
+)
 from bioetl.composition.registry import get_default_registry
 
 
@@ -145,3 +148,20 @@ def test_multiple_registries_in_same_process():
     # But they should be different instances
     assert registry1 is not registry2
     assert registry1._registry is not registry2._registry
+
+
+def test_reset_registration_clears_default_registry_state():
+    """reset_registration should clear the default registry and registration flag."""
+    from bioetl.composition.factories.pipeline.registry import is_registered
+
+    try:
+        register_all_pipelines()
+        assert is_registered()
+        assert len(get_default_registry().list_pipelines()) > 0
+
+        reset_registration()
+
+        assert not is_registered()
+        assert get_default_registry().list_pipelines() == []
+    finally:
+        register_all_pipelines()

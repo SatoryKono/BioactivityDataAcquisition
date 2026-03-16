@@ -26,6 +26,7 @@ Usage:
 from __future__ import annotations
 
 import threading
+from types import MappingProxyType
 from typing import cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
@@ -43,10 +44,14 @@ from bioetl.domain.ports import PipelineFactoryPort
 # Factory Instances (created from PIPELINE_CONFIGS)
 # =============================================================================
 
-# Create all factories using loop over configurations
-_factories: dict[str, GenericPipelineFactory[GenericPipeline]] = {
-    config.pipeline_name: create_factory(config) for config in PIPELINE_CONFIGS
-}
+def _build_factories() -> dict[str, GenericPipelineFactory[GenericPipeline]]:
+    """Build factory instances from the canonical pipeline config table."""
+    return {config.pipeline_name: create_factory(config) for config in PIPELINE_CONFIGS}
+
+
+# Backward-compatible module surface kept for tests/importers, but frozen to
+# avoid additional module-level mutable registry state.
+_factories = MappingProxyType(_build_factories())
 
 # Export individual factories for backward compatibility
 chembl_activity_factory = _factories["chembl_activity"]
@@ -76,9 +81,28 @@ semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 # Registration Functions
 # =============================================================================
 
-# Thread-safe registration state
-_registration_lock = threading.Lock()
-_factories_registered = False
+class _PipelineFactoryRegistrationState:
+    """Thread-safe default-registration state holder.
+
+    This keeps mutable registration state instance-scoped and lazily created,
+    mirroring the project-wide registry hardening pattern without changing the
+    existing module-level helper API.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.RLock()
+        self._registered = False
+
+
+_default_registration_state: _PipelineFactoryRegistrationState | None = None
+
+
+def _get_default_registration_state() -> _PipelineFactoryRegistrationState:
+    """Get the lazy default registration-state singleton."""
+    global _default_registration_state
+    if _default_registration_state is None:
+        _default_registration_state = _PipelineFactoryRegistrationState()
+    return _default_registration_state
 
 
 def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
@@ -100,29 +124,29 @@ def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
 
     Should be called once at application startup (e.g., in cli.py or bootstrap.py).
     """
-    global _factories_registered
-
     # For custom registries, register directly. _register_factories_to() is
     # idempotent at the registry level and skips already-registered pipelines.
     if registry is not None:
         _register_factories_to(registry)
         return
 
+    registration_state = _get_default_registration_state()
+
     # Default registry: use idempotency guard
     # Fast path: already registered (no lock needed)
-    if _factories_registered:
+    if registration_state._registered:
         return
 
     # Slow path: acquire lock and double-check
-    with _registration_lock:
+    with registration_state._lock:
         # Double-check after acquiring lock (TOCTOU prevention)
-        if _factories_registered:
+        if registration_state._registered:
             return
 
         default_registry = get_default_registry()
         _register_factories_to(default_registry)
 
-        _factories_registered = True
+        registration_state._registered = True
 
 
 def _register_factories_to(registry: PipelineRegistry) -> None:
@@ -150,7 +174,7 @@ def is_registered() -> bool:
         True if register_all_pipelines() has been called.
     """
     # Reading a bool is atomic in Python, no lock needed for read
-    return _factories_registered
+    return _get_default_registration_state()._registered
 
 
 def reset_registration() -> None:
@@ -162,10 +186,10 @@ def reset_registration() -> None:
     Note: For isolated tests, prefer creating a new registry instance with
     create_registry() rather than using reset_registration().
     """
-    global _factories_registered
-    with _registration_lock:
+    registration_state = _get_default_registration_state()
+    with registration_state._lock:
         get_default_registry().clear()
-        _factories_registered = False
+        registration_state._registered = False
 
 
 def get_factory(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline]:

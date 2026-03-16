@@ -1,13 +1,13 @@
 """StorageAdapter - Unified storage adapter for Bronze/Silver/Gold layers.
 
-Implements StoragePort protocol from domain/ports.py.
+Implements StoragePort protocol from ``bioetl.domain.ports``.
 
 This module was extracted from storage.py as part of the storage factory split
 to improve maintainability and reduce file size.
 
 Note:
-    Lock validation is performed at Application layer (BatchWriter)
-    per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O adapters.
+    Lock validation is performed at Application layer (BatchWriter).
+    Infrastructure writers are pure I/O adapters.
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ class StorageAdapter(
 ):
     """Unified storage adapter for Bronze/Silver/Gold.
 
-    Implements StoragePort protocol from domain/ports.py.
+    Implements StoragePort protocol from ``bioetl.domain.ports``.
     Delegates to specialized writers for each layer.
     """
 
