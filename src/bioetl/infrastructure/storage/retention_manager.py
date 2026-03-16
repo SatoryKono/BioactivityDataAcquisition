@@ -267,7 +267,25 @@ class RetentionPolicy:
         version: int | None = None,
         timestamp: datetime | None = None,
     ) -> DeltaTable:
-        """Read table snapshot by version or timestamp."""
+        """Read table snapshot at a specific version or timestamp.
+
+        Args:
+            table_name: Delta table name (relative to base path).
+            version: Specific table version number to load.
+            timestamp: Point-in-time datetime for time travel.
+
+        Returns:
+            DeltaTable instance at the requested snapshot.
+
+        Raises:
+            ValueError: If both or neither version/timestamp are specified.
+            TableNotFoundError: If the Delta table does not exist.
+
+        Note:
+            The timestamp branch uses ``storage_options`` to pass the
+            timestamp — verify compatibility with your delta-rs version.
+            Version-based time travel is the more reliable path.
+        """
         if version is not None and timestamp is not None:
             raise ValueError("Specify either version or timestamp, not both")
 

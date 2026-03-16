@@ -126,6 +126,8 @@ def execute_run(
 
     Args:
         request: Prepared run request with pipeline, options, and health config.
+        registry: Optional pipeline registry for test isolation; uses the
+            default global registry when None.
 
     Returns:
         RunResult with pipeline execution status and record counts.
@@ -232,6 +234,7 @@ async def _run_pipeline_async(
         options: Run options.
         health_server_enabled: Whether to enable health server.
         health_port: Port for health server.
+        registry: Optional pipeline registry for test isolation.
 
     Returns:
         RunResult object with status and metrics.

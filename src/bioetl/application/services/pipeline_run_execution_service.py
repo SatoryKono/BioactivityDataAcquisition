@@ -56,7 +56,7 @@ class PipelineRunExecutionService:
         """Execute runner and return normalized status/metrics outcome.
 
         Args:
-            runner: RunnablePort implementation containing the pipeline to run.
+            runner: ExecutionMetricsRunnerPort implementation containing the pipeline to run.
             run_logger: Logger port for recording completion, shutdown, or failure.
             metrics_extractor: Port for extracting pipeline metrics after execution.
 

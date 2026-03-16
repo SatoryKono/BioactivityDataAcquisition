@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Assay entity.
 
-Aligned with RULES.md v5.23 and ChEMBL 34 schema.
+Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 """
 
 from __future__ import annotations

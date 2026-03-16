@@ -163,7 +163,7 @@ PubMedAdapter                         (pubchempy)
 | Файл                           | Компонент                  | Назначение                              |
 | ------------------------------ | -------------------------- | --------------------------------------- |
 | `retention_manager.py`         | `RetentionPolicy`          | VACUUM retention и Delta maintenance    |
-| `composite_checkpoint_writer.py`| `CompositeCheckpointWriter`| Запись composite checkpoint             |
+| `composite_checkpoint_writer.py`| `FileCompositeCheckpointWriter`| Запись composite checkpoint             |
 
 #### 2.1.2. Adapter Support Infrastructure
 
@@ -180,7 +180,7 @@ PubMedAdapter                         (pubchempy)
 | Файл                      | Компонент                | Назначение                                    |
 | ------------------------- | ------------------------ | --------------------------------------------- |
 | `health_check_mixin.py`   | `HealthCheckMixin`       | Mixin для реализации `health_check()` в адаптерах |
-| `health_check_contract.py`| `HealthCheckContract`    | Контракт health check response                |
+| `health_check_contract.py`| `HealthCheckContext`     | Контракт health check response                |
 | `health_probe_policy.py`  | `HealthProbePolicy`      | Политика health probes (interval, timeout)    |
 | `health_status_policy.py` | `HealthStatusPolicy`     | Политика определения статуса по результатам   |
 

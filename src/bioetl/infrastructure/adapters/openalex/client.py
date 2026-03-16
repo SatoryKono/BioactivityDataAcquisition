@@ -1,7 +1,7 @@
 """OpenAlex data source adapter.
 
 Implements FilterableDataSourcePort for OpenAlex Works API.
-See RULES.md Appendix A for rate limits and retry strategy.
+Rate limits and retry strategy configured via source YAML (``configs/sources/openalex.yaml``).
 
 Uses httpx via UnifiedHTTPClient for REST/JSON API access.
 

@@ -1,6 +1,6 @@
 """Pandera schema for OpenAlex Publication entity.
 
-Aligned with RULES.md v5.23 and Publication Schema Unification spec.
+Aligned with RULES.md v5.24 and Publication Schema Unification spec.
 Includes lookup metadata fields for DOI/title resolution tracking.
 
 Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.

@@ -2,7 +2,7 @@
 """
 Naming Convention Audit Tool for BioETL.
 
-Validates naming conventions according to RULES.md v5.23 §2:
+Validates naming conventions according to RULES.md v5.24 §2:
 - Classes: PascalCase with role-appropriate suffixes
 - Modules: snake_case
 - Functions: snake_case with semantic prefixes

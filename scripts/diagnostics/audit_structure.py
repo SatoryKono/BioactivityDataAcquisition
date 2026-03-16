@@ -11,7 +11,7 @@ Flags:
     --json    Output results in JSON format
     --strict  Exit with code 1 on SHOULD violations too (default: only MUST)
 
-Aligned with RULES.md v5.23 (2026-03-03)
+Aligned with RULES.md v5.24 (2026-03-03)
 """
 
 from __future__ import annotations

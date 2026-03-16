@@ -1,6 +1,6 @@
 """Pandera schema for UniProt ID Mapping entity.
 
-Aligned with RULES.md v5.23 and UniProt ID Mapping API.
+Aligned with RULES.md v5.24 and UniProt ID Mapping API.
 Source: https://www.uniprot.org/id-mapping/
 
 Schema validates ChEMBL → UniProt ID mapping results:
