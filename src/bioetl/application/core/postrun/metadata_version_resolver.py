@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.ports import LoggerPort, StorageMaintenancePort
 
 
@@ -20,7 +21,7 @@ class PostrunMetadataVersionResolver:
         self,
         *,
         logger: LoggerPort,
-        runtime: object,
+        runtime: RuntimeConfig,
         storage: StorageMaintenancePort,
         warning_allowlist: tuple[type[BaseException], ...],
     ) -> None:
@@ -68,7 +69,7 @@ class PostrunMetadataVersionResolver:
             return None
 
     def _is_strict_validation_enabled(self) -> bool:
-        return getattr(self._runtime, "strict_validation", False) is True
+        return self._runtime.strict_validation
 
 
 __all__ = ["PostrunMetadataVersionResolver"]
