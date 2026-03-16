@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         DQReportResult,
         DQReportService,
     )
+    from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
         GoldDQConfigPort,
@@ -27,7 +28,7 @@ class PostrunDQReportService:
         self,
         *,
         logger: LoggerPort,
-        runtime: object,
+        runtime: RuntimeConfig,
         dq_report_service: DQReportService | None,
         bronze_dq_config: BronzeDQConfigPort | None,
         silver_dq_config: SilverDQConfigPort | None,
@@ -141,7 +142,7 @@ class PostrunDQReportService:
 
     def _is_strict_validation_enabled(self) -> bool:
         """Return True only when strict validation is explicitly enabled."""
-        return getattr(self._runtime, "strict_validation", False) is True
+        return self._runtime.strict_validation
 
 
 __all__ = ["PostrunDQReportService"]
