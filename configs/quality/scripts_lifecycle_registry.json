@@ -627,91 +627,136 @@
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/ci/_compatibility_telemetry.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/data/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/dev/__init__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/dev/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/diagnostics/__init__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/diagnostics/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/diagrams/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/diagrams/generate_all_bundles.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/docs/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/ops/__init__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/ops/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/ops/check_mcp.sh": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/qa/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     },
     "scripts/schema/__main__.py": {
       "owner": "SatoryKono",
       "status": "orphan",
       "rationale": "autofixed",
-      "next_action": "review"
+      "next_action": "review",
+      "decision": "retain",
+      "next_step": "evaluate usage",
+      "review_by": "2026-Q4"
     }
   }
 }
