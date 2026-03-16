@@ -142,7 +142,8 @@ class PostrunDQReportService:
 
     def _is_strict_validation_enabled(self) -> bool:
         """Return True only when strict validation is explicitly enabled."""
-        return self._runtime.strict_validation
+        value = getattr(self._runtime, "strict_validation", False)
+        return bool(value) if isinstance(value, bool) else False
 
 
 __all__ = ["PostrunDQReportService"]

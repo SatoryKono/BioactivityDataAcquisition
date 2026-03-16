@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
@@ -30,7 +30,9 @@ class PostrunMetadataVersionResolver:
         self._storage = storage
         self._warning_allowlist = warning_allowlist
 
-    def resolve_delta_version(self, table_path: str, *, layer: str) -> int | None:
+    def resolve_delta_version(
+        self, table_path: str, *, layer: Literal["silver", "gold"]
+    ) -> int | None:
         """Resolve Delta table version for lineage metadata.
 
         Args:
@@ -69,7 +71,8 @@ class PostrunMetadataVersionResolver:
             return None
 
     def _is_strict_validation_enabled(self) -> bool:
-        return self._runtime.strict_validation
+        value = getattr(self._runtime, "strict_validation", False)
+        return bool(value) if isinstance(value, bool) else False
 
 
 __all__ = ["PostrunMetadataVersionResolver"]

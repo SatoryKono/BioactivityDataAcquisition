@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
@@ -357,7 +357,9 @@ class PostrunService:
             "gold_yield": executor.records_gold / total_records,
         }
 
-    def _resolve_delta_version(self, table_path: str, *, layer: str) -> int | None:
+    def _resolve_delta_version(
+        self, table_path: str, *, layer: Literal["silver", "gold"]
+    ) -> int | None:
         """Resolve Delta table version with warning-mode fallback and allowlist."""
         return self._metadata_version_resolver.resolve_delta_version(
             table_path,

@@ -12,10 +12,9 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
-from bioetl.application.composite.runner_pkg.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
-)
-from bioetl.application.composite.runner_pkg.runner_models import (
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import MergeResult
@@ -112,9 +111,7 @@ def _make_runner(
     config = _Config()
     fsm = FSMStateHelperService(config=config, logger=logger, run_id=run_id)
 
-    return CompositePipelineRunner(
-        config=config,
-        runtime=CompositeRuntimeConfig(),
+    deps = CompositeRunnerDependencies(
         seed_runner_factory=lambda: seed_runner,
         enricher_runner_factory=lambda name, df: seed_runner,
         key_extractor=key_extractor,
@@ -124,6 +121,11 @@ def _make_runner(
         logger=logger,
         lock=lock or _make_lock(),
         fsm_state_helper=fsm,
+    )
+    return CompositePipelineRunner(
+        config=config,
+        runtime=CompositeRuntimeConfig(),
+        deps=deps,
         run_id=run_id,
     )
 

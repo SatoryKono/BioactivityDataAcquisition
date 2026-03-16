@@ -23,6 +23,7 @@ from bioetl.infrastructure.storage.composite_checkpoint_writer import (
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import (
@@ -175,9 +176,7 @@ class TestFSMMergeStateTransitions:
 
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -189,6 +188,11 @@ class TestFSMMergeStateTransitions:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -238,9 +242,7 @@ class TestFSMMergeStateTransitions:
 
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -252,6 +254,11 @@ class TestFSMMergeStateTransitions:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -289,9 +296,7 @@ class TestFSMDryRunMode:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -303,6 +308,11 @@ class TestFSMDryRunMode:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=True),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -353,9 +363,7 @@ class TestFSMDryRunMode:
 
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -367,6 +375,11 @@ class TestFSMDryRunMode:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=True),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -422,9 +435,7 @@ class TestMergeInputPolicy:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -436,6 +447,11 @@ class TestMergeInputPolicy:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -494,9 +510,7 @@ class TestMergeInputPolicy:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -508,6 +522,11 @@ class TestMergeInputPolicy:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -551,9 +570,7 @@ class TestFSMEnrichmentCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -565,6 +582,11 @@ class TestFSMEnrichmentCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -603,9 +625,7 @@ class TestFSMEnrichmentCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -617,6 +637,11 @@ class TestFSMEnrichmentCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -656,9 +681,7 @@ class TestFSMEnrichmentCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -670,6 +693,11 @@ class TestFSMEnrichmentCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -711,9 +739,7 @@ class TestFSMEnrichmentCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -725,6 +751,11 @@ class TestFSMEnrichmentCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -796,9 +827,7 @@ class TestFSMEnrichmentCompletedTransition:
 
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -810,6 +839,11 @@ class TestFSMEnrichmentCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -852,9 +886,7 @@ class TestFSMDependenciesCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -866,6 +898,11 @@ class TestFSMDependenciesCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         runner._dependency_coordinator = mock_coordinator  # type: ignore[attr-defined]
@@ -902,9 +939,7 @@ class TestFSMDependenciesCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -916,6 +951,11 @@ class TestFSMDependenciesCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -973,9 +1013,7 @@ class TestFSMDependenciesCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -987,6 +1025,11 @@ class TestFSMDependenciesCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -1021,9 +1064,7 @@ class TestFSMDependenciesCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1035,6 +1076,11 @@ class TestFSMDependenciesCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -1088,9 +1134,7 @@ class TestFSMDependenciesCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1102,6 +1146,11 @@ class TestFSMDependenciesCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -1148,9 +1197,7 @@ class TestFSMDependenciesCompletedTransition:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1162,6 +1209,11 @@ class TestFSMDependenciesCompletedTransition:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -1255,9 +1307,7 @@ class TestFSMResumeFromFailed:
 
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False, resume=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1269,6 +1319,11 @@ class TestFSMResumeFromFailed:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False, resume=True),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -1312,9 +1367,7 @@ class TestFSMCheckpointDeletion:
 
         checkpoint_manager.delete = failing_delete  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1326,6 +1379,11 @@ class TestFSMCheckpointDeletion:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -1365,9 +1423,7 @@ class TestFSMCheckpointDeletion:
 
         checkpoint_manager.delete = failing_delete  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1379,6 +1435,11 @@ class TestFSMCheckpointDeletion:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
 
@@ -1415,9 +1476,7 @@ class TestFinalizationPolicy:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1429,6 +1488,11 @@ class TestFinalizationPolicy:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -1468,9 +1532,7 @@ class TestFinalizationPolicy:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1482,6 +1544,11 @@ class TestFinalizationPolicy:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         state = CompositeCheckpointState(
@@ -1516,9 +1583,7 @@ class TestFinalizationPolicy:
             logger=mock_logger,
             resume=False,
         )
-        runner = CompositePipelineRunner(
-            config=mock_config,
-            runtime=CompositeRuntimeConfig(dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: mock_seed_runner,
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
@@ -1530,6 +1595,11 @@ class TestFinalizationPolicy:
             fsm_state_helper=FSMStateHelperService(
                 config=mock_config, logger=mock_logger, run_id=test_run_id
             ),
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            deps=deps,
             run_id=test_run_id,
         )
         merge_result = MergeResult(

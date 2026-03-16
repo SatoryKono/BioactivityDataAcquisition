@@ -44,14 +44,12 @@ _POSTRUN_WARNING_ALLOWLIST = (
     OSError,
     RuntimeError,
     ValueError,
-    TypeError,
 )
 _METADATA_VERSION_ALLOWLIST = (
     FileNotFoundError,
     OSError,
     RuntimeError,
     ValueError,
-    TypeError,
 )
 
 

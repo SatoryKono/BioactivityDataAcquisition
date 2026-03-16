@@ -19,6 +19,7 @@ import pytest
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import (
@@ -222,9 +223,7 @@ def create_runner(
     if runtime is None:
         runtime = CompositeRuntimeConfig()
 
-    return CompositePipelineRunner(
-        config=config,
-        runtime=runtime,
+    deps = CompositeRunnerDependencies(
         seed_runner_factory=lambda: seed_runner,
         enricher_runner_factory=lambda name, df: MockPipelineRunner(),
         key_extractor=create_mock_key_extractor(),
@@ -234,6 +233,11 @@ def create_runner(
         logger=logger,
         lock=create_mock_lock(),
         fsm_state_helper=MagicMock(),
+    )
+    return CompositePipelineRunner(
+        config=config,
+        runtime=runtime,
+        deps=deps,
     )
 
 

@@ -1,19 +1,8 @@
-# Reports Directory
+# Reports (Non-Normative)
 
-*Status: Dated engineering reports (non-normative)*
-*Last updated: 2026-03-03*
+This folder aggregates generated reports and analysis snapshots. Content here is **non-normative**; authoritative guidance remains in:
+- docs/02-architecture (ADRs, policies, diagrams)
+- docs/03-guides (implementation and operations guides)
+- docs/04-reference (pipelines, providers, contracts)
 
-This directory stores audit reports, comparative analyses, and one-off investigation results.
-Canonical project guidance remains in `docs/02-architecture/**`, `docs/03-guides/**`, and `docs/04-reference/**`.
-
-## Navigation
-
-- Primary report listing: `docs/reports/index.md`
-- Reports are informational history and evidence.
-- Reports are not a replacement for `RULES.md`, `REQUIREMENTS.md`, or ADR decisions.
-
-## Maintenance Rules
-
-- Keep report names date-stamped (`YYYY-MM-DD`) for traceability.
-- Avoid duplicate report copies with the same scope/date.
-- Archive stale reports under `docs/99-archive/reports/` when they lose operational value.
+Use these reports for historical context and evidence only.

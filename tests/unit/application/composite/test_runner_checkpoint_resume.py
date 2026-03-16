@@ -23,6 +23,7 @@ from bioetl.infrastructure.storage.composite_checkpoint_writer import (
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import (
@@ -219,9 +220,7 @@ class TestResumeFromFailedState:
         seed_runner = MockPipelineRunner()
         logger = create_mock_logger()
 
-        runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
-            runtime=CompositeRuntimeConfig(resume=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: seed_runner,
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
             key_extractor=create_mock_key_extractor(),
@@ -231,6 +230,11 @@ class TestResumeFromFailedState:
             logger=logger,
             lock=create_mock_lock(),
             fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
+        )
+        runner = CompositePipelineRunner(
+            config=MockCompositeConfig(),
+            runtime=CompositeRuntimeConfig(resume=True),
+            deps=deps,
         )
 
         await runner.run()
@@ -283,9 +287,7 @@ class TestResumeFromFailedState:
         seed_runner = MockPipelineRunner()
         logger = create_mock_logger()
 
-        runner = CompositePipelineRunner(
-            config=config,
-            runtime=CompositeRuntimeConfig(resume=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: seed_runner,
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
             key_extractor=create_mock_key_extractor(),
@@ -295,6 +297,11 @@ class TestResumeFromFailedState:
             logger=logger,
             lock=create_mock_lock(),
             fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
+        )
+        runner = CompositePipelineRunner(
+            config=config,
+            runtime=CompositeRuntimeConfig(resume=True),
+            deps=deps,
         )
 
         await runner.run()
@@ -355,9 +362,7 @@ class TestResumeFromFailedState:
         merger = create_mock_merger()
         logger = create_mock_logger()
 
-        runner = CompositePipelineRunner(
-            config=config,
-            runtime=CompositeRuntimeConfig(resume=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: seed_runner,
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
             key_extractor=create_mock_key_extractor(),
@@ -367,6 +372,11 @@ class TestResumeFromFailedState:
             logger=logger,
             lock=create_mock_lock(),
             fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
+        )
+        runner = CompositePipelineRunner(
+            config=config,
+            runtime=CompositeRuntimeConfig(resume=True),
+            deps=deps,
         )
 
         await runner.run()
@@ -432,9 +442,7 @@ class TestResumeContextLogging:
         checkpoint_manager = create_mock_checkpoint_manager(partial_state)
         logger = create_mock_logger()
 
-        runner = CompositePipelineRunner(
-            config=config,
-            runtime=CompositeRuntimeConfig(resume=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
             key_extractor=create_mock_key_extractor(),
@@ -444,6 +452,11 @@ class TestResumeContextLogging:
             logger=logger,
             lock=create_mock_lock(),
             fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
+        )
+        runner = CompositePipelineRunner(
+            config=config,
+            runtime=CompositeRuntimeConfig(resume=True),
+            deps=deps,
         )
 
         await runner.run()
@@ -460,9 +473,7 @@ class TestResumeContextLogging:
         checkpoint_manager = create_mock_checkpoint_manager()
         logger = create_mock_logger()
 
-        runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
-            runtime=CompositeRuntimeConfig(resume=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
             key_extractor=create_mock_key_extractor(),
@@ -472,6 +483,11 @@ class TestResumeContextLogging:
             logger=logger,
             lock=create_mock_lock(),
             fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
+        )
+        runner = CompositePipelineRunner(
+            config=MockCompositeConfig(),
+            runtime=CompositeRuntimeConfig(resume=False),
+            deps=deps,
         )
 
         await runner.run()
@@ -638,9 +654,7 @@ class TestFSMStateTransitionOnResume:
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
         logger = create_mock_logger()
 
-        runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
-            runtime=CompositeRuntimeConfig(resume=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
             key_extractor=create_mock_key_extractor(),
@@ -650,6 +664,11 @@ class TestFSMStateTransitionOnResume:
             logger=logger,
             lock=create_mock_lock(),
             fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
+        )
+        runner = CompositePipelineRunner(
+            config=MockCompositeConfig(),
+            runtime=CompositeRuntimeConfig(resume=True),
+            deps=deps,
         )
 
         await runner.run()
@@ -704,9 +723,7 @@ class TestFSMStateTransitionOnResume:
 
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
-        runner = CompositePipelineRunner(
-            config=config,
-            runtime=CompositeRuntimeConfig(resume=True),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
             key_extractor=create_mock_key_extractor(),
@@ -716,6 +733,11 @@ class TestFSMStateTransitionOnResume:
             logger=logger,
             lock=create_mock_lock(),
             fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
+        )
+        runner = CompositePipelineRunner(
+            config=config,
+            runtime=CompositeRuntimeConfig(resume=True),
+            deps=deps,
         )
 
         await runner.run()

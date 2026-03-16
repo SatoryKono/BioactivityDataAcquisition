@@ -25,6 +25,7 @@ from bioetl.infrastructure.storage.composite_checkpoint_writer import (
 )
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import (
@@ -159,9 +160,7 @@ def create_runner(
     preflight_validator: MagicMock | None = None,
 ) -> CompositePipelineRunner:
     """Helper to create a runner with all dependencies."""
-    return CompositePipelineRunner(
-        config=mock_config,
-        runtime=runtime or CompositeRuntimeConfig(dry_run=False),
+    deps = CompositeRunnerDependencies(
         seed_runner_factory=lambda: mock_seed_runner,
         enricher_runner_factory=lambda name, df: AsyncMock(),
         key_extractor=mock_key_extractor,
@@ -171,8 +170,13 @@ def create_runner(
         logger=mock_logger,
         lock=mock_lock,
         fsm_state_helper=MagicMock(),
-        run_id=test_run_id,
         preflight_validator=preflight_validator,
+    )
+    return CompositePipelineRunner(
+        config=mock_config,
+        runtime=runtime or CompositeRuntimeConfig(dry_run=False),
+        deps=deps,
+        run_id=test_run_id,
     )
 
 

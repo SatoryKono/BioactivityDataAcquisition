@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -12,8 +14,33 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.application.composite.checkpoint import CompositeCheckpointManager
+    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+    from bioetl.application.composite.dependency_coordinator import (
+        DependencyCoordinatorService,
+    )
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.key_extractor import KeyExtractorService
+    from bioetl.application.composite.merger import MergeService
+    from bioetl.application.composite.preflight_validator import (
+        CompositePreflightValidator,
+    )
+    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.ports import (
+        ExecutionMetricsRunnerPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        QuarantinePort,
+    )
+
 __all__ = [
     "CompositeExecutionContext",
+    "CompositeRunnerDependencies",
+    "CompositeRunnerDependencyGroup",
     "CompositeRuntimeConfig",
 ]
 
@@ -40,6 +67,42 @@ class CompositeRuntimeConfig:
         """Normalize mutable values into immutable runtime fields."""
         if isinstance(self.enrich_only, list):
             object.__setattr__(self, "enrich_only", tuple(self.enrich_only))
+
+
+@dataclass(frozen=True, slots=True)
+class CompositeRunnerDependencyGroup:
+    """Grouped dependencies for CompositePipelineRunner constructor.
+
+    Bundles the collaborator services, ports, and factories that the
+    composite runner requires at construction time.  Using a frozen
+    dataclass keeps the dependency set explicit and reduces the runner
+    constructor parameter count from 18 to 4.
+    """
+
+    seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
+    enricher_runner_factory: Callable[
+        [str, pl.DataFrame], ExecutionMetricsRunnerPort
+    ]
+    key_extractor: KeyExtractorService
+    coordinator: EnrichmentCoordinatorService
+    merger: MergeService
+    checkpoint_manager: CompositeCheckpointManager
+    logger: LoggerPort
+    lock: LockPort
+    fsm_state_helper: FSMStateHelperService
+    # Optional collaborators
+    dq_report_service: DQReportService | None = None
+    preflight_validator: CompositePreflightValidator | None = None
+    dependencies_runner_factory: (
+        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
+    ) = None
+    dependency_coordinator: DependencyCoordinatorService | None = None
+    quarantine_port: QuarantinePort | None = None
+    metrics: MetricsPort | None = None
+
+
+# Backward-compatible alias for legacy naming
+CompositeRunnerDependencies = CompositeRunnerDependencyGroup
 
 
 @dataclass(frozen=True, slots=True)

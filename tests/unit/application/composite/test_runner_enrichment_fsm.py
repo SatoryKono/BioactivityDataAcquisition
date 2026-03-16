@@ -19,6 +19,7 @@ import pytest
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.application.composite.runner_pkg.runner_helpers import (
@@ -225,9 +226,7 @@ def runner(
     mock_lock,
 ) -> CompositePipelineRunner:
     """Create a CompositePipelineRunner instance for testing."""
-    return CompositePipelineRunner(
-        config=sample_composite_config,
-        runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+    deps = CompositeRunnerDependencies(
         seed_runner_factory=mock_seed_runner_factory,
         enricher_runner_factory=mock_enricher_runner_factory,
         key_extractor=mock_key_extractor,
@@ -237,6 +236,11 @@ def runner(
         logger=mock_logger,
         lock=mock_lock,
         fsm_state_helper=MagicMock(),
+    )
+    return CompositePipelineRunner(
+        config=sample_composite_config,
+        runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps=deps,
         run_id="00000000-0000-0000-0000-000000000123",
     )
 
@@ -390,9 +394,7 @@ class TestEnrichmentFSMFailure:
             }
         )
 
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
@@ -402,6 +404,11 @@ class TestEnrichmentFSMFailure:
             logger=mock_logger,
             lock=mock_lock,
             fsm_state_helper=MagicMock(),
+        )
+        runner = CompositePipelineRunner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -441,9 +448,7 @@ class TestEnrichmentFSMFailure:
             }
         )
 
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
@@ -453,6 +458,11 @@ class TestEnrichmentFSMFailure:
             logger=mock_logger,
             lock=mock_lock,
             fsm_state_helper=MagicMock(),
+        )
+        runner = CompositePipelineRunner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -489,9 +499,7 @@ class TestEnrichmentFSMFailure:
             }
         )
 
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
@@ -501,6 +509,11 @@ class TestEnrichmentFSMFailure:
             logger=mock_logger,
             lock=mock_lock,
             fsm_state_helper=MagicMock(),
+        )
+        runner = CompositePipelineRunner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -539,9 +552,7 @@ class TestEnrichmentSkipStage:
         sample_composite_config.enrichers = []
         sample_composite_config.required_enrichers = []
 
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
@@ -551,6 +562,11 @@ class TestEnrichmentSkipStage:
             logger=mock_logger,
             lock=mock_lock,
             fsm_state_helper=MagicMock(),
+        )
+        runner = CompositePipelineRunner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -584,9 +600,7 @@ class TestEnrichmentSkipStage:
         sample_composite_config.enrichers = []
         sample_composite_config.required_enrichers = []
 
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
@@ -596,6 +610,11 @@ class TestEnrichmentSkipStage:
             logger=mock_logger,
             lock=mock_lock,
             fsm_state_helper=MagicMock(),
+        )
+        runner = CompositePipelineRunner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -646,9 +665,7 @@ class TestOptionalEnricherFailure:
             }
         )
 
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
@@ -658,6 +675,11 @@ class TestOptionalEnricherFailure:
             logger=mock_logger,
             lock=mock_lock,
             fsm_state_helper=MagicMock(),
+        )
+        runner = CompositePipelineRunner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -719,9 +741,7 @@ class TestOptionalEnricherFailure:
             }
         )
 
-        runner = CompositePipelineRunner(
-            config=sample_composite_config,
-            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+        deps = CompositeRunnerDependencies(
             seed_runner_factory=mock_seed_runner_factory,
             enricher_runner_factory=mock_enricher_runner_factory,
             key_extractor=mock_key_extractor,
@@ -731,6 +751,11 @@ class TestOptionalEnricherFailure:
             logger=mock_logger,
             lock=mock_lock,
             fsm_state_helper=MagicMock(),
+        )
+        runner = CompositePipelineRunner(
+            config=sample_composite_config,
+            runtime=CompositeRuntimeConfig(resume=False, dry_run=False),
+            deps=deps,
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
