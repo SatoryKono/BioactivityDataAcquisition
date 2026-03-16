@@ -369,7 +369,15 @@ def validate_exemption_target_references(
     for registry_name, entries in sorted(registries.items()):
         if not isinstance(entries, dict):
             continue
-        _check_registry_symbols(registry_name, entries, classes_by_module, class_counts, functions_by_module, function_counts, errors)
+        _check_registry_symbols(
+            registry_name,
+            entries,
+            classes_by_module,
+            class_counts,
+            functions_by_module,
+            function_counts,
+            errors
+        )
 
     return errors
 
