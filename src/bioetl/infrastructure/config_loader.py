@@ -292,9 +292,9 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
 
 # Preserve legacy cache management API used by tests and callers.
-load_pipeline_config.cache_clear = _load_pipeline_config_cached.cache_clear
-load_pipeline_config.cache_info = _load_pipeline_config_cached.cache_info
-load_pipeline_config.__wrapped__ = _load_pipeline_config_cached
+load_pipeline_config.cache_clear = _load_pipeline_config_cached.cache_clear  # type: ignore[attr-defined]
+load_pipeline_config.cache_info = _load_pipeline_config_cached.cache_info  # type: ignore[attr-defined]
+load_pipeline_config.__wrapped__ = _load_pipeline_config_cached  # type: ignore[attr-defined]
 
 
 def load_pipeline_config_uncached(

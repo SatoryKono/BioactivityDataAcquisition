@@ -63,7 +63,7 @@ class ProviderRegistry:
     """
 
     def __init__(self) -> None:
-        self._providers: dict[str, ProviderConfig] = {}
+        self._providers: dict[str, ProviderConfig] = {}  # type: ignore[no-redef]
         self._lock = threading.RLock()
 
     # ------------------------------------------------------------------
@@ -78,8 +78,9 @@ class ProviderRegistry:
             self, obj: ProviderRegistry | None, objtype: type[ProviderRegistry]
         ) -> dict[str, ProviderConfig]:
             if obj is not None:
-                return obj.__dict__["_providers"]
-            return get_default_provider_registry()._providers
+                result: dict[str, ProviderConfig] = obj.__dict__["_providers"]
+                return result
+            return get_default_provider_registry()._providers  # type: ignore[return-value]
 
     _providers = _ProvidersDescriptor()  # type: ignore[assignment]
 

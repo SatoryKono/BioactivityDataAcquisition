@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -33,7 +33,7 @@ class StorageAdapterMaintenanceMixin:
     def is_table_initialized(
         self,
         table_name: str,
-        layer: str = "silver",
+        layer: Literal["silver", "gold"] = "silver",
     ) -> bool:
         """Check whether a Delta table has been written to."""
         writer = self.gold if layer == "gold" else self.silver
@@ -44,7 +44,7 @@ class StorageAdapterMaintenanceMixin:
         self,
         table_path: str,
         *,
-        layer: str = "silver",
+        layer: Literal["silver", "gold"] = "silver",
     ) -> int | None:
         """Return the current Delta table version, or None if table does not exist."""
         path = Path(table_path)
@@ -127,15 +127,20 @@ class StorageAdapterMaintenanceMixin:
             from deltalake import DeltaTable
 
             loop = asyncio.get_running_loop()
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(str(gold_table_path)),
-            )
-            removed = await loop.run_in_executor(
-                None,
-                lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
-            )
-            total_removed += len(removed)
+            try:
+                dt = await loop.run_in_executor(
+                    None,
+                    lambda: DeltaTable(str(gold_table_path)),
+                )
+                removed = await loop.run_in_executor(
+                    None,
+                    lambda: dt.vacuum(
+                        retention_hours=retention_hours, dry_run=dry_run
+                    ),
+                )
+                total_removed += len(removed)
+            except (OSError, RuntimeError):
+                pass
 
         return total_removed
 

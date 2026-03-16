@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1074,
-    "total_internal_imports": 4118,
+    "total_internal_imports": 4122,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 245,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 497,
+      "imports": 499,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 650,
+      "imports": 652,
       "allowed": true
     },
     {
@@ -319,6 +319,11 @@
       "imports": 12
     },
     {
+      "source": "application.core",
+      "target": "domain.config",
+      "imports": 11
+    },
+    {
       "source": "application.services",
       "target": "domain.exceptions",
       "imports": 11
@@ -337,11 +342,6 @@
       "source": "application.pipelines",
       "target": "domain.services",
       "imports": 10
-    },
-    {
-      "source": "application.core",
-      "target": "domain.config",
-      "imports": 9
     },
     {
       "source": "application.pipelines",

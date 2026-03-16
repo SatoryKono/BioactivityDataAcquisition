@@ -26,6 +26,7 @@ from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import (
@@ -488,9 +489,7 @@ def create_test_runner(
         run_id=run_id,
     )
 
-    runner = CompositePipelineRunner(
-        config=config,
-        runtime=runtime,
+    deps = CompositeRunnerDependencies(
         seed_runner_factory=lambda: seed_factory.create("seed"),
         enricher_runner_factory=enricher_factory.create_enricher,
         key_extractor=key_extractor,
@@ -500,6 +499,11 @@ def create_test_runner(
         logger=logger,
         lock=lock,
         fsm_state_helper=fsm_state_helper,
+    )
+    runner = CompositePipelineRunner(
+        config=config,
+        runtime=runtime,
+        deps=deps,
         run_id=run_id,
     )
 

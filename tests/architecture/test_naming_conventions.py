@@ -85,6 +85,7 @@ def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
                     "Output",
                     "Outcome",
                     "Entry",
+                    "Dependencies",
                 )
             ):
                 continue

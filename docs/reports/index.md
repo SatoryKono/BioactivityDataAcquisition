@@ -1,31 +1,10 @@
-# Reports Index
+# Reports Index (Non-Normative)
 
-*Status: Internal / Extended documentation (non-normative)*
-*Last updated: 2026-03-06*
+This directory holds generated artifacts, analyses, and export-only reports. It is **non-normative**: authoritative guidance lives in the canonical documentation sets.
 
-This section aggregates dated engineering reports. Use these reports as operational history, not as the primary source of architectural truth.
-Canonical project guidance remains in `docs/02-architecture/**`, `docs/03-guides/**`, and `docs/04-reference/**`.
+Canonical sources:
+- docs/02-architecture — ADRs, architecture policies, and reference diagrams.
+- docs/03-guides — implementation and operational guides.
+- docs/04-reference — pipeline, provider, and contract specifications.
 
-## Latest
-
-- [Architecture Debt Baseline (2026-03-04, Phase A freeze)](architecture-debt-baseline-2026-03-04.md)
-- [Debt Ownership Dashboard (2026-03-06)](debt-ownership-dashboard-2026-03-06.md)
-- [File-Size Decomposition Migration Notes (2026-03-06)](file-size-decomposition-migration-notes-2026-03-06.md)
-- [Domain DDD Consolidation P1 (2026-03-06)](domain-ddd-consolidation-p1-2026-03-06.md)
-- [Architecture Debt Baseline (2026-03-03)](architecture-debt-baseline-2026-03-03.md)
-- [Quality Debt Scorecard (2026-Q1)](quality-debt-scorecard-2026-Q1.md)
-- [Documentation Audit (2026-03-03, main)](documentation-audit-2026-03-03-main.md)
-- [Documentation Audit (2026-03-03, exhaustive)](documentation-audit-2026-03-03-exhaustive.md)
-- [Documentation Cascade Audit (2026-02-27)](documentation-cascade-audit-2026-02-27.md)
-- [Documentation Audit (2026-02-25)](documentation-audit-2026-02-25.md)
-- [Scripts Inventory (2026-03-01)](scripts-inventory-2026-03-01.md)
-
-## Branch Analysis (2026-03-01)
-
-- [Branch Full Diff Matrix](branch-full-diff-matrix-2026-03-01.md)
-- [Branch Full Diff Matrix (Diagram Scope)](branch-full-diff-matrix-diagram-scope-2026-03-01.md)
-- [Branch Render Settings Diff Matrix](branch-render-settings-diff-matrix-2026-03-01.md)
-
-## Historical
-
-- [Codex Branches Summary (2026-02-24)](codex-branches-summary-2026-02-24.md)
+Use reports for situational evidence and derived outputs; always cross-check canonical docs before applying any changes.

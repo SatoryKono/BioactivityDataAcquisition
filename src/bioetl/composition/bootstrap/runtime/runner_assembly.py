@@ -16,7 +16,10 @@ from bioetl.application.composite.key_extractor import (
     KeyExtractorService as _KeyExtractorService,
 )
 from bioetl.application.composite.merger import MergeService as _MergeService
-from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
+from bioetl.application.composite.runner_pkg import (
+    CompositePipelineRunnerService,
+    CompositeRunnerDependencies,
+)
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.ports import LoggerPort
@@ -92,9 +95,7 @@ def create_composite_runner_with_legacy_fsm_adapter(
             run_id=effective_run_id,
         )
 
-    return CompositePipelineRunnerService(
-        config=config,
-        runtime=runtime,
+    deps = CompositeRunnerDependencies(
         seed_runner_factory=seed_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
         key_extractor=key_extractor,
@@ -104,13 +105,18 @@ def create_composite_runner_with_legacy_fsm_adapter(
         logger=logger,
         lock=lock,
         fsm_state_helper=effective_fsm_state_helper,
-        run_id=effective_run_id,
         dq_report_service=dq_report_service,
         preflight_validator=preflight_validator,
         dependencies_runner_factory=dependencies_runner_factory,
         dependency_coordinator=dependency_coordinator,
         quarantine_port=quarantine_port,
         metrics=metrics,
+    )
+    return CompositePipelineRunnerService(
+        config=config,
+        runtime=runtime,
+        deps=deps,
+        run_id=effective_run_id,
     )
 
 

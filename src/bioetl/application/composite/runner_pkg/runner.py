@@ -5,7 +5,6 @@ Coordinates high-level execution flow while delegating stage logic to mixins.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
@@ -15,6 +14,7 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
 )
 from bioetl.application.composite.runner_pkg.runner_models import (
     CompositeExecutionContext,
+    CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
 from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
@@ -38,41 +38,14 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.types import RunID
 
-_COMPOSITE_HEARTBEAT_INTERVAL_SECONDS = 30  # deprecated: use CompositeRuntimeConfig.heartbeat_interval_seconds
-
 if TYPE_CHECKING:
-    import polars as pl
-
-    from bioetl.application.composite.checkpoint import (
-        CompositeCheckpointManager,
-        CompositeCheckpointState,
-    )
-    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-    from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinatorService,
-    )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.key_extractor import KeyExtractorService
-    from bioetl.application.composite.merger import MergeService
-    from bioetl.application.composite.preflight_validator import (
-        CompositePreflightValidator,
-    )
-    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import (
-        ExecutionMetricsRunnerPort,
-        LockPort,
-        LoggerPort,
-        MetricsPort,
-        QuarantinePort,
-    )
 
 
 __all__ = [
-    "CompositeExecutionContext",
     "CompositePipelineRunner",
     "CompositePipelineRunnerService",
-    "CompositeRuntimeConfig",
 ]
 
 
@@ -88,27 +61,8 @@ class CompositePipelineRunner(
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort],
-        enricher_runner_factory: Callable[
-            [str, pl.DataFrame], ExecutionMetricsRunnerPort
-        ],
-        key_extractor: KeyExtractorService,
-        coordinator: EnrichmentCoordinatorService,
-        merger: MergeService,
-        checkpoint_manager: CompositeCheckpointManager,
-        logger: LoggerPort,
-        lock: LockPort,
-        fsm_state_helper: FSMStateHelperService,
+        deps: CompositeRunnerDependencies,
         run_id: str | None = None,
-        dq_report_service: DQReportService | None = None,
-        preflight_validator: CompositePreflightValidator | None = None,
-        dependencies_runner_factory: Callable[
-            [str, pl.DataFrame], ExecutionMetricsRunnerPort
-        ]
-        | None = None,
-        dependency_coordinator: DependencyCoordinatorService | None = None,
-        quarantine_port: QuarantinePort | None = None,
-        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize composite pipeline orchestrator with injected dependencies.
 
@@ -119,67 +73,33 @@ class CompositePipelineRunner(
             runtime: Run-time flags such as ``resume``, ``run_type``, and
                 ``dry_run`` that control execution behaviour without changing
                 domain configuration.
-            seed_runner_factory: Zero-argument factory that creates the
-                metrics-readable runner for the seed pipeline on demand.
-            enricher_runner_factory: Two-argument factory ``(pipeline_name,
-                keys_df)`` that creates a runner for one enricher pipeline
-                scoped to the given key DataFrame.
-            key_extractor: Service that reads extracted join keys from the
-                seed Silver table after the seed phase completes.
-            coordinator: Service that fans out enricher pipelines
-                concurrently and collects typed ``EnrichmentResult`` values.
-            merger: Service that joins seed, dependency, and enricher Silver
-                tables into unified Gold output.
-            checkpoint_manager: Service responsible for persisting and
-                loading mid-run checkpoint state.
-            logger: Structured logger for pipeline lifecycle events and
-                diagnostic output.
-            lock: Distributed lock adapter used to prevent concurrent
-                executions of the same composite pipeline.
-            fsm_state_helper: Helper that encapsulates FSM state-transition
-                logic and resume-from-failed semantics.
+            deps: Grouped collaborator services, ports, and factories.
             run_id: Optional explicit run identifier; a UUID is generated
                 automatically when omitted.
-            dq_report_service: Optional service that writes a DQ report
-                artefact after the merge phase; ``None`` disables reporting.
-            preflight_validator: Optional service that validates composite
-                configuration consistency before pipeline execution begins;
-                ``None`` skips preflight validation.
-            dependencies_runner_factory: Optional two-argument factory for
-                dependency pipelines, mirroring ``enricher_runner_factory``;
-                ``None`` disables the dependency phase.
-            dependency_coordinator: Optional service that orchestrates
-                dependency pipeline execution; required when
-                ``dependencies_runner_factory`` is provided.
-            quarantine_port: Optional adapter for persisting quarantined
-                records that fail cross-validation or DQ checks; ``None``
-                disables quarantine writes.
-            metrics: Optional metrics adapter for emitting pipeline-level
-                counters and histograms; ``None`` disables metric emission.
         """
         self._config = config
         self._runtime = runtime
-        self._seed_runner_factory = seed_runner_factory
-        self._enricher_runner_factory = enricher_runner_factory
-        self._dependencies_runner_factory = dependencies_runner_factory
-        self._key_extractor = key_extractor
-        self._dependency_coordinator = dependency_coordinator
-        self._coordinator = coordinator
-        self._merger = merger
-        self._checkpoint_manager = checkpoint_manager
-        self._logger = logger
-        self._lock = lock
+        self._seed_runner_factory = deps.seed_runner_factory
+        self._enricher_runner_factory = deps.enricher_runner_factory
+        self._dependencies_runner_factory = deps.dependencies_runner_factory
+        self._key_extractor = deps.key_extractor
+        self._dependency_coordinator = deps.dependency_coordinator
+        self._coordinator = deps.coordinator
+        self._merger = deps.merger
+        self._checkpoint_manager = deps.checkpoint_manager
+        self._logger = deps.logger
+        self._lock = deps.lock
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
         self._original_run_id: str | None = None
         self._finished = False
         self._final_state: CompositePipelineState | None = None
-        self._dq_report_service = dq_report_service
-        self._preflight_validator = preflight_validator
-        self._quarantine_port = quarantine_port
-        self._metrics = metrics
-        self._fsm = fsm_state_helper
+        self._dq_report_service = deps.dq_report_service
+        self._preflight_validator = deps.preflight_validator
+        self._quarantine_port = deps.quarantine_port
+        self._metrics = deps.metrics
+        self._fsm = deps.fsm_state_helper
 
     @property
     def run_id(self) -> str:
