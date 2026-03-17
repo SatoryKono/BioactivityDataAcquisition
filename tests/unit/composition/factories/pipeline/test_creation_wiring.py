@@ -1,4 +1,5 @@
 """Unit tests for _creation_wiring pipeline creation internals."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -66,12 +67,8 @@ class TestCreateSilverValidator:
         result = _create_silver_validator(None)
         assert result is None
 
-    @patch(
-        "bioetl.infrastructure.validation.pandera_validator.PanderaSilverValidator"
-    )
-    def test_creates_validator_with_schema(
-        self, mock_validator_cls: MagicMock
-    ) -> None:
+    @patch("bioetl.infrastructure.validation.pandera_validator.PanderaSilverValidator")
+    def test_creates_validator_with_schema(self, mock_validator_cls: MagicMock) -> None:
         """Creates PanderaSilverValidator when schema is provided."""
         schema = MagicMock()
         schema.to_schema.return_value = MagicMock()
@@ -91,18 +88,12 @@ class TestCreatePipelineWithServicesImpl:
     @patch(
         "bioetl.composition.factories.pipeline._creation_wiring._create_silver_validator"
     )
-    @patch(
-        "bioetl.composition.factories.pipeline._creation_wiring.TransformerBuilder"
-    )
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.TransformerBuilder")
     @patch(
         "bioetl.composition.factories.pipeline._creation_wiring.DomainConfigResolver"
     )
-    @patch(
-        "bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory"
-    )
-    @patch(
-        "bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator"
-    )
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory")
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator")
     def test_creates_pipeline(
         self,
         mock_meta_coord: MagicMock,

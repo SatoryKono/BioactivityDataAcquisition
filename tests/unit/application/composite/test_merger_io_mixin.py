@@ -1,4 +1,5 @@
 """Unit tests for merger_io_mixin — cross-validation, output, and result assembly."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
@@ -36,7 +37,9 @@ def _enricher_config(pipeline: str) -> EnricherConfig:
 
 
 def _dependency_config(pipeline: str) -> DependencyConfig:
-    return DependencyConfig(pipeline=pipeline, join_keys=("doi",), silver_table="silver/dep")
+    return DependencyConfig(
+        pipeline=pipeline, join_keys=("doi",), silver_table="silver/dep"
+    )
 
 
 @pytest.mark.unit
@@ -134,9 +137,7 @@ class TestExtractQuarantinePayloads:
         assert MergeIOMixin._extract_quarantine_payloads(df) == []
 
     def test_extracts_quarantined_rows(self) -> None:
-        df = pl.DataFrame(
-            {"a": [1, 2, 3], "_cv_quarantine": [False, True, True]}
-        )
+        df = pl.DataFrame({"a": [1, 2, 3], "_cv_quarantine": [False, True, True]})
         payloads = MergeIOMixin._extract_quarantine_payloads(df)
         assert len(payloads) == 2
         assert payloads[0]["a"] == 2

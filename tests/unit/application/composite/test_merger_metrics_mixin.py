@@ -1,4 +1,5 @@
 """Unit tests for merger_metrics_mixin — lineage, exclusion, and coverage."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock

@@ -27,13 +27,17 @@ class TestBronzeWriterValidationMixin:
     def test_resolve_bronze_path_nested(self) -> None:
         """Nested structure should include provider/entity in the path."""
         host = _Host(flat_structure=False)
-        result = host._resolve_bronze_path("chembl", "activity", "2025-01-15", "data.jsonl.zst")
+        result = host._resolve_bronze_path(
+            "chembl", "activity", "2025-01-15", "data.jsonl.zst"
+        )
         assert result == "chembl/activity/2025-01-15/data.jsonl.zst"
 
     def test_resolve_bronze_path_flat(self) -> None:
         """Flat structure should omit provider/entity from the path."""
         host = _Host(flat_structure=True)
-        result = host._resolve_bronze_path("chembl", "activity", "2025-01-15", "data.jsonl.zst")
+        result = host._resolve_bronze_path(
+            "chembl", "activity", "2025-01-15", "data.jsonl.zst"
+        )
         assert result == "2025-01-15/data.jsonl.zst"
 
     def test_validate_bronze_names_valid(self) -> None:

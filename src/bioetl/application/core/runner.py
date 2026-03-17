@@ -79,7 +79,9 @@ def _resolve_legacy_dependencies(
         raise AssertionError("Legacy constructor path requires all legacy parameters")
     return PipelineRunnerDependencies(
         executor=cast("BatchExecutor", values["executor"]),
-        checkpoint_manager=cast("CheckpointManagerService", values["checkpoint_manager"]),
+        checkpoint_manager=cast(
+            "CheckpointManagerService", values["checkpoint_manager"]
+        ),
         lock_manager=cast("LockCoordinator", values["lock_manager"]),
         preflight=cast("PreflightService", values["preflight"]),
         postrun=cast("PostrunService", values["postrun"]),

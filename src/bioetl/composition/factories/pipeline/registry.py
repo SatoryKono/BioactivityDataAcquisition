@@ -44,6 +44,7 @@ from bioetl.domain.ports import PipelineFactoryPort
 # Factory Instances (created from PIPELINE_CONFIGS)
 # =============================================================================
 
+
 def _build_factories() -> dict[str, GenericPipelineFactory[GenericPipeline]]:
     """Build factory instances from the canonical pipeline config table."""
     return {config.pipeline_name: create_factory(config) for config in PIPELINE_CONFIGS}
@@ -80,6 +81,7 @@ semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 # =============================================================================
 # Registration Functions
 # =============================================================================
+
 
 class _PipelineFactoryRegistrationState:
     """Thread-safe default-registration state holder.

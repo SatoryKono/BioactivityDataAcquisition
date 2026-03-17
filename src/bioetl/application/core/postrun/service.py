@@ -255,11 +255,11 @@ class PostrunService:
             services=services,
         )
         return (
-            resolved_storage,  # type: ignore[return-value]
-            resolved_metrics,
-            resolved_logger,  # type: ignore[return-value]
-            resolved_metadata_coordinator,
-            resolved_metadata_writer,
+            cast("StorageMaintenancePort", resolved_storage),
+            cast("MetricsPort", resolved_metrics),
+            cast("LoggerPort", resolved_logger),
+            cast("MetadataCoordinatorPort | None", resolved_metadata_coordinator),
+            cast("MetadataWriterPort | None", resolved_metadata_writer),
         )
 
     def __init__(
@@ -422,9 +422,11 @@ class PostrunService:
                     stats=stats,
                     dq_reports=dq_reports,
                     completed_at=completed_at,
-                    resolve_delta_version=lambda table_path, layer: self._resolve_delta_version(
-                        table_path,
-                        layer=layer,
+                    resolve_delta_version=lambda table_path, layer: (
+                        self._resolve_delta_version(
+                            table_path,
+                            layer=layer,
+                        )
                     ),
                 ),
                 _build_gold_metadata_write_coro(

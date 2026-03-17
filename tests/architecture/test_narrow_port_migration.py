@@ -15,10 +15,7 @@ from pathlib import Path
 import pytest
 
 _APPLICATION_ROOT = (
-    Path(__file__).resolve().parents[2]
-    / "src"
-    / "bioetl"
-    / "application"
+    Path(__file__).resolve().parents[2] / "src" / "bioetl" / "application"
 )
 
 # Maximum number of files that may still reference the broad StoragePort
@@ -49,14 +46,19 @@ def _files_using_broad_storage_port() -> list[str]:
         has_annotation = False
         for node in ast.walk(tree):
             # Check field annotations: `storage: StoragePort`
-            if isinstance(node, ast.AnnAssign) and isinstance(node.annotation, ast.Name):
+            if isinstance(node, ast.AnnAssign) and isinstance(
+                node.annotation, ast.Name
+            ):
                 if node.annotation.id == "StoragePort":
                     has_annotation = True
                     break
             # Check function parameter annotations
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 for arg in node.args.args + node.args.kwonlyargs:
-                    if isinstance(arg.annotation, ast.Name) and arg.annotation.id == "StoragePort":
+                    if (
+                        isinstance(arg.annotation, ast.Name)
+                        and arg.annotation.id == "StoragePort"
+                    ):
                         has_annotation = True
                         break
                 if has_annotation:
@@ -91,6 +93,6 @@ class TestNarrowPortMigration:
         ]
         for svc in migrated:
             # Normalize path separators
-            assert not any(
-                svc.replace("/", "\\") in f or svc in f for f in files
-            ), f"{svc} should use a narrow port, not StoragePort"
+            assert not any(svc.replace("/", "\\") in f or svc in f for f in files), (
+                f"{svc} should use a narrow port, not StoragePort"
+            )

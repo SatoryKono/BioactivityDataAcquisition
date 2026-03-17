@@ -162,6 +162,30 @@ class MetadataWriter:
             entity=entity,
         )
 
+    async def _write_layer_metadata(
+        self,
+        *,
+        base_path: str | Path,
+        metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+        layer: str,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> str:
+        """Build and execute one normalized metadata write request."""
+        return await self._write_metadata(
+            self._build_metadata_write_request(
+                base_path=base_path,
+                metadata=metadata,
+                layer=layer,
+                table_name=table_name,
+                flat_structure=flat_structure,
+                provider=provider,
+                entity=entity,
+            )
+        )
+
     async def write_bronze_metadata(
         self,
         base_path: str | Path,
@@ -183,14 +207,12 @@ class MetadataWriter:
         Returns:
             Absolute path to the written metadata file.
         """
-        return await self._write_metadata(
-            self._build_metadata_write_request(
-                base_path=base_path,
-                metadata=metadata,
-                layer="bronze",
-                provider=provider,
-                entity=entity,
-            )
+        return await self._write_layer_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            layer="bronze",
+            provider=provider,
+            entity=entity,
         )
 
     async def write_silver_metadata(
@@ -218,16 +240,14 @@ class MetadataWriter:
         Returns:
             Absolute path to the written metadata file.
         """
-        return await self._write_metadata(
-            self._build_metadata_write_request(
-                base_path=base_path,
-                metadata=metadata,
-                layer="silver",
-                table_name=table_name,
-                flat_structure=flat_structure,
-                provider=provider,
-                entity=entity,
-            )
+        return await self._write_layer_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            layer="silver",
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
         )
 
     async def write_gold_metadata(
@@ -255,16 +275,14 @@ class MetadataWriter:
         Returns:
             Absolute path to the written metadata file.
         """
-        return await self._write_metadata(
-            self._build_metadata_write_request(
-                base_path=base_path,
-                metadata=metadata,
-                layer="gold",
-                table_name=table_name,
-                flat_structure=flat_structure,
-                provider=provider,
-                entity=entity,
-            )
+        return await self._write_layer_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            layer="gold",
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
         )
 
     async def _write_metadata(self, request: _MetadataWriteRequest) -> str:

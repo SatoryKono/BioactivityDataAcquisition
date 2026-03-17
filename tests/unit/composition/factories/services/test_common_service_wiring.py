@@ -1,4 +1,5 @@
 """Unit tests for common_service_wiring helpers."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -109,12 +110,8 @@ class TestBuildCommonServicePorts:
 class TestAssemblePipelineService:
     """Tests for assemble_pipeline_service."""
 
-    @patch(
-        "bioetl.infrastructure.storage.metadata_writer.MetadataWriter"
-    )
-    def test_returns_pipeline_service(
-        self, mock_meta_writer_cls: MagicMock
-    ) -> None:
+    @patch("bioetl.infrastructure.storage.metadata_writer.MetadataWriter")
+    def test_returns_pipeline_service(self, mock_meta_writer_cls: MagicMock) -> None:
         """Assembles and returns a PipelineService from common ports."""
         mock_meta_writer_cls.return_value = MagicMock()
 
@@ -144,9 +141,7 @@ class TestAssemblePipelineService:
 
         assert result is not None
 
-    @patch(
-        "bioetl.infrastructure.storage.metadata_writer.MetadataWriter"
-    )
+    @patch("bioetl.infrastructure.storage.metadata_writer.MetadataWriter")
     def test_passes_dq_services_from_common_ports(
         self, mock_meta_writer_cls: MagicMock
     ) -> None:

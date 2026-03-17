@@ -25,11 +25,16 @@ def _schema_signature(config: Any) -> dict[str, Any]:
     }
 
 
-def _normalize_column_groups(groups: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+def _normalize_column_groups(
+    groups: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
     """Strip non-semantic defaults to compare canonical schema intent."""
     if groups is None:
         return []
-    return [{"name": g.get("name"), "fields": g.get("fields"), "pattern": g.get("pattern")} for g in groups]
+    return [
+        {"name": g.get("name"), "fields": g.get("fields"), "pattern": g.get("pattern")}
+        for g in groups
+    ]
 
 
 def _write_unified_pipeline(

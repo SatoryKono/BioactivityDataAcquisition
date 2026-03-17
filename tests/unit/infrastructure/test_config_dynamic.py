@@ -401,7 +401,9 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
     assert source["provider_config"]["batch_size"] == 30
 
 
-def test_load_source_config_rejects_missing_source_section(tmp_path, monkeypatch) -> None:
+def test_load_source_config_rejects_missing_source_section(
+    tmp_path, monkeypatch
+) -> None:
     """Loader should reject provider files without a source section."""
     load_source_config.cache_clear()
 
@@ -412,9 +414,7 @@ def test_load_source_config_rejects_missing_source_section(tmp_path, monkeypatch
     (providers_dir / "pubmed.yaml").write_text(yaml.dump(malformed_provider))
 
     monkeypatch.chdir(tmp_path)
-    with pytest.raises(
-        ValueError, match="requires a top-level 'source' section"
-    ):
+    with pytest.raises(ValueError, match="requires a top-level 'source' section"):
         load_source_config("pubmed")
 
 

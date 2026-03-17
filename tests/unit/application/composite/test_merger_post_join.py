@@ -1,4 +1,5 @@
 """Unit tests for merger_post_join — finalization and persist helpers."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime

@@ -80,9 +80,7 @@ class CompositeRunnerDependencyGroup:
     """
 
     seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
-    enricher_runner_factory: Callable[
-        [str, pl.DataFrame], ExecutionMetricsRunnerPort
-    ]
+    enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
     key_extractor: KeyExtractorService
     coordinator: EnrichmentCoordinatorService
     merger: MergeService

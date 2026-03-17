@@ -47,18 +47,25 @@ class TestExtractFieldFromQualified:
     def test_three_parts_returns_field(self, merge_service: MergeService) -> None:
         """Extract field from three-part qualified name."""
         assert (
-            merge_service._coalesce_policy.extract_field_from_qualified("chembl.publication.title")
+            merge_service._coalesce_policy.extract_field_from_qualified(
+                "chembl.publication.title"
+            )
             == "title"
         )
 
     def test_one_part_returns_original(self, merge_service: MergeService) -> None:
         """Return original for non-qualified name."""
-        assert merge_service._coalesce_policy.extract_field_from_qualified("title") == "title"
+        assert (
+            merge_service._coalesce_policy.extract_field_from_qualified("title")
+            == "title"
+        )
 
     def test_two_parts_returns_original(self, merge_service: MergeService) -> None:
         """Return original for two-part name (not valid qualified)."""
         assert (
-            merge_service._coalesce_policy.extract_field_from_qualified("crossref.title")
+            merge_service._coalesce_policy.extract_field_from_qualified(
+                "crossref.title"
+            )
             == "crossref.title"
         )
 

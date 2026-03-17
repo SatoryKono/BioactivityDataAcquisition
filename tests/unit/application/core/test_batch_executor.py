@@ -1178,15 +1178,15 @@ class TestBatchExecutorLoopHelpers:
             side_effect=lambda *_args, **_kwargs: call_order.append("process_batch")
         )
         progress_service = MagicMock()
-        progress_service.report_progress.side_effect = (
-            lambda **kwargs: call_order.append(f"progress:{kwargs['records_fetched']}")
+        progress_service.report_progress.side_effect = lambda **kwargs: (
+            call_order.append(f"progress:{kwargs['records_fetched']}")
         )
         memory_manager = MagicMock()
-        memory_manager.check_pressure.side_effect = (
-            lambda *_args: call_order.append("check_pressure") or 1
+        memory_manager.check_pressure.side_effect = lambda *_args: (
+            call_order.append("check_pressure") or 1
         )
-        memory_manager.maybe_recover.side_effect = (
-            lambda *_args: call_order.append("maybe_recover") or 3
+        memory_manager.maybe_recover.side_effect = lambda *_args: (
+            call_order.append("maybe_recover") or 3
         )
         checkpoint_recovery_service = AsyncMock()
         checkpoint_recovery_service.save_periodic_checkpoint.side_effect = (

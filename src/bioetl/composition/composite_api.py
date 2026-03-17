@@ -13,4 +13,3 @@ __all__ = [
     "load_composite_config",
     "load_pipeline_config",
 ]
-

@@ -35,4 +35,3 @@ __all__ = [
     "get_quarantine_store",
     "get_vacuum_service",
 ]
-

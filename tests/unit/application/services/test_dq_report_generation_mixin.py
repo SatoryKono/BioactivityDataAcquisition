@@ -8,7 +8,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.dq_report_service import DQReportContext, DQReportService
+from bioetl.application.services.dq_report_service import (
+    DQReportContext,
+    DQReportService,
+)
 from bioetl.domain.ports import GoldDQConfigPort, SilverDQConfigPort
 
 
@@ -166,10 +169,9 @@ async def test_generate_silver_report_uses_context_output_path_precedence(
 
     assert result == expected_path
     service._report_writer.write_silver_report.assert_awaited_once()
-    assert (
-        service._report_writer.write_silver_report.await_args.kwargs["output_path"]
-        == Path(context_output)
-    )
+    assert service._report_writer.write_silver_report.await_args.kwargs[
+        "output_path"
+    ] == Path(context_output)
 
 
 @pytest.mark.unit
@@ -190,10 +192,9 @@ async def test_generate_silver_report_uses_config_output_path_fallback(
     result = await service._generate_silver_report(context, silver_config)
 
     assert result == expected_path
-    assert (
-        service._report_writer.write_silver_report.await_args.kwargs["output_path"]
-        == Path(silver_config.output_path)
-    )
+    assert service._report_writer.write_silver_report.await_args.kwargs[
+        "output_path"
+    ] == Path(silver_config.output_path)
 
 
 @pytest.mark.unit
@@ -226,7 +227,9 @@ async def test_generate_silver_report_returns_none_when_writer_fails(
     service._silver_analyzer = MagicMock()
     service._silver_analyzer.analyze.return_value = _make_report()
     service._report_writer = AsyncMock()
-    service._report_writer.write_silver_report.side_effect = ValueError("silver write failed")
+    service._report_writer.write_silver_report.side_effect = ValueError(
+        "silver write failed"
+    )
     context = _make_context()
 
     result = await service._generate_silver_report(context, silver_config)
@@ -296,10 +299,9 @@ async def test_generate_gold_report_uses_context_output_path_precedence(
     result = await service._generate_gold_report(context, gold_config)
 
     assert result == expected_path
-    assert (
-        service._report_writer.write_gold_report.await_args.kwargs["output_path"]
-        == Path(context_output)
-    )
+    assert service._report_writer.write_gold_report.await_args.kwargs[
+        "output_path"
+    ] == Path(context_output)
 
 
 @pytest.mark.unit
@@ -320,10 +322,9 @@ async def test_generate_gold_report_uses_config_output_path_fallback(
     result = await service._generate_gold_report(context, gold_config)
 
     assert result == expected_path
-    assert (
-        service._report_writer.write_gold_report.await_args.kwargs["output_path"]
-        == Path(gold_config.output_path)
-    )
+    assert service._report_writer.write_gold_report.await_args.kwargs[
+        "output_path"
+    ] == Path(gold_config.output_path)
 
 
 @pytest.mark.unit
@@ -356,7 +357,9 @@ async def test_generate_gold_report_returns_none_when_writer_fails(
     service._gold_analyzer = MagicMock()
     service._gold_analyzer.analyze.return_value = _make_report()
     service._report_writer = AsyncMock()
-    service._report_writer.write_gold_report.side_effect = ValueError("gold write failed")
+    service._report_writer.write_gold_report.side_effect = ValueError(
+        "gold write failed"
+    )
     context = _make_context()
 
     result = await service._generate_gold_report(context, gold_config)

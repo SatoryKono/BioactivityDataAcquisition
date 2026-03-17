@@ -1,4 +1,5 @@
 """Unit tests for observability_bundle bootstrap helpers."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace

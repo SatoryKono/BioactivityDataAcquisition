@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1090,
-    "total_internal_imports": 4162,
+    "scanned_modules": 1091,
+    "total_internal_imports": 4170,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 249,
@@ -65,13 +65,13 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 31,
+      "imports": 33,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 36,
+      "imports": 38,
       "allowed": true
     },
     {
@@ -83,7 +83,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 127,
+      "imports": 131,
       "allowed": true
     }
   ],
@@ -169,13 +169,13 @@
       "imports": 26
     },
     {
-      "source": "application.pipelines",
-      "target": "domain.entities",
-      "imports": 24
-    },
-    {
       "source": "interfaces.cli",
       "target": "application.services",
+      "imports": 26
+    },
+    {
+      "source": "application.pipelines",
+      "target": "domain.entities",
       "imports": 24
     },
     {
@@ -289,6 +289,11 @@
       "imports": 14
     },
     {
+      "source": "interfaces.cli",
+      "target": "composition.services_api",
+      "imports": 14
+    },
+    {
       "source": "application.pipelines",
       "target": "domain.ports",
       "imports": 13
@@ -296,11 +301,6 @@
     {
       "source": "infrastructure.quality",
       "target": "domain.types",
-      "imports": 13
-    },
-    {
-      "source": "interfaces.cli",
-      "target": "composition.services_api",
       "imports": 13
     },
     {
@@ -359,6 +359,11 @@
       "imports": 9
     },
     {
+      "source": "interfaces.cli",
+      "target": "composition.registry",
+      "imports": 9
+    },
+    {
       "source": "composition.bootstrap",
       "target": "infrastructure.storage",
       "imports": 8
@@ -381,11 +386,6 @@
     {
       "source": "infrastructure.schemas",
       "target": "domain.composite",
-      "imports": 8
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.exceptions",
       "imports": 8
     }
   ],

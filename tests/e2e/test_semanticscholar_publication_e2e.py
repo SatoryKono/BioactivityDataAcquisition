@@ -12,6 +12,7 @@ Note:
 Recording cassettes:
     VCR_RECORD_MODE=once pytest tests/e2e/test_semanticscholar_publication_e2e.py -v
 """
+
 from __future__ import annotations
 
 import os
@@ -30,9 +31,7 @@ from .conftest import (
 )
 
 # VCR cassette directory for Semantic Scholar E2E tests
-CASSETTE_DIR = (
-    Path(__file__).parent.parent / "fixtures" / "vcr" / "semanticscholar"
-)
+CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "semanticscholar"
 
 # Stable DOIs for deterministic cassette playback.
 S2_TEST_DOIS = (
@@ -117,9 +116,7 @@ async def test_semanticscholar_publication_metadata_fields(
 
     metadata_fields = ["title", "publication_year"]
     records_with_metadata = sum(
-        1
-        for r in records
-        if any(r.get(f) is not None for f in metadata_fields)
+        1 for r in records if any(r.get(f) is not None for f in metadata_fields)
     )
     assert records_with_metadata >= 1, "At least one record should have metadata"
 

@@ -3,6 +3,7 @@
 Ensures key factory classes are importable and expose expected
 public construction methods.
 """
+
 from __future__ import annotations
 
 import pytest

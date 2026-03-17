@@ -26,4 +26,3 @@ __all__ = [
     "preview_cleanup",
     "vacuum_table",
 ]
-

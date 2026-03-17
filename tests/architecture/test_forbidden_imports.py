@@ -396,8 +396,7 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.resources_api\n"
             "  - bioetl.composition.composite_api\n"
             "  - bioetl.composition.observability_api\n\n"
-            "Violations:\n"
-            + "\n".join(f"  - {item}" for item in violations)
+            "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
 
