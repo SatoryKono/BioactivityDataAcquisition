@@ -27,4 +27,3 @@ __all__ = [
     "push_metrics_to_gateway",
     "run_pipeline",
 ]
-

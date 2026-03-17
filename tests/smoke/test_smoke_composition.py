@@ -3,6 +3,7 @@
 Validates that uncovered composition modules load without ImportError,
 catching wiring breakage before the heavier test suite runs.
 """
+
 from __future__ import annotations
 
 import importlib

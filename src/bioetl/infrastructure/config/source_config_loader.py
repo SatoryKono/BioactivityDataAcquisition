@@ -47,8 +47,7 @@ def read_source_config_payload(
         return payload
 
     raise ValueError(
-        "Provider configuration requires a top-level 'source' section: "
-        f"{unified_path}"
+        f"Provider configuration requires a top-level 'source' section: {unified_path}"
     )
 
 

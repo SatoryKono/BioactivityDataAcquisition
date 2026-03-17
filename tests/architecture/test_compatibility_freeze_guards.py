@@ -564,9 +564,7 @@ def test_datasource_registry_symbol_is_absent_from_canonical_docs_and_diagrams()
 @pytest.mark.architecture
 def test_register_all_providers_symbol_is_confined_to_provider_loading_modules(
     source_content_cache: dict[Path, str],
-) -> (
-    None
-):
+) -> None:
     """Canonical provider lifecycle must use ensure_providers_loaded outside loaders."""
     violations = _iter_symbol_mentions(
         source_content_cache,
@@ -662,9 +660,7 @@ def test_legacy_datasource_factory_module_is_only_used_by_compat_tests(
 @pytest.mark.architecture
 def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat_tests(
     test_content_cache: dict[Path, str],
-) -> (
-    None
-):
+) -> None:
     """Tests must not reintroduce string patch targets for removed datasource module."""
     # Note: this test needs fresh content_cache including self-file; use test_content_cache
     violations = _iter_string_mentions(

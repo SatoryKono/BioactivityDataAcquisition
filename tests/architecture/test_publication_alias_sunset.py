@@ -83,7 +83,9 @@ class TestPublicationAliasSunset:
             # Simple check: entity_type value should not be bare "document"
             for i, line in enumerate(content.splitlines(), 1):
                 stripped = line.strip()
-                if stripped.startswith("entity_type:") or stripped.startswith("entity:"):
+                if stripped.startswith("entity_type:") or stripped.startswith(
+                    "entity:"
+                ):
                     value = stripped.split(":", 1)[1].strip().strip("'\"")
                     if value == "document":
                         violations.append(f"{yaml_file.name}:{i}")

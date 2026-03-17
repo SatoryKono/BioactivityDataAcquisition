@@ -1,4 +1,5 @@
 """Unit tests for pipeline bootstrap (composition root entry point)."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -16,15 +17,9 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner"
-    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_returns_pipeline_runner(
         self,
         mock_build_runner: MagicMock,
@@ -49,15 +44,9 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner"
-    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_skips_registration_when_pipelines_exist(
         self,
         mock_build_runner: MagicMock,
@@ -77,18 +66,10 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.create_registry"
-    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
     def test_creates_registry_when_none_provided(
         self,
         mock_create_registry: MagicMock,
@@ -110,15 +91,9 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner"
-    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_calls_classification_init(
         self,
         mock_build_runner: MagicMock,
@@ -138,15 +113,9 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines"
-    )
-    @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner"
-    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_ensures_providers_loaded(
         self,
         mock_build_runner: MagicMock,

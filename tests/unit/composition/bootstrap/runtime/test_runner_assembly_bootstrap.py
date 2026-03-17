@@ -1,4 +1,5 @@
 """Unit tests for runner_assembly composite bootstrap helpers."""
+
 from __future__ import annotations
 
 import warnings
@@ -200,7 +201,13 @@ class TestBootstrapCompositeRunner:
     def test_passes_run_id_downstream(self) -> None:
         """Effective run_id from basics is forwarded to create_runner."""
         bootstrap_basics = MagicMock(
-            return_value=("effective-rid", SimpleNamespace(), MagicMock(), MagicMock(), MagicMock())
+            return_value=(
+                "effective-rid",
+                SimpleNamespace(),
+                MagicMock(),
+                MagicMock(),
+                MagicMock(),
+            )
         )
         create_runner = MagicMock(return_value=MagicMock())
 

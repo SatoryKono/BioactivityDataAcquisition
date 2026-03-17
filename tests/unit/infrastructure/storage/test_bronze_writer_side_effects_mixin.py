@@ -38,9 +38,7 @@ class TestBronzeWriterSideEffectsMixin:
     """Tests for audit and metadata side effects after Bronze write."""
 
     @pytest.mark.asyncio
-    async def test_log_bronze_audit_calls_audit_log_write(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_log_bronze_audit_calls_audit_log_write(self, tmp_path: Path) -> None:
         """Should call audit.log_write when audit port is configured."""
         host = _Host(tmp_path)
         ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)

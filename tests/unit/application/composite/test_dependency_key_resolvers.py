@@ -1,4 +1,5 @@
 """Unit tests for dependency_key_resolvers — SeedKeyResolver and ChainedKeyResolver."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock

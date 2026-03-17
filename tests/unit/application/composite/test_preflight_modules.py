@@ -1,4 +1,5 @@
 """Unit tests for preflight modules — types, rules, reporting, orchestration."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -39,7 +40,10 @@ class TestPreflightTypes:
 
     def test_validation_issue_default_severity(self) -> None:
         issue = ValidationIssue(
-            field="doi", source="chembl", issue_type="missing_field", message="not found"
+            field="doi",
+            source="chembl",
+            issue_type="missing_field",
+            message="not found",
         )
         assert issue.severity == "error"
 
@@ -140,7 +144,9 @@ class TestPreflightRules:
         mixin = _make_rules_mixin()
         source_fields: dict[str, SchemaFields] = {
             "chembl": {
-                "doi": FieldInfo(name="doi", dtype="str", nullable=True, source="chembl")
+                "doi": FieldInfo(
+                    name="doi", dtype="str", nullable=True, source="chembl"
+                )
             },
         }
         issues, resolved = mixin._validate_field_priority(
@@ -180,9 +186,7 @@ class TestPreflightRules:
 
 
 def _make_reporting_mixin() -> PreflightValidationReportingMixin:
-    mixin = PreflightValidationReportingMixin.__new__(
-        PreflightValidationReportingMixin
-    )
+    mixin = PreflightValidationReportingMixin.__new__(PreflightValidationReportingMixin)
     mixin._logger = MagicMock()
     return mixin
 
@@ -203,7 +207,9 @@ class TestPreflightReporting:
         mixin = _make_reporting_mixin()
         config = MagicMock()
         config.name = "pub_enriched"
-        result = PreflightValidationResult(is_valid=True, resolved_fields={"doi": "chembl"})
+        result = PreflightValidationResult(
+            is_valid=True, resolved_fields={"doi": "chembl"}
+        )
 
         mixin._log_validation_result(
             is_valid=True, config=config, result=result, field_priorities_count=1
@@ -256,9 +262,7 @@ class TestPreflightReporting:
 
 
 def _make_orchestration_mixin() -> PreflightSchemaOrchestrationMixin:
-    mixin = PreflightSchemaOrchestrationMixin.__new__(
-        PreflightSchemaOrchestrationMixin
-    )
+    mixin = PreflightSchemaOrchestrationMixin.__new__(PreflightSchemaOrchestrationMixin)
     mixin._logger = MagicMock()
     # Reset class-level registry to avoid cross-test pollution
     PreflightSchemaOrchestrationMixin._SCHEMA_REGISTRY = None

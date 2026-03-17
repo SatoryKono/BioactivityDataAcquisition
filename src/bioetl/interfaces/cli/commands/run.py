@@ -1,7 +1,4 @@
-"""Run command for BioETL CLI.
-
-Implements the main pipeline execution command using PipelineRunnerService.
-"""
+"""Run command for BioETL CLI."""
 
 from __future__ import annotations
 
@@ -47,6 +44,9 @@ from bioetl.interfaces.cli.commands.run_helpers import (
 )
 from bioetl.interfaces.cli.commands.run_result_presenter import (
     echo_run_result as _echo_run_result,
+)
+from bioetl.interfaces.cli.commands.run_runtime_helpers import (
+    build_run_command_input as _build_run_command_input_impl,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
@@ -129,16 +129,7 @@ def execute_run(
     request: RunExecutionRequest,
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
-    """Execute run and always flush metrics at command boundary.
-
-    Args:
-        request: Prepared run request with pipeline, options, and health config.
-        registry: Optional pipeline registry for test isolation; uses the
-            default global registry when None.
-
-    Returns:
-        RunResult with pipeline execution status and record counts.
-    """
+    """Execute run and flush metrics at command boundary."""
     return get_cli_run_orchestration_service().execute_pipeline(
         request=request,
         run_pipeline_async=partial(_run_prepared_request_async, registry=registry),
@@ -169,7 +160,7 @@ def _build_run_command_input(
     cached_bronze_path: str | None,
 ) -> RunCommandInput:
     """Build normalized CLI input payload for run_command_flow."""
-    return RunCommandInput(
+    return _build_run_command_input_impl(
         pipeline=pipeline,
         run_type=run_type,
         resume=resume,
@@ -234,18 +225,7 @@ async def _run_pipeline_async(
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
-    """Run pipeline asynchronously via service.
-
-    Args:
-        pipeline: Pipeline name.
-        options: Run options.
-        health_server_enabled: Whether to enable health server.
-        health_port: Port for health server.
-        registry: Optional pipeline registry for test isolation.
-
-    Returns:
-        RunResult object with status and metrics.
-    """
+    """Run pipeline asynchronously via service."""
     ensure_metrics_server_started()
     async with health_server_context(
         enabled=health_server_enabled,

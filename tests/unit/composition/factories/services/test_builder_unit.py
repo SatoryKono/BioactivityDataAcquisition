@@ -1,4 +1,5 @@
 """Unit tests for ServicesBuilder."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -13,12 +14,8 @@ from bioetl.composition.factories.services.builder import ServicesBuilder
 class TestServicesBuilderCreateCheckpointManager:
     """Tests for ServicesBuilder.create_checkpoint_manager."""
 
-    @patch(
-        "bioetl.composition.factories.services.builder.create_checkpoint_manager"
-    )
-    def test_delegates_to_module_function(
-        self, mock_create: MagicMock
-    ) -> None:
+    @patch("bioetl.composition.factories.services.builder.create_checkpoint_manager")
+    def test_delegates_to_module_function(self, mock_create: MagicMock) -> None:
         """Static method delegates to create_checkpoint_manager function."""
         expected = MagicMock()
         mock_create.return_value = expected
@@ -34,12 +31,8 @@ class TestServicesBuilderCreateCheckpointManager:
         assert result is expected
         mock_create.assert_called_once()
 
-    @patch(
-        "bioetl.composition.factories.services.builder.create_checkpoint_manager"
-    )
-    def test_passes_loading_strategy(
-        self, mock_create: MagicMock
-    ) -> None:
+    @patch("bioetl.composition.factories.services.builder.create_checkpoint_manager")
+    def test_passes_loading_strategy(self, mock_create: MagicMock) -> None:
         """loading_strategy kwarg is forwarded."""
         mock_create.return_value = MagicMock()
         strategy = MagicMock()
@@ -64,9 +57,7 @@ class TestServicesBuilderCreateBatchProcessingComponents:
     @patch(
         "bioetl.composition.factories.services.builder.create_batch_processing_components"
     )
-    def test_delegates_to_module_function(
-        self, mock_create: MagicMock
-    ) -> None:
+    def test_delegates_to_module_function(self, mock_create: MagicMock) -> None:
         """Static method delegates to create_batch_processing_components."""
         expected = MagicMock()
         mock_create.return_value = expected
@@ -89,9 +80,7 @@ class TestServicesBuilderCreateBatchProcessingComponents:
 class TestServicesBuilderCreateRecordProcessorFromPipeline:
     """Tests for ServicesBuilder.create_record_processor_from_pipeline."""
 
-    @patch(
-        "bioetl.composition.factories.services.builder.extract_pipeline_callbacks"
-    )
+    @patch("bioetl.composition.factories.services.builder.extract_pipeline_callbacks")
     @patch(
         "bioetl.composition.factories.services.builder.create_record_processor_from_pipeline"
     )
@@ -123,9 +112,7 @@ class TestServicesBuilderCreateRecordProcessorFromPipeline:
 class TestServicesBuilderCreateBatchExecutorFromPipeline:
     """Tests for ServicesBuilder.create_batch_executor_from_pipeline."""
 
-    @patch(
-        "bioetl.composition.factories.services.builder.extract_pipeline_callbacks"
-    )
+    @patch("bioetl.composition.factories.services.builder.extract_pipeline_callbacks")
     @patch(
         "bioetl.composition.factories.services.builder.create_batch_executor_from_pipeline"
     )

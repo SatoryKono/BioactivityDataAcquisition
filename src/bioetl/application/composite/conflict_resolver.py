@@ -119,39 +119,44 @@ class ConflictResolverService:
             )
             return df
 
-        match self._config.conflict_resolution:
-            case ConflictResolution.SEED_PRIORITY:
-                return self._coalesce_policy.coalesce_prefer_seed(
-                    df,
-                    enrichers,
-                    seed_pipeline,
-                )
-            case ConflictResolution.ENRICHER_PRIORITY:
-                return self._coalesce_policy.coalesce_prefer_enricher(
-                    df,
-                    enrichers,
-                    seed_pipeline,
-                )
-            case ConflictResolution.COALESCE:
-                return self._coalesce_policy.coalesce_first_non_null(
-                    df,
-                    enrichers,
-                    seed_pipeline,
-                )
-            case ConflictResolution.EXPLICIT_RULES:
-                return self._coalesce_policy.apply_explicit_rules(
-                    df,
-                    enrichers,
-                    self._config.field_priorities,
-                    seed_pipeline,
-                )
-            case ConflictResolution.LATEST_TIMESTAMP:
-                # Timestamp-based coalescing not yet implemented;
-                # falls back to seed-priority (see ADR-026).
-                return self._coalesce_policy.coalesce_prefer_seed(
-                    df,
-                    enrichers,
-                    seed_pipeline,
-                )
-            case _:
-                return df
+        return self._resolve_by_policy(df, enrichers, seed_pipeline)
+
+    def _resolve_by_policy(
+        self,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None,
+    ) -> pl.DataFrame:
+        policy = self._config.conflict_resolution
+        policy_handlers = {
+            ConflictResolution.SEED_PRIORITY: lambda: self._coalesce_policy.coalesce_prefer_seed(
+                df,
+                enrichers,
+                seed_pipeline,
+            ),
+            ConflictResolution.ENRICHER_PRIORITY: lambda: self._coalesce_policy.coalesce_prefer_enricher(
+                df,
+                enrichers,
+                seed_pipeline,
+            ),
+            ConflictResolution.COALESCE: lambda: self._coalesce_policy.coalesce_first_non_null(
+                df,
+                enrichers,
+                seed_pipeline,
+            ),
+            ConflictResolution.EXPLICIT_RULES: lambda: self._coalesce_policy.apply_explicit_rules(
+                df,
+                enrichers,
+                self._config.field_priorities,
+                seed_pipeline,
+            ),
+            # Timestamp coalescing is not implemented yet; fallback to seed-priority.
+            ConflictResolution.LATEST_TIMESTAMP: lambda: self._coalesce_policy.coalesce_prefer_seed(
+                df,
+                enrichers,
+                seed_pipeline,
+            ),
+        }
+
+        handler = policy_handlers.get(policy)
+        return handler() if handler is not None else df

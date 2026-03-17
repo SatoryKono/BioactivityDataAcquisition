@@ -3,6 +3,7 @@
 Validates that each registered Click subcommand responds to ``--help``
 without raising, catching broken imports in command modules.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -35,6 +36,4 @@ class TestCLISubcommandHealth:
         """Invoke --help for each subcommand and assert exit_code == 0."""
         runner = CliRunner()
         result = runner.invoke(cli, [subcommand, "--help"])
-        assert result.exit_code == 0, (
-            f"{subcommand} --help failed: {result.output}"
-        )
+        assert result.exit_code == 0, f"{subcommand} --help failed: {result.output}"

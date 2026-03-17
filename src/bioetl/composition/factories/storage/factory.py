@@ -78,7 +78,9 @@ class StorageFactory:
             StorageContext with assembled adapter and resolved layer paths.
         """
         ctx = build_storage_creation_context(
-            settings=settings, config=config, logger=logger,
+            settings=settings,
+            config=config,
+            logger=logger,
         )
         logger.info(
             "Using local storage",

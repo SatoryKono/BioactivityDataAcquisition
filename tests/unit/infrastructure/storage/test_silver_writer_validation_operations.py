@@ -125,7 +125,9 @@ class TestValidateRecords:
         """Should raise ValueError when required metadata fields are missing."""
         host = MagicMock()
         schema = pa.schema([("id", pa.int64())])
-        records = [{"id": 1, "_run_id": "r1"}]  # missing _run_type, _source_batch_id, _ingestion_ts
+        records = [
+            {"id": 1, "_run_id": "r1"}
+        ]  # missing _run_type, _source_batch_id, _ingestion_ts
         with pytest.raises(ValueError, match="missing required metadata fields"):
             _validate_records(host, records, "test_table", schema)
 

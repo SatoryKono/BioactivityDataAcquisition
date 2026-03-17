@@ -110,7 +110,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 validation, metadata, DQ, resilience, and optional CSV export.
             flat_structure: When True, omit the table-based subdirectory hierarchy.
         """
-        csv_exporter = cast("CsvExporter | None", legacy_kwargs.pop("csv_exporter", None))
+        csv_exporter = cast(
+            "CsvExporter | None", legacy_kwargs.pop("csv_exporter", None)
+        )
         tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
         write_policy = cast(
             "WriteModePolicy | None",

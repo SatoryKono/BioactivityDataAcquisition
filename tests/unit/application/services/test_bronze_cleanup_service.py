@@ -194,5 +194,3 @@ class TestBronzeCleanupServiceFormatBytes:
         """Test formatting zero bytes."""
         result = BronzeCleanupService.format_bytes(0)
         assert result == "0 bytes"
-
-

@@ -1,4 +1,5 @@
 """Unit tests for pipeline_builder module functions."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -40,9 +41,7 @@ class TestCreateCheckpointManager:
     @patch(
         "bioetl.composition.factories.services.pipeline_builder.CheckpointManagerService"
     )
-    def test_creates_checkpoint_manager_service(
-        self, mock_cls: MagicMock
-    ) -> None:
+    def test_creates_checkpoint_manager_service(self, mock_cls: MagicMock) -> None:
         """Creates CheckpointManagerService with all params."""
         expected = MagicMock()
         mock_cls.return_value = expected
@@ -61,9 +60,7 @@ class TestCreateCheckpointManager:
     @patch(
         "bioetl.composition.factories.services.pipeline_builder.CheckpointManagerService"
     )
-    def test_passes_loading_strategy(
-        self, mock_cls: MagicMock
-    ) -> None:
+    def test_passes_loading_strategy(self, mock_cls: MagicMock) -> None:
         """Loading strategy is forwarded to constructor."""
         mock_cls.return_value = MagicMock()
         strategy = MagicMock()
@@ -85,12 +82,8 @@ class TestCreateCheckpointManager:
 class TestCreateBatchProcessingComponents:
     """Tests for create_batch_processing_components."""
 
-    @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchWriter"
-    )
-    @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchTransformer"
-    )
+    @patch("bioetl.composition.factories.services.pipeline_builder.BatchWriter")
+    @patch("bioetl.composition.factories.services.pipeline_builder.BatchTransformer")
     @patch(
         "bioetl.composition.factories.services.pipeline_builder.BatchMetricsRecorderService"
     )

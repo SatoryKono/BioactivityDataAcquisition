@@ -11,4 +11,3 @@ __all__ = [
     "create_silver_atomic_retry_policy",
     "create_silver_merge_resilience_policy",
 ]
-

@@ -1,4 +1,5 @@
 """Unit tests for pipeline contract_validator."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -93,9 +94,7 @@ class TestValidateContractPolicy:
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator.load_pipeline_contract_policy"
     )
-    def test_passes_when_keys_present(
-        self, mock_load_policy: MagicMock
-    ) -> None:
+    def test_passes_when_keys_present(self, mock_load_policy: MagicMock) -> None:
         """No error when all policy keys exist in both schemas."""
         mock_load_policy.return_value = SimpleNamespace(
             primary_key=["pk"], merge_keys=["mk"]
@@ -125,9 +124,7 @@ class TestValidateContractPolicy:
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator.load_pipeline_contract_policy"
     )
-    def test_raises_when_keys_missing(
-        self, mock_load_policy: MagicMock
-    ) -> None:
+    def test_raises_when_keys_missing(self, mock_load_policy: MagicMock) -> None:
         """Raises ValueError when policy keys are missing from schemas."""
         mock_load_policy.return_value = SimpleNamespace(
             primary_key=["pk", "missing_key"], merge_keys=[]
@@ -159,9 +156,7 @@ class TestValidateContractPolicy:
 class TestCreateFactory:
     """Tests for create_factory."""
 
-    @patch(
-        "bioetl.composition.factories.pipeline.assembler.get_data_source_creator"
-    )
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
     )
@@ -188,9 +183,7 @@ class TestCreateFactory:
         assert result is not None
         assert result.pipeline_name == "test_pipe"
 
-    @patch(
-        "bioetl.composition.factories.pipeline.assembler.get_data_source_creator"
-    )
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
     @patch(
         "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
     )

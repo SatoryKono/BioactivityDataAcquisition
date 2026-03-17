@@ -134,9 +134,7 @@ class StorageAdapterMaintenanceMixin:
                 )
                 removed = await loop.run_in_executor(
                     None,
-                    lambda: dt.vacuum(
-                        retention_hours=retention_hours, dry_run=dry_run
-                    ),
+                    lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
                 )
                 total_removed += len(removed)
             except (OSError, RuntimeError):

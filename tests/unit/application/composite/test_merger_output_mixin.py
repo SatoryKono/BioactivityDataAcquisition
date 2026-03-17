@@ -1,4 +1,5 @@
 """Unit tests for merger_output_mixin — Silver/Gold write helpers."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
@@ -29,19 +30,30 @@ class TestPathToTableName:
     """Test _path_to_table_name static method."""
 
     def test_strips_silver_prefix(self) -> None:
-        assert MergeOutputWriterMixin._path_to_table_name("silver/composite/pub") == "composite/pub"
+        assert (
+            MergeOutputWriterMixin._path_to_table_name("silver/composite/pub")
+            == "composite/pub"
+        )
 
     def test_strips_gold_prefix(self) -> None:
-        assert MergeOutputWriterMixin._path_to_table_name("gold/pub_enriched") == "pub_enriched"
+        assert (
+            MergeOutputWriterMixin._path_to_table_name("gold/pub_enriched")
+            == "pub_enriched"
+        )
 
     def test_strips_bronze_prefix(self) -> None:
         assert MergeOutputWriterMixin._path_to_table_name("bronze/raw") == "raw"
 
     def test_handles_backslashes(self) -> None:
-        assert MergeOutputWriterMixin._path_to_table_name("silver\\composite\\pub") == "composite/pub"
+        assert (
+            MergeOutputWriterMixin._path_to_table_name("silver\\composite\\pub")
+            == "composite/pub"
+        )
 
     def test_returns_path_unchanged_when_no_layer(self) -> None:
-        assert MergeOutputWriterMixin._path_to_table_name("other/table") == "other/table"
+        assert (
+            MergeOutputWriterMixin._path_to_table_name("other/table") == "other/table"
+        )
 
 
 @pytest.mark.unit

@@ -239,7 +239,9 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._join_planner.normalize_join_key_columns(df, ["doi"], None)
+        result = merge_service._join_planner.normalize_join_key_columns(
+            df, ["doi"], None
+        )
 
         assert result["doi"].to_list() == ["10.1038/nature12373", "10.1000/abc.def"]
         # Non-normalized columns should be unchanged
@@ -256,7 +258,9 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._join_planner.normalize_join_key_columns(df, ["pmid"], None)
+        result = merge_service._join_planner.normalize_join_key_columns(
+            df, ["pmid"], None
+        )
 
         assert result["pmid"].to_list() == ["12345678", "pmc1234567"]
 
@@ -270,7 +274,9 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._join_planner.normalize_join_key_columns(df, ["pmc_id"], None)
+        result = merge_service._join_planner.normalize_join_key_columns(
+            df, ["pmc_id"], None
+        )
 
         assert result["pmc_id"].to_list() == ["pmc1234567", "pmc7654321"]
 
@@ -285,7 +291,9 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._join_planner.normalize_join_key_columns(df, ["title", "doi"], None)
+        result = merge_service._join_planner.normalize_join_key_columns(
+            df, ["title", "doi"], None
+        )
 
         # title is not in _NORMALIZE_JOIN_KEYS, so it should be unchanged
         assert result["title"].to_list() == ["UPPERCASE TITLE", "Another TITLE"]
@@ -302,7 +310,9 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._join_planner.normalize_join_key_columns(df, ["doi"], None)
+        result = merge_service._join_planner.normalize_join_key_columns(
+            df, ["doi"], None
+        )
 
         assert result["doi"].to_list() == ["10.1038/nature", None, "10.1000/abc"]
 
@@ -317,7 +327,9 @@ class TestMergeServiceJoinKeyNormalization:
             }
         )
 
-        result = merge_service._join_planner.normalize_join_key_columns(df, ["id", "name"], None)
+        result = merge_service._join_planner.normalize_join_key_columns(
+            df, ["id", "name"], None
+        )
 
         # Neither id nor name are in _NORMALIZE_JOIN_KEYS
         assert result["id"].to_list() == ["ID1", "ID2"]
@@ -334,7 +346,9 @@ class TestMergeServiceJoinKeyNormalization:
         )
 
         # Request normalization of doi which doesn't exist
-        result = merge_service._join_planner.normalize_join_key_columns(df, ["doi", "title"], None)
+        result = merge_service._join_planner.normalize_join_key_columns(
+            df, ["doi", "title"], None
+        )
 
         # Should return unchanged since doi doesn't exist
         assert result["title"].to_list() == ["Title 1"]
@@ -468,7 +482,6 @@ class TestMergeServiceMergeOperation:
         assert "test_enricher" in result.sources_used
 
 
-
 @pytest.mark.unit
 class TestMergeServiceOptionalReadPolicy:
     """Tests for optional merge input read degradation."""
@@ -579,8 +592,10 @@ class TestDetectAndResolveConflicts:
         seed = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
         enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.author": ["A1"]})
 
-        seed_out, enricher_out = merge_service._conflict_resolver.detect_and_resolve_conflicts(
-            seed, enricher, {"doi"}
+        seed_out, enricher_out = (
+            merge_service._conflict_resolver.detect_and_resolve_conflicts(
+                seed, enricher, {"doi"}
+            )
         )
 
         assert seed_out.columns == ["doi", "title"]
@@ -593,8 +608,10 @@ class TestDetectAndResolveConflicts:
         seed = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T1"]})
         enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T2"]})
 
-        seed_out, enricher_out = merge_service._conflict_resolver.detect_and_resolve_conflicts(
-            seed, enricher, {"doi"}
+        seed_out, enricher_out = (
+            merge_service._conflict_resolver.detect_and_resolve_conflicts(
+                seed, enricher, {"doi"}
+            )
         )
 
         # Seed columns remain unchanged
@@ -611,8 +628,10 @@ class TestDetectAndResolveConflicts:
         enricher = pl.DataFrame({"doi": ["10.1/a"], "value": ["V2"]})
 
         # doi is join key, value is a conflict
-        seed_out, enricher_out = merge_service._conflict_resolver.detect_and_resolve_conflicts(
-            seed, enricher, {"doi"}
+        seed_out, enricher_out = (
+            merge_service._conflict_resolver.detect_and_resolve_conflicts(
+                seed, enricher, {"doi"}
+            )
         )
 
         # doi should remain unchanged in both
@@ -625,12 +644,21 @@ class TestDetectAndResolveConflicts:
     def test_find_next_suffix_basic(self, merge_service):
         """Test _find_next_suffix returns first available suffix."""
         # No existing suffixes → returns A
-        assert merge_service._conflict_resolver.find_next_suffix("title", {"title"}) == "A"
+        assert (
+            merge_service._conflict_resolver.find_next_suffix("title", {"title"}) == "A"
+        )
         # A exists → returns B
-        assert merge_service._conflict_resolver.find_next_suffix("title", {"title", "title.A"}) == "B"
+        assert (
+            merge_service._conflict_resolver.find_next_suffix(
+                "title", {"title", "title.A"}
+            )
+            == "B"
+        )
         # A, B exist → returns C
         assert (
-            merge_service._conflict_resolver.find_next_suffix("title", {"title", "title.A", "title.B"})
+            merge_service._conflict_resolver.find_next_suffix(
+                "title", {"title", "title.A", "title.B"}
+            )
             == "C"
         )
 
@@ -643,8 +671,10 @@ class TestDetectAndResolveConflicts:
 
         # First enricher conflict
         enricher1 = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-02-01"]})
-        seed_out1, enricher_out1 = merge_service._conflict_resolver.detect_and_resolve_conflicts(
-            seed, enricher1, {"doi"}
+        seed_out1, enricher_out1 = (
+            merge_service._conflict_resolver.detect_and_resolve_conflicts(
+                seed, enricher1, {"doi"}
+            )
         )
         assert "pub_date" in seed_out1.columns  # Seed unchanged
         assert "pub_date.A" in enricher_out1.columns  # First enricher gets A
@@ -660,8 +690,10 @@ class TestDetectAndResolveConflicts:
 
         # Second enricher conflict - should get B suffix
         enricher2 = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-03-01"]})
-        merged_out, enricher_out2 = merge_service._conflict_resolver.detect_and_resolve_conflicts(
-            merged, enricher2, {"doi"}
+        merged_out, enricher_out2 = (
+            merge_service._conflict_resolver.detect_and_resolve_conflicts(
+                merged, enricher2, {"doi"}
+            )
         )
         assert "pub_date" in merged_out.columns  # Original seed column unchanged
         assert "pub_date.A" in merged_out.columns  # First enricher column unchanged
@@ -963,16 +995,12 @@ class TestGetEnricherPrefix:
 
     def test_qualified_prefix_same_provider(self, merge_service):
         """Test qualified prefix for same provider different entity."""
-        prefix = merge_service._priority_orderer.get_enricher_prefix(
-            "chembl_activity"
-        )
+        prefix = merge_service._priority_orderer.get_enricher_prefix("chembl_activity")
         assert prefix == "chembl.activity."
 
     def test_qualified_prefix_different_both(self, merge_service):
         """Test qualified prefix for different provider and entity."""
-        prefix = merge_service._priority_orderer.get_enricher_prefix(
-            "pubchem_compound"
-        )
+        prefix = merge_service._priority_orderer.get_enricher_prefix("pubchem_compound")
         assert prefix == "pubchem.compound."
 
     def test_fallback_prefix_when_invalid_format(self, merge_service):

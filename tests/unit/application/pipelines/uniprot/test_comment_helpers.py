@@ -47,7 +47,9 @@ class TestCommentHelperBasics:
         assert _extract_reaction_data({}) == {}
 
     def test_extract_location_value_handles_missing_or_malformed_input(self) -> None:
-        assert _extract_location_value({"location": {"value": "Cytoplasm"}}) == "Cytoplasm"
+        assert (
+            _extract_location_value({"location": {"value": "Cytoplasm"}}) == "Cytoplasm"
+        )
         assert _extract_location_value({"location": {}}) is None
         assert _extract_location_value({"location": "Cytoplasm"}) is None
 
@@ -55,7 +57,9 @@ class TestCommentHelperBasics:
         assert _extract_texts_from_dict(None) == []
         assert _extract_texts_from_dict("not-a-dict") == []
         assert _extract_texts_from_dict({"texts": "not-a-list"}) == []
-        assert _extract_texts_from_dict({"texts": [{"value": "A"}, {}, {"value": "B"}]}) == [
+        assert _extract_texts_from_dict(
+            {"texts": [{"value": "A"}, {}, {"value": "B"}]}
+        ) == [
             "A",
             "B",
         ]
@@ -70,7 +74,9 @@ class TestCommentHelperBasics:
             "name": "Canonical",
         }
 
-    def test_build_isoform_data_returns_empty_when_optional_fields_missing(self) -> None:
+    def test_build_isoform_data_returns_empty_when_optional_fields_missing(
+        self,
+    ) -> None:
         assert _build_isoform_data({"isoformIds": [], "name": {}}) == {}
 
 
@@ -105,7 +111,9 @@ class TestIsoformExtraction:
         }
         assert _extract_isoform_synonym_values(iso) == ["Isoform A"]
 
-    def test_iter_alternative_product_isoforms_collects_only_dict_isoforms(self) -> None:
+    def test_iter_alternative_product_isoforms_collects_only_dict_isoforms(
+        self,
+    ) -> None:
         comments = [
             {"commentType": "FUNCTION", "isoforms": [{"name": {"value": "ignored"}}]},
             {
@@ -121,7 +129,12 @@ class TestIsoformExtraction:
     def test_iter_alternative_product_isoforms_handles_malformed_payloads(self) -> None:
         assert _iter_alternative_product_isoforms(None) == []
         assert _iter_alternative_product_isoforms([]) == []
-        assert _iter_alternative_product_isoforms([{"commentType": "ALTERNATIVE PRODUCTS", "isoforms": "bad"}]) == []
+        assert (
+            _iter_alternative_product_isoforms(
+                [{"commentType": "ALTERNATIVE PRODUCTS", "isoforms": "bad"}]
+            )
+            == []
+        )
 
 
 @pytest.mark.unit
@@ -136,7 +149,9 @@ class TestCofactorAndKineticsExtraction:
         }
         many_notes = {
             "name": "Zn2+",
-            "note": {"texts": [{"value": "Binding site 1"}, {"value": "Binding site 2"}]},
+            "note": {
+                "texts": [{"value": "Binding site 1"}, {"value": "Binding site 2"}]
+            },
         }
 
         assert _extract_cofactor_entry(one_note) == {
@@ -153,14 +168,18 @@ class TestCofactorAndKineticsExtraction:
         assert _extract_cofactor_entry({}) == {}
 
     def test_extract_km_and_vmax_entries_emit_only_present_fields(self) -> None:
-        assert _extract_km_entry({"constant": 0.5, "unit": "mM", "substrate": "ATP"}) == {
+        assert _extract_km_entry(
+            {"constant": 0.5, "unit": "mM", "substrate": "ATP"}
+        ) == {
             "value": 0.5,
             "unit": "mM",
             "substrate": "ATP",
         }
         assert _extract_km_entry({"unit": "mM"}) == {"unit": "mM"}
 
-        assert _extract_vmax_entry({"velocity": 120, "unit": "umol/min/mg", "enzyme": "recombinant"}) == {
+        assert _extract_vmax_entry(
+            {"velocity": 120, "unit": "umol/min/mg", "enzyme": "recombinant"}
+        ) == {
             "value": 120,
             "unit": "umol/min/mg",
             "enzyme": "recombinant",
@@ -170,7 +189,9 @@ class TestCofactorAndKineticsExtraction:
     def test_extract_list_entries_handles_none_and_non_dict_items(self) -> None:
         assert _extract_list_entries(None, _extract_km_entry) == []
         assert _extract_list_entries("bad", _extract_km_entry) == []
-        assert _extract_list_entries([{"constant": 1}, "bad", {"unit": "mM"}], _extract_km_entry) == [
+        assert _extract_list_entries(
+            [{"constant": 1}, "bad", {"unit": "mM"}], _extract_km_entry
+        ) == [
             {"value": 1},
             {"unit": "mM"},
         ]
@@ -223,10 +244,14 @@ class TestAbsorptionAndBiophysExtraction:
         assert extracted["temperature_dependence"] == ["Stable up to 40C"]
         assert extracted["redox_potential"] == ["-320mV"]
         assert extracted["kinetic_parameters"]["km"] == [{"value": 0.3, "unit": "mM"}]
-        assert extracted["kinetic_parameters"]["vmax"] == [{"value": 100, "unit": "U/mg"}]
+        assert extracted["kinetic_parameters"]["vmax"] == [
+            {"value": 100, "unit": "U/mg"}
+        ]
         assert extracted["absorption"] == {"max": 340, "note": ["Peak in near UV"]}
 
-    def test_extract_biophys_from_comment_defensive_for_malformed_nested_payloads(self) -> None:
+    def test_extract_biophys_from_comment_defensive_for_malformed_nested_payloads(
+        self,
+    ) -> None:
         comment = {
             "phDependence": None,
             "temperatureDependence": {"texts": "bad"},
@@ -237,4 +262,3 @@ class TestAbsorptionAndBiophysExtraction:
 
         extracted = _extract_biophys_from_comment(comment)
         assert extracted == {"redox_potential": ["ok"]}
-

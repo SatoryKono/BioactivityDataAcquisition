@@ -1,4 +1,5 @@
 """Unit tests for factory_method_helpers."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -112,9 +113,7 @@ class TestBuildFactoryServices:
     @patch(
         "bioetl.composition.factories.pipeline.factory_method_helpers.build_pipeline_services"
     )
-    def test_delegates_to_build_pipeline_services(
-        self, mock_build: MagicMock
-    ) -> None:
+    def test_delegates_to_build_pipeline_services(self, mock_build: MagicMock) -> None:
         """Delegates to the canonical build_pipeline_services function."""
         expected = MagicMock()
         mock_build.return_value = expected
@@ -137,9 +136,7 @@ class TestCreateFactoryRunner:
     @patch(
         "bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config"
     )
-    def test_loads_config_when_not_provided(
-        self, mock_load: MagicMock
-    ) -> None:
+    def test_loads_config_when_not_provided(self, mock_load: MagicMock) -> None:
         """Loads pipeline config from disk when config arg is None."""
         mock_load.return_value = MagicMock()
         create_fn = MagicMock(return_value=MagicMock())

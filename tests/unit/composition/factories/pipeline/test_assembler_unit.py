@@ -1,4 +1,5 @@
 """Unit tests for GenericPipelineFactory assembler."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -57,9 +58,7 @@ class TestGenericPipelineFactory:
         assert factory.provider == "chembl"
         assert factory.gold_schema is gold_schema
 
-    @patch(
-        "bioetl.composition.factories.pipeline.assembler.get_data_source_creator"
-    )
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
     def test_resolves_default_data_source_creator(
         self, mock_get_creator: MagicMock
     ) -> None:
@@ -109,9 +108,7 @@ class TestGenericPipelineFactory:
 class TestCreatePipelineFactory:
     """Tests for create_pipeline_factory convenience function."""
 
-    @patch(
-        "bioetl.composition.factories.pipeline.assembler.get_data_source_creator"
-    )
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
     def test_returns_generic_pipeline_factory(
         self, mock_get_creator: MagicMock
     ) -> None:
@@ -132,15 +129,9 @@ class TestCreatePipelineFactory:
 class TestAssembleRunner:
     """Tests for assemble_runner top-level function."""
 
-    @patch(
-        "bioetl.composition.factories.pipeline.assembler._assemble_runner_impl"
-    )
-    @patch(
-        "bioetl.composition.factories.pipeline.assembler._extract_dq_configs"
-    )
-    def test_delegates_to_impl(
-        self, mock_dq: MagicMock, mock_impl: MagicMock
-    ) -> None:
+    @patch("bioetl.composition.factories.pipeline.assembler._assemble_runner_impl")
+    @patch("bioetl.composition.factories.pipeline.assembler._extract_dq_configs")
+    def test_delegates_to_impl(self, mock_dq: MagicMock, mock_impl: MagicMock) -> None:
         """assemble_runner delegates to _assemble_runner_impl with dq extractor."""
         expected_runner = MagicMock()
         mock_impl.return_value = expected_runner

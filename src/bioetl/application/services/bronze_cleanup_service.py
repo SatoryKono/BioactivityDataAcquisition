@@ -137,5 +137,3 @@ class BronzeCleanupService:
             if b >= div:
                 return f"{b / div:.2f} {unit}"
         return f"{b} bytes"
-
-

@@ -12,6 +12,7 @@ Note:
 Recording cassettes:
     VCR_RECORD_MODE=once pytest tests/e2e/test_openalex_publication_e2e.py -v
 """
+
 from __future__ import annotations
 
 import os
@@ -109,9 +110,7 @@ async def test_openalex_publication_metadata_fields(e2e_data_dir: Path) -> None:
 
     metadata_fields = ["title", "publication_year"]
     records_with_metadata = sum(
-        1
-        for r in records
-        if any(r.get(f) is not None for f in metadata_fields)
+        1 for r in records if any(r.get(f) is not None for f in metadata_fields)
     )
     assert records_with_metadata >= 1, "At least one record should have metadata"
 

@@ -213,7 +213,6 @@ class TestProtocolCompatibility:
         assert TransformerProtocol is not None
 
 
-
 class TestProtocolDocumentation:
     """Tests that protocols have proper documentation."""
 

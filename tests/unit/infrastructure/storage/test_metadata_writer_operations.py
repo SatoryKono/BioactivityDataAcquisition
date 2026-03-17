@@ -27,7 +27,10 @@ class TestGetMetadataFilename:
 
     def test_provider_and_entity_filename(self) -> None:
         """Should produce {provider}_{entity}_metadata.yaml."""
-        assert _get_metadata_filename("chembl", "compound") == "chembl_compound_metadata.yaml"
+        assert (
+            _get_metadata_filename("chembl", "compound")
+            == "chembl_compound_metadata.yaml"
+        )
 
     def test_default_filename_when_provider_none(self) -> None:
         """Should return default _metadata.yaml when provider is None."""
@@ -52,7 +55,9 @@ class TestResolveMetadataTarget:
             entity="compound",
         )
         target = _resolve_metadata_target(request)
-        assert target.metadata_path == Path("/data/bronze/chembl_compound_metadata.yaml")
+        assert target.metadata_path == Path(
+            "/data/bronze/chembl_compound_metadata.yaml"
+        )
         assert target.pipeline_label == "chembl.compound"
 
     def test_flat_structure_with_table_name(self) -> None:

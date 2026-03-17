@@ -1,4 +1,5 @@
 """Unit tests for merger_orchestration — load_merge_inputs and execute_merge_workflow."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock

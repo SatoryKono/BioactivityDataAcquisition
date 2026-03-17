@@ -160,8 +160,12 @@ class ProviderRegistry:
         with inst._lock:
             config = get_provider_config(inst._providers, name)
         return create_provider_adapter(
-            name=name, config=config,
-            http_client=http_client, logger=logger, settings=settings, **kwargs,
+            name=name,
+            config=config,
+            http_client=http_client,
+            logger=logger,
+            settings=settings,
+            **kwargs,
         )
 
     @classmethod
@@ -185,9 +189,13 @@ class ProviderRegistry:
         with inst._lock:
             config = get_provider_config(inst._providers, name)
         return create_provider_data_source(
-            name=name, config=config, settings=settings,
-            pipeline_config=pipeline_config, logger=logger,
-            filter_config=filter_config, metrics=metrics,
+            name=name,
+            config=config,
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            filter_config=filter_config,
+            metrics=metrics,
             pipeline_name=pipeline_name,
         )
 
@@ -213,9 +221,12 @@ class ProviderRegistry:
             pipeline_name: str = "unknown",
         ) -> DataSourcePort:
             return cls.create_data_source(
-                name=name, settings=settings,
-                pipeline_config=pipeline_config, logger=logger,
-                filter_config=filter_config, metrics=metrics,
+                name=name,
+                settings=settings,
+                pipeline_config=pipeline_config,
+                logger=logger,
+                filter_config=filter_config,
+                metrics=metrics,
                 pipeline_name=pipeline_name,
             )
 

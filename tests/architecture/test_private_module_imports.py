@@ -148,4 +148,3 @@ def test_owner_aware_private_module_imports(src_dir: Path) -> None:
             for path, module in sorted(unexpected)
         )
     )
-

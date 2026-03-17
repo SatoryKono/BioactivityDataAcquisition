@@ -1,4 +1,5 @@
 """Unit tests for merger_input_mixin — input loading for MergeService."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
