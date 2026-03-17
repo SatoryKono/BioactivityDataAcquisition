@@ -10,7 +10,6 @@ from typing import NoReturn
 import click
 
 from bioetl.application.services import (
-    PipelineRunResult,
     RunOptions,
     RunResult,
 )
@@ -42,11 +41,26 @@ from bioetl.interfaces.cli.commands.run_helpers import (
     show_cleanup_preview,
     validate_pipeline_name,
 )
+from bioetl.interfaces.cli.commands.run_result_flow_helpers import (
+    finalize_run_result as _finalize_run_result_impl,
+)
+from bioetl.interfaces.cli.commands.run_result_flow_helpers import (
+    present_run_health_info as _present_run_health_info_impl,
+)
 from bioetl.interfaces.cli.commands.run_result_presenter import (
     echo_run_result as _echo_run_result,
 )
 from bioetl.interfaces.cli.commands.run_runtime_helpers import (
     build_run_command_input as _build_run_command_input_impl,
+)
+from bioetl.interfaces.cli.commands.run_runtime_helpers import (
+    run_pipeline_async as _run_pipeline_async_impl,
+)
+from bioetl.interfaces.cli.commands.run_runtime_helpers import (
+    run_prepared_request_async as _run_prepared_request_async_impl,
+)
+from bioetl.interfaces.cli.commands.run_service_access import (
+    get_cli_run_orchestration_service as _get_cli_run_orchestration_service_impl,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
@@ -60,15 +74,10 @@ __all__ = [
     "validate_options",
 ]
 
-_cli_run_orchestration_service: CliRunOrchestrationService | None = None
-
 
 def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
     """Return process-local run orchestration service (lazy cached accessor seam)."""
-    global _cli_run_orchestration_service
-    if _cli_run_orchestration_service is None:
-        _cli_run_orchestration_service = CliRunOrchestrationService()
-    return _cli_run_orchestration_service
+    return _get_cli_run_orchestration_service_impl()
 
 
 def _exit_with_code(code: int | str | None = None) -> NoReturn:
@@ -138,67 +147,27 @@ def execute_run(
     )
 
 
-def _build_run_command_input(
-    *,
-    pipeline: str,
-    run_type: str,
-    resume: bool,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    dry_run: bool,
-    yes: bool,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    debug: bool,
-    health_server: bool,
-    health_port: int,
-    use_cached_bronze: bool,
-    cached_bronze_date: str | None,
-    cached_bronze_path: str | None,
-) -> RunCommandInput:
-    """Build normalized CLI input payload for run_command_flow."""
-    return _build_run_command_input_impl(
-        pipeline=pipeline,
-        run_type=run_type,
-        resume=resume,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        dry_run=dry_run,
-        yes=yes,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        debug=debug,
-        health_server=health_server,
-        health_port=health_port,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_date=cached_bronze_date,
-        cached_bronze_path=cached_bronze_path,
-    )
-
-
-def _map_status_to_exit_code(
-    status: PipelineRunResult,
-    error_type: str | None,
-) -> ExitCode:
-    """Map run status to CLI exit code."""
-    return map_status_to_exit_code(status, error_type)
+# Canonical helper aliases (kept patchable for tests and compatibility seams).
+_build_run_command_input = _build_run_command_input_impl
+_map_status_to_exit_code = map_status_to_exit_code
 
 
 def _present_run_health_info(request: RunExecutionRequest) -> None:
     """Render health-server info for a prepared run request."""
-    echo_health_server_info(request.health_server, request.health_port)
+    _present_run_health_info_impl(
+        request,
+        info_presenter=echo_health_server_info,
+    )
 
 
 def _finalize_run_result(result: RunResult) -> None:
     """Render CLI run result and terminate with the canonical exit code."""
-    _echo_run_result(result)
-    _exit_with_code(_map_status_to_exit_code(result.status, result.error_type))
+    _finalize_run_result_impl(
+        result,
+        presenter=_echo_run_result,
+        status_mapper=_map_status_to_exit_code,
+        exit_func=_exit_with_code,
+    )
 
 
 def _run_command_with_cli_policy(
@@ -226,13 +195,16 @@ async def _run_pipeline_async(
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Run pipeline asynchronously via service."""
-    ensure_metrics_server_started()
-    async with health_server_context(
-        enabled=health_server_enabled,
-        port=health_port,
-    ):
-        service = get_pipeline_runner_service(registry=registry)
-        return await service.run(pipeline, options=options)
+    return await _run_pipeline_async_impl(
+        pipeline,
+        options,
+        health_server_enabled=health_server_enabled,
+        health_port=health_port,
+        registry=registry,
+        metrics_starter=ensure_metrics_server_started,
+        health_context_factory=health_server_context,
+        runner_service_factory=get_pipeline_runner_service,
+    )
 
 
 async def _run_prepared_request_async(
@@ -240,12 +212,10 @@ async def _run_prepared_request_async(
     registry: PipelineRegistry | None = None,
 ) -> RunResult:
     """Execute a prepared CLI run request via the canonical async runtime path."""
-    return await _run_pipeline_async(
-        request.pipeline,
-        request.options,
-        health_server_enabled=request.health_server,
-        health_port=request.health_port,
+    return await _run_prepared_request_async_impl(
+        request,
         registry=registry,
+        run_pipeline_async_callable=_run_pipeline_async,
     )
 
 
@@ -393,7 +363,9 @@ def run(
     _run_command_with_cli_policy(ctx, cli_input)
 
 
-# Re-export helpers for backward compatibility with tests
+# ---------------------------------------------------------------------------
+# Compatibility-only re-exports for tests and legacy patch seams
+# ---------------------------------------------------------------------------
 _get_runner_logger = get_runner_logger
 _handle_destructive_run_confirmation = handle_destructive_run_confirmation
 _preview_cleanup = show_cleanup_preview
