@@ -2,7 +2,7 @@
 
 ## Repository
 
-- Canonical repository: `SatoryKono/BioactivityDataAcquisition`
+- Canonical repository: `SatoryKono/BioactivityDataAcquisition2`
 - Default branch: `main`
 - Local branch tracking: `origin/main`
 
@@ -42,21 +42,21 @@ Push a new branch and create a PR:
 
 ```bash
 git push -u origin HEAD
-gh pr create --repo SatoryKono/BioactivityDataAcquisition
+gh pr create --repo SatoryKono/BioactivityDataAcquisition2
 ```
 
 If `gh` cannot infer the repository from the local checkout, always pass:
 
 ```bash
---repo SatoryKono/BioactivityDataAcquisition
+--repo SatoryKono/BioactivityDataAcquisition2
 ```
 
 Useful daily commands:
 
 ```bash
-gh pr status --repo SatoryKono/BioactivityDataAcquisition
-gh run list --repo SatoryKono/BioactivityDataAcquisition --limit 10
-gh workflow list --repo SatoryKono/BioactivityDataAcquisition
+gh pr status --repo SatoryKono/BioactivityDataAcquisition2
+gh run list --repo SatoryKono/BioactivityDataAcquisition2 --limit 10
+gh workflow list --repo SatoryKono/BioactivityDataAcquisition2
 ```
 
 ## Commit format

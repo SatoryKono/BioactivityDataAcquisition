@@ -395,10 +395,10 @@ async def test_backfill_clears_silver_only(e2e_data_dir: Path):
     - BACKFILL should clear Silver
     - Gold is not cleared during backfill
     """
-    # Initial incremental run
+    # Initial incremental run – use higher limit to ensure records pass filters
     ctx1 = create_test_context(
         "chembl_activity",
-        limit=3,
+        limit=10,
         run_type=RunType.INCREMENTAL,
     )
     await run_pipeline_or_skip_transient(ctx1)
@@ -408,7 +408,7 @@ async def test_backfill_clears_silver_only(e2e_data_dir: Path):
     # Backfill run
     ctx2 = create_test_context(
         "chembl_activity",
-        limit=5,
+        limit=10,
         run_type=RunType.BACKFILL,
     )
     await run_pipeline_or_skip_transient(ctx2)

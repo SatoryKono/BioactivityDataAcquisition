@@ -88,8 +88,8 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
     Running the same pipeline twice with same data should not duplicate records
     in Silver table (merge/upsert behavior).
     """
-    # Arrange
-    ctx1 = create_test_context("chembl_activity", limit=5)
+    # Arrange – use higher limit to ensure Silver table is materialized
+    ctx1 = create_test_context("chembl_activity", limit=10)
 
     # Act - First run
     runner1 = bootstrap_pipeline_runner(ctx1)
@@ -99,7 +99,7 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
     )
 
     # Act - Second run with same limit
-    ctx2 = create_test_context("chembl_activity", limit=5)
+    ctx2 = create_test_context("chembl_activity", limit=10)
     runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
     count_after_second = assert_silver_table_has_records(
