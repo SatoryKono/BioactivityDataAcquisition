@@ -1,11 +1,9 @@
 ---
 name: py-test-swarm
-description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_audit, fix_failures, coverage_boost, optimize, and flakiness_scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in reports/test-swarm/task-id/FINAL-REPORT.md. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers.
+description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_audit, fix_failures, coverage_boost, optimize, and flakiness_scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md`. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers.
 ---
 
 # py-test-swarm
-
-*Статус: internal-published (Internal / Extended)*
 
 ## Core Role
 Act as L1 orchestrator by default.
@@ -15,16 +13,16 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 1. Read memory:
 - `../../../docs/00-project/ai/memory/agent-memory.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-bot.md`
-- `.codex/agents/ORCHESTRATION.md` (sections 2-7; or `.claude/agents/` for Claude runtime)
+- `../../../.codex/agents/ORCHESTRATION.md` (sections 2-7)
 2. Read profile:
-- `.codex/agents/py-test-swarm.md` (or `.claude/agents/` for Claude runtime)
+- `../../../.codex/agents/py-test-swarm.md`
 3. Confirm input contract:
 - `task_id` (required)
 - `mode` (required): `full_audit | fix_failures | coverage_boost | optimize | flakiness_scan`
 - `scope` (optional, default all tests)
 - `baseline_report` (optional)
 - `flakiness_runs` (optional, default `5`)
-4. Create artifact root: `reports/test-swarm/<task_id>/`.
+4. Create artifact root: `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/` (LLM = caller).
 
 ## L1 Workflow
 1. Run Discovery baseline commands from [l1-playbook.md](references/l1-playbook.md).
@@ -74,15 +72,15 @@ For L3 agents always prepend the mandatory leaf-agent instruction from [l2-l3-ta
 
 ## Artifact Contract
 Minimum required outputs:
-- `reports/test-swarm/<task_id>/00-swarm-plan.md`
-- `reports/test-swarm/<task_id>/L2-*/report.md`
-- `reports/test-swarm/<task_id>/L2-*/metrics.json`
-- `reports/test-swarm/<task_id>/telemetry/raw/events_*.jsonl`
-- `reports/test-swarm/<task_id>/telemetry/aggregated/failure_stats.csv`
-- `reports/test-swarm/<task_id>/telemetry/aggregated/flaky_index.csv`
-- `reports/test-swarm/<task_id>/telemetry/failure_frequency_summary.md`
-- `reports/test-swarm/<task_id>/flakiness-database.json`
-- `reports/test-swarm/<task_id>/FINAL-REPORT.md`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/00-swarm-plan.md`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/L2-*/report.md`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/L2-*/metrics.json`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/raw/events_*.jsonl`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/aggregated/failure_stats.csv`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/aggregated/flaky_index.csv`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/failure_frequency_summary.md`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/flakiness-database.json`
+- `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md`
 
 ## Constraints
 MUST:

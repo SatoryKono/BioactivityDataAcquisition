@@ -1,7 +1,5 @@
 # Report Templates
 
-*Статус: internal-published (Internal / Extended)*
-
 ## L2/L3 `report.md`
 
 ```markdown

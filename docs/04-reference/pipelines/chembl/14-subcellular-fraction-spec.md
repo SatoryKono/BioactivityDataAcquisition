@@ -85,7 +85,5 @@ provider: chembl
 entity_type: subcellular-fraction
 version: "1.0.0"
 
-primary_keys: ["subcellular-fraction"]
-silver_table: "chembl_subcellular_fraction"
-gold_table: "chembl_subcellular_fraction"
+business_primary_keys: ["subcellular_fraction"]
 ```

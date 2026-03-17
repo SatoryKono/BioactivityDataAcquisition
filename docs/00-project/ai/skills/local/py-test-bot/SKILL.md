@@ -5,8 +5,6 @@ description: Execute BioETL py-test-bot profile for role-specific workflow and c
 
 # py-test-bot
 
-*Статус: internal-published (Internal / Extended)*
-
 ## Objective
 Run the role-specific workflow as defined in the py-test-bot profile.
 

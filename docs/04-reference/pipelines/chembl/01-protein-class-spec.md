@@ -367,21 +367,17 @@ Mode: Overwrite (reference table)
 
 pipeline_name: chembl_protein_class
 provider: chembl
-entity_type: protein-class
+entity_type: protein_class
 version: "1.2.0"
 description: "ChEMBL Protein Classification hierarchy"
 
-primary_keys: ["protein-class-id"]
-silver_table: chembl_protein_class
-gold_table: chembl_protein_class
-
-source_file: ../../sources/chembl.yaml
+business_primary_keys: ["protein_class_id"]
 batch_size: 500
 checkpoint_interval: 500
 
 gold_filters:
   required_fields:
-    - pref-name
+    - pref_name
   columns:
     downgraded: ["0"]
 
@@ -390,17 +386,17 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["protein-class-id"]
-    partition_by: ["class-level"]
+    primary_key: ["protein_class_id"]
+    partition_by: ["class_level"]
     sort_by:
-      columns: ["protein-class-id"]
+      columns: ["protein_class_id"]
       ascending: true
     csv_export:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
     sort_by:
-      columns: ["class-level", "sort-order", "protein-class-id"]
+      columns: ["class_level", "sort_order", "protein_class_id"]
       ascending: true
     csv_export:
       path: "data/output/csv/gold"

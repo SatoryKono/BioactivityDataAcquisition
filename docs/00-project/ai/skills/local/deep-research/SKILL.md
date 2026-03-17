@@ -7,8 +7,6 @@ agent: general-purpose
 
 # Conducting Deep Research
 
-*Статус: internal-published (Internal / Extended)*
-
 This skill uses an iterative methodology treating research as a diffusion process: start with noise (rough draft), apply guidance (research brief), denoise through cycles of critique → research → refine until quality converges.
 
 Use TodoWrite to track these mandatory steps:

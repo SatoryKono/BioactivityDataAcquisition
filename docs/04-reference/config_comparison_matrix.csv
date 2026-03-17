@@ -15,13 +15,11 @@ input_filter,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,
 loading_strategy,—,—,—,—,—,—,—,—,full_scan_only,full_scan_only,full_scan_only,—,—,—,full_scan_only,full_scan_only,—,full_scan_only,full_scan_only,—,—
 maintenance,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 pipeline_name,—,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,—,crossref_publication,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein
-primary_keys,—,"[""activity_id""]","[""assay_chembl_id""]","[""assay_param_id""]","[""cell_chembl_id""]","[""record_id""]","[""molecule_chembl_id""]","[""protein_class_id""]","[""document_chembl_id""]","[""sim_id""]","[""entity_id""]","[""target_chembl_id""]","[""component_id""]",—,"[""doi""]","[""openalex_id""]","[""cid""]","[""pmid""]","[""paper_id""]","[""target_chembl_id""]","[""accession""]"
 provider,—,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,—,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot,uniprot
 schema_version,2.0.0,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 silver_table,—,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,—,crossref_publication,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein
 sink,(dict),—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),—,(dict),(dict),(dict),(dict),(dict),(dict),(dict)
 source,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,(dict),—,(dict),—
-source_file,—,—,—,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,../../sources/chembl.yaml,—,../../sources/crossref.yaml,../../sources/openalex.yaml,../../sources/pubchem.yaml,—,../../sources/semanticscholar.yaml,../../sources/uniprot.yaml,—
 transform,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 version,—,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,2.1.0,2.1.0,2.1.0,1.2.0,1.2.0,—,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,1.1.0,1.2.0
 circuit_breaker.failure_threshold,5,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—

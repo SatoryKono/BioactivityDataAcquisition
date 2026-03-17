@@ -85,8 +85,6 @@ PIPELINE_ALLOWED_KEYS: set[str] = {
     "circuit_breaker",
     "filter_config_file",
     "filter_rules",
-    "column_groups_file",
-    "data_schema_file",
     "column_groups",
     "input_filter",
     "silver_filters",
@@ -95,7 +93,6 @@ PIPELINE_ALLOWED_KEYS: set[str] = {
     "transform",
     "extraction_params",
     "page_size_override",
-    "schema_file",
 }
 
 ENTITY_ALLOWED_KEYS: set[str] = {

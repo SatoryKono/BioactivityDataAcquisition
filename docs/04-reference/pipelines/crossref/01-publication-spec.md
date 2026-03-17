@@ -203,10 +203,7 @@ pipeline_name: crossref_publication
 provider: crossref
 entity_type: publication
 version: "1.2.0"
-
-primary_keys: ["doi"]
-silver_table: "crossref_publication"
-gold_table: "crossref_publication"
+business_primary_keys: ["doi"]
 
 source:
   type: api

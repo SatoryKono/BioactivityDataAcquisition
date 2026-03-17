@@ -1251,7 +1251,7 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 | "Монолит требует декомпозиции"      | Файл с делегированием — НЕ монолит                                      | `GoldWriter` (960 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны          |
 | "NoOp default = нарушение DI"       | Null Object Pattern валиден для опциональных зависимостей               | `NoOpMetrics`, `NoOpTracing`                                                                   |
 | "Optional parameter = нарушение DI" | \`policy: Policy                                                        | None = None\` — допустимый паттерн для value objects                                           |
-| "click.echo в CLI = нарушение"      | User-facing output — законная ответственность interfaces слоя           | `cli.py` confirmation prompts                                                                  |
+| "click.echo в CLI = нарушение"      | User-facing output — законная ответственность interfaces слоя           | `interfaces/cli/main.py` confirmation prompts                                                  |
 | "Shim file = дублирование"          | Re-export для backward compatibility валиден                            | `medallion_lifecycle.py`                                                                        |
 | "Нет автоматизации X"               | Часто уже реализовано, но не проверено                                  | `MedallionPolicy`, `DQConfig` существуют                                                       |
 
@@ -1534,54 +1534,81 @@ pipeline:
   provider: chembl
   entity_type: activity
   description: Extract biological activity records from ChEMBL API
-  business_primary_keys: [activity-id]
+  business_primary_keys: [activity_id]
   batch_size: 1000
-  dq_overrides:
-    field-validations:
-      - field: standard-value
-        type: range
-        min: 0
-        max: 1000000000
-        nullable: true
+  sink:
+    silver:
+      mode: append
+    gold:
+      enabled: false
 
 schema:
-  column-groups:
+  column_groups:
     - name: system
-      fields: [entity-id, content-hash, _run_id, ...]
+      fields: [entity_id, content_hash, _run_id, _source_batch_id, _ingestion_ts]
     - name: business
-      fields: [activity-id, assay-id, ...]
+      fields: [activity_id, assay_id, molecule_id, standard_value, standard_type, standard_units]
     - name: dq
       pattern: ^_dq_
   silver:
-    include-groups: [system, business, dq]
-    alias-policy: preserve
+    include_groups: [system, business, dq]
+    alias_policy: preserve
   gold:
-    include-groups: [system, business]
-    exclude-fields: [_dq_*, _source_batch_id]
-    alias-policy: canonical
+    include_groups: [system, business]
+    exclude_fields: [_dq_*, _source_batch_id]
+    alias_policy: canonical
 
 quality:
-  field-validations:
-    - field: activity-id
+  entity_field_validations:
+    - field: activity_id
       type: required
       nullable: false
-  cross-field-validations: [...]
-  conditional-validations: [...]
+    - field: standard_value
+      type: range
+      min: 0
+      max: 1000000000
+      nullable: true
+  entity_cross_field_validations:
+    - name: value_requires_units
+      fields: [standard_value, standard_units]
+      condition: conditional_required
+      trigger_field: standard_value
+      required_field: standard_units
+  entity_conditional_validations:
+    - name: ic50_range_check
+      condition_field: standard_type
+      condition_value: IC50
+      condition_operator: eq
+      then_validations:
+        - field: standard_value
+          type: range
+          min: 0.001
+          max: 100000
+          nullable: false
+  key_nullability:
+    - field: activity_id
+      key_type: merge
+      nullable: false
 
 filters:
-  extraction-params:
-    standard-type--in: IC50,Ki
+  extraction_params:
+    standard_type__in: IC50,Ki
   silver_filters:
-    columns:
-      standard-type: [IC50, Ki]
+    required_fields: [activity_id, molecule_id, target_id, standard_value]
   gold_filters:
-    required_fields: [standard-value, target-id]
+    required_fields: [standard_type, standard_value, standard_units, target_id]
 
 contracts:
-  primary_key: [activity-id]
-  merge-keys: [activity-id]
-  rename-map: {run_id: _run_id}
-  hash-exclude: [_ingestion_ts, _run_id]
+  primary_key: [activity_id]
+  merge_keys: [activity_id]
+  rename_map: {run_id: _run_id}
+  hash_exclude: [_ingestion_ts, _run_id]
+
+hash_policy:
+  hash_policy:
+    algorithm: sha256
+    include_fields: [activity_id, assay_id, molecule_id, standard_type, standard_value, standard_units]
+    exclude_patterns: [^_dq_]
 ```
 
 Composite pipeline конфиги расположены в `configs/composites/{entity}.yaml`.

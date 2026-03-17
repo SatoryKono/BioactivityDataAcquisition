@@ -119,29 +119,11 @@ class PipelineYamlConfig(BaseModel):
         description="Inline filter overrides. Applied on top of filter_config_file. "
         "Format: {input_filter: {...}, gold_filters: {...}}",
     )
-    column_groups_file: str | None = Field(
-        default=None,
-        description="Path to column group config file relative to pipeline config.",
-    )
-    schema_file: str | None = Field(
-        default=None,
-        description="Path to schema config file relative to pipeline config. "
-        "Auto-computed from provider/entity_type by convention if not specified. "
-        "Example: ../../schemas/chembl/activity.yaml",
-    )
-    data_schema_file: str | None = Field(
-        default=None,
-        description="Deprecated alias for schema_file. Kept for backward compatibility.",
-    )
     business_primary_keys: list[str] | None = Field(default=None, min_length=1)
     technical_primary_key: str = Field(
         default="entity_id",
         min_length=1,
         description="Technical immutable record key in Silver (defaults to entity_id).",
-    )
-    primary_keys: list[str] | None = Field(
-        default=None,
-        description="Deprecated alias for business_primary_keys (kept for migration).",
     )
     silver_table: str = Field(
         default="",
@@ -192,25 +174,9 @@ class PipelineYamlConfig(BaseModel):
         return value
 
     def _validate_primary_key_presence(self) -> None:
-        """Ensure at least one primary key source is specified."""
-        if self.business_primary_keys is None and self.primary_keys is None:
-            raise ValueError(
-                "business_primary_keys is required (or legacy primary_keys during migration)"
-            )
-
-    def _validate_primary_key_consistency(self) -> None:
-        """Ensure legacy and canonical primary keys agree."""
+        """Ensure business primary keys are specified."""
         if self.business_primary_keys is None:
-            self.business_primary_keys = self.primary_keys
-            return
-
-        if self.primary_keys is not None and tuple(self.primary_keys) != tuple(
-            self.business_primary_keys
-        ):
-            raise ValueError(
-                "primary_keys and business_primary_keys mismatch; "
-                "use business_primary_keys as canonical naming"
-            )
+            raise ValueError("business_primary_keys is required")
 
     def _validate_technical_key_separation(self) -> None:
         """Ensure technical PK is not in composite business PKs."""
@@ -238,7 +204,6 @@ class PipelineYamlConfig(BaseModel):
     def validate_primary_key_split(self) -> PipelineYamlConfig:
         """Validate explicit separation between business and technical PKs."""
         self._validate_primary_key_presence()
-        self._validate_primary_key_consistency()
         self._validate_technical_key_separation()
         self._validate_sink_sort_by()
         return self

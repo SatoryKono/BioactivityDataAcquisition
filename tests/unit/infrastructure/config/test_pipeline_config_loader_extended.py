@@ -36,9 +36,8 @@ def _base_pipeline_dict() -> dict[str, Any]:
         "pipeline_name": "test_pipeline",
         "provider": "test_provider",
         "entity_type": "test_entity",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "silver.test",
-        "schema_file": "../../schemas/chembl/activity.yaml",
     }
 
 

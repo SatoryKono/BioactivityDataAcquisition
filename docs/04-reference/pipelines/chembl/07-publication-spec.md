@@ -149,9 +149,7 @@ provider: chembl
 entity_type: document
 version: "1.2.0"
 
-primary_keys: ["publication-id"]
-silver_table: "chembl_publication"
-gold_table: "chembl_publication"
+business_primary_keys: ["publication_id"]
 
 gold_filters:
   required_fields:

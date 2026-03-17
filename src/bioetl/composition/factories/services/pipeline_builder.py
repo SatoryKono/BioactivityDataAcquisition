@@ -10,13 +10,16 @@ from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.core.batch_execution_state_service import (
     BatchExecutionStateService,
 )
-from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_executor import (
+    BatchExecutor,
+    BatchExecutorDependencies,
+)
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer import BatchTransformer
-from bioetl.application.core.batch_writer import BatchWriter
+from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointManagerService,
@@ -113,9 +116,11 @@ def create_batch_processing_components(
         gold_validator=gold_validator,
         error_classifier=error_classifier,
         batch_metrics=batch_metrics,
-        tracer=tracer,
-        lock_validator=lock_validator,
-        column_orderer=column_orderer,
+        options=BatchWriterOptions(
+            tracer=tracer,
+            lock_validator=lock_validator,
+            column_orderer=column_orderer,
+        ),
     )
     return BatchProcessingComponents(
         batch_metrics=batch_metrics, transformer=transformer, writer=writer
@@ -280,25 +285,29 @@ def create_batch_executor_from_pipeline(
     execution_state_service = BatchExecutionStateService(
         batch_processing_service=batch_processing_service
     )
-    return BatchExecutor(
-        services=pipeline.services,
-        context=pipeline.context,
-        config=processor_config,
+    extraction_loop_service = BatchExtractionLoopService(
+        batch_processing_service=batch_processing_service,
+        shutdown_signal=shutdown_signal,
+        memory_manager=memory_manager,
+        progress_service=progress_service,
+        checkpoint_recovery_service=checkpoint_recovery_service,
+        checkpoint_interval=pipeline.config.checkpoint_interval
+        or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
+    )
+    deps = BatchExecutorDependencies(
         batch_metrics=components.batch_metrics,
         transformer=components.transformer,
         writer=components.writer,
         memory_manager=memory_manager,
         execution_run_service=execution_run_service,
-        extraction_loop_service=BatchExtractionLoopService(
-            batch_processing_service=batch_processing_service,
-            shutdown_signal=shutdown_signal,
-            memory_manager=memory_manager,
-            progress_service=progress_service,
-            checkpoint_recovery_service=checkpoint_recovery_service,
-            checkpoint_interval=pipeline.config.checkpoint_interval
-            or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
-        ),
+        extraction_loop_service=extraction_loop_service,
         execution_state_service=execution_state_service,
+    )
+    return BatchExecutor(
+        services=pipeline.services,
+        context=pipeline.context,
+        config=processor_config,
+        dependencies=deps,
         batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
     )

@@ -207,9 +207,7 @@ provider: chembl
 entity_type: target
 version: "1.2.0"
 
-primary_keys: ["target-id"]
-silver_table: "chembl_target"
-gold_table: "chembl_target"
+business_primary_keys: ["target_id"]
 
 gold_filters:
   required_fields:

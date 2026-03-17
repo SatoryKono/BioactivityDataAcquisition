@@ -225,9 +225,7 @@ provider: chembl
 entity_type: assay
 version: "1.2.0"
 
-primary_keys: ["assay-id"]
-silver_table: "chembl_assay"
-gold_table: "chembl_assay"
+business_primary_keys: ["assay_id"]
 
 gold_filters:
   required_fields:

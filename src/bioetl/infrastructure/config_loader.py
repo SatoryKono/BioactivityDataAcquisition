@@ -117,35 +117,6 @@ def _apply_layer_defaults(
     )
 
 
-def _load_data_schema_config(
-    config_path: Path, schema_file: str
-) -> JsonDict | None:  # Any: YAML config has heterogeneous values
-    """Compatibility wrapper for schema loader tests/importers.
-
-    Returns:
-        Dictionary with schema configuration data, or None if not found.
-    """
-    from bioetl.infrastructure.config import pipeline_normalizers
-
-    return pipeline_normalizers._load_data_schema_config(
-        config_path=config_path,
-        schema_file=schema_file,
-    )
-
-
-def _validate_schema_config(
-    data_schema: JsonDict,  # Any: YAML config has heterogeneous values
-    schema_file: str,
-) -> None:
-    """Compatibility wrapper for schema validation tests/importers."""
-    from bioetl.infrastructure.config import pipeline_normalizers
-
-    pipeline_normalizers._validate_schema_config(
-        data_schema=data_schema,
-        schema_file=schema_file,
-    )
-
-
 load_source_config = _load_source_config
 
 

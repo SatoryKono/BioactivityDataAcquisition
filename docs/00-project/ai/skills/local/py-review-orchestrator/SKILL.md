@@ -1,11 +1,9 @@
 ---
 name: py-review-orchestrator
-description: Execute BioETL hierarchical code review orchestration (L1/L2/L3) across sectors S1-S8 with delegated sub-reviews, scoring, and consolidated reporting in reports/review/FINAL-REVIEW.md. Use when a full-project audit or broad multi-layer review is requested.
+description: Execute BioETL hierarchical code review orchestration (L1/L2/L3) across sectors S1-S8 with delegated sub-reviews, scoring, and consolidated reporting in `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md`. Use when a full-project audit or broad multi-layer review is requested.
 ---
 
 # py-review-orchestrator
-
-*Статус: internal-published (Internal / Extended)*
 
 ## Objective
 Run the role-specific workflow as defined in the py-review-orchestrator profile.
@@ -18,5 +16,5 @@ Run the role-specific workflow as defined in the py-review-orchestrator profile.
 ## Workflow
 1. Open and follow `../../agents/py-review-orchestrator.md`.
 2. Execute hierarchical review orchestration (Wave 1, then Wave 2) and respect sector dependencies.
-3. Aggregate sector reports into `reports/review/FINAL-REVIEW.md` with complete critical/high issue rollup.
+3. Aggregate sector reports into `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md` (LLM = caller) with complete critical/high issue rollup.
 4. Keep scoring and status thresholds aligned with the profile and BioETL rules.

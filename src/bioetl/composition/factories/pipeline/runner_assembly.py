@@ -11,7 +11,10 @@ from bioetl.application.core.preflight.medallion_validator import (
     _MedallionConfigValidator,
 )
 from bioetl.application.core.preflight.service import PreflightService
-from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.core.runner import (
+    PipelineRunner,
+    PipelineRunnerDependencies,
+)
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
@@ -178,20 +181,22 @@ def _create_pipeline_runner(
     lifecycle_service: MedallionLifecycleService,
     observer: PipelineObserver,
 ) -> PipelineRunner:
-    return PipelineRunner(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        services=pipeline.services,
-        context=pipeline.context,
+    dependencies = PipelineRunnerDependencies(
         executor=executor,
         checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
-        logger=observability.logger,
         lock_manager=lock_manager,
         preflight=preflight_service,
         postrun=postrun_service,
         lifecycle_service=lifecycle_service,
         observer=observer,
+        shutdown_signal=pipeline.shutdown_signal,
+    )
+    return PipelineRunner(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        services=pipeline.services,
+        context=pipeline.context,
+        dependencies=dependencies,
         pipeline=pipeline,
         tracer=observability.tracer,
     )

@@ -10,7 +10,7 @@
 
 Following the adoption of `LoggerPort` abstraction (ADR-006), there was still direct usage of `structlog` in the `interfaces` layer:
 
-1. `src/bioetl/interfaces/cli.py` imported `structlog.BoundLogger` for type hints
+1. `src/bioetl/interfaces/cli/main.py` (historically `interfaces/cli.py`) imported `structlog.BoundLogger` for type hints
 2. `src/bioetl/interfaces/orchestration/signals.py` imported and used `structlog` directly
 
 This violated the principle that all layers should use ports, not concrete implementations.
@@ -33,7 +33,7 @@ The `interfaces` layer should be infrastructure-agnostic:
 ```
 ┌──────────────────────────────────────────────────┐
 │                   interfaces                      │
-│  cli.py, signals.py                              │
+│  cli/main.py (historical shim: cli.py), signals.py│
 │  Uses: LoggerPort (not structlog)                │
 └───────────────────────┬──────────────────────────┘
                         │ depends on
@@ -81,7 +81,7 @@ ADR-006 established that all logging should go through `LoggerPort`. This ADR ex
 
 ## Implementation Details
 
-### 1. CLI Changes (`cli.py`)
+### 1. CLI Changes (`interfaces/cli/main.py`)
 
 ```python
 # Before

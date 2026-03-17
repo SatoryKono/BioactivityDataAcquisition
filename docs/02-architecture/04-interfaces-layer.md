@@ -68,7 +68,7 @@ python -m bioetl run-composite --composite publication
 python -m bioetl health --provider chembl
 ```
 
-`cli.py` парсит эти аргументы, вызывает функции из `src/bioetl/composition/bootstrap/` для инициализации системы и запускает выполнение пайплайна.
+`interfaces/cli/main.py` парсит аргументы, вызывает функции из `src/bioetl/composition/bootstrap/` для инициализации системы и запускает выполнение пайплайна. Исторический `interfaces/cli.py` оставлен только как совместимый shim и не является активной точкой входа.
 
 ### 2.2. `http/` — HTTP Health Server
 

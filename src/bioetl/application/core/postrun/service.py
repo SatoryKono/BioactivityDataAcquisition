@@ -11,12 +11,13 @@ from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
-from bioetl.domain.ports import ExecutorMetricsPort, NoOpTracing
+from bioetl.domain.ports import ExecutorMetricsPort, NoOpMetrics, NoOpTracing
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.postrun.cleanup_orchestrator import (
         PostrunCleanupService,
     )
@@ -39,14 +40,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import (
-        LoggerPort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-        MetricsPort,
-        StorageMaintenancePort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import TracingPort
 
 
 def _resolve_report_path(
@@ -109,24 +103,45 @@ class PostrunService:
         context: PipelineContext,
         dq_service: DataQualityService,
         lifecycle_service: MedallionLifecycleService,
-        storage: StorageMaintenancePort,
-        metrics: MetricsPort | None,
-        logger: LoggerPort,
-        dependencies: PostrunDependencyContext,
-        metadata_coordinator: MetadataCoordinatorPort | None = None,
-        metadata_writer: MetadataWriterPort | None = None,
+        dependencies: PostrunDependencyContext | None = None,
+        services: PipelineService | None = None,
         tracer: TracingPort | None = None,
+        **legacy_kwargs: object,
     ) -> None:
         self._config = config
         self._runtime = runtime
         self._context = context
         self._dq_service = dq_service
         self._lifecycle_service = lifecycle_service
-        self._storage = storage
-        self._metrics = metrics
-        self._logger = logger
-        self._metadata_coordinator = metadata_coordinator
-        self._metadata_writer = metadata_writer
+        if dependencies is None:
+            raise AssertionError("dependencies must be provided")
+
+        # Resolve collaborators either from PipelineService or legacy kwargs.
+        storage = legacy_kwargs.get("storage")
+        metrics = legacy_kwargs.get("metrics")
+        logger = legacy_kwargs.get("logger")
+        metadata_coordinator = legacy_kwargs.get("metadata_coordinator")
+        metadata_writer = legacy_kwargs.get("metadata_writer")
+
+        if services is None:
+            assert (
+                storage is not None and logger is not None
+            ), "Legacy path requires storage and logger when services is None"
+
+        self._storage = storage if storage is not None else services.storage  # type: ignore[union-attr]
+        metrics_fallback = services.metrics if services is not None else None  # type: ignore[union-attr]
+        self._metrics = metrics if metrics is not None else metrics_fallback or NoOpMetrics()
+        self._logger = logger or (services.logger if services else None) or context.logger  # type: ignore[union-attr]
+        self._metadata_coordinator = (
+            metadata_coordinator
+            if metadata_coordinator is not None
+            else (services.metadata_coordinator if services else None)  # type: ignore[union-attr]
+        )
+        self._metadata_writer = (
+            metadata_writer
+            if metadata_writer is not None
+            else (services.metadata_writer if services else None)  # type: ignore[union-attr]
+        )
         self._cleanup_orchestrator = dependencies.cleanup_orchestrator
         self._dq_report_orchestrator = dependencies.dq_report_orchestrator
         self._metadata_version_resolver = dependencies.metadata_version_resolver

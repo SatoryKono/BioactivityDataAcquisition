@@ -121,12 +121,10 @@ class AssayParametersSchema(ETLRecordSchema):
 ```yaml
 pipeline_name: chembl_assay_parameters
 provider: chembl
-entity_type: assay-parameters
+entity_type: assay_parameters
 version: "1.2.0"
 
-primary_keys: ["assay-param-id"]
-silver_table: "chembl_assay_parameters"
-gold_table: "chembl_assay_parameters"
+business_primary_keys: ["assay_param_id"]
 
 gold_filters:
   required_fields:
@@ -135,7 +133,7 @@ gold_filters:
 input_filter:
   enabled: true
   source_path: "data/input/assay.csv"
-  column_name: "assay-id"
-  filter_field: "assay-id"
+  column_name: "assay_id"
+  filter_field: "assay_id"
   batch_size: 20
 ```

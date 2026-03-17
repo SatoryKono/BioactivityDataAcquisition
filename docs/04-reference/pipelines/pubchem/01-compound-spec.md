@@ -202,10 +202,7 @@ pipeline_name: pubchem_compound
 provider: pubchem
 entity_type: compound
 version: "1.2.0"
-
-primary_keys: ["molecule-id"]
-silver_table: "pubchem_compound"
-gold_table: "pubchem_compound"
+business_primary_keys: ["molecule_id"]
 
 source:
   type: api

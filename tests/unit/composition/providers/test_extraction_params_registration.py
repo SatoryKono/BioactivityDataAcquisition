@@ -287,9 +287,8 @@ class TestOtherProvidersUnpackTriple:
             pipeline_name="pubchem_compound",
             provider="pubchem",
             entity_type="compound",
-            primary_keys=["compound_id"],
+            business_primary_keys=["compound_id"],
             silver_table="compound",
-            schema_file="../../schemas/pubchem/compound.yaml",
         )
         assert config.extraction_params == {}
 
@@ -301,9 +300,8 @@ class TestOtherProvidersUnpackTriple:
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id"],
+            business_primary_keys=["activity_id"],
             silver_table="activity",
-            schema_file="../../schemas/chembl/activity.yaml",
             extraction_params={
                 "standard_type__in": "IC50,Ki",
                 "standard_units": "nM",

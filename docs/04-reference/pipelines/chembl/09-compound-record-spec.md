@@ -118,9 +118,7 @@ provider: chembl
 entity_type: compound-record
 version: "1.2.0"
 
-primary_keys: ["record-id"]
-silver_table: "chembl_compound_record"
-gold_table: "chembl_compound_record"
+business_primary_keys: ["record_id"]
 
 gold_filters:
   required_fields:
