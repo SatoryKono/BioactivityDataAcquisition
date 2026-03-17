@@ -105,6 +105,17 @@ class _BronzeWritePostwriteContext:
     duration: float
 
 
+@dataclass(frozen=True, slots=True)
+class BronzeWriterRuntimeServices:
+    """Optional Bronze runtime collaborators grouped behind one local seam."""
+
+    tracing: TracingPort
+    audit: AuditPort | None
+    metadata_writer: MetadataWriterPort
+    save_metadata: bool
+    metadata_coordinator: MetadataCoordinatorPort | None
+
+
 class BronzeWriter(
     BronzeWriterValidationMixin,
     BronzeWriterMetadataMixin,
@@ -133,17 +144,23 @@ class BronzeWriter(
         base_path: str | Path,
         logger: LoggerPort,
         metrics: MetricsPort,
-        tracing: TracingPort | None = None,
         save_json: bool = False,
         json_path: str | None = None,
         validate_json: bool = True,
-        audit: AuditPort | None = None,
-        metadata_writer: MetadataWriterPort | None = None,
-        save_metadata: bool = False,
-        metadata_coordinator: MetadataCoordinatorPort | None = None,
+        runtime_services: BronzeWriterRuntimeServices | None = None,
         flat_structure: bool = False,
+        **legacy_kwargs: object,
     ) -> None:
         """Initialize Bronze writer."""
+        tracing = legacy_kwargs.pop("tracing", None)
+        audit = legacy_kwargs.pop("audit", None)
+        metadata_writer = legacy_kwargs.pop("metadata_writer", None)
+        save_metadata = legacy_kwargs.pop("save_metadata", False)
+        metadata_coordinator = legacy_kwargs.pop("metadata_coordinator", None)
+        if legacy_kwargs:
+            unexpected = ", ".join(sorted(legacy_kwargs))
+            raise TypeError(f"Unexpected BronzeWriter options: {unexpected}")
+
         if tracing is None:
             from bioetl.domain.ports import NoOpTracing
 
@@ -153,6 +170,13 @@ class BronzeWriter(
             from bioetl.domain.ports import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
+        services = runtime_services or BronzeWriterRuntimeServices(
+            tracing=tracing,
+            audit=audit,
+            metadata_writer=metadata_writer,
+            save_metadata=bool(save_metadata),
+            metadata_coordinator=metadata_coordinator,
+        )
 
         self.base_path = Path(base_path)
         self.logger = logger
@@ -161,13 +185,11 @@ class BronzeWriter(
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
         self.validate_json = validate_json
-        self._audit = audit
-        self._tracing: TracingPort = tracing
-        self._metadata_writer: MetadataWriterPort = metadata_writer
-        self._save_metadata = save_metadata
-        self._metadata_coordinator: MetadataCoordinatorPort | None = (
-            metadata_coordinator
-        )
+        self._audit = services.audit
+        self._tracing = services.tracing
+        self._metadata_writer = services.metadata_writer
+        self._save_metadata = services.save_metadata
+        self._metadata_coordinator = services.metadata_coordinator
         self._flat_structure = flat_structure
 
     async def write_bronze(

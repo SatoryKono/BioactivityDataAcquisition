@@ -43,6 +43,10 @@ from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
 from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
     set_gold_write_span_attributes as _set_write_span_attributes_impl,
 )
+from bioetl.infrastructure.storage.gold_writer_runtime_helpers import (
+    GoldWriterRuntimeServices,
+    build_gold_writer_runtime_services,
+)
 from bioetl.infrastructure.storage.gold_writer_validation_mixin import (
     GoldWriterValidationMixin,
 )
@@ -96,49 +100,45 @@ class GoldWriter(
         self,
         base_path: str | Path,
         logger: LoggerPort,
-        tracing: TracingPort | None = None,
-        csv_exporter: CsvExporter | None = None,
-        audit: AuditPort | None = None,
-        metadata_writer: MetadataWriterPort | None = None,
-        metadata_coordinator: MetadataCoordinatorPort | None = None,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        runtime_services: GoldWriterRuntimeServices | None = None,
         flat_structure: bool = False,
+        **legacy_kwargs: object,
     ) -> None:
         """Initialize Gold writer and optional observability/metadata ports.
 
         Args:
             base_path: Root directory for Gold layer Delta Lake tables.
             logger: Structured logger for write events and errors.
-            tracing: Optional tracing port for span propagation; defaults to NoOpTracing.
-            csv_exporter: Optional CSV exporter for post-write snapshots; disabled when None.
-            audit: Optional audit port for Gold lineage logging; disabled when None.
-            metadata_writer: Optional sidecar metadata writer; defaults to NoOpMetadataWriter.
-            metadata_coordinator: Optional coordinator for metadata orchestration; disabled when None.
             transform_version: Optional version string embedded in Gold metadata.
             transform_steps: Optional tuple of transform step names for lineage.
+            runtime_services: Optional grouped runtime collaborators for tracing,
+                metadata, audit, and optional CSV export.
             flat_structure: When True, omit the table-based subdirectory hierarchy.
         """
+        csv_exporter = legacy_kwargs.pop("csv_exporter", None)
+        tracing = legacy_kwargs.pop("tracing", None)
+        audit = legacy_kwargs.pop("audit", None)
+        metadata_writer = legacy_kwargs.pop("metadata_writer", None)
+        metadata_coordinator = legacy_kwargs.pop("metadata_coordinator", None)
+        if legacy_kwargs:
+            unexpected = ", ".join(sorted(legacy_kwargs))
+            raise TypeError(f"Unexpected GoldWriter options: {unexpected}")
+
         super().__init__(base_path, logger, flat_structure=flat_structure)
-
-        if tracing is None:
-            from bioetl.domain.ports import NoOpTracing
-
-            tracing = NoOpTracing()
-
-        self.csv_exporter = csv_exporter
-        self._audit = audit
-        self._tracing: TracingPort = tracing
-
-        if metadata_writer is None:
-            from bioetl.domain.ports import NoOpMetadataWriter
-
-            metadata_writer = NoOpMetadataWriter()
-        self._metadata_writer: MetadataWriterPort = metadata_writer
-        self._metadata_coordinator: MetadataCoordinatorPort | None = (
-            metadata_coordinator
+        services = runtime_services or build_gold_writer_runtime_services(
+            csv_exporter=csv_exporter,
+            tracing=tracing,
+            audit=audit,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
         )
-
+        self.csv_exporter = services.csv_exporter
+        self._audit = services.audit
+        self._tracing = services.tracing
+        self._metadata_writer = services.metadata_writer
+        self._metadata_coordinator = services.metadata_coordinator
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 
