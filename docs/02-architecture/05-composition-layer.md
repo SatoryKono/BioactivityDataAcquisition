@@ -119,9 +119,23 @@ composition/bootstrap/
 `DataNormalizationService` и `ContractPolicyPort` должны собираться здесь, а не
 неявно внутри `BaseTransformer`.
 
-**Root-level файлы:**
+**Root-level файлы и публичные seams:**
 
-Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`, `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
+Также в корне `composition/` находятся:
+`bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`,
+`execution_api.py`, `services_api.py`, `resources_api.py`, `observability.py`,
+`registry.py`, `types.py`, `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
+
+Политика использования root-level composition seams:
+
+- `entrypoints.py` — `retained-entrypoint` и стабильный публичный composition seam.
+- `execution_api.py`, `services_api.py`, `resources_api.py` — узкие sanctioned public APIs
+  для новых internal call sites в `interfaces`.
+- `_pipeline_execution.py`, `_resource_management.py`, `_services.py` — internal implementation
+  modules; прямые импорты вне `composition/` запрещены policy-тестами.
+
+Текущий governance status для этих модулей фиксируется в
+[Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
 
 **Дополнительные пакеты:**
 

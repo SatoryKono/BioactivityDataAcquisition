@@ -112,7 +112,9 @@ class MergeSchema(BaseModel):
     )
     column_groups_file: str | None = Field(
         default=None,
-        description="Path to column group config file relative to composite config",
+        description="Deprecated migration alias for external column groups file. "
+        "Prefer inline merge.column_groups.",
+        deprecated=True,
     )
     exclude_fields: list[str] = Field(
         default_factory=list,

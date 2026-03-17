@@ -20,7 +20,7 @@ Scope rules:
 | `deprecated-warn` | Facade already emits `DeprecationWarning` on compatibility calls. | Do not add new imports or new call sites. Migrate existing usage to canonical modules. | First-party imports disappear outside dedicated compatibility tests. |
 | `compat-shim` | Thin re-export or alias kept only to avoid a breaking import rename. | Freeze the surface. New code imports the canonical module directly. | Internal call sites migrate and only package-level compatibility coverage remains. |
 | `mixed-module` | Module contains both canonical logic and compatibility surface, so deprecation applies only to part of the API. | New helpers should land in canonical submodules, not in the mixed module compatibility surface. | Compatibility-only symbols no longer needed and tests stop patching them. |
-| `retained-entrypoint` | Canonical public entrypoint that intentionally shields older implementation-module paths. | Keep using the entrypoint for new code; avoid the older implementation-module path it replaces. | Legacy implementation-path imports reach zero and the remaining surface is explicitly reviewed. |
+| `retained-entrypoint` | Canonical public entrypoint that intentionally shields older implementation-module paths. | Keep using the sanctioned public seam for new code (entrypoint module directly or owning package root that re-exports it); avoid the older implementation-module path it replaces. | Legacy implementation-path imports reach zero and the remaining surface is explicitly reviewed. |
 
 ## Governance Freeze
 
@@ -82,11 +82,13 @@ Tracked module paths:
 - `deprecated-warn` and `compat-shim` rows count as compatibility debt and should shrink over time.
 - `mixed-module` rows require symbol-level migration, not whole-module deletion by default.
 - `retained-entrypoint` rows are not removal targets in the current cycle; they exist to stabilize
-  provider package imports while internal implementation modules continue to evolve.
+  public import seams while internal implementation modules continue to evolve.
+- For provider adapters, first-party code should prefer provider package roots when those roots are
+  the documented canonical path; retained `client.py` modules remain stable compatibility seams.
 
 ## Current Import Inventory
 
-Snapshot after RF-002 controlled removal wave:
+Snapshot for the current compatibility-governance cycle:
 
 - `src/` direct imports of `bioetl.composition._pipeline_execution` outside `src/bioetl/composition/`: `0`
 - `src/` direct imports of `bioetl.composition._resource_management` outside `src/bioetl/composition/`: `0`

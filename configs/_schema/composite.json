@@ -762,7 +762,8 @@
             }
           ],
           "default": null,
-          "description": "Path to column group config file relative to composite config",
+          "deprecated": true,
+          "description": "Deprecated migration alias for external column groups file. Prefer inline merge.column_groups.",
           "title": "Column Groups File"
         },
         "exclude_fields": {

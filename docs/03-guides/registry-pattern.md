@@ -18,6 +18,17 @@ runtime shape.
 | `ProviderRegistry` | Class-based | `bioetl.composition.providers` | Canonical registry for provider metadata and creation. |
 | `get_data_source_creator()` / `DataSourceFactory` | Canonical creator path | `bioetl.composition.factories.datasource.data_source_factory` | Preferred for data-source assembly; backed by `ProviderRegistry`. |
 
+Governance status for the two transition-heavy surfaces:
+
+- `bioetl.composition.registry` is currently a `mixed-module` (canonical instance API +
+  transitional shared default-registry compatibility).
+- `bioetl.infrastructure.config_loader` is currently a `mixed-module` (canonical loader API +
+  transitional payload-normalization compatibility).
+
+See the curated ledger in
+[`docs/02-architecture/07-compatibility-facade-inventory.md`](../02-architecture/07-compatibility-facade-inventory.md)
+for status semantics, allowed call sites, and exit criteria.
+
 ## Common Operations
 
 | Goal | `PipelineRegistry` | `ProviderRegistry` | Data-source assembly |

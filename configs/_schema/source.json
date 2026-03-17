@@ -229,6 +229,8 @@
             }
           ],
           "default": null,
+          "deprecated": true,
+          "description": "Deprecated migration alias. Use pagination.id_batch_size.",
           "title": "Batch Size"
         },
         "page_size": {
@@ -243,6 +245,8 @@
             }
           ],
           "default": null,
+          "deprecated": true,
+          "description": "Deprecated migration alias. Use pagination.page_size.",
           "title": "Page Size"
         },
         "max_url_length": {
@@ -257,6 +261,8 @@
             }
           ],
           "default": null,
+          "deprecated": true,
+          "description": "Deprecated migration alias. Use pagination.max_url_length.",
           "title": "Max Url Length"
         },
         "api_version": {

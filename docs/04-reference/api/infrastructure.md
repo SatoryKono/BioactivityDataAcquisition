@@ -48,6 +48,25 @@ loading, and cross-cutting infrastructure concerns. It depends only on the Domai
 | `SemanticScholarAdapter` | (mixins) | `DataSourcePort`, `FilterableDataSourcePort` | Semantic Scholar |
 | `UniProtAdapter` | `BaseHttpAdapter` | `DataSourcePort`, `FilterableDataSourcePort` | UniProt |
 
+### Retained Adapter Entrypoint Policy
+
+- New first-party imports should use provider package roots
+  (`bioetl.infrastructure.adapters.pubmed`,
+  `bioetl.infrastructure.adapters.semanticscholar`).
+- `bioetl.infrastructure.adapters.pubmed.client` and
+  `bioetl.infrastructure.adapters.semanticscholar.client` are retained stable seams
+  for import compatibility.
+- Legacy implementation-module paths
+  (`bioetl.infrastructure.adapters.pubmed.pubmed_client`,
+  `bioetl.infrastructure.adapters.semanticscholar.adapter`) are not sanctioned for
+  new first-party code.
+
+See policy guardrails in
+`tests/architecture/test_adapter_contracts.py` and
+`tests/architecture/test_retained_adapter_entrypoint_policy.py`,
+and lifecycle governance in
+[`docs/02-architecture/07-compatibility-facade-inventory.md`](../../02-architecture/07-compatibility-facade-inventory.md).
+
 ### Base Adapter
 
 | Class | Description |
@@ -174,6 +193,12 @@ Each provider has its own `models.py` with API response models:
 | `FilterConfigLoader` | Loads filter configs from YAML |
 | `BaseConfigLoader` | Abstract base for config loaders |
 | `PublicationTypeClassificationLoader` | Loads publication type classifications |
+
+`bioetl.infrastructure.config_loader` is currently a `mixed-module`: the public
+loader API is canonical, while some normalization concerns remain transitional.
+New normalization helpers should be placed in dedicated config submodules (for example,
+`bioetl.infrastructure.config.pipeline_normalizers`) instead of expanding compatibility
+branches in `config_loader.py`.
 
 ---
 

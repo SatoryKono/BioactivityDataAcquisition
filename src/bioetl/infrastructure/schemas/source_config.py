@@ -132,11 +132,29 @@ class ProviderConfigYaml(BaseModel):
     base_url: str | None = None
     client: ClientYamlConfig = Field(default_factory=ClientYamlConfig)
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
-    # Legacy fields — kept for backward compatibility.
+    # Legacy fields — kept as migration-only compatibility aliases.
     # When set, they are promoted into ``pagination`` by the model_validator.
-    batch_size: int | None = Field(default=None, ge=1, le=10000)
-    page_size: int | None = Field(default=None, ge=1, le=10000)
-    max_url_length: int | None = Field(default=None, ge=100, le=10000)
+    batch_size: int | None = Field(
+        default=None,
+        ge=1,
+        le=10000,
+        description="Deprecated migration alias. Use pagination.id_batch_size.",
+        deprecated=True,
+    )
+    page_size: int | None = Field(
+        default=None,
+        ge=1,
+        le=10000,
+        description="Deprecated migration alias. Use pagination.page_size.",
+        deprecated=True,
+    )
+    max_url_length: int | None = Field(
+        default=None,
+        ge=100,
+        le=10000,
+        description="Deprecated migration alias. Use pagination.max_url_length.",
+        deprecated=True,
+    )
     api_version: str | None = None
     default_email: str | None = None
     fallback: FallbackPolicyYamlConfig | None = None

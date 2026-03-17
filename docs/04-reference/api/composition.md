@@ -20,7 +20,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | `composition.providers` | Provider registration and discovery | `ProviderRegistry`, provider decorators |
 | `composition.runtime_builders` | Runtime component builders | `RunnerBuilder`, `ObservabilityBuilder` |
 | `composition.services` | Composition-level service wiring | `MetadataCoordinator`, versioning |
-| `composition` (top-level) | Entrypoints, registry, observability bundle | `PipelineRegistry`, `ObservabilityBundle` |
+| `composition` (top-level) | Public composition seams, registry, observability bundle | `entrypoints`, `execution_api`, `services_api`, `resources_api`, `PipelineRegistry`, `ObservabilityBundle` |
 
 ---
 
@@ -192,10 +192,35 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 ---
 
+## Public Composition Seams
+
+Current sanctioned public surfaces in `composition/`:
+
+| Module | Policy Role | New Code Guidance |
+|---|---|---|
+| `entrypoints` | `retained-entrypoint` stable public seam | Keep using as stable public entrypoint where broad composition surface is needed. |
+| `execution_api` | Narrow execution-focused public API | Prefer for new CLI/orchestration execution call sites. |
+| `services_api` | Narrow services-focused public API | Prefer for new service/bootstrap retrieval call sites. |
+| `resources_api` | Narrow resource-management public API | Prefer for new quarantine/checkpoint/lifecycle call sites. |
+
+Internal modules `_pipeline_execution`, `_resource_management`, `_services` remain
+implementation seams behind the public modules above and are not sanctioned import paths
+outside the owning `composition` package and dedicated boundary tests.
+
+Governance status model and exit criteria for compatibility surfaces are tracked in
+[`docs/02-architecture/07-compatibility-facade-inventory.md`](../../02-architecture/07-compatibility-facade-inventory.md).
+
+---
+
 ## Entrypoints (`composition.entrypoints`)
 
-Top-level entrypoint functions that wire everything together and start the application.
-Used by the CLI (`interfaces.cli`) to bootstrap and run pipelines.
+`composition.entrypoints` is a retained, stable public composition seam.
+It intentionally re-exports behavior from internal implementation modules while keeping
+external import paths stable.
+
+When new call sites only need one capability family, prefer the narrower
+`execution_api`, `services_api`, or `resources_api` modules instead of growing this
+retained facade.
 
 ---
 
@@ -216,7 +241,11 @@ Used by the CLI (`interfaces.cli`) to bootstrap and run pipelines.
 | `builders` | `FilterConfigBuilder` -- builds filter configs from YAML |
 | `bootstrap_logger` | `BootstrapLogger` -- logging during bootstrap phase |
 | `bootstrap_contexts` | Context objects for bootstrap configuration |
+| `entrypoints` | Retained stable public composition seam (broad facade) |
+| `execution_api` | Public execution-focused composition API |
+| `services_api` | Public services-focused composition API |
+| `resources_api` | Public resource-management composition API |
 | `types` | Type definitions for composition layer |
-| `_pipeline_execution` | Internal pipeline execution helpers (`VacuumOptions`, `ArchiveOptions`) |
-| `_resource_management` | Internal resource management helpers |
-| `_services` | Internal service wiring helpers |
+| `_pipeline_execution` | Internal implementation module behind `entrypoints`/`execution_api` |
+| `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` |
+| `_services` | Internal implementation module behind `entrypoints`/`services_api` |

@@ -1401,6 +1401,7 @@
         }
       ],
       "default": null,
+      "deprecated": true,
       "description": "Deprecated: use source pagination.id_batch_size instead. Batch size when input_filter is active. Overrides batch_size.",
       "title": "Filter Batch Size"
     },
@@ -1471,45 +1472,6 @@
       "description": "Inline filter overrides. Applied on top of filter_config_file. Format: {input_filter: {...}, gold_filters: {...}}",
       "title": "Filter Rules"
     },
-    "column_groups_file": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Path to column group config file relative to pipeline config.",
-      "title": "Column Groups File"
-    },
-    "schema_file": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Path to schema config file relative to pipeline config. Auto-computed from provider/entity_type by convention if not specified. Example: ../../schemas/chembl/activity.yaml",
-      "title": "Schema File"
-    },
-    "data_schema_file": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Deprecated alias for schema_file. Kept for backward compatibility.",
-      "title": "Data Schema File"
-    },
     "business_primary_keys": {
       "anyOf": [
         {
@@ -1532,22 +1494,6 @@
       "minLength": 1,
       "title": "Technical Primary Key",
       "type": "string"
-    },
-    "primary_keys": {
-      "anyOf": [
-        {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Deprecated alias for business_primary_keys (kept for migration).",
-      "title": "Primary Keys"
     },
     "silver_table": {
       "default": "",
