@@ -42,5 +42,6 @@ python -m scripts.dev <command> [args...]
 | `run_tests.sh` | Run tests (shell variant) |
 | `run_tests.ps1` | Run tests (PowerShell variant) |
 | `run_pytest.sh` | Run pytest directly |
+| `run_pytest.ps1` | Run pytest directly (PowerShell variant) |
 | `setup_copilot_codex_mcp.sh` | Setup MCP (shell variant) |
 | `setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant) |

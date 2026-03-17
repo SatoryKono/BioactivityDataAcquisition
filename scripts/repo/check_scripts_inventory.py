@@ -19,7 +19,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Final
 
@@ -90,6 +90,14 @@ SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = ("scripts/", "src/tools/")
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
+SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
+    "scripts/ops/codex-exec.bat": ("scripts/codex-exec.bat",),
+    "scripts/ops/codex.bat": ("scripts/codex.bat",),
+    "scripts/ops/start-wsl-proxy.bat": ("scripts/start-wsl-proxy.bat",),
+    "scripts/codex-exec.bat": ("scripts/ops/codex-exec.bat",),
+    "scripts/codex.bat": ("scripts/ops/codex.bat",),
+    "scripts/start-wsl-proxy.bat": ("scripts/ops/start-wsl-proxy.bat",),
+}
 MANIFEST_DEFAULT: Final[str] = "configs/quality/scripts_inventory_manifest.json"
 DEPRECATION_REPORT_DEFAULT: Final[str] = (
     "reports/quality/scripts_deprecation_backlog.md"
@@ -216,18 +224,20 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
             for script_rel in set(
                 SCRIPT_PATH_CANDIDATE_PATTERN.findall(normalized_line)
             ):
-                if script_rel not in script_set:
-                    continue
-                if rel == script_rel:
-                    continue
-                refs[script_rel].append(
-                    RefEvidence(
-                        path=rel,
-                        line=line_no,
-                        text=raw_line.strip()[:200],
-                        source_group=_source_group(rel),
+                candidate_paths = (script_rel, *SCRIPT_PATH_ALIASES.get(script_rel, ()))
+                for candidate_path in candidate_paths:
+                    if candidate_path not in script_set:
+                        continue
+                    if rel == candidate_path:
+                        continue
+                    refs[candidate_path].append(
+                        RefEvidence(
+                            path=rel,
+                            line=line_no,
+                            text=raw_line.strip()[:200],
+                            source_group=_source_group(rel),
+                        )
                     )
-                )
     return refs
 
 
@@ -245,7 +255,9 @@ def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
 
 def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
     if not refs:
-        return "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
+        return (
+            "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
+        )
 
     groups = {item.source_group for item in refs}
     if groups & {"ci", "build", "skills", "tests", "scripts", "agents"}:
@@ -312,7 +324,7 @@ def _build_inventory(root: Path) -> dict[str, object]:
     }
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "summary": summary,
         "scripts": rows,
     }
@@ -375,11 +387,19 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
         for item in entries:
             path_value = str(item["path"])
             type_value = str(item["type"])
-            ref_count = int(item["reference_count"])
+            ref_count_raw = item.get("reference_count", 0)
+            if isinstance(ref_count_raw, (int, float, str)):
+                ref_count = int(ref_count_raw)
+            else:
+                ref_count = 0
             if status == "unknown":
-                next_step = "Validate runtime usage; promote to active or mark deprecated."
+                next_step = (
+                    "Validate runtime usage; promote to active or mark deprecated."
+                )
             elif status == "orphan":
-                next_step = "Plan staged removal or add explicit compatibility call-site."
+                next_step = (
+                    "Plan staged removal or add explicit compatibility call-site."
+                )
             else:
                 next_step = "Archive/remove after freeze window if no active consumers."
             lines.append(
@@ -420,7 +440,9 @@ def _check_lifecycle_registry(
 
     entries_raw = registry.get("entries")
     if not isinstance(entries_raw, dict):
-        print(f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}")
+        print(
+            f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}"
+        )
         return 1
 
     script_rows = payload["scripts"]

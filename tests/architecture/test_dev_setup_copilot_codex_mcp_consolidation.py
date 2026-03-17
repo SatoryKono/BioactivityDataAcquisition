@@ -50,7 +50,8 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert "github-mcp-wrapper.ps1" in servers["github"]["args"][-1]
     else:
         assert (
-            servers["github"]["args"][1] == "@modelcontextprotocol/server-github@2025.4.8"
+            servers["github"]["args"][1]
+            == "@modelcontextprotocol/server-github@2025.4.8"
         )
 
 

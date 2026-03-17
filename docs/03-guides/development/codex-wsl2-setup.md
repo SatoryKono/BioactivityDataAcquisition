@@ -24,7 +24,7 @@ with VPN proxy workaround.
 ┌─────────────────────────────────────────────────┐
 │  Windows Host                                   │
 │                                                 │
-│  scripts/wsl_proxy.py ──► VPN ──► Internet      │
+│  scripts/ops/wsl_proxy.py ──► VPN ──► Internet  │
 │        ▲  (port 3128)                           │
 │        │                                        │
 │  ┌─────┼───────────────────────────────────┐    │
@@ -48,11 +48,11 @@ bridges this gap.
 
 | File | Location | Purpose |
 |------|----------|---------|
-| `wsl_proxy.py` | `scripts/` | HTTP CONNECT proxy (Python stdlib) |
-| `start-wsl-proxy.bat` | `scripts/` | Start proxy in background |
-| `codex.bat` | `scripts/` | Launch interactive Codex from Windows |
-| `codex-exec.bat` | `scripts/` | Launch full-auto Codex from Windows |
-| `.setup_wsl_codex.sh` | repo root | DNS resolver (dig + PowerShell fallback) |
+| `wsl_proxy.py` | `scripts/ops/` | HTTP CONNECT proxy (Python stdlib) |
+| `start-wsl-proxy.bat` | `scripts/ops/` | Start proxy in background |
+| `codex.bat` | `scripts/ops/` | Launch interactive Codex from Windows |
+| `codex-exec.bat` | `scripts/ops/` | Launch full-auto Codex from Windows |
+| `.setup_wsl_codex.sh` | `scripts/dev/` | DNS resolver (dig + PowerShell fallback) |
 | `.wsl_proxy_env.sh` | repo root | Auto-configure proxy env vars |
 | `.codex/config.toml` | repo root | Project-level Codex config |
 | `~/.codex/config.toml` | WSL home | Global Codex config (MCP servers) |
@@ -67,13 +67,13 @@ bridges this gap.
 Run once before working with Codex:
 
 ```cmd
-scripts\start-wsl-proxy.bat
+scripts\ops\start-wsl-proxy.bat
 ```
 
 Or manually:
 
 ```cmd
-python scripts\wsl_proxy.py
+python scripts\ops\wsl_proxy.py
 ```
 
 The proxy listens on `0.0.0.0:3128`. Verify:
@@ -99,9 +99,9 @@ codex review                    # code review mode
 ### 4. Alternative: launch from Windows
 
 ```cmd
-scripts\codex.bat                           # interactive
-scripts\codex.bat "add retry logic"         # interactive with prompt
-scripts\codex-exec.bat "fix the bug"        # full-auto
+scripts\ops\codex.bat                           # interactive
+scripts\ops\codex.bat "add retry logic"         # interactive with prompt
+scripts\ops\codex-exec.bat "fix the bug"        # full-auto
 ```
 
 ---
@@ -211,7 +211,7 @@ WSL2 traffic cannot reach external hosts because:
 
 ### Solution: Two-layer workaround
 
-**Layer 1: DNS** (`.setup_wsl_codex.sh`)
+**Layer 1: DNS** (`scripts/dev/.setup_wsl_codex.sh`)
 
 Resolves OpenAI and npm hosts using:
 - `dig` (fast, works when WSL DNS is functional)
@@ -223,10 +223,10 @@ if `api.openai.com` is missing from `/etc/hosts`.
 Manual refresh:
 
 ```bash
-bash "$BIOETL_DIR/.setup_wsl_codex.sh"
+bash "$BIOETL_DIR/scripts/dev/.setup_wsl_codex.sh"
 ```
 
-**Layer 2: Proxy** (`scripts/wsl_proxy.py`)
+**Layer 2: Proxy** (`scripts/ops/wsl_proxy.py`)
 
 Minimal HTTP CONNECT proxy running on Windows, listening on `0.0.0.0:3128`.
 WSL2 routes all HTTP/HTTPS traffic through it via `http_proxy` / `https_proxy`
@@ -249,7 +249,7 @@ alias cxe="cd $BIOETL_DIR && codex exec --full-auto"
 
 # Ensure OpenAI DNS (VPN workaround)
 if ! grep -q "api.openai.com" /etc/hosts 2>/dev/null; then
-  bash "$BIOETL_DIR/.setup_wsl_codex.sh" 2>/dev/null
+  bash "$BIOETL_DIR/scripts/dev/.setup_wsl_codex.sh" 2>/dev/null
 fi
 
 # WSL2 proxy (VPN workaround)
@@ -281,7 +281,7 @@ generateResolvConf = false   # keep custom resolv.conf
    ```cmd
    netstat -an | findstr 3128
    ```
-   If not listening, run `scripts\start-wsl-proxy.bat`.
+   If not listening, run `scripts\ops\start-wsl-proxy.bat`.
 
 2. **Check proxy env** (WSL):
    ```bash
@@ -300,7 +300,7 @@ generateResolvConf = false   # keep custom resolv.conf
 
 ```bash
 # Refresh DNS cache
-bash "$BIOETL_DIR/.setup_wsl_codex.sh"
+bash "$BIOETL_DIR/scripts/dev/.setup_wsl_codex.sh"
 
 # Verify
 grep openai /etc/hosts
