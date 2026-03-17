@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import AbstractAsyncContextManager
 from typing import TYPE_CHECKING
 
 from bioetl.application.services import RunOptions, RunResult
@@ -21,6 +22,17 @@ from bioetl.interfaces.cli.commands.run_command_policy import RunCommandInput
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
+    from typing import Protocol
+
+    class PipelineRunnerService(Protocol):
+        """Protocol for pipeline runner services used by CLI runtime helpers."""
+
+        async def run(
+            self,
+            pipeline: str,
+            *,
+            options: RunOptions,
+        ) -> RunResult: ...
 
 
 def build_run_command_input(
@@ -73,29 +85,53 @@ async def run_pipeline_async(
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
     registry: PipelineRegistry | None = None,
+    *,
+    metrics_starter: Callable[[], bool | None] = ensure_metrics_server_started,
+    health_context_factory: Callable[
+        ..., AbstractAsyncContextManager[object]
+    ] = health_server_context,
+    runner_service_factory: Callable[
+        ..., PipelineRunnerService
+    ] = get_pipeline_runner_service,
 ) -> RunResult:
     """Execute run pipeline request through service with health/metrics context."""
-    ensure_metrics_server_started()
-    async with health_server_context(
+    metrics_starter()
+    async with health_context_factory(
         enabled=health_server_enabled,
         port=health_port,
     ):
-        service = get_pipeline_runner_service(registry=registry)
+        service = runner_service_factory(registry=registry)
         return await service.run(pipeline, options=options)
+
+
+async def run_prepared_request_async(
+    request: RunExecutionRequest,
+    registry: PipelineRegistry | None = None,
+    *,
+    run_pipeline_async_callable: Callable[..., Awaitable[RunResult]] = run_pipeline_async,
+) -> RunResult:
+    """Execute a prepared request through the canonical runtime helper path."""
+    return await run_pipeline_async_callable(
+        request.pipeline,
+        request.options,
+        health_server_enabled=request.health_server,
+        health_port=request.health_port,
+        registry=registry,
+    )
 
 
 def build_run_pipeline_callable(
     registry: PipelineRegistry | None = None,
+    *,
+    run_pipeline_async_callable: Callable[..., Awaitable[RunResult]] = run_pipeline_async,
 ) -> Callable[[RunExecutionRequest], Awaitable[RunResult]]:
     """Return a stable async callable for prepared execution requests."""
 
     async def _run(request: RunExecutionRequest) -> RunResult:
-        return await run_pipeline_async(
-            request.pipeline,
-            request.options,
-            health_server_enabled=request.health_server,
-            health_port=request.health_port,
+        return await run_prepared_request_async(
+            request,
             registry=registry,
+            run_pipeline_async_callable=run_pipeline_async_callable,
         )
 
     return _run
