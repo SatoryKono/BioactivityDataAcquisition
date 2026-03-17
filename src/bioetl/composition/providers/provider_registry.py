@@ -1,12 +1,4 @@
-"""Provider registry facade over split metadata and creation helpers.
-
-Centralizes the public registry API while delegating provider metadata models,
-registry-store helpers, and adapter/data-source creation logic to internal
-submodules.  Instance-scoped design (RF-001) mirrors PipelineRegistry: each
-instance holds its own ``_providers`` dict guarded by ``threading.RLock()``.
-A lazy default singleton preserves backward compatibility for all existing
-``@classmethod`` callsites.
-"""
+"""Provider registry facade over split metadata and creation helpers."""
 
 from __future__ import annotations
 
@@ -53,23 +45,11 @@ DataSourceCreatorPort = DataSourceCreatorProtocol
 
 
 class ProviderRegistry:
-    """Unified data provider registry (thread-safe, instance-scoped).
-
-    Each instance holds its own ``_providers`` dict protected by RLock.
-    Classmethods delegate to a lazy default singleton, preserving all
-    existing ``ProviderRegistry.method()`` callsites unchanged.
-
-    For test isolation, create a new instance via ``create_provider_registry()``.
-    """
+    """Unified data provider registry (thread-safe, instance-scoped)."""
 
     def __init__(self) -> None:
         self._providers: dict[str, ProviderConfig] = {}  # type: ignore[no-redef]
         self._lock = threading.RLock()
-
-    # ------------------------------------------------------------------
-    # Backward-compatible class-level _providers access (used by tests).
-    # Non-data descriptor: instance attrs shadow it automatically.
-    # ------------------------------------------------------------------
 
     class _ProvidersDescriptor:
         """Expose the default singleton's _providers on class-level access."""
@@ -83,11 +63,6 @@ class ProviderRegistry:
             return get_default_provider_registry()._providers
 
     _providers = _ProvidersDescriptor()
-
-    # ------------------------------------------------------------------
-    # Classmethods — backward-compatible public API.
-    # Each delegates to the lazy default singleton with thread safety.
-    # ------------------------------------------------------------------
 
     @classmethod
     def _get_default(cls) -> ProviderRegistry:
@@ -232,10 +207,6 @@ class ProviderRegistry:
 
         return creator
 
-    # ------------------------------------------------------------------
-    # Unified API (consistent with PipelineRegistry)
-    # ------------------------------------------------------------------
-
     @classmethod
     def list_keys(cls) -> list[str]:
         """List all registered provider names (unified API)."""
@@ -247,17 +218,11 @@ class ProviderRegistry:
         return cls.is_registered(key)
 
 
-# ---------------------------------------------------------------------------
-# Lazy default instance — avoids import-time side effects (DI-004).
-# ---------------------------------------------------------------------------
 _default_provider_registry: ProviderRegistry | None = None
 
 
 def get_default_provider_registry() -> ProviderRegistry:
-    """Get the default global provider registry instance.
-
-    Created lazily on first access.  For tests, prefer ``create_provider_registry()``.
-    """
+    """Get the lazily created default global provider registry instance."""
     global _default_provider_registry
     if _default_provider_registry is None:
         _default_provider_registry = ProviderRegistry()

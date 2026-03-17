@@ -44,7 +44,7 @@
 
 - **Composition Layer** - Dependency Injection:
 
-  - bootstrap_pipeline() - Composition Root
+  - bootstrap_pipeline_runner() / bootstrap_composite_runner() - Composition Root runtime entrypoints
   - 8 Factories
   - PipelineRegistry
 
@@ -87,7 +87,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 - 7 Provider Adapters (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, SemanticScholar)
 - Storage Adapters (BronzeWriter, SilverWriter, GoldWriter)
 - Observability Adapters (StructlogLogger, PrometheusMetrics, OTELTracer)
-- Coordination Adapters (MemoryLock, CheckpointAdapter, QuarantineAdapter)
+- Coordination Adapters (MemoryLock, LocalCheckpointAdapter, UnifiedQuarantineAdapter)
 
 **Domain Core:**
 

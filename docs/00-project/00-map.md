@@ -460,7 +460,7 @@ graph TD
 | `src/bioetl/composition/bootstrap_contexts.py`     | Composition root          |
 | `src/bioetl/infrastructure/config_loader.py`       | Config loading (unified + legacy) |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
-| `docs/04-reference/contracts/gold/{entity}.json`   | Gold data contracts       |
+| `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json` | Gold data contracts |
 
 ---
 

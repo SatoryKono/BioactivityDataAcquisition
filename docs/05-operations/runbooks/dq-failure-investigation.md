@@ -50,30 +50,26 @@ Key log fields:
 
 ### Step 2: Examine Quarantine Records
 
-Quarantined records are stored in:
+Quarantined records are stored in unified Delta table:
 
 ```
-data/quarantine/{provider}/{entity}/{date}/
+data/output/quarantine
 ```
 
 ```bash
-# List quarantine files
-ls -la data/quarantine/chembl/activity/
-
-# View recent quarantine records
-cat data/quarantine/chembl/activity/2026-01-02/*.jsonl | head -10 | jq
+# Inspect recent records for one pipeline
+bioetl quarantine inspect --pipeline chembl_activity --limit 10
 ```
 
 Quarantine record structure:
 
 ```json
 {
-  "original-record": { ... },
-  "error-type": "validation-error",
-  "error-message": "Invalid SMILES: 'XYZ'",
-  "field": "canonical-smiles",
-  "quarantine-timestamp": "2026-01-02T14:30:00Z",
-  "run-id": "run-20260102-143022-abc123"
+  "pipeline": "chembl_activity",
+  "dq_status": "NEW",
+  "error_code": "VALIDATION_ERROR",
+  "ingestion_ts": "2026-01-02T14:30:00Z",
+  "payload_hash": "<hash>"
 }
 ```
 
@@ -90,22 +86,9 @@ Common DQ error categories:
 | Encoding issues | Invalid UTF-8            | Low      |
 
 ```python
-import json
-from collections import Counter
-from pathlib import Path
-
-# Count error types
-error-types = Counter()
-quarantine-dir = Path("data/quarantine/chembl/activity/2026-01-02")
-
-for f in quarantine-dir.glob("*.jsonl"):
-    for line in f.read-text().splitlines():
-        record = json.loads(line)
-        error-types[record.get("error-type", "unknown")] += 1
-
-print("Error distribution:")
-for error, count in error-types.most-common():
-    print(f"  {error}: {count}")
+# CLI dashboard
+# (includes by_error_code/by_status and oldest/newest timestamps)
+bioetl quarantine stats --pipeline chembl_activity
 ```
 
 ### Step 4: Root Cause Analysis

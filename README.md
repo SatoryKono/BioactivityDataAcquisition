@@ -33,7 +33,7 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Drive
 │                     INTERFACES (CLI)                        │
 ├─────────────────────────────────────────────────────────────┤
 │                    COMPOSITION (DI)                         │
-│              bootstrap_pipeline() → Factories               │
+│         bootstrap_pipeline_runner() → Factories             │
 ├─────────────────────────────────────────────────────────────┤
 │                     APPLICATION                             │
 │         PipelineRunner → Executor → BaseTransformer         │
@@ -239,7 +239,7 @@ bioetl run --pipeline chembl_activity --run-type backfill --resume
 bioetl quarantine inspect --pipeline chembl_activity --limit 10
 
 # List checkpoints
-bioetl checkpoint list
+bioetl checkpoint list --pipeline chembl_activity
 ```
 
 ## Development

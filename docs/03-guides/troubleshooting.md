@@ -31,10 +31,12 @@
 *   **Причина**: Уже запущен другой экземпляр того же пайплайна или предыдущий запуск завершился аварийно.
 *   **Решение**:
     1.  Проверьте наличие других процессов того же пайплайна.
-    2.  Если уверены, что процессов нет, блокировка может быть устаревшей. Освободите её вручную:
+    2.  Если уверены, что процессов нет, проверьте lock owner (`run-id`) и освободите lock вручную:
         ```bash
-        make release-lock PIPELINE=your-pipeline-name
+        bioetl lock check --pipeline your-pipeline-name --run-id <owner-uuid>
+        bioetl lock release --pipeline your-pipeline-name --run-id <owner-uuid>
         ```
+    3.  В Local-Only режиме блокировки in-memory, поэтому операции lock применимы в рамках текущего процесса.
 
 ### Ошибка: `pydantic.ValidationError`
 *   **Симптом**: Пайплайн падает на стадии `transform` или `load` с ошибкой валидации Pydantic.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from unittest.mock import MagicMock
 
 from bioetl.application.composite.aggregator import EnricherAggregator
@@ -14,11 +15,60 @@ from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.join_execution import JoinExecutorService
+from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.domain.composite.config import MergeConfig
+
+
+def build_join_planner_service(
+    *,
+    merge_config: MergeConfig,
+    logger: MagicMock,
+    deduplicator: EnricherDeduplicatorService | MagicMock,
+    aggregator: EnricherAggregator | MagicMock,
+    renamer: ColumnRenamer | MagicMock,
+    conflict_resolver: ConflictResolverService | MagicMock,
+    field_alias_resolver: Callable[[str], dict[str, str] | None] | None = None,
+    join_type_resolver: Callable[[], JoinHow] | None = None,
+) -> JoinPlannerService:
+    """Create JoinPlannerService with canonical collaborator wiring for tests."""
+    if field_alias_resolver is None:
+        field_alias_resolver = lambda _pipeline: None
+    if join_type_resolver is None:
+        join_type_resolver = lambda: "left"
+
+    join_key_resolver = JoinKeyResolverService(
+        normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
+        parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
+    )
+    join_executor = JoinExecutorService(
+        logger=logger,
+        join_type_resolver=join_type_resolver,
+    )
+    dependency_joiner = DependencyJoinerService(
+        logger=logger,
+        deduplicator=deduplicator,
+        renamer=renamer,
+        conflict_resolver=conflict_resolver,
+        field_alias_resolver=field_alias_resolver,
+        join_key_resolver=join_key_resolver,
+        join_executor=join_executor,
+        system_columns_to_drop=JoinPlannerService._SYSTEM_COLUMNS_TO_DROP,
+    )
+    return JoinPlannerService(
+        merge_config=merge_config,
+        logger=logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        conflict_resolver=conflict_resolver,
+        field_alias_resolver=field_alias_resolver,
+        join_key_resolver=join_key_resolver,
+        join_executor=join_executor,
+        dependency_joiner=dependency_joiner,
+    )
 
 
 def build_merge_service(
@@ -39,25 +89,7 @@ def build_merge_service(
         logger=logger,
         coalesce_policy=coalesce_policy,
     )
-    join_key_resolver = JoinKeyResolverService(
-        normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
-        parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
-    )
-    join_executor = JoinExecutorService(
-        logger=logger,
-        join_type_resolver=lambda: "left",
-    )
-    dependency_joiner = DependencyJoinerService(
-        logger=logger,
-        deduplicator=deduplicator,
-        renamer=renamer,
-        conflict_resolver=conflict_resolver,
-        field_alias_resolver=lambda _pipeline: None,
-        join_key_resolver=join_key_resolver,
-        join_executor=join_executor,
-        system_columns_to_drop=JoinPlannerService._SYSTEM_COLUMNS_TO_DROP,
-    )
-    join_planner = JoinPlannerService(
+    join_planner = build_join_planner_service(
         merge_config=merge_config,
         logger=logger,
         deduplicator=deduplicator,
@@ -65,9 +97,7 @@ def build_merge_service(
         renamer=renamer,
         conflict_resolver=conflict_resolver,
         field_alias_resolver=lambda _pipeline: None,
-        join_key_resolver=join_key_resolver,
-        join_executor=join_executor,
-        dependency_joiner=dependency_joiner,
+        join_type_resolver=lambda: "left",
     )
     return MergeService(
         merge_config=merge_config,

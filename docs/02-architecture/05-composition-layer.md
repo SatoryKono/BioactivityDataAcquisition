@@ -39,7 +39,8 @@ composition/bootstrap/
 └── runtime/             # Runtime assembly (23 модуля)
 ```
 
-- `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна. **Deprecated** — предпочтителен прямой вызов `runtime/pipeline.py`.
+- `bootstrap_pipeline_runner()`: Каноническая точка входа для создания `PipelineRunner` в runtime-сценариях.
+- `bootstrap_composite_runner()`: Каноническая точка входа для сборки `CompositePipelineRunner`.
 - `bootstrap/runtime/composite.py`: Bootstrap для Composite Pipeline (ADR-026).
 
 #### 2.1.1. `runtime/` — Runtime Assembly (23 модуля)

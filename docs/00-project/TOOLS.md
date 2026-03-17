@@ -59,18 +59,17 @@ python -m scripts.ci quality-gate
 
 | Файл | Директория | bioetl? | Unified command | Make-цель | Описание |
 |------|------------|---------|-----------------|-----------|----------|
-| `create_pipeline.py` | src/tools/ | Да | — | `make new-pipeline` | Генерация boilerplate для новых пайплайнов |
+| `create_pipeline.py` | src/tools/ | Да | — | — | Генерация boilerplate для новых пайплайнов |
 | `verify_schema_parity.py` | src/tools/ | Да | — | — | Верификация Silver↔Gold schema parity |
 | `file_merger.py` | src/tools/ | Нет | — | — | Объединение файлов с метаданными |
-| `build_diagram_docs.py` | src/tools/ | Да | — | — | Рендеринг Mermaid-диаграмм |
-| `cleanup_project.py` | scripts/diagnostics/ | Нет | — | `make clean-dev` | Очистка кэшей и артефактов |
+| `cleanup_project.py` | scripts/diagnostics/ | Нет | — | `make clean` | Очистка кэшей и артефактов |
 | `cleanup_consolidate.py` | scripts/diagnostics/ | Нет | — | — | Консолидированный аудит очистки |
-| `audit_structure.py` | scripts/diagnostics/ | Нет | — | `make audit-structure` | Аудит соответствия File Policy |
-| `vacuum_delta.py` | scripts/data/ | Нет | `python -m scripts.data vacuum` | `make vacuum-silver` | VACUUM Delta Lake таблиц |
+| `audit_structure.py` | scripts/diagnostics/ | Нет | — | — | Аудит соответствия File Policy |
+| `vacuum_delta.py` | scripts/data/ | Нет | `python -m scripts.data vacuum` | — | VACUUM Delta Lake таблиц |
 | `dq_baseline_update.py` | scripts/data/ | Нет | `python -m scripts.data dq-baseline` | — | Пересчёт DQ baseline |
-| `verify_checksums.py` | scripts/data/ | Нет | `python -m scripts.data checksums` | `make verify-checksums` | Верификация контрольных сумм |
+| `verify_checksums.py` | scripts/data/ | Нет | `python -m scripts.data checksums` | — | Верификация контрольных сумм |
 | `salt_rotate.py` | scripts/ops/ | Нет | — | — | Ротация PII-соли |
-| `naming_audit.py` | scripts/qa/ | Нет | `python -m scripts.qa check-naming` | `make audit-naming` | Аудит naming conventions |
+| `naming_audit.py` | scripts/qa/ | Нет | `python -m scripts.qa check-naming` | — | Аудит naming conventions |
 | `lint_terminology.py` | scripts/qa/ | Нет | `python -m scripts.qa check-terminology` | — | Линтер терминологии |
 | `config_gap_analysis.py` | scripts/schema/ | Нет | `python -m scripts.schema analyze-gaps` | — | Анализ расхождений конфигов |
 | `validate_pipeline_configs.py` | scripts/schema/ | Нет | `python -m scripts.schema validate-configs` | — | Валидация configs vs JSON Schema |

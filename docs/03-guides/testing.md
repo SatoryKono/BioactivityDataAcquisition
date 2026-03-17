@@ -245,7 +245,7 @@ Stage 5: Contract (ежемесячно)
 make setup-dev
 
 # Универсальный скрипт (создаст venv и установит зависимости)
-./scripts/dev/dev-setup.sh
+./scripts/dev/dev_setup.sh
 ```
 
 Команда `make setup-dev` выполняет полную синхронизацию зависимостей и запускает расширенный набор проверок `test-deps-dev`.

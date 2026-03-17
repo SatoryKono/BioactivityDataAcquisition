@@ -14,6 +14,22 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
 
 
+@dataclass(frozen=True, slots=True)
+class _PipelineIdentity:
+    """Parsed ``provider_entity`` identity used by helper-level resolvers."""
+
+    provider: str
+    entity: str
+
+
+def _try_parse_pipeline_identity(pipeline: str) -> _PipelineIdentity | None:
+    """Return parsed pipeline identity or ``None`` when format is invalid."""
+    if "_" not in pipeline:
+        return None
+    provider, entity = pipeline.split("_", 1)
+    return _PipelineIdentity(provider=provider, entity=entity)
+
+
 def resolve_field_aliases_from_registry(pipeline: str) -> dict[str, str] | None:
     """Resolve provider alias map for ``provider_entity`` pipeline names.
 
@@ -24,10 +40,10 @@ def resolve_field_aliases_from_registry(pipeline: str) -> dict[str, str] | None:
         Alias mapping dict for the provider, or None if the pipeline name has no
         underscore separator or no aliases are registered for the provider.
     """
-    if "_" not in pipeline:
+    identity = _try_parse_pipeline_identity(pipeline)
+    if identity is None:
         return None
-    provider, _entity = pipeline.split("_", 1)
-    alias_map = get_alias_map_for_provider(provider)
+    alias_map = get_alias_map_for_provider(identity.provider)
     return alias_map if alias_map else None
 
 
@@ -40,12 +56,12 @@ def parse_pipeline_name(pipeline: str) -> tuple[str, str]:
     Returns:
         Two-element tuple ``(provider, entity)`` derived by splitting on the first underscore.
     """
-    if "_" not in pipeline:
+    identity = _try_parse_pipeline_identity(pipeline)
+    if identity is None:
         raise ValueError(
             f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
         )
-    provider, entity = pipeline.split("_", 1)
-    return provider, entity
+    return identity.provider, identity.entity
 
 
 def table_path_to_name(path: str) -> str:
@@ -62,10 +78,9 @@ def table_path_to_name(path: str) -> str:
 
 def infer_silver_table(pipeline_name: str) -> str:
     """Infer Silver table path from a ``provider_entity`` pipeline name."""
-    parts = pipeline_name.split("_", 1)
-    if len(parts) == 2:
-        provider, entity = parts
-        return f"silver/{provider}/{entity}"
+    identity = _try_parse_pipeline_identity(pipeline_name)
+    if identity is not None:
+        return f"silver/{identity.provider}/{identity.entity}"
     return f"silver/{pipeline_name}"
 
 

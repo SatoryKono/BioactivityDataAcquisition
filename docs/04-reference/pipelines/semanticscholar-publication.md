@@ -757,7 +757,7 @@ erDiagram
 
 1. **Full Scan Only**: No incremental loading due to API offset pagination instability (ADR-030, ADR-031).
 
-2. **Author Fields Not in Gold**: Author-level data (S2 IDs, ORCIDs, h-indices) excluded from Gold schema.
+2. **Author Fields Flattened**: Author-level data (`author_s2_ids`, `author_orcids`, `author_h_indices`) stored as flattened list-like fields and may need downstream normalization.
 
 3. **Citation Contexts Not in Gold**: Context sentences for citation analysis only in Silver.
 
@@ -767,16 +767,16 @@ erDiagram
 
 6. **Rate Limiting**: Without API key, rate limits are restrictive (100 requests/5 min).
 
-### Schema Gaps
+### Schema Notes
 
-The following fields are created by the transformer but not defined in Silver schema:
-- `author-s2-ids`, `author-orcids`, `author-h-indices`
-- `citation-contexts`, `dblp-id`, `influential-citation-count`, `issue`
+The following fields are represented in flattened form and should be treated as denormalized payloads:
+- `author_s2_ids`, `author_orcids`, `author_h_indices`
+- `citation_contexts`, `dblp_id`, `influential_citation_count`, `issue`
 
 ### Future Enhancements
 
-- [ ] Add author fields to Gold schema with flattened structure
-- [ ] Add `influential-citation-count` to Gold schema
+- [ ] Improve normalization strategy for author-level fields
+- [ ] Improve ranking/calibration usage for `influential_citation_count`
 - [ ] Implement incremental loading when S2 stabilizes cursor pagination
 - [ ] Add citation/reference extraction for network analysis
 - [ ] Add abstract (currently excluded per user request)

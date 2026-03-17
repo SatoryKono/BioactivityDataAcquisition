@@ -50,7 +50,7 @@ Key log fields to examine:
 ### Step 3: Check Checkpoint State
 
 ```bash
-cat data/checkpoints/{provider}-{entity}.json
+cat data/output/checkpoints/{pipeline}.json
 ```
 
 Checkpoint contains:
@@ -116,7 +116,7 @@ For schema issues or data corruption:
 mv data/output/silver/chembl/activity data/output/silver/chembl/activity.bak
 
 # 2. Clear checkpoint
-rm data/checkpoints/chembl_activity.json
+rm data/output/checkpoints/chembl_activity.json
 
 # 3. Full refresh
 bioetl run --pipeline chembl_activity --run-type rebuild

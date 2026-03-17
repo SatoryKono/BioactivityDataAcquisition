@@ -28,11 +28,11 @@ traceability, but they are not normative for current project behavior.
 | `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../ai/skills/README.md) |
 | `docs/plans/**` | `internal-published` | Curated pages MAY be shown under `Internal / Extended -> Plans` | [docs/plans/README.md](../../plans/README.md) or curated nav node |
 | `docs/reports/**` | `internal-published` + `internal` | Curated pages MAY be in `Internal / Extended -> Reports`; bulk report artifacts MAY remain non-nav | [docs/reports/index.md](../../reports/index.md) |
-| `docs/99-archive/**` | `archive` | MUST remain non-nav by default; historical context only | [docs/99-archive/README.md](../../99-archive/README.md) (or equivalent archive index) |
+| `docs/99-archive/**` | `archive` | SHOULD remain non-nav by default; curated archive entrypoints MAY appear in nav with explicit historical labeling | [docs/99-archive/README.md](../../99-archive/README.md) (or equivalent archive index) |
 
 Notes:
 - active project guidance comes from published docs in `docs/00-05`;
-- `docs/99-archive/**` remains historical context only and does not override active guidance;
+- `docs/99-archive/**` remains historical context only and does not override active guidance, even when curated entries are visible in nav;
 - `internal-generated` documents (for example large generated index/variant sets) are allowed outside nav.
 - Non-nav documents MUST NOT be used as the primary source of architecture or operational policy.
 

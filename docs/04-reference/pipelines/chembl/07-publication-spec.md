@@ -1,4 +1,4 @@
-# ChEMBL Publication (Document) Pipeline Specification
+# ChEMBL Publication Pipeline Specification
 
 *Version 1.2.0 | Aligned with RULES.md v5.24*
 
@@ -10,7 +10,7 @@
 | ---------------- | ------------------------------------------------ |
 | **Pipeline ID**  | `chembl_publication`                             |
 | **Provider**     | ChEMBL (EBI)                                     |
-| **Entity**       | document                                         |
+| **Entity**       | publication                                      |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/document` |
 | **Library**      | Built-in ChEMBL adapter (httpx)                      |
 | **Rate Limit**   | None                                             |
@@ -146,8 +146,8 @@ class ChemblPublicationSchema(ETLRecordSchema):
 ```yaml
 pipeline_name: chembl_publication
 provider: chembl
-entity_type: document
-version: "1.2.0"
+entity_type: publication
+version: "2.1.0"
 
 business_primary_keys: ["publication_id"]
 
@@ -155,12 +155,12 @@ gold_filters:
   required_fields:
     - title
   columns:
-    doc-type: [PUBLICATION]
+    publication_type: [PUBLICATION]
 
 input_filter:
   enabled: true
-  source_path: "data/input/document.csv"
-  column_name: "publication-id"
-  filter_field: "publication-id"
+  source_path: "data/input/publication.csv"
+  column_name: "publication_id"
+  filter_field: "publication_id"
   batch_size: 20
 ```

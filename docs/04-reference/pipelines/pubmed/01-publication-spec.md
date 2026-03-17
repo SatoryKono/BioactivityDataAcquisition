@@ -15,7 +15,7 @@
 | **Library** | `httpx` (E-utilities API) |
 | **Rate Limit** | 3 req/sec (10 with API key) |
 | **Health Check** | `/einfo.fcgi` |
-| **Auth Type** | API Key (NCBI-API-KEY) |
+| **Auth Type** | API Key + Email (`BIOETL_PUBMED_API_KEY`, `BIOETL_PUBMED_EMAIL`) |
 
 ---
 
@@ -205,13 +205,13 @@ class ArticleSchema(ETLRecordSchema):
 ```yaml
 pipeline_name: pubmed_publication
 provider: pubmed
-entity_type: publications
+entity_type: publication
 version: "1.2.0"
 business_primary_keys: ["pmid"]
 
 source:
   type: api
-  batch_size: 200  # E-utilities limit
+  batch_size: 100  # E-utilities default
 
 dq_overrides:
   soft_fail_threshold: 0.05
@@ -236,7 +236,7 @@ input_filter:
   source_path: "data/input/pubmed.csv"
   column_name: "pmid"
   filter_field: "pmid"
-  batch_size: 200
+  batch_size: 100
 ```
 
 ---
@@ -247,7 +247,8 @@ input_filter:
 
 ```bash
 # Environment variable
-export NCBI-API-KEY=your-api-key
+export BIOETL_PUBMED_API_KEY=your-api-key
+export BIOETL_PUBMED_EMAIL=you@example.com
 
 # Increases rate limit from 3 to 10 req/sec
 ```

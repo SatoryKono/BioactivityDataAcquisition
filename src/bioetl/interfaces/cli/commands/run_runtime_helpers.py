@@ -99,4 +99,3 @@ def build_run_pipeline_callable(
         )
 
     return _run
-

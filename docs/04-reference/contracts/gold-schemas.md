@@ -433,10 +433,10 @@ gold_filters:
 | `title` | str | Yes | Заголовок |
 | `abstract` | str | Yes | Абстракт |
 | `journal` | str | Yes | Журнал |
-| `authors` | list[str] | Yes | Авторы |
-| `pub_year` | float | Yes | Год публикации |
-| `mesh_terms` | list[str] | Yes | MeSH термины |
-| `keywords` | list[str] | Yes | Ключевые слова |
+| `authors` | str | Yes | Авторы (flattened representation) |
+| `publication_year` | float | Yes | Год публикации |
+| `subject_mesh` | str | Yes | MeSH термины (flattened representation) |
+| `subject_keywords` | str | Yes | Ключевые слова (flattened representation) |
 
 ---
 
@@ -654,12 +654,12 @@ Composite-схемы используют `strict=False` — бизнес-пол
 
 ## Системные поля
 
-Все Gold-таблицы содержат следующие метаданные:
+Провайдерные Gold-таблицы содержат следующие системные метаданные:
 
 | Поле | Alias | Тип | Nullable | Описание |
 |------|-------|-----|----------|----------|
 | `entity_id` | — | str | No | Глобальный уникальный ID |
-| `content_hash` | — | str | No | SHA256 хэш содержимого |
+| `content_hash` | — | str | No* | SHA256 хэш содержимого (обязателен для провайдерных схем; composite-схемы могут не декларировать явно) |
 | `_run_id` | run_id | str | No | ID запуска пайплайна |
 | `_run_type` | run_type | str | No | Тип запуска (incremental/backfill) |
 | `_source_batch_id` | source_batch_id | str | Yes | ID исходного batch |

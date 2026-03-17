@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 import polars as pl
 
@@ -127,36 +127,54 @@ class ConflictResolverService:
         enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None,
     ) -> pl.DataFrame:
-        policy = self._config.conflict_resolution
-        policy_handlers = {
-            ConflictResolution.SEED_PRIORITY: lambda: self._coalesce_policy.coalesce_prefer_seed(
-                df,
-                enrichers,
-                seed_pipeline,
-            ),
-            ConflictResolution.ENRICHER_PRIORITY: lambda: self._coalesce_policy.coalesce_prefer_enricher(
-                df,
-                enrichers,
-                seed_pipeline,
-            ),
-            ConflictResolution.COALESCE: lambda: self._coalesce_policy.coalesce_first_non_null(
-                df,
-                enrichers,
-                seed_pipeline,
-            ),
-            ConflictResolution.EXPLICIT_RULES: lambda: self._coalesce_policy.apply_explicit_rules(
-                df,
-                enrichers,
-                self._config.field_priorities,
-                seed_pipeline,
-            ),
-            # Timestamp coalescing is not implemented yet; fallback to seed-priority.
-            ConflictResolution.LATEST_TIMESTAMP: lambda: self._coalesce_policy.coalesce_prefer_seed(
-                df,
-                enrichers,
-                seed_pipeline,
-            ),
-        }
-
-        handler = policy_handlers.get(policy)
+        handler = self._resolve_policy_handler(
+            df=df,
+            enrichers=enrichers,
+            seed_pipeline=seed_pipeline,
+        )
         return handler() if handler is not None else df
+
+    def _resolve_policy_handler(
+        self,
+        *,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None,
+    ) -> Callable[[], pl.DataFrame] | None:
+        """Map configured conflict policy to coalesce-policy execution callable."""
+        policy = self._config.conflict_resolution
+        match policy:
+            case ConflictResolution.SEED_PRIORITY:
+                return lambda: self._coalesce_policy.coalesce_prefer_seed(
+                    df,
+                    enrichers,
+                    seed_pipeline,
+                )
+            case ConflictResolution.ENRICHER_PRIORITY:
+                return lambda: self._coalesce_policy.coalesce_prefer_enricher(
+                    df,
+                    enrichers,
+                    seed_pipeline,
+                )
+            case ConflictResolution.COALESCE:
+                return lambda: self._coalesce_policy.coalesce_first_non_null(
+                    df,
+                    enrichers,
+                    seed_pipeline,
+                )
+            case ConflictResolution.EXPLICIT_RULES:
+                return lambda: self._coalesce_policy.apply_explicit_rules(
+                    df,
+                    enrichers,
+                    self._config.field_priorities,
+                    seed_pipeline,
+                )
+            case ConflictResolution.LATEST_TIMESTAMP:
+                # Timestamp coalescing is not implemented yet; fallback to seed-priority.
+                return lambda: self._coalesce_policy.coalesce_prefer_seed(
+                    df,
+                    enrichers,
+                    seed_pipeline,
+                )
+            case _:
+                return None

@@ -639,7 +639,7 @@ erDiagram
 
 1. **Full Scan Only**: No incremental loading due to OpenAlex API offset pagination instability (ADR-030, ADR-031).
 
-2. **Topics Not in Gold**: Hierarchical topic classification is excluded from Gold schema due to complex nested structure.
+2. **Topics Flattened in Gold**: Topics and primary topic are flattened into publication-level fields (`subject_topics`, `primary_topic`) and may require post-processing for hierarchy.
 
 3. **Concepts Deprecated**: The `concepts` field is deprecated by OpenAlex (2024). Use `topics` for new development.
 
@@ -651,9 +651,9 @@ erDiagram
 
 ### Future Enhancements
 
-- [ ] Add `topics` and `grants` to Gold schema with flattened structure
+- [ ] Refine `topics`/`grants` normalization quality and taxonomy mapping
 - [ ] Implement incremental loading when OpenAlex stabilizes cursor pagination
-- [ ] Add author ORCID extraction from `authorships[].author.orcid`
+- [ ] Improve author ORCID normalization and deduplication
 - [ ] Add related works extraction (`related-works[]`)
 - [ ] Add citation context extraction from `referenced-works[]`
 

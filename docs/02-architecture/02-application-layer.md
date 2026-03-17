@@ -227,7 +227,7 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 | --------------------------------- | --------------------------------------------------------- |
 | `merger.py`                       | Главный `MergeService` (координация)                      |
 | `merger_collaborators.py`         | Bundle collaborator-ов и legacy wiring bridge             |
-| `merger_compatibility_mixin.py`   | Временные compatibility helper-методы `MergeService`      |
+| `merger_collaborators.py`         | Bundle collaborator-ов и compatibility bridge              |
 | `merger_input_mixin.py`           | Чтение и подготовка входных данных                        |
 | `merger_io_mixin.py`              | I/O операции merge                                        |
 | `merger_output_mixin.py`          | Формирование результата merge                             |
@@ -235,11 +235,10 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 | `merger_orchestration.py`         | Оркестрация merge workflow                                |
 | `merger_post_join.py`             | Post-join обработка (conflict resolution, coalesce)       |
 
-Compatibility wrappers for `MergeService` are now isolated in
-`merger_compatibility_mixin.py`, while collaborator bundle normalization and the
-legacy keyword bridge live in `merger_collaborators.py`. `merger.py` remains the
-facade/orchestration entrypoint, while canonical behavior stays in the collaborator
-services listed below.
+Compatibility bridge и collaborator bundle для `MergeService` находятся в
+`merger_collaborators.py`. `merger.py` остаётся facade/orchestration entrypoint,
+а каноническое поведение реализуется в специализированных collaborator/service
+модулях, перечисленных ниже.
 
 #### 2.5.3. Column и Join Infrastructure
 

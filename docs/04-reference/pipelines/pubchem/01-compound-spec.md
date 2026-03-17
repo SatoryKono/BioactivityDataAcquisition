@@ -220,10 +220,10 @@ sink:
 
 input_filter:
   enabled: true
-  source_path: "data/input/compound.csv"
-  column_name: "cid"
-  filter_field: "cid"
-  batch_size: 100
+  source_path: "data/input/molecule.csv"
+  column_name: "canonical_smiles"
+  filter_field: "smiles"
+  batch_size: 1
 ```
 
 ----------------------------------------------------------------------
