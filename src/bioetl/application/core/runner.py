@@ -110,40 +110,59 @@ class PipelineRunner:
         self._services = services
         self._context = context
         if dependencies is None:
-            executor = legacy_kwargs.get("executor")
-            checkpoint_manager = legacy_kwargs.get("checkpoint_manager")
-            shutdown_signal = legacy_kwargs.get("shutdown_signal")
-            lock_manager = legacy_kwargs.get("lock_manager")
-            preflight = legacy_kwargs.get("preflight")
-            postrun = legacy_kwargs.get("postrun")
-            lifecycle_service = legacy_kwargs.get("lifecycle_service")
-            observer = legacy_kwargs.get("observer")
-            assert all(
-                [
-                    executor,
-                    checkpoint_manager,
-                    shutdown_signal,
-                    lock_manager,
-                    preflight,
-                    postrun,
-                    lifecycle_service,
-                    observer,
-                ]
-            ), "Legacy constructor path requires all legacy parameters"
+            executor = cast("BatchExecutor | None", legacy_kwargs.get("executor"))
+            checkpoint_manager = cast(
+                "CheckpointManagerService | None",
+                legacy_kwargs.get("checkpoint_manager"),
+            )
+            shutdown_signal = cast(
+                "ShutdownSignal | None",
+                legacy_kwargs.get("shutdown_signal"),
+            )
+            lock_manager = cast(
+                "LockCoordinator | None",
+                legacy_kwargs.get("lock_manager"),
+            )
+            preflight = cast(
+                "PreflightService | None",
+                legacy_kwargs.get("preflight"),
+            )
+            postrun = cast("PostrunService | None", legacy_kwargs.get("postrun"))
+            lifecycle_service = cast(
+                "MedallionLifecycleService | None",
+                legacy_kwargs.get("lifecycle_service"),
+            )
+            observer = cast(
+                "PipelineObserver | None",
+                legacy_kwargs.get("observer"),
+            )
+            if (
+                executor is None
+                or checkpoint_manager is None
+                or shutdown_signal is None
+                or lock_manager is None
+                or preflight is None
+                or postrun is None
+                or lifecycle_service is None
+                or observer is None
+            ):
+                raise AssertionError(
+                    "Legacy constructor path requires all legacy parameters"
+                )
             dependencies = PipelineRunnerDependencies(
-                executor=executor,  # type: ignore[arg-type]
-                checkpoint_manager=checkpoint_manager,  # type: ignore[arg-type]
-                lock_manager=lock_manager,  # type: ignore[arg-type]
-                preflight=preflight,  # type: ignore[arg-type]
-                postrun=postrun,  # type: ignore[arg-type]
-                lifecycle_service=lifecycle_service,  # type: ignore[arg-type]
-                observer=observer,  # type: ignore[arg-type]
-                shutdown_signal=shutdown_signal,  # type: ignore[arg-type]
+                executor=executor,
+                checkpoint_manager=checkpoint_manager,
+                lock_manager=lock_manager,
+                preflight=preflight,
+                postrun=postrun,
+                lifecycle_service=lifecycle_service,
+                observer=observer,
+                shutdown_signal=shutdown_signal,
             )
         self._executor = dependencies.executor
         self._checkpoint_manager = dependencies.checkpoint_manager
         self._shutdown_signal = dependencies.shutdown_signal
-        legacy_logger = legacy_kwargs.get("logger")
+        legacy_logger = cast("LoggerPort | None", legacy_kwargs.get("logger"))
         self._logger = logger or legacy_logger or context.logger
         self._pipeline = pipeline
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()

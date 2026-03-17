@@ -6,6 +6,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+from bioetl.infrastructure.storage.gold_writer_runtime_helpers import (
+    GoldWriterRuntimeServices,
+)
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 if TYPE_CHECKING:
@@ -54,11 +57,14 @@ def create_gold_writer(
     return writer_cls(
         base_path=base_path,
         logger=logger,
-        tracing=effective_tracing,
-        csv_exporter=csv_exporter,
-        metadata_writer=metadata_writer,
-        metadata_coordinator=metadata_coordinator,
         transform_version=transform_version,
         transform_steps=transform_steps,
+        runtime_services=GoldWriterRuntimeServices(
+            csv_exporter=csv_exporter,
+            tracing=effective_tracing,
+            audit=None,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
+        ),
         flat_structure=flat_structure,
     )

@@ -152,11 +152,17 @@ class BronzeWriter(
         **legacy_kwargs: object,
     ) -> None:
         """Initialize Bronze writer."""
-        tracing = legacy_kwargs.pop("tracing", None)
-        audit = legacy_kwargs.pop("audit", None)
-        metadata_writer = legacy_kwargs.pop("metadata_writer", None)
+        tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
+        audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
+        metadata_writer = cast(
+            "MetadataWriterPort | None",
+            legacy_kwargs.pop("metadata_writer", None),
+        )
         save_metadata = legacy_kwargs.pop("save_metadata", False)
-        metadata_coordinator = legacy_kwargs.pop("metadata_coordinator", None)
+        metadata_coordinator = cast(
+            "MetadataCoordinatorPort | None",
+            legacy_kwargs.pop("metadata_coordinator", None),
+        )
         if legacy_kwargs:
             unexpected = ", ".join(sorted(legacy_kwargs))
             raise TypeError(f"Unexpected BronzeWriter options: {unexpected}")

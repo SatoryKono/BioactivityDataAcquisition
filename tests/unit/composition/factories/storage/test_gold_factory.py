@@ -36,8 +36,9 @@ class TestCreateGoldWriter:
 
         assert result is expected
         call_kwargs = writer_cls.call_args[1]
-        assert isinstance(call_kwargs["tracing"], NoOpTracing)
-        assert isinstance(call_kwargs["metadata_writer"], NoOpMetadataWriter)
+        runtime_services = call_kwargs["runtime_services"]
+        assert isinstance(runtime_services.tracing, NoOpTracing)
+        assert isinstance(runtime_services.metadata_writer, NoOpMetadataWriter)
 
     def test_uses_config_save_metadata(self) -> None:
         """Creates real MetadataWriter when config.save_metadata is True."""
@@ -58,7 +59,9 @@ class TestCreateGoldWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert not isinstance(call_kwargs["metadata_writer"], NoOpMetadataWriter)
+        assert not isinstance(
+            call_kwargs["runtime_services"].metadata_writer, NoOpMetadataWriter
+        )
 
     def test_uses_provided_tracing(self) -> None:
         """Uses provided TracingPort instead of NoOpTracing."""
@@ -79,7 +82,7 @@ class TestCreateGoldWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert call_kwargs["tracing"] is tracer
+        assert call_kwargs["runtime_services"].tracing is tracer
 
     def test_passes_csv_exporter(self) -> None:
         """csv_exporter is forwarded to writer constructor."""
@@ -100,7 +103,7 @@ class TestCreateGoldWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert call_kwargs["csv_exporter"] is csv
+        assert call_kwargs["runtime_services"].csv_exporter is csv
 
     def test_passes_transform_metadata(self) -> None:
         """transform_version and transform_steps are forwarded."""

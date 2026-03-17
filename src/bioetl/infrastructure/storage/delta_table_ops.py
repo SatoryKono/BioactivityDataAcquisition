@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
+import pyarrow as pa
 from deltalake import DeltaTable
 
 from bioetl.domain.types import BronzeRecord
@@ -37,7 +38,7 @@ def resolve_delta_table_path(
     return f"{base_path}/{table_name.replace('.', '/')}"
 
 
-def get_delta_table_arrow_schema(table: DeltaTable):
+def get_delta_table_arrow_schema(table: DeltaTable) -> pa.Schema:
     """Extract the PyArrow schema from an opened Delta table."""
     return table.schema().to_arrow()
 

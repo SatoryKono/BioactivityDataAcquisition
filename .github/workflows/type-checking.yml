@@ -1,4 +1,4 @@
-﻿name: Type Checking (Strict)
+name: Type Checking (Strict)
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -8,12 +8,12 @@ on:
     branches:
       - main
       - master
+      - develop
     paths-ignore:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
       - '.claude/**'
-      - '.github/workflows/**'
       - 'LICENSE'
   pull_request:
     paths-ignore:
@@ -21,7 +21,6 @@ on:
       - '*.md'
       - '.ai/**'
       - '.claude/**'
-      - '.github/workflows/**'
       - 'LICENSE'
   workflow_dispatch:
 
@@ -41,13 +40,15 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p reports
+          rm -rf .mypy_cache
 
           echo "Running full mypy strict gate on src/bioetl..."
           echo "Event: ${{ github.event_name }}" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \
-            make qa-types \
+            uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \
+            --txt-report reports/mypy_report \
             2>&1 | tee -a reports/mypy_strict.log
           status=${PIPESTATUS[0]}
           set -e
@@ -163,15 +164,6 @@ jobs:
           else:
               print("✅ No problematic Any type usage found")
           PY
-
-      - name: Generate type coverage report
-        run: |
-          mkdir -p reports
-          rm -rf .mypy_cache
-          timeout --signal=TERM --kill-after=30s 20m \
-            uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \
-            --txt-report reports/mypy_report || true
-          echo "Type checking report generated"
 
       - name: Upload type checking reports
         uses: actions/upload-artifact@v4

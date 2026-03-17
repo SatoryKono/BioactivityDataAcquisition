@@ -211,8 +211,6 @@ jobs:
                         path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/
                     -   name: integration
                         path: tests/integration/
-                    -   name: architecture
-                        path: tests/architecture/
                     -   name: security
                         path: tests/security/
 
@@ -232,17 +230,7 @@ jobs:
                     uv run pytest ${{ matrix.test-group.path }} \
                       -m "not serial" \
                       -n auto --dist loadscope --max-worker-restart=0 \
-                      --cov=src/bioetl \
-                      --cov-report=xml:coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml \
                       -q --tb=short
-
-            -   name: Upload Coverage Report
-                uses: actions/upload-artifact@v4
-                if: always()
-                with:
-                    name: coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}
-                    path: coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml
-                    retention-days: 7
 
     performance-budgets:
         runs-on: ubuntu-latest

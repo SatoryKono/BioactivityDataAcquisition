@@ -5,8 +5,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+    SilverWriterRuntimeServices,
+)
+from bioetl.infrastructure.storage.write_resilience import (
+    DEFAULT_SILVER_MERGE_POLICY,
+)
+from bioetl.infrastructure.validation.pandera_validator import NoOpSilverValidator
 
 if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
@@ -79,13 +88,20 @@ def create_silver_writer(
     return writer_cls(
         base_path=base_path,
         logger=logger,
-        tracing=effective_tracing,
-        csv_exporter=csv_exporter,
-        silver_validator=silver_validator,
-        metadata_writer=metadata_writer,
-        metadata_coordinator=metadata_coordinator,
         transform_version=transform_version,
         transform_steps=transform_steps,
+        runtime_services=SilverWriterRuntimeServices(
+            csv_exporter=csv_exporter,
+            tracing=effective_tracing,
+            write_policy=WriteModePolicy(),
+            metrics=metrics,
+            audit=None,
+            silver_validator=silver_validator or NoOpSilverValidator(),
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
+            dq_calculator=DQMetricsCalculator(),
+            merge_resilience_policy=merge_resilience_policy
+            or DEFAULT_SILVER_MERGE_POLICY,
+        ),
         flat_structure=flat_structure,
-        merge_resilience_policy=merge_resilience_policy,
     )

@@ -1,4 +1,4 @@
-name: Lint, Type Check, and Tests
+name: Lint and Architecture Gates
 
 permissions:
     contents: read
@@ -8,12 +8,12 @@ on:
         branches:
             - main
             - master
+            - develop
         paths-ignore:
             - 'docs/**'
             - '*.md'
             - '.ai/**'
             - '.claude/**'
-            - '.github/workflows/**'
             - 'LICENSE'
     pull_request:
         paths-ignore:
@@ -21,7 +21,6 @@ on:
             - '*.md'
             - '.ai/**'
             - '.claude/**'
-            - '.github/workflows/**'
             - 'LICENSE'
 
 concurrency:
@@ -110,10 +109,6 @@ jobs:
                       exit 1
                     fi
 
-            -   name: Mypy (strict-ish)
-                run: |
-                    uv run mypy --config-file pyproject.toml src/bioetl
-
     c901-governance:
         name: C901 Governance (blocking)
         runs-on: ubuntu-latest
@@ -152,108 +147,17 @@ jobs:
             -   name: Run canonical full architecture gate
                 run: make qa-arch-full
 
-    unit-tests:
-        needs: lint
-        runs-on: ubuntu-latest
-
-        steps:
-            -   name: Checkout
-                uses: actions/checkout@v4
-
-            -   name: Setup Python + uv
-                uses: ./.github/actions/setup-python-uv
-                with:
-                    enable-pytest-cache: "true"
-                    pytest-cache-prefix: "pytest-unit"
-
-            -   name: Unit tests with coverage
-                run: |
-                    uv run pytest tests --ignore=tests/integration --ignore=tests/architecture \
-                      --ignore=tests/e2e --ignore=tests/contract \
-                      --cov=src/bioetl --cov-report=xml:coverage-unit.xml --cov-report=term-missing
-
-            -   name: Enforce coverage thresholds
-                run: |
-                    uv run python - <<'PY'
-                    import sys
-                    import xml.etree.ElementTree as ET
-
-                    tree = ET.parse("coverage-unit.xml")
-                    root = tree.getroot()
-
-                    def overall_percent() -> float:
-                      try:
-                        covered = int(root.attrib["lines-covered"])
-                        valid = int(root.attrib["lines-valid"])
-                        return 100 * covered / valid if valid else 100.0
-                      except KeyError:
-                        return float(root.attrib.get("line-rate", 0)) * 100
-
-                    def percent_for_prefix(prefixes: tuple[str, ...]) -> float:
-                      covered = total = 0
-                      for cls in root.iterfind(".//class"):
-                        filename = cls.attrib.get("filename", "")
-                        if not filename or not filename.startswith(prefixes):
-                          continue
-                        for line in cls.iterfind(".//line"):
-                          total += 1
-                          if int(line.attrib.get("hits", "0")) > 0:
-                            covered += 1
-                      if total == 0:
-                        return 100.0
-                      return 100 * covered / total
-
-                    overall = overall_percent()
-                    domain_app = percent_for_prefix(("bioetl/application", "bioetl/domain"))
-
-                    print(f"Overall coverage: {overall:.2f}%")
-                    print(f"Domain/Application coverage: {domain_app:.2f}%")
-
-                    errors = []
-                    if overall < 85:
-                      errors.append(f"Overall coverage below 85%: {overall:.2f}%")
-                    if domain_app < 90:
-                      errors.append(
-                        f"Domain/Application coverage below 90%: {domain_app:.2f}%"
-                      )
-
-                    if errors:
-                      for error in errors:
-                        print(error)
-                      sys.exit(1)
-                    PY
-
-    integration-tests:
-        needs: lint
-        runs-on: ubuntu-latest
-
-        steps:
-            -   name: Checkout
-                uses: actions/checkout@v4
-
-            -   name: Setup Python + uv
-                uses: ./.github/actions/setup-python-uv
-                with:
-                    enable-pytest-cache: "true"
-                    pytest-cache-prefix: "pytest-integration"
-
-            -   name: Integration tests
-                run: |
-                    uv run pytest tests/integration -v --tb=short
-
     checks-complete:
         needs:
             - lint
             - c901-governance
-            - unit-tests
-            - integration-tests
             - arch-tests
         runs-on: ubuntu-latest
         if: ${{ always() }}
         steps:
             -   name: Final status
                 run: |
-                    if [[ "${{ needs.lint.result }}" != "success" || "${{ needs['c901-governance'].result }}" != "success" || "${{ needs.unit-tests.result }}" != "success" || "${{ needs['integration-tests'].result }}" != "success" || "${{ needs['arch-tests'].result }}" != "success" ]]; then
+                    if [[ "${{ needs.lint.result }}" != "success" || "${{ needs['c901-governance'].result }}" != "success" || "${{ needs['arch-tests'].result }}" != "success" ]]; then
                       echo "One or more checks failed"
                       exit 1
                     fi

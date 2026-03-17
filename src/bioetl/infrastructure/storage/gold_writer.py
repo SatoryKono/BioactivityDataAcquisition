@@ -6,14 +6,21 @@ import asyncio  # noqa: F401 - compatibility monkeypatch target in tests
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake  # noqa: F401
 from deltalake.exceptions import TableNotFoundError  # noqa: F401
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.ports import (
+    AuditPort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
+    TracingPort,
+)
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,  # noqa: F401
@@ -54,15 +61,8 @@ from bioetl.infrastructure.storage.gold_writer_validation_mixin import (
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
-    from bioetl.domain.ports import (
-        AuditPort,
-        LoggerPort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-    from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = ["GoldWriteMode", "GoldWriter"]
 
@@ -117,11 +117,17 @@ class GoldWriter(
                 metadata, audit, and optional CSV export.
             flat_structure: When True, omit the table-based subdirectory hierarchy.
         """
-        csv_exporter = legacy_kwargs.pop("csv_exporter", None)
-        tracing = legacy_kwargs.pop("tracing", None)
-        audit = legacy_kwargs.pop("audit", None)
-        metadata_writer = legacy_kwargs.pop("metadata_writer", None)
-        metadata_coordinator = legacy_kwargs.pop("metadata_coordinator", None)
+        csv_exporter = cast("CsvExporter | None", legacy_kwargs.pop("csv_exporter", None))
+        tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
+        audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
+        metadata_writer = cast(
+            "MetadataWriterPort | None",
+            legacy_kwargs.pop("metadata_writer", None),
+        )
+        metadata_coordinator = cast(
+            "MetadataCoordinatorPort | None",
+            legacy_kwargs.pop("metadata_coordinator", None),
+        )
         if legacy_kwargs:
             unexpected = ", ".join(sorted(legacy_kwargs))
             raise TypeError(f"Unexpected GoldWriter options: {unexpected}")

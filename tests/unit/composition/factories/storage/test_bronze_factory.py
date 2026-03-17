@@ -35,9 +35,10 @@ class TestCreateBronzeWriter:
         assert result is expected
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["save_json"] is False
-        assert call_kwargs["save_metadata"] is False
-        assert isinstance(call_kwargs["tracing"], NoOpTracing)
-        assert isinstance(call_kwargs["metadata_writer"], NoOpMetadataWriter)
+        runtime_services = call_kwargs["runtime_services"]
+        assert runtime_services.save_metadata is False
+        assert isinstance(runtime_services.tracing, NoOpTracing)
+        assert isinstance(runtime_services.metadata_writer, NoOpMetadataWriter)
 
     def test_uses_config_flags(self) -> None:
         """Reads save_json and save_metadata from config."""
@@ -57,7 +58,7 @@ class TestCreateBronzeWriter:
 
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["save_json"] is True
-        assert call_kwargs["save_metadata"] is True
+        assert call_kwargs["runtime_services"].save_metadata is True
 
     def test_uses_provided_tracing(self) -> None:
         """Uses provided TracingPort instead of NoOpTracing."""
@@ -76,7 +77,7 @@ class TestCreateBronzeWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert call_kwargs["tracing"] is tracer
+        assert call_kwargs["runtime_services"].tracing is tracer
 
     def test_creates_metadata_writer_when_save_metadata(self) -> None:
         """Creates real MetadataWriter when save_metadata is True."""
@@ -95,7 +96,9 @@ class TestCreateBronzeWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert not isinstance(call_kwargs["metadata_writer"], NoOpMetadataWriter)
+        assert not isinstance(
+            call_kwargs["runtime_services"].metadata_writer, NoOpMetadataWriter
+        )
 
     def test_passes_flat_structure(self) -> None:
         """flat_structure flag is forwarded to writer constructor."""
@@ -132,4 +135,4 @@ class TestCreateBronzeWriter:
         )
 
         call_kwargs = writer_cls.call_args[1]
-        assert call_kwargs["metadata_coordinator"] is coordinator
+        assert call_kwargs["runtime_services"].metadata_coordinator is coordinator
