@@ -8,6 +8,7 @@ Usage:
 Commands:
     check-vcr-placement    Block VCR cassette anti-patterns
     check-vcr-naming       Enforce VCR filename policy
+    check-vcr-secrets      Detect potential secret leaks in VCR cassettes
     check-delta            Check Delta Lake integrity
     check-data-dir         Validate data directory structure
     vacuum                 Vacuum Delta tables
@@ -25,6 +26,7 @@ from pathlib import Path
 COMMANDS: dict[str, str] = {
     "check-vcr-placement": "check_root_vcr_cassettes.py",
     "check-vcr-naming": "check_vcr_filename_policy.py",
+    "check-vcr-secrets": "check_vcr_secrets.py",
     "check-delta": "check_delta_integrity.py",
     "check-data-dir": "validate_data_dir.py",
     "vacuum": "vacuum_delta.py",

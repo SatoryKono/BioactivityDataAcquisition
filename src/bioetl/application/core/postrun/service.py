@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Generator
+from collections.abc import Awaitable, Callable, Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
@@ -40,7 +40,14 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import TracingPort
+    from bioetl.domain.ports import (
+        LoggerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
+        MetricsPort,
+        StorageMaintenancePort,
+        TracingPort,
+    )
 
 
 def _resolve_report_path(
@@ -85,6 +92,92 @@ def _resolve_legacy_or_service(
     if services is None:
         return None
     return cast("object | None", getattr(services, service_attr or key, None))
+
+
+def _build_silver_metadata_write_coro(
+    *,
+    metadata_coordinator: MetadataCoordinatorPort | None,
+    metadata_writer: MetadataWriterPort | None,
+    storage: StorageMaintenancePort,
+    config: PipelineConfig,
+    context: PipelineContext,
+    stats: dict[str, object],
+    dq_reports: DQReportResult | None,
+    completed_at: datetime,
+    resolve_delta_version: Callable[[str, Literal["silver", "gold"]], int | None],
+) -> Awaitable[object] | None:
+    """Build coroutine for writing final Silver metadata."""
+    from bioetl.domain.ports import SilverMetadataInput
+
+    if not metadata_coordinator or not metadata_writer:
+        return None
+    silver_table = config.table.silver_table
+    if not silver_table:
+        return None
+
+    silver_path = storage.get_table_path(silver_table, layer="silver")
+    version_after = resolve_delta_version(str(silver_path), "silver")
+    silver_input = SilverMetadataInput(
+        table_path=str(silver_path),
+        primary_keys=list(config.table.primary_keys),
+        mode=config.table.silver_write_mode,
+        total_records=cast("int | None", stats.get("records_silver")),
+        source_batch_ids=cast("list[str] | None", stats.get("source_batch_ids")),
+        version_after=version_after,
+        dq_report_path=_resolve_report_path(dq_reports, layer="silver"),
+        started_at=context.started_at,
+        completed_at=completed_at,
+    )
+    silver_metadata = metadata_coordinator.create_silver_metadata(silver_input)
+    return metadata_writer.write_silver_metadata(
+        str(silver_path),
+        silver_metadata,
+        provider=config.provider,
+        entity=config.entity_type,
+    )
+
+
+def _build_gold_metadata_write_coro(
+    *,
+    metadata_coordinator: MetadataCoordinatorPort | None,
+    metadata_writer: MetadataWriterPort | None,
+    storage: StorageMaintenancePort,
+    config: PipelineConfig,
+    runtime: RuntimeConfig,
+    stats: dict[str, object],
+    dq_reports: DQReportResult | None,
+    completed_at: datetime,
+) -> Awaitable[object] | None:
+    """Build coroutine for writing final Gold metadata."""
+    from bioetl.domain.ports import GoldMetadataInput
+
+    if not metadata_coordinator or not metadata_writer:
+        return None
+    if runtime.skip_gold:
+        return None
+    gold_table = config.table.gold_table
+    if not gold_table:
+        return None
+
+    if not storage.is_table_initialized(gold_table, layer="gold"):
+        return None
+    gold_path = Path(storage.get_table_path(gold_table, layer="gold"))
+    gold_input = GoldMetadataInput(
+        table_path=str(gold_path),
+        table_name=gold_table,
+        mode=config.table.gold_write_mode,
+        total_records=cast("int | None", stats.get("records_gold")),
+        dq_report_path=_resolve_report_path(dq_reports, layer="gold"),
+        completed_at=completed_at,
+        gold_schema=config.gold_schema,
+    )
+    gold_metadata = metadata_coordinator.create_gold_metadata(gold_input)
+    return metadata_writer.write_gold_metadata(
+        str(gold_path),
+        gold_metadata,
+        provider=config.provider,
+        entity=config.entity_type,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -320,12 +413,26 @@ class PostrunService:
         write_coros = [
             coro
             for coro in (
-                self._build_silver_metadata_write_coro(
+                _build_silver_metadata_write_coro(
+                    metadata_coordinator=self._metadata_coordinator,
+                    metadata_writer=self._metadata_writer,
+                    storage=self._storage,
+                    config=self._config,
+                    context=self._context,
                     stats=stats,
                     dq_reports=dq_reports,
                     completed_at=completed_at,
+                    resolve_delta_version=lambda table_path, layer: self._resolve_delta_version(
+                        table_path,
+                        layer=layer,
+                    ),
                 ),
-                self._build_gold_metadata_write_coro(
+                _build_gold_metadata_write_coro(
+                    metadata_coordinator=self._metadata_coordinator,
+                    metadata_writer=self._metadata_writer,
+                    storage=self._storage,
+                    config=self._config,
+                    runtime=self._runtime,
                     stats=stats,
                     dq_reports=dq_reports,
                     completed_at=completed_at,
@@ -335,86 +442,6 @@ class PostrunService:
         ]
         if write_coros:
             await asyncio.gather(*write_coros)
-
-    def _build_silver_metadata_write_coro(
-        self,
-        *,
-        stats: dict[str, object],
-        dq_reports: DQReportResult | None,
-        completed_at: datetime,
-    ) -> Awaitable[object] | None:
-        """Build coroutine for writing final Silver metadata."""
-        from bioetl.domain.ports import SilverMetadataInput
-
-        if not self._metadata_coordinator or not self._metadata_writer:
-            return None
-        silver_table = self._config.table.silver_table
-        if not silver_table:
-            return None
-
-        silver_path = self._storage.get_table_path(silver_table, layer="silver")
-        version_after = self._resolve_delta_version(
-            table_path=str(silver_path),
-            layer="silver",
-        )
-        silver_input = SilverMetadataInput(
-            table_path=str(silver_path),
-            primary_keys=list(self._config.table.primary_keys),
-            mode=self._config.table.silver_write_mode,
-            total_records=cast("int | None", stats.get("records_silver")),
-            source_batch_ids=cast("list[str] | None", stats.get("source_batch_ids")),
-            version_after=version_after,
-            dq_report_path=_resolve_report_path(dq_reports, layer="silver"),
-            started_at=self._context.started_at,
-            completed_at=completed_at,
-        )
-        silver_metadata = self._metadata_coordinator.create_silver_metadata(
-            silver_input
-        )
-        return self._metadata_writer.write_silver_metadata(
-            str(silver_path),
-            silver_metadata,
-            provider=self._config.provider,
-            entity=self._config.entity_type,
-        )
-
-    def _build_gold_metadata_write_coro(
-        self,
-        *,
-        stats: dict[str, object],
-        dq_reports: DQReportResult | None,
-        completed_at: datetime,
-    ) -> Awaitable[object] | None:
-        """Build coroutine for writing final Gold metadata."""
-        from bioetl.domain.ports import GoldMetadataInput
-
-        if not self._metadata_coordinator or not self._metadata_writer:
-            return None
-        if self._runtime.skip_gold:
-            return None
-        gold_table = self._config.table.gold_table
-        if not gold_table:
-            return None
-
-        if not self._storage.is_table_initialized(gold_table, layer="gold"):
-            return None
-        gold_path = Path(self._storage.get_table_path(gold_table, layer="gold"))
-        gold_input = GoldMetadataInput(
-            table_path=str(gold_path),
-            table_name=gold_table,
-            mode=self._config.table.gold_write_mode,
-            total_records=cast("int | None", stats.get("records_gold")),
-            dq_report_path=_resolve_report_path(dq_reports, layer="gold"),
-            completed_at=completed_at,
-            gold_schema=self._config.gold_schema,
-        )
-        gold_metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
-        return self._metadata_writer.write_gold_metadata(
-            str(gold_path),
-            gold_metadata,
-            provider=self._config.provider,
-            entity=self._config.entity_type,
-        )
 
     def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
         """Collect batch metrics from executor."""
