@@ -12,6 +12,9 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.services.composite_metadata_helpers import (
+    extract_composite_output_ext as _extract_composite_output_ext,
+)
 from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.types import JsonDict, ScdConfig
 from bioetl.domain.version import get_version as _get_bioetl_version
@@ -19,9 +22,6 @@ from bioetl.infrastructure.storage.metadata_builder_base import (
     _get_git_commit_cached,
     _MetadataBuilderBase,
     _parse_table_name,
-)
-from bioetl.infrastructure.storage.metadata_builder_composite_helpers import (
-    build_composite_output_ext,
 )
 
 if TYPE_CHECKING:
@@ -164,23 +164,17 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             Tuple of (DQSummary, BaseOutputMetadata, GoldOutputExt or CompositeOutputExt).
         """
         from bioetl.domain.models.metadata import (
-            BaseOutputMetadata,
             DQSummary,
-            GoldOutputExt,
         )
 
         dq_summary = DQSummary(
             total_records=len(records),
             valid_records=len(records),
         )
-        composite_ext = build_composite_output_ext(records)
-        output = BaseOutputMetadata(
-            record_count=len(records),
-            write_started_at=now,
-            write_completed_at=now,
-            composite_run_id=composite_ext.composite_run_id if composite_ext else None,
+        output, output_ext = self._build_output_with_composite_ext(
+            records=records,
+            now=now,
         )
-        output_ext = composite_ext or GoldOutputExt()
         return dq_summary, output, output_ext
 
     def _build_fallback_scd_metadata(
@@ -260,19 +254,19 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         )
 
     @staticmethod
-    def _build_merged_output(
+    def _build_output_with_composite_ext(
         *,
         records: list[JsonDict],  # Any: heterogeneous metadata values
         now: datetime,
     ) -> tuple[BaseOutputMetadata, GoldOutputExt | CompositeOutputExt]:
-        """Build unified output metadata for merged Gold records.
+        """Build output metadata and optional composite extension.
 
         Returns:
-            Tuple of (BaseOutputMetadata, GoldOutputExt or CompositeOutputExt) for the merged Gold output.
+            Tuple of (BaseOutputMetadata, GoldOutputExt or CompositeOutputExt).
         """
         from bioetl.domain.models.metadata import BaseOutputMetadata, GoldOutputExt
 
-        composite_ext = build_composite_output_ext(records)
+        composite_ext = _extract_composite_output_ext(records)
         output = BaseOutputMetadata(
             record_count=len(records),
             write_started_at=now,
@@ -308,7 +302,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             sources_used=sources_used,
         )
         dq_summary = self._build_merged_dq_summary(records)
-        output, output_ext = self._build_merged_output(
+        output, output_ext = self._build_output_with_composite_ext(
             records=records,
             now=now,
         )
