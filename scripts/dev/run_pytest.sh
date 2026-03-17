@@ -2,11 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
-if [[ -f "scripts/setup_plugins.sh" ]]; then
-    bash scripts/setup_plugins.sh --pytest-only
+if [[ -f "scripts/ops/setup_plugins.sh" ]]; then
+    bash scripts/ops/setup_plugins.sh --pytest-only
 fi
 
 if command -v uv >/dev/null 2>&1; then

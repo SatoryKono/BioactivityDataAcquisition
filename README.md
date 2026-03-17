@@ -304,6 +304,12 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   ./scripts/run_pytest.sh
   ```
 
+  Windows PowerShell:
+
+  ```powershell
+  .\scripts\run_pytest.ps1
+  ```
+
   The helper bootstraps the virtual environment (installs `pytest-cov`, `orjson`, `syrupy`, and other test-only dependencies) and reproduces the default CI command with coverage output.
 
   If you prefer to run the command manually, activate the local virtual environment first to avoid `--cov` argument errors:

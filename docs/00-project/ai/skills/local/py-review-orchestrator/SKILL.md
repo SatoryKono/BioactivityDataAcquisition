@@ -9,12 +9,12 @@ description: Execute BioETL hierarchical code review orchestration (L1/L2/L3) ac
 Run the role-specific workflow as defined in the py-review-orchestrator profile.
 
 ## Source Of Truth
-- Primary profile: `../../agents/py-review-orchestrator.md`
-- Team orchestration: `../../agents/ORCHESTRATION.md`
+- Primary profile: `../../../.claude/agents/py-review-orchestrator.md`
+- Team orchestration: `../../../.claude/agents/ORCHESTRATION.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 
 ## Workflow
-1. Open and follow `../../agents/py-review-orchestrator.md`.
+1. Open and follow `../../../.claude/agents/py-review-orchestrator.md`.
 2. Execute hierarchical review orchestration (Wave 1, then Wave 2) and respect sector dependencies.
 3. Aggregate sector reports into `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md` (LLM = caller) with complete critical/high issue rollup.
 4. Keep scoring and status thresholds aligned with the profile and BioETL rules.

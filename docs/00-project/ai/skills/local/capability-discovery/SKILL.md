@@ -23,10 +23,7 @@ Before executing workflows, discover what tools are available so commands can:
 ### Step 1: Scan for Custom Agents
 
 ```bash
-# Project-level Codex agents (preferred)
-ls .codex/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
-
-# Legacy Claude agents (fallback only)
+# Project-level Claude agents (preferred source of truth)
 ls .claude/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
 
 # Plugin agents
@@ -152,7 +149,7 @@ Based on capabilities:
 
 Before implementation:
 1. Invoke capability-discovery skill
-2. Note available `.codex/agents` and `.codex/skills`
+2. Note available `.claude/agents` and `.codex/skills`
 3. Note quality commands for Phase 3
 4. Store tech stack and Codex runtime constraints for appropriate tooling
 ```

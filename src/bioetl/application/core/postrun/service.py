@@ -71,6 +71,22 @@ def _get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
     return {}
 
 
+def _resolve_legacy_or_service(
+    legacy_kwargs: dict[str, object],
+    *,
+    key: str,
+    services: PipelineService | None,
+    service_attr: str | None = None,
+) -> object | None:
+    """Resolve collaborator from legacy kwargs first, then service container."""
+    resolved = legacy_kwargs.get(key)
+    if resolved is not None:
+        return resolved
+    if services is None:
+        return None
+    return cast("object | None", getattr(services, service_attr or key, None))
+
+
 @dataclass(frozen=True, slots=True)
 class PostrunResult:
     """Combined result of all post-run operations."""
@@ -96,6 +112,63 @@ class PostrunService:
 
     TRACER_NAME = "bioetl.postrun"
 
+    @staticmethod
+    def _resolve_collaborators(
+        services: PipelineService | None,
+        context: PipelineContext,
+        legacy_kwargs: dict[str, object],
+    ) -> tuple[
+        StorageMaintenancePort,
+        MetricsPort,
+        LoggerPort,
+        MetadataCoordinatorPort | None,
+        MetadataWriterPort | None,
+    ]:
+        """Resolve storage/metrics/logger/metadata collaborators."""
+        resolved_storage = _resolve_legacy_or_service(
+            legacy_kwargs,
+            key="storage",
+            services=services,
+        )
+        resolved_logger = _resolve_legacy_or_service(
+            legacy_kwargs,
+            key="logger",
+            services=services,
+        )
+        if resolved_logger is None:
+            resolved_logger = context.logger
+
+        if resolved_storage is None or resolved_logger is None:
+            raise AssertionError(
+                "PostrunService requires storage and logger (provide services or legacy kwargs)"
+            )
+
+        resolved_metrics = _resolve_legacy_or_service(
+            legacy_kwargs,
+            key="metrics",
+            services=services,
+        )
+        if resolved_metrics is None:
+            resolved_metrics = NoOpMetrics()
+
+        resolved_metadata_coordinator = _resolve_legacy_or_service(
+            legacy_kwargs,
+            key="metadata_coordinator",
+            services=services,
+        )
+        resolved_metadata_writer = _resolve_legacy_or_service(
+            legacy_kwargs,
+            key="metadata_writer",
+            services=services,
+        )
+        return (
+            resolved_storage,  # type: ignore[return-value]
+            resolved_metrics,
+            resolved_logger,  # type: ignore[return-value]
+            resolved_metadata_coordinator,
+            resolved_metadata_writer,
+        )
+
     def __init__(
         self,
         config: PipelineConfig,
@@ -116,31 +189,16 @@ class PostrunService:
         if dependencies is None:
             raise AssertionError("dependencies must be provided")
 
-        # Resolve collaborators either from PipelineService or legacy kwargs.
-        storage = legacy_kwargs.get("storage")
-        metrics = legacy_kwargs.get("metrics")
-        logger = legacy_kwargs.get("logger")
-        metadata_coordinator = legacy_kwargs.get("metadata_coordinator")
-        metadata_writer = legacy_kwargs.get("metadata_writer")
-
-        if services is None:
-            assert (
-                storage is not None and logger is not None
-            ), "Legacy path requires storage and logger when services is None"
-
-        self._storage = storage if storage is not None else services.storage  # type: ignore[union-attr]
-        metrics_fallback = services.metrics if services is not None else None  # type: ignore[union-attr]
-        self._metrics = metrics if metrics is not None else metrics_fallback or NoOpMetrics()
-        self._logger = logger or (services.logger if services else None) or context.logger  # type: ignore[union-attr]
-        self._metadata_coordinator = (
-            metadata_coordinator
-            if metadata_coordinator is not None
-            else (services.metadata_coordinator if services else None)  # type: ignore[union-attr]
-        )
-        self._metadata_writer = (
-            metadata_writer
-            if metadata_writer is not None
-            else (services.metadata_writer if services else None)  # type: ignore[union-attr]
+        (
+            self._storage,
+            self._metrics,
+            self._logger,
+            self._metadata_coordinator,
+            self._metadata_writer,
+        ) = self._resolve_collaborators(
+            services=services,
+            context=context,
+            legacy_kwargs=legacy_kwargs,
         )
         self._cleanup_orchestrator = dependencies.cleanup_orchestrator
         self._dq_report_orchestrator = dependencies.dq_report_orchestrator
