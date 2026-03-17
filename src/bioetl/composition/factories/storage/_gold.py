@@ -66,5 +66,7 @@ def create_gold_writer(
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
         ),
+        # Keep legacy kwarg for constructor-call compatibility in tests and shims.
+        csv_exporter=csv_exporter,
         flat_structure=flat_structure,
     )

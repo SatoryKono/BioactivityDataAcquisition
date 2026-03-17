@@ -60,6 +60,38 @@ class PipelineRunnerDependencies:
     shutdown_signal: ShutdownSignal
 
 
+def _resolve_legacy_dependencies(
+    legacy_kwargs: dict[str, object],
+) -> PipelineRunnerDependencies:
+    """Resolve legacy constructor kwargs into structured dependencies."""
+    values = {
+        "executor": legacy_kwargs.get("executor"),
+        "checkpoint_manager": legacy_kwargs.get("checkpoint_manager"),
+        "shutdown_signal": legacy_kwargs.get("shutdown_signal"),
+        "lock_manager": legacy_kwargs.get("lock_manager"),
+        "preflight": legacy_kwargs.get("preflight"),
+        "postrun": legacy_kwargs.get("postrun"),
+        "lifecycle_service": legacy_kwargs.get("lifecycle_service"),
+        "observer": legacy_kwargs.get("observer"),
+    }
+    missing = [name for name, value in values.items() if value is None]
+    if missing:
+        raise AssertionError("Legacy constructor path requires all legacy parameters")
+    return PipelineRunnerDependencies(
+        executor=cast("BatchExecutor", values["executor"]),
+        checkpoint_manager=cast("CheckpointManagerService", values["checkpoint_manager"]),
+        lock_manager=cast("LockCoordinator", values["lock_manager"]),
+        preflight=cast("PreflightService", values["preflight"]),
+        postrun=cast("PostrunService", values["postrun"]),
+        lifecycle_service=cast(
+            "MedallionLifecycleService",
+            values["lifecycle_service"],
+        ),
+        observer=cast("PipelineObserver", values["observer"]),
+        shutdown_signal=cast("ShutdownSignal", values["shutdown_signal"]),
+    )
+
+
 class PipelineRunner:
     """Manages the execution lifecycle of a pipeline.
 
@@ -110,55 +142,7 @@ class PipelineRunner:
         self._services = services
         self._context = context
         if dependencies is None:
-            executor = cast("BatchExecutor | None", legacy_kwargs.get("executor"))
-            checkpoint_manager = cast(
-                "CheckpointManagerService | None",
-                legacy_kwargs.get("checkpoint_manager"),
-            )
-            shutdown_signal = cast(
-                "ShutdownSignal | None",
-                legacy_kwargs.get("shutdown_signal"),
-            )
-            lock_manager = cast(
-                "LockCoordinator | None",
-                legacy_kwargs.get("lock_manager"),
-            )
-            preflight = cast(
-                "PreflightService | None",
-                legacy_kwargs.get("preflight"),
-            )
-            postrun = cast("PostrunService | None", legacy_kwargs.get("postrun"))
-            lifecycle_service = cast(
-                "MedallionLifecycleService | None",
-                legacy_kwargs.get("lifecycle_service"),
-            )
-            observer = cast(
-                "PipelineObserver | None",
-                legacy_kwargs.get("observer"),
-            )
-            if (
-                executor is None
-                or checkpoint_manager is None
-                or shutdown_signal is None
-                or lock_manager is None
-                or preflight is None
-                or postrun is None
-                or lifecycle_service is None
-                or observer is None
-            ):
-                raise AssertionError(
-                    "Legacy constructor path requires all legacy parameters"
-                )
-            dependencies = PipelineRunnerDependencies(
-                executor=executor,
-                checkpoint_manager=checkpoint_manager,
-                lock_manager=lock_manager,
-                preflight=preflight,
-                postrun=postrun,
-                lifecycle_service=lifecycle_service,
-                observer=observer,
-                shutdown_signal=shutdown_signal,
-            )
+            dependencies = _resolve_legacy_dependencies(legacy_kwargs)
         self._executor = dependencies.executor
         self._checkpoint_manager = dependencies.checkpoint_manager
         self._shutdown_signal = dependencies.shutdown_signal
