@@ -23,7 +23,7 @@ Before executing workflows, discover what tools are available so commands can:
 ### Step 1: Scan for Custom Agents
 
 ```bash
-# Project-level agents
+# Project-level Claude agents (preferred source of truth)
 ls .claude/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
 
 # Plugin agents
@@ -37,7 +37,13 @@ done
 ### Step 2: Scan for Custom Skills
 
 ```bash
-# Project-level skills
+# Project-level Codex skills (preferred)
+ls .codex/skills/*/SKILL.md 2>/dev/null | while read f; do
+  skill=$(dirname $f | xargs basename)
+  echo "$skill"
+done
+
+# Legacy Claude skills (fallback only)
 ls .claude/skills/*/SKILL.md 2>/dev/null | while read f; do
   skill=$(dirname $f | xargs basename)
   echo "$skill"
@@ -65,20 +71,20 @@ ls plugins/*/commands/*.md 2>/dev/null | while read f; do
 done
 ```
 
-### Step 4: Parse CLAUDE.md for Quality Commands
+### Step 4: Parse Repo Instructions And Codex Config
 
 ```bash
-# Look for explicit quality command definitions
+# Root agent instructions
+grep -E "uv run python -m pytest|uv run python -m mypy|ruff|pytest|mypy" AGENTS.md 2>/dev/null
+
+# Project Codex config
+sed -n '1,120p' .codex/config.toml 2>/dev/null
+
+# MCP server inventory
+sed -n '1,220p' .codex/settings.json 2>/dev/null
+
+# Legacy fallback
 grep -E "^(lint|test|check|format|typecheck|build):" .claude/CLAUDE.md 2>/dev/null
-
-# Look for npm scripts references
-grep -E "npm run (lint|test|check|format|build)" .claude/CLAUDE.md 2>/dev/null
-
-# Look for Python tool references
-grep -E "(ruff|pytest|mypy|pyright|black|isort)" .claude/CLAUDE.md 2>/dev/null
-
-# Look for Go tool references
-grep -E "(go vet|go test|golangci-lint)" .claude/CLAUDE.md 2>/dev/null
 ```
 
 ### Step 5: Detect Tech Stack
@@ -115,7 +121,7 @@ Report discovered capabilities in structured format:
 | capability-discovery | gh-workflow | This skill |
 | lint | project | Custom lint configuration |
 
-### Quality Commands (from CLAUDE.md)
+### Quality Commands (from AGENTS.md / Codex config / fallback docs)
 | Command | Purpose |
 |---------|---------|
 | `ruff check .` | Python linting |
@@ -143,9 +149,9 @@ Based on capabilities:
 
 Before implementation:
 1. Invoke capability-discovery skill
-2. Note available agents for later review phases
+2. Note available `.claude/agents` and `.codex/skills`
 3. Note quality commands for Phase 3
-4. Store tech stack for appropriate tooling
+4. Store tech stack and Codex runtime constraints for appropriate tooling
 ```
 
 ### In gh-review
@@ -155,7 +161,7 @@ Before implementation:
 
 Before detailed review:
 1. Check for review-specific agents (code-reviewer, convention-checker)
-2. Check for quality skills (lint, test)
+2. Check for quality skills (lint, test, architecture verification)
 3. Plan review facets based on available capabilities
 ```
 
@@ -167,7 +173,7 @@ When capabilities are not found:
 |-------------------|----------|
 | No custom agents | Use built-in review checklist |
 | No lint skill | Detect from tech stack |
-| No CLAUDE.md commands | Use standard tools for detected stack |
+| No AGENTS.md / Codex config commands | Use standard tools for detected stack |
 | No tech stack detected | Ask user for commands |
 
 ## Integration Points
@@ -185,6 +191,6 @@ Results inform:
 ## Best Practices
 
 1. **Cache results** - Don't re-scan within same session
-2. **Prefer explicit** - CLAUDE.md commands over detected ones
+2. **Prefer explicit** - `AGENTS.md` and `.codex/config.toml` over inferred defaults
 3. **Report clearly** - Show what was found and what wasn't
 4. **Enable fallbacks** - Never block workflow due to missing capabilities
