@@ -1,4 +1,8 @@
-"""Legacy pagination promotion helpers for source config schema."""
+"""Legacy pagination promotion helpers for source config schema.
+
+These helpers implement migration-only alias promotion from legacy provider keys
+to canonical ``pagination`` fields.
+"""
 
 from __future__ import annotations
 

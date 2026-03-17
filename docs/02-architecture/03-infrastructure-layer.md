@@ -27,6 +27,16 @@
 Создание и настройка адаптеров централизованы в каноническом composition-path через
 `DataSourceFactory`, `get_data_source_creator()` и `ProviderRegistry`.
 
+Политика import surfaces для provider adapters:
+
+- Для нового first-party кода предпочтителен import provider package root
+  (например, `bioetl.infrastructure.adapters.pubmed`,
+  `bioetl.infrastructure.adapters.semanticscholar`).
+- `pubmed/client.py` и `semanticscholar/client.py` остаются retained public seams
+  для import stability.
+- Старые implementation-module paths (`pubmed.pubmed_client`,
+  `semanticscholar.adapter`) не являются sanctioned import path для нового кода.
+
 **Обязанности адаптера:**
 
 - Управление HTTP-соединениями через `UnifiedHTTPClient`.
@@ -156,7 +166,7 @@ PubMedAdapter                         (pubchempy)
 | `metadata_writer_operations.py`       | Internal operations| Подготовка, telemetry, retry для metadata     |
 | `metadata_builder.py`                 | `MetadataBuilder`  | Сборка metadata моделей                       |
 | `metadata_builder_base.py`            | Base builder       | Базовые функции сборки metadata               |
-| `metadata_builder_composite_helpers.py`| Composite helpers | Metadata для composite pipelines              |
+| `metadata_builder_composite_helpers.py`| Compatibility wrapper | Transitional wrapper over canonical `bioetl.domain.services.composite_metadata_helpers` |
 
 **Other storage:**
 

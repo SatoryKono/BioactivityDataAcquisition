@@ -126,6 +126,20 @@ stateDiagram-v2
 
 Дополнительно: activity/chemical/molecular/DQ/result value objects, а также объекты для field groups и run context.
 
+#### 2.4.1. Retained public entrypoints для domain фасадов
+
+Для текущего compatibility-governance цикла следующие domain entrypoints считаются
+санкционированными стабильными публичными import paths:
+
+- `bioetl.domain.composite.config`
+- `bioetl.domain.value_objects.activity_values`
+- `bioetl.domain.value_objects.publication_field_groups`
+
+Split internal modules остаются implementation detail owner packages и не являются
+рекомендуемыми import path для нового first-party кода.
+Текущий lifecycle/status этих фасадов ведётся в
+[Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
+
 ### 2.5. Пользовательские типы (`types/`)
 
 `src/bioetl/domain/types/` содержит типизированные идентификаторы и alias-ы, используемые агрегатами и сущностями:

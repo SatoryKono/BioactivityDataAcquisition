@@ -108,7 +108,9 @@ async def run_prepared_request_async(
     request: RunExecutionRequest,
     registry: PipelineRegistry | None = None,
     *,
-    run_pipeline_async_callable: Callable[..., Awaitable[RunResult]] = run_pipeline_async,
+    run_pipeline_async_callable: Callable[
+        ..., Awaitable[RunResult]
+    ] = run_pipeline_async,
 ) -> RunResult:
     """Execute a prepared request through the canonical runtime helper path."""
     return await run_pipeline_async_callable(
@@ -123,7 +125,9 @@ async def run_prepared_request_async(
 def build_run_pipeline_callable(
     registry: PipelineRegistry | None = None,
     *,
-    run_pipeline_async_callable: Callable[..., Awaitable[RunResult]] = run_pipeline_async,
+    run_pipeline_async_callable: Callable[
+        ..., Awaitable[RunResult]
+    ] = run_pipeline_async,
 ) -> Callable[[RunExecutionRequest], Awaitable[RunResult]]:
     """Return a stable async callable for prepared execution requests."""
 

@@ -88,6 +88,7 @@ class PipelineYamlConfig(BaseModel):
         le=5000,
         description="Deprecated: use source pagination.id_batch_size instead. "
         "Batch size when input_filter is active. Overrides batch_size.",
+        deprecated=True,
     )
     page_size_override: int | None = Field(
         default=None,
