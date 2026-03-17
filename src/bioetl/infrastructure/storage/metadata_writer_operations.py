@@ -69,14 +69,6 @@ class _PreparedMetadataWriteOperation:
     run_id: str
 
 
-@dataclass(frozen=True, slots=True)
-class _PreparedMetadataWriteArtifacts:
-    """Prepared payload and telemetry assembled before adding runtime state."""
-
-    prepared_write: _PreparedMetadataWrite
-    telemetry_context: _MetadataWriteTelemetryContext
-
-
 @dataclass(slots=True)
 class _MetadataWriteRetryState:
     """Mutable retry count shared with the atomic-write callback."""
@@ -165,14 +157,15 @@ def _build_metadata_write_telemetry_context(
 
 def _build_prepared_metadata_write_operation(
     *,
-    artifacts: _PreparedMetadataWriteArtifacts,
+    prepared_write: _PreparedMetadataWrite,
+    telemetry_context: _MetadataWriteTelemetryContext,
     run_id: str,
 ) -> _PreparedMetadataWriteOperation:
-    """Wrap prepared payload artifacts with runtime-specific operation state."""
+    """Build operation payload with runtime-specific state."""
 
     return _PreparedMetadataWriteOperation(
-        prepared_write=artifacts.prepared_write,
-        telemetry_context=artifacts.telemetry_context,
+        prepared_write=prepared_write,
+        telemetry_context=telemetry_context,
         run_id=run_id,
     )
 
@@ -180,26 +173,18 @@ def _build_prepared_metadata_write_operation(
 def _prepare_metadata_write_operation(
     request: _MetadataWriteRequest,
 ) -> _PreparedMetadataWriteOperation:
-    """Resolve the prepared write payload and shared telemetry context."""
-    return _build_prepared_metadata_write_operation(
-        artifacts=_prepare_metadata_write_artifacts(request),
-        run_id=request.metadata.runtime.run_id,
-    )
-
-
-def _prepare_metadata_write_artifacts(
-    request: _MetadataWriteRequest,
-) -> _PreparedMetadataWriteArtifacts:
-    """Resolve target, payload, and telemetry before runtime-specific wrapping."""
+    """Resolve target/payload/telemetry and package one executable operation."""
 
     target = _resolve_metadata_target(request)
     prepared_write = _build_prepared_metadata_write(request, target)
-    return _PreparedMetadataWriteArtifacts(
+    telemetry_context = _build_metadata_write_telemetry_context(
+        request,
         prepared_write=prepared_write,
-        telemetry_context=_build_metadata_write_telemetry_context(
-            request,
-            prepared_write,
-        ),
+    )
+    return _build_prepared_metadata_write_operation(
+        prepared_write=prepared_write,
+        telemetry_context=telemetry_context,
+        run_id=request.metadata.runtime.run_id,
     )
 
 

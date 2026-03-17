@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import ast
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
@@ -10,7 +9,6 @@ from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     CompositeOutputExt,
-    CompositeSchemaValidationMetadata,
     DeltaMetrics,
     DQSummary,
     LineageMetadata,
@@ -19,6 +17,12 @@ from bioetl.domain.models.metadata import (
     SCDMetadata,
 )
 from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput
+from bioetl.domain.services.composite_metadata_helpers import (
+    extract_composite_output_ext,
+    parse_composite_list,
+    parse_composite_status,
+    parse_lineage_created_at,
+)
 from bioetl.domain.value_objects.run_context import RunContext
 
 if TYPE_CHECKING:
@@ -46,40 +50,17 @@ class PipelineMetadataProtocol(Protocol):
 
 def _parse_composite_list(value: object) -> list[str]:
     """Parse composite list metadata stored as list or stringified list."""
-    if isinstance(value, list):
-        return [str(item) for item in value]
-    if isinstance(value, str):
-        try:
-            parsed = ast.literal_eval(value)
-        except (ValueError, SyntaxError):
-            return []
-        if isinstance(parsed, list):
-            return [str(item) for item in parsed]
-    return []
+    return parse_composite_list(value)
 
 
 def _parse_composite_status(value: object) -> dict[str, str]:
     """Parse enrichment status stored as dict or stringified dict."""
-    if isinstance(value, dict):
-        return {str(k): str(v) for k, v in value.items()}
-    if isinstance(value, str):
-        try:
-            parsed = ast.literal_eval(value)
-        except (ValueError, SyntaxError):
-            return {}
-        if isinstance(parsed, dict):
-            return {str(k): str(v) for k, v in parsed.items()}
-    return {}
+    return parse_composite_status(value)
 
 
 def _parse_lineage_created_at(value: object) -> datetime | None:
     """Parse lineage timestamp from raw metadata payload."""
-    if not isinstance(value, str):
-        return None
-    try:
-        return datetime.fromisoformat(value)
-    except ValueError:
-        return None
+    return parse_lineage_created_at(value)
 
 
 def _extract_composite_output_ext(
@@ -90,32 +71,11 @@ def _extract_composite_output_ext(
     schema_validation_strict: bool | None = None,
 ) -> CompositeOutputExt | None:
     """Extract composite output metadata from merged Gold records."""
-    if not records:
-        return None
-
-    sample = records[0]
-    composite_run_id = sample.get("_composite_run_id")
-    lineage_raw = sample.get("_lineage_created_at")
-    lineage_created_at = _parse_lineage_created_at(lineage_raw)
-
-    has_composite_fields = any(key.startswith("_composite_") for key in sample)
-    has_lineage_fields = "_source_providers" in sample or "_enrichment_status" in sample
-    if not has_composite_fields and not has_lineage_fields:
-        return None
-
-    return CompositeOutputExt(
+    return extract_composite_output_ext(
+        records,
         partition_count=partition_count,
-        composite_run_id=(
-            str(composite_run_id) if composite_run_id is not None else None
-        ),
-        source_providers=_parse_composite_list(sample.get("_source_providers")),
-        enrichment_status=_parse_composite_status(sample.get("_enrichment_status")),
-        lineage_created_at=lineage_created_at,
-        schema_validation=CompositeSchemaValidationMetadata(
-            enabled=schema_validation_enabled,
-            strict=schema_validation_strict,
-            status="passed" if schema_validation_enabled else "not_run",
-        ),
+        schema_validation_enabled=schema_validation_enabled,
+        schema_validation_strict=schema_validation_strict,
     )
 
 
