@@ -5,7 +5,7 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Entity ID** | `assay-chembl-id` (Business Key) |
+| **Entity ID** | `assay_id` (Business Key) |
 | **Content Hash** | `content_hash` (SHA256 for SCD Type 2) |
 | **Source** | ChEMBL API (`/chembl/api/data/assay.json`) |
 | **Update Frequency** | Quarterly (ChEMBL release cycle) |
@@ -16,9 +16,9 @@ Assay records define the experimental conditions under which bioactivity measure
 
 ### Key Relationships
 ```
-Assay ◄─── Activity (assay-chembl-id)
+Assay ◄─── Activity (assay_id)
     │
-    ├───► Target (target-chembl-id)
+    ├───► Target (target_id)
     │
     ├───► Document (document-chembl-id)
     │
@@ -54,7 +54,7 @@ Gold layer applies filters for high-confidence assays:
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `assay-chembl-id` | `str` | No | `^CHEMBL\d+$` | ChEMBL assay identifier | `assays[].assay-chembl-id` |
+| `assay_id` | `str` | No | `^CHEMBL\d+$` | ChEMBL assay identifier | `assays[].assay_id` |
 
 ### Description & Classification
 
@@ -99,7 +99,7 @@ Gold layer applies filters for high-confidence assays:
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `target-chembl-id` | `str` | Yes | `^CHEMBL\d+$` | FK to Target | `assays[].target-chembl-id` |
+| `target_id` | `str` | Yes | `^CHEMBL\d+$` | FK to Target | `assays[].target_id` |
 | `document-chembl-id` | `str` | Yes | `^CHEMBL\d+$` | FK to Document | `assays[].document-chembl-id` |
 | `cell-chembl-id` | `str` | Yes | — | FK to Cell Line | `assays[].cell-chembl-id` |
 | `tissue-chembl-id` | `str` | Yes | — | FK to Tissue | `assays[].tissue-chembl-id` |
@@ -164,7 +164,7 @@ Gold layer applies filters for high-confidence assays:
 
 | Field | Type | Nullable | Purpose | Included in Content Hash |
 |-------|------|----------|---------|-------------------------|
-| `entity_id` | `str` | No | Business key (= assay-chembl-id) | Yes |
+| `entity_id` | `str` | No | Business key (= assay_id) | Yes |
 | `content_hash` | `str` | No | SHA256 for SCD Type 2 | — |
 | `_run_id` | `UUID` | No | Pipeline run correlation ID | No |
 | `_run_type` | `Enum` | No | incremental/backfill/rebuild | No |
@@ -181,7 +181,7 @@ Gold layer applies filters for high-confidence assays:
 
 | Source Field | Target Field | Transformation |
 |--------------|--------------|----------------|
-| `assay-chembl-id` | `assay-chembl-id` | Direct |
+| `assay_id` | `assay_id` | Direct |
 | `assay-tax-id` | `assay-tax-id` | `safe-int()` |
 | `confidence-score` | `confidence-score` | `safe-int()` |
 | `variant-sequence` | `variant-*` | Flatten nested dict |
@@ -199,7 +199,7 @@ Gold layer applies filters for high-confidence assays:
 class AssaySchema(ETLRecordSchema):
     """Assay validation schema for Silver layer."""
 
-    assay-chembl-id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False, str-matches=r"^CHEMBL\d+$"
     )
     assay-type: Optional[Series[str]] = pa.Field(
@@ -208,7 +208,7 @@ class AssaySchema(ETLRecordSchema):
     confidence-score: Optional[Series[int]] = pa.Field(
         nullable=True, ge=0, le=9
     )
-    target-chembl-id: Optional[Series[str]] = pa.Field(
+    target_id: Optional[Series[str]] = pa.Field(
         nullable=True, str-matches=r"^CHEMBL\d+$"
     )
 
@@ -222,7 +222,7 @@ class AssaySchema(ETLRecordSchema):
 
 ```python
 def -validate-invariants(self) -> None:
-    if not self.assay-chembl-id:
+    if not self.assay_id:
         raise ValueError("Assay ChEMBL ID is required")
     if self.confidence-score is not None and not (0 <= self.confidence-score <= 9):
         raise ValueError(f"Confidence score must be 0-9, got {self.confidence-score}")
@@ -234,7 +234,7 @@ def -validate-invariants(self) -> None:
 
 | Source | ID Field | Mapping Strategy |
 |--------|----------|------------------|
-| ChEMBL | `assay-chembl-id` | Primary source |
+| ChEMBL | `assay_id` | Primary source |
 | BioAssay Ontology | `bao-format` | Via BAO ID |
 | PubChem BioAssay | `src-assay-id` (when src-id=7) | Source mapping |
 
@@ -246,13 +246,13 @@ def -validate-invariants(self) -> None:
 
 ```json
 {
-  "assay-chembl-id": "CHEMBL872937",
+  "assay_id": "CHEMBL872937",
   "description": "In vivo inhibitory activity against human Heparanase",
   "assay-type": "B",
   "assay-test-type": "In vivo",
   "assay-organism": "Homo sapiens",
   "assay-tax-id": 9606,
-  "target-chembl-id": "CHEMBL3921",
+  "target_id": "CHEMBL3921",
   "document-chembl-id": "CHEMBL1146658",
   "confidence-score": 9,
   "confidence-description": "Direct single protein target assigned",
@@ -269,7 +269,7 @@ def -validate-invariants(self) -> None:
 ```json
 {
   "entity_id": "CHEMBL872937",
-  "assay-chembl-id": "CHEMBL872937",
+  "assay_id": "CHEMBL872937",
   "content_hash": "sha256:ghi789...",
   "_run_id": "550e8400-e29b-41d4-a716-446655440002",
   "_run_type": "incremental",
@@ -283,7 +283,7 @@ def -validate-invariants(self) -> None:
   "assay-organism": "Homo sapiens",
   "assay-tax-id": 9606,
 
-  "target-chembl-id": "CHEMBL3921",
+  "target_id": "CHEMBL3921",
   "document-chembl-id": "CHEMBL1146658",
 
   "confidence-score": 9,

@@ -8,10 +8,10 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.dependency_joiner import DependencyJoinerService
-from bioetl.application.composite.join_execution import JoinExecutorService
-from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import JoinPlannerService
+from tests.unit.application.composite.merge_test_support import (
+    build_join_planner_service,
+)
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
@@ -58,10 +58,6 @@ def planner_deps() -> tuple[MagicMock, MagicMock, MagicMock, MagicMock]:
 def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
     deduplicator, aggregator, renamer, conflict_resolver = planner_deps
     logger = MagicMock()
-    join_key_resolver = JoinKeyResolverService(
-        normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
-        parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
-    )
     # Use a mutable ref so test can swap planner._config and resolver follows
     planner_ref: list[JoinPlannerService] = []
 
@@ -80,31 +76,15 @@ def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
             case _:
                 return "left"
 
-    join_executor = JoinExecutorService(
-        logger=logger,
-        join_type_resolver=_resolve_join_type,
-    )
-    dependency_joiner = DependencyJoinerService(
-        logger=logger,
-        deduplicator=deduplicator,
-        renamer=renamer,
-        conflict_resolver=conflict_resolver,
-        field_alias_resolver=lambda _pipeline: None,
-        join_key_resolver=join_key_resolver,
-        join_executor=join_executor,
-        system_columns_to_drop=JoinPlannerService._SYSTEM_COLUMNS_TO_DROP,
-    )
-    svc = JoinPlannerService(
+    svc = build_join_planner_service(
         merge_config=merge_config,
         logger=logger,
         deduplicator=deduplicator,
         aggregator=aggregator,
         renamer=renamer,
         conflict_resolver=conflict_resolver,
-        field_alias_resolver=lambda pipeline: None,
-        join_key_resolver=join_key_resolver,
-        join_executor=join_executor,
-        dependency_joiner=dependency_joiner,
+        field_alias_resolver=lambda _pipeline: None,
+        join_type_resolver=_resolve_join_type,
     )
     planner_ref.append(svc)
     return svc

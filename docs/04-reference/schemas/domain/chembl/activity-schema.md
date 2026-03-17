@@ -5,7 +5,7 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Entity ID** | `activity-id` (Business Key) |
+| **Entity ID** | `activity_id` (Business Key) |
 | **Content Hash** | `content_hash` (SHA256 for SCD Type 2) |
 | **Source** | ChEMBL API (`/chembl/api/data/activity.json`) |
 | **Update Frequency** | Weekly (ChEMBL release cycle) |
@@ -16,11 +16,11 @@ Activity records represent bioactivity measurements from scientific publications
 
 ### Key Relationships
 ```
-Activity ───► Molecule (molecule-chembl-id)
+Activity ───► Molecule (molecule_id)
     │
-    ├───► Target (target-chembl-id)
+    ├───► Target (target_id)
     │
-    ├───► Assay (assay-chembl-id)
+    ├───► Assay (assay_id)
     │
     └───► Document (document-chembl-id)
 ```
@@ -47,7 +47,7 @@ Gold layer applies strict filters to ensure high-quality data for analysis:
 | `potential-duplicate` | `["0"]` | Exclude duplicates |
 | `standard-value` | `> 0` | Valid positive values |
 
-**Required Fields for Gold**: `standard-type`, `standard-value`, `standard-units`, `target-chembl-id`
+**Required Fields for Gold**: `standard-type`, `standard-value`, `standard-units`, `target_id`
 
 ---
 
@@ -57,15 +57,15 @@ Gold layer applies strict filters to ensure high-quality data for analysis:
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `activity-id` | `str` | No | — | Primary key (integer as string) | `activities[].activity-id` |
+| `activity_id` | `str` | No | — | Primary key (integer as string) | `activities[].activity_id` |
 
 ### Foreign Keys
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `assay-chembl-id` | `str` | No | `^CHEMBL\d+$` | FK to Assay entity | `activities[].assay-chembl-id` |
-| `molecule-chembl-id` | `str` | No | `^CHEMBL\d+$` | FK to Molecule entity | `activities[].molecule-chembl-id` |
-| `target-chembl-id` | `str` | Yes | `^CHEMBL\d+$` | FK to Target entity | `activities[].target-chembl-id` |
+| `assay_id` | `str` | No | `^CHEMBL\d+$` | FK to Assay entity | `activities[].assay_id` |
+| `molecule_id` | `str` | No | `^CHEMBL\d+$` | FK to Molecule entity | `activities[].molecule_id` |
+| `target_id` | `str` | Yes | `^CHEMBL\d+$` | FK to Target entity | `activities[].target_id` |
 | `document-chembl-id` | `str` | Yes | `^CHEMBL\d+$` | FK to Document entity | `activities[].document-chembl-id` |
 | `record-id` | `int` | Yes | — | FK to compound-record | `activities[].record-id` |
 | `src-id` | `int` | Yes | — | Source database ID | `activities[].src-id` |
@@ -112,9 +112,9 @@ Gold layer applies strict filters to ensure high-quality data for analysis:
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `canonical-smiles` | `str` | Yes | — | Canonical SMILES structure | `activities[].canonical-smiles` |
+| `canonical_smiles` | `str` | Yes | — | Canonical SMILES structure | `activities[].canonical_smiles` |
 | `molecule-pref-name` | `str` | Yes | — | Preferred molecule name | `activities[].molecule-pref-name` |
-| `parent-molecule-chembl-id` | `str` | Yes | — | Parent molecule ID (for salts) | `activities[].parent-molecule-chembl-id` |
+| `parent-molecule_id` | `str` | Yes | — | Parent molecule ID (for salts) | `activities[].parent-molecule_id` |
 
 ### Target Fields (Denormalized)
 
@@ -188,7 +188,7 @@ Gold layer applies strict filters to ensure high-quality data for analysis:
 
 | Field | Type | Nullable | Purpose | Included in Content Hash |
 |-------|------|----------|---------|-------------------------|
-| `entity_id` | `str` | No | Business key (= activity-id) | Yes |
+| `entity_id` | `str` | No | Business key (= activity_id) | Yes |
 | `content_hash` | `str` | No | SHA256 for SCD Type 2 | — |
 | `_run_id` | `UUID` | No | Pipeline run correlation ID | No |
 | `_run_type` | `Enum` | No | incremental/backfill/rebuild | No |
@@ -205,7 +205,7 @@ Gold layer applies strict filters to ensure high-quality data for analysis:
 
 | Source Field | Target Field | Transformation |
 |--------------|--------------|----------------|
-| `activity-id` | `activity-id` | `str(value)` |
+| `activity_id` | `activity_id` | `str(value)` |
 | `standard-value` | `standard-value` | `safe-float()` |
 | `value` | `value` | `safe-float()` |
 | `pchembl-value` | `pchembl-value` | `safe-float()` |
@@ -251,16 +251,16 @@ class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for Silver layer."""
 
     # Primary Key
-    activity-id: Series[str] = pa.Field(nullable=False)
+    activity_id: Series[str] = pa.Field(nullable=False)
 
     # Foreign Keys
-    assay-chembl-id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False, str-matches=r"^CHEMBL\d+$"
     )
-    molecule-chembl-id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False, str-matches=r"^CHEMBL\d+$"
     )
-    target-chembl-id: Optional[Series[str]] = pa.Field(
+    target_id: Optional[Series[str]] = pa.Field(
         nullable=True, str-matches=r"^CHEMBL\d+$"
     )
 
@@ -282,9 +282,9 @@ class ActivitySchema(ETLRecordSchema):
 
 | Check | Column | Threshold | Action |
 |-------|--------|-----------|--------|
-| null-rate | `activity-id` | 0% | Critical (fail batch) |
-| null-rate | `molecule-chembl-id` | 0% | Critical (fail batch) |
-| null-rate | `assay-chembl-id` | 0% | Critical (fail batch) |
+| null-rate | `activity_id` | 0% | Critical (fail batch) |
+| null-rate | `molecule_id` | 0% | Critical (fail batch) |
+| null-rate | `assay_id` | 0% | Critical (fail batch) |
 | null-rate | `standard-value` | <5% warn, <20% fail | RULES.md §3.1.2 |
 | range | `pchembl-value` | 0-14 | Quarantine |
 | regex | `*-chembl-id` | `^CHEMBL\d+$` | Quarantine |
@@ -294,9 +294,9 @@ class ActivitySchema(ETLRecordSchema):
 
 ```python
 def -validate-invariants(self) -> None:
-    if not self.activity-id:
+    if not self.activity_id:
         raise ValueError("Activity ID is required")
-    if not self.molecule-chembl-id:
+    if not self.molecule_id:
         raise ValueError("Molecule ID is required")
     if self.pchembl-value is not None and self.pchembl-value < 0:
         raise ValueError(f"pChemBL value must be non-negative")
@@ -308,10 +308,10 @@ def -validate-invariants(self) -> None:
 
 | Source | ID Field | Mapping Strategy |
 |--------|----------|------------------|
-| ChEMBL | `activity-id` | Primary source |
+| ChEMBL | `activity_id` | Primary source |
 | PubChem | N/A | Activities not mapped directly |
-| ChEMBL Molecule | `molecule-chembl-id` | FK join |
-| ChEMBL Target | `target-chembl-id` | FK join |
+| ChEMBL Molecule | `molecule_id` | FK join |
+| ChEMBL Target | `target_id` | FK join |
 | UniProt | `target-components.accession` | Via Target entity |
 
 ---
@@ -322,8 +322,8 @@ def -validate-invariants(self) -> None:
 
 ```json
 {
-  "activity-id": 31864,
-  "assay-chembl-id": "CHEMBL872937",
+  "activity_id": 31864,
+  "assay_id": "CHEMBL872937",
   "assay-description": "In vivo inhibitory activity against human Heparanase",
   "assay-type": "B",
   "assay-variant-accession": null,
@@ -331,7 +331,7 @@ def -validate-invariants(self) -> None:
   "bao-endpoint": "BAO-0000190",
   "bao-format": "BAO-0000218",
   "bao-label": "organism-based format",
-  "canonical-smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
+  "canonical_smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
   "data-validity-comment": null,
   "document-chembl-id": "CHEMBL1146658",
   "document-journal": "Bioorg Med Chem Lett",
@@ -342,7 +342,7 @@ def -validate-invariants(self) -> None:
     "lle": "1.30",
     "sei": "5.56"
   },
-  "molecule-chembl-id": "CHEMBL324340",
+  "molecule_id": "CHEMBL324340",
   "pchembl-value": "5.60",
   "potential-duplicate": 0,
   "qudt-units": "http://www.openphacts.org/units/Nanomolar",
@@ -354,7 +354,7 @@ def -validate-invariants(self) -> None:
   "standard-type": "IC50",
   "standard-units": "nM",
   "standard-value": "2500.0",
-  "target-chembl-id": "CHEMBL3921",
+  "target_id": "CHEMBL3921",
   "target-organism": "Homo sapiens",
   "target-pref-name": "Heparanase",
   "target-tax-id": "9606",
@@ -370,7 +370,7 @@ def -validate-invariants(self) -> None:
 ```json
 {
   "entity_id": "31864",
-  "activity-id": "31864",
+  "activity_id": "31864",
   "content_hash": "sha256:a1b2c3d4e5f6...",
   "_run_id": "550e8400-e29b-41d4-a716-446655440000",
   "_run_type": "incremental",
@@ -379,9 +379,9 @@ def -validate-invariants(self) -> None:
   "_dq_warn": false,
   "_index": 0,
 
-  "assay-chembl-id": "CHEMBL872937",
-  "molecule-chembl-id": "CHEMBL324340",
-  "target-chembl-id": "CHEMBL3921",
+  "assay_id": "CHEMBL872937",
+  "molecule_id": "CHEMBL324340",
+  "target_id": "CHEMBL3921",
   "document-chembl-id": "CHEMBL1146658",
 
   "standard-type": "IC50",
@@ -397,7 +397,7 @@ def -validate-invariants(self) -> None:
   "ligand-efficiency-lle": 1.30,
   "ligand-efficiency-sei": 5.56,
 
-  "canonical-smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
+  "canonical_smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
   "target-pref-name": "Heparanase",
   "target-organism": "Homo sapiens",
   "assay-type": "B",
@@ -420,24 +420,24 @@ Gold layer contains only records passing gold-filters:
 - `standard-units` = `"nM"`
 - `standard-relation` = `"="`
 - `standard-value` > 0
-- `target-chembl-id` is not null
+- `target_id` is not null
 
 ```json
 {
   "entity_id": "31864",
-  "activity-id": "31864",
+  "activity_id": "31864",
   "content_hash": "sha256:a1b2c3d4e5f6...",
 
-  "molecule-chembl-id": "CHEMBL324340",
-  "target-chembl-id": "CHEMBL3921",
-  "assay-chembl-id": "CHEMBL872937",
+  "molecule_id": "CHEMBL324340",
+  "target_id": "CHEMBL3921",
+  "assay_id": "CHEMBL872937",
 
   "standard-type": "IC50",
   "standard-value": 2500.0,
   "standard-units": "nM",
   "pchembl-value": 5.60,
 
-  "canonical-smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
+  "canonical_smiles": "Cc1ccc2oc(-c3cccc(N4C(=O)c5ccc(C(=O)O)cc5C4=O)c3)nc2c1",
   "target-pref-name": "Heparanase",
   "target-organism": "Homo sapiens"
 }

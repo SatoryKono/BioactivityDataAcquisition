@@ -251,8 +251,7 @@ src/bioetl/
 │   │   ├── state.py            # CompositePipelineState FSM enum
 │   │   ├── strategy.py         # MergeStrategy enum
 │   │   └── lineage.py          # LineageMetadata value object
-│   └── ports/
-│       └── composite.py        # CompositeOrchestratorPort (if needed)
+│   └── ports/                  # Existing shared ports package (no dedicated composite.py)
 │
 ├── application/
 │   ├── composite/
@@ -268,18 +267,17 @@ src/bioetl/
 │       └── runner.py           # Existing PipelineRunner (unchanged)
 │
 ├── composition/
-│   ├── composite/
-│   │   ├── __init__.py
-│   │   ├── bootstrap.py        # bootstrap-composite-pipeline()
-│   │   └── factory.py          # CompositePipelineFactory
+│   ├── bootstrap/
+│   │   └── runtime/
+│   │       └── composite.py    # bootstrap_composite_runner()
+│   ├── composite_api.py        # Public composite composition API
 │   └── factories/              # Existing factories (unchanged)
 │
 ├── infrastructure/
-│   └── storage/
-│       └── silver_reader.py    # SilverReader adapter for key extraction
+│   └── storage/                # Existing storage adapters (Bronze/Silver/Gold writers)
 │
 └── interfaces/
-    └── cli/main.py             # Extended with composite commands (legacy shim: cli.py)
+    └── cli/main.py             # Extended with run-composite command family
 ```
 
 ### Import Rules
@@ -1225,48 +1223,45 @@ def test-composite-port-contracts():
 
 ```bash
 # Full composite run
-bioetl run --pipeline composite_publication
+bioetl run-composite --composite publication
 
 # With options
-bioetl run --pipeline composite_publication \
-    --limit 1000 \
+bioetl run-composite --composite publication \
+    --seed-limit 1000 \
     --dry-run
 
 # Re-enrich specific source only
-bioetl run --pipeline composite_publication \
+bioetl run-composite --composite publication \
     --enrich-only pubmed,openalex
 
 # Skip optional enrichers (fast mode)
-bioetl run --pipeline composite_publication \
+bioetl run-composite --composite publication \
     --required-only
 
 # Resume after failure
-bioetl run --pipeline composite_publication \
+bioetl run-composite --composite publication \
     --resume
 
 # Force re-run of specific enricher
-bioetl run --pipeline composite_publication \
+bioetl run-composite --composite publication \
     --force-enricher crossref
 
 # List composite pipeline status
-bioetl status composite_publication
+bioetl run-composite --composite publication --dry-run
 ```
 
 ### CLI Implementation
 
 ```python
-# src/bioetl/interfaces/cli/main.py (extensions; legacy shim interfaces/cli.py)
+# src/bioetl/interfaces/cli/commands/run_composite.py
 
 @cli.command()
 @click.option("--enrich-only", help="Run only specified enrichers (comma-separated)")
 @click.option("--required-only", is-flag=True, help="Skip optional enrichers")
 @click.option("--force-enricher", help="Force re-run of specified enricher")
-def run(pipeline: str, enrich-only: str | None, required-only: bool, ...):
-    """Run a pipeline (regular or composite)."""
-    if pipeline.startswith("composite-"):
-        return run-composite(pipeline, enrich-only, required-only, ...)
-    else:
-        return run-regular(pipeline, ...)
+def run_composite_command(composite: str, enrich_only: str | None, required_only: bool, ...):
+    """Run a composite pipeline."""
+    return run_composite(composite, enrich_only=enrich_only, required_only=required_only, ...)
 ```
 
 ## Consequences

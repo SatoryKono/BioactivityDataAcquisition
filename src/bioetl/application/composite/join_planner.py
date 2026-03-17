@@ -187,21 +187,12 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
             enricher_df=enricher_df,
             enricher=enricher,
         )
-        merged_df, prepared_enricher_df = prepare_join_frames(
+        merged_df, prepared_enricher_df = self._prepare_join_frames_for_enricher(
             merged_df=merged_df,
-            right_df=prepared_enricher_df,
-            left_join_keys=metadata.join_keys_list,
-            right_join_keys=metadata.join_keys_list,
-            right_pipeline=enricher.pipeline,
+            prepared_enricher_df=prepared_enricher_df,
+            metadata=metadata,
+            enricher_pipeline=enricher.pipeline,
             seed_pipeline=seed_pipeline,
-            deduplicator=self._deduplicator,
-            join_key_resolver=self._join_key_resolver,
-            renamer=self._renamer,
-            logger=self._logger,
-            field_alias_resolver=self._field_alias_resolver,
-            drop_system_columns=self.drop_system_columns,
-            log_message="Renamed enricher columns to qualified format",
-            log_field_name="enricher",
         )
         return _PreparedEnricherJoinContext(
             enricher_pipeline=enricher.pipeline,
@@ -215,12 +206,10 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
         *,
         prepared_context: _PreparedEnricherJoinContext,
     ) -> pl.DataFrame:
-        resolved_merged_df, resolved_enricher_df = (
-            self._conflict_resolver.detect_and_resolve_conflicts(
-                prepared_context.merged_df,
-                prepared_context.enricher_df,
-                prepared_context.metadata.join_key_set,
-            )
+        resolved_merged_df, resolved_enricher_df = self._resolve_pre_join_conflicts(
+            merged_df=prepared_context.merged_df,
+            enricher_df=prepared_context.enricher_df,
+            join_key_set=prepared_context.metadata.join_key_set,
         )
         return self.execute_polars_join(
             resolved_merged_df,
@@ -228,6 +217,47 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
             prepared_context.metadata.seed_join_key,
             prepared_context.metadata.enricher_join_key,
             prepared_context.enricher_pipeline,
+        )
+
+    def _prepare_join_frames_for_enricher(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        prepared_enricher_df: pl.DataFrame,
+        metadata: EnricherJoinMetadataContext,
+        enricher_pipeline: str,
+        seed_pipeline: str | None,
+    ) -> tuple[pl.DataFrame, pl.DataFrame]:
+        """Prepare normalized/qualified left-right frames for join execution."""
+        return prepare_join_frames(
+            merged_df=merged_df,
+            right_df=prepared_enricher_df,
+            left_join_keys=metadata.join_keys_list,
+            right_join_keys=metadata.join_keys_list,
+            right_pipeline=enricher_pipeline,
+            seed_pipeline=seed_pipeline,
+            deduplicator=self._deduplicator,
+            join_key_resolver=self._join_key_resolver,
+            renamer=self._renamer,
+            logger=self._logger,
+            field_alias_resolver=self._field_alias_resolver,
+            drop_system_columns=self.drop_system_columns,
+            log_message="Renamed enricher columns to qualified format",
+            log_field_name="enricher",
+        )
+
+    def _resolve_pre_join_conflicts(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        enricher_df: pl.DataFrame,
+        join_key_set: set[str],
+    ) -> tuple[pl.DataFrame, pl.DataFrame]:
+        """Resolve technical column-name conflicts before join execution."""
+        return self._conflict_resolver.detect_and_resolve_conflicts(
+            merged_df,
+            enricher_df,
+            join_key_set,
         )
 
     def _prepare_enricher_dataframe(

@@ -70,13 +70,13 @@ Key observation: `composition/` remains the primary DI layer. While `interfaces/
 The `bootstrap` module is used by multiple entry points:
 
 ```python
-# CLI (interfaces/cli/main.py; historical shim: interfaces/cli.py)
-from bioetl.composition.bootstrap import bootstrap_pipeline
-runner = bootstrap_pipeline(...)
+# CLI (interfaces/cli/main.py)
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+runner = bootstrap_pipeline_runner(...)
 
 # Integration Tests
-from bioetl.composition.bootstrap import bootstrap_pipeline
-runner = bootstrap_pipeline(...)
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+runner = bootstrap_pipeline_runner(...)
 
 # Future: HTTP API, Lambda handlers, etc.
 ```

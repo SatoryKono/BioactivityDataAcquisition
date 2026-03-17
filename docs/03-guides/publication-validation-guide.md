@@ -360,9 +360,9 @@ stateDiagram-v2
 ```mermaid
 graph TB
     subgraph "Configuration Hierarchy"
-        Default[Default Config<br/>application/config/validation.yaml<br/>Priority: 1]
-        Provider[Provider Config<br/>config/{provider}-validation.yaml<br/>Priority: 2]
-        Pipeline[Pipeline Config<br/>pipelines/{provider}-{entity}.yaml<br/>Priority: 3]
+        Default[Default Config<br/>domain/app defaults<br/>Priority: 1]
+        Provider[Provider Config<br/>configs/providers/{provider}.yaml<br/>Priority: 2]
+        Pipeline[Pipeline Config<br/>configs/entities/{provider}/{entity}.yaml<br/>Priority: 3]
         CLI[CLI Arguments<br/>--validation-mode strict<br/>Priority: 4]
     end
 
@@ -381,15 +381,15 @@ graph TB
 
 **Приоритет (от низкого к высокому):**
 
-1. **Default Config** (`application/config/validation.yaml`)
+1. **Default Config** (значения по умолчанию в коде и dataclass/Settings)
    - Базовые правила для всех провайдеров
    - Дефолтные пороги и таймауты
 
-2. **Provider Config** (`config/chembl-validation.yaml`)
+2. **Provider Config** (`configs/providers/{provider}.yaml`)
    - Специфичные для провайдера настройки
    - Переопределяет Default
 
-3. **Pipeline Config** (`pipelines/chembl-compound.yaml`)
+3. **Pipeline Config** (`configs/entities/{provider}/{entity}.yaml`)
    - Настройки для конкретного pipeline (provider + entity)
    - Переопределяет Provider
 
@@ -399,7 +399,7 @@ graph TB
 
 **Пример Default Config:**
 ```yaml
-# application/config/validation.yaml
+# Example validation defaults (conceptual)
 validation:
   base:
     enabled: true
@@ -580,7 +580,7 @@ from bioetl.application.services.dq import (
 )
 
 # Configure validators
-config = ValidationConfig.load("config/pubmed-validation.yaml")
+config = ValidationConfig.load("configs/entities/pubmed/publication.yaml")
 
 validators = [
     BaseValidator(schema=PubMedPublicationSchema),
@@ -629,14 +629,11 @@ df.to-parquet("silver/pubmed/publication-validated.parquet")
 # 1. Проверить доступность API
 curl -I https://api.crossref.org/works/10.1038/nature12373
 
-# 2. Отключить проблемный уровень
-python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider crossref \
-    --entity publication \
-    --skip-external
+# 2. Запустить ограниченный прогон для диагностики
+python -m bioetl run --pipeline crossref_publication --limit 100
 
 # 3. Увеличить порог similarity
-# В config/crossref-validation.yaml:
+# В configs/providers/crossref.yaml:
 semantic:
   similarity-threshold: 0.2  # Было 0.3
 ```
@@ -688,7 +685,7 @@ def transform_doi(raw_doi: str) -> str:
 
 **Решение:**
 ```yaml
-# config/pubmed-validation.yaml
+# configs/providers/pubmed.yaml
 external-verification:
   timeout: 30.0  # Увеличить с 10 до 30
   batch_size: 50  # Уменьшить batch
@@ -722,25 +719,25 @@ external-verification:
 from prometheus-client import Counter, Histogram
 
 validation-passed = Counter(
-    "bioetl-validation-passed-total",
+    "bioetl_validation_passed_total",
     "Records passed validation",
     ["provider", "level"]
 )
 
 validation-warned = Counter(
-    "bioetl-validation-warned-total",
+    "bioetl_validation_warned_total",
     "Records with warnings",
     ["provider", "level", "rule"]
 )
 
 validation-failed = Counter(
-    "bioetl-validation-failed-total",
+    "bioetl_validation_failed_total",
     "Records failed validation",
     ["provider", "level", "rule"]
 )
 
 validation-duration = Histogram(
-    "bioetl-validation-duration-seconds",
+    "bioetl_validation_duration_seconds",
     "Validation duration",
     ["provider", "level"]
 )

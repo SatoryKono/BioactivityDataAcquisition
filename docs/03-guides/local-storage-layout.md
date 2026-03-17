@@ -197,7 +197,7 @@ Storage paths are configured via environment variables or `Settings`:
 from bioetl.infrastructure.config import Settings
 
 settings = Settings()
-print(settings.data-dir)  # Path("data")
+print(settings.data_dir)  # Path("data")
 # Actual paths use data/output/ hierarchy:
 # - Bronze: data/output/bronze/
 # - Silver: data/output/silver/

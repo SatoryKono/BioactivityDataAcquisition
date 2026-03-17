@@ -47,17 +47,12 @@ PipelineRunner.run()
 from bioetl.domain.config import RuntimeConfig
 
 config = RuntimeConfig(
-    vacuum-enabled=True,      # Включить автоматический VACUUM
-    vacuum-retention-days=7,  # Файлы старше 7 дней удаляются
+    vacuum_after_run=True,      # Включить автоматический VACUUM
+    vacuum_retention_days=7,    # Файлы старше 7 дней удаляются
 )
 ```
-
-Или через переменные окружения:
-
-```bash
-export BIOETL_VACUUM_ENABLED=true
-export BIOETL_VACUUM_RETENTION_DAYS=7
-```
+Для CLI-run эти параметры также доступны через флаги `--vacuum-after-run` и
+`--vacuum-retention-days`.
 
 ---
 
@@ -122,11 +117,11 @@ bioetl maintenance vacuum-all --dry-run
 0 3 * * * cd /path/to/bioetl && bioetl maintenance vacuum-all --retention-days 7 >> /var/log/bioetl/vacuum.log 2>&1
 ```
 
-### Скрипт автоматизации
+### Скрипт автоматизации (пример)
 
 ```bash
 #!/bin/bash
-# scripts/scheduled-vacuum.sh
+# scripts/repo/scheduled_vacuum.sh (пример пользовательского скрипта)
 
 set -euo pipefail
 
@@ -162,17 +157,8 @@ fi
 
 ### Forensic Retention
 
-Для критических таблиц можно настроить расширенный retention:
-
-```yaml
-# configs/runtime.yaml
-vacuum:
-  default-retention-days: 7
-  forensic-tables:
-    - chembl_activity
-    - pubchem_compound
-  forensic-retention-days: 30
-```
+Для критических таблиц используйте отдельный cron-профиль/команду с большим
+`--retention-days` (например, `30`) вместо глобального значения.
 
 ---
 
@@ -184,7 +170,7 @@ VACUUM операции логируются с structlog pattern:
 
 ```json
 {
-  "event": "vacuum-completed",
+  "event": "vacuum_completed",
   "layer": "silver",
   "table": "chembl_activity",
   "files-removed": 42,
@@ -196,9 +182,9 @@ VACUUM операции логируются с structlog pattern:
 
 | Метрика | Тип | Описание |
 |---------|-----|----------|
-| `vacuum-files-removed` | Counter | Количество удалённых файлов |
-| `vacuum-duration-seconds` | Histogram | Время выполнения VACUUM |
-| `vacuum-errors-total` | Counter | Ошибки VACUUM |
+| `bioetl_vacuum_files_removed_total` | Counter | Количество удалённых файлов |
+| `bioetl_vacuum_duration_seconds` | Histogram | Время выполнения VACUUM |
+| `bioetl_errors_total` (label `error_code`) | Counter | Ошибки выполнения, включая VACUUM |
 
 ---
 

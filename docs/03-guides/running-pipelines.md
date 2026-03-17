@@ -269,19 +269,19 @@ BioETL автоматически собирает метрики выполне
 
 ```bash
 # Метрики доступны на порту 8000
-curl http://localhost:8000/metrics | grep bioetl-
+curl http://localhost:8000/metrics | grep bioetl_
 ```
 
 **Ключевые метрики:**
 
 | Метрика                               | Тип       | Описание                          |
 | ------------------------------------- | --------- | --------------------------------- |
-| `bioetl-pipeline-duration-seconds`    | Histogram | Длительность выполнения пайплайна |
-| `bioetl-records-processed-total`      | Counter   | Количество обработанных записей   |
-| `bioetl-errors-total`                 | Counter   | Количество ошибок                 |
-| `bioetl-batch-size-records`           | Histogram | Размер батчей                     |
-| `bioetl-dq-records-quarantined-total` | Counter   | Карантинные записи                |
-| `bioetl-circuit-breaker-state`        | Gauge     | Состояние Circuit Breaker         |
+| `bioetl_pipeline_duration_seconds`    | Histogram | Длительность выполнения пайплайна |
+| `bioetl_records_processed_total`      | Counter   | Количество обработанных записей   |
+| `bioetl_errors_total`                 | Counter   | Количество ошибок                 |
+| `bioetl_batch_size_records`           | Histogram | Размер батчей                     |
+| `bioetl_dq_records_quarantined_total` | Counter   | Карантинные записи                |
+| `bioetl_circuit_breaker_state`        | Gauge     | Состояние Circuit Breaker         |
 
 **Включение/отключение метрик:**
 
@@ -335,20 +335,20 @@ bioetl health server --port 8081
 
 ```
 data/
-├── output/
-│   ├── bronze/
-│   │   └── chembl/activity/2026-01-26/
-│   │       └── batch-001.jsonl.zst
-│   ├── silver/
-│   │   └── chembl/activity/
-│   │       └── _delta_log/
-│   └── gold/
-│       └── chembl/activity/
-│           └── _delta_log/
-├── checkpoints/
-│   └── chembl_activity.json
-└── quarantine/
-    └── chembl/activity/
+└── output/
+    ├── bronze/
+    │   └── chembl/activity/2026-01-26/
+    │       └── batch-001.jsonl.zst
+    ├── silver/
+    │   └── chembl/activity/
+    │       └── _delta_log/
+    ├── gold/
+    │   └── chembl/activity/
+    │       └── _delta_log/
+    ├── checkpoints/
+    │   └── chembl_activity.json
+    └── quarantine/
+        └── _delta_log/
 ```
 
 ### Экспорт данных

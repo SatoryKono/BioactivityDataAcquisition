@@ -22,7 +22,7 @@
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды (24 модуля в `commands/`, актуально на 2026-03-12):**
+**Доступные команды (32 модуля в `commands/`, актуально на 2026-03-17):**
 
 | Команда         | Модуль                       | Описание                                |
 | --------------- | ---------------------------- | --------------------------------------- |
@@ -68,7 +68,7 @@ python -m bioetl run-composite --composite publication
 python -m bioetl health --provider chembl
 ```
 
-`interfaces/cli/main.py` парсит аргументы, вызывает функции из `src/bioetl/composition/bootstrap/` для инициализации системы и запускает выполнение пайплайна. Исторический `interfaces/cli.py` оставлен только как совместимый shim и не является активной точкой входа.
+`interfaces/cli/main.py` парсит аргументы и вызывает composition runtime bootstrap (`bootstrap_pipeline_runner`, `bootstrap_composite_runner`) для запуска исполнения. Каноническая точка входа CLI — `src/bioetl/interfaces/cli/main.py`.
 
 ### 2.2. `http/` — HTTP Health Server
 
@@ -126,6 +126,6 @@ Graceful shutdown обрабатывается непосредственно в
 
 ### Смежные Разделы Документации
 
-- [Composition Layer](05-composition-layer.md) — `bootstrap_pipeline`, фабрики
+- [Composition Layer](05-composition-layer.md) — runtime bootstrap (`bootstrap_pipeline_runner`, `bootstrap_composite_runner`), фабрики
 - [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
 - [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов (interfaces может импортировать всё)

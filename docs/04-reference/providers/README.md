@@ -37,9 +37,15 @@ ChEMBL provides comprehensive bioactivity data with multiple entity types:
 
 ## Provider Configuration
 
-Pipeline configurations for providers are in `configs/entities/{provider}/`:
+Provider-level configurations are in `configs/providers/{provider}.yaml`,
+while pipeline/entity configurations are in `configs/entities/{provider}/`:
 
 ```
+configs/providers/
+- chembl.yaml        # Provider-level source/rate-limit/auth settings
+- pubchem.yaml       # Provider-level source/rate-limit/auth settings
+- ...
+
 configs/entities/
 - chembl/           # ChEMBL pipeline configs
 - pubchem/          # PubChem configs

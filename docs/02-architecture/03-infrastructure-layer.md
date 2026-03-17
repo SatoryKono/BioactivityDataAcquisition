@@ -217,8 +217,8 @@ Redis-адаптер без изменения domain/application слоёв.
 
 ### 2.4. `checkpoint/` и `quarantine/`
 
-- **`checkpoint/`**: Реализация `CheckpointPort` для сохранения состояния пайплайнов. Текущая реализация использует локальную файловую систему (`LocalCheckpoint`). См. [ADR-010](decisions/ADR-010-local-only-deployment.md).
-- **`quarantine/`**: Реализация `QuarantinePort` для записи "плохих" данных в отдельное хранилище для последующего анализа.
+- **`checkpoint/`**: Реализация `CheckpointPort` для сохранения состояния пайплайнов. Текущая реализация использует локальную файловую систему (`LocalCheckpointAdapter`). См. [ADR-010](decisions/ADR-010-local-only-deployment.md).
+- **`quarantine/`**: Реализация `QuarantinePort` через unified Delta-backed адаптер (`UnifiedQuarantineAdapter`) для записи "плохих" данных.
 
 ### 2.5. `observability/` — Наблюдаемость
 

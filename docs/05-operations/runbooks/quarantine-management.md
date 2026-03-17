@@ -14,7 +14,7 @@ Records that fail Data Quality (DQ) checks are sent to the Quarantine table (`co
 ### 1. Inspect Quarantine
 Review new errors to identify systemic issues.
 ```bash
-make quarantine-inspect PIPELINE={pipeline-name} LIMIT=50
+bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 ```
 
 ### 2. Triage Errors
@@ -25,20 +25,20 @@ make quarantine-inspect PIPELINE={pipeline-name} LIMIT=50
 ### 3. Replay Records
 After fixing a bug, replay quarantined records.
 ```bash
-make quarantine-replay PIPELINE={pipeline-name}
+bioetl quarantine replay --pipeline {pipeline-name}
 ```
-*Note: Only records with `dq-status='NEW'` are replayed.*
+*Note: Replay targets records with `dq_status='NEW'` and marks processed records as `REPROCESSED`.*
 
 ### 4. Purge Garbage
 Remove records that cannot be recovered.
 ```bash
-make quarantine-purge PIPELINE={pipeline-name}
+bioetl quarantine purge --pipeline {pipeline-name}
 ```
-*Note: This sets `dq-status='IGNORED'` (soft delete) or physically deletes depending on config.*
+*Note: Purge deletes old records from the Delta quarantine table.*
 
 ## Metrics
 - `dq-records-quarantined-total`: Total records sent to quarantine.
 - `dq-quarantine-size-bytes`: Storage size of quarantine table.
 
 ## Retention
-Quarantine data is retained for **30 days** by default. Old records are automatically cleaned up.
+Quarantine data is retained for **30 days** by default. Cleanup is executed via explicit purge operations (`bioetl quarantine purge`).

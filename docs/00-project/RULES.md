@@ -697,11 +697,11 @@ _run_id → _run_id → pipeline-run-id
 
 **Запуск метрик:**
 
-- Автоматически в `bootstrap-pipeline()` (Composition Root)
+- Автоматически в `bootstrap_pipeline_runner()` (Composition Root)
 - Идемпотентный: повторный вызов безопасен (Double-Check Locking)
 - Graceful degradation: ошибки метрик не блокируют пайплайн
 
-**Pipeline Metrics (prefix: `bioetl-`):**
+**Pipeline Metrics (prefix: `bioetl_`):**
 
 | Метрика                       | Тип       | Labels                            | Описание                        |
 | ----------------------------- | --------- | --------------------------------- | ------------------------------- |
@@ -1021,7 +1021,7 @@ from __future__ import annotations
 
 1. Прекратить извлечение (fetch) новых записей.
 1. Дождаться завершения записи текущего батча.
-1. Сохранить чекпоинт в **local storage** с использованием **If-Match / ETag** для обеспечения атомарности и предотвращения Lost Updates.
+1. Сохранить чекпоинт в **local storage** с использованием атомарной записи файла (`*.tmp` -> rename) для предотвращения частичных обновлений.
 1. Выйти с кодом 0.
 
 - **Guarantees**: Система гарантирует At-Least-Once доставку + Дедупликацию в Silver (через Content Hash). Гарантия Exactly-Once на уровне транспорта не требуется.
@@ -1340,8 +1340,8 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 
 ### 8.1. Контракты Данных (Data Contracts)
 
-- **Реестр Схем**: Gold-схемы публикуются в `docs/04-reference/contracts/gold/{entity}.json` (JSON Schema).
-- **Версионирование**: Семантическое версионирование схем: `{entity}-v{major}.{minor}`.
+- **Реестр Схем**: Gold-схемы публикуются в `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json` (JSON Schema).
+- **Версионирование**: Семантическое версионирование схем: `{provider}_{entity}_v{major}.{minor}`.
   - Minor: добавление nullable полей.
   - Major: удаление/переименование полей, изменение типов.
 - **Уведомление о Breaking Change**:

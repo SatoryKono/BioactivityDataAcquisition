@@ -5,7 +5,7 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Entity ID** | `molecule-chembl-id` (Business Key) |
+| **Entity ID** | `molecule_id` (Business Key) |
 | **Content Hash** | `content_hash` (SHA256 for SCD Type 2) |
 | **Source** | ChEMBL API (`/chembl/api/data/molecule.json`) |
 | **Update Frequency** | Quarterly (ChEMBL release cycle) |
@@ -16,7 +16,7 @@ Molecule records represent chemical compounds including small molecules, protein
 
 ### Key Relationships
 ```
-Molecule ◄─── Activity (molecule-chembl-id)
+Molecule ◄─── Activity (molecule_id)
     │
     └──► Parent Molecule (hierarchy-parent-chembl-id)
 ```
@@ -40,7 +40,7 @@ Gold layer applies filters for high-quality drug-like molecules:
 | `structure-type` | `["MOL"]` | Molecules with structures |
 | `inorganic-flag` | `["0"]` | Organic compounds only |
 
-**Required Fields for Gold**: `molecule-chembl-id`
+**Required Fields for Gold**: `molecule_id`
 
 ---
 
@@ -50,7 +50,7 @@ Gold layer applies filters for high-quality drug-like molecules:
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `molecule-chembl-id` | `str` | No | `^CHEMBL\d+$` | ChEMBL molecule identifier | `molecules[].molecule-chembl-id` |
+| `molecule_id` | `str` | No | `^CHEMBL\d+$` | ChEMBL molecule identifier | `molecules[].molecule_id` |
 
 ### Core Properties
 
@@ -135,14 +135,14 @@ Gold layer applies filters for high-quality drug-like molecules:
 
 | Field | Type | Nullable | Description | Source |
 |-------|------|----------|-------------|--------|
-| `canonical-smiles` | `str` | Yes | Canonical SMILES representation | `molecule-structures.canonical-smiles` |
+| `canonical_smiles` | `str` | Yes | Canonical SMILES representation | `molecule-structures.canonical_smiles` |
 | `standard-inchi` | `str` | Yes | Standard InChI representation | `molecule-structures.standard-inchi` |
 | `inchi-key` | `str` | Yes | Standard InChI Key | `molecule-structures.standard-inchi-key` |
 
 #### Migration from v5.9.x
 
 The following field names have been renamed:
-- `structure-canonical-smiles` → `canonical-smiles`
+- `structure-canonical_smiles` → `canonical_smiles`
 - `structure-standard-inchi` → `standard-inchi`
 - `structure-standard-inchi-key` → `inchi-key`
 
@@ -154,7 +154,7 @@ Use the migration script: `src/tools/scripts/migrations/rename_structure_fields.
 
 | Field | Type | Nullable | Purpose | Included in Content Hash |
 |-------|------|----------|---------|-------------------------|
-| `entity_id` | `str` | No | Business key (= molecule-chembl-id) | Yes |
+| `entity_id` | `str` | No | Business key (= molecule_id) | Yes |
 | `content_hash` | `str` | No | SHA256 for SCD Type 2 | — |
 | `_run_id` | `UUID` | No | Pipeline run correlation ID | No |
 | `_run_type` | `Enum` | No | incremental/backfill/rebuild | No |
@@ -171,7 +171,7 @@ Use the migration script: `src/tools/scripts/migrations/rename_structure_fields.
 
 | Source Field | Target Field | Transformation |
 |--------------|--------------|----------------|
-| `molecule-chembl-id` | `molecule-chembl-id` | Direct |
+| `molecule_id` | `molecule_id` | Direct |
 | `max-phase` | `max-phase` | `safe-float()` |
 | `first-approval` | `first-approval` | `safe-int()` |
 | `molecule-hierarchy` | `molecule-hierarchy` | `json.dumps()` |
@@ -179,7 +179,7 @@ Use the migration script: `src/tools/scripts/migrations/rename_structure_fields.
 | `molecule-properties` | `molecule-properties` | `json.dumps()` |
 | `molecule-properties.*` | `property-*` | Flatten & convert |
 | `molecule-structures` | `molecule-structures` | `json.dumps()` |
-| `molecule-structures.canonical-smiles` | `canonical-smiles` | Flatten (no prefix) |
+| `molecule-structures.canonical_smiles` | `canonical_smiles` | Flatten (no prefix) |
 | `molecule-structures.standard-inchi` | `standard-inchi` | Flatten (no prefix) |
 | `molecule-structures.standard-inchi-key` | `inchi-key` | Flatten + rename |
 
@@ -193,7 +193,7 @@ Use the migration script: `src/tools/scripts/migrations/rename_structure_fields.
 class MoleculeSchema(ETLRecordSchema):
     """Molecule validation schema for Silver layer."""
 
-    molecule-chembl-id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False, str-matches=r"^CHEMBL\d+$"
     )
     max-phase: Optional[Series[float]] = pa.Field(
@@ -213,7 +213,7 @@ class MoleculeSchema(ETLRecordSchema):
 
 ```python
 def -validate-invariants(self) -> None:
-    if not self.molecule-chembl-id:
+    if not self.molecule_id:
         raise ValueError("Molecule ChEMBL ID is required")
     if self.max-phase is not None and not (0 <= self.max-phase <= 4):
         raise ValueError(f"max-phase must be 0-4, got {self.max-phase}")
@@ -225,7 +225,7 @@ def -validate-invariants(self) -> None:
 
 | Source | ID Field | Mapping Strategy |
 |--------|----------|------------------|
-| ChEMBL | `molecule-chembl-id` | Primary source |
+| ChEMBL | `molecule_id` | Primary source |
 | PubChem | `cross-references[src="PubChem"]` | Via cross-references |
 | DrugBank | `cross-references[src="DrugBank"]` | Via cross-references |
 | ChEBI | `cross-references[src="ChEBI"]` | Via cross-references |
@@ -238,7 +238,7 @@ def -validate-invariants(self) -> None:
 
 ```json
 {
-  "molecule-chembl-id": "CHEMBL25",
+  "molecule_id": "CHEMBL25",
   "pref-name": "ASPIRIN",
   "molecule-type": "Small molecule",
   "structure-type": "MOL",
@@ -250,7 +250,7 @@ def -validate-invariants(self) -> None:
   "black-box-warning": 0,
   "therapeutic-flag": true,
   "molecule-hierarchy": {
-    "molecule-chembl-id": "CHEMBL25",
+    "molecule_id": "CHEMBL25",
     "parent-chembl-id": "CHEMBL25"
   },
   "molecule-properties": {
@@ -264,7 +264,7 @@ def -validate-invariants(self) -> None:
     "qed-weighted": 0.56
   },
   "molecule-structures": {
-    "canonical-smiles": "CC(=O)Oc1ccccc1C(=O)O",
+    "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
     "standard-inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
     "standard-inchi-key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
   }
@@ -276,7 +276,7 @@ def -validate-invariants(self) -> None:
 ```json
 {
   "entity_id": "CHEMBL25",
-  "molecule-chembl-id": "CHEMBL25",
+  "molecule_id": "CHEMBL25",
   "content_hash": "sha256:abc123...",
   "_run_id": "550e8400-e29b-41d4-a716-446655440000",
   "_run_type": "incremental",
@@ -306,7 +306,7 @@ def -validate-invariants(self) -> None:
   "property-ro5-violations": 0,
   "property-qed-weighted": 0.56,
 
-  "canonical-smiles": "CC(=O)Oc1ccccc1C(=O)O",
+  "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
   "standard-inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
   "inchi-key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
 }

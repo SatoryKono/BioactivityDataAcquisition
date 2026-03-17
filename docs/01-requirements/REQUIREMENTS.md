@@ -681,7 +681,7 @@
 
 #### REQ-SHUTDOWN-003
 - **Уровень**: MUST
-- **Описание**: Сохранить чекпоинт в локальном хранилище (`data/output/checkpoints`) с If-Match/ETag
+- **Описание**: Сохранить чекпоинт в локальном хранилище (`data/output/checkpoints`) с атомарной записью (tmp + rename)
 - **Проверка**: Тест — чекпоинт сохраняется атомарно
 
 #### REQ-SHUTDOWN-004
@@ -811,12 +811,12 @@
 
 #### REQ-CONTRACT-001
 - **Уровень**: MUST
-- **Описание**: Gold-схемы публикуются в `docs/04-reference/contracts/gold/{entity}.json`
+- **Описание**: Gold-схемы публикуются в `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json`
 - **Проверка**: Проверить наличие JSON Schema файлов
 
 #### REQ-CONTRACT-002
 - **Уровень**: MUST
-- **Описание**: Версионирование: `{entity}-v{major}.{minor}`
+- **Описание**: Версионирование: `{provider}_{entity}_v{major}.{minor}`
 - **Проверка**: Проверить формат версий в схемах
 
 #### REQ-CONTRACT-003

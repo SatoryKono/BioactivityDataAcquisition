@@ -15,7 +15,7 @@
 | **Library** | `httpx` (REST API) |
 | **Rate Limit** | 10 req/sec (polite pool) |
 | **Health Check** | `/works?per-page=1` |
-| **Auth Type** | API Key (email-based, optional) |
+| **Auth Type** | Email `mailto` (`BIOETL_OPENALEX_EMAIL`) |
 
 ---
 
