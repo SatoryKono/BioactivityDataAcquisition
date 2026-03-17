@@ -85,8 +85,9 @@ Before contributing, read these documents:
 
 For PRs to `main`, configure GitHub branch protection/rulesets to require:
 
-- `checks-complete` (from `.github/workflows/import-linter.yml` — lint, type check, unit + integration + arch tests)
+- `checks-complete` (from `.github/workflows/import-linter.yml` — lint, C901 governance, import-linter + architecture gates)
 - `coverage-verify` (from `.github/workflows/tests.yml` — 85% coverage threshold)
+- `type-check` (from `.github/workflows/type-checking.yml` — mypy strict compliance)
 - `Schema Governance Status` (from `.github/workflows/schema-governance.yml`)
 - `detect-secrets` (from `.github/workflows/security.yml`)
 

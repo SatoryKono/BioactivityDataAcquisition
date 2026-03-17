@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1074,
-    "total_internal_imports": 4120,
+    "scanned_modules": 1079,
+    "total_internal_imports": 4147,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 245,
@@ -35,13 +35,13 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 223,
+      "imports": 225,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 198,
+      "imports": 203,
       "allowed": true
     },
     {
@@ -53,13 +53,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 521,
+      "imports": 526,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 638,
+      "imports": 653,
       "allowed": true
     },
     {
@@ -136,7 +136,12 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 42
+      "imports": 44
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.types",
+      "imports": 40
     },
     {
       "source": "composition.factories",
@@ -144,14 +149,9 @@
       "imports": 39
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.types",
-      "imports": 39
-    },
-    {
       "source": "composition.factories",
       "target": "infrastructure.storage",
-      "imports": 32
+      "imports": 36
     },
     {
       "source": "application.services",
@@ -359,6 +359,11 @@
       "imports": 9
     },
     {
+      "source": "composition.factories",
+      "target": "domain.services",
+      "imports": 9
+    },
+    {
       "source": "composition.bootstrap",
       "target": "infrastructure.storage",
       "imports": 8
@@ -366,11 +371,6 @@
     {
       "source": "composition.factories",
       "target": "domain.context",
-      "imports": 8
-    },
-    {
-      "source": "composition.factories",
-      "target": "domain.services",
       "imports": 8
     },
     {

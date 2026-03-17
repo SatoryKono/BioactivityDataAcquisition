@@ -121,21 +121,32 @@ def build_postrun_service(
         silver_dq_config=dq_configs.silver,
         gold_dq_config=dq_configs.gold,
     )
-    postrun_kwargs = {
-        "config": pipeline.config,
-        "runtime": pipeline.runtime,
-        "context": pipeline.context,
-        "dq_service": dq_service,
-        "lifecycle_service": lifecycle_service,
-        "storage": pipeline.services.storage,
-        "metrics": pipeline.services.metrics,
-        "logger": logger_port,
-        "dependencies": dependencies,
-        "metadata_coordinator": pipeline.services.metadata_coordinator,
-        "metadata_writer": pipeline.services.metadata_writer,
-    }
-
     if tracer is None:
-        return PostrunService(**postrun_kwargs)
+        return PostrunService(
+            config=pipeline.config,
+            runtime=pipeline.runtime,
+            context=pipeline.context,
+            dq_service=dq_service,
+            lifecycle_service=lifecycle_service,
+            dependencies=dependencies,
+            storage=pipeline.services.storage,
+            metrics=pipeline.services.metrics,
+            logger=logger_port,
+            metadata_coordinator=pipeline.services.metadata_coordinator,
+            metadata_writer=pipeline.services.metadata_writer,
+        )
 
-    return PostrunService(tracer=tracer, **postrun_kwargs)
+    return PostrunService(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        context=pipeline.context,
+        dq_service=dq_service,
+        lifecycle_service=lifecycle_service,
+        dependencies=dependencies,
+        tracer=tracer,
+        storage=pipeline.services.storage,
+        metrics=pipeline.services.metrics,
+        logger=logger_port,
+        metadata_coordinator=pipeline.services.metadata_coordinator,
+        metadata_writer=pipeline.services.metadata_writer,
+    )

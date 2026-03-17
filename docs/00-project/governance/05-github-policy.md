@@ -43,8 +43,8 @@ BioETL uses **19 GitHub Actions workflows** organized by purpose.
 
 | Workflow | File | Key Jobs | What It Checks |
 |----------|------|----------|----------------|
-| **Lint, Type Check, Tests** | `import-linter.yml` | `lint`, `arch-tests`, `unit-tests`, `integration-tests`, `checks-complete` | Ruff lint+format, mypy strict, architecture import rules, unit+integration tests, 85%/90% coverage |
-| **Tests** | `tests.yml` | `smoke-check`, `test-fast`, `test-matrix`, `coverage-verify` | VCR cassettes, config validation, smoke tests, full test matrix (Python 3.11+3.12, 6 groups), 85% coverage |
+| **Lint and Architecture Gates** | `import-linter.yml` | `lint`, `c901-governance`, `arch-tests`, `checks-complete` | Ruff lint+format, changed-file formatting enforcement, C901 baseline governance, architecture tests, import-linter, dependency boundary checks |
+| **Tests** | `tests.yml` | `smoke-check`, `test-fast`, `test-matrix`, `coverage-verify` | VCR cassettes, config validation, smoke tests, fast unit feedback, full test matrix (Python 3.11+3.12, 6 groups), final 85% coverage gate |
 | **Type Checking (Strict)** | `type-checking.yml` | `type-check` | mypy strict, NewType/Protocol verification, `Any` usage analysis |
 | **Commit Lint** | `commit-lint.yml` | `commit-lint` | Conventional Commits format enforcement |
 
@@ -93,7 +93,7 @@ For PRs to `main`, the following status checks **MUST** pass:
 
 | Check Name | Workflow | Purpose |
 |------------|----------|---------|
-| `checks-complete` | import-linter.yml | Aggregates lint + arch + tests |
+| `checks-complete` | import-linter.yml | Aggregates lint + C901 governance + architecture gates |
 | `coverage-verify` | tests.yml | 85% coverage threshold |
 | `schema-governance-status` | schema-governance.yml | Schema parity and contracts |
 | `detect-secrets` | security.yml | No credential leaks |

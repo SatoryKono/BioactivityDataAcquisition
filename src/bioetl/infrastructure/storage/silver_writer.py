@@ -5,15 +5,24 @@ from __future__ import annotations
 import asyncio as _asyncio
 import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable as _DeltaTable
 from deltalake import write_deltalake as _write_deltalake
 
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
+from bioetl.domain.ports import (
+    AuditPort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
+    MetricsPort,
+    SilverValidatorPort,
+    TracingPort,
+)
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
 )
@@ -43,12 +52,7 @@ from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
 )
 from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
     SilverWriterRuntimeServices,
-)
-from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
     build_silver_writer_runtime_services,
-)
-from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
-    resolve_silver_writer_runtime,
 )
 from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
     SilverWriterValidationMixin,
@@ -66,18 +70,9 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from bioetl.domain.config import KeyNullabilityRule
-    from bioetl.domain.ports import (
-        AuditPort,
-        LoggerPort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-        MetricsPort,
-        SilverValidatorPort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-    from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
@@ -115,16 +110,34 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 validation, metadata, DQ, resilience, and optional CSV export.
             flat_structure: When True, omit the table-based subdirectory hierarchy.
         """
-        csv_exporter = legacy_kwargs.pop("csv_exporter", None)
-        tracing = legacy_kwargs.pop("tracing", None)
-        write_policy = legacy_kwargs.pop("write_policy", None)
-        metrics = legacy_kwargs.pop("metrics", None)
-        audit = legacy_kwargs.pop("audit", None)
-        silver_validator = legacy_kwargs.pop("silver_validator", None)
-        metadata_writer = legacy_kwargs.pop("metadata_writer", None)
-        metadata_coordinator = legacy_kwargs.pop("metadata_coordinator", None)
-        dq_calculator = legacy_kwargs.pop("dq_calculator", None)
-        merge_resilience_policy = legacy_kwargs.pop("merge_resilience_policy", None)
+        csv_exporter = cast("CsvExporter | None", legacy_kwargs.pop("csv_exporter", None))
+        tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
+        write_policy = cast(
+            "WriteModePolicy | None",
+            legacy_kwargs.pop("write_policy", None),
+        )
+        metrics = cast("MetricsPort | None", legacy_kwargs.pop("metrics", None))
+        audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
+        silver_validator = cast(
+            "SilverValidatorPort | None",
+            legacy_kwargs.pop("silver_validator", None),
+        )
+        metadata_writer = cast(
+            "MetadataWriterPort | None",
+            legacy_kwargs.pop("metadata_writer", None),
+        )
+        metadata_coordinator = cast(
+            "MetadataCoordinatorPort | None",
+            legacy_kwargs.pop("metadata_coordinator", None),
+        )
+        dq_calculator = cast(
+            "DQMetricsCalculator | None",
+            legacy_kwargs.pop("dq_calculator", None),
+        )
+        merge_resilience_policy = cast(
+            "SilverMergeResiliencePolicy | None",
+            legacy_kwargs.pop("merge_resilience_policy", None),
+        )
         if legacy_kwargs:
             unexpected = ", ".join(sorted(legacy_kwargs))
             raise TypeError(f"Unexpected SilverWriter options: {unexpected}")

@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriterRuntimeServices
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 if TYPE_CHECKING:
@@ -46,16 +47,19 @@ def create_bronze_writer(
     metadata_writer = (
         MetadataWriter(logger=logger) if save_metadata else NoOpMetadataWriter()
     )
-    effective_tracing: TracingPort = tracing or NoOpTracing()
+    effective_tracing = cast("TracingPort", tracing or NoOpTracing())
     return writer_cls(
         base_path=base_path,
         logger=logger,
         metrics=metrics,
-        tracing=effective_tracing,
         save_json=save_json,
         json_path=None,
-        metadata_writer=metadata_writer,
-        save_metadata=save_metadata,
-        metadata_coordinator=metadata_coordinator,
+        runtime_services=BronzeWriterRuntimeServices(
+            tracing=effective_tracing,
+            audit=None,
+            metadata_writer=metadata_writer,
+            save_metadata=save_metadata,
+            metadata_coordinator=metadata_coordinator,
+        ),
         flat_structure=flat_structure,
     )
