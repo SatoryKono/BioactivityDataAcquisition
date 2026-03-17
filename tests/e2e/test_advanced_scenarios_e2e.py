@@ -22,7 +22,7 @@ import pytest
 from deltalake import DeltaTable
 
 from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import BatchID, RunID, RunType
 from .conftest import (
     assert_silver_table_has_records,
     create_test_context,
@@ -67,7 +67,7 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
     # Create context with vacuum enabled
     ctx = PipelineRunContext(
         pipeline_name="chembl_activity",
-        run_id=uuid4(),
+        run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         resume=False,
         limit=5,
@@ -161,7 +161,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
     await manager.quarantine_record(
         record=test_record,
         error_type=ErrorType.DATA_QUALITY,
-        batch_id=uuid4(),
+        batch_id=BatchID(uuid4()),
         error_details="Test DQ error",
         ingestion_ts=datetime.now(UTC),
     )
@@ -199,7 +199,7 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
             pipeline="test_pipeline",
             error_code="DataQualityError",
             payload={"entity_id": f"entity_{i}"},
-            bronze_batch_id=uuid4(),
+            bronze_batch_id=BatchID(uuid4()),
             metadata={"error_message": f"Error {i}"},
             ingestion_ts=datetime.now(UTC),
         )
@@ -312,7 +312,7 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
     # Load checkpoint - returns tuple (run_id, metadata)
     loaded = await checkpoint.load(pipeline=pipeline_name)
     assert loaded is not None, "Checkpoint should be loadable"
-    loaded_run_id, loaded_metadata = loaded
+    _, loaded_metadata = loaded
     assert loaded_metadata["state"]["offset"] == 100
     assert loaded_metadata["state"]["batch_count"] == 5
 
