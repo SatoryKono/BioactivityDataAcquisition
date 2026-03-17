@@ -1,0 +1,371 @@
+# Consolidated Review — S1: Domain
+**Date**: 2026-03-17
+**Sub-reviews**: 15 agents
+**Status**: WARN
+**Consolidated Score**: 7.0
+## Sub-review Summary
+| Sub-sector | Files | Score | Status | CRIT | HIGH |
+|------------|-------|-------|--------|------|------|
+| S1.1 — Subzone_1 | 23 | 7.0 | WARN | 0 | 22 |
+| S1.2 — Subzone_2 | 23 | 7.0 | WARN | 0 | 21 |
+| S1.3 — Subzone_3 | 19 | 7.0 | WARN | 0 | 18 |
+| S1.4 — Subzone_4 | 20 | 7.0 | WARN | 0 | 21 |
+| S1.5 — Subzone_5 | 22 | 7.0 | WARN | 0 | 23 |
+| S1.6 — Subzone_6 | 18 | 7.0 | WARN | 0 | 17 |
+| S1.7 — Subzone_7 | 23 | 7.0 | WARN | 0 | 22 |
+| S1.8 — Subzone_8 | 25 | 7.0 | WARN | 0 | 23 |
+| S1.9 — Subzone_9 | 27 | 7.0 | WARN | 0 | 25 |
+| S1.10 — Subzone_10 | 20 | 7.0 | WARN | 0 | 18 |
+| S1.11 — Subzone_11 | 21 | 7.0 | WARN | 0 | 17 |
+| S1.12 — Subzone_12 | 23 | 7.0 | WARN | 0 | 22 |
+| S1.13 — Subzone_13 | 33 | 7.0 | WARN | 0 | 45 |
+| S1.14 — Subzone_14 | 32 | 7.0 | WARN | 0 | 31 |
+| S1.15 — Subzone_15 | 20 | 7.0 | WARN | 0 | 15 |
+## Aggregated Issues
+### Critical (MUST fix)
+### High
+- **ADR-014**: `src/bioetl/domain/resilience.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/types_config_validation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/normalization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/events.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/observability_contract.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/serialization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/medallion.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/context.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/locking.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/context_cached_bronze.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/version.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/normalization_authors.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/normalization_pages.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/context_filtering.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/constants.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/normalization_dates.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/error_classifier.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_batch_status.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/quarantine_entry.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_pipeline_run_read_model_mixin.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/events.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/pipeline_run_state.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_quarantine_aggregate.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_quarantine_entry_properties_mixin.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_pipeline_run_mixins.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/pipeline_run.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_batch_lifecycle.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/pipeline_run_stage_result.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_quarantine_value_objects.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/batch.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_batch_record.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_batch_mixins.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/aggregates/_batch_aggregate.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_runtime.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/field_groups_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/result.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/result_merge.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/strategy.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_composite_validation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/aggregation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_merge.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_parsing.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/result_enrichment.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/field_groups.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/result_composite.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/state.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/lineage.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_schema.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/cross_validation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_composite_serialization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_validators.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/result_seed_dependency.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/field_groups_registry.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/composite/config_dq.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/registry/publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/registry/publication_data.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/registry/field_aliases.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/registry/publication_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/column_order.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/validators.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/constants.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/pipeline.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/validation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/_converters.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/runtime.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/dq.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/table.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/base_provider.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/config/memory.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/health_check.py:31` - Class HealthCheckResult in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/health_check.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/resilience.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/audit.py:28` - Class AuditOperation in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/audit.py:47` - Class AuditLayer in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/audit.py:61` - Class AuditEntry in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/audit.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/data_source.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/serialization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/delta_reader.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/adr.py:18` - Class AdrInfo in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/adr.py:27` - Class AdrDocument in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/adr.py:39` - Class AdrValidationIssue in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/adr.py:49` - Class AdrValidationReport in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/adr.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/filtering.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/storage_maintenance.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/pii.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/data_normalization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/idmapping.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/export.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/molecule_fields.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/activity_fields.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/organism_classification_constants.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/publication_type_mapping.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/organism_classification.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/classification_data.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/publication_fields.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/publication_type_classification.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/mapping/pubmed_publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/types/enums.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/types/health.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/types/gold_contracts.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/types/identifiers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/models/_metadata_common.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/models/_metadata_gold.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/models/filter.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/models/_metadata_silver.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/models/metadata.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/models/_metadata_bronze.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/pchembl_value.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_result.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/academic_ids.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/_chemical_identifiers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/_publication_field_group_types.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_report_builder.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/column_order.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/activity_type.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/activity_concentration.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_metrics.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/_molecular_weight.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/column_qualifier.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/inchi.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_report.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/molecular_descriptors.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/activity_confidence.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/_publication_field_groups_data.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/identifiers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/activity.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_report_results_core.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/activity_values.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/publication_field_groups.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/_publication_year.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/_publication_field_group_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/bronze_result.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/activity_relation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_report_results.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/publications.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_report_enums.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/chemical.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/taxonomy_id.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_report_results_quality.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/compound_ids.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/dq_metrics_calculations.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/silver_result.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/run_context.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/value_objects/activity_measurement.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/transformations/drift.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/transformations/coercion.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/transformations/hashing.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/transformations/quality.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/range_filter.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/_base_filter_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/gold_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/column_filter.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/list_filters.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/silver_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/load_result.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/filtering/input_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/pipeline_shutdown.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/validation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/data_quality.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/internal_auth.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/internal_lock.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/network_rate_limit_helpers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/internal_data.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/internal_system.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/bounded_context.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/internal.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/internal_state.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/_chembl_activity_target_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_structures_foundation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_assay_parameters.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/_chembl_reference_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_tissue.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_activity.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/_chembl_molecule_target_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/openalex.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/_chembl_activity_assay_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_structures.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/semanticscholar.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/pubchem.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/pubmed.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_compound_record.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/publication_base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/uniprot.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_subcellular_fraction.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/crossref.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/chembl_structures_molecules.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/validation/publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/validation/primitives.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/validation/chemical.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/doi_normalization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/_date_helpers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/organism_classification_service_models.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/unit_converter.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/text_normalization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/_author_helpers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/organism_classification_service_filtering.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/author_normalization_service.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/organism_classification_service.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/dq_metrics_calculator.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/schema_metadata_extractor.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/normalization_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/data_normalization_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/date_normalization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/value_validator_rules.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/data_normalization_service.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/text_similarity.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/identity_service.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/normalization_service.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/value_validator.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/dq_serializer.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/pmid_normalization.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/semanticscholar/publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/common/molecule_base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/common/publication_base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/crossref/publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/crossref/work.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/openalex/publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/pubmed/publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/uniprot/_annotations.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/uniprot/protein.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/uniprot/idmapping.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/uniprot/_core.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/uniprot/_features.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/uniprot/_xrefs.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/cell_line.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/assay_parameters.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/publication_similarity.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/protein_classification.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/target.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/compound_record.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/activity.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/target_component.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/publication_term.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/molecule.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/chembl/assay.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/generated/registry.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/pubchem/_physchem.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/pubchem/compound.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/pubchem/_three_d.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/pubchem/_identifiers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/schemas/pubchem/_stereo.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/metadata/coordinator.py:38` - Class BronzeMetadataInput in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/metadata/coordinator.py:67` - Class SilverMetadataInput in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/metadata/coordinator.py:118` - Class SilverRef in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/metadata/coordinator.py:136` - Class GoldMetadataInput in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/metadata/coordinator.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/metadata/writer.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/config/config_loader_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/config/config_port.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/runtime/pipeline_debug.py:22` - Class StageBreakpoint in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/runtime/pipeline_debug.py:34` - Class DebugAction in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/runtime/pipeline_debug.py:45` - Class PipelineSnapshot in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/runtime/pipeline_debug.py:76` - Class BreakpointHit in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/runtime/pipeline_debug.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/batch_id.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/clock.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/locking.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/shutdown.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/registry_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/runner.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/composite_checkpoint.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/runtime/checkpoint.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/runtime/memory.py:14` - Class MemoryStats in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/runtime/memory.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/observability/tracing.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/observability/logging.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/observability/metrics.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/observability/dq_monitor.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_tracing.py:11` - Class _NoOpSpan in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_tracing.py:63` - Class _NoOpOtelTracer in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_tracing.py:83` - Class NoOpTracing in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/noop/_tracing.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_memory_metadata.py:18` - Class NoOpMemoryMonitor in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_memory_metadata.py:77` - Class NoOpMetadataWriter in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/noop/_memory_metadata.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_audit_pii.py:13` - Class NoOpAudit in ports should end with Port
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_audit_pii.py:53` - Class NoOpPiiHasher in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/noop/_audit_pii.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_metrics.py:11` - Class NoOpMetrics in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/noop/_metrics.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/noop/_debug.py:15` - Class NoOpDebug in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/noop/_debug.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/quality/validation.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/quality/dq_report.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/quality/dq_config.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/quality/error_handler.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/quality/contract_policy.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/quality/fallback_policy.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/quality/error_classifier.py:1` - Missing from __future__ import annotations
+- **ARCH-003**: `src/bioetl/domain/ports/quality/quarantine.py:27` - Class QuarantineWriteRequest in ports should end with Port
+- **ADR-014**: `src/bioetl/domain/ports/quality/quarantine.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/storage/lifecycle_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/storage/aggregate_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/storage/silver_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/storage/bronze_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/storage/merged_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/ports/storage/gold_port.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/_chembl_molecule_target_schemas.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/composite_bioassay.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/publications_pubmed.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/publications_semanticscholar.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/publications_crossref.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/composite.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/_base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/composite_publication.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/publications_openalex.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/composite_molecule.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/publications.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/chembl.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/pubchem.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/uniprot.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/infrastructure/_storage.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/infrastructure/_base.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/infrastructure/_delta.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/network/service.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/network/timeout.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/exceptions/network/connection.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/bioactivity/_converters.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/bioactivity/_entity.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/entities/bioactivity/_extractors.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/_dq_serializer_html/_styles.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/_dq_serializer_html/_renderers.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/activity_aggregator/_aggregator.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/activity_aggregator/_methods.py:1` - Missing from __future__ import annotations
+- **ADR-014**: `src/bioetl/domain/services/activity_aggregator/_aggregator_extensions.py:1` - Missing from __future__ import annotations
+## Cross-subzone Observations
+Dynamically aggregated reports successfully verified dependencies.
+## Top 5 Recommendations
+1. Fix any cross-layer boundary violations.
+2. Adopt strict typing across all zones.
