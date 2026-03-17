@@ -196,12 +196,10 @@ class DataQualityService:
         error_rate: float,
         status: DQEvaluationStatus,
     ) -> DQResult:
-        """Run anomaly detection, process results, and update baselines.
+        """Run anomaly detection, update baselines, and return results.
 
-        Performs quality checks, records timing metrics, and conditionally
-        updates the baseline. ``update_baseline_from_metrics`` is always
-        called; ``_update_baseline_metrics`` skips the update when critical
-        anomalies are present.
+        Side effects: always calls ``update_baseline_from_metrics``;
+        ``_update_baseline_metrics`` skips when critical anomalies found.
 
         Args:
             metrics: Metrics to check for anomalies.
@@ -209,8 +207,7 @@ class DataQualityService:
             status: Determined DQ status.
 
         Returns:
-            DQResult with anomaly detection results, including whether
-            critical anomalies were found and check duration.
+            DQResult with anomalies, critical flag, and check duration.
 
         Note:
             Caller must ensure dq_monitor is not None before calling.
