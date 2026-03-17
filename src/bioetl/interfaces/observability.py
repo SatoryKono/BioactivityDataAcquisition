@@ -30,7 +30,7 @@ def start_metrics_server(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Start the metrics server through composition on demand."""
-    from bioetl.composition.entrypoints import start_metrics_server as _impl
+    from bioetl.composition.observability_api import start_metrics_server as _impl
 
     return _impl(
         port=port,

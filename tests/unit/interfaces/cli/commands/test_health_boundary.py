@@ -8,14 +8,14 @@ import pytest
 
 
 @pytest.mark.unit
-def test_get_health_service_delegates_to_composition_entrypoints() -> None:
+def test_get_health_service_delegates_to_services_api() -> None:
     """Health command module should lazily delegate service resolution."""
     import bioetl.interfaces.cli.commands.health as health_module
 
     service = MagicMock()
 
     with patch(
-        "bioetl.composition.entrypoints.get_health_service",
+        "bioetl.composition.services_api.get_health_service",
         return_value=service,
     ) as mock_get_health_service:
         result = health_module.get_health_service()
@@ -25,14 +25,14 @@ def test_get_health_service_delegates_to_composition_entrypoints() -> None:
 
 
 @pytest.mark.unit
-def test_get_health_server_dependencies_delegates_to_composition_entrypoints() -> None:
+def test_get_health_server_dependencies_delegates_to_services_api() -> None:
     """Health command module should lazily delegate dependency resolution."""
     import bioetl.interfaces.cli.commands.health as health_module
 
     dependencies = MagicMock()
 
     with patch(
-        "bioetl.composition.entrypoints.get_health_server_dependencies",
+        "bioetl.composition.services_api.get_health_server_dependencies",
         return_value=dependencies,
     ) as mock_get_health_server_dependencies:
         result = health_module.get_health_server_dependencies()

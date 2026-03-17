@@ -26,6 +26,12 @@ from bioetl.domain.exceptions import (
     TableNotFoundError,
     UploadError,
 )
+from bioetl.infrastructure.storage.atomic import (
+    AtomicWriteError,
+    atomic_write,
+    atomic_write_bytes,
+    atomic_write_text,
+)
 from bioetl.infrastructure.storage.bronze_write_result_helpers import (
     is_bronze_write_result_persisted,
 )
@@ -36,6 +42,7 @@ from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = [
+    "AtomicWriteError",
     "BronzeWriter",
     "BucketNotFoundError",
     "DeltaReader",
@@ -47,5 +54,8 @@ __all__ = [
     "StorageError",
     "TableNotFoundError",
     "UploadError",
+    "atomic_write",
+    "atomic_write_bytes",
+    "atomic_write_text",
     "is_bronze_write_result_persisted",
 ]

@@ -21,11 +21,9 @@ from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
     RunExecutionRequest,
 )
-from bioetl.composition.entrypoints import (
-    get_pipeline_runner_service,
-    push_metrics_to_gateway,
-)
+from bioetl.composition.execution_api import push_metrics_to_gateway
 from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.services_api import get_pipeline_runner_service
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -56,12 +54,21 @@ from bioetl.interfaces.cli.formatters import echo_error
 __all__ = [
     "build_run_options",
     "execute_run",
+    "get_cli_run_orchestration_service",
     "handle_cli_failure",
     "run",
     "validate_options",
 ]
 
-_CLI_RUN_ORCHESTRATION_SERVICE = CliRunOrchestrationService()
+_cli_run_orchestration_service: CliRunOrchestrationService | None = None
+
+
+def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
+    """Return process-local run orchestration service (lazy cached accessor seam)."""
+    global _cli_run_orchestration_service
+    if _cli_run_orchestration_service is None:
+        _cli_run_orchestration_service = CliRunOrchestrationService()
+    return _cli_run_orchestration_service
 
 
 def _exit_with_code(code: int | str | None = None) -> NoReturn:
@@ -71,7 +78,7 @@ def _exit_with_code(code: int | str | None = None) -> NoReturn:
 
 def validate_options(start_offset: int | None, run_type: str, resume: bool) -> None:
     """Validate --start-offset constraints; sys.exit on error."""
-    validation = _CLI_RUN_ORCHESTRATION_SERVICE.validate_start_offset(
+    validation = get_cli_run_orchestration_service().validate_start_offset(
         start_offset=start_offset,
         run_type=run_type,
         resume=resume,
@@ -100,7 +107,7 @@ def build_run_options(
     cached_bronze_path: str | None,
 ) -> RunOptions:
     """Build RunOptions from CLI parameters."""
-    return _CLI_RUN_ORCHESTRATION_SERVICE.build_options(
+    return get_cli_run_orchestration_service().build_options(
         run_type=run_type,
         resume=resume,
         start_offset=start_offset,
@@ -132,8 +139,7 @@ def execute_run(
     Returns:
         RunResult with pipeline execution status and record counts.
     """
-
-    return _CLI_RUN_ORCHESTRATION_SERVICE.execute_pipeline(
+    return get_cli_run_orchestration_service().execute_pipeline(
         request=request,
         run_pipeline_async=partial(_run_prepared_request_async, registry=registry),
         run_coroutine=asyncio.run,
@@ -210,9 +216,10 @@ def _run_command_with_cli_policy(
 ) -> None:
     """Execute the prepared run command through the canonical CLI policy path."""
     registry = resolve_context_registry(ctx)
+    service = get_cli_run_orchestration_service()
     run_command_flow(
         cli_input=cli_input,
-        service=_CLI_RUN_ORCHESTRATION_SERVICE,
+        service=service,
         execute_run=partial(execute_run, registry=registry),
         health_info_presenter=_present_run_health_info,
         result_finalizer=_finalize_run_result,

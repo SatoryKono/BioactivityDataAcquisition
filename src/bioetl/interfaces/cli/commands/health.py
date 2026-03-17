@@ -34,14 +34,14 @@ if TYPE_CHECKING:
 
 def get_health_service() -> HealthService:
     """Load the health service through composition on demand."""
-    from bioetl.composition.entrypoints import get_health_service as _impl
+    from bioetl.composition.services_api import get_health_service as _impl
 
     return _impl()
 
 
 def get_health_server_dependencies() -> HealthServerDependencies:
     """Load health server dependencies through composition on demand."""
-    from bioetl.composition.entrypoints import (
+    from bioetl.composition.services_api import (
         get_health_server_dependencies as _impl,
     )
 

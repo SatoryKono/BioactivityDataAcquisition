@@ -21,7 +21,7 @@ __all__ = [
 
 def ensure_metrics_server_started() -> bool:
     """Start the metrics server through composition on demand."""
-    from bioetl.composition.entrypoints import ensure_metrics_server_started as _impl
+    from bioetl.composition.execution_api import ensure_metrics_server_started as _impl
 
     return _impl()
 

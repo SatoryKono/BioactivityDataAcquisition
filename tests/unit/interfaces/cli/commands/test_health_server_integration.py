@@ -37,7 +37,7 @@ class TestHealthServerContext:
             assert server is None
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.entrypoints.get_health_server_dependencies")
+    @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_enabled_starts_and_stops_server(
         self,
@@ -62,7 +62,7 @@ class TestHealthServerContext:
         mock_server.stop.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.entrypoints.get_health_server_dependencies")
+    @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_stops_server_on_exception(
         self,
@@ -85,7 +85,7 @@ class TestHealthServerContext:
         mock_server.stop.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.entrypoints.get_health_server_dependencies")
+    @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     async def test_context_custom_host_port(
         self,
@@ -111,7 +111,7 @@ class TestHealthServerContext:
             assert call_kwargs["health_monitor"] is mock_deps.health_monitor
 
     @pytest.mark.asyncio
-    @patch("bioetl.composition.entrypoints.get_health_server_dependencies")
+    @patch("bioetl.composition.services_api.get_health_server_dependencies")
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch("click.echo")
     async def test_context_continues_when_port_in_use(

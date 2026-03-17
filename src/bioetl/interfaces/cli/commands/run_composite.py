@@ -57,7 +57,7 @@ def _validate_composite_name(
 
 def load_composite_config(name: str) -> CompositeConfig:
     """Load composite config through composition on demand."""
-    from bioetl.composition.entrypoints import load_composite_config as _impl
+    from bioetl.composition.composite_api import load_composite_config as _impl
 
     return _impl(name)
 
@@ -67,7 +67,7 @@ def bootstrap_composite_runner(
     runtime: CompositeRuntimeConfig,
 ) -> CompositePipelineRunner:
     """Build composite runner through composition on demand."""
-    from bioetl.composition.entrypoints import bootstrap_composite_runner as _impl
+    from bioetl.composition.composite_api import bootstrap_composite_runner as _impl
 
     return _impl(config, runtime)
 

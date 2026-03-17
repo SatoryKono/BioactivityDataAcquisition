@@ -8,14 +8,14 @@ import pytest
 
 
 @pytest.mark.unit
-def test_get_lifecycle_service_delegates_to_composition_entrypoints() -> None:
+def test_get_lifecycle_service_delegates_to_resources_api() -> None:
     """Vacuum command module should lazily delegate lifecycle resolution."""
     import bioetl.interfaces.cli.commands.vacuum as vacuum_module
 
     service = MagicMock()
 
     with patch(
-        "bioetl.composition.entrypoints.get_lifecycle_service",
+        "bioetl.composition.resources_api.get_lifecycle_service",
         return_value=service,
     ) as mock_get_lifecycle_service:
         result = vacuum_module.get_lifecycle_service()
@@ -25,14 +25,14 @@ def test_get_lifecycle_service_delegates_to_composition_entrypoints() -> None:
 
 
 @pytest.mark.unit
-def test_get_vacuum_service_delegates_to_composition_entrypoints() -> None:
+def test_get_vacuum_service_delegates_to_services_api() -> None:
     """Vacuum command module should lazily delegate vacuum service resolution."""
     import bioetl.interfaces.cli.commands.vacuum as vacuum_module
 
     service = MagicMock()
 
     with patch(
-        "bioetl.composition.entrypoints.get_vacuum_service",
+        "bioetl.composition.services_api.get_vacuum_service",
         return_value=service,
     ) as mock_get_vacuum_service:
         result = vacuum_module.get_vacuum_service()

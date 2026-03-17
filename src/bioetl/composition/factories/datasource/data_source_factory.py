@@ -7,10 +7,8 @@ from typing import TYPE_CHECKING, ClassVar, cast
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
-from bioetl.composition.providers._models import (
-    DataSourceCreatorProtocol,
-)
 from bioetl.composition.providers.provider_registry import (
+    DataSourceCreatorProtocol,
     ProviderRegistry,
 )
 from bioetl.domain.ports import DataSourcePort

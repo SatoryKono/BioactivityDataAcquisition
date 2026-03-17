@@ -31,7 +31,7 @@ def checkpoint() -> None:
 
 def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
     """Load the checkpoint manager through composition on demand."""
-    from bioetl.composition.entrypoints import get_checkpoint_manager as _impl
+    from bioetl.composition.resources_api import get_checkpoint_manager as _impl
 
     return _impl(pipeline)
 

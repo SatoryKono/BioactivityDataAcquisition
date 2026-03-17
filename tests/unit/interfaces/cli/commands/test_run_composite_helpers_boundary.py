@@ -8,12 +8,12 @@ import pytest
 
 
 @pytest.mark.unit
-def test_push_metrics_to_gateway_delegates_to_composition_entrypoints() -> None:
+def test_push_metrics_to_gateway_delegates_to_execution_api() -> None:
     """Run-composite helpers should lazily delegate metrics pushing."""
     import bioetl.interfaces.cli.commands.run_composite_helpers as helpers_module
 
     with patch(
-        "bioetl.composition.entrypoints.push_metrics_to_gateway",
+        "bioetl.composition.execution_api.push_metrics_to_gateway",
         return_value=True,
     ) as mock_push_metrics_to_gateway:
         result = helpers_module.push_metrics_to_gateway(

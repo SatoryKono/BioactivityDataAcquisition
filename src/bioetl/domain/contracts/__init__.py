@@ -34,6 +34,7 @@ from __future__ import annotations
 # ChEMBL, Composite, CrossRef, OpenAlex, PubChem, PubMed,
 # SemanticScholar, and UniProt schemas.
 from bioetl.domain.contracts.gold import (
+    DATE_REGEX,
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -61,9 +62,6 @@ from bioetl.domain.contracts.gold import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
-
-# Utilities
-from bioetl.domain.contracts.gold._base import DATE_REGEX
 
 __all__ = [
     # Utilities

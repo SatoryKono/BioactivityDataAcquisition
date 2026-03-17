@@ -11,8 +11,9 @@ Current status:
 - Signal handlers were removed in 2025-12-31 (CLI handles KeyboardInterrupt directly)
 - The module is reserved for future orchestration needs
 
-For pipeline execution, use the entrypoints module:
-    from bioetl.composition.entrypoints import run_pipeline, get_pipeline_runner_service
+For pipeline execution, use composition public APIs:
+    from bioetl.composition.execution_api import run_pipeline
+    from bioetl.composition.services_api import get_pipeline_runner_service
 """
 
 from __future__ import annotations

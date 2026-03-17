@@ -17,7 +17,7 @@ from bioetl.domain.value_objects.dq_report import (
     GoldDQReport,
     SilverDQReport,
 )
-from bioetl.infrastructure.storage._atomic import atomic_write_bytes
+from bioetl.infrastructure.storage.atomic import atomic_write_bytes
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
