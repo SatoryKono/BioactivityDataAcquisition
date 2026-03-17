@@ -96,5 +96,7 @@ def create_silver_writer(
         transform_version=transform_version,
         transform_steps=transform_steps,
         runtime_services=runtime_services,
+        # Keep legacy kwarg for constructor-call compatibility in tests and shims.
+        csv_exporter=csv_exporter,
         flat_structure=flat_structure,
     )
