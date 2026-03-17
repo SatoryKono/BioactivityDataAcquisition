@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -41,7 +41,7 @@ class TestBronzeWriterSideEffectsMixin:
     async def test_log_bronze_audit_calls_audit_log_write(self, tmp_path: Path) -> None:
         """Should call audit.log_write when audit port is configured."""
         host = _Host(tmp_path)
-        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         await host._log_bronze_audit(
             run_id=RunID("run-1"),
             ingestion_ts=ts,
@@ -68,7 +68,7 @@ class TestBronzeWriterSideEffectsMixin:
         """Should silently skip audit when audit port is None."""
         host = _Host(tmp_path)
         host._audit = None
-        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         await host._log_bronze_audit(
             run_id=RunID("run-2"),
             ingestion_ts=ts,

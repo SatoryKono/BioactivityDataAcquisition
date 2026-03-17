@@ -32,7 +32,7 @@ model: opus
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010)
-- Провайдеры: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar, IUPHAR, Open Targets
+- Провайдеры: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar,
 
 ---
 
@@ -160,7 +160,7 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 
 **Workflow для composite pipeline:**
 1. Analyze Requirements — data sources, target layers, DQ needs
-2. Design Pipeline Configuration — YAML в `configs/pipelines/composite/`
+2. Design Pipeline Configuration — YAML в `configs/entities/composite/`
 3. Implement Transformers — extend `BaseTransformer`
 4. Wire Dependencies — factories в `composition/factories/`
 5. Add Tests — unit, integration, architecture
@@ -204,12 +204,12 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 | Тренды по категории | `bioRxiv:search_preprints` | `category="bioinformatics"` | Контекст для planning |
 | Статистика публикаций | `bioRxiv:get_content_statistics` | `interval="monthly"` | Capacity planning |
 
-### Open Targets — валидация планов по таргетам
+### OpenAlex — валидация планов по таргетам
 
 | Сценарий | Инструмент | Параметры | Результат |
 |----------|------------|-----------|-----------|
-| Проверка target existence | `Open Targets:search_entities` | `query_strings=["BRCA1"]` | ID resolution |
-| Оценка data volume | `Open Targets:query_open_targets_graphql` | Query с counts | Capacity planning |
+| Проверка target existence | `OpenAlex:search_entities` | `query_strings=["BRCA1"]` | ID resolution |
+| Оценка data volume | `OpenAlex:query_open_targets_graphql` | Query с counts | Capacity planning |
 
 ### PubMed — оценка publication coverage
 
