@@ -3,19 +3,29 @@
 from __future__ import annotations
 
 from collections import Counter
+import importlib.util
 from pathlib import Path
+import sys
+from types import ModuleType
 
 import pytest
-
-from scripts.ci._compatibility_telemetry import (
-    collect_compatibility_surface_snapshot,
-    render_compatibility_surface_section,
-)
 
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_DOC = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
 )
+
+
+def _load_compatibility_telemetry_module() -> ModuleType:
+    script = (ROOT / "scripts" / "ci" / "_compatibility_telemetry.py").resolve()
+    spec = importlib.util.spec_from_file_location(
+        "compatibility_telemetry_reporting", str(script)
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["compatibility_telemetry_reporting"] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def _iter_inventory_statuses() -> Counter[str]:
@@ -35,7 +45,8 @@ def _iter_inventory_statuses() -> Counter[str]:
 @pytest.mark.architecture
 def test_compatibility_surface_snapshot_matches_inventory_status_counts() -> None:
     """CI telemetry should stay aligned with curated compatibility inventory rows."""
-    snapshot = collect_compatibility_surface_snapshot()
+    mod = _load_compatibility_telemetry_module()
+    snapshot = mod.collect_compatibility_surface_snapshot()
     status_counts = _iter_inventory_statuses()
     text = INVENTORY_DOC.read_text(encoding="utf-8")
 
@@ -55,8 +66,9 @@ def test_compatibility_surface_snapshot_matches_inventory_status_counts() -> Non
 @pytest.mark.architecture
 def test_compatibility_surface_summary_section_lists_required_metrics() -> None:
     """Rendered telemetry section should expose stable metric names for CI reports."""
-    snapshot = collect_compatibility_surface_snapshot()
-    section = render_compatibility_surface_section(
+    mod = _load_compatibility_telemetry_module()
+    snapshot = mod.collect_compatibility_surface_snapshot()
+    section = mod.render_compatibility_surface_section(
         snapshot, heading="## Compatibility Surface Snapshot"
     )
 
