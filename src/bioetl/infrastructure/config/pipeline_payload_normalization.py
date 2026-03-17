@@ -38,7 +38,6 @@ def _apply_file_reference_defaults(
     entity_type: str,
 ) -> None:
     """Apply convention-based defaults for file references."""
-    config.setdefault("source_file", f"../../providers/{provider}.yaml")
     config.setdefault("dq_config_file", f"../../entities/{provider}/{entity_type}.yaml")
     config.setdefault(
         "filter_config_file",
@@ -72,9 +71,7 @@ def apply_convention_defaults(
     if not provider or not entity_type:
         return config
 
-    raw_primary_keys = config.get("business_primary_keys") or config.get(
-        "primary_keys", []
-    )
+    raw_primary_keys = config.get("business_primary_keys", [])
     primary_keys = [str(key) for key in raw_primary_keys if str(key).strip()]
     technical_primary_key = str(config.get("technical_primary_key", "entity_id"))
     sort_policy = [technical_primary_key] + [
@@ -98,10 +95,7 @@ def load_source_section(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: Path,
 ) -> None:
-    """Load source config from external file and merge with entity overrides."""
-    source_file = config.get("source_file")
-    if not source_file:
-        return
+    """Load provider source config and merge it with entity-level overrides."""
     provider = config.get("provider")
     if not isinstance(provider, str) or not provider:
         return
@@ -137,9 +131,7 @@ def normalize_pipeline_payload(
     )
     load_source_section(config, payload.config_path)
 
-    for key in ("source_file", "data_schema", "filter_defaults", "contract_defaults"):
-        config.pop(key, None)
-    for key in ("schema_file", "data_schema_file", "column_groups_file"):
+    for key in ("data_schema", "filter_defaults", "contract_defaults"):
         config.pop(key, None)
     return config
 

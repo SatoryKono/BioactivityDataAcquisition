@@ -1,7 +1,5 @@
 # Search Patterns
 
-*Статус: internal-published (Internal / Extended)*
-
 ## Query Templates
 - `site:official.domain <topic> <version>`
 - `<topic> benchmark methodology`

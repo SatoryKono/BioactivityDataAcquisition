@@ -259,10 +259,7 @@ pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
 version: "1.2.0"
-
-primary_keys: ["paper-id"]
-silver_table: "semanticscholar_publication"
-gold_table: "semanticscholar_publication"
+business_primary_keys: ["paper_id"]
 
 source:
   type: api

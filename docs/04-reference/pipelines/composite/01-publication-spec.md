@@ -13,7 +13,7 @@ Merges publication data from multiple providers into a unified composite publica
 | Pipeline ID | `composite_publication` |
 | Provider | `composite` |
 | Entity | `publication` |
-| Version | `1.2.0` |
+| Version | `1.1.0` |
 | Config | `configs/composites/publication.yaml` |
 
 ## Seed and Enrichers
@@ -38,8 +38,7 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Related Configs
 
-- Field map: `configs/composites/publication.yaml`
-- Filters: `configs/composites/publication.yaml#filters`
+- Field map & filters: `configs/composites/publication.yaml`
 
 ## Related ADRs
 

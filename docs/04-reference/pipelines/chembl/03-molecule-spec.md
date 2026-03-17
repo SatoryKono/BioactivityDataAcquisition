@@ -429,24 +429,19 @@ provider: chembl
 entity_type: molecule
 version: "1.2.0"
 description: "Extract molecules from ChEMBL API"
-
-primary_keys: ["molecule-id"]
-silver_table: "chembl_molecule"
-gold_table: "chembl_molecule"
-
-source_file: ../../sources/chembl.yaml
+business_primary_keys: ["molecule_id"]
 
 gold_filters:
   required_fields:
-    - molecule-id
+    - molecule_id
 
 sink:
   bronze:
     path: "data/output/bronze"
-  silver:
-    path: "data/output/silver"
-    primary_key: ["molecule-id"]
-    partition_by: ["molecule-type"]
+silver:
+  path: "data/output/silver"
+  primary_key: ["molecule_id"]
+  partition_by: ["molecule_type"]
     csv_export:
       path: "data/output/csv/silver"
   gold:

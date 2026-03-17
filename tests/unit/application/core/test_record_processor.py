@@ -41,7 +41,7 @@ def _write_temp_pipeline_config(
                 f"  pipeline_name: {pipeline_name}",
                 f"  provider: {provider}",
                 f"  entity_type: {entity}",
-                "  primary_keys: ['id']",
+                "  business_primary_keys: ['id']",
                 "  silver_table: 'tmp_silver'",
                 "  batch_size: 10",
                 "  checkpoint_interval: 100",

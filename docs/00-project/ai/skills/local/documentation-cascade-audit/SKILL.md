@@ -5,8 +5,6 @@ description: Run a hierarchical documentation audit for BioETL using cascade dec
 
 # Documentation Cascade Audit
 
-*Статус: internal-published (Internal / Extended)*
-
 ## Overview
 
 Coordinate a multi-scope documentation audit where each scope is analyzed separately and then merged into a single decision-ready report.
@@ -16,11 +14,10 @@ Use this skill when a single-pass manual review is too large or error-prone.
 
 Read, in this order:
 1. `../../../docs/00-project/ai/memory/agent-memory.md`
-2. `../../../docs/00-project/ai/agents/agents/ORCHESTRATION.md`
-3. `.codex/agents/ORCHESTRATION.md` (or `.claude/agents/ORCHESTRATION.md` for Claude runtime if runtime behavior matters)
-4. `../documentation-audit/SKILL.md`
-5. `../documentation-audit/references/audit-checklist.md`
-6. `../documentation-audit/references/report-template.md`
+2. `../../../.codex/agents/ORCHESTRATION.md`
+3. `../documentation-audit/SKILL.md`
+4. `../documentation-audit/references/audit-checklist.md`
+5. `../documentation-audit/references/report-template.md`
 
 ## Cascade Workflow
 
@@ -50,9 +47,10 @@ Read, in this order:
 ## Deliverables
 
 Required artifacts:
-1. `reports/plans/<task_id>/cascade-audit-report.md`
-2. `reports/plans/<task_id>/cascade-remediation-plan.md`
-3. `reports/plans/<task_id>/cascade-open-questions.md`
+1. Итоговый отчёт: `reports/{LLM}/review_documentation-cascade-audit_{YYYYMMDD}_{HHMM}.md`
+   (включает сводку и приоритеты; LLM = вызывающая модель)
+2. При необходимости дополнительные вложения (remediation/open questions) сохраняй рядом
+   в той же директории с тем же префиксом.
 
 ## Quality Gates
 

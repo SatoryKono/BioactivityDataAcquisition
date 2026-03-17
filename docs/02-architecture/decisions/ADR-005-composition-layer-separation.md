@@ -22,7 +22,7 @@ src/bioetl/
 │   ├── factories/
 │   └── ...
 └── interfaces/       # Driving Adapters (CLI, API, Orchestration)
-    ├── cli.py
+    ├── cli/main.py   # canonical entrypoint (historical shim: cli.py)
     └── orchestration/
 ```
 
@@ -70,7 +70,7 @@ Key observation: `composition/` remains the primary DI layer. While `interfaces/
 The `bootstrap` module is used by multiple entry points:
 
 ```python
-# CLI (interfaces/cli.py)
+# CLI (interfaces/cli/main.py; historical shim: interfaces/cli.py)
 from bioetl.composition.bootstrap import bootstrap_pipeline
 runner = bootstrap_pipeline(...)
 
@@ -115,7 +115,7 @@ New developers immediately understand where dependency injection happens.
 
 ```
 interfaces/
-├── cli.py
+├── cli/main.py  # historical shim: cli.py
 ├── orchestration/
 └── bootstrap/        # Moved here
     ├── __init__.py
@@ -124,7 +124,7 @@ interfaces/
 
 **Rejected because:**
 - Violates SRP — interfaces would have two responsibilities
-- Requires complex import rules (bootstrap can import infrastructure, but cli.py cannot)
+- Requires complex import rules (bootstrap can import infrastructure, but cli/main.py cannot)
 - Less explicit about DI location
 
 ### Alternative 2: Merge composition/ into application/

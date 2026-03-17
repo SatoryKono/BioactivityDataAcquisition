@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -43,9 +44,14 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["sequential-thinking"]["args"][1] == (
         "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
     )
-    assert (
-        servers["github"]["args"][1] == "@modelcontextprotocol/server-github@2025.4.8"
-    )
+    if os.name == "nt":
+        assert servers["github"]["command"] == "powershell"
+        assert ".claude" in servers["github"]["args"][-1]
+        assert "github-mcp-wrapper.ps1" in servers["github"]["args"][-1]
+    else:
+        assert (
+            servers["github"]["args"][1] == "@modelcontextprotocol/server-github@2025.4.8"
+        )
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:

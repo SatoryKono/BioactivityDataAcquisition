@@ -611,7 +611,6 @@ def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> N
 def test_validate_pk_contract_requires_business_primary_keys() -> None:
     config = SimpleNamespace(
         business_primary_keys=[],
-        primary_keys=None,
         technical_primary_key="entity_id",
     )
 
@@ -619,21 +618,19 @@ def test_validate_pk_contract_requires_business_primary_keys() -> None:
         inputs_resolver.validate_pk_contract(config)
 
 
-def test_validate_pk_contract_rejects_legacy_pk_mismatch() -> None:
+def test_validate_pk_contract_ignores_legacy_attribute_when_present() -> None:
     config = SimpleNamespace(
         business_primary_keys=["entity_id"],
         primary_keys=["legacy_id"],
         technical_primary_key="entity_id",
     )
 
-    with pytest.raises(ValueError, match="PK mismatch"):
-        inputs_resolver.validate_pk_contract(config)
+    inputs_resolver.validate_pk_contract(config)
 
 
 def test_validate_pk_contract_requires_technical_primary_key() -> None:
     config = SimpleNamespace(
         business_primary_keys=["entity_id"],
-        primary_keys=["entity_id"],
         technical_primary_key="",
     )
 

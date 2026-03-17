@@ -1,45 +1,8 @@
-"""Pipeline-configuration normalization utilities.
-
-Encapsulates schema-reference migration concerns so pipeline loaders can keep
-read -> normalize -> validate -> map orchestration explicit.
-"""
+"""Pipeline-configuration normalization utilities."""
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
-
-
-def _load_data_schema_config(
-    config_path: Path, schema_file: str
-) -> JsonDict | None:  # Any: YAML config has heterogeneous values
-    """Load data schema configuration with layer-specific column definitions.
-
-    Returns:
-        Dictionary with column_groups, silver, and gold schema sections if present, None if empty.
-    """
-    schema_path = (config_path.parent / schema_file).resolve()
-    if not schema_path.exists():
-        raise FileNotFoundError(
-            f"Data schema file not found: {schema_path} "
-            f"(resolved from '{schema_file}' relative to {config_path.parent})"
-        )
-
-    data = _load_yaml_file(schema_path)
-
-    result: JsonDict = {}  # Any: YAML config has heterogeneous values
-    if "column_groups" in data:
-        result["column_groups"] = data["column_groups"]
-    if "content_hash" in data:
-        result["content_hash"] = data["content_hash"]
-    if "silver" in data:
-        result["silver"] = data["silver"]
-    if "gold" in data:
-        result["gold"] = data["gold"]
-
-    return result if result else None
 
 
 def _merge_data_schema_into_config(
@@ -59,7 +22,7 @@ def _merge_data_schema_into_config(
 
 def _validate_column_groups(
     groups: object,
-    schema_file: str,
+    schema_source: str,
 ) -> set[str | None]:
     """Validate column_groups is a non-empty list and return group names.
 
@@ -68,7 +31,7 @@ def _validate_column_groups(
     """
     if not isinstance(groups, list) or not groups:
         raise ValueError(
-            f"schema_file '{schema_file}' must define non-empty column_groups"
+            f"schema '{schema_source}' must define non-empty column_groups"
         )
     return {g.get("name") for g in groups if isinstance(g, dict)}
 
@@ -90,48 +53,48 @@ def _has_business_group(group_names: set[str | None]) -> bool:
 def _validate_layer_include_groups(
     data_schema: JsonDict,  # Any: YAML config has heterogeneous values
     layer: str,
-    schema_file: str,
+    schema_source: str,
 ) -> None:
     """Validate a single layer has proper include_groups config."""
     layer_cfg = data_schema.get(layer)
     if not isinstance(layer_cfg, dict):
         raise ValueError(
-            f"schema_file '{schema_file}' missing '{layer}' layer filter config"
+            f"schema '{schema_source}' missing '{layer}' layer filter config"
         )
     include_groups = layer_cfg.get("include_groups")
     if not isinstance(include_groups, list) or not include_groups:
         raise ValueError(
-            f"schema_file '{schema_file}' must define non-empty {layer}.include_groups"
+            f"schema '{schema_source}' must define non-empty {layer}.include_groups"
         )
 
 
 def _validate_schema_config(
     data_schema: JsonDict,  # Any: YAML config has heterogeneous values
-    schema_file: str,
+    schema_source: str,
 ) -> None:
     """Validate schema configuration has required minimum structure."""
     group_names = _validate_column_groups(
-        data_schema.get("column_groups") or [], schema_file
+        data_schema.get("column_groups") or [], schema_source
     )
 
     if not ("system" in group_names and _has_business_group(group_names)):
         raise ValueError(
-            f"schema_file '{schema_file}' must contain system and business groups"
+            f"schema '{schema_source}' must contain system and business groups"
         )
 
     for layer in ("silver", "gold"):
-        _validate_layer_include_groups(data_schema, layer, schema_file)
+        _validate_layer_include_groups(data_schema, layer, schema_source)
 
 
 def apply_pipeline_schema_normalization(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     *,
     entity_config: JsonDict,  # Any: YAML config has heterogeneous values
-    config_path: Path,
+    config_path: object,
     unified_schema: JsonDict | None = None,  # Any: YAML values are heterogeneous
 ) -> None:
     """Normalize pipeline schema from canonical `unified_schema`."""
-    _ = entity_config
+    _ = entity_config, config_path
 
     if unified_schema:
         _validate_schema_config(unified_schema, "entities/*/*:schema")

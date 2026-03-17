@@ -17,7 +17,6 @@ def _base_payload() -> dict[str, object]:
         "entity_type": "item",
         "business_primary_keys": ["id"],
         "technical_primary_key": "entity_id",
-        "schema_file": "../../schemas/demo/item.yaml",
     }
 
 

@@ -387,36 +387,32 @@ Mode: Overwrite
 
 pipeline_name: chembl_cell_line
 provider: chembl
-entity_type: cell-line
+entity_type: cell_line
 version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
-primary_keys: ["cell-id"]
-silver_table: "chembl_cell_line"
-gold_table: "chembl_cell_line"
-
-source_file: ../../sources/chembl.yaml
+business_primary_keys: ["cell_id"]
 
 gold_filters:
   required_fields:
-    - cell-name
+    - cell_name
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["cell-id"]
+    primary_key: ["cell_id"]
     partition_by: []
     sort_by:
-      columns: ["cell-id"]
+      columns: ["cell_id"]
       ascending: true
     csv_export:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
     sort_by:
-      columns: ["cell-id", "cell-name"]
+      columns: ["cell_id", "cell_name"]
       ascending: true
     csv_export:
       path: "data/output/csv/gold"
@@ -424,8 +420,8 @@ sink:
 input_filter:
   enabled: true
   source_path: "data/input/cell.csv"
-  column_name: "cell-id"
-  filter_field: "cell-id"
+  column_name: "cell_id"
+  filter_field: "cell_id"
   batch_size: 20
 ```
 

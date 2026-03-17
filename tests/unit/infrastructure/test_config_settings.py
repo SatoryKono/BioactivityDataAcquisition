@@ -184,7 +184,7 @@ class TestYamlConfigToDomain:
             pipeline_name="test_pipeline",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver_table",
             gold_table="gold_table",
             gold_filters=GoldFiltersConfig(),
@@ -196,7 +196,6 @@ class TestYamlConfigToDomain:
                 hard_fail_threshold=0.20,
             ),
             sink={},
-            schema_file="../../schemas/test/entity.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)
@@ -224,7 +223,7 @@ class TestYamlConfigToDomain:
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver",
             gold_table=None,
             gold_filters=GoldFiltersConfig(),
@@ -242,7 +241,6 @@ class TestYamlConfigToDomain:
                 hard_fail_threshold=0.20,
             ),
             sink={},
-            schema_file="../../schemas/test/test.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)
@@ -262,7 +260,7 @@ class TestYamlConfigToDomain:
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver",
             gold_table=None,
             gold_filters=GoldFiltersConfig(),
@@ -274,7 +272,6 @@ class TestYamlConfigToDomain:
                 hard_fail_threshold=0.30,
             ),
             sink={},
-            schema_file="../../schemas/test/test.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)
@@ -296,7 +293,7 @@ class TestYamlConfigToDomain:
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver",
             gold_table=None,
             gold_filters=GoldFiltersConfig(),
@@ -305,7 +302,6 @@ class TestYamlConfigToDomain:
             source=SourceConfig(),
             dq_overrides=DQYamlConfig(),
             sink={},
-            schema_file="../../schemas/test/test.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)

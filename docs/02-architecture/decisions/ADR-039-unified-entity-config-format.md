@@ -56,10 +56,8 @@ pipeline:
   provider: chembl
   entity_type: activity
   description: Extract biological activity records from ChEMBL API
-  business_primary_keys: [activity-id]
+  business_primary_keys: [activity_id]
   batch_size: 1000
-  dq_overrides:
-    field_validations: [...]
 
 schema:
   content_hash:
@@ -79,10 +77,10 @@ quality:
   version: 1.1.0
   provider: chembl
   entity: activity
-  field_validations: [...]
-  cross-field_validations: [...]
-  conditional_validations: [...]
-  key-nullability: [...]
+  entity_field_validations: [...]
+  entity_cross_field_validations: [...]
+  entity_conditional_validations: [...]
+  key_nullability: [...]
 
 filters:
   version: 1.0.0
@@ -124,23 +122,27 @@ hash_policy:
 ```
 Base defaults (configs/base/pipeline.yaml)
     ↓ deep-merge
+Provider defaults (configs/providers/{p}.yaml, optional)
+    ↓
 Unified entity pipeline section (configs/entities/{p}/{e}.yaml → pipeline:)
     ↓
-Convention defaults (ADR-029): paths, table names, file references
+Convention defaults (ADR-029): paths, table names, sink defaults
     ↓
 Hierarchical filter config (ADR-028)
     ↓
-Column groups: unified schema section OR schema_file
+Schema normalization from unified inline schema (no schema_file branch)
     ↓
-Source section: configs/providers/{provider}.yaml
+Source section merged from provider defaults (no source_file branch)
     ↓
-Payload normalization before validation (legacy/new shape coercion only)
+Payload normalization (canonical-only *_file handling; coerces hyphenated aliases)
 ```
 
 **Текущее правило слияния**: `load_pipeline_config()` читает только canonical unified path
-`configs/entities/{provider}/{entity}.yaml`. Legacy file-path fallback удалён; оставшаяся
-обратная совместимость находится на уровне нормализации payload и alias/coercion правил
-перед валидацией.
+`configs/entities/{provider}/{entity}.yaml`. Legacy file-path fallback удалён; обратная
+совместимость ограничена нормализацией payload для hyphenated aliases. Ключи
+`schema_file`/`data_schema_file`/`column_groups_file`/`source_file` считаются legacy
+migration-only и в active runtime contract должны отбрасываться из документации и fixtures,
+а не silently приниматься loader'ом.
 
 ### 4. Изменения в loader/normalization boundary
 
@@ -388,7 +390,7 @@ contracts:
 - [ADR-029: Convention-based Config](ADR-029-output-metadata-unification.md) — convention defaults
 - [ADR-037: config_merge() unification](ADR-037-canonical-schema-generation.md) — deep-merge делегирование
 - [ADR-038: Enum Externalization](ADR-038-enum-externalization.md) — enum values в YAML
-- [Config Unification Plan](../../99-archive/plans/config-unification-plan.md) — полный план рефакторинга *(archived)*
+- [Config Unification Plan (archived overview)](../../99-archive/plans/README.md) — полный план рефакторинга *(archived)*
 
 ## Changelog
 

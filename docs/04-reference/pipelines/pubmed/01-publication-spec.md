@@ -207,10 +207,7 @@ pipeline_name: pubmed_publication
 provider: pubmed
 entity_type: publications
 version: "1.2.0"
-
-primary_keys: ["pmid"]
-silver_table: "pubmed_publication"
-gold_table: "pubmed_publication"
+business_primary_keys: ["pmid"]
 
 source:
   type: api

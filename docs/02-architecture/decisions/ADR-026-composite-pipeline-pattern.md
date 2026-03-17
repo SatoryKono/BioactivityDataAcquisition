@@ -279,7 +279,7 @@ src/bioetl/
 │       └── silver_reader.py    # SilverReader adapter for key extraction
 │
 └── interfaces/
-    └── cli.py                  # Extended with composite commands
+    └── cli/main.py             # Extended with composite commands (legacy shim: cli.py)
 ```
 
 ### Import Rules
@@ -1255,7 +1255,7 @@ bioetl status composite_publication
 ### CLI Implementation
 
 ```python
-# src/bioetl/interfaces/cli.py (extensions)
+# src/bioetl/interfaces/cli/main.py (extensions; legacy shim interfaces/cli.py)
 
 @cli.command()
 @click.option("--enrich-only", help="Run only specified enrichers (comma-separated)")

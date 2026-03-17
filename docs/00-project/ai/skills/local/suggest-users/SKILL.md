@@ -8,8 +8,6 @@ agent: Explore
 
 # Suggest Users
 
-*Статус: internal-published (Internal / Extended)*
-
 This skill provides intelligent user suggestions for PRs (reviewers) and issues (assignees) based on GitHub repository data, file ownership, and activity patterns.
 
 ## Purpose

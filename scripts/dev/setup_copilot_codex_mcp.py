@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -12,6 +13,28 @@ from pathlib import Path
 
 NPM_CONFIG_CACHE = "/tmp/npm-cache"
 MEMORY_FILE_RELATIVE_PATH = Path("docs/00-project/ai/memory/mcp-memory.json")
+
+
+def _github_server(root: Path) -> dict[str, object]:
+    if os.name == "nt":
+        wrapper_path = str((root / ".claude" / "github-mcp-wrapper.ps1").resolve())
+        return {
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                wrapper_path,
+            ],
+            "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
+        }
+
+    return {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github@2025.4.8"],
+        "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
+    }
 
 
 def _core_servers(root: Path) -> dict[str, dict[str, object]]:
@@ -36,11 +59,7 @@ def _core_servers(root: Path) -> dict[str, dict[str, object]]:
             "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"],
             "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
         },
-        "github": {
-            "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-github@2025.4.8"],
-            "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
-        },
+        "github": _github_server(root),
     }
 
 
@@ -67,7 +86,10 @@ def _write_vscode_mcp(root: Path) -> None:
     print(f"[1/3] Writing VS Code MCP config: {vscode_mcp_path}")
     vscode_mcp_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {"servers": _core_servers(root)}
-    vscode_mcp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    # Atomic write keeps MCP config deterministic and avoids partial files.
+    tmp_path = vscode_mcp_path.with_suffix(".json.tmp")
+    tmp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp_path, vscode_mcp_path)
 
 
 def _codex_registration(root: Path) -> int:

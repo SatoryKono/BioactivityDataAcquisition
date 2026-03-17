@@ -39,6 +39,19 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
+class BatchExecutorDependencies:
+    """Grouped collaborators required by BatchExecutor."""
+
+    batch_metrics: BatchMetricsRecorderService
+    transformer: BatchTransformer
+    writer: BatchWriter
+    memory_manager: BatchMemoryManagerService
+    execution_run_service: BatchExecutionRunService
+    extraction_loop_service: BatchExtractionLoopService
+    execution_state_service: BatchExecutionStateService
+
+
+@dataclass(frozen=True, slots=True)
 class BatchResult:
     """Result of processing a batch of records."""
 
@@ -59,17 +72,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
         services: PipelineService,
         context: PipelineContext,
         config: RecordProcessorConfig,
-        batch_metrics: BatchMetricsRecorderService,
-        transformer: BatchTransformer,
-        writer: BatchWriter,
-        memory_manager: BatchMemoryManagerService,
-        execution_run_service: BatchExecutionRunService,
-        extraction_loop_service: BatchExtractionLoopService,
-        execution_state_service: BatchExecutionStateService,
+        dependencies: BatchExecutorDependencies | None = None,
         *,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
         logger: LoggerPort | None = None,
+        **legacy_kwargs: object,
     ) -> None:
         """Initialize batch executor.
 
@@ -99,7 +107,37 @@ class BatchExecutor(_BatchExecutorDQMixin):
             checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
         )
 
-        self._memory = memory_manager
+        if dependencies is None:
+            # Build from legacy parameters for backward compatibility in tests/composition
+            batch_metrics = legacy_kwargs.get("batch_metrics")
+            transformer = legacy_kwargs.get("transformer")
+            writer = legacy_kwargs.get("writer")
+            memory_manager = legacy_kwargs.get("memory_manager")
+            execution_run_service = legacy_kwargs.get("execution_run_service")
+            extraction_loop_service = legacy_kwargs.get("extraction_loop_service")
+            execution_state_service = legacy_kwargs.get("execution_state_service")
+            assert all(
+                [
+                    batch_metrics,
+                    transformer,
+                    writer,
+                    memory_manager,
+                    execution_run_service,
+                    extraction_loop_service,
+                    execution_state_service,
+                ]
+            ), "Legacy constructor path requires all legacy parameters"
+            dependencies = BatchExecutorDependencies(
+                batch_metrics=batch_metrics,  # type: ignore[arg-type]
+                transformer=transformer,  # type: ignore[arg-type]
+                writer=writer,  # type: ignore[arg-type]
+                memory_manager=memory_manager,  # type: ignore[arg-type]
+                execution_run_service=execution_run_service,  # type: ignore[arg-type]
+                extraction_loop_service=extraction_loop_service,  # type: ignore[arg-type]
+                execution_state_service=execution_state_service,  # type: ignore[arg-type]
+            )
+
+        self._memory = dependencies.memory_manager
 
         self.records_fetched = 0
         self.records_bronze = 0
@@ -116,13 +154,13 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._last_bronze_path: str | None = None
 
         # Kept for compatibility and test visibility; execution services use them upstream.
-        self._batch_metrics = batch_metrics
-        self._transformer = transformer
-        self._writer = writer
+        self._batch_metrics = dependencies.batch_metrics
+        self._transformer = dependencies.transformer
+        self._writer = dependencies.writer
 
-        self._execution_run_service = execution_run_service
-        self._extraction_loop_service = extraction_loop_service
-        self._execution_state_service = execution_state_service
+        self._execution_run_service = dependencies.execution_run_service
+        self._extraction_loop_service = dependencies.extraction_loop_service
+        self._execution_state_service = dependencies.execution_state_service
         # Retained compatibility seam for tests/helpers that still inspect the
         # delegated batch-processing service through BatchExecutor directly.
         self._batch_processing_service = (

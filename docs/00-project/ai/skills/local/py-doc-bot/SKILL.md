@@ -5,8 +5,6 @@ description: Execute BioETL py-doc-bot profile for role-specific workflow and co
 
 # py-doc-bot
 
-*Статус: internal-published (Internal / Extended)*
-
 ## Objective
 Run the role-specific workflow as defined in the py-doc-bot profile.
 

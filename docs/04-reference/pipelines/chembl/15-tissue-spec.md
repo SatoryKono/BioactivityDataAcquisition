@@ -78,9 +78,7 @@ provider: chembl
 entity_type: tissue
 version: "1.0.0"
 
-primary_keys: ["tissue-id"]
-silver_table: "chembl_tissue"
-gold_table: "chembl_tissue"
+business_primary_keys: ["tissue_id"]
 ```
 
 ---

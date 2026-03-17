@@ -266,19 +266,13 @@ provider: uniprot
 entity_type: idmapping
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
-
-primary_keys: ["target-id"]
-silver_table: "uniprot_idmapping"
-gold_table: "uniprot_idmapping"
+business_primary_keys: ["target_id"]
 
 source:
-  type: file
-  load-strategy: full
-  input-path: data/input/target.csv
   api:
-    base-url: https://rest.uniprot.org
-    from-db: ChEMBL
-    to-db: UniProtKB
+    base_url: https://rest.uniprot.org
+    from_db: ChEMBL
+    to_db: UniProtKB
 
 dq_overrides:
   soft_fail_threshold: 0.30  # 30% not-found acceptable
@@ -289,14 +283,14 @@ sink:
     enabled: false  # No Bronze for ID mapping
   silver:
     path: "data/output/silver"
-    primary_key: ["target-id"]
+    primary_key: ["target_id"]
     partition_by: []
   gold:
     path: "data/output/gold"
 
 gold_filters:
   required_fields:
-    - target-id
+    - target_id
     - mapping-status
 
 input_filter:

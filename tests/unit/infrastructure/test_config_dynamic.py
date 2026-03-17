@@ -20,34 +20,6 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
-def _create_minimal_schema_for_pipeline(pipeline_yaml_path: Path) -> None:
-    """Create a minimal valid schema file at the convention-resolved path.
-
-    The config loader resolves schema_file (default '../../schemas/{provider}/{entity}.yaml')
-    relative to the pipeline config file's parent directory.  This helper reads provider
-    and entity_type from the pipeline YAML and writes a minimal schema file at the
-    location where the loader will look for it.
-    """
-    with open(pipeline_yaml_path, encoding="utf-8") as f:
-        cfg = yaml.safe_load(f) or {}
-
-    provider = cfg["provider"]
-    entity_type = cfg["entity_type"]
-    schema_rel = cfg.get("schema_file", f"../../schemas/{provider}/{entity_type}.yaml")
-
-    schema_path = (pipeline_yaml_path.parent / schema_rel).resolve()
-    schema_path.parent.mkdir(parents=True, exist_ok=True)
-    schema_data = {
-        "column_groups": [
-            {"name": "system", "fields": ["_etl_timestamp"]},
-            {"name": "business", "fields": ["id"]},
-        ],
-        "silver": {"include_groups": ["system", "business"]},
-        "gold": {"include_groups": ["business"]},
-    }
-    schema_path.write_text(yaml.dump(schema_data))
-
-
 def _minimal_unified_schema() -> dict[str, Any]:
     return {
         "column_groups": [
@@ -118,7 +90,7 @@ def setup_configs(tmp_path, monkeypatch):
         "pipeline_name": "dummy_test",
         "provider": "dummy",
         "entity_type": "test",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "dummy.test_silver",
         "batch_size": 100,
         "checkpoint_interval": 1000,
@@ -454,7 +426,7 @@ def test_dq_thresholds_are_validated_once(setup_configs):
         "pipeline_name": "dummy_invalid",
         "provider": "dummy",
         "entity_type": "invalid",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "dummy.test_silver",
         "dq_overrides": {"soft_fail_threshold": 0.3, "hard_fail_threshold": 0.2},
     }
@@ -478,7 +450,7 @@ def test_gold_filters_loading(setup_configs):
         "pipeline_name": "chembl_filters",
         "provider": "chembl",
         "entity_type": "filters",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "chembl.filters",
         "gold_filters": {
             "columns": {"standard_type": ["IC50", "Ki"]},
@@ -509,15 +481,14 @@ def test_gold_filters_loading(setup_configs):
 
 
 def test_convention_based_source_file(setup_configs, tmp_path):
-    """Verify source/filter file refs are auto-computed from provider when not specified."""
+    """Verify provider source config is loaded without pipeline-level source_file."""
     entities_dir = setup_configs
 
-    # Create a config without source_file
     config_data = {
         "pipeline_name": "test_provider_entity",
         "provider": "testprovider",
         "entity_type": "entity",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "test.entity",
     }
 
@@ -545,11 +516,9 @@ def test_convention_based_source_file(setup_configs, tmp_path):
 
     config = load_pipeline_config("testprovider_entity")
 
-    # source_file should be auto-computed
     assert config.dq_config_file == "../../entities/testprovider/entity.yaml"
     assert config.filter_config_file == "../../entities/testprovider/entity.yaml"
     assert config.source is not None
-    assert config.schema_file is None
 
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):
@@ -561,7 +530,7 @@ def test_convention_based_sink_paths(setup_configs, tmp_path):
         "pipeline_name": "auto_paths",
         "provider": "autoprov",
         "entity_type": "autoent",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "auto.entity",
     }
 
@@ -588,7 +557,7 @@ def test_explicit_paths_override_convention(setup_configs, tmp_path):
         "pipeline_name": "explicit_paths",
         "provider": "explicit",
         "entity_type": "entity",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "explicit.entity",
         "sink": {
             "bronze": {"path": "custom/bronze/path"},
@@ -636,7 +605,7 @@ def test_filter_config_merging(setup_configs, tmp_path):
         "pipeline_name": "filtertest_entity",
         "provider": "filtertest",
         "entity_type": "entity",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "filter.entity",
         # filter_config_file will be auto-computed to ../../entities/filtertest/entity.yaml
     }
@@ -683,7 +652,7 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
         "pipeline_name": "override_entity",
         "provider": "override",
         "entity_type": "entity",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "override.entity",
         # Explicit overrides
         "input_filter": {
@@ -728,7 +697,6 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     config = {
         "provider": "chembl",
-        "source_file": "../../providers/chembl.yaml",
         "source": {"batch_size": 999},
     }
     config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
@@ -753,3 +721,27 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     assert config["source"]["batch_size"] == 999
     assert config["source"]["provider_config"]["provider"] == "chembl"
+
+
+def test_pipeline_source_file_is_rejected_as_legacy_key(setup_configs):
+    """Pipeline YAML must reject legacy source_file after normalization hardening."""
+    entities_dir = setup_configs
+
+    config_data = {
+        "pipeline_name": "legacy_source_bridge",
+        "provider": "chembl",
+        "entity_type": "bridge",
+        "business_primary_keys": ["id"],
+        "silver_table": "chembl.bridge",
+        "source_file": "../../providers/chembl.yaml",
+    }
+
+    _write_unified_entity_config(
+        entities_dir,
+        "chembl",
+        "bridge",
+        config_data,
+    )
+
+    with pytest.raises(ValueError, match="source_file"):
+        load_pipeline_config("chembl_bridge")

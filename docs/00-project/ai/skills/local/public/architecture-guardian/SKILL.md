@@ -5,8 +5,6 @@ description: "Validate BioETL architecture boundaries, ADR compliance, naming co
 
 # Architecture Guardian
 
-*Статус: internal-published (Internal / Extended)*
-
 ## Objective
 Protect the BioETL hexagonal architecture by auditing code changes for boundary violations, DI issues, naming conventions, and ADR compliance.
 

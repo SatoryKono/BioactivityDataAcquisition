@@ -5,20 +5,17 @@ description: Scaffold a new BioETL provider/entity pipeline with configs, transf
 
 # New Pipeline
 
-*Статус: internal-published (Internal / Extended)*
-
 ## Objective
 Create a new ETL pipeline for a provider/entity pair in BioETL.
 
 ## Source Of Truth
-- Codex SSOT: `.codex/skills/new-pipeline/SKILL.md`
-- Claude runtime: `.claude/commands/new-pipeline.md`
+- Primary instructions: `../../../.claude/skills/new-pipeline.md`
 
 ## Workflow
-1. Open and follow the SSOT skill file for your active runtime.
+1. Open and follow `../../../.claude/skills/new-pipeline.md`.
 2. If source examples are shell-specific, adapt commands to the current shell/environment.
 3. Keep generated code/config aligned with project architecture rules in `AGENTS.md`.
 4. Run verification commands from the source skill (or closest working equivalents in this environment).
 
 ## Notes
-- The `.codex/skills/` directory is canonical for templates and detailed steps.
+- Treat the `.claude` skill file as canonical for templates and detailed steps.

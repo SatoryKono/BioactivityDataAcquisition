@@ -53,15 +53,12 @@ def _write_unified_pipeline(
     (entity_dir / f"{entity}.yaml").write_text(yaml.dump(payload), encoding="utf-8")
 
 
-def test_pipeline_legacy_and_new_schema_file_aliases_are_equivalent(
+def test_pipeline_loader_uses_unified_schema_section(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Full loader should load unified schema from the `schema` section."""
     load_pipeline_config.cache_clear()
-
-    schema_path = tmp_path / "configs" / "schemas" / "demo" / "common.yaml"
-    schema_path.parent.mkdir(parents=True, exist_ok=True)
     schema_payload = {
         "column_groups": [
             {"name": "system", "fields": ["_etl_ts"]},
@@ -71,7 +68,6 @@ def test_pipeline_legacy_and_new_schema_file_aliases_are_equivalent(
         "silver": {"include_groups": ["system", "business"]},
         "gold": {"include_groups": ["business"]},
     }
-    schema_path.write_text(yaml.dump(schema_payload), encoding="utf-8")
 
     entities_dir = tmp_path / "configs" / "entities"
     common_pipeline = {
@@ -118,9 +114,6 @@ def test_pipeline_schema_normalizer_golden_vector(
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text("version: 1.0.0\n", encoding="utf-8")
 
-    schema_rel = "../../schemas/demo/item.yaml"
-    schema_path = (config_path.parent / schema_rel).resolve()
-    schema_path.parent.mkdir(parents=True, exist_ok=True)
     schema_payload = {
         "column_groups": [
             {"name": "system", "fields": ["_etl_ts"]},
@@ -130,16 +123,6 @@ def test_pipeline_schema_normalizer_golden_vector(
         "silver": {"include_groups": ["system", "business"]},
         "gold": {"include_groups": ["business"]},
     }
-    schema_path.write_text(yaml.dump(schema_payload), encoding="utf-8")
-
-    unified_cfg = {"schema_file": schema_rel}
-
-    apply_pipeline_schema_normalization(
-        unified_cfg,
-        entity_config={},
-        config_path=config_path,
-        unified_schema=None,
-    )
 
     expected = {
         "column_groups": schema_payload["column_groups"],
@@ -150,13 +133,16 @@ def test_pipeline_schema_normalizer_golden_vector(
         },
     }
 
-    # schema_file is no longer used as a runtime alias; canonical normalization
-    # is driven by the explicit `unified_schema` input.
+    unified_cfg: dict[str, Any] = {}
+    apply_pipeline_schema_normalization(
+        unified_cfg,
+        entity_config={},
+        config_path=config_path,
+        unified_schema=None,
+    )
     assert {k: unified_cfg.get(k) for k in expected} != expected
 
-    unified_cfg = {
-        "schema_file": schema_rel,
-    }
+    unified_cfg = {}
     apply_pipeline_schema_normalization(
         unified_cfg,
         entity_config={},

@@ -347,7 +347,7 @@ entity-conditional-validations:
 1. `configs/base/pipeline.yaml`
 1. `configs/providers/{provider}.yaml`
 1. `configs/entities/{provider}/{entity}.yaml`
-1. Inline `filter-rules` в pipeline конфиге
+1. Inline `filter_rules` в pipeline конфиге
 
 ### Input Filter
 
@@ -357,9 +357,9 @@ entity-conditional-validations:
 input_filter:
   enabled: true
   batch_size: 100
-  source_file: "data/filter-ids.csv"
-  column: "molecule_id"
-  api-field: "molecule-chembl-id"
+  source_path: "data/filter-ids.csv"
+  column_name: "molecule_id"
+  filter_field: "molecule_chembl_id"
 ```
 
 ### Gold Filters

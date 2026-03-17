@@ -2,61 +2,13 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
-import yaml
 
 from bioetl.infrastructure.config.pipeline_normalizers import (
-    _load_data_schema_config,
     _merge_data_schema_into_config,
     _validate_schema_config,
     apply_pipeline_schema_normalization,
 )
-
-
-class TestLoadDataSchemaConfig:
-    """Tests for _load_data_schema_config."""
-
-    def test_missing_file_raises(self, tmp_path: Path) -> None:
-        """Should raise FileNotFoundError when schema file is missing."""
-        config_path = tmp_path / "config.yaml"
-        with pytest.raises(FileNotFoundError, match="Data schema file not found"):
-            _load_data_schema_config(config_path, "schema.yaml")
-
-    def test_loads_full_schema(self, tmp_path: Path) -> None:
-        """Should load column_groups, silver, gold, and content_hash."""
-        schema = {
-            "column_groups": [{"name": "system"}],
-            "content_hash": {"fields": ["id"]},
-            "silver": {"include_groups": ["system"]},
-            "gold": {"include_groups": ["system"]},
-        }
-        (tmp_path / "schema.yaml").write_text(yaml.safe_dump(schema))
-        config_path = tmp_path / "config.yaml"
-        result = _load_data_schema_config(config_path, "schema.yaml")
-        assert result is not None
-        assert "column_groups" in result
-        assert "content_hash" in result
-        assert "silver" in result
-        assert "gold" in result
-
-    def test_empty_schema_returns_none(self, tmp_path: Path) -> None:
-        """Should return None for empty schema file."""
-        (tmp_path / "schema.yaml").write_text("")
-        config_path = tmp_path / "config.yaml"
-        result = _load_data_schema_config(config_path, "schema.yaml")
-        assert result is None
-
-    def test_partial_schema(self, tmp_path: Path) -> None:
-        """Should only include present sections."""
-        schema = {"column_groups": [{"name": "system"}]}
-        (tmp_path / "schema.yaml").write_text(yaml.safe_dump(schema))
-        config_path = tmp_path / "config.yaml"
-        result = _load_data_schema_config(config_path, "schema.yaml")
-        assert result is not None
-        assert "column_groups" in result
-        assert "silver" not in result
 
 
 class TestMergeDataSchemaIntoConfig:
@@ -184,7 +136,7 @@ class TestApplyPipelineSchemaNormalization:
         apply_pipeline_schema_normalization(
             config,
             entity_config=entity_config,
-            config_path=Path("."),
+            config_path="unused",
             unified_schema=None,
         )
         assert "column_groups" not in config
@@ -203,7 +155,7 @@ class TestApplyPipelineSchemaNormalization:
         apply_pipeline_schema_normalization(
             config,
             entity_config={},
-            config_path=Path("."),
+            config_path="unused",
             unified_schema=unified_schema,
         )
         assert config["column_groups"] == unified_schema["column_groups"]
@@ -214,6 +166,6 @@ class TestApplyPipelineSchemaNormalization:
         """Should do nothing when no schema sources are available."""
         config: dict = {}
         apply_pipeline_schema_normalization(
-            config, entity_config={}, config_path=Path(".")
+            config, entity_config={}, config_path="unused"
         )
         assert "column_groups" not in config

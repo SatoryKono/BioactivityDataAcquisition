@@ -253,10 +253,7 @@ pipeline_name: openalex_publication
 provider: openalex
 entity_type: publication
 version: "1.2.0"
-
-primary_keys: ["openalex_id"]
-silver_table: "openalex_publication"
-gold_table: "openalex_publication"
+business_primary_keys: ["openalex_id"]
 
 source:
   type: api

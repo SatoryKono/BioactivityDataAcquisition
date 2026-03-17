@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = ["BatchWriter"]
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.batch_writer_columns_mixin import BatchWriterColumnsMixin
@@ -23,6 +24,16 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import GoldValidatorPort, StoragePort, TracingPort
 
 
+@dataclass(frozen=True, slots=True)
+class BatchWriterOptions:
+    """Optional writer collaborators grouped to reduce constructor width."""
+
+    tracer: TracingPort | None = None
+    lock_validator: BatchWriterLockValidator | None = None
+    data_schema_config: DataSchemaConfig | None = None
+    column_orderer: ColumnOrderer | None = None
+
+
 class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracingMixin):
     """Writes records to medallion layers via StoragePort."""
 
@@ -34,10 +45,8 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         gold_validator: GoldValidatorPort,
         error_classifier: ErrorClassifier,
         batch_metrics: BatchMetricsRecorderService,
-        tracer: TracingPort | None = None,
-        lock_validator: BatchWriterLockValidator = None,
-        data_schema_config: DataSchemaConfig | None = None,
-        column_orderer: ColumnOrderer | None = None,
+        options: BatchWriterOptions | None = None,
+        **legacy_kwargs: object,
     ) -> None:
         """Initialize writer dependencies and static write configuration.
 
@@ -48,22 +57,26 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
             gold_validator: Validator that enforces Gold schema contracts before writes.
             error_classifier: Classifies write exceptions into structured error categories.
             batch_metrics: Metrics recorder for tracking write-layer events and errors.
-            tracer: Optional distributed tracing port. If None, tracing is disabled.
-            lock_validator: Optional callable that checks whether the distributed lock is
-                still held before each write. If None, lock validation is skipped.
-            data_schema_config: Optional override for composite data-schema configuration.
-                Falls back to ``config.data_schema`` when None.
-            column_orderer: Optional column orderer for semantic column ordering.
-                If None and column_groups are configured, a default ColumnOrderer is created.
+            options: Optional grouped collaborators (tracer, lock validator, schema/column helpers).
         """
         self._storage = storage
         self._context = context
         self._config = config
         self._gold_validator = gold_validator
         self._error_classifier = error_classifier
+        # Backward-compatible: allow direct legacy kwargs (tracer, lock_validator, etc.)
+        if options is None:
+            opts = BatchWriterOptions(
+                tracer=legacy_kwargs.get("tracer"),  # type: ignore[arg-type]
+                lock_validator=legacy_kwargs.get("lock_validator"),  # type: ignore[arg-type]
+                data_schema_config=legacy_kwargs.get("data_schema_config"),  # type: ignore[arg-type]
+                column_orderer=legacy_kwargs.get("column_orderer"),  # type: ignore[arg-type]
+            )
+        else:
+            opts = options
         self._batch_metrics = batch_metrics
-        self._tracer = tracer
-        self._lock_validator = lock_validator
+        self._tracer = opts.tracer
+        self._lock_validator = opts.lock_validator
 
         self._provider = config.provider
         self._entity_type = config.entity_type
@@ -72,9 +85,11 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         self._gold_schema = config.gold_schema
         self._column_groups = config.column_groups
         self._data_schema = (
-            data_schema_config if data_schema_config is not None else config.data_schema
+            opts.data_schema_config
+            if opts.data_schema_config is not None
+            else config.data_schema
         )
-        self._column_orderer = column_orderer
+        self._column_orderer = opts.column_orderer
 
         self._silver_table_name = (
             self._table_config.silver_table or f"{self._provider}.{self._entity_type}"

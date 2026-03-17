@@ -132,9 +132,7 @@ provider: chembl
 entity_type: target-component
 version: "1.2.0"
 
-primary_keys: ["targcomp-id"]
-silver_table: "chembl_target_component"
-gold_table: "chembl_target_component"
+business_primary_keys: ["targcomp_id"]
 
 gold_filters:
   required_fields:

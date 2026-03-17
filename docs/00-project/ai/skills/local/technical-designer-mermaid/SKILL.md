@@ -5,8 +5,6 @@ description: Design technical diagrams in Mermaid syntax for architecture, data 
 
 # Technical Designer Mermaid
 
-*Статус: internal-published (Internal / Extended)*
-
 ## Overview
 
 Create, refactor, and review Mermaid diagrams with a technical-design mindset.

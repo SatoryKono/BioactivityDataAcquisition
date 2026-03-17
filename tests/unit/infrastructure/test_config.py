@@ -21,9 +21,8 @@ def test_yaml_config_to_domain_mapping():
         pipeline_name="test_pipeline",
         provider="test",
         entity_type="entity",
-        primary_keys=["id"],
+        business_primary_keys=["id"],
         silver_table="silver.test",
-        schema_file="../../schemas/chembl/activity.yaml",
         dq_overrides=YamlDQConfig(),
         sink={"silver": SinkLayerConfig(mode="append", sort_by=["id"])},
     )
@@ -44,9 +43,8 @@ def test_yaml_config_to_domain_default_mode():
         pipeline_name="test_pipeline",
         provider="test",
         entity_type="entity",
-        primary_keys=["id"],
+        business_primary_keys=["id"],
         silver_table="silver.test",
-        schema_file="../../schemas/chembl/activity.yaml",
         dq_overrides=YamlDQConfig(),
     )
 
@@ -61,9 +59,8 @@ def test_pipeline_yaml_config_accepts_dq_overrides_key() -> None:
         "pipeline_name": "test_pipeline",
         "provider": "test",
         "entity_type": "entity",
-        "primary_keys": ["id"],
+        "business_primary_keys": ["id"],
         "silver_table": "silver.test",
-        "schema_file": "../../schemas/chembl/activity.yaml",
     }
 
     cfg = PipelineYamlConfig.model_validate(
@@ -121,14 +118,41 @@ class TestMaintenanceConfig:
             pipeline_name="test_pipeline",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver.test",
-            schema_file="../../schemas/chembl/activity.yaml",
         )
 
         assert yaml_config.maintenance is not None
         assert yaml_config.maintenance.auto_vacuum is False
         assert yaml_config.maintenance.vacuum_retention_days == 7
+
+    def test_pipeline_yaml_config_rejects_legacy_primary_keys_alias(self):
+        """Legacy pipeline-YAML alias `primary_keys` is no longer accepted."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+            PipelineYamlConfig(
+                pipeline_name="test_pipeline",
+                provider="test",
+                entity_type="entity",
+                business_primary_keys=["id"],
+                primary_keys=["id"],
+                silver_table="silver.test",
+            )
+
+    def test_pipeline_yaml_config_rejects_legacy_schema_file_alias(self):
+        """Legacy schema-file references are no longer accepted in pipeline YAML."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+            PipelineYamlConfig(
+                pipeline_name="test_pipeline",
+                provider="test",
+                entity_type="entity",
+                business_primary_keys=["id"],
+                schema_file="../../schemas/test/entity.yaml",
+                silver_table="silver.test",
+            )
 
     def test_pipeline_yaml_config_maintenance_from_yaml(self):
         """Test PipelineYamlConfig parses maintenance from YAML dict."""
@@ -136,9 +160,8 @@ class TestMaintenanceConfig:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "maintenance": {
                 "auto_vacuum": True,
                 "vacuum_retention_days": 14,
@@ -163,9 +186,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "parquet", "sort_by": ["id"]},
             },
@@ -180,9 +202,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "gold": {"format": "parquet", "sort_by": ["id"]},
             },
@@ -198,9 +219,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "delta", "sort_by": ["id"]},
             },
@@ -215,9 +235,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "gold": {"format": "delta", "sort_by": ["id"]},
             },
@@ -232,9 +251,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "bronze": {"format": "jsonl"},
             },
@@ -253,9 +271,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "bronze": {"format": "delta"},
             },
@@ -275,9 +292,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "bronze": {"format": "parquet"},
             },
@@ -299,9 +315,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "jsonl", "sort_by": ["id"]},
             },
@@ -322,9 +337,8 @@ class TestMedallionFormatValidation:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "csv"},
             },
@@ -403,9 +417,8 @@ class TestTransformConfig:
             pipeline_name="test_pipeline",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver.test",
-            schema_file="../../schemas/chembl/activity.yaml",
         )
 
         assert yaml_config.transform is not None
@@ -418,9 +431,8 @@ class TestTransformConfig:
             "pipeline_name": "test_pipeline",
             "provider": "test",
             "entity_type": "entity",
-            "primary_keys": ["id"],
+            "business_primary_keys": ["id"],
             "silver_table": "silver.test",
-            "schema_file": "../../schemas/chembl/activity.yaml",
             "transform": {
                 "version": "1.0.0",
                 "steps": ["step1", "step2"],
@@ -440,9 +452,8 @@ class TestTransformConfig:
             pipeline_name="test_pipeline",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver.test",
-            schema_file="../../schemas/chembl/activity.yaml",
             transform=TransformConfig(
                 version="2.0.0",
                 steps=["normalize", "validate", "hash"],
@@ -460,9 +471,8 @@ class TestTransformConfig:
             pipeline_name="test_pipeline",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
+            business_primary_keys=["id"],
             silver_table="silver.test",
-            schema_file="../../schemas/chembl/activity.yaml",
         )
 
         domain_config = yaml_config_to_domain(yaml_config)

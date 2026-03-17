@@ -274,11 +274,12 @@ provider: uniprot
 entity_type: protein
 version: "1.2.0"
 
-primary_keys: ["accession"]
-silver_table: "uniprot_protein"
-gold_table: "uniprot_protein"
-
-source_file: ../../sources/uniprot.yaml
+business_primary_keys: ["accession"]
+sink:
+  silver:
+    mode: append
+  gold:
+    mode: scd2
 
 gold_filters:
   required_fields:
@@ -290,10 +291,10 @@ gold_filters:
 sink:
   bronze:
     path: "data/output/bronze"
-  silver:
-    path: "data/output/silver"
-    primary_key: ["accession"]
-    partition_by: []
+silver:
+  path: "data/output/silver"
+  primary_key: ["accession"]
+  partition_by: []
   gold:
     path: "data/output/gold"
 

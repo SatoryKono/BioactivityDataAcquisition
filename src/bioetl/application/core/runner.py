@@ -18,6 +18,7 @@ __all__ = ["PipelineRunner"]
 
 from collections.abc import Generator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.events import PipelineEvent
@@ -45,6 +46,20 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, TracingPort
 
 
+@dataclass(frozen=True, slots=True)
+class PipelineRunnerDependencies:
+    """Grouped collaborators for PipelineRunner."""
+
+    executor: BatchExecutor
+    checkpoint_manager: CheckpointManagerService
+    lock_manager: LockCoordinator
+    preflight: PreflightService
+    postrun: PostrunService
+    lifecycle_service: MedallionLifecycleService
+    observer: PipelineObserver
+    shutdown_signal: ShutdownSignal
+
+
 class PipelineRunner:
     """Manages the execution lifecycle of a pipeline.
 
@@ -63,17 +78,12 @@ class PipelineRunner:
         runtime: RuntimeConfig,
         services: PipelineService,
         context: PipelineContext,
-        executor: BatchExecutor,
-        checkpoint_manager: CheckpointManagerService,
-        shutdown_signal: ShutdownSignal,
-        logger: LoggerPort,
-        lock_manager: LockCoordinator,
-        preflight: PreflightService,
-        postrun: PostrunService,
-        lifecycle_service: MedallionLifecycleService,
-        observer: PipelineObserver,
+        dependencies: PipelineRunnerDependencies | None = None,
+        *,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
+        logger: LoggerPort | None = None,
+        **legacy_kwargs: object,
     ) -> None:
         """Initialize pipeline runner.
 
@@ -93,24 +103,57 @@ class PipelineRunner:
             observer: Pipeline observability wrapper for tracing, metrics, logging.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
+            logger: Optional logger override; defaults to context.logger.
         """
         self._config = config
         self._runtime = runtime
         self._services = services
         self._context = context
-        self._executor = executor
-        self._checkpoint_manager = checkpoint_manager
-        self._shutdown_signal = shutdown_signal
-        self._logger = logger
+        if dependencies is None:
+            executor = legacy_kwargs.get("executor")
+            checkpoint_manager = legacy_kwargs.get("checkpoint_manager")
+            shutdown_signal = legacy_kwargs.get("shutdown_signal")
+            lock_manager = legacy_kwargs.get("lock_manager")
+            preflight = legacy_kwargs.get("preflight")
+            postrun = legacy_kwargs.get("postrun")
+            lifecycle_service = legacy_kwargs.get("lifecycle_service")
+            observer = legacy_kwargs.get("observer")
+            assert all(
+                [
+                    executor,
+                    checkpoint_manager,
+                    shutdown_signal,
+                    lock_manager,
+                    preflight,
+                    postrun,
+                    lifecycle_service,
+                    observer,
+                ]
+            ), "Legacy constructor path requires all legacy parameters"
+            dependencies = PipelineRunnerDependencies(
+                executor=executor,  # type: ignore[arg-type]
+                checkpoint_manager=checkpoint_manager,  # type: ignore[arg-type]
+                lock_manager=lock_manager,  # type: ignore[arg-type]
+                preflight=preflight,  # type: ignore[arg-type]
+                postrun=postrun,  # type: ignore[arg-type]
+                lifecycle_service=lifecycle_service,  # type: ignore[arg-type]
+                observer=observer,  # type: ignore[arg-type]
+                shutdown_signal=shutdown_signal,  # type: ignore[arg-type]
+            )
+        self._executor = dependencies.executor
+        self._checkpoint_manager = dependencies.checkpoint_manager
+        self._shutdown_signal = dependencies.shutdown_signal
+        legacy_logger = legacy_kwargs.get("logger")
+        self._logger = logger or legacy_logger or context.logger
         self._pipeline = pipeline
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
 
         # Services injected directly via DI (created in composition layer)
-        self._lock_manager = lock_manager
-        self._preflight_service = preflight
-        self._postrun_service = postrun
-        self._lifecycle_service = lifecycle_service
-        self._observer = observer
+        self._lock_manager = dependencies.lock_manager
+        self._preflight_service = dependencies.preflight
+        self._postrun_service = dependencies.postrun
+        self._lifecycle_service = dependencies.lifecycle_service
+        self._observer = dependencies.observer
 
     @property
     def logger(self) -> LoggerPort:
