@@ -17,6 +17,7 @@ See CLAUDE.md §2.1 Matrix of Imports and §11 Anti-Patterns.
 
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
@@ -324,14 +325,13 @@ class TestInterfacesBootstrapIsolation:
     def test_cli_no_bootstrap_import(self, src_dir: Path) -> None:
         """Interfaces layer MUST NOT import from bootstrap.py directly.
 
-        REQ-ARCH-C1: CLI должен использовать entrypoints, не bootstrap.
-        The CLI should only import from composition/entrypoints.py,
-        which acts as a facade for all composition operations.
+        REQ-ARCH-C1: Interfaces must use sanctioned composition public APIs,
+        never composition.bootstrap directly.
 
         This separation ensures:
-        - Clean layer boundaries (interfaces → entrypoints → bootstrap)
+        - Clean layer boundaries (interfaces → composition public APIs → bootstrap)
         - Easier testing of CLI without full bootstrap machinery
-        - Single entry point for orchestration layers (CLI, REST API)
+        - Stable composition API seams with explicit ownership
         """
         interfaces_path = src_dir / "bioetl" / "interfaces"
         if not interfaces_path.exists():
@@ -356,12 +356,48 @@ class TestInterfacesBootstrapIsolation:
 
         assert not violations, (
             "Interfaces layer must not import from bootstrap.py directly.\n"
-            "Use bioetl.composition.entrypoints instead.\n\n"
+            "Use sanctioned composition public APIs instead.\n\n"
             "Correct:\n"
-            "  from bioetl.composition.entrypoints import create_pipeline_runner\n\n"
+            "  from bioetl.composition.execution_api import create_pipeline_runner\n\n"
             "Wrong:\n"
             "  from bioetl.composition.bootstrap import bootstrap_pipeline_runner\n\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
+        )
+
+    def test_interfaces_no_direct_entrypoints_imports(self, src_dir: Path) -> None:
+        """Interfaces must consume narrow composition APIs, not entrypoints façade."""
+        interfaces_path = src_dir / "bioetl" / "interfaces"
+        if not interfaces_path.exists():
+            pytest.skip("Interfaces layer not found")
+
+        violations: list[str] = []
+        for py_file in interfaces_path.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    if node.module == "bioetl.composition.entrypoints":
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+                elif isinstance(node, ast.Import):
+                    if any(
+                        alias.name == "bioetl.composition.entrypoints"
+                        for alias in node.names
+                    ):
+                        violations.append(
+                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
+                        )
+
+        assert not violations, (
+            "Interfaces layer must not import bioetl.composition.entrypoints.\n"
+            "Use sanctioned modules such as:\n"
+            "  - bioetl.composition.execution_api\n"
+            "  - bioetl.composition.services_api\n"
+            "  - bioetl.composition.resources_api\n"
+            "  - bioetl.composition.composite_api\n"
+            "  - bioetl.composition.observability_api\n\n"
+            "Violations:\n"
+            + "\n".join(f"  - {item}" for item in violations)
         )
 
 

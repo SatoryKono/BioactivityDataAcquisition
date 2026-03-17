@@ -39,14 +39,14 @@ __all__ = [
 
 def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
-    from bioetl.composition.entrypoints import get_lifecycle_service as _impl
+    from bioetl.composition.resources_api import get_lifecycle_service as _impl
 
     return _impl()
 
 
 def get_vacuum_service() -> VacuumService:
     """Load the vacuum service through composition on demand."""
-    from bioetl.composition.entrypoints import get_vacuum_service as _impl
+    from bioetl.composition.services_api import get_vacuum_service as _impl
 
     return _impl()
 

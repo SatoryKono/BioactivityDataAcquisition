@@ -46,7 +46,7 @@ async def health_server_context(
         return
 
     # Import here to avoid circular imports and keep interfaces layer clean
-    from bioetl.composition.entrypoints import get_health_server_dependencies
+    from bioetl.composition.services_api import get_health_server_dependencies
     from bioetl.interfaces.http.health_server import HealthServer
 
     # Get dependencies from composition root (proper DI)

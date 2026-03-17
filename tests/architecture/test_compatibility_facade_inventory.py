@@ -394,7 +394,7 @@ def test_inventory_doc_tracks_measured_compatibility_registry() -> None:
 def test_src_outside_composition_avoids_internal_composition_entrypoint_modules() -> (
     None
 ):
-    """First-party source outside composition should use composition.entrypoints."""
+    """First-party source outside composition should use public composition APIs."""
     internal_modules = frozenset(
         {
             "bioetl.composition._pipeline_execution",
@@ -418,7 +418,7 @@ def test_src_outside_composition_avoids_internal_composition_entrypoint_modules(
                 break
 
     assert not violations, (
-        "First-party src outside composition must use bioetl.composition.entrypoints "
-        "instead of internal composition entrypoint modules:\n"
+        "First-party src outside composition must use sanctioned public "
+        "composition APIs instead of internal composition entrypoint modules:\n"
         + "\n".join(sorted(violations))
     )

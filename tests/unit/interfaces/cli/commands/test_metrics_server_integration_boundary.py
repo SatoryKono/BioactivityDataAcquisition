@@ -8,12 +8,12 @@ import pytest
 
 
 @pytest.mark.unit
-def test_ensure_metrics_server_started_delegates_to_composition_entrypoints() -> None:
+def test_ensure_metrics_server_started_delegates_to_execution_api() -> None:
     """Metrics helper module should lazily delegate server startup."""
     import bioetl.interfaces.cli.commands.metrics_server_integration as metrics_module
 
     with patch(
-        "bioetl.composition.entrypoints.ensure_metrics_server_started",
+        "bioetl.composition.execution_api.ensure_metrics_server_started",
         return_value=True,
     ) as mock_ensure_metrics_server_started:
         result = metrics_module.ensure_metrics_server_started()

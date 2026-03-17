@@ -4,10 +4,10 @@ from unittest import mock
 
 import pytest
 
-from bioetl.composition import entrypoints as composition_entrypoints
 from bioetl.composition.bootstrap.runtime import (
     observability as composition_observability,
 )
+from bioetl.composition import observability_api as composition_observability_api
 from bioetl.domain import exceptions as domain_exceptions
 from bioetl.infrastructure import observability as infra_observability
 from bioetl.infrastructure.observability import server as obs_server
@@ -51,17 +51,17 @@ def test_start_metrics_server_failure():
         assert result is False
 
 
-def test_interface_re_exports_from_composition_entrypoints():
-    """Verify interface delegates start_metrics_server via composition entrypoints.
+def test_interface_re_exports_from_composition_observability_api():
+    """Verify interface delegates start_metrics_server via composition API.
 
     interfaces/observability.py now exposes a thin wrapper over
-    composition.entrypoints.start_metrics_server, preserving the public API
+    composition.observability_api.start_metrics_server, preserving the public API
     while removing the direct module-level composition import.
     """
     logger = mock.Mock()
 
     with mock.patch.object(
-        composition_entrypoints,
+        composition_observability_api,
         "start_metrics_server",
         return_value=True,
     ) as mock_start_metrics_server:

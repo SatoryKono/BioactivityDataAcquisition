@@ -1,10 +1,10 @@
 {
   "summary": {
-    "scanned_modules": 1079,
-    "total_internal_imports": 4143,
+    "scanned_modules": 1090,
+    "total_internal_imports": 4162,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 245,
+    "cross_layer_group_edges_total": 249,
     "violations": 0
   },
   "layer_edges": [
@@ -23,13 +23,13 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 209,
+      "imports": 210,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 259,
+      "imports": 273,
       "allowed": true
     },
     {
@@ -59,7 +59,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 653,
+      "imports": 655,
       "allowed": true
     },
     {
@@ -71,7 +71,7 @@
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 34,
+      "imports": 36,
       "allowed": true
     },
     {
@@ -194,11 +194,6 @@
       "imports": 23
     },
     {
-      "source": "interfaces.cli",
-      "target": "composition.entrypoints",
-      "imports": 23
-    },
-    {
       "source": "application.services",
       "target": "domain.types",
       "imports": 22
@@ -301,6 +296,11 @@
     {
       "source": "infrastructure.quality",
       "target": "domain.types",
+      "imports": 13
+    },
+    {
+      "source": "interfaces.cli",
+      "target": "composition.services_api",
       "imports": 13
     },
     {

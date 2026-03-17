@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import click
 
-from bioetl.composition.entrypoints import (
-    get_quarantine_manager,
-    get_quarantine_service,
-)
+from bioetl.composition.resources_api import get_quarantine_manager
+from bioetl.composition.services_api import get_quarantine_service
 from bioetl.interfaces.cli.commands.quarantine_support import (
     _inspect_quarantine,
     _purge_quarantine,

@@ -32,7 +32,7 @@ def adr() -> None:
 
 def get_adr_service() -> AdrServicePort:
     """Load the ADR service through composition on demand."""
-    from bioetl.composition.entrypoints import get_adr_service as _impl
+    from bioetl.composition.services_api import get_adr_service as _impl
 
     return _impl()
 

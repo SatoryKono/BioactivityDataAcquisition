@@ -8,14 +8,14 @@ import pytest
 
 
 @pytest.mark.unit
-def test_get_config_service_delegates_to_composition_entrypoints() -> None:
+def test_get_config_service_delegates_to_services_api() -> None:
     """Config command module should lazily delegate service resolution."""
     import bioetl.interfaces.cli.commands.config as config_module
 
     service = MagicMock()
 
     with patch(
-        "bioetl.composition.entrypoints.get_config_service",
+        "bioetl.composition.services_api.get_config_service",
         return_value=service,
     ) as mock_get_config_service:
         result = config_module.get_config_service()

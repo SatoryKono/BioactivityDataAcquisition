@@ -6,13 +6,13 @@ import pytest
 
 
 @pytest.mark.unit
-def test_start_metrics_server_delegates_to_composition_entrypoints() -> None:
+def test_start_metrics_server_delegates_to_composition_observability_api() -> None:
     import bioetl.interfaces.observability as observability_module
 
     logger = mock.Mock()
 
     with mock.patch(
-        "bioetl.composition.entrypoints.start_metrics_server",
+        "bioetl.composition.observability_api.start_metrics_server",
         return_value=True,
     ) as mock_start_metrics_server:
         result = observability_module.start_metrics_server(

@@ -7,23 +7,25 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-from bioetl.composition.factories._observability_wiring import (
-    _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
-)
-from bioetl.composition.factories._observability_wiring import (
-    _create_data_source as _create_data_source_impl,
-)
-from bioetl.composition.factories._observability_wiring import create_shared_metrics
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.pipeline._creation_wiring import (
+from bioetl.composition.factories.services.creation_api import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,
     _ServiceBundleDeps,
 )
 from bioetl.composition.factories.services.factory import BaseServicesFactory
+from bioetl.composition.factories.services.observability_api import (
+    _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
+)
+from bioetl.composition.factories.services.observability_api import (
+    _create_data_source as _create_data_source_impl,
+)
+from bioetl.composition.factories.services.observability_api import (
+    create_shared_metrics,
+)
 from bioetl.composition.services.versioning import (
     compute_config_hash as _compute_config_hash_direct,
 )

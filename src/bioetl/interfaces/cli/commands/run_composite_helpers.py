@@ -36,7 +36,7 @@ def push_metrics_to_gateway(
     pipeline_name: str | None = None,
 ) -> bool:
     """Push metrics through composition on demand."""
-    from bioetl.composition.entrypoints import push_metrics_to_gateway as _impl
+    from bioetl.composition.execution_api import push_metrics_to_gateway as _impl
 
     return _impl(run_label=run_label, pipeline_name=pipeline_name)
 

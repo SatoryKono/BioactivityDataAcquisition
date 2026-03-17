@@ -8,14 +8,14 @@ import pytest
 
 
 @pytest.mark.unit
-def test_get_adr_service_delegates_to_composition_entrypoints() -> None:
+def test_get_adr_service_delegates_to_services_api() -> None:
     """ADR command module should lazily delegate service resolution."""
     import bioetl.interfaces.cli.commands.adr as adr_module
 
     service = MagicMock()
 
     with patch(
-        "bioetl.composition.entrypoints.get_adr_service",
+        "bioetl.composition.services_api.get_adr_service",
         return_value=service,
     ) as mock_get_adr_service:
         result = adr_module.get_adr_service()

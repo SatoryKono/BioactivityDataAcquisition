@@ -25,6 +25,7 @@ Example usage:
 from __future__ import annotations
 
 # Import all schemas for flat namespace access
+from bioetl.domain.contracts.gold._base import DATE_REGEX
 from bioetl.domain.contracts.gold.chembl import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
@@ -61,6 +62,7 @@ from bioetl.domain.contracts.gold.uniprot import (
 )
 
 __all__ = [
+    "DATE_REGEX",
     "ChEMBLActivityGoldSchema",
     "ChEMBLAssayGoldSchema",
     "ChEMBLAssayParametersGoldSchema",

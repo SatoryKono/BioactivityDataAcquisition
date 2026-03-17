@@ -8,15 +8,15 @@ import pytest
 
 
 @pytest.mark.unit
-def test_create_pipeline_runner_delegates_to_composition_entrypoints() -> None:
-    """CLI package export should remain a thin wrapper around entrypoints."""
+def test_create_pipeline_runner_delegates_to_execution_api() -> None:
+    """CLI package export should remain a thin wrapper around execution API."""
     import bioetl.interfaces.cli as cli_package
 
     options = MagicMock()
     runner = MagicMock()
 
     with patch(
-        "bioetl.composition.entrypoints.create_pipeline_runner",
+        "bioetl.composition.execution_api.create_pipeline_runner",
         return_value=runner,
     ) as mock_create_runner:
         result = cli_package.create_pipeline_runner("chembl_activity", options)

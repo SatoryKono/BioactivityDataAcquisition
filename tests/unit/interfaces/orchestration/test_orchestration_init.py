@@ -33,12 +33,13 @@ class TestOrchestrationModule:
         assert orchestration.__all__ == []
         assert isinstance(orchestration.__all__, list)
 
-    def test_module_docstring_references_entrypoints(self) -> None:
-        """Test module docstring mentions composition.entrypoints for pipeline execution."""
+    def test_module_docstring_references_public_composition_apis(self) -> None:
+        """Test module docstring mentions public composition execution/services APIs."""
         from bioetl.interfaces import orchestration
 
         assert orchestration.__doc__ is not None
-        assert "entrypoints" in orchestration.__doc__
+        assert "execution_api" in orchestration.__doc__
+        assert "services_api" in orchestration.__doc__
 
     def test_module_docstring_mentions_arch_requirements(self) -> None:
         """Test module docstring references architecture requirements."""

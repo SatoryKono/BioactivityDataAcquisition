@@ -38,7 +38,7 @@ def create_pipeline_runner(
     Kept as a package-level convenience export while avoiding a direct
     composition import at module import time.
     """
-    from bioetl.composition.entrypoints import create_pipeline_runner as _impl
+    from bioetl.composition.execution_api import create_pipeline_runner as _impl
 
     return _impl(name, options)
 
