@@ -36,6 +36,21 @@ from bioetl.infrastructure.storage.arrow_converter import (
 from bioetl.infrastructure.storage.arrow_converter import (
     sort_arrow_table_by_primary_keys as _sort_by_primary_keys_impl,
 )
+from bioetl.infrastructure.storage.delta_schema_ops import (
+    coerce_null_types_for_delta as _coerce_null_types_for_delta_impl,
+)
+from bioetl.infrastructure.storage.delta_table_ops import (
+    clear_delta_tables as _clear_delta_tables_impl,
+)
+from bioetl.infrastructure.storage.delta_table_ops import (
+    get_delta_table_arrow_schema as _get_delta_table_arrow_schema_impl,
+)
+from bioetl.infrastructure.storage.delta_table_ops import (
+    read_delta_records as _read_delta_records_impl,
+)
+from bioetl.infrastructure.storage.delta_table_ops import (
+    resolve_delta_table_path as _resolve_delta_table_path_impl,
+)
 from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
 
 __all__ = ["BaseDeltaWriter", "coerce_null_types_for_delta"]
@@ -65,9 +80,7 @@ def _read_delta_records(
     columns: list[str] | None = None,
 ) -> list[BronzeRecord]:
     """Read Delta rows into generic record dictionaries."""
-    arrow_table = table.to_pyarrow_table(columns=columns)
-    result: list[BronzeRecord] = arrow_table.to_pylist()
-    return result
+    return _read_delta_records_impl(table, columns)
 
 
 def _load_delta_table(table_path: str) -> DeltaTable:
@@ -82,14 +95,16 @@ def _resolve_delta_table_path(
     flat_structure: bool,
 ) -> str:
     """Resolve the filesystem path for a Delta table."""
-    if flat_structure:
-        return base_path
-    return f"{base_path}/{table_name.replace('.', '/')}"
+    return _resolve_delta_table_path_impl(
+        base_path=base_path,
+        table_name=table_name,
+        flat_structure=flat_structure,
+    )
 
 
 def _get_delta_table_arrow_schema(table: DeltaTable) -> pa.Schema:
     """Extract the PyArrow schema from an opened Delta table."""
-    return table.schema().to_arrow()
+    return _get_delta_table_arrow_schema_impl(table)
 
 
 def _clear_delta_tables(
@@ -99,25 +114,11 @@ def _clear_delta_tables(
     dry_run: bool,
 ) -> int:
     """Clear one Delta table or all Delta tables rooted at a base path."""
-    import shutil
-
-    if not base_path.exists():
-        return 0
-
-    if table_path is not None:
-        if not table_path.exists():
-            return 0
-        if not dry_run:
-            shutil.rmtree(table_path)
-        return 1
-
-    cleared = 0
-    for item in base_path.iterdir():
-        if item.is_dir() and (item / "_delta_log").exists():
-            if not dry_run:
-                shutil.rmtree(item)
-            cleared += 1
-    return cleared
+    return _clear_delta_tables_impl(
+        base_path=base_path,
+        table_path=table_path,
+        dry_run=dry_run,
+    )
 
 
 def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
@@ -143,25 +144,7 @@ def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
         >>> fixed = coerce_null_types_for_delta(table)
         >>> fixed.schema  # list<item: string>, string
     """
-    for field in table.schema:
-        if pa.types.is_null(field.type):
-            # Top-level null column -> String with all nulls
-            col_idx = table.schema.get_field_index(field.name)
-            null_array = pa.nulls(table.num_rows, type=pa.string())
-            table = table.set_column(
-                col_idx, pa.field(field.name, pa.string()), null_array
-            )
-        elif pa.types.is_list(field.type) and pa.types.is_null(field.type.value_type):
-            # list<null> -> list<string> with empty lists
-            col_idx = table.schema.get_field_index(field.name)
-            empty_lists = pa.array(
-                [[] for _ in range(table.num_rows)],
-                type=pa.list_(pa.string()),
-            )
-            table = table.set_column(
-                col_idx, pa.field(field.name, pa.list_(pa.string())), empty_lists
-            )
-    return table
+    return _coerce_null_types_for_delta_impl(table)
 
 
 class BaseDeltaWriter:

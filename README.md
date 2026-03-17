@@ -286,6 +286,32 @@ export GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"
 
 On Windows, the project wrapper `.claude/github-mcp-wrapper.ps1` can auto-read token from `gh auth token` when available.
 
+### Cursor: Run Codex via Tasks
+
+Cursor uses the same workspace tasks as VS Code. This repository includes two Codex tasks:
+
+- `BioETL: Codex interactive (WSL)` — starts interactive Codex in WSL.
+- `BioETL: Codex exec full-auto (WSL)` — prompts for a task string and runs `codex exec --full-auto`.
+
+How to run:
+
+1. Open Command Palette (`Ctrl+Shift+P`).
+2. Run `Tasks: Run Task`.
+3. Pick one of the `BioETL: Codex ...` tasks.
+
+### IDE: Run Codex via Run and Debug
+
+For one-click IDE launch, use `Run and Debug` configurations:
+
+- `BioETL: Codex interactive (WSL)`
+- `BioETL: Codex exec full-auto (WSL)`
+
+How to run:
+
+1. Open `Run and Debug` (`Ctrl+Shift+D`).
+2. Select one of the `BioETL: Codex ...` configurations.
+3. Press `F5`.
+
 ### Testing
 
 The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.

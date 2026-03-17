@@ -42,6 +42,12 @@ from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
     SilverWriterPostwriteMixin,
 )
 from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+    SilverWriterRuntimeServices,
+)
+from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+    build_silver_writer_runtime_services,
+)
+from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
     resolve_silver_writer_runtime,
 )
 from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
@@ -92,69 +98,60 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self,
         base_path: str | Path,
         logger: LoggerPort,
-        tracing: TracingPort | None = None,
-        csv_exporter: CsvExporter | None = None,
-        write_policy: WriteModePolicy | None = None,
-        metrics: MetricsPort | None = None,
-        audit: AuditPort | None = None,
-        silver_validator: SilverValidatorPort | None = None,
-        metadata_writer: MetadataWriterPort | None = None,
-        metadata_coordinator: MetadataCoordinatorPort | None = None,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        runtime_services: SilverWriterRuntimeServices | None = None,
         flat_structure: bool = False,
-        dq_calculator: DQMetricsCalculator | None = None,
-        merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
+        **legacy_kwargs: object,
     ) -> None:
         """Initialize Silver writer.
 
         Args:
             base_path: Root directory for Silver layer Delta Lake tables.
             logger: Structured logger for write events and errors.
-            tracing: Optional tracing port for span propagation; defaults to
-                NoOpTracing when None.
-            csv_exporter: Optional CSV exporter for post-write CSV snapshots;
-                disabled when None.
-            write_policy: Medallion write mode policy; uses default policy when None.
-            metrics: Optional metrics port for recording write telemetry; disabled
-                when None.
-            audit: Optional audit port for Silver lineage logging; disabled when None.
-            silver_validator: Optional Pandera schema validator; defaults to
-                NoOpSilverValidator when None.
-            metadata_writer: Optional sidecar metadata writer; defaults to
-                NoOpMetadataWriter when None.
-            metadata_coordinator: Optional coordinator for metadata orchestration;
-                disabled when None.
             transform_version: Optional version string embedded in Silver metadata.
             transform_steps: Optional tuple of transform step names for lineage.
+            runtime_services: Optional grouped runtime collaborators for tracing,
+                validation, metadata, DQ, resilience, and optional CSV export.
             flat_structure: When True, omit the table-based subdirectory hierarchy.
-            dq_calculator: Optional DQ metrics calculator; uses default instance when None.
-            merge_resilience_policy: Optional resilience policy for merge retries
-                and timeouts; uses default policy when None.
         """
+        csv_exporter = legacy_kwargs.pop("csv_exporter", None)
+        tracing = legacy_kwargs.pop("tracing", None)
+        write_policy = legacy_kwargs.pop("write_policy", None)
+        metrics = legacy_kwargs.pop("metrics", None)
+        audit = legacy_kwargs.pop("audit", None)
+        silver_validator = legacy_kwargs.pop("silver_validator", None)
+        metadata_writer = legacy_kwargs.pop("metadata_writer", None)
+        metadata_coordinator = legacy_kwargs.pop("metadata_coordinator", None)
+        dq_calculator = legacy_kwargs.pop("dq_calculator", None)
+        merge_resilience_policy = legacy_kwargs.pop("merge_resilience_policy", None)
+        if legacy_kwargs:
+            unexpected = ", ".join(sorted(legacy_kwargs))
+            raise TypeError(f"Unexpected SilverWriter options: {unexpected}")
+
         super().__init__(base_path, logger, flat_structure=flat_structure)
-        self.csv_exporter = csv_exporter
-        self._metrics = metrics
-        self._audit = audit
-        (
-            self._tracing,
-            self._write_policy,
-            self._silver_validator,
-            self._metadata_writer,
-            self._dq_calculator,
-            self._merge_resilience_policy,
-        ) = resolve_silver_writer_runtime(
+        services = runtime_services or build_silver_writer_runtime_services(
+            csv_exporter=csv_exporter,
             tracing=tracing,
             write_policy=write_policy,
+            metrics=metrics,
+            audit=audit,
             silver_validator=silver_validator,
             metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
             dq_calculator=dq_calculator,
             merge_resilience_policy=merge_resilience_policy,
         )
-        self._metadata_coordinator: MetadataCoordinatorPort | None = (
-            metadata_coordinator
-        )
-
+        self.csv_exporter = services.csv_exporter
+        self._metrics = services.metrics
+        self._audit = services.audit
+        self._tracing = services.tracing
+        self._write_policy = services.write_policy
+        self._silver_validator = services.silver_validator
+        self._metadata_writer = services.metadata_writer
+        self._metadata_coordinator = services.metadata_coordinator
+        self._dq_calculator = services.dq_calculator
+        self._merge_resilience_policy = services.merge_resilience_policy
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 
