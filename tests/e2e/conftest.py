@@ -29,7 +29,7 @@ from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.exceptions.infrastructure import InfrastructureError
 from bioetl.domain.exceptions.network import ExternalServiceError
 from bioetl.domain.resilience import RetryConfig
-from bioetl.domain.types import RunType
+from bioetl.domain.types import RunID, RunType
 
 # Default timeout for E2E tests (seconds)
 # E2E tests run full pipelines with HTTP calls, Delta Lake operations,
@@ -105,13 +105,18 @@ def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
 def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     """Return normalized cassette file name in snake_case format."""
     node_name = request.node.name
+    if node_name is None:
+        msg = "pytest node name must be defined for VCR cassette resolution"
+        raise RuntimeError(msg)
     qualified_name = (
         f"{request.node.cls.__name__}.{node_name}" if request.node.cls else node_name
     )
-    return _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(
-        qualified_name,
-        _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(node_name, node_name),
-    )
+    qualified_override = _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(qualified_name)
+    if qualified_override is not None:
+        return qualified_override
+    if node_name in _E2E_VCR_CASSETTE_NAME_OVERRIDES:
+        return _E2E_VCR_CASSETTE_NAME_OVERRIDES[node_name]
+    return node_name
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -231,6 +236,7 @@ class MockRedisClient:
 
     async def keys(self, pattern: str) -> list:
         """Return empty list - no locks in Local-Only mode."""
+        await asyncio.sleep(0)
         return []
 
 
@@ -284,7 +290,7 @@ def create_test_context(
 
     return PipelineRunContext(
         pipeline_name=pipeline_name,
-        run_id=uuid4(),
+        run_id=RunID(uuid4()),
         run_type=run_type,
         resume=resume,
         limit=limit,
@@ -326,13 +332,47 @@ def build_e2e_skip_reason(
     return f"{_E2E_SKIP_PREFIX}[{reason_code}] pipeline={pipeline_name}; {detail}"
 
 
+def _create_retry_run_context(
+    context: PipelineRunContext, attempt: int
+) -> PipelineRunContext:
+    """Return stable retry context, replacing run_id only after first attempt."""
+    if attempt == 0:
+        return context
+    return replace(context, run_id=RunID(uuid4()))
+
+
+def _get_transient_reason_code(exc: Exception | None) -> str:
+    """Map transient exception to deterministic CI skip code."""
+    if isinstance(exc, ExternalServiceError) and exc.status_code == 429:
+        return "INFRA_FLAKY_429"
+    if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429:
+        return "INFRA_FLAKY_429"
+    return "INFRA_FLAKY_UPSTREAM"
+
+
+def _skip_transient_pipeline_run(
+    context: PipelineRunContext, transient_exc: Exception | None
+) -> None:
+    """Skip test with deterministic message after transient retry exhaustion."""
+    pytest.skip(
+        build_e2e_skip_reason(
+            _get_transient_reason_code(transient_exc),
+            pipeline_name=context.pipeline_name,
+            detail=(
+                f"transient upstream error after "
+                f"{_E2E_RETRY_CONFIG.max_attempts} attempts: {transient_exc}"
+            ),
+        )
+    )
+
+
 async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
     """Run pipeline with deterministic retries; skip on transient exhaustion."""
     from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
     transient_exc: Exception | None = None
     for attempt in range(_E2E_RETRY_CONFIG.max_attempts):
-        run_context = context if attempt == 0 else replace(context, run_id=uuid4())
+        run_context = _create_retry_run_context(context, attempt)
         runner = bootstrap_pipeline_runner(run_context)
         try:
             await runner.run()
@@ -347,25 +387,7 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
             transient_exc = exc
 
         if _E2E_RETRY_CONFIG.is_last_attempt(attempt):
-            reason_code = "INFRA_FLAKY_UPSTREAM"
-            if isinstance(transient_exc, ExternalServiceError):
-                if transient_exc.status_code == 429:
-                    reason_code = "INFRA_FLAKY_429"
-            elif (
-                isinstance(transient_exc, httpx.HTTPStatusError)
-                and transient_exc.response.status_code == 429
-            ):
-                reason_code = "INFRA_FLAKY_429"
-            pytest.skip(
-                build_e2e_skip_reason(
-                    reason_code,
-                    pipeline_name=context.pipeline_name,
-                    detail=(
-                        f"transient upstream error after "
-                        f"{_E2E_RETRY_CONFIG.max_attempts} attempts: {transient_exc}"
-                    ),
-                )
-            )
+            _skip_transient_pipeline_run(context, transient_exc)
 
         delay = _E2E_RETRY_CONFIG.calculate_delay(attempt, url=context.pipeline_name)
         await asyncio.sleep(delay)
@@ -423,6 +445,58 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
     )
 
 
+def _build_table_name_variants(table_name: str) -> list[str]:
+    """Build deterministic logical-name variants for table path resolution."""
+    normalized = table_name.replace("\\", "/").strip("/")
+    variants = {
+        normalized,
+        normalized.replace(".", "/"),
+        normalized.replace("/", "."),
+        normalized.replace("/", "_"),
+        normalized.replace(".", "_"),
+    }
+    if "_" in normalized:
+        variants.add(normalized.replace("_", "/", 1))
+        variants.add(normalized.replace("_", ".", 1))
+    return sorted(variant for variant in variants if variant)
+
+
+def _resolve_silver_table_path(data_dir: Path, table_name: str) -> Path:
+    """Resolve Silver Delta table path across naming/layout variants."""
+    silver_base = data_dir / "output" / "silver"
+    variants = _build_table_name_variants(table_name)
+
+    # Prefer explicit logical-name candidates first.
+    for variant in variants:
+        candidate = silver_base / variant.replace(".", "/")
+        if candidate.exists() and (candidate / "_delta_log").exists():
+            return candidate
+
+    # Flat-structure Delta table at layer root.
+    if silver_base.exists() and (silver_base / "_delta_log").exists():
+        return silver_base
+
+    # Fallback: discover existing delta tables and match by relative path variants.
+    if silver_base.exists():
+        discovered = sorted({p.parent for p in silver_base.rglob("_delta_log")})
+        variant_set = set(variants)
+        for candidate in discovered:
+            rel = candidate.relative_to(silver_base).as_posix()
+            candidate_variants = {
+                rel,
+                rel.replace("/", "."),
+                rel.replace("/", "_"),
+            }
+            if candidate_variants & variant_set:
+                return candidate
+
+    checked = [str(silver_base / variant.replace(".", "/")) for variant in variants]
+    raise AssertionError(
+        "Silver table does not exist. "
+        f"table_name={table_name}, checked={checked}, flat={silver_base}"
+    )
+
+
 def assert_silver_table_has_records(
     data_dir: Path, table_name: str, expected_min: int = 1
 ) -> int:
@@ -444,19 +518,7 @@ def assert_silver_table_has_records(
         and flat_structure layout (data_dir/output/silver/) for pipelines
         with flat_structure: true in their config.
     """
-    # Standard path: data_dir/output/silver/{table_name}/
-    table_path = data_dir / "output" / "silver" / table_name
-
-    # Flat structure path: data_dir/output/silver/ (Delta table at root)
-    flat_path = data_dir / "output" / "silver"
-
-    # Check both locations - standard path first, then flat structure
-    if not table_path.exists():
-        # Try flat_structure path (check for _delta_log at root)
-        if flat_path.exists() and (flat_path / "_delta_log").exists():
-            table_path = flat_path
-        else:
-            raise AssertionError(f"Silver table does not exist: {table_path}")
+    table_path = _resolve_silver_table_path(data_dir, table_name)
 
     dt = DeltaTable(str(table_path))
     df = dt.to_pyarrow_table()
@@ -532,14 +594,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     Note:
         Handles both standard and flat_structure layouts.
     """
-    # Standard path: data_dir/output/silver/{table_name}/
-    table_path = data_dir / "output" / "silver" / table_name
-
-    # Try flat_structure path if standard doesn't exist
-    if not table_path.exists():
-        flat_path = data_dir / "output" / "silver"
-        if flat_path.exists() and (flat_path / "_delta_log").exists():
-            table_path = flat_path
+    table_path = _resolve_silver_table_path(data_dir, table_name)
 
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()

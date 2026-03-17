@@ -137,6 +137,39 @@ def _iter_scripts(root: Path) -> list[Path]:
     return sorted(set(scripts))
 
 
+def _is_skipped_rel_path(rel_path: str) -> bool:
+    return any(
+        rel_path == prefix.rstrip("/") or rel_path.startswith(prefix)
+        for prefix in SKIP_PATH_PREFIXES
+    )
+
+
+def _should_include_search_file(root: Path, file_path: Path) -> bool:
+    rel_path = file_path.relative_to(root).as_posix()
+    if _is_skipped_rel_path(rel_path):
+        return False
+    if file_path.suffix.lower() in SKIP_FILE_EXTENSIONS:
+        return False
+    return True
+
+
+def _iter_dir_search_files(root: Path, base: Path) -> list[Path]:
+    files: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(base):
+        current_path = Path(dirpath)
+        rel_dir = current_path.relative_to(root).as_posix()
+        if _is_skipped_rel_path(f"{rel_dir}/"):
+            dirnames.clear()
+            continue
+
+        dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_NAMES]
+        for filename in filenames:
+            file_path = current_path / filename
+            if _should_include_search_file(root, file_path):
+                files.append(file_path)
+    return files
+
+
 def _iter_search_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for rel in SEARCH_ROOTS:
@@ -144,36 +177,10 @@ def _iter_search_files(root: Path) -> list[Path]:
         if not path.exists():
             continue
         if path.is_file():
-            rel_path = path.relative_to(root).as_posix()
-            if any(
-                rel_path == prefix.rstrip("/") or rel_path.startswith(prefix)
-                for prefix in SKIP_PATH_PREFIXES
-            ):
-                continue
-            if path.suffix.lower() in SKIP_FILE_EXTENSIONS:
-                continue
-            files.append(path)
+            if _should_include_search_file(root, path):
+                files.append(path)
             continue
-        for dirpath, dirnames, filenames in os.walk(path):
-            current_path = Path(dirpath)
-            rel_dir = current_path.relative_to(root).as_posix()
-            rel_dir_prefix = f"{rel_dir}/"
-            if any(rel_dir_prefix.startswith(prefix) for prefix in SKIP_PATH_PREFIXES):
-                dirnames.clear()
-                continue
-
-            dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_NAMES]
-            for filename in filenames:
-                file_path = current_path / filename
-                rel_file = file_path.relative_to(root).as_posix()
-                if any(
-                    rel_file == prefix.rstrip("/") or rel_file.startswith(prefix)
-                    for prefix in SKIP_PATH_PREFIXES
-                ):
-                    continue
-                if file_path.suffix.lower() in SKIP_FILE_EXTENSIONS:
-                    continue
-                files.append(file_path)
+        files.extend(_iter_dir_search_files(root, path))
     return sorted(files)
 
 
@@ -204,41 +211,83 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
     search_files = _iter_search_files(root)
 
     for file_path in search_files:
-        rel = file_path.relative_to(root).as_posix()
-        try:
-            text = file_path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
+        discovered = _discover_refs_in_file(
+            root=root,
+            file_path=file_path,
+            script_set=script_set,
+        )
+        if not discovered:
             continue
-
-        normalized_text = text.replace("\\", "/")
-        if not any(token in normalized_text for token in SCRIPT_PATH_TOKENS):
-            continue
-
-        original_lines = text.splitlines()
-        normalized_lines = normalized_text.splitlines()
-        for line_no, (raw_line, normalized_line) in enumerate(
-            zip(original_lines, normalized_lines), start=1
-        ):
-            if not any(token in normalized_line for token in SCRIPT_PATH_TOKENS):
-                continue
-            for script_rel in set(
-                SCRIPT_PATH_CANDIDATE_PATTERN.findall(normalized_line)
-            ):
-                candidate_paths = (script_rel, *SCRIPT_PATH_ALIASES.get(script_rel, ()))
-                for candidate_path in candidate_paths:
-                    if candidate_path not in script_set:
-                        continue
-                    if rel == candidate_path:
-                        continue
-                    refs[candidate_path].append(
-                        RefEvidence(
-                            path=rel,
-                            line=line_no,
-                            text=raw_line.strip()[:200],
-                            source_group=_source_group(rel),
-                        )
-                    )
+        for script_rel, evidence in discovered:
+            refs[script_rel].append(evidence)
     return refs
+
+
+def _discover_refs_in_file(
+    root: Path,
+    file_path: Path,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    rel = file_path.relative_to(root).as_posix()
+    try:
+        text = file_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return []
+
+    normalized_text = text.replace("\\", "/")
+    if not any(token in normalized_text for token in SCRIPT_PATH_TOKENS):
+        return []
+
+    source_group = _source_group(rel)
+    discovered: list[tuple[str, RefEvidence]] = []
+    original_lines = text.splitlines()
+    normalized_lines = normalized_text.splitlines()
+    for line_no, (raw_line, normalized_line) in enumerate(
+        zip(original_lines, normalized_lines, strict=True),
+        start=1,
+    ):
+        if not any(token in normalized_line for token in SCRIPT_PATH_TOKENS):
+            continue
+        discovered.extend(
+            _discover_refs_from_line(
+                rel=rel,
+                line_no=line_no,
+                raw_line=raw_line,
+                normalized_line=normalized_line,
+                source_group=source_group,
+                script_set=script_set,
+            )
+        )
+    return discovered
+
+
+def _discover_refs_from_line(
+    *,
+    rel: str,
+    line_no: int,
+    raw_line: str,
+    normalized_line: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    discovered: list[tuple[str, RefEvidence]] = []
+    for script_rel in set(SCRIPT_PATH_CANDIDATE_PATTERN.findall(normalized_line)):
+        candidate_paths = (script_rel, *SCRIPT_PATH_ALIASES.get(script_rel, ()))
+        for candidate_path in candidate_paths:
+            if candidate_path not in script_set or rel == candidate_path:
+                continue
+            discovered.append(
+                (
+                    candidate_path,
+                    RefEvidence(
+                        path=rel,
+                        line=line_no,
+                        text=raw_line.strip()[:200],
+                        source_group=source_group,
+                    ),
+                )
+            )
+    return discovered
 
 
 def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
@@ -438,24 +487,67 @@ def _check_lifecycle_registry(
         print(f"[FAIL] {exc}")
         return 1
 
-    entries_raw = registry.get("entries")
-    if not isinstance(entries_raw, dict):
-        print(
-            f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}"
+    entries_raw = _extract_registry_entries(registry, registry_path)
+    if entries_raw is None:
+        return 1
+    script_map = _build_script_map(payload)
+    target_statuses = {"unknown", "orphan", "legacy"}
+    missing, invalid, forbidden = _validate_target_registry_entries(
+        script_map=script_map,
+        entries_raw=entries_raw,
+        target_statuses=target_statuses,
+        forbid_evaluate_active=forbid_evaluate_active,
+    )
+    stale, stale_invalid = _validate_stale_registry_entries(
+        script_map=script_map,
+        entries_raw=entries_raw,
+        target_statuses=target_statuses,
+    )
+    invalid.extend(stale_invalid)
+
+    if missing or stale or invalid or forbidden:
+        _print_lifecycle_validation_failures(
+            registry_path=registry_path,
+            missing=missing,
+            stale=stale,
+            invalid=invalid,
+            forbidden=forbidden,
         )
         return 1
 
+    print(
+        f"[OK] Lifecycle registry covers unknown/orphan/legacy scripts: {registry_path}"
+    )
+    return 0
+
+
+def _extract_registry_entries(
+    registry: dict[str, object], registry_path: Path
+) -> dict[str, object] | None:
+    entries_raw = registry.get("entries")
+    if isinstance(entries_raw, dict):
+        return entries_raw
+    print(f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}")
+    return None
+
+
+def _build_script_map(payload: dict[str, object]) -> dict[str, dict[str, object]]:
     script_rows = payload["scripts"]
     assert isinstance(script_rows, list)
-    script_map: dict[str, dict[str, object]] = {
-        str(item["path"]): item for item in script_rows if isinstance(item, dict)
-    }
+    return {str(item["path"]): item for item in script_rows if isinstance(item, dict)}
 
-    target_statuses = {"unknown", "orphan", "legacy"}
+
+def _validate_target_registry_entries(
+    *,
+    script_map: dict[str, dict[str, object]],
+    entries_raw: dict[str, object],
+    target_statuses: set[str],
+    forbid_evaluate_active: bool,
+) -> tuple[list[str], list[str], list[str]]:
     missing: list[str] = []
-    stale: list[str] = []
     invalid: list[str] = []
     forbidden: list[str] = []
+    required = {"owner", "decision", "review_by", "next_step"}
 
     for path, row in script_map.items():
         status = str(row.get("status", "unknown"))
@@ -465,49 +557,64 @@ def _check_lifecycle_registry(
         if not isinstance(entry, dict):
             missing.append(path)
             continue
-        required = {"owner", "decision", "review_by", "next_step"}
         absent = sorted(required - set(entry.keys()))
         if absent:
             invalid.append(f"{path}: missing fields {absent}")
         if forbid_evaluate_active and str(entry.get("decision")) == "evaluate_active":
             forbidden.append(path)
 
-    for path, entry in entries_raw.items():
-        if not isinstance(entry, dict):
+    return missing, invalid, forbidden
+
+
+def _validate_stale_registry_entries(
+    *,
+    script_map: dict[str, dict[str, object]],
+    entries_raw: dict[str, object],
+    target_statuses: set[str],
+) -> tuple[list[str], list[str]]:
+    stale: list[str] = []
+    invalid: list[str] = []
+
+    for path, entry_value in entries_raw.items():
+        if not isinstance(entry_value, dict):
             invalid.append(f"{path}: entry must be object")
             continue
-        row = script_map.get(path)
-        if row is None:
+        row_value = script_map.get(path)
+        if row_value is None:
             stale.append(f"{path}: script not found in current inventory")
             continue
-        status = str(row.get("status", "unknown"))
+        status = str(row_value.get("status", "unknown"))
         if status not in target_statuses:
             stale.append(f"{path}: status changed to {status}")
 
-    if missing or stale or invalid or forbidden:
-        print(f"[FAIL] Lifecycle registry validation failed: {registry_path}")
-        if missing:
-            print("  Missing entries:")
-            for item in missing:
-                print(f"    - {item}")
-        if forbidden:
-            print("  Forbidden decision values (evaluate_active):")
-            for item in forbidden:
-                print(f"    - {item}")
-        if invalid:
-            print("  Invalid entries:")
-            for item in invalid:
-                print(f"    - {item}")
-        if stale:
-            print("  Stale entries:")
-            for item in stale:
-                print(f"    - {item}")
-        return 1
+    return stale, invalid
 
-    print(
-        f"[OK] Lifecycle registry covers unknown/orphan/legacy scripts: {registry_path}"
-    )
-    return 0
+
+def _print_lifecycle_validation_failures(
+    *,
+    registry_path: Path,
+    missing: list[str],
+    stale: list[str],
+    invalid: list[str],
+    forbidden: list[str],
+) -> None:
+    print(f"[FAIL] Lifecycle registry validation failed: {registry_path}")
+    if missing:
+        print("  Missing entries:")
+        for item in missing:
+            print(f"    - {item}")
+    if forbidden:
+        print("  Forbidden decision values (evaluate_active):")
+        for item in forbidden:
+            print(f"    - {item}")
+    if invalid:
+        print("  Invalid entries:")
+        for item in invalid:
+            print(f"    - {item}")
+    if stale:
+        print("  Stale entries:")
+        for item in stale:
+            print(f"    - {item}")
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -568,6 +675,24 @@ def main(argv: list[str] | None = None) -> int:
         _write_manifest(manifest_path, payload)
         print(f"[OK] Updated scripts inventory manifest: {manifest_path}")
 
+    check_result = _run_requested_checks(root=root, args=args, payload=payload, manifest_path=manifest_path)
+    if check_result != 0:
+        return check_result
+
+    report_path_text = str(args.deprecation_report).strip()
+    if report_path_text:
+        report_path = root / report_path_text
+        _write_deprecation_report(report_path, payload)
+        print(f"[OK] Updated scripts deprecation report: {report_path}")
+
+    _print_payload(args=args, payload=payload)
+
+    return 0
+
+
+def _run_requested_checks(
+    *, root: Path, args: argparse.Namespace, payload: dict[str, object], manifest_path: Path
+) -> int:
     if args.check:
         result = _check(manifest_path, payload)
         if result != 0:
@@ -582,28 +707,40 @@ def main(argv: list[str] | None = None) -> int:
         )
         if lifecycle_result != 0:
             return lifecycle_result
+    return 0
 
-    report_path_text = str(args.deprecation_report).strip()
-    if report_path_text:
-        report_path = root / report_path_text
-        _write_deprecation_report(report_path, payload)
-        print(f"[OK] Updated scripts deprecation report: {report_path}")
 
+def _coerce_int(value: object, *, default: int = 0) -> int:
+    if isinstance(value, (int, float, str)):
+        return int(value)
+    return default
+
+
+def _payload_status_counts(payload: dict[str, object]) -> tuple[int, dict[str, object]]:
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        raise ValueError("Inventory payload must contain object field 'summary'")
+    total_scripts = _coerce_int(summary.get("total_scripts", 0))
+    status_counts_raw = summary.get("status_counts", {})
+    status_counts = status_counts_raw if isinstance(status_counts_raw, dict) else {}
+    return total_scripts, status_counts
+
+
+def _print_payload(*, args: argparse.Namespace, payload: dict[str, object]) -> None:
     if args.json:
         print(json.dumps(payload, ensure_ascii=True, indent=2))
-    else:
-        summary = payload["summary"]
-        print(
-            "[INFO] scripts={total} active={active} unknown={unknown} orphan={orphan} legacy={legacy}".format(
-                total=summary["total_scripts"],
-                active=summary["status_counts"].get("active", 0),
-                unknown=summary["status_counts"].get("unknown", 0),
-                orphan=summary["status_counts"].get("orphan", 0),
-                legacy=summary["status_counts"].get("legacy", 0),
-            )
-        )
+        return
 
-    return 0
+    total_scripts, status_counts = _payload_status_counts(payload)
+    print(
+        "[INFO] scripts={total} active={active} unknown={unknown} orphan={orphan} legacy={legacy}".format(
+            total=total_scripts,
+            active=status_counts.get("active", 0),
+            unknown=status_counts.get("unknown", 0),
+            orphan=status_counts.get("orphan", 0),
+            legacy=status_counts.get("legacy", 0),
+        )
+    )
 
 
 if __name__ == "__main__":

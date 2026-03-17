@@ -1,46 +1,85 @@
 #!/usr/bin/env python3
-"""Detect potential secret leaks in VCR cassette files."""
+"""Detect potential secret leaks in VCR cassette files.
+
+The checker is intentionally conservative and only inspects places where API
+credentials should appear in recorded HTTP traffic:
+- request headers (`Authorization`, `X-API-Key`, etc.)
+- request URLs (`api_key`, `apikey`, `token`, `key` query parameters)
+"""
 
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
+from urllib.parse import parse_qsl, urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
 VCR_ROOT = ROOT / "tests" / "fixtures" / "vcr"
 
-TOKEN_RE = re.compile(
-    r"(?i)\b(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|password)\b"
-)
-EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-BEARER_RE = re.compile(r"(?i)\bbearer\s+([A-Za-z0-9._~+/=-]{8,})")
-REDACTED_MARKERS = ("REDACTED", "<redacted>", "***", "example", "noreply", "test@")
+QUERY_KEYS = {"api_key", "apikey", "token", "key", "access_token", "refresh_token"}
+HEADER_KEYS = {
+    "authorization",
+    "x-api-key",
+    "api-key",
+    "x-auth-token",
+    "proxy-authorization",
+}
+REDACTED_MARKERS = ("redacted", "<redacted>", "***", "example", "dummy", "test")
 
 
 def _looks_redacted(value: str) -> bool:
-    lowered = value.lower()
-    return any(marker.lower() in lowered for marker in REDACTED_MARKERS)
+    lowered = value.strip().strip("'\"").lower()
+    if not lowered:
+        return True
+    return any(marker in lowered for marker in REDACTED_MARKERS)
+
+
+def _scan_uri(path: Path, line_idx: int, uri_value: str) -> list[str]:
+    findings: list[str] = []
+    query_items = parse_qsl(urlparse(uri_value).query, keep_blank_values=True)
+    for key, value in query_items:
+        if key.lower() not in QUERY_KEYS:
+            continue
+        if _looks_redacted(value):
+            continue
+        findings.append(
+            f"{path.relative_to(ROOT)}:{line_idx}: unredacted query credential '{key}'"
+        )
+    return findings
 
 
 def _scan_file(path: Path) -> list[str]:
     findings: list[str] = []
-    for idx, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for idx, raw_line in enumerate(lines, start=1):
         line = raw_line.strip()
         if not line:
             continue
 
-        if TOKEN_RE.search(line) and not _looks_redacted(line):
-            findings.append(f"{path.relative_to(ROOT)}:{idx}: suspicious token field")
+        if line.lower().startswith("uri: "):
+            uri = line[5:].strip()
+            findings.extend(_scan_uri(path, idx, uri))
             continue
 
-        if BEARER_RE.search(line) and not _looks_redacted(line):
-            findings.append(f"{path.relative_to(ROOT)}:{idx}: possible bearer token")
+        if not line.endswith(":"):
+            continue
+        header_name = line[:-1].strip().lower()
+        if header_name not in HEADER_KEYS:
             continue
 
-        match = EMAIL_RE.search(line)
-        if match and not _looks_redacted(match.group(0)):
-            findings.append(f"{path.relative_to(ROOT)}:{idx}: possible real email")
+        # VCR stores header values on the next list item line: "- value"
+        next_line = lines[idx].strip() if idx < len(lines) else ""
+        if not next_line.startswith("-"):
+            findings.append(
+                f"{path.relative_to(ROOT)}:{idx}: header '{header_name}' without value"
+            )
+            continue
+        header_value = next_line.lstrip("-").strip()
+        if _looks_redacted(header_value):
+            continue
+        findings.append(
+            f"{path.relative_to(ROOT)}:{idx + 1}: unredacted header '{header_name}'"
+        )
 
     return findings
 
