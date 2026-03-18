@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1099`
-- Internal import edges (raw): `4211`
+- Scanned modules: `1100`
+- Internal import edges (raw): `4218`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `249`
@@ -20,8 +20,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|504 OK| application
-    application -->|666 OK| domain
+    application -->|508 OK| application
+    application -->|669 OK| domain
     composition -->|214 OK| application
     composition -->|276 OK| composition
     composition -->|224 OK| domain
@@ -39,8 +39,8 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 504 | allowed |
-| `application` | `domain` | 666 | allowed |
+| `application` | `application` | 508 | allowed |
+| `application` | `domain` | 669 | allowed |
 | `composition` | `application` | 214 | allowed |
 | `composition` | `composition` | 276 | allowed |
 | `composition` | `domain` | 224 | allowed |
@@ -60,7 +60,7 @@ flowchart LR
 | `application.composite` | `domain.composite` | 89 |
 | `infrastructure.adapters` | `domain.types` | 85 |
 | `composition.factories` | `application.core` | 84 |
-| `application.pipelines` | `domain.types` | 70 |
+| `application.pipelines` | `domain.types` | 71 |
 | `infrastructure.adapters` | `domain.ports` | 69 |
 | `application.core` | `domain.types` | 59 |
 | `application.core` | `domain.ports` | 49 |
@@ -94,11 +94,11 @@ flowchart LR
 | `application.pipelines` | `domain.context` | 15 |
 | `composition.bootstrap` | `domain.composite` | 15 |
 | `composition.factories` | `application.services` | 15 |
+| `application.pipelines` | `domain.ports` | 14 |
 | `application.pipelines` | `domain.value_objects` | 14 |
 | `infrastructure.config` | `domain.types` | 14 |
 | `infrastructure.schemas` | `domain.config` | 14 |
 | `interfaces.cli` | `composition.services_api` | 14 |
-| `application.pipelines` | `domain.ports` | 13 |
 | `infrastructure.quality` | `domain.types` | 13 |
 | `application.core` | `domain.config` | 12 |
 | `composition.bootstrap` | `infrastructure.observability` | 12 |

@@ -7,7 +7,8 @@
 > - Architecture tree paths updated to `mmd-diagrams/`
 > - Quick-start and pipeline command references aligned with current CLI
 > - Inventory-style counts trimmed to avoid stale snapshot drift
-> - Active entry points clarified: `RULES.md`, `TOOLS.md`, and `99-archive/README.md`
+> - Active entry points clarified: `RULES.md` and `TOOLS.md`
+> - `99-archive/README.md` kept only as a historical entrypoint
 > - Legacy `docs/INDEX.md` entry point aligned with the active rules/requirements split
 
 ## Quick Links

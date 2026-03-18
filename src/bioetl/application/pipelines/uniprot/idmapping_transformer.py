@@ -64,23 +64,27 @@ class IDMappingTransformer(BaseTransformer):
             pii_hasher: Optional PII hasher collaborator when not using dependencies.
             dependencies: Explicit collaborator bundle.
         """
-        if dependencies is not None:
-            overrides = {
-                key: value
-                for key, value in {
-                    "tracer": tracer,
-                    "metrics": metrics,
-                    "identity_service": identity_service,
-                    "pii_hasher": pii_hasher,
-                }.items()
-                if value is not None
-            }
-            if overrides:
-                dependencies = dataclasses.replace(dependencies, **overrides)
-                tracer = None
-                metrics = None
-                identity_service = None
-                pii_hasher = None
+        if dependencies is not None and any(
+            value is not None
+            for value in (tracer, metrics, identity_service, pii_hasher)
+        ):
+            dependencies = dataclasses.replace(
+                dependencies,
+                tracer=tracer if tracer is not None else dependencies.tracer,
+                metrics=metrics if metrics is not None else dependencies.metrics,
+                identity_service=(
+                    identity_service
+                    if identity_service is not None
+                    else dependencies.identity_service
+                ),
+                pii_hasher=(
+                    pii_hasher if pii_hasher is not None else dependencies.pii_hasher
+                ),
+            )
+            tracer = None
+            metrics = None
+            identity_service = None
+            pii_hasher = None
 
         super().__init__(
             provider,
