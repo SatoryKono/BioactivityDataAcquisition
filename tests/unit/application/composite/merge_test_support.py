@@ -17,7 +17,10 @@ from bioetl.application.composite.dependency_joiner import DependencyJoinerServi
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
-from bioetl.application.composite.join_planner import JoinPlannerService
+from bioetl.application.composite.join_planner import (
+    JoinPlannerService,
+    JoinPreparationCollaborators,
+)
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.domain.composite.config import MergeConfig
 
@@ -60,10 +63,12 @@ def build_join_planner_service(
     return JoinPlannerService(
         merge_config=merge_config,
         logger=logger,
-        deduplicator=deduplicator,
-        aggregator=aggregator,
-        renamer=renamer,
-        conflict_resolver=conflict_resolver,
+        preparation=JoinPreparationCollaborators(
+            deduplicator=deduplicator,
+            aggregator=aggregator,
+            renamer=renamer,
+            conflict_resolver=conflict_resolver,
+        ),
         field_alias_resolver=field_alias_resolver,
         join_key_resolver=join_key_resolver,
         join_executor=join_executor,

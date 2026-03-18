@@ -5,7 +5,7 @@
 ## Summary
 
 - Scanned modules: `1094`
-- Internal import edges (raw): `4191`
+- Internal import edges (raw): `4194`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `249`
@@ -20,10 +20,10 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|500 OK| application
-    application -->|659 OK| domain
-    composition -->|210 OK| application
-    composition -->|273 OK| composition
+    application -->|501 OK| application
+    application -->|660 OK| domain
+    composition -->|212 OK| application
+    composition -->|272 OK| composition
     composition -->|223 OK| domain
     composition -->|201 OK| infrastructure
     domain -->|696 OK| domain
@@ -39,10 +39,10 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 500 | allowed |
-| `application` | `domain` | 659 | allowed |
-| `composition` | `application` | 210 | allowed |
-| `composition` | `composition` | 273 | allowed |
+| `application` | `application` | 501 | allowed |
+| `application` | `domain` | 660 | allowed |
+| `composition` | `application` | 212 | allowed |
+| `composition` | `composition` | 272 | allowed |
 | `composition` | `domain` | 223 | allowed |
 | `composition` | `infrastructure` | 201 | allowed |
 | `domain` | `domain` | 696 | allowed |
@@ -59,7 +59,7 @@ flowchart LR
 |---|---|---:|
 | `application.composite` | `domain.composite` | 89 |
 | `infrastructure.adapters` | `domain.types` | 85 |
-| `composition.factories` | `application.core` | 81 |
+| `composition.factories` | `application.core` | 83 |
 | `application.pipelines` | `domain.types` | 70 |
 | `infrastructure.adapters` | `domain.ports` | 69 |
 | `application.core` | `domain.types` | 57 |
@@ -107,9 +107,9 @@ flowchart LR
 | `application.services` | `domain.exceptions` | 11 |
 | `composition.factories` | `domain.config` | 11 |
 | `composition.factories` | `infrastructure.adapters` | 11 |
+| `application.pipelines` | `domain.filtering` | 10 |
 | `application.pipelines` | `domain.services` | 10 |
 | `application.core` | `domain.value_objects` | 9 |
-| `application.pipelines` | `domain.filtering` | 9 |
 | `application.pipelines` | `domain.transformations` | 9 |
 | `composition.bootstrap` | `application.core` | 9 |
 | `infrastructure.storage` | `domain.services` | 9 |

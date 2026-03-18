@@ -6,6 +6,7 @@ PipelineExecutor and RecordProcessor.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
@@ -136,6 +137,7 @@ def transform_callback():
     """Create mock transform callback with lineage fields."""
 
     async def transform(ctx, record, index):
+        await asyncio.sleep(0)
         return {
             "entity_id": record.get("id", "unknown"),
             "value": record.get("value"),
@@ -616,6 +618,7 @@ class TestBatchExecutorProcessBatch:
         """Test that transform errors result in quarantine."""
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -851,6 +854,7 @@ class TestBatchExecutorTracing:
         """Runtime failures should save a recovery checkpoint and mark the span."""
 
         async def boom(*_args, **_kwargs):
+            await asyncio.sleep(0)
             batch_executor_with_tracer.records_fetched = 3
             raise RuntimeError("boom")
 

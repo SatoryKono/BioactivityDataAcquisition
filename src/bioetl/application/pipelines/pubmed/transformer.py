@@ -35,20 +35,14 @@ from bioetl.domain.mapping.pubmed_publication import (
     PUBMED_SILVER_EXCLUDED_FIELDS,
     build_pubmed_publication_type_fields,
 )
-from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldRecord, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import (
-        ContractPolicyPort,
-        DataNormalizationPort,
-        MetricsPort,
-        PiiHasherPort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord
 
 
@@ -103,31 +97,24 @@ class PubMedPublicationTransformer(
         self,
         provider: str = "pubmed",
         entity_type: str = "publication",
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
-        data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
         author_extractor: AuthorExtractor | None = None,
         date_extractor: DateExtractor | None = None,
-    ):
+    ) -> None:
         """Initialize PubMed publication transformer.
 
         Args:
             provider: Data provider identifier.
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
-            tracer: Optional tracing port for distributed tracing (O1 observability).
-            metrics: Optional metrics port for duration/error tracking (O1 observability).
             silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
-            identity_service: Service for computing entity IDs and content hashes.
-            pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
-            data_normalizer: Optional data normalization service for DOI normalization.
-            contract_policy: Optional pipeline contract policy.
+            dependencies: Explicit collaborator bundle.
             author_extractor: Optional author extractor dependency.
                 If None, defaults to AuthorExtractor().
             date_extractor: Optional date extractor dependency.
@@ -137,14 +124,12 @@ class PubMedPublicationTransformer(
         super().__init__(
             provider,
             entity_type=entity_type,
-            tracer=tracer,
-            metrics=metrics,
             silver_filters=silver_filters,
             gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
-            data_normalizer=data_normalizer,
-            contract_policy=contract_policy,
             dependencies=dependencies,
         )
         self._cached_xml_root = None

@@ -21,7 +21,10 @@ __all__ = ["BasePublicationTransformer"]
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.base_transformer import (
+    BaseTransformer,
+    TransformerDependencyContext,
+)
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
@@ -29,6 +32,9 @@ from bioetl.domain.mapping.publication_type_classification import (
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -57,6 +63,31 @@ class BasePublicationTransformer(BaseTransformer):
 
     RF-NORM-04: Uniform content normalization (strip_html_tags on title/abstract).
     """
+
+    def __init__(
+        self,
+        provider: str,
+        entity_type: str = "publication",
+        silver_filters: SilverFilterConfig | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
+    ) -> None:
+        """Initialize publication transformer with explicit DI seams."""
+        super().__init__(
+            provider=provider,
+            entity_type=entity_type,
+            silver_filters=silver_filters,
+            gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            dependencies=dependencies,
+        )
 
     @abstractmethod
     def _extract_business_data(self, record: BronzeRecord) -> JsonDict:

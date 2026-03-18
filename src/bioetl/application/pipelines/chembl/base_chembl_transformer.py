@@ -24,19 +24,13 @@ from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )
-from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import (
-        ContractPolicyPort,
-        DataNormalizationPort,
-        MetricsPort,
-        PiiHasherPort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
@@ -71,14 +65,12 @@ class BaseChemblTransformer(BaseTransformer):
         self,
         provider: str = "chembl",
         entity_type: str | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
-        data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize ChEMBL transformer.
@@ -109,13 +101,11 @@ class BaseChemblTransformer(BaseTransformer):
             entity_type=resolved_entity_type,
             silver_filters=silver_filters,
             gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
             dependencies=dependencies,
-            legacy_tracer=tracer,
-            legacy_metrics=metrics,
-            legacy_identity_service=identity_service,
-            legacy_pii_hasher=pii_hasher,
-            legacy_data_normalizer=data_normalizer,
-            legacy_contract_policy=contract_policy,
         )
 
     async def _transform_impl(
