@@ -58,18 +58,18 @@ class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
 
 | Класс | Назначение |
 |-------|------------|
-| `BaseDQThresholds` | Пороги soft-fail/hard-fail с валидацией |
-| `BaseDQConfig` | Расширяет Thresholds + strict-validation |
+| `BaseDQThresholds` | Пороги `soft_fail`/`hard_fail` с валидацией |
+| `BaseDQConfig` | Расширяет thresholds + `strict_validation` |
 
 ```python
 from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
 
 config = BaseDQConfig(
-    soft-fail-threshold=0.05,
-    hard-fail-threshold=0.20,
-    strict-validation=False,
+    soft_fail_threshold=0.05,
+    hard_fail_threshold=0.20,
+    strict_validation=False,
 )
-domain-config = config.to_domain()
+domain_config = config.to_domain()
 ```
 
 ### 2.2. Resilience Configuration
@@ -113,8 +113,8 @@ class ExtendedCircuitBreakerConfig(BaseCircuitBreakerConfig):
     """Extended circuit breaker with additional fields."""
 
     # Новые поля
-    alert-on-open: bool = Field(default=False)
-    max-half-open-attempts: int = Field(default=3, ge=1, le=10)
+    alert_on_open: bool = Field(default=False)
+    max_half_open_attempts: int = Field(default=3, ge=1, le=10)
 ```
 
 ### 3.2. Переопределение Валидаторов
@@ -128,8 +128,8 @@ class StrictDQConfig(BaseDQConfig):
 
     @model_validator(mode="after")
     def validate_strict_mode(self) -> StrictDQConfig:
-        if self.strict-validation and self.hard-fail-threshold > 0.10:
-            raise ValueError("strict mode requires hard-fail <= 0.10")
+        if self.strict_validation and self.hard_fail_threshold > 0.10:
+            raise ValueError("strict mode requires hard_fail <= 0.10")
         return self
 ```
 
@@ -238,7 +238,7 @@ class BaseCircuitBreakerConfig(BaseModel):
 ```python
 @model_validator(mode="after")
 def validate_thresholds(self) -> BaseDQThresholds:
-    """Validate that soft-fail < hard-fail."""
+    """Validate that soft_fail < hard_fail."""
     if self.soft_fail_threshold >= self.hard_fail_threshold:
         raise ValueError(
             f"soft_fail ({self.soft_fail_threshold}) must be < "

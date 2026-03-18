@@ -203,8 +203,8 @@ docs/
 
 ```
 src/bioetl/
-├── domain/                      # Pure logic, no I/O (§1.1) — 192 files
-│   ├── ports/                   # Protocol interfaces — 28 Port protocols
+├── domain/                      # Pure logic, no I/O (§1.1)
+│   ├── ports/                   # Protocol interfaces
 │   │   ├── __init__.py          # Facade — single import point (ARCH-008)
 │   │   ├── data_source.py       # DataSourcePort, FilterableDataSourcePort
 │   │   ├── storage.py           # StoragePort

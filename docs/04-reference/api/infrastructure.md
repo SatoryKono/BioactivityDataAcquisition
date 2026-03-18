@@ -128,7 +128,7 @@ Each provider has its own `models.py` with API response models:
 
 | Class | Implements | Description |
 |---|---|---|
-| `BronzeWriter` | `BronzeStoragePort` | Writes raw API data to Bronze layer (JSON/Parquet) |
+| `BronzeWriter` | `BronzeStoragePort` | Writes raw API data to Bronze layer as JSONL + zstd |
 | `SilverWriter` | `SilverStoragePort` | Writes transformed data to Silver layer (Delta Lake) |
 | `GoldWriter` | `GoldStoragePort` | Writes validated data to Gold layer (Delta Lake, SCD2 support) |
 | `BaseDeltaWriter` | -- | Shared Delta Lake write logic |
@@ -143,7 +143,7 @@ Each provider has its own `models.py` with API response models:
 
 | Class | Description |
 |---|---|
-| `MetadataWriter` | Writes metadata sidecar JSON files |
+| `MetadataWriter` | Writes metadata sidecar YAML files |
 | `SilverMetadataBuilder` | Builds Silver layer metadata payloads |
 | `GoldMetadataBuilder` | Builds Gold layer metadata payloads |
 
