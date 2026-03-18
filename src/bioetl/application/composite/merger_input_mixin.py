@@ -233,9 +233,9 @@ class _MergeInputLoaderMixin:
         # Compatibility path:
         # - legacy callers may not define `_silver_reader` at all -> use `_storage`.
         # - if `_silver_reader` exists and is None, treat it as explicit misconfiguration.
-        silver_reader = (
-            self._silver_reader if "_silver_reader" in self.__dict__ else self._storage
-        )
+        silver_reader = self._silver_reader if "_silver_reader" in self.__dict__ else None
+        if silver_reader is None and isinstance(self._storage, SilverStoragePort):
+            silver_reader = self._storage
         if silver_reader is None:
             raise RuntimeError(
                 "MergeService requires delta_reader or silver_reader for silver reads"

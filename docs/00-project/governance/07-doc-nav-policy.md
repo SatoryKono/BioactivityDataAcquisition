@@ -115,7 +115,7 @@ Failure policy:
 | `published` | policy, requirements, active runbooks | MUST be in primary nav |
 | `internal-published` | selected `plans/**`, `reports/**`, `00-project/ai/{agents,memory,prompts,skills}/**`, architecture extras | SHOULD be in `Internal / Extended` |
 | `internal-generated` | generated indexes/variants (for example some diagram artifact indexes) | MAY stay outside nav, but MUST be linked from an index |
-| `archive` | `99-archive/**` | MUST stay outside nav with archive disclaimer |
+| `archive` | `99-archive/**` | SHOULD stay outside nav by default; curated archive entrypoints MAY appear with explicit historical labeling |
 
 ### 6.2 Selection Criteria (for nav promotion)
 

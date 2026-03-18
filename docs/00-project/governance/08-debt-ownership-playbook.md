@@ -35,6 +35,11 @@ Mandatory enforcement points:
 
 ## Dashboard
 
-Current ownership snapshot is tracked in:
+Current ownership metadata is governed by:
+
+- `configs/quality/debt_scorecard.yaml`
+- `configs/quality/architecture_metric_exemptions.yaml`
+
+Latest historical snapshot/evidence:
 
 - `docs/reports/debt-ownership-dashboard-2026-03-06.md`

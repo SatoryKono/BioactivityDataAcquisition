@@ -317,7 +317,7 @@ nav:
                     -   "Observability Checklist": 05-operations/runbooks/observability-checklist.md
                     -   "Scaling": 05-operations/runbooks/scaling.md
                     -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
-            -   "Release Checklist": 05-operations/release-checklist.md
+            -   "Historical Release Checklist (v5.9)": 05-operations/release-checklist.md
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
     -   Verification:

@@ -147,7 +147,7 @@ class JoinPlannerDelegationMixin:
         return self._dependency_joiner.apply_dependency_joins(
             merged_df=merged_df,
             dependency_dfs=dependency_dfs,
-            dependencies=dependencies,
+            dependencies=list(dependencies),
             seed_pipeline=seed_pipeline,
         )
 
