@@ -158,21 +158,22 @@ composite:
 
   enrichers:                          # Обогащение из других провайдеров
     - pipeline: crossref_publication
-      join-key: doi
-      optional: true
+      join_keys: [doi, title]
+      required: false
     - pipeline: openalex_publication
-      join-key: doi
-      optional: true
+      join_keys: [doi, title]
+      required: false
     - pipeline: pubmed_publication
-      join-key: pmid
-      optional: true
+      join_keys: [pmid, doi]
+      required: false
     - pipeline: semanticscholar_publication
-      join-key: doi
-      optional: true
+      join_keys: [doi, title]
+      required: false
 
   merge:
-    strategy: left-outer              # Сохраняем все seed записи
-    conflict-resolution: prefer-seed  # При конфликте — seed выигрывает
+    strategy: left_outer               # Сохраняем все seed записи
+    conflict_resolution: seed_priority # При конфликте — seed выигрывает
+    preserve_all_sources: true         # Храним provider-qualified поля
 ```
 
 ### Доступные Composite Pipelines
@@ -189,12 +190,12 @@ composite:
 
 | Аспект        | Regular Pipeline                           | Composite Pipeline                                      |
 | ------------- | ------------------------------------------ | ------------------------------------------------------- |
-| Корневой ключ | `pipeline_name`, `provider`, `entity-type` | `composite:`                                            |
-| Source        | Один провайдер                             | Несколько провайдеров через `enrichers`                 |
-| Schema        | `-schema.json`                             | Отдельная схема (ADR-026)                               |
-| Пути          | Auto-computed                              | Определяются в `merge.output`                           |
+| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
+| Source        | Один провайдер + provider source config    | Несколько провайдеров через `enrichers`                 |
+| Schema        | `configs/_schema/pipeline.json`            | Отдельная composite schema (ADR-026)                    |
+| Пути          | Auto-computed                              | Часть путей задаётся в `merge.output`                   |
 | Orchestration | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
-| Реализация    | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
+| Реализация    | `application/pipelines/{provider}/`        | `application/composite/`                                |
 
 > **Архитектурная заметка:** Composite pipelines **не используют** классы трансформеров
 > (`*Transformer`). Вместо этого оркестрация выполняется через `CompositePipelineRunner`,
@@ -206,38 +207,55 @@ composite:
 
 ## Convention-based Path Resolution (ADR-029)
 
-Пути и ссылки вычисляются автоматически из `provider` и `entity-type`.
-Pipeline YAML файлы **не должны** явно указывать эти поля — они вычисляются
-конвенционно. Если указаны явно, значение используется как override-path.
+Пути и file-reference defaults вычисляются автоматически из `provider` и
+`entity_type`. Entity pipeline config задаёт `provider` и `entity_type`, после
+чего loader:
+
+1. подставляет convention defaults для `dq_config_file` и `filter_config_file`;
+1. вычисляет медальонные пути и table names;
+1. загружает provider source config из `configs/providers/{provider}.yaml`;
+1. merge-ит provider source config с entity-level `source` overrides.
 
 | Поле                 | Auto-computed значение                                 | Примечание                                |
 | -------------------- | ------------------------------------------------------ | ----------------------------------------- |
-| `source-file`        | `../../providers/{provider}.yaml`                      | Provider API settings                     |
-| `dq-config-file`     | `../../entities/{provider}/{entity-type}.yaml`         | Informational; loader uses full hierarchy |
-| `filter_config-file` | `../../entities/{provider}/{entity-type}.yaml`         | Informational; loader uses full hierarchy |
-| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity-type}`          |                                           |
-| `sink.silver.path`   | `data/output/silver/{provider}/{entity-type}`          |                                           |
-| `sink.gold.path`     | `data/output/gold/{provider}/{entity-type}`            |                                           |
+| `dq_config_file`     | `../../entities/{provider}/{entity_type}.yaml`         | Convention default для entity-level DQ     |
+| `filter_config_file` | `../../entities/{provider}/{entity_type}.yaml`         | Convention default для entity-level filters |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`          |                                           |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`          |                                           |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`            |                                           |
+| `silver_table`       | `{provider}_{entity_type}`                             | Если явно не задан                        |
+| `gold_table`         | `{provider}_{entity_type}`                             | Если явно не задан                        |
+
+> **Важно:** pipeline config не использует `source-file`. Provider source section
+> canonical-но грузится из `configs/providers/{provider}.yaml`, затем merge-ится
+> с inline `source:` overrides в entity pipeline config.
 
 ### Авто-пропагация sort-by (ADR-014 compliance)
 
-Параметры `sink.silver.sort-by.columns` и `sink.gold.sort-by.columns` **автоматически вычисляются** из `business_primary_keys`:
+Параметры `sink.silver.sort_by` и `sink.gold.sort_by` **автоматически вычисляются**
+из `technical_primary_key` и `business_primary_keys`:
 
 ```python
-# config_loader.py:154-159
-if "sort-by" not in sink_silver:
-    sink_silver["sort-by"] = {
-        "columns": config["business_primary_keys"],
-        "ascending": True,
-    }
+# pipeline_payload_normalization.py
+raw_primary_keys = config.get("business_primary_keys", [])
+primary_keys = [str(key) for key in raw_primary_keys if str(key).strip()]
+technical_primary_key = str(config.get("technical_primary_key", "entity_id"))
+sort_policy = [technical_primary_key] + [
+    key for key in primary_keys if key != technical_primary_key
+]
+
+if layer_name in {"silver", "gold"}:
+    layer.setdefault("sort_by", list(sort_policy))
 ```
 
-Это означает, что entity configs **не должны** явно указывать `sort-by` — он пропагируется из `business_primary_keys`:
+Это означает, что entity configs обычно **не должны** явно указывать `sort_by` —
+он выводится из primary key policy:
 
 ```yaml
-# НЕ нужно указывать sort-by — он auto-computed!
+# НЕ нужно указывать sort_by — он auto-computed
 pipeline_name: chembl_activity
-business_primary_keys: ["activity_id"]  # → sort-by.columns = ["activity_id"]
+technical_primary_key: entity_id
+business_primary_keys: ["activity_id"]  # → sort_by = ["entity_id", "activity_id"]
 ```
 
 > **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 21 entity configs соответствуют ADR-014 через авто-пропагацию.
@@ -255,9 +273,9 @@ DQ правила загружаются в порядке приоритета 
 1. `configs/entities/{provider}/{entity}.yaml` — entity-specific
 1. Inline `dq-overrides` в pipeline конфиге — финальные переопределения
 
-> **Примечание:** Поле `dq-config-file` в pipeline YAML вычисляется конвенционно
+> **Примечание:** Поле `dq_config_file` в pipeline YAML вычисляется конвенционно
 > (ADR-029) и **не требует** явного указания. `DQConfigLoader` всегда загружает
-> полную 3-уровневую иерархию по `provider`/`entity-type`. Если `dq-config-file`
+> полную 3-уровневую иерархию по `provider`/`entity_type`. Если `dq_config_file`
 > указан явно — он используется как override-path для entity-level файла.
 
 ### Специальная merge логика
@@ -271,8 +289,8 @@ DQ правила загружаются в порядке приоритета 
 ```yaml
 # configs/base/quality.yaml
 thresholds:
-  soft-fail: 0.05      # >5% errors → Warning
-  hard-fail: 0.20      # >20% errors → Fail Batch
+  soft_fail: 0.05      # >5% errors → Warning
+  hard_fail: 0.20      # >20% errors → Fail Batch
 
 strict_validation: false
 invalid_record_policy: quarantine  # quarantine | skip | fail
@@ -280,14 +298,14 @@ invalid_record_policy: quarantine  # quarantine | skip | fail
 report:
   enabled: true
   format: json
-  include-sample-failures: true
-  sample-size: 10
+  include_sample_failures: true
+  sample_size: 10
 
-common-field-validations:
-  - field: -content-hash
+common_field_validations:
+  - field: _content_hash
     type: required
     nullable: false
-  - field: -ingestion_ts
+  - field: _ingestion_ts
     type: pattern
     pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
 ```
@@ -296,7 +314,7 @@ common-field-validations:
 
 ```yaml
 # configs/entities/chembl/activity.yaml
-entity-field-validations:
+entity_field_validations:
   - field: activity_id
     type: required
     nullable: false
@@ -308,20 +326,20 @@ entity-field-validations:
     type: enum
     allowed: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, Kd, EC50, AC50, Potency]
 
-entity-cross-field-validations:
-  - name: value-requires-units
+entity_cross_field_validations:
+  - name: value_requires_units
     fields: [standard_value, standard_units]
-    condition: conditional-required
-    trigger-field: standard_value
-    required-field: standard_units
+    condition: conditional_required
+    trigger_field: standard_value
+    required_field: standard_units
 
-entity-conditional-validations:
-  - name: binding-requires-target
-    condition-field: assay-type
-    condition-value: B
-    condition-operator: eq
-    then-validations:
-      - field: target-chembl-id
+entity_conditional_validations:
+  - name: binding_requires_target
+    condition_field: assay_type
+    condition_value: B
+    condition_operator: eq
+    then_validations:
+      - field: target_chembl_id
         type: required
 ```
 
@@ -573,11 +591,11 @@ bioetl config list-pipelines
 
 | Проверка                         | Описание                                       |
 | -------------------------------- | ---------------------------------------------- |
-| `validate-batch-size`            | batch-size ≤ 5000                              |
-| `validate-provider`              | Provider в lowercase                           |
-| `validate-entity-type-canonical` | publication\* вместо document\*                |
-| `validate-medallion-formats`     | Bronze→JSONL, Silver→Delta, Gold→Delta/Parquet |
-| `validate_thresholds`            | soft-fail < hard-fail                          |
+| `validate_batch_size`            | `batch_size <= 5000`                           |
+| `validate_provider`              | `provider` в lowercase                         |
+| `validate_entity_type_canonical` | publication\* вместо legacy document\*         |
+| `validate_medallion_formats`     | Bronze принудительно `jsonl`, Silver только `delta` |
+| `validate_thresholds`            | `soft_fail < hard_fail`                        |
 
 ----------------------------------------------------------------------
 
@@ -608,10 +626,10 @@ gold_table: "chembl_activity"
 
 dq_overrides:
   thresholds:
-    soft-fail: 0.10
-    hard-fail: 0.30
+    soft_fail: 0.10
+    hard_fail: 0.30
 
-  field-validations:
+  field_validations:
     - field: pchembl_value
       type: range
       min: 0
@@ -685,9 +703,9 @@ bioetl config validate chembl_activity
 
 | Ошибка                   | Причина                     | Решение                |
 | ------------------------ | --------------------------- | ---------------------- |
-| `batch-size > 5000`      | Слишком большой batch       | Уменьшить до ≤5000     |
+| `batch_size > 5000`      | Слишком большой batch       | Уменьшить до ≤5000     |
 | `provider not lowercase` | Provider в верхнем регистре | Использовать lowercase |
-| `soft-fail >= hard-fail` | Неверные пороги             | soft-fail < hard-fail  |
+| `soft_fail >= hard_fail` | Неверные пороги             | soft_fail < hard_fail  |
 | `unknown field`          | Опечатка в имени поля       | Проверить spelling     |
 
 ### DQ правила не применяются

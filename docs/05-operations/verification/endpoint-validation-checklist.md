@@ -422,7 +422,7 @@ done
 ## 5. PubMed
 
 **Source config:** `configs/providers/pubmed.yaml`
-**Adapter code:** `src/bioetl/infrastructure/adapters/pubmed/pubmed-client.py`
+**Adapter code:** `src/bioetl/infrastructure/adapters/pubmed/client.py`
 **API Docs:** https://www.ncbi.nlm.nih.gov/books/NBK25500/
 
 ### Base Configuration
