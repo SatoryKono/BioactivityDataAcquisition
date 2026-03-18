@@ -15,23 +15,28 @@ from bioetl.application.core.batch_execution_lifecycle import (
 from bioetl.application.core.batch_execution_run_service import (
     BatchExecutionRunService,
 )
-from bioetl.application.core.batch_execution_state_service import (
-    BatchExecutionStateService,
-)
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
+from bioetl.application.core.batch_executor_protocols import (
+    BatchStateCommitPort,
+    PipelineProcessingPort,
+)
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
+)
+from bioetl.application.core.lifecycle.batch_fsm import (
+    BatchExecutionCommand,
+    BatchExecutionEvent,
+    BatchExecutionFSM,
+    BatchExecutionState,
 )
 from bioetl.domain.constants import (
     DEFAULT_CHECKPOINT_INTERVAL as _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.batch_transformer import BatchTransformer
-    from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.context import PipelineContext
@@ -42,13 +47,12 @@ if TYPE_CHECKING:
 class BatchExecutorDependencies:
     """Grouped collaborators required by BatchExecutor."""
 
-    batch_metrics: BatchMetricsRecorderService
-    transformer: BatchTransformer
-    writer: BatchWriter
     memory_manager: BatchMemoryManagerService
     execution_run_service: BatchExecutionRunService
     extraction_loop_service: BatchExtractionLoopService
-    execution_state_service: BatchExecutionStateService
+    execution_state_service: BatchStateCommitPort
+    processing_port: PipelineProcessingPort
+    fsm: BatchExecutionFSM
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +63,17 @@ class BatchResult:
     silver_count: int
     gold_count: int
     quarantined_count: int
+
+
+_BATCH_EXECUTOR_RUNTIME_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    KeyError,
+    AttributeError,
+)
 
 
 class BatchExecutor(_BatchExecutorDQMixin):
@@ -72,12 +87,11 @@ class BatchExecutor(_BatchExecutorDQMixin):
         services: PipelineService,
         context: PipelineContext,
         config: RecordProcessorConfig,
-        dependencies: BatchExecutorDependencies | None = None,
+        dependencies: BatchExecutorDependencies,
         *,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
         logger: LoggerPort | None = None,
-        **legacy_kwargs: object,
     ) -> None:
         """Initialize batch executor.
 
@@ -85,13 +99,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
             services: Shared pipeline services (logger, DQ report service, etc.).
             context: Pipeline-level context carrying run metadata and identifiers.
             config: Record processor configuration (entity type, table names, DQ config).
-            batch_metrics: Recorder for per-batch and per-run metrics.
-            transformer: Handles Bronze→Silver→Gold record transformation.
-            writer: Writes transformed records to storage layers.
-            memory_manager: Monitors memory pressure and adjusts batch sizing.
-            execution_run_service: Coordinates start/finalize lifecycle for one run.
-            extraction_loop_service: Drives the async record extraction loop.
-            execution_state_service: Applies processed-batch outcomes to executor state.
+            dependencies: Preferred grouped runtime collaborators.
             batch_size: Initial number of records per batch; defaults to DEFAULT_BATCH_SIZE.
             checkpoint_interval: Number of records between checkpoint saves; defaults to domain default.
             logger: Logger override; falls back to services.logger if not provided.
@@ -106,36 +114,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self.checkpoint_interval = (
             checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
         )
-
-        if dependencies is None:
-            # Build from legacy parameters for backward compatibility in tests/composition
-            batch_metrics = legacy_kwargs.get("batch_metrics")
-            transformer = legacy_kwargs.get("transformer")
-            writer = legacy_kwargs.get("writer")
-            memory_manager = legacy_kwargs.get("memory_manager")
-            execution_run_service = legacy_kwargs.get("execution_run_service")
-            extraction_loop_service = legacy_kwargs.get("extraction_loop_service")
-            execution_state_service = legacy_kwargs.get("execution_state_service")
-            assert all(
-                [
-                    batch_metrics,
-                    transformer,
-                    writer,
-                    memory_manager,
-                    execution_run_service,
-                    extraction_loop_service,
-                    execution_state_service,
-                ]
-            ), "Legacy constructor path requires all legacy parameters"
-            dependencies = BatchExecutorDependencies(
-                batch_metrics=batch_metrics,  # type: ignore[arg-type]
-                transformer=transformer,  # type: ignore[arg-type]
-                writer=writer,  # type: ignore[arg-type]
-                memory_manager=memory_manager,  # type: ignore[arg-type]
-                execution_run_service=execution_run_service,  # type: ignore[arg-type]
-                extraction_loop_service=extraction_loop_service,  # type: ignore[arg-type]
-                execution_state_service=execution_state_service,  # type: ignore[arg-type]
-            )
 
         self._memory = dependencies.memory_manager
 
@@ -153,19 +131,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._source_batch_ids: list[str] = []
         self._last_bronze_path: str | None = None
 
-        # Kept for compatibility and test visibility; execution services use them upstream.
-        self._batch_metrics = dependencies.batch_metrics
-        self._transformer = dependencies.transformer
-        self._writer = dependencies.writer
-
         self._execution_run_service = dependencies.execution_run_service
         self._extraction_loop_service = dependencies.extraction_loop_service
         self._execution_state_service = dependencies.execution_state_service
-        # Retained compatibility seam for tests/helpers that still inspect the
-        # delegated batch-processing service through BatchExecutor directly.
-        self._batch_processing_service = (
-            self._execution_state_service._batch_processing_service
-        )
+        self._processing_port = dependencies.processing_port
+        self._fsm = dependencies.fsm
+        self._fsm_state = BatchExecutionState.IDLE
 
         self._resume_offset = 0
         self._query_string: str | None = None
@@ -184,6 +155,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
             query=query,
             offset=offset,
         )
+
+        res = self._fsm.advance(self._fsm_state, BatchExecutionEvent.RUN_STARTED)
+        self._fsm_state = res.new_state
+
         await self._execution_run_service.execute(
             execution_context=execution_context,
             run_loop=self._run_extraction_loop,
@@ -209,6 +184,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
         execution_context: BatchExecutionContext,
     ) -> None:
         """Run the main extraction and processing loop."""
+        if self._fsm_state == BatchExecutionState.IDLE:
+            res = self._fsm.advance(self._fsm_state, BatchExecutionEvent.RUN_STARTED)
+            self._fsm_state = res.new_state
+
         await self._extraction_loop_service.run(
             execution_context,
             batch_size=self.batch_size,
@@ -216,12 +195,21 @@ class BatchExecutor(_BatchExecutorDQMixin):
             progress_state=self,
         )
 
+        res_done = self._fsm.advance(
+            self._fsm_state, BatchExecutionEvent.STREAM_EXHAUSTED_EMPTY
+        )
+        self._fsm_state = res_done.new_state
+
     async def process(
         self,
         records: list[BronzeRecord],
         start_index: int = 0,
     ) -> BatchResult:
         """Public API for processing one explicit batch."""
+        if self._fsm_state == BatchExecutionState.IDLE:
+            res = self._fsm.advance(self._fsm_state, BatchExecutionEvent.RUN_STARTED)
+            self._fsm_state = res.new_state
+
         await self._process_batch_and_update_state(records, start_index)
         return self._execution_state_service.build_batch_result(
             state=self,
@@ -234,12 +222,51 @@ class BatchExecutor(_BatchExecutorDQMixin):
         start_index: int,
     ) -> None:
         """Process one batch and apply results to executor-level counters/state."""
-        await self._execution_state_service.process_batch_and_update_state(
-            state=self,
-            records=records,
-            start_index=start_index,
-            query_string=self._query_string,
-        )
+        t1 = self._fsm.advance(self._fsm_state, BatchExecutionEvent.BATCH_ASSEMBLED)
+        self._fsm_state = t1.new_state
+
+        if BatchExecutionCommand.PROCESS_BATCH in t1.commands:
+            try:
+                outcome = await self._processing_port.process_batch(
+                    records=records,
+                    start_index=start_index,
+                    query_string=self._query_string,
+                )
+            except _BATCH_EXECUTOR_RUNTIME_ERRORS:
+                self._fsm_state = self._fsm.advance(
+                    self._fsm_state, BatchExecutionEvent.PROCESS_FAILED
+                ).new_state
+                raise
+
+            t2 = self._fsm.advance(
+                self._fsm_state, BatchExecutionEvent.PROCESS_SUCCEEDED
+            )
+            self._fsm_state = t2.new_state
+
+            if BatchExecutionCommand.COMMIT_STATE in t2.commands:
+                try:
+                    self._execution_state_service.commit_successful_batch(
+                        state=self,
+                        records=records,
+                        outcome=outcome,
+                    )
+                except _BATCH_EXECUTOR_RUNTIME_ERRORS:
+                    self._fsm_state = self._fsm.advance(
+                        self._fsm_state, BatchExecutionEvent.STATE_COMMIT_FAILED
+                    ).new_state
+                    raise
+
+                t3 = self._fsm.advance(
+                    self._fsm_state, BatchExecutionEvent.STATE_COMMITTED
+                )
+                self._fsm_state = t3.new_state
+
+                # FSM expects CHECKPOINT decision. We delegate the actual check to the extraction loop.
+                # So we simply reset the FSM back to STREAMING for the next batch.
+                t4 = self._fsm.advance(
+                    self._fsm_state, BatchExecutionEvent.CHECKPOINT_NOT_REQUIRED
+                )
+                self._fsm_state = t4.new_state
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:
         """Get aggregated statistics for the entire pipeline run."""

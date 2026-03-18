@@ -5,7 +5,7 @@ from __future__ import annotations
 __all__ = ["BatchExecutionStateService"]
 
 
-from typing import TYPE_CHECKING, Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 from bioetl.application.core.batch_executor_helpers import (
     apply_processed_batch_outcome,
@@ -14,7 +14,9 @@ from bioetl.application.core.batch_executor_helpers import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.batch_processing_service import BatchProcessingOutput
+    from bioetl.application.core.batch_processing_contracts import (
+        BatchProcessingOutcome,
+    )
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 _BatchResultT = TypeVar("_BatchResultT", covariant=True)
@@ -31,18 +33,6 @@ class _BatchResultBuilder(Protocol[_BatchResultT]):
         gold_count: int,
         quarantined_count: int,
     ) -> _BatchResultT: ...
-
-
-class _BatchProcessingStateUpdaterPort(Protocol):
-    """Batch-processing contract required to update executor state."""
-
-    async def process_batch(
-        self,
-        *,
-        records: list[BronzeRecord],
-        start_index: int,
-        query_string: str | None,
-    ) -> BatchProcessingOutput: ...
 
 
 class _BatchExecutionStatePort(Protocol):
@@ -81,69 +71,56 @@ class _BatchExecutionStatisticsState(Protocol):
 
 
 class BatchExecutionStateService:
-    """Applies processed batch outputs to executor state and snapshots."""
+    """Pure service applying processed batch outcomes to executor state."""
 
-    def __init__(
+    def __init__(self) -> None:
+        """Initialize state service."""
+        pass
+
+    def commit_successful_batch(
         self,
         *,
-        batch_processing_service: _BatchProcessingStateUpdaterPort,
-    ) -> None:
-        """Initialize execution state service.
-
-        Args:
-            batch_processing_service: Processes one batch of Bronze records through
-                Silver and Gold transformation, returning a BatchProcessingOutput.
-        """
-        self._batch_processing_service = batch_processing_service
-
-    async def process_batch_and_update_state(
-        self,
-        *,
-        state: _BatchExecutionStatePort,
+        state: object,
         records: list[BronzeRecord],
-        start_index: int,
-        query_string: str | None,
+        outcome: BatchProcessingOutcome,
     ) -> None:
-        """Process one batch and apply its projected outcome to executor state."""
-        output = await self._batch_processing_service.process_batch(
-            records=records,
-            start_index=start_index,
-            query_string=query_string,
-        )
+        """Apply one successful batch outcome to executor-level state."""
         apply_processed_batch_outcome(
-            state=state,
+            state=cast(_BatchExecutionStatePort, state),
             outcome=build_processed_batch_outcome(
                 records=records,
-                output=output,
+                output=outcome,
             ),
         )
 
     def build_batch_result(
         self,
         *,
-        state: _BatchExecutionStatisticsState,
+        state: object,
         batch_result_type: _BatchResultBuilder[_BatchResultT],
     ) -> _BatchResultT:
         """Project current cumulative counters into public batch result."""
+        typed_state = cast(_BatchExecutionStatisticsState, state)
         return batch_result_type(
-            bronze_count=state.records_bronze,
-            silver_count=state.records_silver,
-            gold_count=state.records_gold,
-            quarantined_count=state.records_quarantined,
+            bronze_count=typed_state.records_bronze,
+            silver_count=typed_state.records_silver,
+            gold_count=typed_state.records_gold,
+            quarantined_count=typed_state.records_quarantined,
         )
 
     def build_run_statistics(
         self,
         *,
-        state: _BatchExecutionStatisticsState,
+        state: object,
     ) -> dict[str, int | list[str]]:
         """Project deterministic run statistics from current executor state."""
+        typed_state = cast(_BatchExecutionStatisticsState, state)
         return build_run_statistics(
-            records_fetched=state.records_fetched,
-            records_bronze=state.records_bronze,
-            records_silver=state.records_silver,
-            records_gold=state.records_gold,
-            records_quarantined=state.records_quarantined,
-            records_filtered_out=state.records_filtered_out,
-            source_batch_ids=state._source_batch_ids,
+            records_fetched=typed_state.records_fetched,
+            records_bronze=typed_state.records_bronze,
+            records_silver=typed_state.records_silver,
+            records_gold=typed_state.records_gold,
+            records_quarantined=typed_state.records_quarantined,
+            records_filtered_out=typed_state.records_filtered_out,
+            source_batch_ids=typed_state._source_batch_ids,
         )

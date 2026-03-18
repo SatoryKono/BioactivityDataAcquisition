@@ -1,10 +1,4 @@
-"""PubMed Publication Transformer.
-
-See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
-
-Refactored to use BasePublicationTransformer pattern for consistency
-with other publication pipelines (CrossRef, OpenAlex, SemanticScholar).
-"""
+"""PubMed publication transformer."""
 
 from __future__ import annotations
 
@@ -16,19 +10,28 @@ from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
+from bioetl.application.pipelines.pubmed._block_helpers import (
+    build_authors_with_affiliations,
+    compute_publication_date,
+    extract_date_data,
+    extract_journal_data,
+    is_valid_date_format,
+    process_structured_affiliations,
+)
+from bioetl.application.pipelines.pubmed.blocks import (
+    _PubMedAuthorBlock,
+    _PubMedClassificationBlock,
+    _PubMedCoreBlock,
+    _PubMedDateBlock,
+    _PubMedIdentifierBlock,
+    _PubMedJournalBlock,
+    _PubMedMetricsBlock,
+)
 from bioetl.application.pipelines.pubmed.extractors import (
     AuthorExtractor,
     DateExtractor,
-    PubMedAuthorBlockExtractor,
-    PubMedBusinessDataExtractor,
     RawAuthor,
-    StructuredAffiliation,
-)
-from bioetl.application.pipelines.pubmed.transformer_authors_mixin import (
-    _PubMedTransformerAuthorsMixin,
-)
-from bioetl.application.pipelines.pubmed.transformer_dates_mixin import (
-    _PubMedTransformerDatesMixin,
 )
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.mapping.pubmed_publication import (
@@ -36,6 +39,7 @@ from bioetl.domain.mapping.pubmed_publication import (
     build_pubmed_publication_type_fields,
 )
 from bioetl.domain.types import GoldRecord, JsonDict
+from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -46,35 +50,14 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
-class PubMedPublicationTransformer(
-    _PubMedTransformerAuthorsMixin,
-    _PubMedTransformerDatesMixin,
-    BasePublicationTransformer,
-):
-    """Transformer for PubMed publication records.
+class PubMedPublicationTransformer(BasePublicationTransformer):
+    """Transformer for PubMed publication records."""
 
-    Implements BasePublicationTransformer pattern for unified transformation flow:
-    1. Pre-extraction validation (XML parsing)
-    2. Business data extraction from parsed XML
-    3. Entity ID and content hash computation
-    4. Domain entity creation
-
-    The parsed XML root is cached during _pre_extract_validation and reused
-    in _extract_business_data to avoid parsing twice.
-    """
-
-    # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
 
-    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
-    # they propagate to _compute_publication_date.
     _VALID_DATE_PATTERNS: ClassVar[tuple[re.Pattern[str], ...]] = (
-        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
         re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-        # Partial month: YYYY-MM (with valid month 01-12)
         re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-        # Partial year: YYYY
         re.compile(r"^\d{4}$"),
     )
 
@@ -107,20 +90,7 @@ class PubMedPublicationTransformer(
         author_extractor: AuthorExtractor | None = None,
         date_extractor: DateExtractor | None = None,
     ) -> None:
-        """Initialize PubMed publication transformer.
-
-        Args:
-            provider: Data provider identifier.
-            entity_type: Entity type for metrics labels. Defaults to 'publication'.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-            author_extractor: Optional author extractor dependency.
-                If None, defaults to AuthorExtractor().
-            date_extractor: Optional date extractor dependency.
-                If None, defaults to DateExtractor().
-
-        """
+        """Initialize PubMed publication transformer."""
         super().__init__(
             provider,
             entity_type=entity_type,
@@ -154,7 +124,6 @@ class PubMedPublicationTransformer(
         try:
             self._cached_xml_root = ET.fromstring(raw_xml)
         except ET.ParseError as e:
-            # Log the parse error with context
             context.logger.warning(
                 "XML_parse_error",
                 error=str(e),
@@ -162,52 +131,80 @@ class PubMedPublicationTransformer(
             )
             raise ValueError(f"XML parse error: {e}") from e
 
+    @property
+    def extraction_blocks(self) -> list[ExtractionBlock]:
+        """Declarative extraction blocks for PubMed XML pipeline."""
+
+        def resolve_cached_root() -> ET.Element | None:
+            return self._cached_xml_root
+
+        return [
+            _PubMedIdentifierBlock(
+                data_normalizer=self._data_normalizer,
+                root_resolver=resolve_cached_root,
+            ),
+            _PubMedCoreBlock(
+                data_normalizer=self._data_normalizer,
+                root_resolver=resolve_cached_root,
+            ),
+            _PubMedAuthorBlock(
+                author_extractor=self._author_extractor,
+                data_normalizer=self._data_normalizer,
+                pii_hasher=self._pii_hasher,
+                serialize_json_list=self.serialize_json_list,
+                normalize_author_list=self._data_normalizer.normalize_author_list,
+                normalize_author_keys=self._data_normalizer.normalize_author_keys,
+                root_resolver=resolve_cached_root,
+            ),
+            _PubMedJournalBlock(root_resolver=resolve_cached_root),
+            _PubMedDateBlock(
+                date_extractor=self._date_extractor,
+                data_normalizer=self._data_normalizer,
+                validate_publication_year=self._validate_publication_year,
+                valid_date_patterns=self._VALID_DATE_PATTERNS,
+                month_map=self._MONTH_MAP,
+                root_resolver=resolve_cached_root,
+            ),
+            _PubMedClassificationBlock(
+                serialize_json_list=self.serialize_json_list,
+                classify_publication_types=self._build_pubmed_classification,
+                root_resolver=resolve_cached_root,
+            ),
+            _PubMedMetricsBlock(root_resolver=resolve_cached_root),
+        ]
+
     def _extract_author_block(
         self, article: ET.Element, raw_author_data: list[RawAuthor]
     ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
         """Extract and process author-related fields from article XML."""
-        return PubMedAuthorBlockExtractor.extract(
-            article=article,
-            raw_author_data=raw_author_data,
-            data_normalizer=self._data_normalizer,
-            author_extractor=self._author_extractor,
-            normalize_author_list=self._data_normalizer.normalize_author_list,
-            normalize_author_keys=self._data_normalizer.normalize_author_keys,
-            serialize_json_list=self.serialize_json_list,
-            build_authors_with_affiliations=self._build_authors_with_affiliations,
-            process_structured_affiliations=lambda affiliations: (
-                self._process_structured_affiliations(
-                    cast(list[StructuredAffiliation], affiliations)
-                )
-            ),
+        author_names = self._author_extractor.normalize(raw_author_data)
+        authors_with_affiliations = build_authors_with_affiliations(
+            raw_author_data,
+            self._pii_hasher,
         )
-
-    def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
-        """Extract all business fields from PubMed XML.
-
-        Uses the cached XML root from _pre_extract_validation.
-
-        Args:
-            record: Raw Bronze record (unused, XML already parsed).
-
-        Returns:
-            Dictionary of extracted and normalized fields.
-
-        """
-        root = self._cached_xml_root
-        if root is None:
-            return {"pmid": None}
-        return PubMedBusinessDataExtractor.extract(
-            record=record,
-            root=root,
-            data_normalizer=self._data_normalizer,
-            author_extractor=self._author_extractor,
-            serialize_json_list=self.serialize_json_list,
-            extract_author_block=self._extract_author_block,
-            extract_journal_data=self._extract_journal_data,
-            extract_date_data=self._extract_date_data,
-            classify_publication_types=self._build_pubmed_classification,
+        affiliation_strings = self._data_normalizer.extract_affiliations_from_authors(
+            cast("list[JsonDict]", raw_author_data)
         )
+        structured_affiliations = process_structured_affiliations(
+            self._author_extractor.parse_structured_affiliations(article),
+            self._pii_hasher,
+        )
+        return {
+            "authors": self._data_normalizer.normalize_author_list(author_names),
+            "author_keys": self._data_normalizer.normalize_author_keys(author_names),
+            "authors_with_affiliations": self.serialize_json_list(
+                authors_with_affiliations
+            )
+            if authors_with_affiliations
+            else None,
+            "affiliation_list": self._data_normalizer.normalize_affiliations(
+                affiliation_strings
+            )
+            if affiliation_strings
+            else None,
+            "affiliation_structured": self.serialize_json_list(structured_affiliations),
+            "author_count": len(author_names),
+        }
 
     def _build_pubmed_classification(
         self, pub_types: list[str]
@@ -221,37 +218,68 @@ class PubMedPublicationTransformer(
             ),
         )
 
+    def _validate_publication_year(self, raw: object) -> int | None:
+        """Validate publication year and return integer value."""
+        value = self.validate_value_object(
+            PublicationYear,
+            raw,
+            as_string=False,
+        )
+        return value if isinstance(value, int) else None
+
+    def _is_valid_date_format(self, date_str: str | None) -> bool:
+        """Validate PubMed date strings against supported ISO-like formats."""
+        return is_valid_date_format(date_str, self._VALID_DATE_PATTERNS)
+
+    def _compute_publication_date(
+        self,
+        epub_date: str | None,
+        pub_date: str | None,
+        year: int | None,
+    ) -> str | None:
+        """Compute unified publication date using the shared helper seam."""
+        return compute_publication_date(
+            data_normalizer=self._data_normalizer,
+            epub_date=epub_date,
+            pub_date=pub_date,
+            year=year,
+        )
+
+    def _extract_journal_data(
+        self,
+        article: ET.Element,
+    ) -> dict[str, object]:
+        """Extract journal-related data from article XML."""
+        return extract_journal_data(article)
+
+    def _extract_date_data(
+        self,
+        article: ET.Element,
+        pubmed_data: ET.Element | None,
+        medline: ET.Element | None,
+    ) -> dict[str, object]:
+        """Extract normalized date fields from article and Medline XML."""
+        return extract_date_data(
+            article=article,
+            pubmed_data=pubmed_data,
+            medline=medline,
+            date_extractor=self._date_extractor,
+            data_normalizer=self._data_normalizer,
+            validate_publication_year=self._validate_publication_year,
+            valid_date_patterns=self._VALID_DATE_PATTERNS,
+            month_map=self._MONTH_MAP,
+        )
+
     def _get_primary_id_field(self) -> str:
-        """Return the primary ID field name for PubMed publications.
-
-        Returns:
-            'pmid' - the PubMed-specific identifier field.
-
-        """
+        """Return the PubMed primary identifier field."""
         return "pmid"
 
     def _get_entity_class(self) -> type[BaseEntity]:
-        """Return the domain entity class for PubMed publications.
-
-        Returns:
-            PubMedPublicationEntity class.
-
-        """
+        """Return the PubMed domain entity class."""
         return cast("type[BaseEntity]", PubMedPublicationEntity)
 
     def _should_log_fallback_lookup(self) -> bool:
-        """Enable fallback lookup logging for PubMed.
-
-        PubMed supports title-based fallback when PMID lookup fails.
-        Adapter uses PubMedTitleFallbackHandler for three-phase lookup:
-        1. PMID batch fetch
-        2. Title fallback for unresolved PMIDs
-        3. Title-only lookup for entries without PMIDs
-
-        Returns:
-            True - log fallback lookups for observability.
-
-        """
+        """Enable fallback lookup logging for PubMed."""
         return True
 
     def entity_to_silver_record(

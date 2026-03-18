@@ -349,7 +349,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Error rate 10% - above soft (5%), below hard (20%)
-        result = await service.evaluate({"error_rate": 0.10})
+        result = service.evaluate({"error_rate": 0.10})
 
         assert result.status == DQEvaluationStatus.WARNING
 
@@ -393,7 +393,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Normal metrics - below all thresholds
-        result = await service.evaluate({"error_rate": 0.01, "record_count": 100.0})
+        result = service.evaluate({"error_rate": 0.01, "record_count": 100.0})
 
         # Verify histogram was emitted
         histogram_calls = recording_metrics.get_histogram_calls("dq_check_duration_ms")
@@ -442,7 +442,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Evaluate with normal metrics
-        result = await service.evaluate({"error_rate": 0.01, "record_count": 1000.0})
+        result = service.evaluate({"error_rate": 0.01, "record_count": 1000.0})
 
         # Verify check was performed
         assert result.check_duration_ms >= 0
@@ -485,7 +485,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Evaluate with multiple metrics
-        await service.evaluate(
+        service.evaluate(
             {
                 "error_rate": 0.01,
                 "record_count": 100.0,
@@ -534,7 +534,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Error rate 3% - below soft threshold
-        result = await service.evaluate({"error_rate": 0.03})
+        result = service.evaluate({"error_rate": 0.03})
 
         assert result.status == DQEvaluationStatus.PASSED
 
@@ -582,7 +582,7 @@ class TestDataQualityServiceMetricsEmission:
         )
 
         # Trigger soft threshold warning
-        await service.evaluate(
+        service.evaluate(
             {
                 "error_rate": 0.10,  # Above soft threshold (5%)
                 "record_count": 1000.0,

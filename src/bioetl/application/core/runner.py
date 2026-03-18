@@ -291,9 +291,9 @@ class PipelineRunner:
             runtime=self._runtime,
         )
 
-    async def _check_data_quality(self) -> None:
+    def _check_data_quality(self) -> None:
         """Check data quality metrics and report anomalies."""
-        await self._postrun_service.run_dq_checks(self._executor)
+        self._postrun_service.run_dq_checks(self._executor)
 
     async def _run_vacuum_if_enabled(self) -> None:
         """Run VACUUM on Silver and Gold tables if enabled."""

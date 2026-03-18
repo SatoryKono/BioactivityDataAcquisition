@@ -13,7 +13,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.batch_processing_service import (
-    BatchProcessingOutput,
+    BatchProcessingOutcome,
     BatchProcessingService,
 )
 from bioetl.application.core.batch_transformer import TransformResult
@@ -155,18 +155,18 @@ def _make_service(
 
 
 # ---------------------------------------------------------------------------
-# BatchProcessingOutput dataclass
+# BatchProcessingOutcome dataclass
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestBatchProcessingOutput:
-    """Tests for the BatchProcessingOutput frozen dataclass."""
+class TestBatchProcessingOutcome:
+    """Tests for the BatchProcessingOutcome frozen dataclass."""
 
     def test_is_frozen(self):
-        """BatchProcessingOutput instances are immutable."""
+        """BatchProcessingOutcome instances are immutable."""
         batch_id = BatchID(uuid4())
-        output = BatchProcessingOutput(
+        output = BatchProcessingOutcome(
             batch_id=batch_id,
             bronze_result=MagicMock(),
             silver_records=[],
@@ -181,7 +181,7 @@ class TestBatchProcessingOutput:
         """All fields are accessible after construction."""
         batch_id = BatchID(uuid4())
         bronze = MagicMock()
-        output = BatchProcessingOutput(
+        output = BatchProcessingOutcome(
             batch_id=batch_id,
             bronze_result=bronze,
             silver_records=[{"a": 1}],
@@ -411,7 +411,7 @@ class TestProcessBatchHappyPath:
         mock_tracing,
         mock_batch_id_factory,
     ):
-        """process_batch returns a BatchProcessingOutput instance."""
+        """process_batch returns a BatchProcessingOutcome instance."""
         svc = _make_service(
             mock_context,
             mock_services,
@@ -428,7 +428,7 @@ class TestProcessBatchHappyPath:
             records=[{"id": "1"}], start_index=0, query_string=None
         )
 
-        assert isinstance(output, BatchProcessingOutput)
+        assert isinstance(output, BatchProcessingOutcome)
 
     async def test_tracks_bronze_metrics(
         self,
@@ -473,7 +473,7 @@ class TestProcessBatchHappyPath:
         mock_tracing,
         mock_batch_id_factory,
     ):
-        """BatchProcessingOutput.quarantined_count matches transform result."""
+        """BatchProcessingOutcome.quarantined_count matches transform result."""
         mock_transformer.transform_batch = AsyncMock(
             return_value=_make_transform_result(
                 silver=[{"entity_id": "s1"}],

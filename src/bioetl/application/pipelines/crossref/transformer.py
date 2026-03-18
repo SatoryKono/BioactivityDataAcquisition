@@ -23,8 +23,15 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.application.pipelines.common.blocks import (
+    _CrossRefAuthorBlock,
+    _CrossRefCoreBlock,
+    _CrossRefDateBlock,
+    _CrossRefJournalBlock,
+    _CrossRefMetadataBlock,
+)
+from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
 from bioetl.application.pipelines.crossref._business_data_builder import (
-    build_crossref_business_data,
     compute_publication_date,
     hash_author_details,
 )
@@ -90,21 +97,32 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             dependencies=dependencies,
         )
 
-    def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
-        """Extract publication business data from CrossRef bronze record."""
-        return build_crossref_business_data(
-            record,
-            data_normalizer=self._data_normalizer,
-            validate_doi=self._validate_doi,
-            validate_publication_year=self._validate_publication_year,
-            classify_publication_type=lambda raw_type: self._classify_publication_type(
-                "crossref",
-                raw_type=raw_type,
+    @property
+    def extraction_blocks(self) -> list[ExtractionBlock]:
+        """Declarative blocks for CrossRef extraction pipeline."""
+        return [
+            _CrossRefCoreBlock(
+                validate_doi=self._validate_doi,
+                classify_pub_type=lambda raw_type: self._classify_publication_type(
+                    "crossref", raw_type=raw_type
+                ),
+                serialize_json_list=self.serialize_json_list,
             ),
-            serialize_json=self.serialize_json,
-            serialize_json_list=self.serialize_json_list,
-            hash_pii_value=self.hash_pii_value,
-        )
+            _CrossRefJournalBlock(),
+            _CrossRefMetadataBlock(
+                serialize_json=self.serialize_json,
+                serialize_json_list=self.serialize_json_list,
+            ),
+            _CrossRefDateBlock(
+                validate_publication_year=self._validate_publication_year
+            ),
+            _CrossRefAuthorBlock(
+                data_normalizer=self._data_normalizer,
+                hash_pii_value=self.hash_pii_value,
+                serialize_json=self.serialize_json,
+                serialize_json_list=self.serialize_json_list,
+            ),
+        ]
 
     def _validate_doi(self, raw: object) -> str | None:
         """Validate DOI and return canonical string form."""
@@ -176,11 +194,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     def _hash_author_details(
         self,
-        author_details: list[
-            JsonDict  # Any: transformer record has heterogeneous values
-        ],  # Any: transformer record has heterogeneous values
-    ) -> list[JsonDict]:  # Any: transformer record has heterogeneous values
-        """Hash PII fields in author details while preserving non-PII data."""
+        author_details: list[JsonDict],  # Any: raw CrossRef API JSON fragments
+    ) -> list[JsonDict]:
+        """Compatibility seam for tests and callers expecting transformer helper."""
         return hash_author_details(
             author_details,
             hash_pii_value=self.hash_pii_value,
@@ -191,7 +207,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         published_print: str | None,
         published_online: str | None,
     ) -> str | None:
-        """Build unified publication_date (YYYY-MM-DD), preferring print."""
+        """Compatibility seam for date-selection tests and legacy callers."""
         return compute_publication_date(published_print, published_online)
 
     def _should_log_fallback_lookup(self) -> bool:

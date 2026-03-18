@@ -45,9 +45,9 @@ class _LoggerStub:
 
 class _BatchExecutorDQHarness(_BatchExecutorDQMixin):
     def __init__(self) -> None:
-        self._services = SimpleNamespace(dq_report_service=object())
-        self._context = SimpleNamespace(run_id="run-1")
-        self._config = SimpleNamespace(
+        self._services = SimpleNamespace(dq_report_service=object())  # type: ignore[assignment]
+        self._context = SimpleNamespace(run_id="run-1")  # type: ignore[assignment]
+        self._config = SimpleNamespace(  # type: ignore[assignment]
             dq_config=_DQConfig(
                 soft_fail_threshold=0.11,
                 hard_fail_threshold=0.22,
@@ -63,7 +63,7 @@ class _BatchExecutorDQHarness(_BatchExecutorDQMixin):
             flat_structure=False,
             scd_config=None,
         )
-        self._logger = _LoggerStub()
+        self._logger = _LoggerStub()  # type: ignore[assignment]
         self._bronze_records_for_dq: list[bytes] = []
         self._silver_records_for_dq: list[dict[str, object]] = []
         self._gold_records_for_dq: list[dict[str, object]] = []
@@ -78,7 +78,7 @@ def test_should_collect_dq_data_depends_on_report_service_presence() -> None:
     harness = _BatchExecutorDQHarness()
     assert harness._should_collect_dq_data() is True
 
-    harness._services.dq_report_service = None
+    harness._services.dq_report_service = None  # type: ignore[misc]
     assert harness._should_collect_dq_data() is False
 
 
@@ -90,7 +90,7 @@ def test_collect_dq_data_skips_unserializable_records_and_tracks_outputs() -> No
 
     harness._collect_dq_data(
         records=[{"ok": 1}, circular_record],
-        batch_id=object(),
+        batch_id=object(),  # type: ignore[arg-type]
         bronze_result=bronze_result,
         silver_records=[{"silver": "value"}],
         gold_records=[{"gold": "value"}],
@@ -117,19 +117,19 @@ def test_normalize_records_for_polars_stringifies_mixed_nested_columns() -> None
 
 def test_extract_dq_entity_prefers_suffix_from_table_name() -> None:
     harness = _BatchExecutorDQHarness()
-    harness._config.table_config.silver_table = "silver_activity"
+    harness._config.table_config.silver_table = "silver_activity"  # type: ignore[misc]
     assert harness._extract_dq_entity() == "activity"
 
-    harness._config.table_config.silver_table = "domain.activity"
+    harness._config.table_config.silver_table = "domain.activity"  # type: ignore[misc]
     assert harness._extract_dq_entity() == "activity"
 
-    harness._config.table_config.silver_table = None
+    harness._config.table_config.silver_table = None  # type: ignore[misc]
     assert harness._extract_dq_entity() == "publication"
 
 
 def test_get_dq_thresholds_uses_defaults_when_dq_config_missing() -> None:
     harness = _BatchExecutorDQHarness()
-    harness._config.dq_config = None
+    harness._config.dq_config = None  # type: ignore[misc]
 
     assert harness._get_dq_thresholds() == (0.05, 0.20)
 
@@ -148,8 +148,8 @@ def test_get_dq_context_builds_context_with_resolved_rules() -> None:
     assert context.run_id == "run-1"
     assert context.entity == "publication"
     assert context.silver_primary_keys == ["entity_id"]
-    assert context.dq_soft_threshold == 0.11
-    assert context.dq_hard_threshold == 0.22
+    assert context.dq_soft_threshold == pytest.approx(0.11)
+    assert context.dq_hard_threshold == pytest.approx(0.22)
     assert context.silver_key_nullability_rules == [
         {"field": "entity_id", "key_type": "primary", "nullable": False}
     ]
@@ -170,6 +170,6 @@ def test_reservoir_add_respects_max_sample_size(
 
 def test_get_dq_context_returns_none_when_collection_disabled() -> None:
     harness = _BatchExecutorDQHarness()
-    harness._services.dq_report_service = None
+    harness._services.dq_report_service = None  # type: ignore[misc]
 
     assert harness.get_dq_context() is None

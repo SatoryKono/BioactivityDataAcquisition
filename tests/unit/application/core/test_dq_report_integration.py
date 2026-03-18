@@ -28,7 +28,7 @@ from bioetl.application.core.batch_execution_state_service import (
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
-from bioetl.application.core.batch_processing_service import BatchProcessingOutput
+from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.application.services.dq_report_service import (
     DQReportContext,
     DQReportResult,
@@ -52,7 +52,7 @@ def mock_logger() -> LoggerPort:
 def mock_dq_service() -> MagicMock:
     """Create mock DataQualityService."""
     service = MagicMock()
-    service.evaluate = AsyncMock(
+    service.evaluate = MagicMock(
         return_value=DQResult(
             error_rate=0.01,
             status=DQEvaluationStatus.PASSED,
@@ -176,7 +176,7 @@ class TestPostrunServiceDQReports:
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
         mock_storage: MagicMock,
-        mock_logger: LoggerPort,
+        mock_logger: MagicMock,
         mock_dq_report_service: MagicMock,
         mock_executor: MagicMock,
         sample_dq_context: DQReportContext,
@@ -212,7 +212,7 @@ class TestPostrunServiceDQReports:
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
         mock_storage: MagicMock,
-        mock_logger: LoggerPort,
+        mock_logger: MagicMock,
         mock_dq_report_service: MagicMock,
         mock_executor: MagicMock,
     ) -> None:
@@ -244,7 +244,7 @@ class TestPostrunServiceDQReports:
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
         mock_storage: MagicMock,
-        mock_logger: LoggerPort,
+        mock_logger: MagicMock,
         mock_executor: MagicMock,
         sample_dq_context: DQReportContext,
     ) -> None:
@@ -275,7 +275,7 @@ class TestPostrunServiceDQReports:
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
         mock_storage: MagicMock,
-        mock_logger: LoggerPort,
+        mock_logger: MagicMock,
         mock_executor: MagicMock,
         sample_dq_context: DQReportContext,
     ) -> None:
@@ -315,7 +315,7 @@ class TestPostrunServiceDQReports:
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
         mock_storage: MagicMock,
-        mock_logger: LoggerPort,
+        mock_logger: MagicMock,
         mock_dq_report_service: MagicMock,
         mock_executor: MagicMock,
         sample_dq_context: DQReportContext,
@@ -362,6 +362,9 @@ class TestBatchExecutorDQCollection:
     @staticmethod
     def _make_executor(*, dq_report_service: object | None) -> BatchExecutor:
         """Build a minimal concrete BatchExecutor with DQ-related dependencies."""
+        from bioetl.application.core.batch_executor import BatchExecutorDependencies
+        from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
+
         services = SimpleNamespace(
             dq_report_service=dq_report_service,
             dq_monitor=MagicMock(),
@@ -392,13 +395,7 @@ class TestBatchExecutorDQCollection:
             checkpoint_recovery_service=MagicMock(),
         )
 
-        return BatchExecutor(
-            services=services,
-            context=context,
-            config=config,
-            batch_metrics=MagicMock(),
-            transformer=MagicMock(),
-            writer=MagicMock(),
+        deps = BatchExecutorDependencies(
             memory_manager=MagicMock(),
             execution_run_service=BatchExecutionRunService(
                 execution_lifecycle_service=execution_lifecycle_service
@@ -411,9 +408,16 @@ class TestBatchExecutorDQCollection:
                 checkpoint_recovery_service=MagicMock(),
                 checkpoint_interval=BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
             ),
-            execution_state_service=BatchExecutionStateService(
-                batch_processing_service=batch_processing_service
-            ),
+            execution_state_service=BatchExecutionStateService(),
+            processing_port=batch_processing_service,
+            fsm=BatchExecutionFSM(),
+        )
+
+        return BatchExecutor(
+            services=services,  # type: ignore[arg-type]
+            context=context,  # type: ignore[arg-type]
+            config=config,  # type: ignore[arg-type]
+            dependencies=deps,
             logger=MagicMock(),
         )
 
@@ -470,16 +474,14 @@ class TestBatchExecutorDQCollection:
         executor = self._make_executor(dq_report_service=MagicMock())
         bronze_result = SimpleNamespace(path="bronze/file.jsonl.zst")
         records = [{"activity_id": "A1"}]
-        executor._execution_state_service._batch_processing_service.process_batch = (
-            AsyncMock(
-                return_value=BatchProcessingOutput(
-                    batch_id="batch-001",
-                    bronze_result=bronze_result,
-                    silver_records=[{"activity_id": "A1"}],
-                    gold_records=[],
-                    quarantined_count=2,
-                    filtered_out_count=0,
-                )
+        executor._processing_port.process_batch = AsyncMock(
+            return_value=BatchProcessingOutcome(
+                batch_id="batch-001",  # type: ignore[arg-type]
+                bronze_result=bronze_result,  # type: ignore[arg-type]
+                silver_records=[{"activity_id": "A1"}],
+                gold_records=[],
+                quarantined_count=2,
+                filtered_out_count=0,
             )
         )
 
@@ -516,8 +518,8 @@ class TestDQReportContext:
         assert context.pipeline_name == "chembl_activity"
         assert context.bronze_batch_id == "batch-001"
         assert context.silver_target_table == "chembl_activity"
-        assert context.dq_soft_threshold == 0.05  # Default
-        assert context.dq_hard_threshold == 0.20  # Default
+        assert context.dq_soft_threshold == pytest.approx(0.05)  # Default
+        assert context.dq_hard_threshold == pytest.approx(0.20)  # Default
 
     def test_dq_report_context_with_custom_thresholds(self) -> None:
         """Test DQReportContext creation with custom thresholds."""
@@ -529,8 +531,8 @@ class TestDQReportContext:
             dq_hard_threshold=0.30,
         )
 
-        assert context.dq_soft_threshold == 0.10
-        assert context.dq_hard_threshold == 0.30
+        assert context.dq_soft_threshold == pytest.approx(0.10)
+        assert context.dq_hard_threshold == pytest.approx(0.30)
 
 
 @pytest.mark.unit

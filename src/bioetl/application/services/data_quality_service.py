@@ -17,7 +17,7 @@ Does NOT handle:
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
@@ -25,6 +25,25 @@ from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 if TYPE_CHECKING:
     from bioetl.domain.config import DQConfig
     from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort
+
+
+class _ValueCarrier(Protocol):
+    """Enum-like value carrier used by structural anomaly typing."""
+
+    value: str
+
+
+class _DQAnomalyLike(Protocol):
+    """Minimal anomaly surface required by the DQ service."""
+
+    anomaly_type: _ValueCarrier
+    severity: _ValueCarrier
+    metric_name: str
+    current_value: float
+    baseline_mean: float
+    baseline_stddev: float
+    z_score: float
+    message: str
 
 
 class DataQualityService:
@@ -68,7 +87,7 @@ class DataQualityService:
         self._pipeline_name = pipeline_name
         self._entity_type = entity_type
 
-    async def evaluate(
+    def evaluate(
         self,
         metrics: dict[str, float],
     ) -> DQResult:
@@ -249,9 +268,7 @@ class DataQualityService:
 
     def _process_anomalies(
         self,
-        anomalies: list[
-            Any
-        ],  # Any: DQ anomaly objects with .severity and .anomaly_type attrs
+        anomalies: list[_DQAnomalyLike],
     ) -> bool:
         """Process detected anomalies and check for critical ones.
 
@@ -270,7 +287,7 @@ class DataQualityService:
 
     def _process_single_anomaly(
         self,
-        anomaly: Any,  # Any: DQ anomaly object with .severity and .anomaly_type attrs
+        anomaly: _DQAnomalyLike,
     ) -> None:
         """Log and track a single anomaly.
 

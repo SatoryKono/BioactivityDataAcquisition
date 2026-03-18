@@ -13,18 +13,20 @@ Reduces code duplication by extracting shared logic:
 
 from __future__ import annotations
 
+from abc import abstractmethod
+
 from bioetl.domain.types import JsonDict
 
 __all__ = ["BasePublicationTransformer"]
 
 
-from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )
+from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
@@ -39,30 +41,7 @@ if TYPE_CHECKING:
 
 
 class BasePublicationTransformer(BaseTransformer):
-    """Abstract base class for publication transformers.
-
-    Implements Template Method pattern for unified publication transformation:
-    1. Pre-extraction validation (optional hook)
-    2. Extract business data (_extract_business_data - abstract)
-    3. Validate primary ID exists
-    4. Log fallback lookup usage if applicable
-    5. Generate entity ID
-    6. Compute content hash (excluding metadata fields)
-    7. Create domain entity (_get_entity_class - abstract)
-    8. Convert to SilverRecord
-
-    Subclasses MUST implement:
-    - _extract_business_data(): Extract and normalize fields from record
-    - _get_primary_id_field(): Return primary ID field name (e.g., 'openalex_id')
-    - _get_entity_class(): Return the domain entity class
-
-    Subclasses MAY override:
-    - _pre_extract_validation(): Add validation before extraction
-    - _should_log_fallback_lookup(): Disable fallback logging (default: True)
-    - _normalize_content_fields(): Customize content field normalization
-
-    RF-NORM-04: Uniform content normalization (strip_html_tags on title/abstract).
-    """
+    """Shared Template Method flow for publication transformers."""
 
     def __init__(
         self,
@@ -89,11 +68,19 @@ class BasePublicationTransformer(BaseTransformer):
             dependencies=dependencies,
         )
 
-    @abstractmethod
+    @property
+    def extraction_blocks(self) -> list[ExtractionBlock]:
+        """Optional list of declarative blocks to extract data.
+
+        Subclasses can override this to use the block architecture instead
+        of overriding _extract_business_data manually.
+        """
+        return []
+
     def _extract_business_data(self, record: BronzeRecord) -> JsonDict:
         """Extract and normalize fields from bronze record.
 
-        Provider-specific extraction logic. Delegates to extractors module.
+        Provider-specific extraction logic. Delegates to extraction_blocks if provided.
 
         Args:
             record: Raw Bronze record from provider API.
@@ -102,7 +89,17 @@ class BasePublicationTransformer(BaseTransformer):
             Dictionary of extracted and normalized fields.
 
         """
-        ...
+        blocks = self.extraction_blocks
+        if blocks:
+            result: JsonDict = {}
+            for block in blocks:
+                result.update(block.extract(record))
+            return result
+
+        raise NotImplementedError(
+            f"{self.__class__.__name__} must implement extraction_blocks property "
+            "or override _extract_business_data() method."
+        )
 
     @abstractmethod
     def _get_primary_id_field(self) -> str:
@@ -165,12 +162,7 @@ class BasePublicationTransformer(BaseTransformer):
         return True
 
     _CONTENT_FIELDS: tuple[str, ...] = ("abstract",)
-    """Fields to apply ``strip_html_tags`` on after extraction (RF-NORM-04).
-
-    Only ``abstract`` by default — titles may contain angle brackets
-    (e.g. ``5' & 3' ends in DNA <structure>``) that are valid content,
-    not HTML markup.  Subclasses MAY extend to ``("title", "abstract")``.
-    """
+    """Fields to normalize via ``strip_html_tags`` after extraction."""
 
     def _normalize_content_fields(
         self,

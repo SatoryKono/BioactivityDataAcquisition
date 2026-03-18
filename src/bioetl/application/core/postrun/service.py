@@ -335,7 +335,7 @@ class PostrunService:
             # Silver compact before DQ so checks see deduplicated data
             compaction = await self.run_silver_compact_if_needed()
 
-            dq_result = await self.run_dq_checks(executor)
+            dq_result = self.run_dq_checks(executor)
             dq_reports = await self._generate_dq_reports(dq_context)
             vacuum_result = await self.run_vacuum_if_enabled()
 
@@ -352,7 +352,7 @@ class PostrunService:
             span.set_attribute("bioetl.dq_status", dq_result.status.value)
             return result
 
-    async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
+    def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.
 
         Args:
@@ -362,7 +362,7 @@ class PostrunService:
             DQResult with overall DQ status and per-check results.
         """
         batch_metrics = self._collect_batch_metrics(executor)
-        return await self._dq_service.evaluate(batch_metrics)
+        return self._dq_service.evaluate(batch_metrics)
 
     async def run_vacuum_if_enabled(self) -> VacuumResult:
         """Run VACUUM on Silver and Gold tables if enabled.

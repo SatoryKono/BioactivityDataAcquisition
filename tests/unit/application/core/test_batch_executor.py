@@ -7,12 +7,20 @@ PipelineExecutor and RecordProcessor.
 from __future__ import annotations
 
 import asyncio
+from dataclasses import FrozenInstanceError
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
+from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
+from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
+from bioetl.application.core.batch_executor import (
+    BatchExecutor,
+    BatchExecutorDependencies,
+    BatchResult,
+)
 from bioetl.application.core.batch_executor_helpers import (
     BatchExecutionStateOutcome,
     apply_processed_batch_outcome,
@@ -47,7 +55,6 @@ from bioetl.application.core.batch_extraction_loop_service import (
 )
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_processing_service import (
-    BatchProcessingOutput,
     BatchProcessingService,
 )
 from bioetl.application.core.batch_progress_service import BatchProgressService
@@ -65,7 +72,13 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.ports import MetricsPort
-from bioetl.domain.types import BatchID, RunType, ValidationResult
+from bioetl.domain.types import (
+    BatchID,
+    GoldSchemaType,
+    RunID,
+    RunType,
+    ValidationResult,
+)
 
 
 @pytest.fixture
@@ -112,7 +125,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -185,7 +198,7 @@ def processor_config():
         provider="test_provider",
         entity_type="test_entity",
         silver_schema=MagicMock(),
-        gold_schema=MagicMock(),
+        gold_schema=cast(GoldSchemaType, MagicMock()),
         table_config=TableConfig(),
     )
 
@@ -257,20 +270,12 @@ def _create_batch_executor(
     execution_run_service = BatchExecutionRunService(
         execution_lifecycle_service=execution_lifecycle_service
     )
-    execution_state_service = BatchExecutionStateService(
-        batch_processing_service=batch_processing_service
-    )
+    execution_state_service = BatchExecutionStateService()
     effective_checkpoint_interval = (
         checkpoint_interval or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL
     )
 
-    return BatchExecutor(
-        services=services,
-        context=context,
-        config=config,
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
+    deps = BatchExecutorDependencies(
         memory_manager=memory_manager,
         execution_run_service=execution_run_service,
         extraction_loop_service=BatchExtractionLoopService(
@@ -282,6 +287,15 @@ def _create_batch_executor(
             checkpoint_interval=effective_checkpoint_interval,
         ),
         execution_state_service=execution_state_service,
+        processing_port=batch_processing_service,
+        fsm=BatchExecutionFSM(),
+    )
+
+    return BatchExecutor(
+        services=services,
+        context=context,
+        config=config,
+        dependencies=deps,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
     )
@@ -381,12 +395,6 @@ class TestBatchExecutorInit:
         assert batch_executor.records_silver == 0
         assert batch_executor.records_gold == 0
         assert batch_executor.records_quarantined == 0
-
-    def test_init_creates_internal_components(self, batch_executor):
-        """Test that initialization creates BatchTransformer and BatchWriter."""
-        assert batch_executor._transformer is not None
-        assert batch_executor._writer is not None
-        assert batch_executor._batch_metrics is not None
 
 
 @pytest.mark.unit
@@ -893,8 +901,8 @@ class TestBatchResult:
             gold_count=8,
             quarantined_count=1,
         )
-        with pytest.raises(AttributeError):
-            result.bronze_count = 20
+        with pytest.raises(FrozenInstanceError):
+            result.__setattr__("bronze_count", 20)
 
     def test_batch_result_stores_counts(self):
         """Test that BatchResult stores all counts."""
@@ -918,7 +926,7 @@ class TestBatchExecutorHelpers:
         """Processed-outcome helper should preserve both state deltas and DQ inputs."""
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         records = [{"id": "1", "value": 10}]
-        output = BatchProcessingOutput(
+        output = BatchProcessingOutcome(
             batch_id=batch_id,
             bronze_result=MagicMock(path="bronze/file.jsonl"),
             silver_records=[{"id": "1", "value": 10}],
@@ -986,7 +994,7 @@ class TestBatchExecutorHelpers:
         state._should_collect_dq_data.return_value = True
         outcome = build_processed_batch_outcome(
             records=[{"id": "1"}],
-            output=BatchProcessingOutput(
+            output=BatchProcessingOutcome(
                 batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
                 bronze_result=MagicMock(path="bronze/file.jsonl"),
                 silver_records=[{"id": "1"}],
@@ -1028,7 +1036,7 @@ class TestBatchExecutorHelpers:
         state._should_collect_dq_data.return_value = False
         outcome = build_processed_batch_outcome(
             records=[{"id": "1"}],
-            output=BatchProcessingOutput(
+            output=BatchProcessingOutcome(
                 batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
                 bronze_result=None,
                 silver_records=[],
