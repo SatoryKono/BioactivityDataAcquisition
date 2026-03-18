@@ -6,6 +6,7 @@ from collections.abc import Awaitable, Callable, Sequence
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_processing_service import BatchProcessingComponents
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointManagerService,
@@ -21,7 +22,6 @@ from bioetl.composition.factories.services.callbacks import (
     extract_pipeline_callbacks,
 )
 from bioetl.composition.factories.services.pipeline_builder import (
-    BatchProcessingComponents,
     create_batch_executor_from_pipeline,
     create_batch_processing_components,
     create_checkpoint_manager,

@@ -160,7 +160,7 @@ test-quick: ## Run quickest possible tests (fast profile, parallel, no slow test
 
 test-changed: ## Run tests for changed files (compared to main branch)
 	@echo "$(BLUE)Running tests for changed files...$(NC)"
-	./scripts/dev/test_changed.sh
+	$(RUN) pytest tests/ -p no:xdist -v --lf
 
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"

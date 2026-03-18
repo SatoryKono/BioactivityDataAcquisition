@@ -243,10 +243,7 @@ def _create_batch_executor(
         services=services,
         context=context,
         config=config,
-        logger=services.logger,
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
+        components=components,
         tracing_manager=tracing_manager,
         batch_id_factory=effective_batch_id_factory,
     )
@@ -490,7 +487,7 @@ class TestBatchExecutorExecute:
         """Test execute with no data."""
 
         async def mock_fetch(**kwargs):
-            if False:
+            if kwargs.get("__yield__"):
                 yield {}
 
         mock_services.data_source.fetch = mock_fetch
@@ -506,7 +503,7 @@ class TestBatchExecutorExecute:
 
         async def mock_fetch(**kwargs):
             captured_kwargs.update(kwargs)
-            if False:
+            if kwargs.get("__yield__"):
                 yield {}
 
         mock_services.data_source.fetch = mock_fetch

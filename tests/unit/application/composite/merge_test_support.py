@@ -103,6 +103,7 @@ def build_merge_service(
         merge_config=merge_config,
         storage=storage,
         logger=logger,
+        silver_reader=storage,
         collaborators=MergeCollaboratorGroup(
             deduplicator=deduplicator,
             aggregator=aggregator,

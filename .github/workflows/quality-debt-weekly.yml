@@ -1,4 +1,4 @@
-﻿name: Quality Debt Weekly
+﻿﻿name: Quality Debt Weekly
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -34,6 +34,10 @@ jobs:
             --markdown-out reports/quality/debt-weekly.md \
             --summary-out "$GITHUB_STEP_SUMMARY"
 
+      - name: Run config gap analysis
+        run: |
+          uv run python scripts/schema/config_gap_analysis.py
+
       - name: Upload weekly debt artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -42,4 +46,3 @@ jobs:
             reports/quality/debt-weekly.json
             reports/quality/debt-weekly.md
           retention-days: 30
-

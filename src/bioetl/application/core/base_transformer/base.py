@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
@@ -147,28 +148,39 @@ class BaseTransformer(
         self,
         provider: str,
         entity_type: str | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
-        identity_service: IdentityService | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
+        *,
+        # --- Legacy Transitional Args (To be removed at the end of RF-017) ---
+        legacy_tracer: TracingPort | None = None,
+        legacy_metrics: MetricsPort | None = None,
+        legacy_identity_service: IdentityService | None = None,
+        legacy_pii_hasher: PiiHasherPort | None = None,
+        legacy_data_normalizer: DataNormalizationPort | None = None,
+        legacy_contract_policy: ContractPolicyPort | None = None,
     ) -> None:
         """Initialize transformer with explicitly wired collaborators."""
         self.provider = provider
         self.entity_type = entity_type or "unknown"
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
+
+        if dependencies is None:
+            warnings.warn(
+                "Passing flat legacy collaborators to BaseTransformer is deprecated. "
+                "Use TransformerDependencyContext via 'dependencies' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         resolved_dependencies = _resolve_dependency_context(
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            data_normalizer=data_normalizer,
-            contract_policy=contract_policy,
+            tracer=legacy_tracer,
+            metrics=legacy_metrics,
+            identity_service=legacy_identity_service,
+            pii_hasher=legacy_pii_hasher,
+            data_normalizer=legacy_data_normalizer,
+            contract_policy=legacy_contract_policy,
             dependencies=dependencies,
         )
         self._tracer = resolved_dependencies.tracer

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
@@ -18,6 +17,7 @@ from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_processing_service import BatchProcessingComponents
 from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
 from bioetl.application.core.config import RecordProcessorConfig
@@ -59,15 +59,6 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types import GoldSchemaType, RunID
-
-
-@dataclass(frozen=True, slots=True)
-class BatchProcessingComponents:
-    """Injected components shared by RecordProcessor and BatchExecutor."""
-
-    batch_metrics: BatchMetricsRecorderService
-    transformer: BatchTransformer
-    writer: BatchWriter
 
 
 def create_batch_processing_components(

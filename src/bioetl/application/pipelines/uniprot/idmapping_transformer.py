@@ -75,15 +75,15 @@ class IDMappingTransformer(BaseTransformer):
         super().__init__(
             provider,
             entity_type=entity_type,
-            tracer=tracer,
-            metrics=metrics,
             silver_filters=silver_filters,
             gold_filters=gold_filters,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            data_normalizer=data_normalizer,
-            contract_policy=contract_policy,
             dependencies=dependencies,
+            legacy_tracer=tracer,
+            legacy_metrics=metrics,
+            legacy_identity_service=identity_service,
+            legacy_pii_hasher=pii_hasher,
+            legacy_data_normalizer=data_normalizer,
+            legacy_contract_policy=contract_policy,
         )
 
     async def _transform_impl(

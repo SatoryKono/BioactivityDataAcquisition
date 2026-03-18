@@ -14,7 +14,7 @@ All medallion layer operations are consolidated here:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.services.medallion_maintenance_mixin import (
     _MedallionMaintenanceMixin,
@@ -25,11 +25,25 @@ from bioetl.application.services.medallion_types import (
     VacuumResult,
 )
 from bioetl.domain.exceptions import BioETLError, StorageError
+from bioetl.domain.ports import StorageMaintenancePort
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.medallion import MedallionPolicy
-    from bioetl.domain.ports import LoggerPort, MetricsPort, StoragePort
+    from bioetl.domain.ports import (
+        LoggerPort,
+        MetricsPort,
+    )
+
+
+class MedallionStoragePort(StorageMaintenancePort, Protocol):
+    """Lifecycle-focused storage contract for medallion service."""
+
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+        ...
+
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+        ...
 
 
 _LIFECYCLE_OPERATION_ERRORS = (
@@ -50,7 +64,7 @@ class _MedallionClearMixin:
     is logged for observability and supports a dry-run mode.
     """
 
-    storage: StoragePort
+    storage: MedallionStoragePort
     logger: LoggerPort
 
     async def clear(
@@ -142,7 +156,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
     optimization (vacuum/compact) when configured.
     """
 
-    storage: StoragePort
+    storage: MedallionStoragePort
     logger: LoggerPort
 
     # =========================================================================
@@ -320,7 +334,7 @@ class MedallionLifecycleService(
 ):
     """Unified facade for managing medallion layer lifecycle operations."""
 
-    storage: StoragePort
+    storage: MedallionStoragePort
     logger: LoggerPort
 
 

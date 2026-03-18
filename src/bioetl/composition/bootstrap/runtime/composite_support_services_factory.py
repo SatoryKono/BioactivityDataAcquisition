@@ -209,6 +209,7 @@ class CompositeSupportServicesFactory:
             storage=self._storage,
             logger=self._logger,
             delta_reader=delta_reader,
+            silver_reader=self._storage,
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
             gold_schema=self._resolve_gold_schema(self._config.name),
