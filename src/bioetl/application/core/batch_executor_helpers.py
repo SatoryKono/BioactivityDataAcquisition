@@ -6,7 +6,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, TypeVar
 
 if TYPE_CHECKING:
-    from bioetl.application.core.batch_processing_service import BatchProcessingOutput
+    from bioetl.application.core.batch_processing_contracts import (
+        BatchProcessingOutcome,
+    )
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 
@@ -91,7 +93,7 @@ class _BatchResultBuilder(Protocol[_BatchResultT]):
 def build_batch_execution_state_update(
     *,
     input_record_count: int,
-    output: BatchProcessingOutput,
+    output: BatchProcessingOutcome,
 ) -> BatchExecutionStateOutcome:
     """Project batch-processing output into executor-level state deltas."""
     return BatchExecutionStateOutcome(
@@ -107,7 +109,7 @@ def build_batch_execution_state_update(
 def build_processed_batch_outcome(
     *,
     records: list[BronzeRecord],
-    output: BatchProcessingOutput,
+    output: BatchProcessingOutcome,
 ) -> BatchProcessedOutcome:
     """Project one processed batch into explicit state and DQ outcome payloads."""
     return BatchProcessedOutcome(

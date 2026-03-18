@@ -116,10 +116,10 @@ class TestDataQualityServiceThresholds:
         }
 
         with pytest.raises(DataQualityThresholdError) as exc_info:
-            await service.evaluate(metrics)
+            service.evaluate(metrics)
 
-        assert exc_info.value.error_rate == 0.25
-        assert exc_info.value.threshold == 0.20
+        assert exc_info.value.error_rate == pytest.approx(0.25)
+        assert exc_info.value.threshold == pytest.approx(0.20)
         mock_logger.error.assert_called_once()
         mock_metrics.inc_dq_validation_failures.assert_called_once_with(
             pipeline="test_pipeline",
@@ -148,7 +148,7 @@ class TestDataQualityServiceThresholds:
         }
 
         with pytest.raises(DataQualityThresholdError):
-            await service.evaluate(metrics)
+            service.evaluate(metrics)
 
         mock_metrics.inc_dq_validation_failures.assert_called_once_with(
             pipeline="test_pipeline",
@@ -176,10 +176,10 @@ class TestDataQualityServiceThresholds:
             "error_rate": 0.10,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.status == DQEvaluationStatus.WARNING
-        assert result.error_rate == 0.10
+        assert result.error_rate == pytest.approx(0.10)
         mock_logger.warning.assert_called_once()
         mock_metrics.increment_counter.assert_called_once_with(
             "dq_soft_threshold_exceeded",
@@ -212,7 +212,7 @@ class TestDataQualityServiceThresholds:
             "error_rate": 0.05,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.status == DQEvaluationStatus.WARNING
         mock_logger.warning.assert_called_once()
@@ -239,10 +239,10 @@ class TestDataQualityServiceThresholds:
             "error_rate": 0.03,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.status == DQEvaluationStatus.PASSED
-        assert result.error_rate == 0.03
+        assert result.error_rate == pytest.approx(0.03)
         mock_logger.warning.assert_not_called()
         mock_logger.error.assert_not_called()
         mock_metrics.increment_counter.assert_not_called()
@@ -271,11 +271,11 @@ class TestDataQualityServiceGracefulDegradation:
             "error_rate": 0.03,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.anomalies_count == 0
         assert result.has_critical is False
-        assert result.check_duration_ms == 0.0
+        assert result.check_duration_ms == pytest.approx(0.0)
         assert result.anomalies == ()
 
     @pytest.mark.asyncio
@@ -295,7 +295,7 @@ class TestDataQualityServiceGracefulDegradation:
             "error_rate": 0.10,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.status == DQEvaluationStatus.WARNING
         mock_logger.warning.assert_called_once()
@@ -328,7 +328,7 @@ class TestDataQualityServiceAnomalyDetection:
             "error_rate": 0.03,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.anomalies_count == 0
         assert result.has_critical is False
@@ -376,7 +376,7 @@ class TestDataQualityServiceAnomalyDetection:
             "error_rate": 0.03,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.anomalies_count == 1
         assert result.has_critical is False
@@ -424,7 +424,7 @@ class TestDataQualityServiceAnomalyDetection:
             "error_rate": 0.03,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.anomalies_count == 1
         assert result.has_critical is True
@@ -453,7 +453,7 @@ class TestDataQualityServiceAnomalyDetection:
             "error_rate": 0.03,
         }
 
-        result = await service.evaluate(metrics)
+        result = service.evaluate(metrics)
 
         assert result.check_duration_ms >= 0
         mock_metrics.observe_histogram.assert_called_once()
@@ -489,7 +489,7 @@ class TestDataQualityServiceBaselineUpdates:
             "silver_yield": 0.95,
         }
 
-        await service.evaluate(metrics)
+        service.evaluate(metrics)
 
         # Should be called 3 times, once per metric
         baseline_calls = [
@@ -540,7 +540,7 @@ class TestDataQualityServiceBaselineUpdates:
             "error_rate": 0.03,
         }
 
-        await service.evaluate(metrics)
+        service.evaluate(metrics)
 
         # dq_baseline_updated should NOT be called
         baseline_calls = [
@@ -565,11 +565,11 @@ class TestDQResult:
             check_duration_ms=123.45,
         )
 
-        assert result.error_rate == 0.05
+        assert result.error_rate == pytest.approx(0.05)
         assert result.status == DQEvaluationStatus.WARNING
         assert result.anomalies == ()
         assert result.has_critical is False
-        assert result.check_duration_ms == 123.45
+        assert result.check_duration_ms == pytest.approx(123.45)
 
     def test_dq_result_list_to_tuple_conversion(self):
         """Test that DQResult converts list anomalies to tuple."""

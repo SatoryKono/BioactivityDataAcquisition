@@ -4,19 +4,20 @@ from __future__ import annotations
 
 __all__ = [
     "BatchProcessingComponents",
-    "BatchProcessingOutput",
+    "BatchProcessingOutcome",
     "BatchProcessingService",
 ]
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.application.core.batch_processing_service_mixins import (
     _BatchProcessingExecutionMixin,
     _BatchProcessingMetadataMixin,
 )
 from bioetl.domain.ports import BatchIdGeneratorPort
-from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
+from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -38,18 +39,6 @@ class BatchProcessingComponents:
     batch_metrics: BatchMetricsRecorderService
     transformer: BatchTransformer
     writer: BatchWriter
-
-
-@dataclass(frozen=True, slots=True)
-class BatchProcessingOutput:
-    """Batch-level write/transform output used by BatchExecutor state updates."""
-
-    batch_id: BatchID
-    bronze_result: object
-    silver_records: list[BronzeRecord]
-    gold_records: list[GoldRecord]
-    quarantined_count: int
-    filtered_out_count: int
 
 
 class BatchProcessingService(
@@ -106,7 +95,7 @@ class BatchProcessingService(
         records: list[BronzeRecord],
         start_index: int,
         query_string: str | None,
-    ) -> BatchProcessingOutput:
+    ) -> BatchProcessingOutcome:
         """Process one batch through Bronze, Silver, and Gold writes.
 
         Args:
@@ -115,7 +104,7 @@ class BatchProcessingService(
             query_string: Query string used to fetch these records, for logging context.
 
         Returns:
-            BatchProcessingOutput with write counts and source batch ID.
+            BatchProcessingOutcome with write counts and source batch ID.
         """
         batch_id = self._batch_id_factory.create()
         ingestion_ts = self._context.started_at
@@ -142,9 +131,9 @@ class BatchProcessingService(
             )
             self._finalize_batch_span(span, records, transform_result)
 
-            return BatchProcessingOutput(
+            return BatchProcessingOutcome(
                 batch_id=batch_id,
-                bronze_result=bronze_result,
+                bronze_result=cast("BronzeWriteResult | None", bronze_result),
                 silver_records=transform_result.silver_records,
                 gold_records=transform_result.gold_records,
                 quarantined_count=transform_result.quarantined_count,

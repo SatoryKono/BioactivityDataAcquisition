@@ -15,8 +15,9 @@ Tests verify:
 
 from __future__ import annotations
 
+from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -24,8 +25,8 @@ from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.ports import NoOpTracing
-from bioetl.domain.types import RunType
+from bioetl.domain.ports import NoOpTracing, TracingPort
+from bioetl.domain.types import RunID, RunType
 
 
 # ---------------------------------------------------------------------------
@@ -57,7 +58,7 @@ def _pipeline_config() -> PipelineConfig:
         provider="chembl",
         entity_type="activity",
         table=TableConfig(
-            primary_keys=["activity_id"],
+            primary_keys=("activity_id",),
             silver_table="test_silver",
         ),
     )
@@ -76,7 +77,7 @@ def _runtime_config() -> RuntimeConfig:
 class TestPipelineRunnerSpan:
     """Verify that PipelineRunner.run creates a pipeline.run OTel span."""
 
-    def _build_runner(self, tracer: object) -> PipelineRunner:
+    def _build_runner(self, tracer: object | None) -> PipelineRunner:
         """Build a fully-mocked PipelineRunner with the given tracer."""
         from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
         from bioetl.application.core.preflight.service import PreflightService
@@ -102,7 +103,7 @@ class TestPipelineRunnerSpan:
         mock_token = FencingToken(
             sequence=1,
             key="lock:test",
-            owner_id=uuid.UUID("00000000-0000-0000-0000-000000000000"),
+            owner_id=RunID(uuid.UUID("00000000-0000-0000-0000-000000000000")),
             issued_at=0.0,
         )
 
@@ -117,7 +118,7 @@ class TestPipelineRunnerSpan:
         mock_logger.warning = MagicMock()
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
@@ -213,7 +214,7 @@ class TestPipelineRunnerSpan:
             postrun=postrun,
             lifecycle_service=lifecycle_service,
             observer=observer,
-            tracer=tracer,
+            tracer=cast(TracingPort | None, tracer),
         )
 
     @pytest.mark.asyncio
@@ -266,7 +267,7 @@ class TestPipelineRunnerSpan:
         """Verify span __exit__ receives exception info when run() raises."""
         mock_tracer = _make_mock_tracer()
         runner = self._build_runner(tracer=mock_tracer)
-        runner._executor.execute.side_effect = RuntimeError("forced error")
+        cast(Any, runner._executor.execute).side_effect = RuntimeError("forced error")
 
         with pytest.raises(RuntimeError, match="forced error"):
             await runner.run()
@@ -313,7 +314,7 @@ class TestPipelineRunnerSpan:
 class TestPostrunServiceSpan:
     """Verify that PostrunService.run creates a postrun.run OTel span."""
 
-    def _build_postrun_service(self, tracer: object) -> PostrunService:
+    def _build_postrun_service(self, tracer: object | None) -> PostrunService:
         """Build a PostrunService with mocked dependencies."""
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.application.core.postrun.compact_orchestrator import (
@@ -332,13 +333,13 @@ class TestPostrunServiceSpan:
         mock_logger.debug = MagicMock()
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
         )
 
         dq_service = MagicMock(spec=DataQualityService)
-        dq_service.evaluate = AsyncMock(
+        dq_service.evaluate = MagicMock(
             return_value=DQResult(
                 error_rate=0.0,
                 status=DQEvaluationStatus.PASSED,
@@ -392,7 +393,7 @@ class TestPostrunServiceSpan:
             metrics=None,
             logger=mock_logger,
             dependencies=dependencies,
-            tracer=tracer,
+            tracer=cast(TracingPort | None, tracer),
         )
 
     def _make_executor(self) -> MagicMock:
@@ -465,7 +466,7 @@ class TestPostrunServiceSpan:
         """Verify span __exit__ receives exception info when run() raises."""
         mock_tracer = _make_mock_tracer()
         service = self._build_postrun_service(tracer=mock_tracer)
-        service._dq_service.evaluate.side_effect = RuntimeError("dq error")
+        cast(Any, service._dq_service.evaluate).side_effect = RuntimeError("dq error")
 
         with pytest.raises(RuntimeError, match="dq error"):
             await service.run(executor=self._make_executor())
@@ -520,7 +521,7 @@ class TestRecordProcessorSpanRegression:
         from bioetl.application.core.config import RecordProcessorConfig
 
         context = PipelineContext(
-            run_id=uuid4(),
+            run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
             logger=MagicMock(),
         )
@@ -549,7 +550,7 @@ class TestRecordProcessorSpanRegression:
             transformer=transformer,
             writer=writer,
             config=config,
-            tracer=tracer,
+            tracer=cast(TracingPort, tracer),
         )
 
     @pytest.mark.asyncio
@@ -560,8 +561,8 @@ class TestRecordProcessorSpanRegression:
 
         from bioetl.domain.types import BatchID
 
-        batch_id = BatchID("test-batch-001")
-        await processor.process_batch(records=[{"id": "1"}], batch_id=batch_id)
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        await cast(Any, processor).process_batch(records=[{"id": "1"}], batch_id=batch_id)
 
         # get_tracer("bioetl.processor") should be called for span creation
         tracer_names = [c.args[0] for c in mock_tracer.get_tracer.call_args_list]
@@ -574,6 +575,8 @@ class TestRecordProcessorSpanRegression:
 
         from bioetl.domain.types import BatchID
 
-        batch_id = BatchID("test-batch-001")
-        result = await processor.process_batch(records=[{"id": "1"}], batch_id=batch_id)
+        batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        result = await cast(Any, processor).process_batch(
+            records=[{"id": "1"}], batch_id=batch_id
+        )
         assert result is not None

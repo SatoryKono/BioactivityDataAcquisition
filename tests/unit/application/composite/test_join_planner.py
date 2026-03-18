@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
+from dataclasses import replace
 from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
 
+from bioetl.application.composite.join_execution import JoinHow
 from bioetl.application.composite.join_planner import JoinPlannerService
 from tests.unit.application.composite.merge_test_support import (
     build_join_planner_service,
@@ -61,7 +62,7 @@ def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
     # Use a mutable ref so test can swap planner._config and resolver follows
     planner_ref: list[JoinPlannerService] = []
 
-    def _resolve_join_type() -> str:
+    def _resolve_join_type() -> JoinHow:
         from bioetl.domain.composite.strategy import MergeStrategy
 
         if not planner_ref:
@@ -126,12 +127,7 @@ async def test_apply_joins_many_to_one_aggregates_and_joins(
     )
     aggregation = AggregationConfig(
         group_by="doi",
-        fields=(
-            AggregationFieldSpec(
-                source_field="title",
-                agg_function=AggregationFunction.FIRST,
-            ),
-        ),
+        fields=(AggregationFieldSpec("title", AggregationFunction.FIRST),),
     )
     enrichers = (
         EnricherConfig(
@@ -459,11 +455,11 @@ def test_composite_key_resolution_and_join_type_mapping(
     )
     assert "x" in diff_key_join.columns
 
-    planner._config = SimpleNamespace(strategy=MergeStrategy.LEFT_OUTER)
+    planner._config = replace(planner._config, strategy=MergeStrategy.LEFT_OUTER)
     assert planner.get_polars_join_type() == "left"
-    planner._config = SimpleNamespace(strategy=MergeStrategy.INNER)
+    planner._config = replace(planner._config, strategy=MergeStrategy.INNER)
     assert planner.get_polars_join_type() == "inner"
-    planner._config = SimpleNamespace(strategy=MergeStrategy.UNION)
+    planner._config = replace(planner._config, strategy=MergeStrategy.UNION)
     assert planner.get_polars_join_type() == "full"
-    planner._config = SimpleNamespace(strategy="unknown")
+    object.__setattr__(planner._config, "strategy", "unknown")
     assert planner.get_polars_join_type() == "left"

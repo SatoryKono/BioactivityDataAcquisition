@@ -25,12 +25,12 @@ from bioetl.application.services.medallion_lifecycle import (
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.locking import FencingToken
-from bioetl.domain.types import RunType
+from bioetl.domain.types import RunID, RunType
 
 _MOCK_TOKEN = FencingToken(
     sequence=1,
     key="lock:mock",
-    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    owner_id=RunID(UUID("00000000-0000-0000-0000-000000000000")),
     issued_at=0.0,
 )
 
@@ -54,7 +54,7 @@ def pipeline_config():
         provider="chembl",
         entity_type="activity",
         table=TableConfig(
-            primary_keys=["activity_id"],
+            primary_keys=("activity_id",),
             silver_table="test_silver",
         ),
     )
@@ -112,7 +112,7 @@ def mock_services():
 def mock_context(mock_logger):
     """Create a mock pipeline context."""
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -175,7 +175,7 @@ def mock_postrun_service():
     )
 
     service = MagicMock(spec=PostrunService)
-    service.run_dq_checks = AsyncMock(
+    service.run_dq_checks = MagicMock(
         return_value=DQResult(
             error_rate=0.0,
             status=DQEvaluationStatus.PASSED,
@@ -794,7 +794,7 @@ class TestPipelineRunnerCheckDataQuality:
         services = create_mock_services()
 
         postrun_service = MagicMock(spec=PostrunService)
-        postrun_service.run_dq_checks = AsyncMock(
+        postrun_service.run_dq_checks = MagicMock(
             return_value=DQResult(
                 error_rate=0.0,
                 status=DQEvaluationStatus.PASSED,
@@ -830,7 +830,7 @@ class TestPipelineRunnerCheckDataQuality:
             observer=mock_observer,
         )
 
-        await runner._check_data_quality()
+        runner._check_data_quality()
 
         # Should delegate to postrun service
         postrun_service.run_dq_checks.assert_called_once_with(mock_executor)

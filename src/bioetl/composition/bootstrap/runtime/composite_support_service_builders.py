@@ -45,8 +45,8 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_composite_checkpoint_port,
     bootstrap_quarantine_port,
 )
+from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinAdapter
 from bioetl.domain.composite.strategy import MergeStrategy
-from bioetl.infrastructure.dataframe.polars_join_adapter import PolarsJoinAdapter
 
 if TYPE_CHECKING:
     from collections.abc import Callable

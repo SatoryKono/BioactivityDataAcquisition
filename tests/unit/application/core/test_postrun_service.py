@@ -51,7 +51,7 @@ def pipeline_config():
         provider="chembl",
         entity_type="activity",
         table=TableConfig(
-            primary_keys=["activity_id"],
+            primary_keys=("activity_id",),
             silver_table="test_silver",
         ),
     )
@@ -97,7 +97,7 @@ def mock_lifecycle_service():
 def mock_dq_service():
     """Create a mock DataQualityService."""
     service = MagicMock(spec=DataQualityService)
-    service.evaluate = AsyncMock(
+    service.evaluate = MagicMock(
         return_value=DQResult(
             error_rate=0.05,
             status=DQEvaluationStatus.PASSED,
@@ -241,7 +241,7 @@ class TestPostrunServiceRun:
         self, postrun_service, mock_executor, mock_dq_service
     ):
         """Test run method propagates DataQualityThresholdError from DQ service."""
-        mock_dq_service.evaluate = AsyncMock(
+        mock_dq_service.evaluate = MagicMock(
             side_effect=DataQualityThresholdError(error_rate=0.25, threshold=0.20)
         )
 
@@ -258,7 +258,7 @@ class TestPostrunServiceDQChecks:
         self, postrun_service, mock_executor, mock_dq_service
     ):
         """Test run_dq_checks delegates to DataQualityService."""
-        result = await postrun_service.run_dq_checks(mock_executor)
+        result = postrun_service.run_dq_checks(mock_executor)
 
         assert isinstance(result, DQResult)
         mock_dq_service.evaluate.assert_called_once()
@@ -274,19 +274,19 @@ class TestPostrunServiceDQChecks:
         self, postrun_service, mock_executor, mock_dq_service
     ):
         """Test run_dq_checks collects correct batch metrics."""
-        await postrun_service.run_dq_checks(mock_executor)
+        postrun_service.run_dq_checks(mock_executor)
 
         call_args = mock_dq_service.evaluate.call_args
         metrics_dict = call_args[0][0]
 
-        assert metrics_dict["record_count"] == 100.0
-        assert metrics_dict["bronze_count"] == 100.0
-        assert metrics_dict["silver_count"] == 95.0
-        assert metrics_dict["gold_count"] == 90.0
-        assert metrics_dict["quarantined_count"] == 5.0
-        assert metrics_dict["error_rate"] == 0.05
-        assert metrics_dict["silver_yield"] == 0.95
-        assert metrics_dict["gold_yield"] == 0.90
+        assert metrics_dict["record_count"] == pytest.approx(100.0)
+        assert metrics_dict["bronze_count"] == pytest.approx(100.0)
+        assert metrics_dict["silver_count"] == pytest.approx(95.0)
+        assert metrics_dict["gold_count"] == pytest.approx(90.0)
+        assert metrics_dict["quarantined_count"] == pytest.approx(5.0)
+        assert metrics_dict["error_rate"] == pytest.approx(0.05)
+        assert metrics_dict["silver_yield"] == pytest.approx(0.95)
+        assert metrics_dict["gold_yield"] == pytest.approx(0.90)
 
 
 @pytest.mark.unit
@@ -428,14 +428,14 @@ class TestPostrunServiceBatchMetrics:
         """Test batch metrics collection."""
         metrics = postrun_service._collect_batch_metrics(mock_executor)
 
-        assert metrics["record_count"] == 100.0
-        assert metrics["bronze_count"] == 100.0
-        assert metrics["silver_count"] == 95.0
-        assert metrics["gold_count"] == 90.0
-        assert metrics["quarantined_count"] == 5.0
-        assert metrics["error_rate"] == 0.05
-        assert metrics["silver_yield"] == 0.95
-        assert metrics["gold_yield"] == 0.90
+        assert metrics["record_count"] == pytest.approx(100.0)
+        assert metrics["bronze_count"] == pytest.approx(100.0)
+        assert metrics["silver_count"] == pytest.approx(95.0)
+        assert metrics["gold_count"] == pytest.approx(90.0)
+        assert metrics["quarantined_count"] == pytest.approx(5.0)
+        assert metrics["error_rate"] == pytest.approx(0.05)
+        assert metrics["silver_yield"] == pytest.approx(0.95)
+        assert metrics["gold_yield"] == pytest.approx(0.90)
 
 
 @pytest.mark.unit
@@ -460,7 +460,7 @@ class TestPostrunServiceMetadata:
             provider="chembl",
             entity_type="activity",
             table=TableConfig(
-                primary_keys=["activity_id"],
+                primary_keys=("activity_id",),
                 silver_table="test_silver",
                 gold_table="test_gold",
             ),
@@ -501,8 +501,8 @@ class TestPostrunServiceMetadata:
         metrics = postrun_service._collect_batch_metrics(zero_executor)
 
         # Should use max(1, total) to avoid division by zero
-        assert metrics["record_count"] == 0.0
-        assert metrics["error_rate"] == 0.0
+        assert metrics["record_count"] == pytest.approx(0.0)
+        assert metrics["error_rate"] == pytest.approx(0.0)
 
 
 @pytest.mark.unit
@@ -595,7 +595,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         assert isinstance(result, PostrunResult)
         # 5% error rate exactly equals soft threshold (5%), so status is WARNING
         assert result.dq.status == DQEvaluationStatus.WARNING
-        assert result.dq.error_rate == 0.05
+        assert result.dq.error_rate == pytest.approx(0.05)
         assert result.vacuum.skipped is False
 
     @pytest.mark.asyncio
@@ -642,5 +642,5 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         with pytest.raises(DataQualityThresholdError) as exc_info:
             await service.run(executor)
 
-        assert exc_info.value.error_rate == 0.25
-        assert exc_info.value.threshold == 0.20
+        assert exc_info.value.error_rate == pytest.approx(0.25)
+        assert exc_info.value.threshold == pytest.approx(0.20)

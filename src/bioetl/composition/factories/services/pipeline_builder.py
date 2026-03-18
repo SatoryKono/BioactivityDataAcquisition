@@ -21,6 +21,7 @@ from bioetl.application.core.batch_processing_service import BatchProcessingComp
 from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter, BatchWriterOptions
 from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointManagerService,
 )
@@ -41,6 +42,7 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
+    import pandera as pdr
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -203,7 +205,8 @@ def _build_record_processor_config(
         scd_config=pipeline.config.scd_config,
     )
     gold_validator = PanderaGoldValidator(
-        cast("pa.DataFrameSchema | None", gold_schema), strict=strict_gold_validation
+        cast("pdr.DataFrameSchema | None", cast(object, gold_schema)),
+        strict=strict_gold_validation,
     )
     return processor_config, gold_validator
 
@@ -260,7 +263,7 @@ def create_batch_executor_from_pipeline(
         tracer=tracer,
         batch_id_factory=batch_id_factory,
     )
-    components, batch_processing_service = build_components_and_processing_service(
+    _, batch_processing_service = build_components_and_processing_service(
         pipeline=pipeline,
         processor_config=processor_config,
         error_classifier=ErrorClassifier(),
@@ -273,9 +276,7 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=effective_batch_id_factory,
         create_batch_processing_components_fn=create_batch_processing_components_fn,
     )
-    execution_state_service = BatchExecutionStateService(
-        batch_processing_service=batch_processing_service
-    )
+    execution_state_service = BatchExecutionStateService()
     extraction_loop_service = BatchExtractionLoopService(
         batch_processing_service=batch_processing_service,
         shutdown_signal=shutdown_signal,
@@ -286,13 +287,12 @@ def create_batch_executor_from_pipeline(
         or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
     )
     deps = BatchExecutorDependencies(
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
         memory_manager=memory_manager,
         execution_run_service=execution_run_service,
         extraction_loop_service=extraction_loop_service,
         execution_state_service=execution_state_service,
+        processing_port=batch_processing_service,
+        fsm=BatchExecutionFSM(),
     )
     return BatchExecutor(
         services=pipeline.services,

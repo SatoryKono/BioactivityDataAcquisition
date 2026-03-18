@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_executor import (
+    BatchExecutor,
+    BatchExecutorDependencies,
+)
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
@@ -28,6 +32,7 @@ from bioetl.application.core.batch_memory_manager import BatchMemoryManagerServi
 from bioetl.application.core.batch_processing_service import BatchProcessingService
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
+from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
 from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
@@ -37,7 +42,7 @@ from bioetl.domain.config import MemoryConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports import MemoryMonitorPort, MetricsPort
-from bioetl.domain.types import BatchID, RunType, ValidationResult
+from bioetl.domain.types import BatchID, GoldSchemaType, RunID, RunType, ValidationResult
 
 
 @pytest.fixture
@@ -59,7 +64,7 @@ def mock_context():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
     return PipelineContext(
-        run_id=uuid4(),
+        run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         logger=mock_logger,
     )
@@ -81,7 +86,7 @@ def processor_config():
         provider="test_provider",
         entity_type="test_entity",
         silver_schema=MagicMock(),
-        gold_schema=MagicMock(),
+        gold_schema=cast(GoldSchemaType, MagicMock()),
         table_config=TableConfig(),
     )
 
@@ -202,17 +207,9 @@ def _create_batch_executor(
     execution_run_service = BatchExecutionRunService(
         execution_lifecycle_service=execution_lifecycle_service
     )
-    execution_state_service = BatchExecutionStateService(
-        batch_processing_service=batch_processing_service
-    )
+    execution_state_service = BatchExecutionStateService()
 
-    return BatchExecutor(
-        services=services,
-        context=context,
-        config=config,
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
+    deps = BatchExecutorDependencies(
         memory_manager=mem_manager,
         execution_run_service=execution_run_service,
         extraction_loop_service=BatchExtractionLoopService(
@@ -225,6 +222,15 @@ def _create_batch_executor(
             or BatchExecutor.DEFAULT_CHECKPOINT_INTERVAL,
         ),
         execution_state_service=execution_state_service,
+        processing_port=batch_processing_service,
+        fsm=BatchExecutionFSM(),
+    )
+
+    return BatchExecutor(
+        services=services,
+        context=context,
+        config=config,
+        dependencies=deps,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
     )

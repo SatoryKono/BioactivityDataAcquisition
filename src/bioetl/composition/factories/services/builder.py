@@ -34,6 +34,7 @@ from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteM
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
+    import pandera as pdr
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -177,7 +178,7 @@ class ServicesBuilder:
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
             gold_validator=PanderaGoldValidator(
-                cast("pa.DataFrameSchema | None", gold_schema),
+                cast("pdr.DataFrameSchema | None", cast(object, gold_schema)),
                 strict=strict_gold_validation,
             ),
             tracer=effective_tracer,

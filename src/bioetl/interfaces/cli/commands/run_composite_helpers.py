@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import sys
 from collections.abc import Callable, Coroutine
-from typing import Any
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.exceptions import BioETLError
@@ -88,9 +87,7 @@ def run_composite_with_cli_policy(
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
     run_async: Callable[
         [str, CompositeRuntimeConfig, bool, int],
-        Coroutine[
-            Any, Any, tuple[bool, str | None]
-        ],  # Any: coroutine send/receive types are unused by CLI wrapper
+        Coroutine[object, object, tuple[bool, str | None]],
     ],
     exception_handler: Callable[[BaseException, str, str], None] | None = None,
 ) -> tuple[bool, str | None]:

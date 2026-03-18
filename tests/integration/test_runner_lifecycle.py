@@ -285,7 +285,7 @@ def mock_postrun_service(call_recorder):
             compaction=CompactionResult(status="skipped"),
         )
 
-    async def run_dq_checks(executor):
+    def run_dq_checks(executor):
         call_recorder.record("postrun.dq_checks")
 
     async def run_vacuum_if_enabled():
@@ -295,7 +295,7 @@ def mock_postrun_service(call_recorder):
         call_recorder.record("postrun.cleanup")
 
     service.run = AsyncMock(side_effect=run)
-    service.run_dq_checks = AsyncMock(side_effect=run_dq_checks)
+    service.run_dq_checks = MagicMock(side_effect=run_dq_checks)
     service.run_vacuum_if_enabled = AsyncMock(side_effect=run_vacuum_if_enabled)
     service.cleanup = AsyncMock(side_effect=cleanup)
     return service
