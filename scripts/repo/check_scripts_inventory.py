@@ -35,8 +35,8 @@ SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
 SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts", "src/tools")
 SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
-    ".claude/agents",
-    ".claude/skills",
+    ".codex/agents",
+    ".codex/skills",
     ".github/workflows",
     "pyproject.toml",
     "Makefile",
@@ -187,9 +187,9 @@ def _iter_search_files(root: Path) -> list[Path]:
 def _source_group(rel_path: str) -> str:
     if rel_path.startswith(".github/workflows/"):
         return "ci"
-    if rel_path.startswith(".claude/skills/"):
+    if rel_path.startswith(".codex/skills/"):
         return "skills"
-    if rel_path.startswith(".claude/agents/"):
+    if rel_path.startswith(".codex/agents/"):
         return "agents"
     if rel_path in {"Makefile", "makefile", "pyproject.toml"}:
         return "build"
@@ -319,12 +319,12 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
 def _agent_usage(refs: list[RefEvidence]) -> list[str]:
     usages: set[str] = set()
     for item in refs:
-        if item.path.startswith(".claude/skills/"):
+        if item.path.startswith(".codex/skills/"):
             parts = item.path.split("/")
             if len(parts) >= 4:
                 usages.add(parts[2])
             continue
-        if item.path.startswith(".claude/agents/"):
+        if item.path.startswith(".codex/agents/"):
             agent_name = Path(item.path).stem
             if agent_name:
                 usages.add(agent_name)
@@ -527,9 +527,7 @@ def _extract_registry_entries(
     entries_raw = registry.get("entries")
     if isinstance(entries_raw, dict):
         return entries_raw
-    print(
-        f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}"
-    )
+    print(f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}")
     return None
 
 
@@ -677,9 +675,7 @@ def main(argv: list[str] | None = None) -> int:
         _write_manifest(manifest_path, payload)
         print(f"[OK] Updated scripts inventory manifest: {manifest_path}")
 
-    check_result = _run_requested_checks(
-        root=root, args=args, payload=payload, manifest_path=manifest_path
-    )
+    check_result = _run_requested_checks(root=root, args=args, payload=payload, manifest_path=manifest_path)
     if check_result != 0:
         return check_result
 
@@ -695,11 +691,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _run_requested_checks(
-    *,
-    root: Path,
-    args: argparse.Namespace,
-    payload: dict[str, object],
-    manifest_path: Path,
+    *, root: Path, args: argparse.Namespace, payload: dict[str, object], manifest_path: Path
 ) -> int:
     if args.check:
         result = _check(manifest_path, payload)

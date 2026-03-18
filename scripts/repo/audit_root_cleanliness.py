@@ -15,6 +15,7 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         ".ai",
         ".aiassistant",
         ".claude",
+        ".codex",
         ".gemini",
         ".github",
         ".jules",
@@ -118,9 +119,7 @@ def _get_tracked_paths(repo_root: Path) -> list[str]:
     )
     decoded = completed.stdout.decode("utf-8", errors="replace")
     deleted = {
-        path
-        for path in staged_deleted.stdout.decode("utf-8", errors="replace").split("\0")
-        if path
+        path for path in staged_deleted.stdout.decode("utf-8", errors="replace").split("\0") if path
     }
     return [path for path in decoded.split("\0") if path and path not in deleted]
 
@@ -214,14 +213,11 @@ def main() -> int:
         sys.stderr.write(f"ERROR: failed to query untracked paths: {exc}\n")
         return 2
 
-    unexpected_untracked_root_files = sorted(
-        _collect_untracked_root_files(untracked_paths)
-    )
+    unexpected_untracked_root_files = sorted(_collect_untracked_root_files(untracked_paths))
     unexpected_untracked_root_dirs = sorted(
         root_dir
         for root_dir in _collect_untracked_root_dirs(untracked_paths)
-        if root_dir not in tracked_root_dirs
-        and root_dir not in ALLOWED_ROOT_DIRECTORIES
+        if root_dir not in tracked_root_dirs and root_dir not in ALLOWED_ROOT_DIRECTORIES
     )
     strict_untracked_violation = False
     if unexpected_untracked_root_files:

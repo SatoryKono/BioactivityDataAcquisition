@@ -76,19 +76,19 @@ def test_discover_refs_normalizes_windows_path_separators() -> None:
     )
 
 
-def test_agent_usage_includes_claude_agents_and_skills() -> None:
+def test_agent_usage_includes_codex_agents_and_skills() -> None:
     """Agent usage should detect both skill wrappers and logical agent specs."""
     module = _load_inventory_module()
 
     refs = [
         module.RefEvidence(
-            path=".claude/skills/technical-designer-mermaid/SKILL.md",
+            path=".codex/skills/technical-designer-mermaid/SKILL.md",
             line=1,
             text="/".join(["scripts", "diagrams", "lint_diagrams.py"]),
             source_group="skills",
         ),
         module.RefEvidence(
-            path=".claude/agents/py-doc-bot.md",
+            path=".codex/agents/py-doc-bot.md",
             line=1,
             text="/".join(["scripts", "diagrams", "lint_diagrams.py"]),
             source_group="agents",
