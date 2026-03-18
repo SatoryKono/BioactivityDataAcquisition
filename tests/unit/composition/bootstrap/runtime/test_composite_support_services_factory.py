@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+from typing import Any, cast
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServicesFactory,
+)
+from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
 )
 from bioetl.application.composite.join_planner_helpers import (
     resolve_field_aliases_from_registry,
@@ -16,29 +22,41 @@ from bioetl.application.composite.join_planner_helpers import (
 from bioetl.domain.composite.strategy import MergeStrategy
 
 
-def _make_factory() -> CompositeSupportServicesFactory:
-    config = SimpleNamespace(
-        name="composite_publication",
-        merge=SimpleNamespace(strategy=MergeStrategy.LEFT_OUTER),
-        cross_validation=SimpleNamespace(enabled=False),
-        dq=SimpleNamespace(),
-        execution=SimpleNamespace(max_concurrency=3),
+def _make_factory(
+    *,
+    checkpoint_manager_cls: type[CompositeCheckpointService] = CompositeCheckpointService,
+) -> CompositeSupportServicesFactory:
+    config = cast(
+        Any,
+        SimpleNamespace(
+            name="composite_publication",
+            merge=SimpleNamespace(strategy=MergeStrategy.LEFT_OUTER),
+            cross_validation=SimpleNamespace(enabled=False),
+            dq=SimpleNamespace(),
+            execution=SimpleNamespace(max_concurrency=3),
+        ),
     )
-    runtime = SimpleNamespace(resume=False)
-    settings = SimpleNamespace(data_dir="data")
+    runtime = CompositeRuntimeConfig(resume=False)
+    settings = cast(Any, SimpleNamespace(data_dir="data"))
     logger = MagicMock()
     storage = MagicMock()
+
+    infra_context = cast(Any, CompositeInfrastructureContext)(
+        run_id="run-123",
+        settings=settings,
+        logger=logger,
+        storage=storage,
+        lock=MagicMock(),
+    )
 
     return CompositeSupportServicesFactory(
         config=config,
         runtime=runtime,
-        settings=settings,
-        logger=logger,
-        storage=storage,
-        run_id="run-123",
+        infra_context=infra_context,
         resolve_gold_schema=lambda _name: None,
         load_field_group_registry=lambda _name, _logger: None,
         create_dq_report_service=lambda _logger, _settings: MagicMock(),
+        checkpoint_manager_cls=checkpoint_manager_cls,
     )
 
 
@@ -107,9 +125,13 @@ def test_build_uses_canonical_composite_checkpoint_port(
     mock_enrichment_coordinator_cls: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
-    factory = _make_factory()
-    checkpoint_storage = MagicMock(name="checkpoint_storage")
     checkpoint_manager = MagicMock(name="checkpoint_manager")
+    checkpoint_manager_cls = cast(
+        Any,
+        MagicMock(return_value=checkpoint_manager),
+    )
+    factory = _make_factory(checkpoint_manager_cls=checkpoint_manager_cls)
+    checkpoint_storage = MagicMock(name="checkpoint_storage")
     merger = MagicMock(name="merger")
 
     mock_bootstrap_checkpoint_port.return_value = checkpoint_storage
@@ -124,16 +146,15 @@ def test_build_uses_canonical_composite_checkpoint_port(
     )
     factory._create_cross_validator = MagicMock(return_value=None)
     factory._create_merge_service = MagicMock(return_value=merger)
-    factory._checkpoint_manager_cls = MagicMock(return_value=checkpoint_manager)
 
     result = factory.build()
 
     assert result.checkpoint_manager is checkpoint_manager
     mock_bootstrap_checkpoint_port.assert_called_once_with()
-    factory._checkpoint_manager_cls.assert_called_once_with(
+    cast(MagicMock, checkpoint_manager_cls).assert_called_once_with(
         composite_name="composite_publication",
         run_id="run-123",
         storage=checkpoint_storage,
-        logger=factory._logger,
+        logger=factory._infra.logger,
         resume=False,
     )

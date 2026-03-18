@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1094,
-    "total_internal_imports": 4194,
+    "scanned_modules": 1095,
+    "total_internal_imports": 4201,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 249,
@@ -17,7 +17,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 660,
+      "imports": 662,
       "allowed": true
     },
     {
@@ -29,19 +29,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 272,
+      "imports": 275,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 223,
+      "imports": 224,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 201,
+      "imports": 202,
       "allowed": true
     },
     {
@@ -181,7 +181,7 @@
     {
       "source": "composition.bootstrap",
       "target": "domain.ports",
-      "imports": 23
+      "imports": 24
     },
     {
       "source": "composition.factories",
@@ -199,14 +199,14 @@
       "imports": 22
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.value_objects",
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
       "imports": 22
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.config",
-      "imports": 21
+      "source": "infrastructure.storage",
+      "target": "domain.value_objects",
+      "imports": 22
     },
     {
       "source": "infrastructure.storage",
@@ -275,6 +275,11 @@
     },
     {
       "source": "application.pipelines",
+      "target": "domain.ports",
+      "imports": 14
+    },
+    {
+      "source": "application.pipelines",
       "target": "domain.value_objects",
       "imports": 14
     },
@@ -292,11 +297,6 @@
       "source": "interfaces.cli",
       "target": "composition.services_api",
       "imports": 14
-    },
-    {
-      "source": "application.pipelines",
-      "target": "domain.ports",
-      "imports": 13
     },
     {
       "source": "infrastructure.quality",
@@ -324,6 +324,11 @@
       "imports": 12
     },
     {
+      "source": "application.pipelines",
+      "target": "domain.services",
+      "imports": 11
+    },
+    {
       "source": "application.services",
       "target": "domain.exceptions",
       "imports": 11
@@ -341,11 +346,6 @@
     {
       "source": "application.pipelines",
       "target": "domain.filtering",
-      "imports": 10
-    },
-    {
-      "source": "application.pipelines",
-      "target": "domain.services",
       "imports": 10
     },
     {

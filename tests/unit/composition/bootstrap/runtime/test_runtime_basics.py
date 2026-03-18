@@ -13,6 +13,9 @@ from bioetl.composition.bootstrap.runtime.runtime_basics import (
     build_runner_factories,
     build_support_services,
 )
+from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 
 
 _FIXED_UUID = UUID("12345678-1234-5678-1234-567812345678")
@@ -129,14 +132,18 @@ class TestBuildSupportServices:
         mock_instance = MagicMock()
         mock_instance.build.return_value = expected_services
         mock_cls = MagicMock(return_value=mock_instance)
+        infra_context = CompositeInfrastructureContext(
+            run_id="rid",
+            settings=SimpleNamespace(),
+            logger=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        )
 
         result = build_support_services(
             config=SimpleNamespace(),
             runtime=SimpleNamespace(),
-            settings=SimpleNamespace(),
-            logger=MagicMock(),
-            storage=MagicMock(),
-            run_id="rid",
+            infra_context=infra_context,
             support_services_factory_cls=mock_cls,
             resolve_gold_schema_fn=MagicMock(),
             load_field_group_registry_fn=MagicMock(),
@@ -152,14 +159,18 @@ class TestBuildSupportServices:
         mock_instance.build.return_value = SimpleNamespace()
         mock_cls = MagicMock(return_value=mock_instance)
         config = SimpleNamespace(name="test")
+        infra_context = CompositeInfrastructureContext(
+            run_id="rid",
+            settings=SimpleNamespace(),
+            logger=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        )
 
         build_support_services(
             config=config,
             runtime=SimpleNamespace(),
-            settings=SimpleNamespace(),
-            logger=MagicMock(),
-            storage=MagicMock(),
-            run_id="rid",
+            infra_context=infra_context,
             support_services_factory_cls=mock_cls,
             resolve_gold_schema_fn=MagicMock(),
             load_field_group_registry_fn=MagicMock(),

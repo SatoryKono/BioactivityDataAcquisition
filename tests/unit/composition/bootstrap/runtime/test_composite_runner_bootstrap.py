@@ -69,54 +69,27 @@ def _make_config(*, cross_validation_enabled: bool) -> SimpleNamespace:
 def test_bootstrap_composite_runner_orchestrates_builders() -> None:
     config = _make_config(cross_validation_enabled=True)
     runtime = _make_runtime()
-    logger = MagicMock()
-    lock = MagicMock()
-
-    seed_runner_factory = MagicMock(name="seed_runner_factory")
-    enricher_runner_factory = MagicMock(name="enricher_runner_factory")
-    dependency_runner_factory = MagicMock(name="dependency_runner_factory")
-    support_bundle = SimpleNamespace(
-        key_extractor=MagicMock(),
-        dependency_coordinator=MagicMock(),
-        coordinator=MagicMock(),
-        merger=MagicMock(),
-        checkpoint_manager=MagicMock(),
-        dq_report_service=MagicMock(),
-        fsm_state_helper=MagicMock(),
-        quarantine_port=MagicMock(),
+    plan = SimpleNamespace(
+        run_id="00000000-0000-0000-0000-000000000001",
+        logger=MagicMock(),
+        lock=MagicMock(),
+        seed_runner_factory=MagicMock(name="seed_runner_factory"),
+        dependencies_runner_factory=MagicMock(name="dependency_runner_factory"),
+        enricher_runner_factory=MagicMock(name="enricher_runner_factory"),
+        support_services=MagicMock(name="support_services"),
     )
     composite_runner = MagicMock(name="composite_runner")
 
-    runtime_basics = SimpleNamespace(
-        run_id="00000000-0000-0000-0000-000000000001",
-        settings=MagicMock(),
-        logger=logger,
-        storage=MagicMock(),
-        lock=lock,
-    )
-
     with (
         patch(
-            "bioetl.composition.bootstrap.runtime.composite._bootstrap_runtime_basics"
-        ) as mock_runtime_basics,
+            "bioetl.composition.bootstrap.runtime.composite._build_composite_bootstrap_plan"
+        ) as mock_build_plan,
         patch(
-            "bioetl.composition.bootstrap.runtime.composite._build_runner_factories"
-        ) as mock_build_runner_factories,
-        patch(
-            "bioetl.composition.bootstrap.runtime.composite._build_support_services"
-        ) as mock_build_support_services,
-        patch(
-            "bioetl.composition.bootstrap.runtime.composite.create_composite_runner_with_legacy_fsm_adapter"
-        ) as mock_runner_cls,
+            "bioetl.composition.bootstrap.runtime.composite._create_composite_runner_from_plan"
+        ) as mock_create_from_plan,
     ):
-        mock_runtime_basics.return_value = runtime_basics
-        mock_build_runner_factories.return_value = (
-            seed_runner_factory,
-            dependency_runner_factory,
-            enricher_runner_factory,
-        )
-        mock_build_support_services.return_value = support_bundle
-        mock_runner_cls.return_value = composite_runner
+        mock_build_plan.return_value = plan
+        mock_create_from_plan.return_value = composite_runner
 
         result = composite_runtime.bootstrap_composite_runner(
             config=config,
@@ -125,34 +98,16 @@ def test_bootstrap_composite_runner_orchestrates_builders() -> None:
         )
 
     assert result is composite_runner
-    mock_runtime_basics.assert_called_once_with(
+    mock_build_plan.assert_called_once_with(
         config=config,
+        runtime=runtime,
         run_id="00000000-0000-0000-0000-000000000001",
     )
-    mock_build_runner_factories.assert_called_once_with(
+    mock_create_from_plan.assert_called_once_with(
         config=config,
         runtime=runtime,
-        logger=runtime_basics.logger,
+        plan=plan,
     )
-    mock_build_support_services.assert_called_once_with(
-        config=config,
-        runtime=runtime,
-        runtime_basics=runtime_basics,
-    )
-
-    call_kwargs = mock_runner_cls.call_args.kwargs
-    assert call_kwargs["seed_runner_factory"] is seed_runner_factory
-    assert call_kwargs["enricher_runner_factory"] is enricher_runner_factory
-    assert call_kwargs["dependencies_runner_factory"] is dependency_runner_factory
-    assert call_kwargs["logger"] is logger
-    assert call_kwargs["lock"] is lock
-    assert call_kwargs["run_id"] == "00000000-0000-0000-0000-000000000001"
-    assert call_kwargs["key_extractor"] is support_bundle.key_extractor
-    assert call_kwargs["coordinator"] is support_bundle.coordinator
-    assert call_kwargs["merger"] is support_bundle.merger
-    assert call_kwargs["checkpoint_manager"] is support_bundle.checkpoint_manager
-    assert call_kwargs["dq_report_service"] is support_bundle.dq_report_service
-    assert call_kwargs["fsm_state_helper"] is support_bundle.fsm_state_helper
 
 
 @pytest.mark.unit
@@ -295,7 +250,7 @@ def test_bootstrap_composite_runner_delegates_final_assembly_to_plan_helper() ->
 def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> None:
     config = _make_config(cross_validation_enabled=False)
     runtime = _make_runtime()
-    runtime_basics = SimpleNamespace(
+    infra_context = SimpleNamespace(
         run_id="00000000-0000-0000-0000-000000000005",
         settings=MagicMock(),
         logger=MagicMock(),
@@ -318,7 +273,7 @@ def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> N
             "bioetl.composition.bootstrap.runtime.composite._build_support_services"
         ) as mock_build_support_services,
     ):
-        mock_runtime_basics.return_value = runtime_basics
+        mock_runtime_basics.return_value = infra_context
         mock_build_runner_factories.return_value = (
             seed_runner_factory,
             dependencies_runner_factory,
@@ -332,9 +287,9 @@ def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> N
             run_id="00000000-0000-0000-0000-000000000005",
         )
 
-    assert plan.run_id == runtime_basics.run_id
-    assert plan.logger is runtime_basics.logger
-    assert plan.lock is runtime_basics.lock
+    assert plan.run_id == infra_context.run_id
+    assert plan.logger is infra_context.logger
+    assert plan.lock is infra_context.lock
     assert plan.seed_runner_factory is seed_runner_factory
     assert plan.dependencies_runner_factory is dependencies_runner_factory
     assert plan.enricher_runner_factory is enricher_runner_factory
@@ -342,10 +297,10 @@ def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> N
     mock_build_runner_factories.assert_called_once_with(
         config=config,
         runtime=runtime,
-        logger=runtime_basics.logger,
+        logger=infra_context.logger,
     )
     mock_build_support_services.assert_called_once_with(
         config=config,
         runtime=runtime,
-        runtime_basics=runtime_basics,
+        infra_context=infra_context,
     )

@@ -12,12 +12,6 @@ QuarantineEntry:
   owner: "@core-team"
   expiry_date: "2026-09-15"
 
-CompositeSupportServicesFactory:
-  allowed_args: 10
-  reason: "Composition Root layer, graph assembly."
-  owner: "@core-team"
-  expiry_date: "2026-09-15"
-
 PubChemAdapter:
   allowed_args: 10
   reason: "Requires separate infrastructure wave."

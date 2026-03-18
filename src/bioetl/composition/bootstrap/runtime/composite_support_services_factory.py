@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
 from bioetl.application.composite.cross_validator import (
@@ -31,6 +31,9 @@ if TYPE_CHECKING:
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+        CompositeInfrastructureContext,
+    )
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort, QuarantinePort
@@ -75,10 +78,7 @@ class CompositeSupportServicesFactory:
         *,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        settings: Settings,
-        logger: LoggerPort,
-        storage: Any,  # Any: storage adapter is concrete infra object implementing StoragePort
-        run_id: str,
+        infra_context: CompositeInfrastructureContext,
         resolve_gold_schema: Callable[[str], type | None],
         load_field_group_registry: Callable[
             [str, LoggerPort], FieldGroupRegistry | None
@@ -102,14 +102,7 @@ class CompositeSupportServicesFactory:
                 dependency, DQ, and cross-validation settings.
             runtime: Immutable composite runtime options (resume flag,
                 concurrency settings).
-            settings: Global infrastructure settings supplying paths and feature
-                flags (e.g. ``data_dir``).
-            logger: Structured logger forwarded to all constructed services.
-            storage: Storage adapter implementing ``StoragePort``; typed as ``Any``
-                because it is a concrete infrastructure object injected from the
-                composition root.
-            run_id: Unique string identifier for this composite pipeline run;
-                embedded in checkpoint paths and FSM state.
+            infra_context: Bundle of infrastructure primitives (run_id, settings, logger, storage).
             resolve_gold_schema: Callable that accepts a composite pipeline name and
                 returns the corresponding Pandera ``DataFrameModel`` class or ``None``.
             load_field_group_registry: Callable that accepts a composite pipeline name
@@ -123,10 +116,7 @@ class CompositeSupportServicesFactory:
         """
         self._config = config
         self._runtime = runtime
-        self._settings = settings
-        self._logger = logger
-        self._storage = storage
-        self._run_id = run_id
+        self._infra = infra_context
         self._resolve_gold_schema = resolve_gold_schema
         self._load_field_group_registry = load_field_group_registry
         self._create_dq_report_service = create_dq_report_service
@@ -141,12 +131,12 @@ class CompositeSupportServicesFactory:
         delta_reader = self._create_delta_reader()
         execution_services = build_execution_support_services(
             config=self._config,
-            logger=self._logger,
+            logger=self._infra.logger,
             delta_reader=delta_reader,
         )
         field_group_registry = self._load_field_group_registry(
             self._config.name,
-            self._logger,
+            self._infra.logger,
         )
         cross_validator = self._create_cross_validator()
         merger = self._create_merge_service(
@@ -157,9 +147,9 @@ class CompositeSupportServicesFactory:
         runtime_management_services = build_runtime_management_services(
             config=self._config,
             runtime=self._runtime,
-            settings=self._settings,
-            logger=self._logger,
-            run_id=self._run_id,
+            settings=self._infra.settings,
+            logger=self._infra.logger,
+            run_id=self._infra.run_id,
             checkpoint_manager_cls=self._checkpoint_manager_cls,
             create_dq_report_service=self._create_dq_report_service,
         )
@@ -176,10 +166,10 @@ class CompositeSupportServicesFactory:
         )
 
     def _create_delta_reader(self) -> DeltaReader:
-        silver_base_path = str(Path(self._settings.data_dir) / "output")
+        silver_base_path = str(Path(self._infra.settings.data_dir) / "output")
         return DeltaReader(
             base_path=silver_base_path,
-            logger=self._logger,
+            logger=self._infra.logger,
         )
 
     def _create_cross_validator(self) -> EnrichmentCrossValidator | None:
@@ -187,7 +177,7 @@ class CompositeSupportServicesFactory:
             return None
         return EnrichmentCrossValidator(
             config=self._config.cross_validation,
-            logger=self._logger,
+            logger=self._infra.logger,
         )
 
     def _create_merge_service(
@@ -199,17 +189,17 @@ class CompositeSupportServicesFactory:
     ) -> MergeService:
         merge_dependencies = build_merge_dependencies(
             config=self._config,
-            logger=self._logger,
+            logger=self._infra.logger,
             resolve_join_how=self._resolve_join_how,
             normalize_join_keys=self._NORMALIZE_JOIN_KEYS,
             system_columns_to_drop=self._SYSTEM_COLUMNS_TO_DROP,
         )
         return MergeService(
             merge_config=self._config.merge,
-            storage=self._storage,
-            logger=self._logger,
+            storage=self._infra.storage,
+            logger=self._infra.logger,
             delta_reader=delta_reader,
-            silver_reader=self._storage,
+            silver_reader=self._infra.storage,
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
             gold_schema=self._resolve_gold_schema(self._config.name),

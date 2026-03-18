@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractionService,
     )
+    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+        CompositeInfrastructureContext,
+    )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
         CompositeSupportServicesFactory,
@@ -146,10 +149,7 @@ def build_support_services(
     *,
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
-    settings: Settings,
-    logger: LoggerPort,
-    storage: object,
-    run_id: str,
+    infra_context: CompositeInfrastructureContext,
     support_services_factory_cls: type[CompositeSupportServicesFactory],
     resolve_gold_schema_fn: Callable[[str], type | None],
     load_field_group_registry_fn: Callable[
@@ -162,10 +162,7 @@ def build_support_services(
     Args:
         config: CompositeConfig for this composite run.
         runtime: Runtime options (resume, concurrency, etc.).
-        settings: Global settings supplying data_dir and feature flags.
-        logger: Structured logger forwarded to all support services.
-        storage: Storage adapter injected from the composition root.
-        run_id: UUID string identifying this run for checkpoint scoping.
+        infra_context: Bundle of infrastructure primitives.
         support_services_factory_cls: Factory class that assembles the bundle.
         resolve_gold_schema_fn: Callable returning the Gold Pandera schema for
             a composite pipeline name, or None if not registered.
@@ -180,10 +177,7 @@ def build_support_services(
     return support_services_factory_cls(
         config=config,
         runtime=runtime,
-        settings=settings,
-        logger=logger,
-        storage=storage,
-        run_id=run_id,
+        infra_context=infra_context,
         resolve_gold_schema=resolve_gold_schema_fn,
         load_field_group_registry=load_field_group_registry_fn,
         create_dq_report_service=create_dq_report_service_fn,

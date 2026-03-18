@@ -171,7 +171,7 @@ def main() -> None:
     """Main entry point."""
     warn_only = "--warn-only" in sys.argv
     src_path = Path("src/bioetl")
-    waiver_path = Path(".github/linters/constructor_waivers.yaml")
+    waiver_path = Path("constructor_waivers.yaml")
 
     if not src_path.exists():
         print(f"Source path {src_path} not found")
