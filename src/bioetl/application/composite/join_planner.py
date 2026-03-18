@@ -35,7 +35,17 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["JoinHow", "JoinPlannerService"]
+__all__ = ["JoinHow", "JoinPlannerService", "JoinPreparationCollaborators"]
+
+
+@dataclass(frozen=True, slots=True)
+class JoinPreparationCollaborators:
+    """Grouped preparation collaborators for JoinPlannerService."""
+
+    deduplicator: EnricherDeduplicatorService
+    aggregator: EnricherAggregator
+    renamer: ColumnRenamer
+    conflict_resolver: ConflictResolverService
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,10 +81,7 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
         self,
         merge_config: MergeConfig,
         logger: LoggerPort,
-        deduplicator: EnricherDeduplicatorService,
-        aggregator: EnricherAggregator,
-        renamer: ColumnRenamer,
-        conflict_resolver: ConflictResolverService,
+        preparation: JoinPreparationCollaborators,
         join_key_resolver: JoinKeyResolverProtocol,
         join_executor: JoinExecutorProtocol,
         dependency_joiner: DependencyJoinerProtocol,
@@ -82,8 +89,8 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
     ) -> None:
         """Initialise the join planner with explicit collaborator services.
 
-        Required collaborators (``deduplicator``, ``aggregator``, ``renamer``,
-        ``conflict_resolver``, ``join_key_resolver``, ``join_executor``,
+        Required collaborators (``preparation``,
+        ``join_key_resolver``, ``join_executor``,
         ``dependency_joiner``) must be provided explicitly. See ADR-026 for the
         composite join workflow design.
 
@@ -91,14 +98,8 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
             merge_config: Domain merge configuration containing join strategy,
                 enricher list, and column-conflict policy.
             logger: Structured logger forwarded to all collaborator services.
-            deduplicator: Service that removes duplicate rows from enricher DataFrames
-                before joining.
-            aggregator: Service that performs many-to-one aggregation on enricher
-                DataFrames when ``EnricherConfig.cardinality == MANY_TO_ONE``.
-            renamer: Service that qualifies enricher column names to the
-                ``{provider}.{entity}.{field}`` convention.
-            conflict_resolver: Service that detects and resolves column-name conflicts
-                between the seed/merged frame and an enricher frame.
+            preparation: Grouped preparation services (deduplicator, aggregator,
+                renamer, conflict_resolver) for normalising data frames.
             field_alias_resolver: Callable returning a field-alias mapping
                 for a given pipeline name.
             join_key_resolver: ``JoinKeyResolverProtocol`` implementation for
@@ -109,10 +110,10 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
         """
         self._config = merge_config
         self._logger = logger
-        self._deduplicator = deduplicator
-        self._aggregator = aggregator
-        self._renamer = renamer
-        self._conflict_resolver = conflict_resolver
+        self._deduplicator = preparation.deduplicator
+        self._aggregator = preparation.aggregator
+        self._renamer = preparation.renamer
+        self._conflict_resolver = preparation.conflict_resolver
         self._field_alias_resolver = field_alias_resolver
         self._join_key_resolver = join_key_resolver
         self._join_executor = join_executor

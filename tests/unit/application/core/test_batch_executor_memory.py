@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -90,6 +91,7 @@ def callbacks():
     """Create mock callbacks."""
 
     async def transform(ctx, record, index):
+        await asyncio.sleep(0)
         return {
             "entity_id": str(index),
             "_run_id": str(ctx.run_id),
@@ -188,10 +190,7 @@ def _create_batch_executor(
         services=services,
         context=context,
         config=config,
-        logger=services.logger,
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
+        components=components,
         tracing_manager=tracing_manager,
         batch_id_factory=batch_id_factory,
     )

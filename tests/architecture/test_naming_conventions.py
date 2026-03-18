@@ -5,6 +5,29 @@ import re
 from pathlib import Path
 
 
+def _is_constant_literal(value: ast.expr) -> bool:
+    return isinstance(value, (ast.Constant, ast.Tuple, ast.List, ast.Dict, ast.Set))
+
+
+def _should_skip_constant_name(name: str) -> bool:
+    return name.startswith("_") or name.isupper() or name[0].isupper()
+
+
+def _iter_public_constant_assignments(tree: ast.Module) -> list[tuple[int, str, ast.expr]]:
+    assignments: list[tuple[int, str, ast.expr]] = []
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        for target in node.targets:
+            if not isinstance(target, ast.Name):
+                continue
+            name = target.id
+            if _should_skip_constant_name(name):
+                continue
+            assignments.append((node.lineno, name, node.value))
+    return assignments
+
+
 def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
     suffixes = (
         "Factory",
@@ -86,6 +109,8 @@ def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
                     "Outcome",
                     "Entry",
                     "Dependencies",
+                    "Components",
+                    "Collaborators",
                 )
             ):
                 continue
@@ -109,18 +134,7 @@ def test_module_naming_snake_case(src_python_files: list) -> None:
 def test_constants_upper_snake_case(source_ast_cache: dict) -> None:
     violations: list[str] = []
     for path, tree in source_ast_cache.items():
-        for node in tree.body:
-            if isinstance(node, ast.Assign):
-                for target in node.targets:
-                    if isinstance(target, ast.Name):
-                        name = target.id
-                        if name.startswith("_"):
-                            continue
-                        if name.isupper() or name[0].isupper():
-                            continue
-                        if isinstance(
-                            node.value,
-                            (ast.Constant, ast.Tuple, ast.List, ast.Dict, ast.Set),
-                        ):
-                            violations.append(f"{path}:{node.lineno}:{name}")
+        for lineno, name, value in _iter_public_constant_assignments(tree):
+            if _is_constant_literal(value):
+                violations.append(f"{path}:{lineno}:{name}")
     assert not violations, "Constant naming violations:\n" + "\n".join(violations[:80])

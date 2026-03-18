@@ -5,12 +5,12 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypeVar, cast
 
+from bioetl.composition.factories.pipeline.transformer_dependencies import (
+    build_transformer_dependencies,
+)
 from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
     create_pipeline_with_services,
-)
-from bioetl.composition.factories.transformer_dependencies import (
-    build_transformer_dependencies,
 )
 from bioetl.domain.services import IdentityService
 from bioetl.infrastructure.config import load_pipeline_config
@@ -72,10 +72,14 @@ def create_transformer_instance(
     """Create transformer when a transformer class is configured."""
     if transformer_class is None:
         return None
+
+    resolved_entity_type = extract_entity_type(pipeline_name)
     resolved_dependencies = (
         dependencies
         if dependencies is not None
         else build_transformer_dependencies(
+            provider=provider,
+            entity_type=resolved_entity_type,
             tracer=tracer,
             metrics=metrics,
             identity_service=identity_service,
@@ -86,7 +90,7 @@ def create_transformer_instance(
     )
     return transformer_class(
         provider=provider,
-        entity_type=extract_entity_type(pipeline_name),
+        entity_type=resolved_entity_type,
         silver_filters=silver_filters,
         gold_filters=gold_filters,
         dependencies=resolved_dependencies,

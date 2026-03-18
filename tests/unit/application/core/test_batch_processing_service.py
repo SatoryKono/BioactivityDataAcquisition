@@ -58,8 +58,8 @@ def mock_services():
 
     # fetch yields nothing by default
     async def _empty_fetch(**kwargs):
-        return
-        yield  # pragma: no cover
+        for _ in ():
+            yield _  # pragma: no cover
 
     svc.data_source.fetch = _empty_fetch
     return svc
@@ -136,14 +136,19 @@ def _make_service(
     tracing,
     batch_id_factory,
 ) -> BatchProcessingService:
+    from bioetl.application.core.batch_processing_service import (
+        BatchProcessingComponents,
+    )
+
     return BatchProcessingService(
         services=services,
         context=context,
         config=config,
-        logger=logger,
-        batch_metrics=batch_metrics,
-        transformer=transformer,
-        writer=writer,
+        components=BatchProcessingComponents(
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+        ),
         tracing_manager=tracing,
         batch_id_factory=batch_id_factory,
     )
@@ -765,7 +770,7 @@ class TestGetSourceMetadata:
         result = svc._get_source_metadata(None)
 
         assert result is None
-        mock_logger.warning.assert_called_once()
+        mock_context.logger.warning.assert_called_once()
 
     def test_returns_none_when_query_string_is_none_and_no_metadata(
         self,

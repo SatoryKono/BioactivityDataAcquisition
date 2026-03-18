@@ -9,6 +9,7 @@ from __future__ import annotations
 __all__ = ["IDMappingTransformer"]
 
 
+import dataclasses
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import (
@@ -16,18 +17,12 @@ from bioetl.application.core.base_transformer import (
     TransformerDependencyContext,
 )
 from bioetl.domain.entities.uniprot import IDMappingResult
-from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import (
-        ContractPolicyPort,
-        DataNormalizationPort,
-        MetricsPort,
-        PiiHasherPort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -48,42 +43,55 @@ class IDMappingTransformer(BaseTransformer):
         self,
         provider: str = "uniprot",
         entity_type: str = "idmapping",
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
-        data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
-    ):
+    ) -> None:
         """Initialize ID Mapping transformer.
 
         Args:
             provider: Data provider identifier (default: 'uniprot').
             entity_type: Entity type for metrics labels (default: 'idmapping').
-            tracer: Optional tracing port for distributed tracing.
-            metrics: Optional metrics port for duration/error tracking.
             silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
-            identity_service: Service for computing entity IDs and content hashes.
-            pii_hasher: Optional PII hasher for hashing sensitive data.
-            data_normalizer: Data normalization service for text normalization.
-            contract_policy: Optional pipeline contract policy.
+            tracer: Optional tracing collaborator when not using dependencies.
+            metrics: Optional metrics collaborator when not using dependencies.
+            identity_service: Optional identity collaborator when not using dependencies.
+            pii_hasher: Optional PII hasher collaborator when not using dependencies.
+            dependencies: Explicit collaborator bundle.
         """
+        if dependencies is not None:
+            overrides = {
+                key: value
+                for key, value in {
+                    "tracer": tracer,
+                    "metrics": metrics,
+                    "identity_service": identity_service,
+                    "pii_hasher": pii_hasher,
+                }.items()
+                if value is not None
+            }
+            if overrides:
+                dependencies = dataclasses.replace(dependencies, **overrides)
+                tracer = None
+                metrics = None
+                identity_service = None
+                pii_hasher = None
+
         super().__init__(
             provider,
             entity_type=entity_type,
             silver_filters=silver_filters,
             gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
             dependencies=dependencies,
-            legacy_tracer=tracer,
-            legacy_metrics=metrics,
-            legacy_identity_service=identity_service,
-            legacy_pii_hasher=pii_hasher,
-            legacy_data_normalizer=data_normalizer,
-            legacy_contract_policy=contract_policy,
         )
 
     async def _transform_impl(

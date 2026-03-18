@@ -19,7 +19,6 @@ from bioetl.application.core.base_transformer import (
     TransformerDependencyContext,
 )
 from bioetl.domain.entities import PubchemMolecule
-from bioetl.domain.services import IdentityService
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
 from bioetl.domain.value_objects import InChIKey
@@ -27,13 +26,8 @@ from bioetl.domain.value_objects import InChIKey
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import (
-        ContractPolicyPort,
-        DataNormalizationPort,
-        MetricsPort,
-        PiiHasherPort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -49,30 +43,22 @@ class PubChemCompoundTransformer(BaseTransformer):
         self,
         provider: str = "pubchem",
         entity_type: str = "compound",
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
-        data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
-    ):
+    ) -> None:
         """Initialize PubChem compound transformer.
 
         Args:
             provider: Data provider identifier. Defaults to 'pubchem'.
             entity_type: Entity type for metrics labels. Defaults to 'compound'.
-            tracer: Optional tracing port for distributed tracing (O1 observability).
-            metrics: Optional metrics port for duration/error tracking (O1 observability).
             silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
-            identity_service: Service for computing entity IDs and content hashes.
-            pii_hasher: Optional PII hasher. Not typically used for molecules
-                (no PII in chemical data), but included for API consistency.
-            data_normalizer: Data normalization service for text normalization.
-            contract_policy: Optional pipeline contract policy.
+            dependencies: Explicit collaborator bundle.
 
         """
         super().__init__(
@@ -80,13 +66,11 @@ class PubChemCompoundTransformer(BaseTransformer):
             entity_type=entity_type,
             silver_filters=silver_filters,
             gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
             dependencies=dependencies,
-            legacy_tracer=tracer,
-            legacy_metrics=metrics,
-            legacy_identity_service=identity_service,
-            legacy_pii_hasher=pii_hasher,
-            legacy_data_normalizer=data_normalizer,
-            legacy_contract_policy=contract_policy,
         )
 
     def _extract_computed_descriptors(

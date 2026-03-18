@@ -32,7 +32,10 @@ from bioetl.application.composite.dependency_result_mapper import (
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
-from bioetl.application.composite.join_planner import JoinPlannerService
+from bioetl.application.composite.join_planner import (
+    JoinPlannerService,
+    JoinPreparationCollaborators,
+)
 from bioetl.application.composite.join_planner_helpers import (
     parse_pipeline_name,
     resolve_field_aliases_from_registry,
@@ -199,10 +202,12 @@ def build_merge_dependencies(
     join_planner = JoinPlannerService(
         merge_config=config.merge,
         logger=logger,
-        deduplicator=deduplicator,
-        aggregator=aggregator,
-        renamer=renamer,
-        conflict_resolver=conflict_resolver,
+        preparation=JoinPreparationCollaborators(
+            deduplicator=deduplicator,
+            aggregator=aggregator,
+            renamer=renamer,
+            conflict_resolver=conflict_resolver,
+        ),
         field_alias_resolver=resolve_field_aliases_from_registry,
         join_key_resolver=join_key_resolver,
         join_executor=join_executor,

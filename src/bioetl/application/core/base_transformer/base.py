@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import time
-import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
+from bioetl.application.core.base_transformer.contract_policy import (
+    _DefaultContractPolicy,
+)
 from bioetl.application.core.base_transformer.errors import (
     FilteredOutError,
     TransformationError,
@@ -21,117 +23,70 @@ from bioetl.application.core.base_transformer_dependency_helpers_mixin import (
 from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
-from bioetl.domain.ports import (
-    ContractPolicyPort,
-    DataNormalizationPort,
-    MetricsPort,
-    PiiHasherPort,
-    TracingPort,
-)
-from bioetl.domain.services import IdentityService
+from bioetl.domain.ports import NoOpMetrics, NoOpPiiHasher, NoOpTracing
+from bioetl.domain.services import DataNormalizationService, IdentityService
 from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 __all__ = ["BaseTransformer", "T"]
 
 
-def _merge_dependency_context(
-    dependencies: TransformerDependencyContext,
+def _resolve_transformer_dependencies(
     *,
-    tracer: TracingPort | None,
-    metrics: MetricsPort | None,
-    identity_service: IdentityService | None,
-    pii_hasher: PiiHasherPort | None,
-    data_normalizer: DataNormalizationPort | None,
-    contract_policy: ContractPolicyPort | None,
-) -> TransformerDependencyContext:
-    """Overlay explicit collaborators on top of a dependency context."""
-    return TransformerDependencyContext(
-        tracer=dependencies.tracer if tracer is None else tracer,
-        metrics=dependencies.metrics if metrics is None else metrics,
-        identity_service=(
-            dependencies.identity_service
-            if identity_service is None
-            else identity_service
-        ),
-        pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
-        data_normalizer=(
-            dependencies.data_normalizer if data_normalizer is None else data_normalizer
-        ),
-        contract_policy=(
-            dependencies.contract_policy if contract_policy is None else contract_policy
-        ),
-    )
-
-
-def _build_explicit_dependency_context(
-    *,
-    tracer: TracingPort | None,
-    metrics: MetricsPort | None,
-    identity_service: IdentityService | None,
-    pii_hasher: PiiHasherPort | None,
-    data_normalizer: DataNormalizationPort | None,
-    contract_policy: ContractPolicyPort | None,
-) -> TransformerDependencyContext:
-    """Validate and materialize fully explicit collaborators."""
-    explicit_values = {
-        "tracer": tracer,
-        "metrics": metrics,
-        "identity_service": identity_service,
-        "pii_hasher": pii_hasher,
-        "data_normalizer": data_normalizer,
-        "contract_policy": contract_policy,
-    }
-    missing = [name for name, value in explicit_values.items() if value is None]
-    if missing:
-        missing_list = ", ".join(missing)
-        raise TypeError(
-            "BaseTransformer requires explicit collaborator injection; "
-            f"missing: {missing_list}. Build defaults in composition."
-        )
-    return TransformerDependencyContext(
-        tracer=cast("TracingPort", tracer),
-        metrics=cast("MetricsPort", metrics),
-        identity_service=cast("IdentityService", identity_service),
-        pii_hasher=cast("PiiHasherPort", pii_hasher),
-        data_normalizer=cast("DataNormalizationPort", data_normalizer),
-        contract_policy=cast("ContractPolicyPort", contract_policy),
-    )
-
-
-def _resolve_dependency_context(
-    *,
-    tracer: TracingPort | None,
-    metrics: MetricsPort | None,
-    identity_service: IdentityService | None,
-    pii_hasher: PiiHasherPort | None,
-    data_normalizer: DataNormalizationPort | None,
-    contract_policy: ContractPolicyPort | None,
     dependencies: TransformerDependencyContext | None,
+    tracer: TracingPort | None,
+    metrics: MetricsPort | None,
+    identity_service: IdentityService | None,
+    pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
-    """Resolve transformer collaborators without constructing defaults locally."""
+    """Resolve explicit collaborator bundle for transformer construction."""
     if dependencies is not None:
-        return _merge_dependency_context(
-            dependencies,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            data_normalizer=data_normalizer,
-            contract_policy=contract_policy,
+        if any(
+            collaborator is not None
+            for collaborator in (tracer, metrics, identity_service, pii_hasher)
+        ):
+            raise TypeError(
+                "Pass either 'dependencies' or named collaborators "
+                "('tracer', 'metrics', 'identity_service', 'pii_hasher'), not both."
+            )
+        return dependencies
+
+    if not any(
+        collaborator is not None
+        for collaborator in (tracer, metrics, identity_service, pii_hasher)
+    ):
+        raise TypeError(
+            "BaseTransformer requires explicit collaborator injection via "
+            "'dependencies' (TransformerDependencyContext) or named collaborators. "
+            "Build defaults in composition when possible."
         )
 
-    return _build_explicit_dependency_context(
-        tracer=tracer,
-        metrics=metrics,
-        identity_service=identity_service,
-        pii_hasher=pii_hasher,
-        data_normalizer=data_normalizer,
-        contract_policy=contract_policy,
+    return TransformerDependencyContext(
+        tracer=(
+            tracer
+            if tracer is not None
+            else cast("TracingPort", NoOpTracing())
+        ),
+        metrics=(
+            metrics
+            if metrics is not None
+            else cast("MetricsPort", NoOpMetrics())
+        ),
+        identity_service=(
+            identity_service if identity_service is not None else IdentityService()
+        ),
+        pii_hasher=(
+            pii_hasher
+            if pii_hasher is not None
+            else cast("PiiHasherPort", NoOpPiiHasher())
+        ),
+        data_normalizer=DataNormalizationService(),
+        contract_policy=_DefaultContractPolicy(),
     )
 
 
@@ -150,15 +105,11 @@ class BaseTransformer(
         entity_type: str | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
-        *,
-        # --- Legacy Transitional Args (To be removed at the end of RF-017) ---
-        legacy_tracer: TracingPort | None = None,
-        legacy_metrics: MetricsPort | None = None,
-        legacy_identity_service: IdentityService | None = None,
-        legacy_pii_hasher: PiiHasherPort | None = None,
-        legacy_data_normalizer: DataNormalizationPort | None = None,
-        legacy_contract_policy: ContractPolicyPort | None = None,
     ) -> None:
         """Initialize transformer with explicitly wired collaborators."""
         self.provider = provider
@@ -166,23 +117,14 @@ class BaseTransformer(
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
 
-        if dependencies is None:
-            warnings.warn(
-                "Passing flat legacy collaborators to BaseTransformer is deprecated. "
-                "Use TransformerDependencyContext via 'dependencies' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        resolved_dependencies = _resolve_dependency_context(
-            tracer=legacy_tracer,
-            metrics=legacy_metrics,
-            identity_service=legacy_identity_service,
-            pii_hasher=legacy_pii_hasher,
-            data_normalizer=legacy_data_normalizer,
-            contract_policy=legacy_contract_policy,
+        resolved_dependencies = _resolve_transformer_dependencies(
             dependencies=dependencies,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
         )
+
         self._tracer = resolved_dependencies.tracer
         self._metrics = resolved_dependencies.metrics
         self._identity = resolved_dependencies.identity_service

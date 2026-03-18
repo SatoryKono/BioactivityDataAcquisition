@@ -512,11 +512,11 @@ class TestProviderConfiguration:
         assert transformer.entity_type == "custom_type"
 
     def test_default_entity_type(self) -> None:
-        """Should use 'unknown' as default entity_type."""
+        """Should use 'publication' as default entity_type."""
         transformer = StubPublicationTransformer(
             provider="test", dependencies=build_test_transformer_dependencies()
         )
-        assert transformer.entity_type == "unknown"
+        assert transformer.entity_type == "publication"
 
 
 # =============================================================================

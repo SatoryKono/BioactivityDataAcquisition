@@ -70,15 +70,23 @@ class TestPiiHasherPortContract:
 class TestBaseTransformerPiiSupport:
     """Tests for PII support in BaseTransformer."""
 
-    def test_base_transformer_accepts_pii_hasher(self) -> None:
-        """BaseTransformer.__init__ MUST accept pii_hasher parameter."""
+    def test_base_transformer_accepts_dependencies_bundle(self) -> None:
+        """BaseTransformer.__init__ MUST accept dependencies bundle parameter containing pii_hasher."""
         from bioetl.application.core.base_transformer import BaseTransformer
+        from bioetl.application.core.base_transformer.types import (
+            TransformerDependencyContext,
+        )
 
         sig = inspect.signature(BaseTransformer.__init__)
         param_names = list(sig.parameters.keys())
 
-        assert "pii_hasher" in param_names, (
-            "BaseTransformer.__init__ MUST accept pii_hasher parameter "
+        assert "dependencies" in param_names, (
+            "BaseTransformer.__init__ MUST accept 'dependencies' parameter"
+        )
+
+        bundle_sig = inspect.signature(TransformerDependencyContext.__init__)
+        assert "pii_hasher" in bundle_sig.parameters, (
+            "TransformerDependencyContext MUST include pii_hasher parameter "
             "for RULES.md §5.4 compliance"
         )
 
@@ -105,8 +113,8 @@ class TestTransformersWithPii:
     ]
 
     @pytest.mark.parametrize("transformer_path", PII_TRANSFORMERS)
-    def test_pii_transformers_accept_pii_hasher(self, transformer_path: str) -> None:
-        """Transformers with PII fields MUST accept pii_hasher parameter."""
+    def test_pii_transformers_accept_dependencies(self, transformer_path: str) -> None:
+        """Transformers with PII fields MUST accept dependencies parameter."""
         module_path, class_name = transformer_path.rsplit(".", 1)
 
         # Import the module and class
@@ -118,8 +126,8 @@ class TestTransformersWithPii:
         sig = inspect.signature(transformer_class.__init__)
         param_names = list(sig.parameters.keys())
 
-        assert "pii_hasher" in param_names, (
-            f"{class_name}.__init__ MUST accept pii_hasher parameter "
+        assert "dependencies" in param_names, (
+            f"{class_name}.__init__ MUST accept 'dependencies' parameter "
             f"for RULES.md §5.4 compliance. "
             f"Authors and other PII fields MUST be hashed in Silver layer."
         )

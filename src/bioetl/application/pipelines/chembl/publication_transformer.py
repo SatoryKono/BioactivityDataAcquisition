@@ -35,20 +35,14 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import ChemblPublication
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
-from bioetl.domain.services import IdentityService
 from bioetl.domain.types import BronzeRecord, GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import (
-        ContractPolicyPort,
-        DataNormalizationPort,
-        MetricsPort,
-        PiiHasherPort,
-        TracingPort,
-    )
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import PrimaryId, SilverRecord
 
 
@@ -124,14 +118,12 @@ class PublicationTransformer(BaseChemblTransformer):
         self,
         provider: str = "chembl",
         entity_type: str | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
         silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
-        data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> None:
         """Initialize ChEMBL Publication transformer.
@@ -140,27 +132,20 @@ class PublicationTransformer(BaseChemblTransformer):
             provider: Data provider identifier. Defaults to 'chembl'.
             entity_type: Entity type for metrics labels. If None, derived from
                 entity_class name.
-            tracer: Optional tracing port for distributed tracing.
-            metrics: Optional metrics port for duration/error tracking.
             silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
-            identity_service: Service for computing entity IDs and content hashes.
-            pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
-            data_normalizer: Optional data normalization service for text normalization.
-            contract_policy: Optional pipeline contract policy.
+            dependencies: Explicit collaborator bundle.
 
         """
         super().__init__(
             provider=provider,
             entity_type=entity_type,
-            tracer=tracer,
-            metrics=metrics,
             silver_filters=silver_filters,
             gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
-            data_normalizer=data_normalizer,
-            contract_policy=contract_policy,
             dependencies=dependencies,
         )
 
