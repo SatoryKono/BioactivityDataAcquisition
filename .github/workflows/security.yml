@@ -53,6 +53,9 @@ jobs:
         with:
           uv-extras: "dev"
 
+      - name: Filter requirements for pip-audit
+        run: uv export --format requirements-txt | grep -v '^-e \.' > requirements-audit.txt
+
       - name: Run pip-audit
-        run: uv run pip-audit --require-hashes --disable-pip --strict
+        run: uv run pip-audit --require-hashes --disable-pip --strict -r requirements-audit.txt
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from unittest.mock import MagicMock
 
 import pytest
@@ -27,7 +27,7 @@ class TestBronzeWriterMetadataMixin:
     def test_build_bronze_metadata_returns_expected_keys(self) -> None:
         """_build_bronze_metadata should return a dict with all lineage fields."""
         host = _Host()
-        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         result = host._build_bronze_metadata(
             run_id=RunID("run-123"),
             run_type=RunType.INCREMENTAL,
@@ -48,7 +48,7 @@ class TestBronzeWriterMetadataMixin:
     def test_build_bronze_metadata_backfill_run_type(self) -> None:
         """_build_bronze_metadata should correctly serialize BACKFILL run type."""
         host = _Host()
-        ts = datetime(2025, 3, 1, 0, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 3, 1, 0, 0, 0, tzinfo=UTC)
         result = host._build_bronze_metadata(
             run_id=RunID("run-456"),
             run_type=RunType.BACKFILL,
@@ -63,8 +63,8 @@ class TestBronzeWriterMetadataMixin:
     def test_build_bronze_metadata_payload_returns_dict_with_runtime_key(self) -> None:
         """_build_bronze_metadata_payload should produce a dict with 'runtime' key."""
         host = _Host()
-        started = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
-        completed = datetime(2025, 1, 15, 12, 0, 5, tzinfo=timezone.utc)
+        started = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
+        completed = datetime(2025, 1, 15, 12, 0, 5, tzinfo=UTC)
         payload = host._build_bronze_metadata_payload(
             run_id=RunID("run-789"),
             run_type=RunType.REBUILD,
@@ -89,8 +89,8 @@ class TestBronzeWriterMetadataMixin:
         from bioetl.domain.models.metadata import BronzeMetadata
 
         host = _Host()
-        started = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
-        completed = datetime(2025, 1, 15, 12, 0, 5, tzinfo=timezone.utc)
+        started = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
+        completed = datetime(2025, 1, 15, 12, 0, 5, tzinfo=UTC)
         result = host._build_full_bronze_metadata(
             run_id=RunID("run-full"),
             run_type=RunType.INCREMENTAL,
