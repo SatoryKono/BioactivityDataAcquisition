@@ -30,7 +30,7 @@ from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
+from bioetl.application.composite.join_execution import JoinHow
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import (
     JoinPlannerService,
@@ -46,6 +46,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_quarantine_port,
 )
 from bioetl.domain.composite.strategy import MergeStrategy
+from bioetl.infrastructure.dataframe.polars_join_adapter import PolarsJoinAdapter
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -185,7 +186,7 @@ def build_merge_dependencies(
         normalize_join_keys=normalize_join_keys,
         parse_pipeline_name=parse_pipeline_name,
     )
-    join_executor = JoinExecutorService(
+    join_executor = PolarsJoinAdapter(
         logger=logger,
         join_type_resolver=lambda: resolve_join_how(config.merge.strategy),
     )
