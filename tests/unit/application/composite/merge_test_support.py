@@ -35,9 +35,14 @@ def build_join_planner_service(
 ) -> JoinPlannerService:
     """Create JoinPlannerService with canonical collaborator wiring for tests."""
     if field_alias_resolver is None:
-        field_alias_resolver = lambda _pipeline: None
+
+        def field_alias_resolver(_pipeline):
+            return None
+
     if join_type_resolver is None:
-        join_type_resolver = lambda: "left"
+
+        def join_type_resolver():
+            return "left"
 
     join_key_resolver = JoinKeyResolverService(
         normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,

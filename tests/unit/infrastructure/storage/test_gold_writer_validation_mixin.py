@@ -67,7 +67,7 @@ class TestGoldWriterValidationMixin:
         host = _Host()
         scd_config = MagicMock()
         scd_config.scd_type = 1
-        with pytest.raises(ValueError, match="scd_config.type must be 2"):
+        with pytest.raises(ValueError, match=r"scd_config\\.type must be 2"):
             host._validate_scd2_requirements(GoldWriteMode.SCD2, scd_config, None)
 
     def test_validate_scd2_requirements_missing_business_keys_raises(self) -> None:
@@ -76,7 +76,7 @@ class TestGoldWriterValidationMixin:
         scd_config = MagicMock()
         scd_config.scd_type = 2
         scd_config.business_keys = []
-        with pytest.raises(ValueError, match="scd_config.business_key required"):
+        with pytest.raises(ValueError, match=r"scd_config\\.business_key required"):
             host._validate_scd2_requirements(GoldWriteMode.SCD2, scd_config, None)
 
     def test_validate_scd2_requirements_missing_ingestion_ts_raises(self) -> None:

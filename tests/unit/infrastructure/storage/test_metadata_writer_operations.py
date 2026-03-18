@@ -14,7 +14,6 @@ from bioetl.infrastructure.storage.metadata_writer_operations import (
     _MetadataWriteTelemetryContext,
     _build_metadata_write_final_telemetry,
     _build_retry_callback,
-    _emit_final_telemetry,
     _emit_retry_telemetry,
     _get_metadata_filename,
     _resolve_metadata_target,
