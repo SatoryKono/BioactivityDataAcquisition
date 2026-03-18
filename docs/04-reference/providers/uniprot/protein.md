@@ -17,7 +17,7 @@
 | `pipeline_name` | `uniprot_protein` | Уникальное имя пайплайна. |
 | `provider` | `uniprot` | Имя провайдера данных. |
 | `entity_type` | `protein` | Тип извлекаемой сущности. |
-| `primary_keys` | `["accession"]` | Ключи для слияния в Silver-слое. |
+| `business_primary_keys` | `["accession"]` | Канонический бизнес-ключ для Silver/Gold. |
 
 ## 3. Процесс (ETL)
 

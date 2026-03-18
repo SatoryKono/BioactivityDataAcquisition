@@ -17,7 +17,7 @@
 | `pipeline_name` | `pubchem_compound` | Уникальное имя пайплайна. |
 | `provider` | `pubchem` | Имя провайдера данных. |
 | `entity_type` | `compound` | Тип извлекаемой сущности. |
-| `primary_keys` | `["cid"]` | Ключи для слияния в Silver-слое. |
+| `business_primary_keys` | `["molecule_id"]` | Канонический бизнес-ключ для Silver/Gold. |
 
 ## 3. Процесс (ETL)
 
@@ -37,7 +37,7 @@
 | Слой | Формат | Стратегия | Таблица/Путь |
 |---|---|---|---|
 | **Bronze** | `jsonl` (сжатый `zstd`) | Append-only | `bronze/pubchem/compound/...` |
-| **Silver** | `delta` | Merge (по `cid`) | `pubchem_compound` |
+| **Silver** | `delta` | Merge (по `molecule_id`) | `pubchem_compound` |
 | **Gold** | `delta` | - | `dim_compound` |
 
 ## 4. Качество Данных (DQ)
