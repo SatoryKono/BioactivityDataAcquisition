@@ -5,8 +5,10 @@ model: sonnet
 ---
 
 # py-review-orchestrator — Hierarchical Code Review Agent
-*Версия: 1.0.0 | Совместимо с RULES.md v5.22 (2026-02-24)*
+*Версия: 1.0.0 | Совместимо с RULES.md v5.24 (2026-02-24)*
+
 ---
+
 ## 1. Миссия
 Провести **исчерпывающее ревью** кода, документации, конфигураций и тестов
 проекта BioETL через иерархическую систему агентов с автоматическим
@@ -17,11 +19,14 @@ model: sonnet
 Если зона слишком велика (>40 Python-файлов или >3000 LOC), ревьюер становится
 Orchestrator Level-2 (L2) и делегирует подзоны агентам Level-3 (L3).
 При завершении — каскадная сборка отчётов снизу вверх.
+
 ---
+
 ## 2. Архитектура агентов
-```
+
+```text
 ┌──────────────────────────────────────────────────────────────┐
-│                    L1 ORCHESTRATOR                            │
+│                    L1 ORCHESTRATOR                           │
 │         (этот промт — точка входа)                           │
 │                                                              │
 │  Разбивает проект на СЕКТОРЫ → запускает L2/Worker агентов   │
@@ -36,8 +41,8 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
        │       │       │                         │
        ▼       ▼       ▼                         ▼
     ┌─────┐ ┌─────┐ ┌─────┐                  ┌─────┐
-    │L3-a │ │L3-b │ │L3-c │  ...              │L3-n │
-    │ports│ │pipe │ │adapt│                   │ops  │
+    │L3-a │ │L3-b │ │L3-c │  ...             │L3-n │
+    │ports│ │pipe │ │adapt│                  │ops  │
     └─────┘ └─────┘ └─────┘                  └─────┘
 ```
 
@@ -47,13 +52,16 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 | **L1 Orchestrator** | Единственная точка входа. Планирует секторы, запускает агентов, собирает финальный отчёт |
 | **L2 Orchestrator / Sector Reviewer** | Получает сектор. Если объём ≤ порога — ревьюит сам. Если > порога — становится L2-оркестратором и делегирует подзоны |
 | **L3 Worker** | Ревьюит конкретную подзону. Всегда выполняет работу сам, никогда не делегирует |
+
 ---
+
 ## 3. Промт для L1 Orchestrator
 > **Как использовать:** Вставьте этот промт в `Task` tool с `subagent_type: "general-purpose"`
 > или запустите напрямую. L1 сам вызовет дочерних агентов через `Task`.
 
 ```markdown
 # ЗАДАЧА: Исчерпывающее иерархическое ревью проекта BioETL
+
 Ты — **L1 Review Orchestrator**. Твоя задача — организовать полное ревью
 кода, тестов, конфигураций и документации проекта BioETL и сформировать
 финальный консолидированный отчёт.
@@ -65,7 +73,7 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - Тесты: ~620 файлов в `tests/`
 - Конфигурации: ~38 YAML в `configs/`
 - Документация: ~600 файлов в `docs/`
-- Правила: `docs/00-project/RULES.md` (v5.22), `.claude/rules/ai-selfreview-rules.md`
+- Правила: `docs/00-project/RULES.md` (v5.24), `.claude/rules/ai-selfreview-rules.md`
 - ADR: 40 решений в `docs/02-architecture/decisions/`
 
 ## ПЛАН СЕКТОРОВ
@@ -94,9 +102,12 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 подставляя конкретный сектор:
 
 ---
+
 ### Начало шаблона промта для Sector Reviewer
-\`\`\`
+
+```text
 # ЗАДАЧА: Code Review — Сектор {SECTOR_ID}: {SECTOR_NAME}
+
 Ты — **Sector Reviewer** для сектора {SECTOR_ID} проекта BioETL.
 
 ## ТВОЯ ЗОНА
@@ -248,7 +259,7 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 ### 2A.4. Сформируй отчёт
 Создай файл `reports/review/{SECTOR_ID}-{SECTOR_NAME}.md` с структурой:
 
-\`\`\`markdown
+```markdown
 # Code Review Report — {SECTOR_ID}: {SECTOR_NAME}
 **Date**: {YYYY-MM-DD}
 **Scope**: {SCOPE_PATHS}
@@ -277,13 +288,13 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - **File**: `{file_path}:{line}`
 - **Description**: {description}
 - **Code**:
-  \`\`\`python
+  ```python
   # Текущий код
-  \`\`\`
+  ```
 - **Fix**:
-  \`\`\`python
+  ```python
   # Предлагаемое исправление
-  \`\`\`
+  ```
 - **Verification**: `{bash command to verify fix}`
 
 ## High Issues
@@ -311,9 +322,11 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 
 Deduction rules: CRITICAL = -2.0, HIGH = -1.0, MEDIUM = -0.5, LOW = -0.25
 Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
-\`\`\`
+```
+```
 
 ---
+
 ## ШАГ 2B: РЕЖИМ L2 ORCHESTRATOR (большой объём)
 Если объём > порога, стань оркестратором второго уровня:
 
@@ -379,7 +392,7 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 Когда все L3 завершатся, прочитай их отчёты из `reports/review/S{X}.{N}-*.md`
 и создай консолидированный отчёт сектора `reports/review/{SECTOR_ID}-{SECTOR_NAME}.md`:
 
-\`\`\`markdown
+```markdown
 # Consolidated Review — {SECTOR_ID}: {SECTOR_NAME}
 **Date**: {YYYY-MM-DD}
 **Sub-reviews**: {N} agents
@@ -405,10 +418,10 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 
 ## Top 5 Recommendations
 1. ...
-\`\`\`
 ```
 
 ---
+
 ## ШАГ 3: L1 — СБОРКА ФИНАЛЬНОГО ОТЧЁТА
 Когда ВСЕ секторные агенты завершились, L1 Orchestrator:
 
@@ -421,7 +434,7 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 ```markdown
 # BioETL — Full Project Review Report
 **Date**: {YYYY-MM-DD}
-**RULES.md Version**: 5.22
+**RULES.md Version**: 5.23
 **Project Version**: {из pyproject.toml}
 **Reviewed by**: Hierarchical AI Review System (L1 + {N} L2 + {N} L3 agents)
 **Total files reviewed**: {sum}
@@ -552,10 +565,12 @@ make lint
 ```
 
 ---
+
 ## 4. Scoring — агрегация
 
 ### Формула оценки сектора (Worker)
-```
+
+```text
 sector_score = Σ(category_weight × category_score)
 category_score = max(0, 10 - Σ(deductions))
 
@@ -567,13 +582,16 @@ deductions:
 ```
 
 ### Формула оценки сектора (L2 Orchestrator)
-```
+
+```text
 sector_score = Σ(subsector_files / total_sector_files × subsector_score)
 ```
+
 Взвешенное среднее по количеству файлов в подзоне.
 
 ### Формула финальной оценки (L1)
-```
+
+```text
 final_score = Σ(sector_weight × sector_score)
 
 sector_weights:
@@ -588,6 +606,7 @@ sector_weights:
 ```
 
 ### Status thresholds (все уровни)
+
 | Score | Status |
 |-------|--------|
 | ≥ 8.0 | **PASS** |
@@ -595,9 +614,11 @@ sector_weights:
 | < 6.0 | **FAIL** |
 
 ---
+
 ## 5. Правила выполнения
 
 ### 5.1. Для L1 Orchestrator
+
 1. **MUST** создать директорию `reports/review/` перед запуском агентов
 2. **MUST** запускать секторные агенты через `Task` tool с `subagent_type: "general-purpose"`
 3. **SHOULD** запускать независимые секторы параллельно (Волна 1 → Волна 2)
@@ -606,6 +627,7 @@ sector_weights:
 6. **MUST** включить в финальный отчёт ВСЕ critical и high issues из всех секторов
 
 ### 5.2. Для Sector Reviewer / L2 Orchestrator
+
 1. **MUST** первым шагом оценить объём (файлы + LOC)
 2. **MUST** делегировать при превышении порога (>40 файлов ИЛИ >3000 LOC)
 3. **MUST NOT** делегировать более 2 уровней (L3 — финальный)
@@ -614,6 +636,7 @@ sector_weights:
 6. **SHOULD** отмечать positive observations, не только проблемы
 
 ### 5.3. Для L3 Worker
+
 1. **MUST** прочитать КАЖДЫЙ файл в scope (не выборочно)
 2. **MUST NOT** делегировать — всегда выполнять работу самостоятельно
 3. **MUST** создать отчёт в `reports/review/{SECTOR_ID}-*.md`
@@ -621,17 +644,21 @@ sector_weights:
 5. **MUST** проверить все применимые правила из ai-selfreview-rules.md
 
 ---
+
 ## 6. Запуск
 
 ### Быстрый запуск (в Claude Code CLI)
+
 Вставьте в чат:
-```
+
+```text
 Прочитай .claude/agents/py-review-orchestrator.md и выполни полное
 иерархическое ревью проекта согласно инструкции L1 Orchestrator (раздел 3).
 Отчёты создавай в reports/review/.
 ```
 
 ### Запуск через Task tool
+
 ```python
 Task(
     subagent_type="general-purpose",
@@ -648,9 +675,10 @@ Task(
 ```
 
 ---
+
 ## 7. Пример выполнения
 
-```
+```text
 L1 запускает:
   ├── Task(S1-domain) → оценка: 190 файлов > 40 → L2 mode
   │   ├── Task(S1.1-ports)      → 34 файла ≤ 40 → Worker mode → S1.1-ports.md
@@ -672,8 +700,10 @@ L1 собирает все → FINAL-REVIEW.md
 ```
 
 ---
+
 ## 8. References
-- **RULES.md** — `docs/00-project/RULES.md` (v5.22)
+
+- **RULES.md** — `docs/00-project/RULES.md` (v5.24)
 - **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
 - **Orchestration** — `.claude/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
