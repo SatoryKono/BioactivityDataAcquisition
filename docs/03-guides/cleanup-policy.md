@@ -132,7 +132,7 @@ All whitelist patterns **MUST** be in `.gitignore`.
 | `make clean-local-artifacts DRY_RUN=1` | Preview очистки локальных артефактов |
 | `make clean-local-artifacts` | Применяет локальную очистку (без удаления `.worktrees/.rollback`) |
 | `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback` |
-| `make clean-preflight DRY_RUN=1` | Preview preflight-очистки через `scripts/preflight_cleanup.sh` |
+| `make clean-preflight DRY_RUN=1` | Preview preflight-очистки через `scripts/repo/preflight_cleanup.sh` |
 | `make clean-all` | `clean` + удаление логов/временных файлов |
 
 ### 4.3. Delta Lake VACUUM (MUST)
@@ -162,8 +162,8 @@ make quarantine-purge PIPELINE=chembl_activity
 | Check                     | Command                                                     |
 | ------------------------- | ----------------------------------------------------------- |
 | Tests pass                | `pytest -q` (without network)                               |
-| Golden tests green        | `pytest tests/golden/ -v`                                   |
-| Class inventory unchanged | Compare `tests/project-rules/class-inventory-baseline.json` |
+| Smoke tests green         | `pytest tests/smoke/ -q`                                    |
+| Structure policy green    | `python3 scripts/repo/audit_root_cleanliness.py --strict-untracked` |
 | Smoke run                 | One pipeline, identical artifacts                           |
 
 ### 5.2. Structural Verification

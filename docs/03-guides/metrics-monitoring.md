@@ -60,20 +60,21 @@ export BIOETL_METRICS_ENABLED=false
 
 - **НЕ создавать** новый порт `domain/ports/metrics.py`.
 - Расширять существующий контракт `MetricsPort` только в
-  `src/bioetl/domain/ports/observability.py`.
+  `src/bioetl/domain/ports/observability/__init__.py`
+  и профильных модулях `src/bioetl/domain/ports/observability/*.py`.
 - В текущем проекте используется единый подход: **generic metrics API**.
   Новые метрики добавляются через стандартные методы
-  `observe-histogram()` / `increment-counter()` / `set-gauge()` с
+  `observe_histogram()` / `increment_counter()` / `set_gauge()` с
   нормализованными строковыми именами.
 - Для каждой новой метрики обязательно:
   1. определить объект метрики в
-     `src/bioetl/infrastructure/observability/metrics.py`,
+     `src/bioetl/infrastructure/observability/_metrics_defs_*.py`,
   2. зарегистрировать её в `HISTOGRAMS` / `COUNTERS` / `GAUGES` в
      `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
 
 > Если в будущем потребуется typed API, helper-методы добавляются в
-> `MetricsPort` в `observability.py` и синхронно реализуются в Prometheus и
-> NoOp реализациях без дублирования интерфейсов.
+> `MetricsPort` во facade `observability/__init__.py` и синхронно
+> реализуются в Prometheus и NoOp реализациях без дублирования интерфейсов.
 
 ### Доступ к метрикам
 
@@ -96,88 +97,87 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_pipeline-duration-seconds` | Histogram | pipeline, stage, status, run-type | Длительность выполнения |
-| `bioetl_records-processed-total` | Counter | pipeline, stage, run-type | Обработанные записи |
-| `bioetl_errors-total` | Counter | pipeline, stage, error-code | Количество ошибок |
-| `bioetl_batch-size-records` | Histogram | pipeline, stage | Размер батчей |
-| `bioetl_pipeline-runs-total` | Counter | pipeline, run-type, status | Количество запусков |
+| `bioetl_pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type | Длительность выполнения |
+| `bioetl_records_processed_total` | Counter | pipeline, stage, run_type | Обработанные записи |
+| `bioetl_errors_total` | Counter | pipeline, stage, error_code | Количество ошибок |
+| `bioetl_batch_size_records` | Histogram | pipeline, stage | Размер батчей |
+| `bioetl_pipeline_runs_total` | Counter | pipeline, run_type, status | Количество запусков |
 
 #### Data Quality Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_dq-records-quarantined-total` | Counter | pipeline, error-type, run-type | Карантинные записи |
-| `bioetl_dq-check-duration-ms` | Histogram | pipeline | Длительность DQ проверок |
-| `bioetl_dq-soft-threshold-exceeded` | Counter | pipeline | Превышения soft threshold |
-| `bioetl_dq-validation-score` | Gauge | pipeline, entity | Оценка валидности (0.0-1.0) |
-| `bioetl_dq-anomaly-detected` | Counter | pipeline, metric, severity, anomaly-type | Обнаруженные аномалии |
-| `bioetl_data-freshness-seconds` | Gauge | pipeline, entity | Timestamp последнего ingestion |
-| `bioetl_dq-baseline-updated` | Counter | pipeline, metric | Обновления baseline |
-| `bioetl_dq-baseline-samples` | Gauge | pipeline, metric | Семплы в baseline |
+| `bioetl_dq_records_quarantined_total` | Counter | pipeline, error_type, run_type | Карантинные записи |
+| `bioetl_dq_check_duration_ms` | Histogram | pipeline | Длительность DQ проверок |
+| `bioetl_dq_validation_failures_total` | Counter | pipeline, stage, severity | Превышения DQ порогов |
+| `bioetl_dq_validation_score` | Gauge | pipeline, entity | Оценка валидности (0.0-1.0) |
+| `bioetl_dq_anomaly_detected` | Counter | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии |
+| `bioetl_data_freshness_seconds` | Gauge | pipeline, entity | Timestamp последнего ingestion |
+| `bioetl_dq_baseline_updated` | Counter | pipeline, metric | Обновления baseline |
+| `bioetl_dq_baseline_samples` | Gauge | pipeline, metric | Семплы в baseline |
 
 #### Circuit Breaker Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_circuit-breaker-state` | Gauge | adapter | Состояние (0=closed, 1=half-open, 2=open) |
-| `bioetl_circuit-breaker-trips-total` | Counter | adapter | Количество срабатываний |
-| `bioetl_circuit-breaker-success-total` | Counter | adapter | Успешные вызовы |
-| `bioetl_circuit-breaker-failure-total` | Counter | adapter | Неуспешные вызовы |
+| `bioetl_circuit_breaker_state` | Gauge | adapter | Состояние (0=closed, 1=half-open, 2=open) |
+| `bioetl_circuit_breaker_trips_total` | Counter | adapter | Количество срабатываний |
+| `bioetl_circuit_breaker_success_total` | Counter | adapter | Успешные вызовы |
+| `bioetl_circuit_breaker_failure_total` | Counter | adapter | Неуспешные вызовы |
 
 #### Pipeline Lifecycle Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_pipeline-runs-total` | Counter | pipeline, run-type, status | Количество запусков |
-| `bioetl_phase-duration-seconds` | Histogram | pipeline, phase, status | Длительность фаз lifecycle |
+| `bioetl_pipeline_runs_total` | Counter | pipeline, run_type, status | Количество запусков |
+| `bioetl_phase_duration_seconds` | Histogram | pipeline, phase, status | Длительность фаз lifecycle |
 
 #### Transformer Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_transform-duration-seconds` | Histogram | provider, entity-type | Длительность трансформации |
-| `bioetl_transform-errors-total` | Counter | provider, entity-type, error-type | Ошибки трансформации |
+| `bioetl_transform_duration_seconds` | Histogram | provider, entity_type | Длительность трансформации |
+| `bioetl_transform_errors_total` | Counter | provider, entity_type, error_type | Ошибки трансформации |
 
 #### Storage Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_vacuum-duration-seconds` | Histogram | table | Длительность VACUUM |
-| `bioetl_vacuum-files-removed-total` | Counter | table, layer | Удалённые файлы |
-| `bioetl_storage-optimization-total` | Counter | pipeline, status | Оптимизации storage |
-| `bioetl_bronze-write-duration-seconds` | Histogram | provider, entity | Длительность записи Bronze |
-| `bioetl_bronze-records-written-total` | Counter | provider, entity | Записи в Bronze |
-| `bioetl_bronze-bytes-written-total` | Counter | provider, entity | Байты в Bronze |
-| `bioetl_policy-violations-total` | Counter | layer, mode | Нарушения политик |
-| `bioetl_silver-validation-failures-total` | Counter | table | Ошибки валидации Silver |
+| `bioetl_vacuum_duration_seconds` | Histogram | table | Длительность VACUUM |
+| `bioetl_vacuum_files_removed_total` | Counter | table, layer | Удалённые файлы |
+| `bioetl_bronze_write_duration_seconds` | Histogram | provider, entity | Длительность записи Bronze |
+| `bioetl_bronze_records_written_total` | Counter | provider, entity | Записи в Bronze |
+| `bioetl_bronze_bytes_written_total` | Counter | provider, entity | Байты в Bronze |
+| `bioetl_policy_violations_total` | Counter | layer, mode | Нарушения политик |
+| `bioetl_silver_validation_failures_total` | Counter | table | Ошибки валидации Silver |
 
 #### Input Filter Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_filter-ids-loaded-total` | Counter | pipeline, source-file | Загруженные ID |
-| `bioetl_filter-ids-duplicates-total` | Counter | pipeline, source-file | Дубликаты ID |
-| `bioetl_filter-combinations-loaded-total` | Counter | pipeline, source-file | Комбинации фильтров |
+| `bioetl_filter_ids_loaded_total` | Counter | pipeline, source_file | Загруженные ID |
+| `bioetl_filter_ids_duplicates_total` | Counter | pipeline, source_file | Дубликаты ID |
+| `bioetl_filter_combinations_loaded_total` | Counter | pipeline, source_file | Комбинации фильтров |
 
 #### Health Check Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_health_check-status` | Gauge | component | Статус (0=unknown, 1=healthy, 2=degraded) |
-| `bioetl_pipeline-health_check-passed` | Gauge | pipeline, component | Статус компонента |
-| `bioetl_provider-health-status` | Gauge | provider | Статус провайдера |
-| `bioetl_health_check-duration-seconds` | Histogram | pipeline | Длительность health check |
-| `bioetl_health_check-latency-seconds` | Histogram | provider | Латентность health check |
-| `bioetl_health_check-success-total` | Counter | provider | Успешные health checks |
-| `bioetl_health_check-failures-total` | Counter | provider | Неуспешные health checks |
+| `bioetl_health_check_status` | Gauge | component | Статус (0=unknown, 1=healthy, 2=degraded) |
+| `bioetl_pipeline_health_check_passed` | Gauge | pipeline, component | Статус компонента |
+| `bioetl_provider_health_status` | Gauge | provider | Статус провайдера |
+| `bioetl_health_check_duration_seconds` | Histogram | pipeline | Длительность health check |
+| `bioetl_health_check_latency_seconds` | Histogram | provider | Латентность health check |
+| `bioetl_health_check_success_total` | Counter | provider | Успешные health checks |
+| `bioetl_health_check_failures_total` | Counter | provider | Неуспешные health checks |
 
 #### Preflight Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_preflight-medallion-policy-valid` | Gauge | pipeline, run-id | Валидность medallion policy |
-| `bioetl_preflight-config-errors-total` | Gauge | pipeline, run-id | Ошибки конфигурации |
-| `bioetl_infrastructure-validated` | Gauge | pipeline, run-id | Статус валидации инфраструктуры |
+| `bioetl_preflight_medallion_policy_valid` | Gauge | pipeline, run_id | Валидность medallion policy |
+| `bioetl_preflight_config_errors_total` | Gauge | pipeline, run_id | Ошибки конфигурации |
+| `bioetl_infrastructure_validated` | Gauge | pipeline, run_id | Статус валидации инфраструктуры |
 
 #### Adapter / HTTP Metrics
 

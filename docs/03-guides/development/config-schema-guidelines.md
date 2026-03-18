@@ -154,12 +154,12 @@ class CustomDQConfig(BaseDQConfig):
 
 ```python
 # Infrastructure schema (Pydantic, mutable)
-pydantic-config = DQConfig(soft-fail-threshold=0.05, hard-fail-threshold=0.20)
+pydantic_config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
 
 # Domain dataclass (frozen, immutable)
-domain-config = pydantic-config.to_domain()
+domain_config = pydantic_config.to_domain()
 
-# domain-config теперь можно безопасно использовать в бизнес-логике
+# domain_config теперь можно безопасно использовать в бизнес-логике
 ```
 
 **Преимущества:**
@@ -239,13 +239,17 @@ class BaseCircuitBreakerConfig(BaseModel):
 @model_validator(mode="after")
 def validate_thresholds(self) -> BaseDQThresholds:
     """Validate that soft-fail < hard-fail."""
-    if self.soft-fail-threshold >= self.hard-fail-threshold:
+    if self.soft_fail_threshold >= self.hard_fail_threshold:
         raise ValueError(
-            f"soft-fail ({self.soft-fail-threshold}) must be < "
-            f"hard-fail ({self.hard-fail-threshold})"
+            f"soft_fail ({self.soft_fail_threshold}) must be < "
+            f"hard_fail ({self.hard_fail_threshold})"
         )
     return self
 ```
+
+> **Примечание:** [base_schemas.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/schemas/base_schemas.py)
+> сейчас является facade-модулем над provider-split реализациями. Стабильные
+> импорты остаются на facade path, а не на внутренних split modules.
 
 ---
 
@@ -281,11 +285,11 @@ assert issubclass(CircuitBreakerYamlConfig, BaseCircuitBreakerConfig)
 
 def test-to_domain-conversion():
     """Verify domain conversion."""
-    config = BaseDQConfig(soft-fail-threshold=0.10, hard-fail-threshold=0.25)
+    config = BaseDQConfig(soft_fail_threshold=0.10, hard_fail_threshold=0.25)
     domain = config.to_domain()
 
-    assert domain.soft-fail-threshold == 0.10
-    assert domain.hard-fail-threshold == 0.25
+    assert domain.soft_fail_threshold == 0.10
+    assert domain.hard_fail_threshold == 0.25
 ```
 
 ### 7.2. Тесты для Валидации
@@ -294,7 +298,7 @@ def test-to_domain-conversion():
 def test_threshold_validation():
     """Verify threshold validation."""
     with pytest.raises(ValidationError):
-        BaseDQThresholds(soft-fail-threshold=0.25, hard-fail-threshold=0.20)
+        BaseDQThresholds(soft_fail_threshold=0.25, hard_fail_threshold=0.20)
 ```
 
 ---
