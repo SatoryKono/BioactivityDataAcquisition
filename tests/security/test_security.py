@@ -279,7 +279,6 @@ class TestPrivateKeyExposure:
             ".benchmarks",
             ".import_linter_cache",
             ".claude",
-            ".codex",
             ".jules",
             ".github",
             "data",
