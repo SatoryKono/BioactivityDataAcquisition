@@ -9,12 +9,12 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 TARGET_FILES = (
-    Path(".codex/agents/py-config-bot.md"),
+    Path(".claude/agents/py-config-bot.md"),
     Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-config-bot.md"),
-    Path(".codex/agents/py-audit-bot.md"),
-    Path(".codex/agents/py-doc-bot.md"),
-    Path(".codex/agents/py-plan-bot.md"),
+    Path(".claude/agents/py-audit-bot.md"),
+    Path(".claude/agents/py-doc-bot.md"),
+    Path(".claude/agents/py-plan-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
     Path(
         "docs/02-architecture/mmd-diagrams/views/46-yaml-config-resolution-full.mermaid"
@@ -43,12 +43,12 @@ OBSOLETE_PATTERNS = (
 )
 
 RUNTIME_FACT_TARGET_FILES = (
-    Path(".codex/agents/ORCHESTRATION.md"),
-    Path(".codex/agents/py-audit-bot.md"),
-    Path(".codex/agents/py-config-bot.md"),
-    Path(".codex/agents/py-doc-bot.md"),
-    Path(".codex/agents/py-doc-swarm.md"),
-    Path(".codex/agents/py-plan-bot.md"),
+    Path(".claude/agents/ORCHESTRATION.md"),
+    Path(".claude/agents/py-audit-bot.md"),
+    Path(".claude/agents/py-config-bot.md"),
+    Path(".claude/agents/py-doc-bot.md"),
+    Path(".claude/agents/py-doc-swarm.md"),
+    Path(".claude/agents/py-plan-bot.md"),
     Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
     Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
     Path("docs/00-project/ai/agents/agents/py-config-bot.md"),

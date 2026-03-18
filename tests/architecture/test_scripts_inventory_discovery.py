@@ -82,13 +82,13 @@ def test_agent_usage_includes_codex_agents_and_skills() -> None:
 
     refs = [
         module.RefEvidence(
-            path=".codex/skills/technical-designer-mermaid/SKILL.md",
+            path=".claude/skills/technical-designer-mermaid/SKILL.md",
             line=1,
             text="/".join(["scripts", "diagrams", "lint_diagrams.py"]),
             source_group="skills",
         ),
         module.RefEvidence(
-            path=".codex/agents/py-doc-bot.md",
+            path=".claude/agents/py-doc-bot.md",
             line=1,
             text="/".join(["scripts", "diagrams", "lint_diagrams.py"]),
             source_group="agents",

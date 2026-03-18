@@ -11,7 +11,7 @@ def _project_root() -> Path:
 
 
 def _skill_files(root: Path) -> list[Path]:
-    return sorted((root / ".codex" / "skills").glob("*/SKILL.md"))
+    return sorted((root / ".claude" / "skills").glob("*/SKILL.md"))
 
 
 def test_codex_skills_must_not_reference_removed_codex_agents_dir() -> None:
