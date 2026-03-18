@@ -687,6 +687,7 @@ nav:
                 -   "Codex Branches Summary 2026 02 24": reports/codex-branches-summary-2026-02-24.md
                 -   "Documentation Audit 2026 03 03 Main": reports/documentation-audit-2026-03-03-main.md
                 -   "Documentation Audit 2026 03 03 Exhaustive": reports/documentation-audit-2026-03-03-exhaustive.md
+                -   "Architecture Review and Refactoring Plan": reports/architecture-review-and-refactoring-plan.md
                 -   "Branch Full Diff Matrix 2026 03 01": reports/branch-full-diff-matrix-2026-03-01.md
                 -   "Branch Full Diff Matrix Diagram Scope 2026 03 01": reports/branch-full-diff-matrix-diagram-scope-2026-03-01.md
                 -   "Branch Render Settings Diff Matrix 2026 03 01": reports/branch-render-settings-diff-matrix-2026-03-01.md
