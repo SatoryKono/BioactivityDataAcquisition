@@ -56,8 +56,8 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        CompositeRuntimeBasics,
+    from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+        CompositeInfrastructureContext,
     )
     from bioetl.domain.ports import LockPort, LoggerPort
 
@@ -130,7 +130,7 @@ def _bootstrap_runtime_basics(
     *,
     config: CompositeConfig,
     run_id: str | None,
-) -> CompositeRuntimeBasics:
+) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap."""
     from uuid import uuid4
 
@@ -195,7 +195,7 @@ def _build_support_services(
     *,
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
-    runtime_basics: CompositeRuntimeBasics,
+    infra_context: CompositeInfrastructureContext,
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade."""
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
@@ -205,7 +205,7 @@ def _build_support_services(
     return _build_support_services_builder_impl(
         config=config,
         runtime=runtime,
-        runtime_basics=runtime_basics,
+        infra_context=infra_context,
         support_services_factory_cls=CompositeSupportServicesFactory,
         resolve_gold_schema_fn=_resolve_composite_gold_schema,
         load_field_group_registry_fn=_load_field_group_registry,
@@ -220,23 +220,23 @@ def _build_composite_bootstrap_plan(
     run_id: str | None,
 ) -> _CompositeBootstrapPlan:
     """Resolve declarative bootstrap plan for the composite runner."""
-    runtime_basics = _bootstrap_runtime_basics(config=config, run_id=run_id)
+    infra_context = _bootstrap_runtime_basics(config=config, run_id=run_id)
     seed_runner_factory, dependencies_runner_factory, enricher_runner_factory = (
         _build_runner_factories(
             config=config,
             runtime=runtime,
-            logger=runtime_basics.logger,
+            logger=infra_context.logger,
         )
     )
     support_services = _build_support_services(
         config=config,
         runtime=runtime,
-        runtime_basics=runtime_basics,
+        infra_context=infra_context,
     )
     return _CompositeBootstrapPlan(
-        run_id=runtime_basics.run_id,
-        logger=runtime_basics.logger,
-        lock=runtime_basics.lock,
+        run_id=infra_context.run_id,
+        logger=infra_context.logger,
+        lock=infra_context.lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
