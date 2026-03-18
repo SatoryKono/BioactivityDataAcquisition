@@ -5,7 +5,8 @@ from __future__ import annotations
 __all__ = ["BatchWriter"]
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, cast
+from datetime import datetime
+from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.application.core.batch_writer_columns_mixin import BatchWriterColumnsMixin
 from bioetl.application.core.batch_writer_io_mixin import BatchWriterIOMixin
@@ -16,12 +17,76 @@ from bioetl.application.core.batch_writer_tracing_mixin import (
 from bioetl.domain.composite.config import DataSchemaConfig
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from bioetl.application.composite.column_orderer import ColumnOrderer
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.ports import GoldValidatorPort, StoragePort, TracingPort
+    from bioetl.domain.models.metadata import SourceMetadata
+    from bioetl.domain.ports import GoldValidatorPort, TracingPort
+    from bioetl.domain.types import (
+        ArrowSchema,
+        BatchID,
+        BronzeRecord,
+        GoldRecord,
+        RunID,
+        RunType,
+        ScdConfig,
+    )
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+
+class BatchWriteStoragePort(Protocol):
+    """Minimal write-only storage contract for BatchWriter."""
+
+    async def write_bronze(
+        self,
+        records: Iterator[bytes],
+        provider: str,
+        entity: str,
+        date: datetime,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+        source_metadata: SourceMetadata | None = None,
+    ) -> BronzeWriteResult:
+        ...
+
+    async def write_silver(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: ArrowSchema,
+        mode: Literal["merge", "append", "delete"] = "merge",
+        partition_cols: list[str] | None = None,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        column_order: list[str] | None = None,
+        bronze_refs: list[BronzeWriteResult] | None = None,
+        key_nullability_rules: list[KeyNullabilityRule] | None = None,
+    ) -> SilverWriteResult | None:
+        ...
+
+    async def write_gold(
+        self,
+        table_name: str,
+        records: list[GoldRecord],
+        schema: object,
+        primary_keys: list[str] | None = None,
+        mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+        *,
+        scd_config: ScdConfig | None = None,
+        column_order: list[str] | None = None,
+        ingestion_ts: datetime | None = None,
+        run_id: RunID | None = None,
+        silver_refs: list[object] | None = None,
+    ) -> None:
+        ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,11 +100,11 @@ class BatchWriterOptions:
 
 
 class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracingMixin):
-    """Writes records to medallion layers via StoragePort."""
+    """Writes records to medallion layers via narrow write-only port."""
 
     def __init__(
         self,
-        storage: StoragePort,
+        storage: BatchWriteStoragePort,
         context: PipelineContext,
         config: RecordProcessorConfig,
         gold_validator: GoldValidatorPort,
@@ -51,7 +116,7 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         """Initialize writer dependencies and static write configuration.
 
         Args:
-            storage: Port for writing to Bronze, Silver, and Gold layers.
+            storage: Write-only storage port for Bronze, Silver, and Gold layers.
             context: Pipeline execution context carrying run ID, run type, and logger.
             config: Per-pipeline record processor configuration including schemas and table settings.
             gold_validator: Validator that enforces Gold schema contracts before writes.

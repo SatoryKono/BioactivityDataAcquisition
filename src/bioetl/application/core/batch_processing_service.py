@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-__all__ = ["BatchProcessingOutput", "BatchProcessingService"]
+__all__ = [
+    "BatchProcessingComponents",
+    "BatchProcessingOutput",
+    "BatchProcessingService",
+]
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
@@ -24,8 +28,16 @@ if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+
+
+@dataclass(frozen=True, slots=True)
+class BatchProcessingComponents:
+    """Injected components shared by RecordProcessor and BatchExecutor."""
+
+    batch_metrics: BatchMetricsRecorderService
+    transformer: BatchTransformer
+    writer: BatchWriter
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,10 +63,7 @@ class BatchProcessingService(
         services: PipelineService,
         context: PipelineContext,
         config: RecordProcessorConfig,
-        logger: LoggerPort,
-        batch_metrics: BatchMetricsRecorderService,
-        transformer: BatchTransformer,
-        writer: BatchWriter,
+        components: BatchProcessingComponents,
         tracing_manager: BatchTracingManagerService,
         batch_id_factory: BatchIdGeneratorPort,
     ) -> None:
@@ -62,10 +71,10 @@ class BatchProcessingService(
         self._services = services
         self._context = context
         self._config = config
-        self._logger = logger
-        self._batch_metrics = batch_metrics
-        self._transformer = transformer
-        self._writer = writer
+        self._logger = context.logger
+        self._batch_metrics = components.batch_metrics
+        self._transformer = components.transformer
+        self._writer = components.writer
         self._tracing = tracing_manager
         self._batch_id_factory = batch_id_factory
 

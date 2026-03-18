@@ -187,6 +187,17 @@ class TestMergeServiceReadsSilverViaStorage:
 
         assert len(df) == 0
 
+    @pytest.mark.asyncio
+    async def test_read_silver_requires_reader_when_all_readers_missing(
+        self, merge_service
+    ) -> None:
+        """Missing delta_reader and silver_reader should raise explicit runtime error."""
+        merge_service._delta_reader = None
+        merge_service._silver_reader = None
+
+        with pytest.raises(RuntimeError, match="requires delta_reader or silver_reader"):
+            await merge_service._read_silver_table("silver/test/table")
+
 
 @pytest.mark.unit
 class TestMergeServiceWritesViaStorage:
@@ -442,7 +453,7 @@ class TestMergeServiceMergeOperation:
         # Setup mock to return different data for seed vs enricher
         call_count = 0
 
-        async def read_side_effect(table_name):
+        def read_side_effect(table_name):
             nonlocal call_count
             call_count += 1
             if "seed" in table_name:

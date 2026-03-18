@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1094,
-    "total_internal_imports": 4185,
+    "total_internal_imports": 4191,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 249,
@@ -17,7 +17,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 653,
+      "imports": 659,
       "allowed": true
     },
     {
@@ -116,7 +116,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 56
+      "imports": 57
     },
     {
       "source": "application.core",
@@ -154,14 +154,14 @@
       "imports": 35
     },
     {
-      "source": "interfaces.cli",
-      "target": "application.services",
+      "source": "application.services",
+      "target": "domain.ports",
       "imports": 30
     },
     {
-      "source": "application.services",
-      "target": "domain.ports",
-      "imports": 29
+      "source": "interfaces.cli",
+      "target": "application.services",
+      "imports": 30
     },
     {
       "source": "infrastructure.adapters",
@@ -304,6 +304,11 @@
       "imports": 13
     },
     {
+      "source": "application.core",
+      "target": "domain.config",
+      "imports": 12
+    },
+    {
       "source": "composition.bootstrap",
       "target": "infrastructure.observability",
       "imports": 12
@@ -317,11 +322,6 @@
       "source": "interfaces.cli",
       "target": "domain.exceptions",
       "imports": 12
-    },
-    {
-      "source": "application.core",
-      "target": "domain.config",
-      "imports": 11
     },
     {
       "source": "application.services",
@@ -342,6 +342,11 @@
       "source": "application.pipelines",
       "target": "domain.services",
       "imports": 10
+    },
+    {
+      "source": "application.core",
+      "target": "domain.value_objects",
+      "imports": 9
     },
     {
       "source": "application.pipelines",
@@ -381,11 +386,6 @@
     {
       "source": "composition.factories",
       "target": "domain.services",
-      "imports": 8
-    },
-    {
-      "source": "infrastructure.observability",
-      "target": "domain.ports",
       "imports": 8
     }
   ],

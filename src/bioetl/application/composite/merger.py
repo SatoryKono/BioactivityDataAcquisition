@@ -39,7 +39,12 @@ if TYPE_CHECKING:
         MergeConfig,
     )
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, MergedStoragePort
+    from bioetl.domain.ports import (
+        DeltaReaderPort,
+        LoggerPort,
+        MergedStoragePort,
+        SilverStoragePort,
+    )
 
 
 def _path_to_table_name(path: str) -> str:
@@ -65,6 +70,7 @@ class MergeService(
         storage: MergedStoragePort,
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
+        silver_reader: SilverStoragePort | None = None,
         field_group_registry: FieldGroupRegistry | None = None,
         cross_validator: EnrichmentCrossValidator | None = None,
         gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
@@ -84,8 +90,9 @@ class MergeService(
             storage: ``MergedStoragePort`` adapter used to persist merged Silver/Gold output.
             logger: Structured logger for progress and diagnostic output.
             delta_reader: Optional ``DeltaReaderPort`` for reading seed and enricher
-                Silver tables; when ``None`` the service falls back to
-                storage-based reads.
+                Silver tables.
+            silver_reader: Optional ``SilverStoragePort`` used only as a
+                compatibility fallback when ``delta_reader`` is not available.
             field_group_registry: Optional registry mapping publication field names to
                 semantic groups; enables Gold-layer column filtering and ordering.
             cross_validator: Optional service that validates consistency across
@@ -100,6 +107,7 @@ class MergeService(
         self._storage = storage
         self._logger = logger
         self._delta_reader = delta_reader
+        self._silver_reader = silver_reader
         self._field_group_registry = field_group_registry
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema

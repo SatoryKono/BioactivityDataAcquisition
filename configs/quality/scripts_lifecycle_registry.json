@@ -4,7 +4,7 @@
   "entries": {
     "scripts/archive/build_diagram_docs.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove.",
       "sunset_date": "2026-06-30",
@@ -13,7 +13,7 @@
     },
     "scripts/archive/ci/apply-ci-optimizations.ps1": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-04-30",
       "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need.",
       "sunset_date": "2026-04-30",
@@ -22,7 +22,7 @@
     },
     "scripts/archive/cleanup_cache.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -31,7 +31,7 @@
     },
     "scripts/archive/data/check_delta_integrity.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -40,7 +40,7 @@
     },
     "scripts/archive/data/extract_null_fields.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -49,7 +49,7 @@
     },
     "scripts/archive/data/generate_content_hash_comparison_report.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -58,7 +58,7 @@
     },
     "scripts/archive/debug/_tmp_inspect_vcr.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-04-30",
       "next_step": "Delete after one sprint if no recovery/debug need is identified.",
       "sunset_date": "2026-04-30",
@@ -67,7 +67,7 @@
     },
     "scripts/archive/debug/debug_pandera.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-04-30",
       "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case.",
       "sunset_date": "2026-04-30",
@@ -76,7 +76,7 @@
     },
     "scripts/archive/debug/debug_storage_health.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-04-30",
       "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case.",
       "sunset_date": "2026-04-30",
@@ -85,7 +85,7 @@
     },
     "scripts/archive/dev/install_deps.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -94,7 +94,7 @@
     },
     "scripts/archive/dev/run-tests.sh": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -103,7 +103,7 @@
     },
     "scripts/archive/diagrams/fix_diagram_links.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -112,7 +112,7 @@
     },
     "scripts/archive/diagrams/fix_sequence_nbsp.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -121,7 +121,7 @@
     },
     "scripts/archive/diagrams/mermaid_prune_orphans.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -130,7 +130,7 @@
     },
     "scripts/archive/diagrams/normalize_node_sizes.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -139,7 +139,7 @@
     },
     "scripts/archive/docs/fix_doc_links_explicit.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -148,7 +148,7 @@
     },
     "scripts/archive/docs/fix_link_warnings.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -157,7 +157,7 @@
     },
     "scripts/archive/docs/sentence_doc_audit.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-05-31",
       "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
       "sunset_date": "2026-05-31",
@@ -166,7 +166,7 @@
     },
     "scripts/archive/log_explorer.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Confirm no consumers, then archive/remove.",
       "sunset_date": "2026-06-30",
@@ -175,7 +175,7 @@
     },
     "scripts/archive/migrations/migrate_exemption_keys_to_paths.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Move to migration archive after confirming one-time migration completion.",
       "sunset_date": "2026-06-30",
@@ -184,7 +184,7 @@
     },
     "scripts/archive/migrations/migrate_openalex_citation_count.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
       "sunset_date": "2026-06-30",
@@ -193,7 +193,7 @@
     },
     "scripts/archive/migrations/migrate_pmid_to_string.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
       "sunset_date": "2026-06-30",
@@ -202,7 +202,7 @@
     },
     "scripts/archive/migrations/migrate_vcr_extensionless.py": {
       "owner": "@bioetl-platform",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Move to migration archive after confirming no extensionless cassettes remain.",
       "sunset_date": "2026-06-30",
@@ -211,7 +211,7 @@
     },
     "scripts/archive/migrations/rename_structure_fields.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
       "sunset_date": "2026-06-30",
@@ -220,7 +220,7 @@
     },
     "scripts/archive/scaffold_pipeline.py": {
       "owner": "@bioetl-architecture",
-      "decision": "archived",
+      "decision": "removed",
       "review_by": "2026-06-30",
       "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint.",
       "sunset_date": "2026-06-30",
@@ -475,9 +475,9 @@
     },
     "src/tools/init_db.sql": {
       "owner": "@bioetl-platform",
-      "decision": "evaluate",
+      "decision": "removed",
       "review_by": "2026-06-30",
-      "next_step": "Confirm whether the optional PostgreSQL bootstrap helper is still part of any supported local setup; deprecate if Local-Only workflows no longer rely on it."
+      "next_step": "Removed. PostgreSQL is not required for Local-Only workflows (ADR-010)."
     },
     "src/tools/scripts/__init__.py": {
       "owner": "@bioetl-platform",
@@ -499,9 +499,9 @@
     },
     "src/tools/scripts/test_changed.sh": {
       "owner": "@bioetl-platform",
-      "decision": "evaluate",
+      "decision": "removed",
       "review_by": "2026-06-30",
-      "next_step": "Evaluate if used in CI or local dev workflow. Keep or deprecate."
+      "next_step": "Removed. Superseded by pytest --lf standard functionality."
     },
     "src/tools/scripts/validate_unified_configs.py": {
       "owner": "@bioetl-platform",
@@ -589,39 +589,39 @@
     },
     "scripts/repo/check_version_consistency.py": {
       "owner": "@bioetl-platform",
-      "decision": "evaluate",
+      "decision": "integrated_ci",
       "review_by": "2026-06-30",
-      "next_step": "Evaluate whether the version-consistency check should be promoted into a documented CI/dev workflow or archived."
+      "next_step": "Integrated into release.yml."
     },
     "scripts/schema/check_config_invariants.py": {
       "owner": "@bioetl-architecture",
-      "decision": "evaluate",
+      "decision": "integrated_ci",
       "review_by": "2026-06-30",
-      "next_step": "Evaluate whether the config invariant checker should remain supported as a documented architecture guard."
+      "next_step": "Integrated into pre-commit and tests/architecture/."
     },
     "scripts/schema/generate_pipeline_schema.py": {
       "owner": "@bioetl-architecture",
-      "decision": "evaluate",
+      "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "Evaluate whether pipeline schema generation should remain a supported workflow or be archived as legacy tooling."
+      "next_step": "Keep as manual helper for codegen; check artifacts for drift in CI."
     },
     "scripts/schema/generate_publication_type_classification_artifacts.py": {
       "owner": "@bioetl-architecture",
-      "decision": "evaluate",
+      "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "Evaluate whether the wrapper-backed publication classification codegen flow should stay supported or be archived."
+      "next_step": "Keep as manual tool. Artifacts are tracked by hash manifests."
     },
     "scripts/schema/validate_pipeline_configs.py": {
       "owner": "@bioetl-architecture",
-      "decision": "evaluate",
+      "decision": "integrated_ci",
       "review_by": "2026-06-30",
-      "next_step": "Evaluate whether pipeline config validation should stay as a documented manual guard or be moved into a stricter supported workflow."
+      "next_step": "Delegated to pre-commit and strict YAML test suites."
     },
     "scripts/schema/lint_config_paths.py": {
       "owner": "@bioetl-architecture",
-      "decision": "evaluate",
+      "decision": "integrated_ci",
       "review_by": "2026-06-30",
-      "next_step": "Evaluate whether the wrapper-backed config path linter should stay supported or be archived."
+      "next_step": "Integrated into pre-commit custom hook."
     }
   }
 }

@@ -21,7 +21,15 @@ _APPLICATION_ROOT = (
 # Maximum number of files that may still reference the broad StoragePort
 # in type annotations (field declarations or function parameters).
 # Ratchet this down as migrations proceed.
-_MAX_BROAD_STORAGE_PORT_FILES = 4
+_MAX_BROAD_STORAGE_PORT_FILES = 0
+_DI_BUNDLE_EXCEPTIONS = {
+    "core/pipeline_services.py",
+}
+
+
+def _to_posix(path: Path) -> str:
+    """Convert relative path to deterministic POSIX form."""
+    return path.as_posix()
 
 
 def _files_using_broad_storage_port() -> list[str]:
@@ -65,9 +73,18 @@ def _files_using_broad_storage_port() -> list[str]:
                     break
 
         if has_annotation:
-            hits.append(str(py_file.relative_to(_APPLICATION_ROOT)))
+            hits.append(_to_posix(py_file.relative_to(_APPLICATION_ROOT)))
 
     return hits
+
+
+def _consumer_files_using_broad_storage_port() -> list[str]:
+    """Return broad-port hits excluding explicit architecture allowlist."""
+    return sorted(
+        file_path
+        for file_path in _files_using_broad_storage_port()
+        if file_path not in _DI_BUNDLE_EXCEPTIONS
+    )
 
 
 @pytest.mark.architecture
@@ -76,11 +93,21 @@ class TestNarrowPortMigration:
 
     def test_broad_storage_port_usage_within_budget(self) -> None:
         """Files using broad StoragePort must not exceed the ratchet budget."""
-        files = _files_using_broad_storage_port()
+        files = _consumer_files_using_broad_storage_port()
         assert len(files) <= _MAX_BROAD_STORAGE_PORT_FILES, (
-            f"Found {len(files)} files using broad StoragePort "
+            f"Found {len(files)} consumer files using broad StoragePort "
             f"(budget: {_MAX_BROAD_STORAGE_PORT_FILES}):\n"
             + "\n".join(f"  - {f}" for f in files)
+        )
+
+    def test_di_bundle_exceptions_remain_explicit(self) -> None:
+        """Broad-port usage in application is allowed only for declared DI bundles."""
+        files = _files_using_broad_storage_port()
+        extras = sorted(file_path for file_path in files if file_path in _DI_BUNDLE_EXCEPTIONS)
+        assert extras == sorted(_DI_BUNDLE_EXCEPTIONS), (
+            "DI-bundle StoragePort exceptions drifted:\n"
+            f"expected: {sorted(_DI_BUNDLE_EXCEPTIONS)}\n"
+            f"actual:   {extras}"
         )
 
     def test_migrated_services_use_narrow_ports(self) -> None:
@@ -90,9 +117,17 @@ class TestNarrowPortMigration:
             "services/bronze_cleanup_service.py",
             "services/medallion_maintenance_mixin.py",
             "composite/merger.py",
+            "core/batch_writer.py",
+            "core/lifecycle/cleanup_service.py",
+            "services/medallion_lifecycle.py",
         ]
         for svc in migrated:
-            # Normalize path separators
-            assert not any(svc.replace("/", "\\") in f or svc in f for f in files), (
+            assert svc not in files, (
                 f"{svc} should use a narrow port, not StoragePort"
             )
+
+    def test_composite_input_loader_has_no_storage_cast_fallback(self) -> None:
+        """Composite read path should not rely on cast(SilverStoragePort, _storage)."""
+        path = _APPLICATION_ROOT / "composite" / "merger_input_mixin.py"
+        source = path.read_text(encoding="utf-8")
+        assert "cast(SilverStoragePort, self._storage)" not in source

@@ -10,11 +10,28 @@ __all__ = ["CleanupPreview", "CleanupResult", "CleanupService", "LayerInfo"]
 
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, StoragePort
-from bioetl.domain.types import JsonDict
+    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict, MetaDict
+
+
+class CleanupStoragePort(Protocol):
+    """Minimal cleanup-focused storage contract for CleanupService."""
+
+    def preview_cleanup(
+        self,
+        silver_table: str,
+        gold_table: str | None = None,
+    ) -> MetaDict:
+        ...
+
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+        ...
+
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+        ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,7 +98,7 @@ class CleanupService:
     Dependencies are injected via constructor following clean architecture.
 
     Attributes:
-        _storage: StoragePort for data layer operations.
+        _storage: CleanupStoragePort for data layer operations.
         _logger: LoggerPort for structured logging.
 
     Example:
@@ -98,11 +115,11 @@ class CleanupService:
         150
     """
 
-    def __init__(self, storage: StoragePort, logger: LoggerPort) -> None:
+    def __init__(self, storage: CleanupStoragePort, logger: LoggerPort) -> None:
         """Initialize cleanup service.
 
         Args:
-            storage: StoragePort for data layer operations.
+            storage: Cleanup-focused storage port for data layer operations.
             logger: LoggerPort for structured logging.
         """
         self._storage = storage

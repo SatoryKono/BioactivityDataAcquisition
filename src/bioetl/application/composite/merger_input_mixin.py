@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any
 
 import polars as pl
 
@@ -78,6 +78,7 @@ class _MergeInputLoaderMixin:
     _logger: LoggerPort
     _storage: MergedStoragePort
     _delta_reader: DeltaReaderPort | None
+    _silver_reader: SilverStoragePort | None
     _renamer: ColumnRenamer
 
     async def _read_optional_merge_input(
@@ -221,7 +222,7 @@ class _MergeInputLoaderMixin:
         return _LoadedMergeInputsResult(dataframes=loaded_dfs, sources=sources)
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table from DeltaReaderPort or StoragePort fallback."""
+        """Read a Silver table using DeltaReaderPort or explicit SilverStoragePort."""
         if self._delta_reader is not None:
             arrow_table = await self._delta_reader.read_table(path)
             result = pl.from_arrow(arrow_table)
@@ -229,11 +230,19 @@ class _MergeInputLoaderMixin:
                 return result.to_frame()
             return result
 
+        # Compatibility path:
+        # - legacy callers may not define `_silver_reader` at all -> use `_storage`.
+        # - if `_silver_reader` exists and is None, treat it as explicit misconfiguration.
+        silver_reader = (
+            self._silver_reader if "_silver_reader" in self.__dict__ else self._storage
+        )
+        if silver_reader is None:
+            raise RuntimeError(
+                "MergeService requires delta_reader or silver_reader for silver reads"
+            )
+
         table_name = table_path_to_name(path)
-        # At runtime _storage is StoragePort (aggregate) which extends SilverStoragePort;
-        # MergedStoragePort is declared for mixin compatibility with MergeOutputWriterMixin.
-        storage = cast(SilverStoragePort, self._storage)
-        records = await storage.read_silver(table_name)
+        records = await silver_reader.read_silver(table_name)
         if not records:
             return pl.DataFrame()
         return pl.DataFrame(records)
