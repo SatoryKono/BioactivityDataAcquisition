@@ -168,13 +168,16 @@ gold_filters:
 {
   "record_id": 1234567,
   "molecule_chembl_id": "CHEMBL25",
-  "document_chembl_id": "CHEMBL1121421",
+  "publication_id": "CHEMBL1121421",
   "compound_key": "Aspirin",
   "compound_name": "acetylsalicylic acid",
   "src_id": 1,
   "src_compound_id": null
 }
 ```
+
+`document_chembl_id` remains a legacy upstream/source alias and is normalized to
+`publication_id` by the current pipeline contract.
 
 ### Silver (нормализованные данные)
 

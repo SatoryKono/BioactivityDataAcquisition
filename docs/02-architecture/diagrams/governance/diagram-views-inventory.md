@@ -1,61 +1,53 @@
-# Diagram Inventory (foundation .mmd)
+# Diagram Views Inventory
 
-Source scope: `docs/02-architecture/diagrams/foundation/*.mmd` (canonical Mermaid sources). This inventory tracks foundation source files; decomposed views live in `views/*.mermaid`.
+Measured inventory for `docs/02-architecture/diagrams/views/*.mermaid`.
 
-| File | Type | Nodes | Edges | Status |
-|---|---|---:|---:|---|
-| 01-full-system-component.mmd | flowchart | 60 | 32 | CRITICAL |
-| 01-high-level.mmd | flowchart | 20 | 12 | OVERLOADED |
-| 02-full-medallion-data-flow.mmd | flowchart | 16 | 16 | OK |
-| 03-pipeline-execution-happy-path.mmd | sequenceDiagram | 17 | 34 | OK |
-| 04-domain-layer-class-diagram.mmd | classDiagram | 26 | 12 | OVERLOADED |
-| 04-error-flow.mmd | flowchart | 19 | 21 | OK |
-| 05-layers-interaction.mmd | flowchart | 24 | 14 | OVERLOADED |
-| 05-pipeline-lifecycle-states.mmd | stateDiagram | 51 | 65 | CRITICAL |
-| 06-application-layer-class-diagram.mmd | classDiagram | 22 | 19 | OVERLOADED |
-| 06-pipeline-execution.mmd | sequenceDiagram | 10 | 30 | OK |
-| 07-circuit-breaker-states.mmd | stateDiagram | 21 | 18 | OVERLOADED |
-| 07-medallion-flow.mmd | flowchart | 13 | 9 | OK |
-| 08-complete-etl-workflow.mmd | flowchart | 62 | 57 | CRITICAL |
-| 08-domain-ddd.mmd | flowchart | 26 | 19 | OVERLOADED |
-| 09-full-er-diagram.mmd | erDiagram | 14 | 9 | OK |
-| 10-infrastructure-layer-class-diagram.mmd | classDiagram | 28 | 25 | OVERLOADED |
-| 11-lock-acquisition-sequence.mmd | sequenceDiagram | 11 | 29 | OK |
-| 12-local-deployment-architecture.mmd | flowchart | 21 | 23 | OVERLOADED |
-| 13-domain-models-relationship.mmd | classDiagram | 17 | 24 | OK |
-| 14-provider-health-states.mmd | stateDiagram | 21 | 22 | OVERLOADED |
-| 15-dq-check-workflow.mmd | flowchart | 26 | 29 | OVERLOADED |
-| 16-memory-lock-class.mmd | classDiagram | 7 | 6 | OK |
-| 17-pipeline-hierarchy.mmd | classDiagram | 14 | 13 | OK |
-| 18-bronze-write-sequence.mmd | sequenceDiagram | 15 | 19 | OK |
-| 19-delta-lake-write-sequence.mmd | sequenceDiagram | 18 | 31 | OK |
-| 20-quarantine-record-states.mmd | stateDiagram | 18 | 10 | OK |
-| 21-activity-entity-data-flow.mmd | flowchart | 31 | 18 | OVERLOADED |
-| 22-client-api-request-sequence.mmd | sequenceDiagram | 8 | 27 | OK |
-| 23-silver-writer-class.mmd | classDiagram | 11 | 11 | OK |
-| 24-hash-service-class.mmd | classDiagram | 5 | 4 | OK |
-| 25-circuit-breaker-observer-class.mmd | classDiagram | 8 | 7 | OK |
-| 26-hexagonal-ports-adapters.mmd | flowchart | 48 | 16 | CRITICAL |
-| 27-import-matrix-enforcement.mmd | flowchart | 11 | 22 | OK |
-| 28-composition-root-di-graph.mmd | flowchart | 28 | 28 | OVERLOADED |
-| 29-composite-pipeline-workflow.mmd | flowchart | 33 | 26 | OVERLOADED |
-| 30-port-adapter-mapping.mmd | flowchart | 35 | 30 | OVERLOADED |
-| 31-pipeline-run-lifecycle.mmd | stateDiagram | 22 | 30 | OVERLOADED |
-| 32-single-record-journey.mmd | flowchart | 20 | 21 | OVERLOADED |
-| 33-cli-run-interaction.mmd | sequenceDiagram | 23 | 34 | OVERLOADED |
-| 34-batch-processing-flow.mmd | sequenceDiagram | 23 | 24 | OVERLOADED |
-| 35-bootstrap-sequence.mmd | flowchart | 30 | 20 | OVERLOADED |
-| 36-architecture-principles-mindmap.mmd | mindmap | 81 | 80 | CRITICAL |
-| 37-cli-entry-full-chain.mmd | flowchart | 19 | 21 | OK |
-| 38-runtime-assembly-sequence.mmd | sequenceDiagram | 17 | 40 | OK |
-| 39-medallion-invariants.mmd | flowchart | 22 | 18 | OVERLOADED |
-| 40-application-core-collaboration.mmd | flowchart | 17 | 15 | OK |
-| 41-error-classification-tree.mmd | flowchart | 24 | 29 | OVERLOADED |
-| 42-pipeline-runner-class.mmd | classDiagram | 9 | 8 | OK |
-| 43-fan-out-fan-in-pattern.mmd | flowchart | 18 | 17 | OK |
-| 44-cross-provider-enrichment.mmd | flowchart | 30 | 18 | OVERLOADED |
-| 46-yaml-config-resolution.mmd | flowchart | 30 | 27 | OVERLOADED |
-| 47-publication-merge-sources.mmd | sequenceDiagram | 18 | 29 | OK |
-| 48-composite-phase-lifecycle.mmd | stateDiagram | 22 | 26 | OVERLOADED |
-| 49-composite-runner-class.mmd | classDiagram | 13 | 12 | OK |
-| 50-exception-hierarchy.mmd | flowchart | 82 | 50 | CRITICAL |
+Current baseline reviewed on `2026-03-19`:
+
+- `34` parent view families
+- `31` foundation families with the full five-view set
+- `3` architecture-derived families with reduced `full + overview` slices
+- `1` service legend file (`00-legend.mermaid`)
+- `162` tracked `.mermaid` files total
+
+Parent-source truth stays in the canonical `.mmd` files under
+`docs/02-architecture/diagrams/foundation/` and
+`docs/02-architecture/diagrams/architecture/`.
+
+| View family | Parent source | Variants | Files |
+|---|---|---|---:|
+| `00-legend` | `(root legend)` | `legend` | 1 |
+| `01-full-system-component` | `docs/02-architecture/diagrams/foundation/01-full-system-component.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `01-high-level` | `docs/02-architecture/diagrams/foundation/01-high-level.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `02-medallion` | `docs/02-architecture/diagrams/foundation/02-full-medallion-data-flow.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `03-medallion-data-flow` | `docs/02-architecture/diagrams/architecture/03-medallion-data-flow.mmd` | `full, overview` | 2 |
+| `04-domain-layer-class-diagram` | `docs/02-architecture/diagrams/foundation/04-domain-layer-class-diagram.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `05-layers-interaction` | `docs/02-architecture/diagrams/foundation/05-layers-interaction.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `05-pipeline-lifecycle-states` | `docs/02-architecture/diagrams/foundation/05-pipeline-lifecycle-states.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `06-application-layer-class-diagram` | `docs/02-architecture/diagrams/foundation/06-application-layer-class-diagram.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `07-circuit-breaker-states` | `docs/02-architecture/diagrams/foundation/07-circuit-breaker-states.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `08-complete-etl-workflow` | `docs/02-architecture/diagrams/foundation/08-complete-etl-workflow.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `08-domain-ddd` | `docs/02-architecture/diagrams/foundation/08-domain-ddd.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `10-infrastructure-layer-class-diagram` | `docs/02-architecture/diagrams/foundation/10-infrastructure-layer-class-diagram.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `12-local-deployment-architecture` | `docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `13-port-protocol-contracts` | `docs/02-architecture/diagrams/architecture/13-port-protocol-contracts.mmd` | `full, overview` | 2 |
+| `14-provider-health-states` | `docs/02-architecture/diagrams/foundation/14-provider-health-states.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `15-dq-check-workflow` | `docs/02-architecture/diagrams/foundation/15-dq-check-workflow.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `16-transformer-hierarchy` | `docs/02-architecture/diagrams/architecture/16-transformer-hierarchy.mmd` | `full, overview` | 2 |
+| `21-activity-entity-data-flow` | `docs/02-architecture/diagrams/foundation/21-activity-entity-data-flow.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `26-hexagonal-ports-adapters` | `docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `28-composition-root-di-graph` | `docs/02-architecture/diagrams/foundation/28-composition-root-di-graph.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `29-composite-pipeline-workflow` | `docs/02-architecture/diagrams/foundation/29-composite-pipeline-workflow.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `30-port-adapter-mapping` | `docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `31-pipeline-run-lifecycle` | `docs/02-architecture/diagrams/foundation/31-pipeline-run-lifecycle.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `32-single-record-journey` | `docs/02-architecture/diagrams/foundation/32-single-record-journey.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `33-cli-run-interaction` | `docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `34-batch-processing-flow` | `docs/02-architecture/diagrams/foundation/34-batch-processing-flow.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `35-bootstrap-sequence` | `docs/02-architecture/diagrams/foundation/35-bootstrap-sequence.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `36-architecture-principles-mindmap` | `docs/02-architecture/diagrams/foundation/36-architecture-principles-mindmap.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `39-medallion-invariants` | `docs/02-architecture/diagrams/foundation/39-medallion-invariants.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `41-error-classification-tree` | `docs/02-architecture/diagrams/foundation/41-error-classification-tree.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `44-cross-provider-enrichment` | `docs/02-architecture/diagrams/foundation/44-cross-provider-enrichment.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `46-yaml-config-resolution` | `docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `48-composite-phase-lifecycle` | `docs/02-architecture/diagrams/foundation/48-composite-phase-lifecycle.mmd` | `dataflow, domain, full, infra, overview` | 5 |
+| `50-exception-hierarchy` | `docs/02-architecture/diagrams/foundation/50-exception-hierarchy.mmd` | `dataflow, domain, full, infra, overview` | 5 |

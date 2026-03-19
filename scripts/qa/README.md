@@ -34,3 +34,12 @@ python -m scripts.qa <command> [args...]
 | `report-dep-map` | After changing imports in `src/bioetl/`; use `--check` for drift detection, `--update` to regenerate | Pre-commit hook + CI gate |
 | `report-hotspots` | After performance benchmark runs; generates degradation report from JSONL observations | Manual, on-demand |
 | `calibrate-hotspots` | After collecting new performance observations; recalculates budget thresholds | Manual, on-demand |
+
+## Canonical Commands
+
+```bash
+python scripts/qa/generate_architecture_dependency_map.py --check
+python scripts/qa/generate_architecture_dependency_map.py --update
+```
+
+`scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only.

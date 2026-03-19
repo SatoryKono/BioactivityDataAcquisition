@@ -115,7 +115,7 @@ Tissue (tissue_id)
 
 ```json
 {
-  "tissue_chembl_id": "CHEMBL3638186",
+  "tissue_id": "CHEMBL3638186",
   "pref_name": "Liver",
   "bto_id": "BTO:0000759",
   "caloha_id": "TS-0564",
@@ -123,6 +123,9 @@ Tissue (tissue_id)
   "uberon_id": "UBERON:0002107"
 }
 ```
+
+`tissue_chembl_id` is still accepted as a legacy source alias, but the active
+normalized contract publishes this field as `tissue_id`.
 
 ### Silver (нормализованный)
 

@@ -6,7 +6,12 @@
 
 ## 1. Обзор системы диаграмм
 
-Проект BioETL поддерживает **288 tracked source diagrams**, организованных в двухуровневую архитектуру: канонические исходники (`.mmd`) и декомпозированные представления (`.mermaid`). Вся система подчинена ADR-040 — решению об управлении диаграммами, которое определяет цветовую палитру, метаданные, правила lint-проверки и стратегии компоновки.
+Проект BioETL поддерживает **289 tracked diagram files**:
+**127** `.mmd`-артефактов в canonical tree (`architecture/`, `class-diagrams/`,
+`foundation/`, `_template.mmd`) и **162** `.mermaid` view-файла в `views/`
+(34 parent families, 161 derived views и `00-legend.mermaid`). Вся система
+подчинена ADR-040 — решению об управлении диаграммами, которое определяет
+цветовую палитру, метаданные, правила lint-проверки и стратегии компоновки.
 
 ### 1.1. Двойная структура хранения
 
@@ -20,7 +25,8 @@
 
 **Декомпозированные представления** — `docs/02-architecture/diagrams/views/` (162 файла):
 
-Каждая родительская диаграмма из `foundation/` разбивается на **5 представлений (views)**:
+Большинство foundation families разворачиваются в стандартный набор из
+**5 представлений (views)**:
 
 - `*-full.mermaid` — полная копия-эталон
 - `*-overview.mermaid` — кросс-слойный обзор (до 15 нод)
@@ -28,7 +34,11 @@
 - `*-infra.mermaid` — маппинг infrastructure
 - `*-dataflow.mermaid` — поток данных
 
-Количество views следует текущему tracked decomposition baseline и обновляется вместе с добавлением новых parent-диаграмм и derived slices.
+Дополнительно есть узкие architecture-derived families с сокращённым набором
+views (`03-medallion-data-flow`, `13-port-protocol-contracts`,
+`16-transformer-hierarchy`) и служебный `00-legend.mermaid`.
+Количество views следует текущему tracked decomposition baseline и
+обновляется вместе с добавлением новых parent-диаграмм и derived slices.
 
 ### 1.2. Поддерживаемые типы диаграмм
 
@@ -68,7 +78,7 @@
 Для декомпозированных представлений формат короче:
 
 ```
-%% View: Overview | Parent: 01-high-level.mermaid
+%% View: Overview | Parent: 01-high-level-full.mermaid
 ```
 
 ### 2.3. Шаблон

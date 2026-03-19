@@ -8,7 +8,7 @@ order,ID,Full,DB,category,field
 7,33,semanticscholar.publication.content_hash,semanticscholar,id,content_hash
 8,34,semanticscholar.publication.corpus_id,semanticscholar,id,corpus_id
 9,35,semanticscholar.publication.dblp_id,semanticscholar,id,dblp_id
-10,15,chembl.publication.document_chembl_id,chembl,id,document_chembl_id
+10,15,chembl.publication.publication_id,chembl,id,publication_id
 11,17,chembl.publication.entity_id,chembl,id,entity_id
 12,22,crossref.publication.entity_id,crossref,id,entity_id
 13,24,openalex.publication.entity_id,openalex,id,entity_id
