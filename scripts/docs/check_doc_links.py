@@ -445,17 +445,21 @@ def _check_path_contracts_for_file(
             if not re.search(r"(^|/)governance/", normalized_target):
                 continue
 
-            try:
-                _ = resolved.relative_to(canonical_governance)
-            except ValueError:
-                if docs_root in resolved.parents:
-                    violations.append(
-                        (
-                            line_no,
-                            "governance_path_contract",
-                            normalized_target,
+            # Architecture governance docs (like diagrams/governance) are allowed
+            is_architecture_governance = "02-architecture" in resolved.parts and "governance" in resolved.parts
+
+            if not is_architecture_governance:
+                try:
+                    _ = resolved.relative_to(canonical_governance)
+                except ValueError:
+                    if docs_root in resolved.parents:
+                        violations.append(
+                            (
+                                line_no,
+                                "governance_path_contract",
+                                normalized_target,
+                            )
                         )
-                    )
 
     return violations
 
