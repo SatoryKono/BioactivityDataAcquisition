@@ -1,6 +1,6 @@
 """ChEMBL Publication Similarity Transformer.
 
-Transforms Bronze records to Silver format (DocumentSimilarity entity).
+Transforms Bronze records to Silver format (ChemblPublicationSimilarity entity).
 Computes derived Tanimoto metrics (avg_tani, max_tani).
 
 .. versionchanged:: 2.0.0
@@ -20,7 +20,7 @@ from bioetl.application.core.field_specs import normalize_pmid
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.domain.entities import DocumentSimilarity
+from bioetl.domain.entities import ChemblPublicationSimilarity
 from bioetl.domain.transformations import safe_float, safe_int
 
 if TYPE_CHECKING:
@@ -38,7 +38,7 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
         Renamed from DocumentSimilarityTransformer (ADR-024).
     """
 
-    entity_class = DocumentSimilarity
+    entity_class = ChemblPublicationSimilarity
     primary_id_field = "sim_id"
 
     def _extract_business_data(
@@ -53,7 +53,7 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
             primary_id: Validated sim_id value.
 
         Returns:
-            Dictionary of DocumentSimilarity business fields.
+            Dictionary of ChemblPublicationSimilarity business fields.
 
         """
         # Extract and validate Tanimoto coefficients

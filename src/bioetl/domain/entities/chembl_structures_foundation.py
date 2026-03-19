@@ -29,7 +29,7 @@ class ChemblPublication(PublicationEntityBase):
 
 
 @dataclass(frozen=True, kw_only=True)
-class DocumentTerm(BaseEntity):
+class ChemblPublicationTerm(BaseEntity):
     """Represents a term associated with a ChEMBL document."""
 
     publication_id: str
@@ -151,7 +151,7 @@ class CellLine(BaseEntity):
 __all__ = [
     "CellLine",
     "ChemblPublication",
-    "DocumentTerm",
+    "ChemblPublicationTerm",
     "Target",
     "TargetComponent",
 ]

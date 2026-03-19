@@ -11,7 +11,7 @@ from bioetl.domain.entities import (
     Bioactivity,
     BioactivityState,
     CrossRefPublicationEntity,
-    DocumentSimilarity,
+    ChemblPublicationSimilarity,
     PubchemMolecule,
     UniprotTarget,
 )
@@ -725,11 +725,11 @@ class TestPublicationRecord:
 
 @pytest.mark.unit
 class TestDocumentSimilarity:
-    """Tests for DocumentSimilarity entity."""
+    """Tests for ChemblPublicationSimilarity entity."""
 
     def test_valid_entity(self, base_entity_kwargs):
         """Test creation of valid entity."""
-        entity = DocumentSimilarity(
+        entity = ChemblPublicationSimilarity(
             **base_entity_kwargs,
             sim_id=1,
             doc_1=100,
@@ -750,7 +750,7 @@ class TestDocumentSimilarity:
 
     def test_minimal_entity(self, base_entity_kwargs):
         """Test creation with only required fields."""
-        entity = DocumentSimilarity(
+        entity = ChemblPublicationSimilarity(
             **base_entity_kwargs,
             sim_id=1,
             doc_1=100,
@@ -767,7 +767,7 @@ class TestDocumentSimilarity:
 
     def test_with_pubmed_ids(self, base_entity_kwargs):
         """Test creation with PubMed identifiers."""
-        entity = DocumentSimilarity(
+        entity = ChemblPublicationSimilarity(
             **base_entity_kwargs,
             sim_id=1,
             doc_1=100,
@@ -782,7 +782,7 @@ class TestDocumentSimilarity:
     def test_invalid_sim_id_zero(self, base_entity_kwargs):
         """Test that sim_id=0 raises error."""
         with pytest.raises(ValueError, match="sim_id must be positive"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **base_entity_kwargs,
                 sim_id=0,
                 doc_1=100,
@@ -792,7 +792,7 @@ class TestDocumentSimilarity:
     def test_invalid_sim_id_negative(self, base_entity_kwargs):
         """Test that negative sim_id raises error."""
         with pytest.raises(ValueError, match="sim_id must be positive"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **base_entity_kwargs,
                 sim_id=-1,
                 doc_1=100,
@@ -802,7 +802,7 @@ class TestDocumentSimilarity:
     def test_invalid_doc_1_zero(self, base_entity_kwargs):
         """Test that doc_1=0 raises error."""
         with pytest.raises(ValueError, match="doc_1 and doc_2 must be positive"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **base_entity_kwargs,
                 sim_id=1,
                 doc_1=0,
@@ -812,7 +812,7 @@ class TestDocumentSimilarity:
     def test_invalid_doc_2_zero(self, base_entity_kwargs):
         """Test that doc_2=0 raises error."""
         with pytest.raises(ValueError, match="doc_1 and doc_2 must be positive"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **base_entity_kwargs,
                 sim_id=1,
                 doc_1=100,
@@ -822,7 +822,7 @@ class TestDocumentSimilarity:
     def test_invalid_same_document(self, base_entity_kwargs):
         """Test that doc_1==doc_2 raises error."""
         with pytest.raises(ValueError, match="cannot be similar to itself"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **base_entity_kwargs,
                 sim_id=1,
                 doc_1=100,
@@ -832,7 +832,7 @@ class TestDocumentSimilarity:
     def test_invalid_tanimoto_above_one(self, base_entity_kwargs):
         """Test that Tanimoto > 1.0 raises error."""
         with pytest.raises(ValueError, match="tid_tani must be in"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **base_entity_kwargs,
                 sim_id=1,
                 doc_1=100,
@@ -843,7 +843,7 @@ class TestDocumentSimilarity:
     def test_invalid_tanimoto_negative(self, base_entity_kwargs):
         """Test that negative Tanimoto raises error."""
         with pytest.raises(ValueError, match="mol_tani must be in"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **base_entity_kwargs,
                 sim_id=1,
                 doc_1=100,
@@ -853,7 +853,7 @@ class TestDocumentSimilarity:
 
     def test_valid_tanimoto_boundary_zero(self, base_entity_kwargs):
         """Test that Tanimoto=0.0 is valid."""
-        entity = DocumentSimilarity(
+        entity = ChemblPublicationSimilarity(
             **base_entity_kwargs,
             sim_id=1,
             doc_1=100,
@@ -864,7 +864,7 @@ class TestDocumentSimilarity:
 
     def test_valid_tanimoto_boundary_one(self, base_entity_kwargs):
         """Test that Tanimoto=1.0 is valid."""
-        entity = DocumentSimilarity(
+        entity = ChemblPublicationSimilarity(
             **base_entity_kwargs,
             sim_id=1,
             doc_1=100,
@@ -874,8 +874,8 @@ class TestDocumentSimilarity:
         assert entity.mol_tani == 1.0
 
     def test_entity_is_frozen(self, base_entity_kwargs):
-        """Test that DocumentSimilarity is immutable."""
-        entity = DocumentSimilarity(
+        """Test that ChemblPublicationSimilarity is immutable."""
+        entity = ChemblPublicationSimilarity(
             **base_entity_kwargs,
             sim_id=1,
             doc_1=100,

@@ -20,7 +20,7 @@ from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.domain.entities import DocumentTerm
+from bioetl.domain.entities import ChemblPublicationTerm
 from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
@@ -49,7 +49,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         Renamed from DocumentTermTransformer (ADR-024).
     """
 
-    entity_class = DocumentTerm
+    entity_class = ChemblPublicationTerm
     primary_id_field = "publication_id"
 
     async def _transform_impl(

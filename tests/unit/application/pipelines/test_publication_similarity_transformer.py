@@ -220,9 +220,9 @@ class TestPublicationSimilarityTransformer:
 
     def test_entity_class(self, transformer):
         """Test entity class is set correctly."""
-        from bioetl.domain.entities import DocumentSimilarity
+        from bioetl.domain.entities import ChemblPublicationSimilarity
 
-        assert transformer.entity_class is DocumentSimilarity
+        assert transformer.entity_class is ChemblPublicationSimilarity
 
     @pytest.mark.asyncio
     async def test_transform_generates_content_hash(self, transformer, mock_context):
