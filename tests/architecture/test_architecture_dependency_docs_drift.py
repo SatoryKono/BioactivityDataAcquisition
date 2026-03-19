@@ -112,9 +112,9 @@ def test_dependency_map_drift_check_passes_current_repo() -> None:
 
 
 def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> None:
-    markdown = Path("docs/02-architecture/generated/module-dependency-map.md").read_text(
-        encoding="utf-8"
+    markdown = Path(
+        "docs/02-architecture/generated/module-dependency-map.md"
+    ).read_text(encoding="utf-8")
+    assert "scripts/qa/generate_architecture_dependency_map.py" in markdown, (
+        "Generated dependency-map markdown should point to the canonical generator"
     )
-    assert (
-        "scripts/qa/generate_architecture_dependency_map.py" in markdown
-    ), "Generated dependency-map markdown should point to the canonical generator"

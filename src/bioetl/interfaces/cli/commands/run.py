@@ -17,8 +17,8 @@ from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
     RunExecutionRequest,
 )
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.execution_api import push_metrics_to_gateway
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.services_api import (
     get_pipeline_runner_service as _get_pipeline_runner_service_impl,
 )
@@ -75,23 +75,35 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 __all__ = [
-    "build_run_options", "execute_run", "get_cli_run_orchestration_service",
-    "handle_cli_failure", "run", "validate_options",
+    "build_run_options",
+    "execute_run",
+    "get_cli_run_orchestration_service",
+    "handle_cli_failure",
+    "run",
+    "validate_options",
 ]
 
 # Inventory of retained run-command seams. Update tests alongside intentional changes.
 _RUN_CANONICAL_BOUNDARY_SEAMS = (
-    "get_cli_run_orchestration_service", "_build_run_command_input",
-    "_build_run_pipeline_callable", "_map_status_to_exit_code",
-    "_present_run_health_info", "_finalize_run_result",
-    "_run_pipeline_async", "_run_prepared_request_async",
+    "get_cli_run_orchestration_service",
+    "_build_run_command_input",
+    "_build_run_pipeline_callable",
+    "_map_status_to_exit_code",
+    "_present_run_health_info",
+    "_finalize_run_result",
+    "_run_pipeline_async",
+    "_run_prepared_request_async",
 )
 
 _RUN_COMPATIBILITY_SEAMS = (
-    "_get_runner_logger", "_handle_destructive_run_confirmation",
-    "_preview_cleanup", "_validate_start_offset",
-    "echo_health_server_info", "ensure_metrics_server_started",
-    "health_server_context", "get_pipeline_runner_service",
+    "_get_runner_logger",
+    "_handle_destructive_run_confirmation",
+    "_preview_cleanup",
+    "_validate_start_offset",
+    "echo_health_server_info",
+    "ensure_metrics_server_started",
+    "health_server_context",
+    "get_pipeline_runner_service",
 )
 
 

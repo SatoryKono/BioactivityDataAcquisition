@@ -1419,8 +1419,7 @@ def test_run_module_declares_expected_seam_inventory() -> None:
         assert hasattr(run_module, seam_name)
 
     assert (
-        run_module._build_run_command_input
-        is run_module._build_run_command_input_impl
+        run_module._build_run_command_input is run_module._build_run_command_input_impl
     )
     assert (
         run_module._build_run_pipeline_callable
@@ -1435,8 +1434,7 @@ def test_run_module_declares_expected_seam_inventory() -> None:
     assert run_module._preview_cleanup is run_module.show_cleanup_preview
     assert run_module._validate_start_offset is run_module.validate_options
     assert (
-        run_module.echo_health_server_info
-        is run_module._echo_health_server_info_impl
+        run_module.echo_health_server_info is run_module._echo_health_server_info_impl
     )
     assert (
         run_module.ensure_metrics_server_started

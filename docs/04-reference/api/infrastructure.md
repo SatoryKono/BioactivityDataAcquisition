@@ -67,6 +67,23 @@ See policy guardrails in
 and lifecycle governance in
 [`docs/02-architecture/07-compatibility-facade-inventory.md`](../../02-architecture/07-compatibility-facade-inventory.md).
 
+### Provider Package Contract
+
+- Every provider package keeps one explicit primary adapter entrypoint, usually
+  `client.py`, plus a package-root facade in `__init__.py`.
+- New first-party code should import primary adapter classes from the provider package
+  root, not from `client.py` or older implementation modules.
+- Optional package-local modules may cover transport exceptions, response/request
+  models, query builders, response mapping/parsing, fetch flows, health/retry logic,
+  and explicit `*_adapter_mixin.py` fragments.
+- Provider packages must not become a home for application transformers, composition
+  wiring, or cross-provider generic helpers; shared infrastructure helpers belong in
+  common adapter packages such as `infrastructure.adapters.common` or
+  `infrastructure.adapters.http`.
+- Large packages such as `uniprot` are allowed to grow beyond a minimal
+  `client.py`-only shape, but the growth should follow stable themes rather than
+  anonymous helper sprawl.
+
 ### Base Adapter
 
 | Class | Description |

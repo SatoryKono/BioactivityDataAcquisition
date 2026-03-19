@@ -7,8 +7,8 @@ Use this module from ``infrastructure.config`` internals and re-export from
 
 from __future__ import annotations
 
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.config.source_config_loader import load_source_config
-from bioetl.infrastructure.config_loader import load_pipeline_config
 
 __all__ = [
     "load_pipeline_config",

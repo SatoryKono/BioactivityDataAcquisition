@@ -428,8 +428,6 @@ gold_filters:
 ```yaml
 # configs/providers/chembl.yaml
 source:
-  batch_size: 10
-
   provider_config:
     provider: chembl
     base_url: https://www.ebi.ac.uk/chembl/api/data
@@ -476,6 +474,9 @@ Retired source provider pagination aliases:
 - `source.provider_config.page_size`
 - `source.provider_config.max_url_length`
 - `source.provider_config.cursor_pagination`
+
+Retired source root alias:
+- `source.batch_size`
 
 ### Rate Limits по провайдерам (7 source configs)
 

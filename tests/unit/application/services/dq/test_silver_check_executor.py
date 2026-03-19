@@ -50,7 +50,11 @@ class TestSilverCheckExecutorDirect:
             status=DQCheckStatus.PASS,
         )
         statistics.check_null_rates.return_value = (
-            [NullRateResult(column_name="id", null_rate=0.0, status=DQCheckStatus.PASS)],
+            [
+                NullRateResult(
+                    column_name="id", null_rate=0.0, status=DQCheckStatus.PASS
+                )
+            ],
             0.0,
         )
         distribution_payload = {"status": "pass", "numeric_columns": {}}
@@ -148,7 +152,7 @@ class TestSilverCheckExecutorDirect:
             status=DQCheckStatus.FAIL,
         )
         statistics.check_schema_drift.return_value = SchemaDriftResult(
-            drift_level=DriftLevel.MINOR,
+            drift_level=DriftLevel.INFO,
             status=DQCheckStatus.PASS,
         )
         statistics.check_content_hash_integrity.return_value = (

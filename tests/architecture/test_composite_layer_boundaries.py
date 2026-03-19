@@ -23,6 +23,11 @@ from pathlib import Path
 import pytest
 
 
+def _get_composite_runner_file(src_dir: Path) -> Path:
+    """Return the canonical CompositePipelineRunner module path."""
+    return src_dir / "bioetl" / "application" / "composite" / "runner_pkg" / "runner.py"
+
+
 class TestDomainCompositeLayerBoundaries:
     """Tests for domain/composite layer isolation."""
 
@@ -276,9 +281,9 @@ class TestRunnerFSMOwnership:
         REQ-ARCH-FSM-009: Runner is responsible for FSM state transitions.
         It must import the state enum from domain layer.
         """
-        runner_file = src_dir / "bioetl" / "application" / "composite" / "runner.py"
+        runner_file = _get_composite_runner_file(src_dir)
         if not runner_file.exists():
-            pytest.skip("application/composite/runner.py not found")
+            pytest.skip("application/composite/runner_pkg/runner.py not found")
 
         content = runner_file.read_text(encoding="utf-8")
 
@@ -297,9 +302,9 @@ class TestRunnerFSMOwnership:
 
         REQ-ARCH-FSM-010: Runner should have methods for state transitions.
         """
-        runner_file = src_dir / "bioetl" / "application" / "composite" / "runner.py"
+        runner_file = _get_composite_runner_file(src_dir)
         if not runner_file.exists():
-            pytest.skip("application/composite/runner.py not found")
+            pytest.skip("application/composite/runner_pkg/runner.py not found")
 
         content = runner_file.read_text(encoding="utf-8")
 

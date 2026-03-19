@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
@@ -22,6 +22,11 @@ from bioetl.application.composite.runner_pkg.runner_models import (
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult
 from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
+        CompositeResultBuildRequest,
+    )
 
 
 class _CompositeRunnerSupportHostProtocol(Protocol):
@@ -57,6 +62,11 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
         self,
         artifacts: CompositeExecutionContext,
     ) -> _PreparedCompositeResultContext: ...
+
+    def _create_result_build_request(
+        self,
+        artifacts: CompositeExecutionContext,
+    ) -> CompositeResultBuildRequest: ...
 
     def _log_composite_completion(
         self,

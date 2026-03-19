@@ -9,11 +9,26 @@ CLI arguments and YAML configuration into domain-level ``RunnerInputs``.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
+    build_runtime_config as _build_runtime_config,
+)
+from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
+    log_cached_bronze as _log_cached_bronze,
+)
+from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
+    log_filter_config as _log_filter_config,
+)
+from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
+    resolve_health_check_mode_policy as _resolve_health_check_mode_policy,
+)
+from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
+    resolve_runtime_projection as _resolve_runtime_projection,
+)
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import load_source_config
 
@@ -76,6 +91,8 @@ __all__ = [
     "validate_pk_contract",
 ]
 
+_DEFAULT_HEALTH_CHECK_MODE: Literal["strict", "probe"] = "strict"
+
 
 def assemble_vacuum_settings(
     *,
@@ -102,6 +119,7 @@ def assemble_runtime_config(
     heartbeat_interval: int,
     vacuum: ResolvedVacuumSettings,
     health_check_mode: Literal["strict", "probe"],
+    skip_gold: bool,
 ) -> RuntimeConfig:
     """Build ``RuntimeConfig`` from run context and resolved vacuum settings."""
     return RuntimeConfig(
@@ -114,7 +132,7 @@ def assemble_runtime_config(
         dry_run=ctx.dry_run,
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
-        skip_gold=ctx.skip_gold,
+        skip_gold=skip_gold,
         health_check_mode=health_check_mode,
     )
 
@@ -161,28 +179,9 @@ def validate_pk_contract(config: PipelineYamlConfig) -> None:
 
 def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
     """Resolve runtime health check mode from settings."""
-    if settings.test_mode:
-        return "probe"
-    return cast(
-        Literal["strict", "probe"],
-        getattr(settings.pipeline, "health_check_mode", "strict"),
-    )
-
-
-def _log_filter_config(
-    *,
-    observability: ObservabilityBundle,
-    filter_config: InputFilterConfig | None,
-    from_cli: bool,
-) -> None:
-    if not filter_config:
-        return
-    observability.logger.info(
-        "input_filter_enabled",
-        csv_path=filter_config.source_path,
-        column=filter_config.column_name,
-        filter_field=filter_config.filter_field,
-        source="cli" if from_cli else "config",
+    return _resolve_health_check_mode_policy(
+        settings=settings,
+        default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
     )
 
 
@@ -227,43 +226,6 @@ def adjust_batch_size_for_filter(
         yaml_config.batch_size = filter_batch_size
 
 
-def _log_cached_bronze(
-    *,
-    observability: ObservabilityBundle,
-    cached_bronze: CachedBronzeContext,
-) -> None:
-    if not cached_bronze.enabled:
-        return
-    observability.logger.info(
-        "cached_bronze_mode_enabled",
-        bronze_path=cached_bronze.bronze_path,
-        bronze_date=cached_bronze.bronze_date,
-    )
-
-
-def _resolve_skip_gold(
-    *,
-    runtime_config: RuntimeConfig,
-    yaml_config: PipelineYamlConfig,
-    observability: ObservabilityBundle,
-) -> RuntimeConfig:
-    """Respect sink.gold.enabled when runtime did not explicitly request Gold."""
-    if not isinstance(runtime_config, RuntimeConfig):
-        return cast(RuntimeConfig, runtime_config)
-    if runtime_config.skip_gold:
-        return runtime_config
-    sink = getattr(yaml_config, "sink", {})
-    gold_sink = sink.get("gold") if isinstance(sink, dict) else None
-    if gold_sink is None or gold_sink.enabled:
-        return runtime_config
-    observability.logger.info(
-        "gold_sink_disabled",
-        reason="sink.gold.enabled_false",
-        pipeline=getattr(yaml_config, "pipeline_name", None),
-    )
-    return replace(runtime_config, skip_gold=True)
-
-
 def prepare_runner_inputs(
     *,
     ctx: PipelineRunContext,
@@ -291,16 +253,18 @@ def prepare_runner_inputs(
     vacuum = assemble_vacuum_settings_fn(
         cli_vacuum=ctx.vacuum, yaml_maintenance=yaml_config.maintenance
     )
-    runtime_config = assemble_runtime_config_fn(
+    runtime_projection = _resolve_runtime_projection(
         ctx=ctx,
-        heartbeat_interval=settings.pipeline.heartbeat_interval,
-        vacuum=vacuum,
-        health_check_mode=resolve_health_check_mode(settings=settings),
-    )
-    runtime_config = _resolve_skip_gold(
-        runtime_config=runtime_config,
+        settings=settings,
         yaml_config=yaml_config,
         observability=observability,
+        default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
+    )
+    runtime_config = _build_runtime_config(
+        assemble_runtime_config_fn=assemble_runtime_config_fn,
+        ctx=ctx,
+        vacuum=vacuum,
+        runtime_projection=runtime_projection,
     )
     filter_config = assemble_filter_config_fn(
         yaml_filter=yaml_config.input_filter,

@@ -631,6 +631,102 @@ class TestBatchWriterLockValidation:
         assert exc_info.value.operation == "write_silver"
         mock_storage.write_silver.assert_not_called()
 
+    async def test_write_silver_lock_loss_prevents_span_and_record_mutation(
+        self,
+        mock_storage,
+        mock_context,
+        mock_gold_validator,
+        mock_error_classifier,
+        mock_batch_metrics,
+        mock_tracer,
+        lock_validator_lost,
+    ):
+        """Lock loss must stop write-side effects before tracing or batch-id mutation."""
+        config = RecordProcessorConfig(
+            pipeline_name="test_provider_test_entity",
+            provider="test_provider",
+            entity_type="test_entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(),
+        )
+        writer = BatchWriter(
+            storage=mock_storage,
+            context=mock_context,
+            config=config,
+            gold_validator=mock_gold_validator,
+            error_classifier=mock_error_classifier,
+            batch_metrics=mock_batch_metrics,
+            tracer=mock_tracer,
+            lock_validator=lock_validator_lost,
+        )
+
+        records = [
+            {
+                "entity_id": "1",
+                "value": 10,
+                "_run_id": str(mock_context.run_id),
+                "_run_type": mock_context.run_type.value,
+                "_ingestion_ts": mock_context.started_at.isoformat(),
+            }
+        ]
+        original_record = dict(records[0])
+
+        with pytest.raises(LockNotHeldError):
+            await writer.write_silver(
+                records,
+                BatchID(uuid4()),
+                mock_context.started_at,
+            )
+
+        mock_storage.write_silver.assert_not_called()
+        mock_tracer.get_tracer.assert_not_called()
+        assert records[0] == original_record, (
+            "write_silver must not mutate input records after lock loss"
+        )
+
+    async def test_write_bronze_lock_loss_prevents_span_and_serialization(
+        self,
+        mock_storage,
+        mock_context,
+        mock_gold_validator,
+        mock_error_classifier,
+        mock_batch_metrics,
+        mock_tracer,
+        lock_validator_lost,
+    ):
+        """Lock loss must stop bronze write before tracing or JSON serialization."""
+        config = RecordProcessorConfig(
+            pipeline_name="test_provider_test_entity",
+            provider="test_provider",
+            entity_type="test_entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(),
+        )
+        writer = BatchWriter(
+            storage=mock_storage,
+            context=mock_context,
+            config=config,
+            gold_validator=mock_gold_validator,
+            error_classifier=mock_error_classifier,
+            batch_metrics=mock_batch_metrics,
+            tracer=mock_tracer,
+            lock_validator=lock_validator_lost,
+        )
+
+        records = [{"id": "1", "bad": object()}]
+
+        with pytest.raises(LockNotHeldError):
+            await writer.write_bronze(
+                records,
+                BatchID(uuid4()),
+                datetime.now(UTC),
+            )
+
+        mock_storage.write_bronze.assert_not_called()
+        mock_tracer.get_tracer.assert_not_called()
+
     async def test_write_gold_raises_when_lock_lost(
         self,
         mock_storage,
@@ -666,6 +762,46 @@ class TestBatchWriterLockValidation:
 
         assert exc_info.value.operation == "write_gold"
         mock_storage.write_gold.assert_not_called()
+
+    async def test_write_gold_lock_loss_prevents_span_and_validation(
+        self,
+        mock_storage,
+        mock_context,
+        mock_error_classifier,
+        mock_batch_metrics,
+        mock_tracer,
+        lock_validator_lost,
+    ):
+        """Lock loss must stop gold write before tracing or schema validation."""
+        failing_validator = MagicMock()
+        failing_validator.validate = MagicMock(
+            side_effect=AssertionError("validation should not run after lock loss")
+        )
+        config = RecordProcessorConfig(
+            pipeline_name="test_provider_test_entity",
+            provider="test_provider",
+            entity_type="test_entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(),
+        )
+        writer = BatchWriter(
+            storage=mock_storage,
+            context=mock_context,
+            config=config,
+            gold_validator=failing_validator,
+            error_classifier=mock_error_classifier,
+            batch_metrics=mock_batch_metrics,
+            tracer=mock_tracer,
+            lock_validator=lock_validator_lost,
+        )
+
+        with pytest.raises(LockNotHeldError):
+            await writer.write_gold([{"entity_id": "1", "value": 10}])
+
+        failing_validator.validate.assert_not_called()
+        mock_storage.write_gold.assert_not_called()
+        mock_tracer.get_tracer.assert_not_called()
 
     async def test_no_validation_when_validator_is_none(
         self, batch_writer, mock_storage

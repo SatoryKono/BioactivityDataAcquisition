@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pyarrow as pa
 import pytest
 
 from bioetl.domain.exceptions import PolicyViolationError, SchemaViolationError
-from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
+from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
 from bioetl.infrastructure.storage.silver_writer_validation_operations import (
-    _SilverSchemaPolicyRequest,
     _deduplicate_by_primary_keys_impl,
     _enforce_write_policy,
     _to_policy_write_mode_impl,

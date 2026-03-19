@@ -104,6 +104,9 @@ def _collect_forbidden_pipeline_source_overrides(
     """Collect pipeline-level source override paths that violate pagination policy."""
     forbidden: list[str] = []
 
+    if "batch_size" in entity_source:
+        forbidden.append("source.batch_size")
+
     provider_config = entity_source.get("provider_config")
     if isinstance(provider_config, dict):
         pagination = provider_config.get("pagination")

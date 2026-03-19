@@ -126,12 +126,7 @@ CANONICAL_DATASOURCE_DOC_FILES = frozenset(
         / "diagrams"
         / "descriptions"
         / "class-summary.md",
-        ROOT
-        / "docs"
-        / "02-architecture"
-        / "diagrams"
-        / "bundles"
-        / "class.bundle.md",
+        ROOT / "docs" / "02-architecture" / "diagrams" / "bundles" / "class.bundle.md",
         ROOT
         / "docs"
         / "02-architecture"
@@ -187,24 +182,9 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
 ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES = frozenset(
     {
         ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_cli_commands.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "interfaces"
-        / "cli"
-        / "test_cli_helpers.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "interfaces"
-        / "cli"
-        / "test_run_all_command.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "interfaces"
-        / "cli"
-        / "test_run_all_service_mock.py",
+        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_cli_helpers.py",
+        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_run_all_command.py",
+        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_run_all_service_mock.py",
         ROOT
         / "tests"
         / "unit"
@@ -218,34 +198,21 @@ ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES = frozenset(
         / "cli"
         / "commands"
         / "test_run_helpers.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "test_debug.py",
+        ROOT / "tests" / "unit" / "interfaces" / "cli" / "commands" / "test_debug.py",
         ROOT / "tests" / "e2e" / "test_cli_safety.py",
-        ROOT
-        / "tests"
-        / "integration"
-        / "interfaces"
-        / "test_cli_exit_code_matrix.py",
+        ROOT / "tests" / "integration" / "interfaces" / "test_cli_exit_code_matrix.py",
     }
 )
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
+    {}
+)
+ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
     {
-        ROOT / "src" / "bioetl" / "composition" / "types.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "factories"
-        / "pipeline"
-        / "registry.py",
+        ROOT / "src" / "bioetl" / "composition" / "__init__.py",
+        ROOT / "src" / "bioetl" / "composition" / "registry_default.py",
     }
 )
-ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset(
+ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset(
     {
         ROOT / "tests" / "architecture" / "test_registry_contracts.py",
         ROOT / "tests" / "unit" / "composition" / "test_types.py",
@@ -258,15 +225,27 @@ ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset(
         / "test_registry.py",
     }
 )
+ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset(
+    {
+        ROOT / "tests" / "architecture" / "test_registry_contracts.py",
+        ROOT / "tests" / "unit" / "composition" / "test_types.py",
+        ROOT / "tests" / "unit" / "composition" / "factories" / "pipeline" / "test_registry.py",
+    }
+)
 ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES = frozenset(
     {
+        ROOT / "tests" / "unit" / "infrastructure" / "test_config_dynamic.py",
+    }
+)
+ALLOWED_CONFIG_LOADER_SRC_FILES: frozenset[Path] = frozenset()
+ALLOWED_CONFIG_LOADER_TEST_FILES = frozenset(
+    {
+        ROOT / "tests" / "unit" / "infrastructure" / "test_config_dynamic.py",
         ROOT
         / "tests"
         / "unit"
         / "infrastructure"
-        / "config"
-        / "test_pipeline_config_legacy_normalization.py",
-        ROOT / "tests" / "unit" / "infrastructure" / "test_config_dynamic.py",
+        / "test_config_loader_schema_path.py",
     }
 )
 ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES = frozenset(
@@ -566,6 +545,22 @@ def test_default_registry_import_is_confined_to_known_src_compatibility_seams(
 
 
 @pytest.mark.architecture
+def test_registry_module_imports_are_confined_to_canonical_and_compat_src_seams(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Direct registry-module imports in src must stay confined to known seams."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name="bioetl.composition.registry",
+        allowed_files=ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES,
+    )
+    assert not violations, (
+        "Direct src imports of bioetl.composition.registry leaked beyond the "
+        "canonical package-root and compatibility seams:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
 def test_default_registry_import_is_confined_to_dedicated_tests(
     test_ast_cache: dict[Path, ast.Module],
 ) -> None:
@@ -579,6 +574,22 @@ def test_default_registry_import_is_confined_to_dedicated_tests(
     assert not violations, (
         "composition.registry.get_default_registry leaked into new test call sites:\n"
         + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_registry_module_imports_are_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests must treat bioetl.composition.registry as a dedicated compat seam."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name="bioetl.composition.registry",
+        allowed_files=ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES,
+    )
+    assert not violations, (
+        "Direct test imports of bioetl.composition.registry leaked beyond dedicated "
+        "registry compatibility coverage:\n" + "\n".join(violations)
     )
 
 
@@ -617,6 +628,38 @@ def test_config_loader_private_compat_helpers_are_confined(
     assert not test_violations, (
         f"{symbol} leaked beyond dedicated config compatibility coverage:\n"
         + "\n".join(test_violations)
+    )
+
+
+@pytest.mark.architecture
+def test_config_loader_module_is_absent_from_first_party_src_imports(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """New first-party src imports must use canonical config modules, not config_loader."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=CONFIG_LOADER_MODULE,
+        allowed_files=ALLOWED_CONFIG_LOADER_SRC_FILES,
+    )
+    assert not violations, (
+        "config_loader compatibility module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_config_loader_module_is_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Ordinary tests must use canonical config seams, not config_loader."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name=CONFIG_LOADER_MODULE,
+        allowed_files=ALLOWED_CONFIG_LOADER_TEST_FILES,
+    )
+    assert not violations, (
+        "config_loader compatibility module leaked beyond dedicated config tests:\n"
+        + "\n".join(violations)
     )
 
 

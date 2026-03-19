@@ -40,7 +40,7 @@ if TYPE_CHECKING:
         VacuumService,
     )
     from bioetl.application.services.lock_service import LockService
-    from bioetl.composition.registry import PipelineRegistry
+    from bioetl.composition import PipelineRegistry
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
 

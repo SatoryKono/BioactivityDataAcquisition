@@ -3,27 +3,25 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import WriteModePolicy
-from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+from bioetl.domain.ports import (
+    AuditPort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
+    MetricsPort,
+    NoOpMetadataWriter,
+    NoOpTracing,
+    SilverValidatorPort,
+    TracingPort,
+)
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.write_resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
     SilverMergeResiliencePolicy,
 )
 from bioetl.infrastructure.validation.pandera_validator import NoOpSilverValidator
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import (
-        AuditPort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-        MetricsPort,
-        SilverValidatorPort,
-        TracingPort,
-    )
-    from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
 @dataclass(frozen=True, slots=True)

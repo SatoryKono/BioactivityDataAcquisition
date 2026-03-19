@@ -6,6 +6,8 @@
 > This Kubernetes guide is provided for **advanced/experimental use only** and is
 > not the recommended deployment strategy.
 > It is outside standard operational support runbooks and release flow.
+> Placement note: this page lives under [Deployment & Tooling Extras](README.md),
+> not under the standard operations/runbook path.
 
 ## Overview
 

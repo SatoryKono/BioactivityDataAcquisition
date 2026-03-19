@@ -37,7 +37,9 @@ class TestSilverStatisticsHelpers:
         assert result == [{"field": "title", "from": "Utf8", "to": "String"}]
 
     def test_check_null_rates_stats_handles_empty_dataframe(self) -> None:
-        df = pl.DataFrame({"id": [], "name": []}, schema={"id": pl.Int64, "name": pl.String})
+        df = pl.DataFrame(
+            {"id": [], "name": []}, schema={"id": pl.Int64, "name": pl.String}
+        )
 
         results, overall = check_null_rates_stats(df)
 
@@ -53,9 +55,13 @@ class TestSilverStatisticsHelpers:
 
         assert result.status == DQCheckStatus.WARN
         assert result.primary_key == "missing_id"
-        assert result.column_stats["_note"]["message"] == "Primary key columns not found"
+        assert (
+            result.column_stats["_note"]["message"] == "Primary key columns not found"
+        )
 
-    def test_check_uniqueness_stats_calculates_duplicate_rate_and_column_stats(self) -> None:
+    def test_check_uniqueness_stats_calculates_duplicate_rate_and_column_stats(
+        self,
+    ) -> None:
         df = pl.DataFrame({"entity_id": ["e1", "e1", "e2"], "source": ["a", "a", "b"]})
 
         result = check_uniqueness_stats(df, ["entity_id"], (RuntimeError,))
@@ -88,7 +94,9 @@ class TestSilverStatisticsHelpers:
         assert result.status == DQCheckStatus.WARN
         assert result.missing_fields == ("title",)
 
-    def test_check_content_hash_integrity_stats_covers_none_and_collision_paths(self) -> None:
+    def test_check_content_hash_integrity_stats_covers_none_and_collision_paths(
+        self,
+    ) -> None:
         missing_hash = check_content_hash_integrity_stats(5, None)
         collisions = check_content_hash_integrity_stats(5, 2)
 
@@ -98,7 +106,9 @@ class TestSilverStatisticsHelpers:
         assert collisions.hash_collisions == 2
         assert collisions.status == DQCheckStatus.WARN
 
-    def test_profile_numeric_column_returns_distribution_for_non_empty_values(self) -> None:
+    def test_profile_numeric_column_returns_distribution_for_non_empty_values(
+        self,
+    ) -> None:
         df = pl.DataFrame({"score": [1.0, None, 3.0, 5.0]})
 
         result = profile_numeric_column(df, "score", (RuntimeError,))
@@ -126,7 +136,9 @@ class TestSilverStatisticsHelpers:
         assert normalized["a"] == 2
         assert normalized["b"] == 1
 
-    def test_value_distribution_to_dict_serializes_numeric_and_categorical_sections(self) -> None:
+    def test_value_distribution_to_dict_serializes_numeric_and_categorical_sections(
+        self,
+    ) -> None:
         payload = ValueDistributionResult(
             numeric_columns={
                 "score": NumericDistribution(
@@ -154,4 +166,6 @@ class TestSilverStatisticsHelpers:
         assert result["status"] == DQCheckStatus.PASS.value
         assert result["numeric_columns"]["score"]["mean"] == 3.0
         assert result["categorical_columns"]["category"]["cardinality"] == 2
-        assert result["categorical_columns"]["category"]["top_values"][0]["value"] == "a"
+        assert (
+            result["categorical_columns"]["category"]["top_values"][0]["value"] == "a"
+        )

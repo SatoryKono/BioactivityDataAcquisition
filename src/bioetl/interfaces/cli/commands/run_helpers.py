@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.composition import PipelineRegistry
 from bioetl.domain.exceptions import BioETLError
 
 __all__ = [
@@ -21,8 +22,6 @@ __all__ = [
     "show_cleanup_preview",
     "validate_pipeline_name",
 ]
-
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.resources_api import preview_cleanup
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,

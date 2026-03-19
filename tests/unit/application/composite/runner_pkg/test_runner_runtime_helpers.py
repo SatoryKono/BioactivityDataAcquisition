@@ -1,0 +1,120 @@
+"""Focused tests for composite runner lifecycle helpers."""
+
+from __future__ import annotations
+
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock
+from uuid import uuid4
+
+import pytest
+
+from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
+    prepare_run_state,
+    resolve_original_run_id,
+    run_with_managed_lock,
+    validate_runner_can_start,
+)
+from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import LockAcquisitionError, RunnerAlreadyExecutedError
+
+
+@pytest.mark.unit
+def test_validate_runner_can_start_raises_for_finished_runner() -> None:
+    with pytest.raises(RunnerAlreadyExecutedError, match="CompositePipelineRunner"):
+        validate_runner_can_start(
+            finished=True,
+            run_id="run-123",
+            final_state=CompositePipelineState.FAILED,
+        )
+
+
+@pytest.mark.unit
+def test_resolve_original_run_id_for_resume_returns_checkpoint_run_id() -> None:
+    runtime = SimpleNamespace(resume=True)
+    state = SimpleNamespace(is_resumable=True, run_id="original-run")
+
+    result = resolve_original_run_id(
+        runtime=runtime,
+        state=state,
+        current_run_id="new-run",
+    )
+
+    assert result == "original-run"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_run_with_managed_lock_starts_and_stops_heartbeat() -> None:
+    lock_port = AsyncMock()
+    lock_port.acquire.return_value = True
+    lock_port.release = AsyncMock()
+    heartbeat = SimpleNamespace(start=AsyncMock(), stop=AsyncMock())
+    owner_id = uuid4()
+    run_while_locked = AsyncMock(return_value="ok")
+
+    result = await run_with_managed_lock(
+        lock_port=lock_port,
+        lock_key="lock:composite",
+        owner_id=owner_id,
+        lock_ttl_seconds=300,
+        heartbeat_interval_seconds=30,
+        logger=SimpleNamespace(),
+        run_while_locked=run_while_locked,
+        lock_context_factory=lambda **_: SimpleNamespace(heartbeat=heartbeat),
+    )
+
+    assert result == "ok"
+    heartbeat.start.assert_awaited_once()
+    run_while_locked.assert_awaited_once()
+    heartbeat.stop.assert_awaited_once()
+    lock_port.release.assert_awaited_once_with(
+        key="lock:composite",
+        owner_id=owner_id,
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_run_with_managed_lock_raises_when_lock_not_acquired() -> None:
+    lock_port = AsyncMock()
+    lock_port.acquire.return_value = False
+    owner_id = uuid4()
+
+    with pytest.raises(LockAcquisitionError, match="lock:composite"):
+        await run_with_managed_lock(
+            lock_port=lock_port,
+            lock_key="lock:composite",
+            owner_id=owner_id,
+            lock_ttl_seconds=300,
+            heartbeat_interval_seconds=30,
+            logger=SimpleNamespace(),
+            run_while_locked=AsyncMock(),
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_prepare_run_state_normalizes_failed_resume_before_logging() -> None:
+    failed_state = SimpleNamespace(
+        state=CompositePipelineState.FAILED,
+        is_resumable=True,
+    )
+    resumed_state = SimpleNamespace(
+        state=CompositePipelineState.ENRICHMENT_COMPLETED,
+        is_resumable=True,
+    )
+    checkpoint_manager = SimpleNamespace(load=AsyncMock(return_value=failed_state))
+    fsm = SimpleNamespace(
+        handle_resume_from_failed=MagicMock(return_value=resumed_state),
+        log_resume_context=MagicMock(),
+    )
+
+    result = await prepare_run_state(
+        checkpoint_manager=checkpoint_manager,
+        runtime=SimpleNamespace(resume=True),
+        fsm=fsm,
+    )
+
+    assert result is resumed_state
+    fsm.handle_resume_from_failed.assert_called_once_with(failed_state)
+    fsm.log_resume_context.assert_called_once_with(resumed_state)

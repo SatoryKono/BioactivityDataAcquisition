@@ -1,5 +1,10 @@
 # Промт: Расширение Диаграмм Проекта BioETL
 
+> **Status:** Historical expansion prompt artifact.
+> Before reuse, align the execution plan with the current canonical diagram policy
+> in [policy.md](policy.md), the measured index in [diagrams-index.md](diagrams-index.md),
+> and the current `.mmd`/`views/*.mermaid` split.
+
 *Дата создания: 2026-02-17*
 
 ----------------------------------------------------------------------
@@ -82,47 +87,22 @@ docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md
 docs/02-architecture/decisions/ADR-038-enum-externalization.md
 ```
 
-### 0.3 Существующие диаграммы (НЕ дублировать!)
+### 0.3 Существующий corpus диаграмм (НЕ дублировать!)
 
-В проекте уже есть **34 mermaid-диаграммы** в `docs/02-architecture/diagrams/*.mermaid`.
-Прочитай **каждую** из них, чтобы не создавать дубликатов:
+Не опирайся на старую модель `docs/02-architecture/diagrams/*.mermaid` как на
+current canonical corpus. Актуальный baseline измеряется через:
 
-```
-01-full-system-component.mermaid     (150 LOC) — Full system component diagram (C4-style)
-01-high-level.mermaid                 (45 LOC) — High-level system overview
-02-full-medallion-data-flow.mermaid   (68 LOC) — Medallion architecture data flow (detailed)
-03-pipeline-execution-happy-path.mermaid (87 LOC) — Pipeline execution (happy path)
-04-domain-layer-class-diagram.mermaid (244 LOC) — Domain layer classes
-04-error-flow.mermaid                 (12 LOC) — Error handling flow
-05-layers-interaction.mermaid         (71 LOC) — Layer interaction
-05-pipeline-lifecycle-states.mermaid (173 LOC) — Pipeline state machine
-06-application-layer-class-diagram.mermaid (222 LOC) — Application layer classes
-06-pipeline-execution.mermaid         (73 LOC) — Pipeline execution flow
-07-circuit-breaker-states.mermaid     (74 LOC) — Circuit breaker state machine
-07-medallion-flow.mermaid             (61 LOC) — Medallion data flow
-08-complete-etl-workflow.mermaid     (109 LOC) — Complete ETL workflow
-08-domain-ddd.mermaid                 (81 LOC) — DDD diagram
-09-full-er-diagram.mermaid           (247 LOC) — Entity-relationship diagram
-10-infrastructure-layer-class-diagram.mermaid (257 LOC) — Infrastructure classes
-11-lock-acquisition-sequence.mermaid  (81 LOC) — Lock acquisition sequence
-12-full-aws-deployment.mermaid        (84 LOC) — Deployment diagram
-13-domain-models-relationship.mermaid (244 LOC) — Domain model relationships
-14-provider-health-states.mermaid     (97 LOC) — Provider health states
-15-dq-check-workflow.mermaid          (96 LOC) — DQ check workflow
-16-memory-lock-class.mermaid         (103 LOC) — MemoryLock class
-17-pipeline-hierarchy.mermaid        (142 LOC) — Pipeline/Transformer hierarchy
-18-bronze-write-sequence.mermaid      (78 LOC) — Bronze write sequence
-19-delta-lake-write-sequence.mermaid  (99 LOC) — Delta Lake write sequence
-20-quarantine-record-states.mermaid  (118 LOC) — Quarantine record states
-21-activity-entity-data-flow.mermaid  (93 LOC) — Activity entity data flow
-22-client-api-request-sequence.mermaid (105 LOC) — Client API request sequence
-23-silver-writer-class.mermaid       (121 LOC) — SilverWriter class
-24-hash-service-class.mermaid         (60 LOC) — Hash service class
-25-circuit-breaker-observer-class.mermaid (118 LOC) — CircuitBreaker class
-```
+- `docs/02-architecture/diagrams/governance/diagrams-index.md`
+- `docs/02-architecture/diagrams/governance/diagram-views-inventory.md`
+- `docs/02-architecture/diagrams/governance/policy.md`
 
-Также есть **22 placeholder .mermaid файла** (по 3 строки-заглушки) в `diagrams/`.
-Их нужно заполнить реальным содержимым, если они попадут в TOP-25.
+Текущая naming/model split:
+
+- canonical source diagrams: `docs/02-architecture/diagrams/**/*.mmd`
+- decomposed views only: `docs/02-architecture/diagrams/views/*.mermaid`
+
+Перед созданием новых диаграмм сверяй measured inventory, а не historical
+списки из этого prompt.
 
 ### 0.4 Исходный код (ключевые модули для чтения)
 
@@ -323,7 +303,7 @@ src/bioetl/interfaces/cli/commands/maintenance.py
 src/bioetl/interfaces/http/health-server.py
 ```
 
-### 0.5 Diagramming Policy (стандарты)
+### 0.5 Diagram Policy (стандарты)
 
 Прочитай `docs/02-architecture/diagrams/governance/policy.md`
 (канонический policy; historical context хранится в
@@ -345,7 +325,7 @@ src/bioetl/interfaces/http/health-server.py
 ## Часть 1: Генерация 500 НОВЫХ диаграмм
 
 После изучения проекта предложи **500 новых уникальных диаграмм**, которых
-**ещё нет** среди 34 существующих. Для каждой диаграммы укажи:
+**ещё нет** в текущем canonical/view corpus. Для каждой диаграммы укажи:
 
 1. **Порядковый номер** (1–500)
 1. **Название** (англ.)
@@ -379,7 +359,7 @@ src/bioetl/interfaces/http/health-server.py
 ### Требования к качеству предложений
 
 - **Уникальность**: каждая диаграмма должна покрывать отдельный аспект,
-  не повторяя существующие 34 диаграммы и не дублируя другие предложения
+  не повторяя текущий measured corpus и не дублируя другие предложения
 - **Конкретность**: название и описание должны быть конкретными,
   а не общими ("Data Flow" — плохо, "ChEMBL Activity Bronze→Silver Transformation
   Including Field Mapping and Content Hash Calculation" — хорошо)
@@ -444,8 +424,9 @@ src/bioetl/interfaces/http/health-server.py
 
 ### 4.1 Создание Mermaid-файла
 
-- Создай файл в `docs/02-architecture/diagrams/`
-- Формат именования: `NN-topic-name.mermaid` (NN = следующий свободный номер, начиная с 26)
+- Создай файл в каноническом `.mmd`-каталоге под `docs/02-architecture/diagrams/`
+  (`architecture/`, `class-diagrams/` или `foundation/` по смыслу)
+- Формат именования: `NN-topic-name.mmd` (NN = следующий свободный номер в выбранной family)
 - Каждый файл начинается с:
   ```
   %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
@@ -459,7 +440,7 @@ src/bioetl/interfaces/http/health-server.py
 
 ### 4.2 Рендер в PNG
 
-После создания всех 25 .mermaid файлов, отрендери каждый в PNG:
+После создания всех 25 `.mmd`-файлов, отрендери каждый в PNG:
 
 ```bash
 # Установка (если не установлен)
@@ -476,11 +457,11 @@ EOF
 # Рендер каждой диаграммы
 # Используй scale=3 для ~300 DPI (base 96 DPI × 3 = 288 DPI)
 # Для сложных диаграмм с мелким текстом — scale=4 (384 DPI)
-for f in docs/02-architecture/diagrams/2[6-9]-*.mermaid \
-         docs/02-architecture/diagrams/3[0-9]-*.mermaid \
-         docs/02-architecture/diagrams/4[0-9]-*.mermaid \
-         docs/02-architecture/diagrams/50-*.mermaid; do
-    base=$(basename "$f" .mermaid)
+for f in docs/02-architecture/diagrams/foundation/2[6-9]-*.mmd \
+         docs/02-architecture/diagrams/foundation/3[0-9]-*.mmd \
+         docs/02-architecture/diagrams/foundation/4[0-9]-*.mmd \
+         docs/02-architecture/diagrams/foundation/50-*.mmd; do
+    base=$(basename "$f" .mmd)
     mmdc -i "$f" \
          -o "docs/02-architecture/diagrams/png/${base}.png" \
          -s 3 \
@@ -501,7 +482,7 @@ done
 
 После создания всех файлов обнови:
 
-1. `docs/02-architecture/diagrams/diagrams-index.md` — добавь новые диаграммы
+1. `docs/02-architecture/diagrams/governance/diagrams-index.md` — добавь новые диаграммы
 1. Создай директорию `docs/02-architecture/diagrams/png/` если не существует
 
 ----------------------------------------------------------------------

@@ -9,7 +9,7 @@ from bioetl.application.services import RunOptions, RunResult
 from bioetl.application.services.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.services_api import get_pipeline_runner_service
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,

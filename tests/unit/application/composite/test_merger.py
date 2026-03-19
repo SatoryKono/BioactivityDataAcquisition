@@ -195,7 +195,9 @@ class TestMergeServiceReadsSilverViaStorage:
         merge_service._delta_reader = None
         merge_service._silver_reader = None
 
-        with pytest.raises(RuntimeError, match="requires delta_reader or silver_reader"):
+        with pytest.raises(
+            RuntimeError, match="requires delta_reader or silver_reader"
+        ):
             await merge_service._read_silver_table("silver/test/table")
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from bioetl.application.core.runner import PipelineRunner
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
         TransformerDependencyContext,
     )
     from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.composition.bootstrap_contexts import DQConfigsContext
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
@@ -63,6 +65,13 @@ __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory
 def _extract_entity_type(pipeline_name: str) -> str | None:
     """Extract entity_type suffix (e.g. 'chembl_activity' -> 'activity')."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+
+
+def _default_dq_configs_extractor() -> Callable[
+    [PipelineYamlConfig | None], DQConfigsContext
+]:
+    """Return the canonical DQ config extractor for runner assembly."""
+    return _extract_dq_configs
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
@@ -261,5 +270,5 @@ def assemble_runner(
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         yaml_config=yaml_config,
-        dq_configs_extractor=_extract_dq_configs,
+        dq_configs_extractor=_default_dq_configs_extractor(),
     )

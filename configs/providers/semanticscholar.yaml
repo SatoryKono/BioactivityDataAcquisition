@@ -1,7 +1,6 @@
 version: 1.0.0
 provider: semanticscholar
 source:
-    batch_size: 50
     provider_config:
         provider: semanticscholar
         base_url: https://api.semanticscholar.org/graph/v1

@@ -24,10 +24,10 @@ from bioetl.application.services import (
     VacuumService,
 )
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.composition import create_registry
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry import create_registry
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -41,7 +41,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from bioetl.composition.registry import PipelineRegistry
+    from bioetl.composition import PipelineRegistry
 
 
 def get_default_registry() -> PipelineRegistry:

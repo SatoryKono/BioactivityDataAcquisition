@@ -24,7 +24,9 @@ from bioetl.domain.composite.strategy import MergeStrategy
 
 def _make_factory(
     *,
-    checkpoint_manager_cls: type[CompositeCheckpointService] = CompositeCheckpointService,
+    checkpoint_manager_cls: type[
+        CompositeCheckpointService
+    ] = CompositeCheckpointService,
 ) -> CompositeSupportServicesFactory:
     config = cast(
         Any,

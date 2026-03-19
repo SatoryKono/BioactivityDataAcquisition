@@ -39,11 +39,9 @@ if TYPE_CHECKING:
 class MedallionStoragePort(StorageMaintenancePort, Protocol):
     """Lifecycle-focused storage contract for medallion service."""
 
-    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
-        ...
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int: ...
 
-    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
-        ...
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int: ...
 
 
 _LIFECYCLE_OPERATION_ERRORS = (

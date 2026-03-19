@@ -240,8 +240,29 @@ class TestNormalizeSourceConfig:
             }
         }
 
-        with pytest.raises(ValueError, match="Retired source provider pagination aliases"):
+        with pytest.raises(
+            ValueError, match="Retired source provider pagination aliases"
+        ):
             normalize_source_config(raw)
+
+    def test_rejects_retired_source_root_batch_size(self) -> None:
+        """Retired source.batch_size should fail fast."""
+        raw = {
+            "source": {
+                "batch_size": 25,
+                "provider_config": {
+                    "provider": "chembl",
+                },
+            }
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="Retired source root pagination aliases",
+        ) as exc_info:
+            normalize_source_config(raw)
+
+        assert "batch_size" in str(exc_info.value)
 
     def test_canonical_provider_pagination_is_accepted(self) -> None:
         """Canonical pagination-only source config should stay valid."""

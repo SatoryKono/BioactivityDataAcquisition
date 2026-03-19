@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.types import JsonDict
@@ -146,37 +146,14 @@ class CompositeConfigFileSchema(BaseModel):
         return self.composite.to_domain()
 
 
-class LegacyCompositeConfigSchema(CompositeConfigSchema):
-    """Legacy schema for pre-v6 composite configs.
-
-    Keeps `version` optional to support a deprecation window for historical
-    YAML files that omitted `composite.version`.
-    """
-
-    version: str = Field(
-        default="1.0.0", min_length=1, description="Configuration version (semver)"
-    )
-
-
-class LegacyCompositeConfigFileSchema(CompositeConfigFileSchema):
-    """Legacy file schema where `composite.version` may be omitted."""
-
-    composite: LegacyCompositeConfigSchema = Field(
-        ..., description="The composite pipeline configuration"
-    )
-
-
-COMPOSITE_VERSION_DEPRECATION_TARGET = "6.2.0"
-
-
 def validate_composite_config_payload(
     payload: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> CompositeConfigFileSchema:
-    """Validate composite YAML payload with explicit legacy fallback.
+    """Validate composite YAML payload against the canonical strict contract.
 
     Runtime and generated JSON Schema both use :class:`CompositeConfigFileSchema`
-    as the canonical contract. Legacy files (missing `composite.version`) are
-    accepted only via an explicit compatibility path.
+    as the canonical contract. Files that omit ``composite.version`` are no
+    longer part of the active runtime contract and must fail validation.
 
     Args:
         payload: Data payload.
@@ -185,20 +162,13 @@ def validate_composite_config_payload(
         Validated CompositeConfigFileSchema.
     """
 
-    try:
-        result: CompositeConfigFileSchema = CompositeConfigFileSchema.model_validate(
-            payload
-        )
-        return result
-    except ValidationError:
-        legacy_schema = LegacyCompositeConfigFileSchema.model_validate(payload)
-        normalized = legacy_schema.model_dump(mode="python")
-        result = CompositeConfigFileSchema.model_validate(normalized)
-        return result
+    result: CompositeConfigFileSchema = CompositeConfigFileSchema.model_validate(
+        payload
+    )
+    return result
 
 
 __all__ = [
-    "COMPOSITE_VERSION_DEPRECATION_TARGET",
     "AggregationFieldSchema",
     "AggregationSchema",
     "ColumnGroupSchema",

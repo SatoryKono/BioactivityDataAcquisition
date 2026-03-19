@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 import click
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -19,6 +18,18 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
 )
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
+)
+from bioetl.interfaces.cli.commands.run_composite_execution import (
+    bootstrap_composite_runner as _bootstrap_composite_runner_impl,
+)
+from bioetl.interfaces.cli.commands.run_composite_execution import (
+    load_composite_config as _load_composite_config_impl,
+)
+from bioetl.interfaces.cli.commands.run_composite_execution import (
+    run_composite_async as _run_composite_async_impl,
+)
+from bioetl.interfaces.cli.commands.run_composite_execution import (
+    run_composite_inner as _run_composite_inner_impl,
 )
 from bioetl.interfaces.cli.commands.run_composite_helpers import (
     emit_composite_startup as _emit_composite_startup_impl,
@@ -56,62 +67,29 @@ def _validate_composite_name(
 
 
 def load_composite_config(name: str) -> CompositeConfig:
-    """Load composite config through composition on demand."""
-    from bioetl.composition.composite_api import load_composite_config as _impl
-
-    return _impl(name)
+    """Load composite config through the canonical execution helper seam."""
+    return _load_composite_config_impl(name)
 
 
 def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
 ) -> CompositePipelineRunner:
-    """Build composite runner through composition on demand."""
-    from bioetl.composition.composite_api import bootstrap_composite_runner as _impl
-
-    return _impl(config, runtime)
+    """Build composite runner through the canonical execution helper seam."""
+    return _bootstrap_composite_runner_impl(config, runtime)
 
 
 async def _run_composite_inner(
     composite_name: str,
     runtime: CompositeRuntimeConfig,
 ) -> tuple[bool, str | None]:
-    """Run composite pipeline execution logic.
-
-    Args:
-        composite_name: Name of composite pipeline (e.g., 'publication').
-        runtime: Runtime configuration.
-
-    Returns:
-        Tuple of (success, error_message).
-    """
-    try:
-        config = load_composite_config(composite_name)
-    except FileNotFoundError as e:
-        return False, str(e)
-    except ValueError as e:
-        return False, f"Invalid configuration: {e}"
-
-    runner = bootstrap_composite_runner(config, runtime)
-
-    try:
-        result = await runner.run()
-        if result.is_success:
-            return True, None
-        # Get error from failed enrichers if any
-        failed = result.failed_enrichers
-        if failed:
-            return False, f"Failed enrichers: {', '.join(failed)}"
-        return False, "Composite pipeline failed"
-    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
-        return (
-            False,
-            (
-                f"{exc} "
-                f"(reason_code=CLI_COMPOSITE_RUNNER_ERROR, composite={composite_name}, "
-                f"error_type={type(exc).__name__})"
-            ),
-        )
+    """Run composite pipeline execution logic."""
+    return await _run_composite_inner_impl(
+        composite_name,
+        runtime,
+        load_config=load_composite_config,
+        build_runner=bootstrap_composite_runner,
+    )
 
 
 async def _run_composite_async(
@@ -120,25 +98,16 @@ async def _run_composite_async(
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> tuple[bool, str | None]:
-    """Run composite pipeline asynchronously with optional health server.
-
-    Args:
-        composite_name: Name of composite pipeline (e.g., 'publication').
-        runtime: Runtime configuration.
-        health_server_enabled: Whether to enable health server.
-        health_port: Port for health server.
-
-    Returns:
-        Tuple of (success, error_message).
-    """
-    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
-    ensure_metrics_server_started()
-
-    async with health_server_context(
-        enabled=health_server_enabled,
-        port=health_port,
-    ):
-        return await _run_composite_inner(composite_name, runtime)
+    """Run composite pipeline asynchronously with optional health server."""
+    return await _run_composite_async_impl(
+        composite_name,
+        runtime,
+        health_server_enabled=health_server_enabled,
+        health_port=health_port,
+        run_inner=_run_composite_inner,
+        metrics_starter=ensure_metrics_server_started,
+        health_context_factory=health_server_context,
+    )
 
 
 def _handle_run_composite_exception(

@@ -247,7 +247,9 @@ class TestReadSilverTable:
         storage.read_silver.return_value = [{"id": 1}]
         mixin = _make_mixin(_storage=storage, _delta_reader=None, _silver_reader=None)
 
-        with pytest.raises(RuntimeError, match="requires delta_reader or silver_reader"):
+        with pytest.raises(
+            RuntimeError, match="requires delta_reader or silver_reader"
+        ):
             await mixin._read_silver_table("silver/my_table")
 
         storage.read_silver.assert_not_called()

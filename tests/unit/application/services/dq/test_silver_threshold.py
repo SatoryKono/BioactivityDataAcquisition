@@ -76,7 +76,9 @@ class TestSilverThresholdChecker:
 
     def test_check_key_nullability_returns_pass_without_violations(self) -> None:
         checker = SilverThresholdChecker()
-        df = pl.DataFrame({"entity_id": ["e1", "e2"], "partition_date": ["2026", "2026"]})
+        df = pl.DataFrame(
+            {"entity_id": ["e1", "e2"], "partition_date": ["2026", "2026"]}
+        )
 
         result = checker.check_key_nullability(
             df,
@@ -88,4 +90,3 @@ class TestSilverThresholdChecker:
 
         assert result["status"] == DQCheckStatus.PASS.value
         assert result["violations"] == []
-

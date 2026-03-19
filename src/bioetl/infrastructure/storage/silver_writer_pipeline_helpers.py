@@ -119,17 +119,59 @@ class _SilverWritePipelineExecutor(Protocol):
     ) -> Awaitable[SilverWriteResult | None]: ...
 
 
+def _parse_table_identity(table_name: str) -> tuple[str | None, str | None]:
+    """Extract provider/entity identity from common Silver table-name formats."""
+    for separator in ("/", ".", "_"):
+        if separator not in table_name:
+            continue
+        provider, entity_type = table_name.split(separator, 1)
+        if provider and entity_type:
+            return provider, entity_type
+    return None, None
+
+
+def _extract_run_context(
+    records: list[BronzeRecord],
+) -> tuple[str | None, str | None]:
+    """Extract stable run metadata from the first Silver record when present."""
+    if not records:
+        return None, None
+
+    first_record = records[0]
+    pipeline_run_id = first_record.get("_run_id")
+    run_type = first_record.get("_run_type")
+
+    normalized_run_id = str(pipeline_run_id) if pipeline_run_id is not None else None
+    normalized_run_type = str(run_type) if run_type is not None else None
+    return normalized_run_id, normalized_run_type
+
+
 def set_silver_write_span_attributes(
     span: Any,  # Any: OpenTelemetry span type varies by backend
     *,
     table_name: str,
     mode: str,
     record_count: int,
+    records: list[BronzeRecord],
 ) -> None:
     """Populate core tracing attributes for a Silver write span."""
+    provider, entity_type = _parse_table_identity(table_name)
+    pipeline_run_id, run_type = _extract_run_context(records)
+
     span.set_attribute("table_name", table_name)
     span.set_attribute("mode", mode)
     span.set_attribute("record_count", record_count)
+    span.set_attribute("bioetl.table_name", table_name)
+    span.set_attribute("bioetl.write_mode", mode)
+    span.set_attribute("bioetl.record_count", record_count)
+    if provider is not None:
+        span.set_attribute("bioetl.provider", provider)
+    if entity_type is not None:
+        span.set_attribute("bioetl.entity_type", entity_type)
+    if pipeline_run_id is not None:
+        span.set_attribute("bioetl.pipeline_run_id", pipeline_run_id)
+    if run_type is not None:
+        span.set_attribute("bioetl.run_type", run_type)
 
 
 def build_silver_write_execution_context(
@@ -236,6 +278,7 @@ async def execute_silver_write_with_tracing(
             table_name=invocation.table_name,
             mode=invocation.mode,
             record_count=len(invocation.records),
+            records=invocation.records,
         )
         ctx = build_silver_write_execution_context(
             invocation=invocation,

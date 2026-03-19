@@ -18,3 +18,17 @@ infrastructure and wire concrete implementations to domain ports.
 See Also:
     docs/02-architecture/decisions/ADR-005-composition-layer-separation.md
 """
+
+from __future__ import annotations
+
+from bioetl.composition.registry import (
+    PipelineDefinition,
+    PipelineRegistry,
+    create_registry,
+)
+
+__all__ = [
+    "PipelineDefinition",
+    "PipelineRegistry",
+    "create_registry",
+]

@@ -181,7 +181,6 @@ class TestSourceConfigSchema:
         config = SourceYamlConfig.model_validate(
             {
                 "source": {
-                    "batch_size": 100,
                     "provider_config": {
                         "provider": "test",
                         "pagination": {"id_batch_size": 50},
@@ -193,14 +192,13 @@ class TestSourceConfigSchema:
         # pagination.id_batch_size takes precedence
         assert config.batch_size == 50
 
-    def test_source_config_falls_back_to_source_batch_size(self) -> None:
-        """batch_size should fall back to source.batch_size if not in provider_config."""
+    def test_source_config_falls_back_to_default_batch_size(self) -> None:
+        """batch_size should fall back to DEFAULT_BATCH_SIZE if not configured."""
         from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
         config = SourceYamlConfig.model_validate(
             {
                 "source": {
-                    "batch_size": 100,
                     "provider_config": {
                         "provider": "test",
                     },

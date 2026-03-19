@@ -1,0 +1,176 @@
+"""Unit tests for pure Gold metadata payload builders."""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from bioetl.domain.medallion import GoldWriteMode
+from bioetl.infrastructure.storage.gold_writer_metadata_payloads import (
+    build_gold_merged_metadata_input,
+    build_gold_metadata_input,
+    build_gold_metadata_payload,
+    build_gold_metadata_via_fallback,
+)
+
+
+@pytest.mark.unit
+class TestBuildGoldMetadataInput:
+    """Tests for Gold coordinator input payload construction."""
+
+    def test_converts_silver_refs_and_preserves_transform_metadata(self) -> None:
+        """Coordinator input should expose canonical SilverRef lineage objects."""
+        silver_ref = MagicMock()
+        silver_ref.table_name = "chembl.activity"
+        silver_ref.table_path = "silver/chembl/activity"
+        silver_ref.delta_version = 7
+
+        result = build_gold_metadata_input(
+            table_path="gold/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            completed_at=None,
+            silver_refs=[silver_ref],
+            gold_schema=None,
+            transform_version="2.0.0",
+            transform_steps=("normalize", "enrich"),
+        )
+
+        assert result.transform_version == "2.0.0"
+        assert result.transform_steps == ("normalize", "enrich")
+        assert result.silver_refs is not None
+        assert len(result.silver_refs) == 1
+        assert result.silver_refs[0].table_name == "chembl.activity"
+        assert result.silver_refs[0].delta_version == 7
+
+
+@pytest.mark.unit
+class TestBuildGoldMergedMetadataInput:
+    """Tests for merged Gold metadata input construction."""
+
+    def test_builds_overwrite_input_with_transform_metadata(self) -> None:
+        result = build_gold_merged_metadata_input(
+            table_path="gold/publication",
+            table_name="composite.publication",
+            records=[{"_lineage_created_at": "2025-01-15T10:00:00", "id": 1}],
+            schema=None,
+            transform_version="2.0.0",
+            transform_steps=("normalize", "enrich"),
+        )
+
+        assert result.mode == GoldWriteMode.OVERWRITE
+        assert result.transform_version == "2.0.0"
+        assert result.transform_steps == ("normalize", "enrich")
+        assert result.schema_validation_enabled is False
+
+    def test_enables_schema_validation_when_schema_present(self) -> None:
+        mock_schema = MagicMock()
+
+        result = build_gold_merged_metadata_input(
+            table_path="gold/publication",
+            table_name="composite.publication",
+            records=[{"id": 1}],
+            schema=mock_schema,
+            transform_version="1.0.0",
+            transform_steps=(),
+        )
+
+        assert result.schema_validation_enabled is True
+        assert result.schema_validation_strict is True
+
+    def test_prefers_lineage_created_at_then_ingestion_ts(self) -> None:
+        result = build_gold_merged_metadata_input(
+            table_path="gold/publication",
+            table_name="composite.publication",
+            records=[{"_ingestion_ts": "2025-06-01T08:00:00", "id": 1}],
+            schema=None,
+            transform_version=None,
+            transform_steps=(),
+        )
+
+        assert result.completed_at is not None
+        assert result.completed_at.month == 6
+
+
+@pytest.mark.unit
+class TestBuildGoldMetadataViaFallback:
+    """Tests for fallback metadata builder delegation."""
+
+    def test_delegates_to_gold_metadata_builder_with_contract_fields(self) -> None:
+        """Fallback helper should preserve the external metadata contract."""
+        with patch(
+            "bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder.build_fallback_metadata",
+            return_value=MagicMock(),
+        ) as mock_build:
+            build_gold_metadata_via_fallback(
+                table_name="chembl.activity",
+                records=[{"id": 1}],
+                mode=GoldWriteMode.OVERWRITE,
+                scd_config=None,
+                ingestion_ts=None,
+                run_id=None,
+                gold_schema=None,
+                transform_version="1.0.0",
+                transform_steps=("normalize",),
+            )
+
+        mock_build.assert_called_once_with(
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.OVERWRITE,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+            gold_schema=None,
+        )
+
+
+@pytest.mark.unit
+class TestBuildGoldMetadataPayload:
+    """Tests for the standard Gold metadata payload routing helper."""
+
+    def test_uses_coordinator_when_present(self) -> None:
+        coordinator = MagicMock()
+        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
+
+        build_gold_metadata_payload(
+            coordinator=coordinator,
+            table_path="gold/t",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.OVERWRITE,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+            silver_refs=None,
+            gold_schema=None,
+            transform_version="1.0.0",
+            transform_steps=("normalize",),
+        )
+
+        coordinator.create_gold_metadata.assert_called_once()
+
+    def test_uses_fallback_when_no_coordinator(self) -> None:
+        with patch(
+            "bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder.build_fallback_metadata",
+            return_value=MagicMock(),
+        ) as mock_fallback:
+            build_gold_metadata_payload(
+                coordinator=None,
+                table_path="gold/t",
+                table_name="chembl.activity",
+                records=[{"id": 1}],
+                mode=GoldWriteMode.OVERWRITE,
+                scd_config=None,
+                ingestion_ts=None,
+                run_id=None,
+                silver_refs=None,
+                gold_schema=None,
+                transform_version="1.0.0",
+                transform_steps=("normalize",),
+            )
+
+        mock_fallback.assert_called_once()

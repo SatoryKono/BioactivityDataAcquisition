@@ -7,9 +7,9 @@ that work with composition-layer constructs.
 For actual runtime imports, use the specific modules:
 - ObservabilityBundle: from bioetl.composition.observability
 - StorageAdapter: from bioetl.composition.factories.storage.storage_factory
-- PipelineRegistry: from bioetl.composition.registry
-- get_default_registry: from bioetl.composition.registry (default instance)
-- create_registry: from bioetl.composition.registry (isolated instance for tests)
+- PipelineRegistry: from bioetl.composition
+- create_registry: from bioetl.composition (isolated instance for tests)
+- get_default_registry: compatibility-only re-export for shared default state
 
 Typed contexts for bootstrap functions (replacing untyped tuples):
 - PipelineCallbacksContext: transform, gold_filter, gold_transform callbacks
@@ -21,6 +21,7 @@ Typed contexts for bootstrap functions (replacing untyped tuples):
 
 from __future__ import annotations
 
+from bioetl.composition import PipelineDefinition, PipelineRegistry, create_registry
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
     DQConfigsContext,
@@ -30,11 +31,8 @@ from bioetl.composition.bootstrap_contexts import (
 )
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.registry import (
-    PipelineDefinition,
-    PipelineRegistry,
-    create_registry,
-    get_default_registry,
+from bioetl.composition.registry_default import (
+    get_default_registry as _compat_get_default_registry,
 )
 
 __all__ = [
@@ -50,3 +48,8 @@ __all__ = [
     "create_registry",
     "get_default_registry",
 ]
+
+
+def get_default_registry() -> PipelineRegistry:
+    """Compatibility-only re-export of the shared default registry instance."""
+    return _compat_get_default_registry()

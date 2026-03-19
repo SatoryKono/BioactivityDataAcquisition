@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-__all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
-
 import asyncio
 import time
 from collections.abc import Iterator
@@ -15,20 +13,28 @@ from typing import TYPE_CHECKING, cast
 import orjson
 import zstandard as zstd
 
-from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
+from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
-from bioetl.infrastructure.storage.bronze_writer_io_mixin import BronzeWriterIOMixin
-from bioetl.infrastructure.storage.bronze_writer_metadata_mixin import (
+from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
+from bioetl.infrastructure.storage.bronze.metadata_mixin import (
     BronzeWriterMetadataMixin,
 )
-from bioetl.infrastructure.storage.bronze_writer_metrics_mixin import (
+from bioetl.infrastructure.storage.bronze.metrics_mixin import (
     BronzeWriterMetricsMixin,
 )
-from bioetl.infrastructure.storage.bronze_writer_side_effects_mixin import (
+from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
+    BronzeWriteArtifacts,
+    BronzeWritePostwriteContext,
+    BronzeWritePrepared,
+    BronzeWriteRequest,
+    build_bronze_write_artifacts,
+    prepare_bronze_write,
+)
+from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
     BronzeWriterSideEffectsMixin,
 )
-from bioetl.infrastructure.storage.bronze_writer_validation_mixin import (
+from bioetl.infrastructure.storage.bronze.validation_mixin import (
     BronzeWriterValidationMixin,
 )
 
@@ -43,6 +49,8 @@ if TYPE_CHECKING:
         TracingPort,
     )
 
+__all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
+
 BRONZE_WRITE_ERRORS = (
     OSError,
     RuntimeError,
@@ -56,53 +64,6 @@ BRONZE_REQUIRED_METADATA_FIELDS = (
     "run_type",
     "batch_id",
 )
-
-
-@dataclass(frozen=True, slots=True)
-class _BronzeWriteRequest:
-    """Normalized request carried through one Bronze write pipeline."""
-
-    records: Iterator[bytes]
-    provider: str
-    entity: str
-    date: datetime
-    batch_id: BatchID
-    run_id: RunID
-    run_type: RunType
-    ingestion_ts: datetime
-    source_metadata: SourceMetadata | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class _BronzeWritePrepared:
-    """Prepared context used by internal bronze write stages."""
-
-    records_iter: Iterator[bytes]
-    record_list: list[bytes]
-    date_str: str
-    relative_path: str
-    metadata: JsonDict  # Any: lightweight write-side metadata sidecar payload
-    full_path: Path
-    meta_path: Path
-
-
-@dataclass(frozen=True, slots=True)
-class _BronzeWriteArtifacts:
-    """Measured write output produced before post-write side effects."""
-
-    record_count: int
-    uncompressed_size: int
-    compressed_size: int
-
-
-@dataclass(frozen=True, slots=True)
-class _BronzeWritePostwriteContext:
-    """All data needed by Bronze post-write side effects."""
-
-    request: _BronzeWriteRequest
-    prepared: _BronzeWritePrepared
-    write_artifacts: _BronzeWriteArtifacts
-    duration: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -138,6 +99,7 @@ class BronzeWriter(
         "run_type",
         "batch_id",
     )
+    BRONZE_METADATA_SIDECAR_SUFFIX = ".meta.json"
 
     def __init__(
         self,
@@ -212,7 +174,7 @@ class BronzeWriter(
     ) -> BronzeWriteResult:
         """Write raw records to Bronze layer (JSONL + zstd)."""
         return await self._write_bronze_with_tracing(
-            _BronzeWriteRequest(
+            BronzeWriteRequest(
                 records=records,
                 provider=provider,
                 entity=entity,
@@ -227,7 +189,7 @@ class BronzeWriter(
 
     async def _write_bronze_with_tracing(
         self,
-        request: _BronzeWriteRequest,
+        request: BronzeWriteRequest,
     ) -> BronzeWriteResult:
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_bronze") as span:
@@ -243,7 +205,7 @@ class BronzeWriter(
             write_artifacts = await self._write_bronze_data_and_sidecar(prepared)
             duration = time.perf_counter() - start_time
             await self._run_bronze_post_write_actions(
-                _BronzeWritePostwriteContext(
+                BronzeWritePostwriteContext(
                     request=request,
                     prepared=prepared,
                     write_artifacts=write_artifacts,
@@ -265,58 +227,43 @@ class BronzeWriter(
                 span=span,
             )
 
-    def _prepare_bronze_write(
-        self,
-        request: _BronzeWriteRequest,
-    ) -> _BronzeWritePrepared:
-        """Validate inputs and build the prepared write context."""
+    def _validate_bronze_request_inputs(self, request: BronzeWriteRequest) -> None:
+        """Keep Bronze request validation explicit in the writer facade."""
         self._validate_bronze_names(request.provider, request.entity)
         self._validate_records_iterator(request.records)
         self._validate_utc_datetime(request.date, "date")
         self._validate_utc_datetime(request.ingestion_ts, "ingestion_ts")
 
-        validated_records = iter(request.records)
-        if self.validate_json:
-            validated_records = self._validate_json_records(validated_records)
+    def _build_bronze_metadata(
+        self,
+        run_id: RunID,
+        run_type: RunType,
+        effective_ts: datetime,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+    ) -> dict[str, str]:
+        """Expose Bronze metadata construction on the writer facade."""
+        return BronzeWriterMetadataMixin._build_bronze_metadata(
+            self,
+            run_id=run_id,
+            run_type=run_type,
+            effective_ts=effective_ts,
+            provider=provider,
+            entity=entity,
+            batch_id=batch_id,
+        )
 
-        date_str = request.date.strftime("%Y-%m-%d")
-        filename = f"batch_{date_str}_{request.batch_id}.jsonl.zst"
-        relative_path = self._resolve_bronze_path(
-            request.provider,
-            request.entity,
-            date_str,
-            filename,
-        )
-        metadata = self._build_bronze_metadata(
-            request.run_id,
-            request.run_type,
-            request.ingestion_ts,
-            request.provider,
-            request.entity,
-            request.batch_id,
-        )
-        if self.save_json:
-            record_list = list(validated_records)
-            records_iter = iter(record_list)
-        else:
-            record_list = cast(list[bytes], [])
-            records_iter = validated_records
-
-        full_path = self.base_path / relative_path
-        meta_path = full_path.with_suffix(".zst.meta.json")
-        return _BronzeWritePrepared(
-            records_iter=records_iter,
-            record_list=record_list,
-            date_str=date_str,
-            relative_path=relative_path,
-            metadata=metadata,
-            full_path=full_path,
-            meta_path=meta_path,
-        )
+    def _prepare_bronze_write(
+        self,
+        request: BronzeWriteRequest,
+    ) -> BronzeWritePrepared:
+        """Validate inputs and build the prepared write context."""
+        return prepare_bronze_write(self, request)
 
     async def _run_bronze_post_write_actions(
         self,
-        context: _BronzeWritePostwriteContext,
+        context: BronzeWritePostwriteContext,
     ) -> None:
         """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
         request = context.request
@@ -372,8 +319,8 @@ class BronzeWriter(
 
     async def _write_bronze_data_and_sidecar(
         self,
-        prepared: _BronzeWritePrepared,
-    ) -> _BronzeWriteArtifacts:
+        prepared: BronzeWritePrepared,
+    ) -> BronzeWriteArtifacts:
         """Write compressed JSONL data and metadata sidecar to disk."""
         loop = asyncio.get_running_loop()
 
@@ -387,8 +334,8 @@ class BronzeWriter(
             return count, size
 
         record_count, uncompressed_size = await loop.run_in_executor(None, _write_task)
-        return _BronzeWriteArtifacts(
+        return build_bronze_write_artifacts(
+            full_path=prepared.full_path,
             record_count=record_count,
             uncompressed_size=uncompressed_size,
-            compressed_size=prepared.full_path.stat().st_size,
         )

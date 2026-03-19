@@ -1,89 +1,30 @@
 # ChEMBL Subcellular Fraction Pipeline Specification
 
-*Version 1.0.0 | Aligned with RULES.md v5.24*
+> **Status**: Historical deep spec. Current canonical contract lives in
+> [../../providers/chembl/subcellular-fraction.md](../../providers/chembl/subcellular-fraction.md)
+> and
+> [../../../../configs/entities/chembl/subcellular_fraction.yaml](../../../../configs/entities/chembl/subcellular_fraction.yaml).
 
-----------------------------------------------------------------------
+## Current Canonical Contract Summary
 
-## 1. Identification
+| Parameter | Value |
+|-----------|-------|
+| Pipeline ID | `chembl_subcellular_fraction` |
+| Provider | `chembl` |
+| Entity | `subcellular_fraction` |
+| Business Primary Keys | `["entity_id"]` |
+| Loading Strategy | `full_scan_only` |
+| Silver Format | `delta` |
+| Gold Format | `delta` |
+| Gold Mode | `scd2` |
 
-| Parameter         | Value                                         |
-| ----------------- | --------------------------------------------- |
-| **Pipeline ID**   | `chembl_subcellular_fraction`                 |
-| **Provider**      | ChEMBL (EBI)                                  |
-| **Entity**        | subcellular-fraction                          |
-| **Source Entity** | assay                                         |
-| **Strategy**      | Derived Entity (Extracted from Assay records) |
+## Notes
 
-----------------------------------------------------------------------
-
-## 2. Business Context
-
-### 2.1. Entity Purpose
-
-Subcellular Fractions represent specific **cellular compartments** (like mitochondria, nucleus, or microsomes) used in assays:
-
-- **Biological Context**: Normalizes compartmental data across different assays.
-- **Reference Table**: Provides a unique list of fractions used in the database for filtering and analysis.
-
-### 2.2. Use Cases
-
-1. **Compartmental Analysis**: Study drug effects specifically on mitochondrial or microsomal enzymes.
-1. **Assay Enrichment**: Group assays by the subcellular fraction used in the experiment.
-
-----------------------------------------------------------------------
-
-## 3. Extraction & Transformation
-
-This is a **derived entity** created by extracting unique values from the `assay-subcellular-fraction` field in the `chembl_assay` pipeline.
-
-### 3.1. Fields
-
-| #   | Field                  | Type    | Nullable | Description                          |
-| --- | ---------------------- | ------- | -------- | ------------------------------------ |
-| 1   | `subcellular-fraction` | string  | No       | Primary key (normalized name)        |
-| 2   | `assay-count`          | integer | Yes      | Number of assays using this fraction |
-| 3   | `example-assay-id`     | string  | Yes      | Reference to an example assay        |
-
-----------------------------------------------------------------------
-
-## 4. Validation
-
-### 4.1. Pandera Schema
-
-```python
-class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
-    """Gold schema for ChEMBL Subcellular Fraction entity."""
-
-    # Primary key
-    subcellular-fraction: Series[str] = pa.Field(
-        nullable=False,
-        str-length={"min-value": 1, "max-value": 200},
-    )
-
-    # Statistics
-    assay-count: Series[float] | None = pa.Field(
-        nullable=True,
-        coerce=True,
-    )
-
-    # Example reference
-    example-assay-id: Series[str] | None = pa.Field(
-        nullable=True,
-    )
-
-    class Config:
-        strict = True
-```
-
-----------------------------------------------------------------------
-
-## 5. Pipeline Configuration
-
-```yaml
-pipeline_name: chembl_subcellular_fraction
-provider: chembl
-entity_type: subcellular-fraction
-version: "1.0.0"
-
-business_primary_keys: ["subcellular_fraction"]
-```
+- Current canonical field names are snake_case, for example `entity_id`,
+  `assay_subcellular_fraction`, `assay_id`, `target_id`, `assay_type`,
+  `assay_organism`.
+- This page no longer republishes older dashed labels such as
+  `subcellular-fraction`, `assay-count`, or `example-assay-id` as the active
+  contract.
+- For derived-entity behavior, validation rules, and filter settings, use the
+  provider reference and entity config above.

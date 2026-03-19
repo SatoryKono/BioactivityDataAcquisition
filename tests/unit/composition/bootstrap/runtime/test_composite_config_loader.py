@@ -184,6 +184,57 @@ class TestCompositeConfigColumnGroups:
         with pytest.raises(ValueError, match="Invalid composite config 'broken'"):
             composite_runtime.load_composite_config("broken")
 
+    def test_rejects_missing_composite_version(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Composite runtime must fail fast when composite.version is omitted."""
+        config_path = tmp_path / "missing-version.yaml"
+        _write_yaml(
+            config_path,
+            {
+                "schema_version": "2.0.0",
+                "composite": {
+                    "name": "publication",
+                    "seed": {
+                        "pipeline": "chembl_publication",
+                        "output_keys": ["publication_id", "doi"],
+                        "silver_table": "silver/chembl/publication",
+                    },
+                    "enrichers": [
+                        {
+                            "pipeline": "crossref_publication",
+                            "join_keys": ["doi"],
+                            "silver_table": "silver/crossref/publication",
+                        }
+                    ],
+                    "merge": {
+                        "output": {
+                            "silver": "silver/composite/publication",
+                            "gold": "gold/composite/publication",
+                        },
+                        "sort_by": {
+                            "silver": ["entity_id", "publication_id"],
+                            "gold": ["entity_id", "publication_id"],
+                        },
+                    },
+                },
+            },
+        )
+
+        monkeypatch.setattr(
+            composite_runtime,
+            "_resolve_composite_config_path",
+            lambda _name: config_path,
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="Invalid composite config 'missing-version'",
+        ):
+            composite_runtime.load_composite_config("missing-version")
+
 
 class TestCompositeDQExternalization:
     """Tests for externalized composite DQ config loading.

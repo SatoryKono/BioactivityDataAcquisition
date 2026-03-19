@@ -18,6 +18,7 @@ _RETIRED_PROVIDER_PAGINATION_KEYS: tuple[str, ...] = (
     "max_url_length",
     "cursor_pagination",
 )
+_RETIRED_SOURCE_ROOT_KEYS: tuple[str, ...] = ("batch_size",)
 
 
 def _deep_merge(
@@ -157,6 +158,14 @@ def _normalize_source_pagination(
     provider_config: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize pagination and batch configuration."""
+    retired_root_keys = [key for key in _RETIRED_SOURCE_ROOT_KEYS if key in source]
+    if retired_root_keys:
+        raise ValueError(
+            "Retired source root pagination aliases are not supported: "
+            f"{', '.join(sorted(retired_root_keys))}. "
+            "Use source.provider_config.pagination.id_batch_size instead."
+        )
+
     retired_keys = [
         key for key in _RETIRED_PROVIDER_PAGINATION_KEYS if key in provider_config
     ]

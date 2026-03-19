@@ -10,13 +10,14 @@ This guide will walk you through setting up a complete local development environ
 Ensure you have the following tools installed on your machine:
 
 - **Python 3.11** or higher: [Download](https://www.python.org/downloads/)
+- **uv** (recommended): Python package/environment manager used by the maintained install path.
 - **Git**: Version control.
 - **Make** (optional): Build automation tool. On Windows, use Chocolatey or WSL, or run commands manually.
 
 **Not required:**
 
-- Docker Desktop (Local-Only architecture)
-- Redis, MinIO, Postgres (replaced with local file system and in-memory locks)
+- Docker Desktop
+- Redis, MinIO, Postgres
 
 ## 1. Clone the Repository
 
@@ -56,6 +57,10 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -e .[dev,tracing]
 ```
+
+If you prefer the convenience aggregate target, `make setup-dev` is still valid;
+it currently expands to `make install` plus dependency verification. The
+repository-local `scripts/dev/dev_setup.sh` is not part of the supported path.
 
 ## 3. Configuration
 

@@ -1,7 +1,6 @@
 version: 1.0.0
 provider: chembl
 source:
-    batch_size: 10
     provider_config:
         provider: chembl
         base_url: https://www.ebi.ac.uk/chembl/api/data

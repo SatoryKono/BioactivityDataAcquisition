@@ -1,0 +1,16 @@
+version: "1.0.0"
+policy_scope: "thin_packages"
+description: >
+  Machine-readable exceptions for source-to-test same-path ownership policy.
+  Thin packages under src/bioetl/ MUST have a same-path tests/unit/.../test_<module>.py
+  sibling unless explicitly exempted here with canonical owner tests.
+
+exemptions:
+  - source: src/bioetl/__main__.py
+    policy: aggregate_owner
+    reason: >
+      Package entrypoint is exercised through CLI-facing tests rather than a
+      mirrored unit module. It stays exempt from same-path thin-package policy.
+    owner_tests:
+      - tests/unit/interfaces/cli/test_cli_helpers.py
+      - tests/unit/interfaces/cli/test_cli_commands_basic.py

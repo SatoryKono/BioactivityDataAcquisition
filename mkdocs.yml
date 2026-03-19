@@ -115,8 +115,8 @@ nav:
             -   "Module Dependency Map": 02-architecture/generated/module-dependency-map.md
             -   Diagrams:
                     -   "Overview": 02-architecture/diagrams/guide/index.md
-                    -   "Diagramming Policy": 02-architecture/diagrams/governance/policy.md
-                    -   "Diagram Catalog": 02-architecture/diagrams/governance/diagram-catalog.md
+                    -   "Diagram Policy": 02-architecture/diagrams/governance/policy.md
+                    -   "Historical Diagram Catalog": 02-architecture/diagrams/governance/diagram-catalog.md
                     -   "Diagram Index": 02-architecture/diagrams/governance/diagrams-index.md
                     -   "Views Inventory": 02-architecture/diagrams/governance/diagram-views-inventory.md
                     -   "Workflow Guide": 02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md
@@ -343,14 +343,13 @@ nav:
             -   "Architecture Extras":
                     -   "Diagram Policy (Canonical)": 02-architecture/diagrams/governance/policy.md
                     -   "Architecture Diagrams (Legacy Index)": 02-architecture/diagrams/guide/architecture-reference.md
-                    -   "MMD README": 02-architecture/diagrams/README.md
-                    -   "MMD Diagram Descriptions": 02-architecture/diagrams/descriptions/class-summary.md
-                    -   "MMD Foundation with Descriptions": 02-architecture/diagrams/bundles/foundation.bundle.md
-                    -   "MMD Class with Descriptions": 02-architecture/diagrams/bundles/class.bundle.md
+                    -   "Diagram Root README": 02-architecture/diagrams/README.md
+                    -   "Class Diagram Description Overview": 02-architecture/diagrams/descriptions/class-summary.md
+                    -   "Foundation Bundle": 02-architecture/diagrams/bundles/foundation.bundle.md
+                    -   "Class Bundle": 02-architecture/diagrams/bundles/class.bundle.md
                     # SVG/PNG Index pages excluded from nav: images are gitignored
                     # (generated locally). Including INDEX.md breaks mkdocs --strict.
                     # Local generated SVG index pages are under docs/02-architecture/diagrams/{category}/svg/.
-                    -   "MMD Class Diagram Descriptions": 02-architecture/diagrams/descriptions/class-summary.md
                     -   "Diagram Views Plan": 02-architecture/diagrams/governance/diagram-views-plan.md
                     -   "Diagram Prompt Expansion": 02-architecture/diagrams/governance/PROMPT-diagram-expansion.md
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
@@ -369,11 +368,15 @@ nav:
                     -   "Pipeline Legacy: SemanticScholar Publication": 04-reference/pipelines/semanticscholar-publication.md
             -   "Operations Extras":
                     -   "Monitoring Guide": 05-operations/01-monitoring-guide.md
-                    -   "Kubernetes Guide (Experimental)": 05-operations/deployment/deployment-guide.md
-                    -   "K8S Summary (Experimental)": 05-operations/deployment/k8s-summary.md
-                    -   "MCP Neo4j Memory Setup": 05-operations/deployment/neo4j-memory-setup.md
-                    -   "MCP Neo4j Memory Summary": 05-operations/deployment/mcp-neo4j-memory-summary.md
-                    -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/mcp-neo4j-memory-final-summary.md
+                    -   "Deployment & Tooling Extras":
+                            -   "Overview": 05-operations/deployment/README.md
+                            -   "Experimental Kubernetes":
+                                    -   "Guide": 05-operations/deployment/deployment-guide.md
+                                    -   "Summary": 05-operations/deployment/k8s-summary.md
+                            -   "Auxiliary Neo4j / MCP Tooling":
+                                    -   "Neo4j Memory Setup": 05-operations/deployment/neo4j-memory-setup.md
+                                    -   "MCP Neo4j Memory Summary": 05-operations/deployment/mcp-neo4j-memory-summary.md
+                                    -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/mcp-neo4j-memory-final-summary.md
                     -   "Endpoint Validation Checklist": 05-operations/verification/endpoint-validation-checklist.md
                     -   "VCR Test Tasks": 05-operations/verification/vcr-test-tasks.md
             -   "Diagram Descriptions":

@@ -94,7 +94,9 @@ def test_build_execution_support_services_wires_expected_collaborators(
     mock_chained_key_resolver.assert_called_once_with(logger)
     mock_progress_service_cls.assert_called_once_with(logger)
     mock_result_service_cls.assert_called_once_with(logger)
-    assert mock_dependency_coordinator_cls.call_args.kwargs["delta_reader"] is delta_reader
+    assert (
+        mock_dependency_coordinator_cls.call_args.kwargs["delta_reader"] is delta_reader
+    )
     assert mock_enrichment_coordinator_cls.call_args.kwargs["dq_config"] is not None
 
 
@@ -262,9 +264,9 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
     result = build_merge_dependencies(
         config=_make_config(column_groups=("priority",)),
         logger=logger,
-        resolve_join_how=lambda strategy: "left"
-        if strategy is MergeStrategy.LEFT_OUTER
-        else "inner",
+        resolve_join_how=lambda strategy: (
+            "left" if strategy is MergeStrategy.LEFT_OUTER else "inner"
+        ),
         normalize_join_keys=frozenset({"doi", "pmid"}),
         system_columns_to_drop=frozenset({"_run_id"}),
     )
@@ -291,4 +293,6 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
     assert join_adapter_kwargs["join_type_resolver"]() == "left"
     assert mock_dependency_joiner_cls.call_args.kwargs["join_executor"] is join_executor
     assert mock_join_planner_cls.call_args.kwargs["join_executor"] is join_executor
-    assert mock_join_planner_cls.call_args.kwargs["dependency_joiner"] is dependency_joiner
+    assert (
+        mock_join_planner_cls.call_args.kwargs["dependency_joiner"] is dependency_joiner
+    )

@@ -22,7 +22,7 @@ registries:
   god_object:
     ProviderRegistry:
       value: 1
-      owner: jules
+      owner: "@bioetl-architecture"
       reason: "Central registry for provider creation and metadata. Defined in src/bioetl/composition/providers/provider_registry.py."
       classification: technical_debt
       linked_rf: RF-001

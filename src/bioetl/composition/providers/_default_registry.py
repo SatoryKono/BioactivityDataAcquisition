@@ -74,7 +74,9 @@ class DefaultRegistryMethod(Generic[R]):
             target = obj
         else:
             if objtype is None:
-                raise AssertionError("objtype is required for class-level registry access")
+                raise AssertionError(
+                    "objtype is required for class-level registry access"
+                )
             target = objtype._get_default()
 
         @wraps(self._func)

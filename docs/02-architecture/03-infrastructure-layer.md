@@ -37,6 +37,61 @@
 - Старые implementation-module paths (`pubmed.pubmed_client`,
   `semanticscholar.adapter`) не являются sanctioned import path для нового кода.
 
+#### 2.1.1. Provider Adapter Package Contract
+
+Package contract для `infrastructure/adapters/{provider}/` строится вокруг роли
+адаптера в Hexagonal Architecture, а не вокруг искусственной симметрии между
+провайдерами.
+
+**Обязательный минимум для provider package:**
+
+- `__init__.py` как package-root facade.
+- Один явный adapter entrypoint для primary adapter surface. В текущем проекте это
+  обычно `client.py`.
+- Primary adapter class должен экспортироваться через provider package root; новый
+  first-party код должен импортировать именно package root, а не implementation
+  modules.
+
+**Допустимые расширения внутри provider package:**
+
+- `exceptions.py`, если есть transport/runtime-specific errors.
+- `models.py` и узкие provider-local model modules.
+- Модули вроде `query_builder.py`, `response_parser.py`, `response_mapper.py`,
+  `fetch_flow.py`, `health_probe.py`, `*_adapter_mixin.py`, если они отражают
+  устойчивую infrastructure-роль.
+- Private underscored modules, если они остаются локальной реализацией package и не
+  становятся новым public import surface.
+
+**Чего в provider package быть не должно:**
+
+- application transformers;
+- composition factories или bootstrap wiring;
+- domain aggregate/value-object implementation details;
+- vague shared helpers вроде `utils.py`/`common.py`, если они фактически нужны
+  нескольким провайдерам. Такие вещи должны жить в
+  `bioetl.infrastructure.adapters.common` или других общих infrastructure seams.
+
+**Growth path policy:**
+
+- Малые provider packages могут оставаться почти single-entrypoint пакетами.
+- Более зрелые пакеты могут расти через тематические модули: query/fetch,
+  response parsing, fallback, health/retry, provider-local models.
+- Рост должен идти по устойчивым темам, а не через случайное накопление helpers на
+  одном уровне каталога.
+
+**Retained compatibility seams в текущем цикле:**
+
+- `pubmed/client.py` и `semanticscholar/client.py` остаются retained public seams
+  для import stability.
+- `pubmed/pubmed_client.py` и `semanticscholar/adapter.py` считаются legacy
+  implementation-module paths и не являются sanctioned import path для нового
+  first-party кода.
+
+Нормативные guardrails для этой политики закреплены в
+`tests/architecture/test_adapter_contracts.py`,
+`tests/architecture/test_retained_adapter_entrypoint_policy.py` и
+[07-compatibility-facade-inventory.md](07-compatibility-facade-inventory.md).
+
 **Обязанности адаптера:**
 
 - Управление HTTP-соединениями через `UnifiedHTTPClient`.
@@ -44,7 +99,7 @@
 - Преобразование ответа API в стандартизированный формат (словари Python).
 - Реализация `health_check()` для проверки доступности API.
 
-#### 2.1.1. Унифицированный HTTP-клиент
+#### 2.1.2. Унифицированный HTTP-клиент
 
 **Все адаптеры используют унифицированную HTTP-инфраструктуру:**
 
@@ -175,7 +230,7 @@ PubMedAdapter                         (pubchempy)
 | `retention_manager.py`         | `RetentionPolicy`          | VACUUM retention и Delta maintenance    |
 | `composite_checkpoint_writer.py`| `FileCompositeCheckpointWriter`| Запись composite checkpoint             |
 
-#### 2.1.2. Adapter Support Infrastructure
+#### 2.1.3. Adapter Support Infrastructure
 
 **Error handling:**
 

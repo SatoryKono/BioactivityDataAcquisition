@@ -1,7 +1,6 @@
 version: 1.0.0
 provider: openalex
 source:
-    batch_size: 50
     provider_config:
         provider: openalex
         base_url: https://api.openalex.org

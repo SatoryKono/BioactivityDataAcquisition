@@ -68,7 +68,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.pipeline_runner_service import (
         PipelineRunnerService,
     )
-    from bioetl.composition.registry import PipelineRegistry
+    from bioetl.composition import PipelineRegistry
 
 # Compatibility patch point retained for tests and legacy callers.
 get_default_registry = _build_cli_registry

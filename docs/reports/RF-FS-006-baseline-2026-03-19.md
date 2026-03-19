@@ -5,6 +5,10 @@
 **Связанные находки:** `FS-003`  
 **Основной scope:** `src/bioetl/composition/bootstrap/runtime/`, `src/bioetl/composition/factories/storage/`, `src/bioetl/domain/transformations/`, а также metadata wrapper chain вокруг `composite_metadata_helpers`
 
+## Актуализация на 2026-03-19 16:58
+
+По runtime/bootstrap и storage-кандидатам baseline не изменился, но metadata-related часть стала лучше подготовлена к аудиту. После `Wave 3C` у `metadata_assemblers.py`, `dq_report_models.py`, `export_models.py`, `medallion_maintenance_mixin.py` и `medallion_types.py` появились прямые owner tests, поэтому разбор metadata wrapper chain теперь можно делать с меньшим риском сломать "ничей" участок без диагностического контура.
+
 ## Цель
 
 `RF-FS-006` должен сократить структурный шум, но без ложной агрессии. По baseline есть набор статически “подозрительных” модулей, у которых не найдено входящих импортов в обычном проектном графе. Часть из них может быть реально мёртвой. Часть может использоваться динамически. Часть может существовать как compatibility façade или тонкий wrapper, который уже потерял смысл после прошлых refactor-wave. Ошибка здесь очень типична: удалить файлы на основе только static import scan и потом ломать runtime bootstrap, lazy loading или косвенные integration paths. Поэтому ключевая задача `RF-FS-006` — не удаление само по себе, а перевод каждого кандидата в подтверждённый статус: `dead`, `dynamic`, `retain`, `merge`.
@@ -17,6 +21,8 @@
 - `src/bioetl/domain/transformations/coercion.py`, `drift.py`, `hashing.py`, `quality.py`;
 - `src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py` как часть wrapper chain вместе с `src/bioetl/application/services/metadata_assemblers_helpers.py` и `src/bioetl/domain/services/composite_metadata_helpers.py`;
 - дополнительно стоит держать в уме `src/bioetl/composition/types.py`, хотя он не обязательно войдёт в первую волну cleanup.
+
+При этом важно: появление direct tests для application-side metadata owners не означает, что wrapper chain уже получила статус `merge` или `retain`. Это только снижает риск confirm/cleanup wave, но не заменяет её.
 
 ## Почему задача важна
 

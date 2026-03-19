@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.infrastructure.config_loader import (
+from bioetl.infrastructure.config.pipeline_config_api import (
     PipelineConfigReadPayload,
     load_pipeline_config,
 )
@@ -207,8 +207,8 @@ def test_load_pipeline_config_cache_isolated_by_working_directory(
 def test_load_pipeline_config_runs_read_normalize_validate_map_in_order(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Loader orchestration should remain explicit and stage-ordered."""
-    import bioetl.infrastructure.config_loader as module
+    """Canonical pipeline API orchestration should remain explicit and stage-ordered."""
+    import bioetl.infrastructure.config.pipeline_config_api as module
 
     module.load_pipeline_config.cache_clear()
     events: list[str] = []

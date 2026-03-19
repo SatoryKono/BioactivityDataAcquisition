@@ -20,6 +20,87 @@ from typing import Any
 import pytest
 import yaml
 
+DEBT_SCORECARD_YAML = Path("configs/quality/debt_scorecard.yaml")
+EXEMPTIONS_YAML = Path("configs/quality/architecture_metric_exemptions.yaml")
+
+
+def _load_debt_scorecard() -> dict[str, Any]:
+    """Load debt scorecard config as mapping for coarse-budget synchronization."""
+    if not DEBT_SCORECARD_YAML.exists():
+        pytest.skip("Debt scorecard YAML not found")
+
+    with open(DEBT_SCORECARD_YAML, encoding="utf-8") as f:
+        raw = yaml.safe_load(f) or {}
+    if not isinstance(raw, dict):
+        pytest.fail("Debt scorecard YAML must be a mapping")
+    return raw
+
+
+def _enforceable_baseline(scorecard: dict[str, Any]) -> dict[str, Any]:
+    """Resolve the live enforceable baseline section from scorecard governance."""
+    governance = scorecard.get("governance", {})
+    section_name = "baseline"
+    if isinstance(governance, dict):
+        baseline_policy = governance.get("baseline_policy", {})
+        if isinstance(baseline_policy, dict):
+            configured = baseline_policy.get("enforceable_section")
+            if isinstance(configured, str) and configured.strip():
+                section_name = configured.strip()
+
+    baseline = scorecard.get(section_name, {})
+    if not isinstance(baseline, dict):
+        pytest.fail(f"scorecard.{section_name} must be a mapping")
+    return baseline
+
+
+def _resolve_coarse_budget(metric_name: str) -> int:
+    """Resolve explicit coarse budget from debt scorecard governance."""
+    scorecard = _load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    if not isinstance(governance, dict):
+        pytest.fail("scorecard.governance must be a mapping")
+
+    coarse = governance.get("coarse_budgets", {})
+    if not isinstance(coarse, dict):
+        pytest.fail("scorecard.governance.coarse_budgets must be a mapping")
+
+    metric = coarse.get(metric_name)
+    if not isinstance(metric, dict):
+        pytest.fail(f"scorecard.governance.coarse_budgets.{metric_name} missing")
+
+    max_count = metric.get("max_count")
+    if not isinstance(max_count, int):
+        pytest.fail(
+            "scorecard.governance.coarse_budgets."
+            f"{metric_name}.max_count must be an int"
+        )
+    return max_count
+
+
+def _resolve_registry_budget(registry_name: str) -> int:
+    """Resolve enforceable registry budget from debt scorecard baseline."""
+    scorecard = _load_debt_scorecard()
+    baseline = _enforceable_baseline(scorecard)
+    by_registry = baseline.get("by_registry", {})
+    if not isinstance(by_registry, dict):
+        pytest.fail("scorecard baseline.by_registry must be a mapping")
+
+    value = by_registry.get(registry_name)
+    if not isinstance(value, int):
+        pytest.fail(f"scorecard baseline.by_registry.{registry_name} must be an int")
+    return value
+
+
+def _resolve_total_exemptions_budget() -> int:
+    """Resolve enforceable total exemption budget from debt scorecard baseline."""
+    scorecard = _load_debt_scorecard()
+    baseline = _enforceable_baseline(scorecard)
+    total = baseline.get("total_exemptions")
+    if not isinstance(total, int):
+        pytest.fail("scorecard baseline.total_exemptions must be an int")
+    return total
+
+
 # ---------------------------------------------------------------------------
 # Metric 1: workflow_yaml_invalid_count (target: 0)
 # ---------------------------------------------------------------------------
@@ -51,9 +132,6 @@ def test_workflow_yaml_validity() -> None:
 # ---------------------------------------------------------------------------
 
 
-MAX_RUFF_ERRORS = 0
-
-
 def _resolve_quality_tool_command(module_name: str) -> list[str] | None:
     """Resolve a deterministic command for running a Python quality tool.
 
@@ -70,6 +148,7 @@ def _resolve_quality_tool_command(module_name: str) -> list[str] | None:
 
 def test_ruff_error_count() -> None:
     """Ruff linter error count must not exceed the ratchet budget."""
+    max_ruff_errors = _resolve_coarse_budget("ruff_error_count")
     tool_cmd = _resolve_quality_tool_command("ruff")
     if tool_cmd is None:
         pytest.skip("ruff executable/runtime not found")
@@ -90,17 +169,14 @@ def test_ruff_error_count() -> None:
         errors = []
 
     error_count = len(errors)
-    assert error_count <= MAX_RUFF_ERRORS, (
-        f"ruff_error_count={error_count} exceeds budget {MAX_RUFF_ERRORS}\n"
+    assert error_count <= max_ruff_errors, (
+        f"ruff_error_count={error_count} exceeds budget {max_ruff_errors}\n"
         + "\n".join(
             f"  - {e.get('filename', '?')}:{e.get('location', {}).get('row', '?')}: "
             f"{e.get('code', '?')} {e.get('message', '')}"
             for e in errors[:20]
         )
     )
-
-
-MAX_MYPY_ERRORS = 0
 
 
 @pytest.mark.slow
@@ -112,6 +188,7 @@ def test_mypy_error_count() -> None:
     Run explicitly with: pytest -m slow
     Skipped by default in addopts (``-m 'not benchmark and not slow'``).
     """
+    max_mypy_errors = _resolve_coarse_budget("mypy_error_count")
     tool_cmd = _resolve_quality_tool_command("mypy")
     if tool_cmd is None:
         pytest.skip("mypy executable/runtime not found")
@@ -130,8 +207,8 @@ def test_mypy_error_count() -> None:
 
     error_lines = [line for line in result.stdout.splitlines() if ": error:" in line]
     error_count = len(error_lines)
-    assert error_count <= MAX_MYPY_ERRORS, (
-        f"mypy_error_count={error_count} exceeds budget {MAX_MYPY_ERRORS}\n"
+    assert error_count <= max_mypy_errors, (
+        f"mypy_error_count={error_count} exceeds budget {max_mypy_errors}\n"
         + "\n".join(f"  - {line}" for line in error_lines[:20])
     )
 
@@ -139,8 +216,6 @@ def test_mypy_error_count() -> None:
 # ---------------------------------------------------------------------------
 # Metric 3: architecture_skip_count (target: ≤24, ratchet)
 # ---------------------------------------------------------------------------
-
-MAX_ARCHITECTURE_SKIPS = 7
 
 
 class _SkipMarkerCounter:
@@ -168,6 +243,7 @@ def test_architecture_skip_count() -> None:
     architecture tests.  Only counts marker-based skips (@pytest.mark.skip,
     @pytest.mark.skipif), not runtime pytest.skip() calls.
     """
+    max_architecture_skips = _resolve_coarse_budget("architecture_skip_count")
     counter = _SkipMarkerCounter()
     # Collect (but don't run) architecture tests to count skip markers.
     pytest.main(
@@ -186,8 +262,8 @@ def test_architecture_skip_count() -> None:
         plugins=[counter],
     )
 
-    assert counter.skipped <= MAX_ARCHITECTURE_SKIPS, (
-        f"architecture_skip_count={counter.skipped} exceeds budget {MAX_ARCHITECTURE_SKIPS}"
+    assert counter.skipped <= max_architecture_skips, (
+        f"architecture_skip_count={counter.skipped} exceeds budget {max_architecture_skips}"
     )
 
 
@@ -289,12 +365,10 @@ def test_inline_adapter_construction_budget(
 # Metric 5: exemptions_total (baseline: 92, ratchet)
 # ---------------------------------------------------------------------------
 
-MAX_EXEMPTIONS_TOTAL = 92
-EXEMPTIONS_YAML = Path("configs/quality/architecture_metric_exemptions.yaml")
-
 
 def test_exemptions_total_budget() -> None:
     """Total exemption count must not exceed the ratchet budget."""
+    max_exemptions_total = _resolve_total_exemptions_budget()
     if not EXEMPTIONS_YAML.exists():
         pytest.skip("Exemptions YAML not found")
 
@@ -310,8 +384,8 @@ def test_exemptions_total_budget() -> None:
         total += count
 
     breakdown = ", ".join(f"{k}={v}" for k, v in sorted(per_registry.items()))
-    assert total <= MAX_EXEMPTIONS_TOTAL, (
-        f"exemptions_total={total} exceeds budget {MAX_EXEMPTIONS_TOTAL}\n"
+    assert total <= max_exemptions_total, (
+        f"exemptions_total={total} exceeds budget {max_exemptions_total}\n"
         f"Breakdown: {breakdown}"
     )
 
@@ -319,9 +393,6 @@ def test_exemptions_total_budget() -> None:
 # ---------------------------------------------------------------------------
 # Metric 6: files_over_loc_threshold + class_size_exemption_count
 # ---------------------------------------------------------------------------
-
-MAX_FILE_SIZE_EXEMPTIONS = 26
-MAX_CLASS_SIZE_EXEMPTIONS = 24
 
 
 def _count_registry_entries(registry_name: str) -> int:
@@ -336,17 +407,19 @@ def _count_registry_entries(registry_name: str) -> int:
 
 def test_file_size_exemption_count() -> None:
     """File size exemption count must not exceed ratchet budget."""
+    max_file_size_exemptions = _resolve_registry_budget("file_size_limits")
     count = _count_registry_entries("file_size_limits")
-    assert count <= MAX_FILE_SIZE_EXEMPTIONS, (
-        f"files_over_loc_threshold={count} exceeds budget {MAX_FILE_SIZE_EXEMPTIONS}"
+    assert count <= max_file_size_exemptions, (
+        f"files_over_loc_threshold={count} exceeds budget {max_file_size_exemptions}"
     )
 
 
 def test_class_size_exemption_count() -> None:
     """Class size exemption count must not exceed ratchet budget."""
+    max_class_size_exemptions = _resolve_registry_budget("class_size")
     count = _count_registry_entries("class_size")
-    assert count <= MAX_CLASS_SIZE_EXEMPTIONS, (
-        f"class_size_exemption_count={count} exceeds budget {MAX_CLASS_SIZE_EXEMPTIONS}"
+    assert count <= max_class_size_exemptions, (
+        f"class_size_exemption_count={count} exceeds budget {max_class_size_exemptions}"
     )
 
 
@@ -591,8 +664,6 @@ def test_architecture_test_p95_duration_tracked() -> None:
 # ---------------------------------------------------------------------------
 # Metric 12: scorecard_registry_sync (governance debt automation)
 # ---------------------------------------------------------------------------
-
-DEBT_SCORECARD_YAML = Path("configs/quality/debt_scorecard.yaml")
 
 
 def test_scorecard_baseline_matches_registry() -> None:

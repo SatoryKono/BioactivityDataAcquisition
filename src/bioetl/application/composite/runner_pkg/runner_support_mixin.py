@@ -13,11 +13,15 @@ from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )
+from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
+    CompositeResultBuildRequest,
+    build_composite_result,
+    finalize_composite_result,
+    log_composite_completion,
+    prepare_composite_result_context,
+)
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
-)
-from bioetl.application.composite.runner_pkg.runner_helpers import (
-    calculate_had_warnings,
 )
 from bioetl.application.composite.runner_pkg.runner_models import (
     CompositeExecutionContext,
@@ -56,28 +60,19 @@ class CompositeRunnerSupportMixin:
         artifacts: CompositeExecutionContext,
     ) -> CompositeResult:
         """Build the final CompositeResult."""
-        context = self._prepare_composite_result_context(artifacts)
-        self._log_composite_completion(context)
-        return self._finalize_composite_result(context)
+        return build_composite_result(
+            request=self._create_result_build_request(artifacts),
+            logger=self._logger,
+        )
 
     def _prepare_composite_result_context(
         self: _CompositeRunnerSupportHostProtocol,
         artifacts: CompositeExecutionContext,
     ) -> _PreparedCompositeResultContext:
         """Resolve completion metadata before final CompositeResult assembly."""
-        completed_at = datetime.now(tz=UTC)
-        started = self._started_at or completed_at
-        had_warnings = calculate_had_warnings(
-            artifacts.enrichment_results,
-            frozenset(self._config.required_enrichers),
-            self._config.name,
-            self._logger,
-        )
-        return _PreparedCompositeResultContext(
-            artifacts=artifacts,
-            completed_at=completed_at,
-            total_duration=(completed_at - started).total_seconds(),
-            had_warnings=had_warnings,
+        return prepare_composite_result_context(
+            request=self._create_result_build_request(artifacts),
+            logger=self._logger,
         )
 
     def _log_composite_completion(
@@ -85,36 +80,35 @@ class CompositeRunnerSupportMixin:
         context: _PreparedCompositeResultContext,
     ) -> None:
         """Emit the canonical completion log payload for composite runs."""
-        log_kwargs: dict[str, object] = {
-            "composite": self._config.name,
-            "run_id": self._run_id_str,
-            "duration_seconds": context.total_duration,
-        }
-        if context.had_warnings:
-            log_kwargs["status"] = "completed_with_warnings"
-            log_kwargs["had_warnings"] = True
-        self._logger.info(PipelineEvent.COMPLETE, **log_kwargs)
+        log_composite_completion(
+            request=self._create_result_build_request(context.artifacts),
+            context=context,
+            logger=self._logger,
+        )
 
     def _finalize_composite_result(
         self: _CompositeRunnerSupportHostProtocol,
         context: _PreparedCompositeResultContext,
     ) -> CompositeResult:
         """Assemble the final CompositeResult from the prepared completion context."""
-        artifacts = context.artifacts
-        return CompositeResult(
+        return finalize_composite_result(
+            request=self._create_result_build_request(context.artifacts),
+            context=context,
+        )
+
+    def _create_result_build_request(
+        self: _CompositeRunnerSupportHostProtocol,
+        artifacts: CompositeExecutionContext,
+    ) -> CompositeResultBuildRequest:
+        """Build an explicit result-assembly request for completion helpers."""
+        return CompositeResultBuildRequest(
+            artifacts=artifacts,
             composite_name=self._config.name,
-            composite_run_id=self._run_id_str,
-            seed_result=artifacts.seed_result,
-            dependency_results=artifacts.dependency_results,
-            enrichment_results=artifacts.enrichment_results,
-            merge_result=artifacts.merge_result,
-            total_duration_seconds=context.total_duration,
+            run_id=self._run_id_str,
             started_at=self._started_at,
-            completed_at=context.completed_at,
-            had_warnings=context.had_warnings,
             original_run_id=self._original_run_id,
-            _required_enrichers=frozenset(self._config.required_enrichers),
-            _required_dependencies=frozenset(self._config.required_dependencies),
+            required_enrichers=frozenset(self._config.required_enrichers),
+            required_dependencies=frozenset(self._config.required_dependencies),
         )
 
     def _validate_config_consistency(

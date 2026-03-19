@@ -85,7 +85,9 @@ class TestCheckBusinessRulesDirect:
         ) -> tuple[bool, int | None]:
             raise ValueError("synthetic evaluation failure")
 
-        monkeypatch.setattr(_checks_business, "_evaluate_single_rule", _raise_value_error)
+        monkeypatch.setattr(
+            _checks_business, "_evaluate_single_rule", _raise_value_error
+        )
 
         result = check_business_rules(
             df,

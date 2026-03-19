@@ -54,8 +54,7 @@ class BatchWriteStoragePort(Protocol):
         run_type: RunType,
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None = None,
-    ) -> BronzeWriteResult:
-        ...
+    ) -> BronzeWriteResult: ...
 
     async def write_silver(
         self,
@@ -69,8 +68,7 @@ class BatchWriteStoragePort(Protocol):
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
         key_nullability_rules: list[KeyNullabilityRule] | None = None,
-    ) -> SilverWriteResult | None:
-        ...
+    ) -> SilverWriteResult | None: ...
 
     async def write_gold(
         self,
@@ -85,8 +83,7 @@ class BatchWriteStoragePort(Protocol):
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[object] | None = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @dataclass(frozen=True, slots=True)

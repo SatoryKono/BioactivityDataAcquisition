@@ -93,9 +93,7 @@ class TestPipelineRunExecutionService:
         assert result.error_message is None
         assert result.error_type is None
         metrics_extractor.extract_metrics.assert_called_once_with(runner)
-        run_logger.warning.assert_called_once_with(
-            "Pipeline was gracefully shut down"
-        )
+        run_logger.warning.assert_called_once_with("Pipeline was gracefully shut down")
 
     @pytest.mark.asyncio
     async def test_expected_runtime_error_is_captured_and_logged(

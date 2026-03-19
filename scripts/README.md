@@ -69,6 +69,23 @@ python scripts/qa/check_c901_baseline.py --target src/bioetl  # still works
 - Run all repo checks:
   - `python -m scripts.repo all`
 
+## Architecture Drift Repair
+
+Use project-local commands for architecture docs and compatibility drift:
+
+```bash
+./.venv/Scripts/python.exe -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
+./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update
+./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_documentation_sync.py -q
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --configs
+```
+
+Canonical repair flow:
+
+1. `dependency-map drift` -> regenerate only through `scripts/qa/generate_architecture_dependency_map.py --update`.
+2. `compatibility/documentation drift` -> verify against `docs/02-architecture/07-compatibility-facade-inventory.md` and rerun the targeted architecture tests above.
+3. Historical files under `docs/reports/` explain past waves, but active repair guidance lives in `docs/02-architecture/**`, `docs/03-guides/**`, and this `scripts/README.md`.
+
 ## Launcher
 
 Use `scripts/run.py` for discovery and consistent invocation:
@@ -110,6 +127,14 @@ check-terminology  Terminology linting
 report-dep-map     Generate/check architecture dependency map
 report-hotspots    Generate hotspot degradation report
 calibrate-hotspots Calibrate hotspot budgets
+```
+
+High-frequency sync commands:
+
+```bash
+python scripts/qa/generate_architecture_dependency_map.py --check
+python scripts/qa/generate_architecture_dependency_map.py --update
+python scripts/docs/check_doc_links.py --configs
 ```
 
 ### scripts.schema

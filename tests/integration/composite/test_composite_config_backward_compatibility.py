@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import yaml
+import pytest
+from pydantic import ValidationError
 
 from bioetl.infrastructure.schemas.composite_config import (
     CompositeConfigFileSchema,
@@ -43,10 +45,9 @@ def test_new_composite_yaml_validates_against_strict_contract() -> None:
     assert schema.composite.version == "1.0.0"
 
 
-def test_legacy_composite_yaml_supported_via_compatibility_path() -> None:
-    """Old format (without composite.version) stays compatible during window."""
+def test_legacy_composite_yaml_without_version_is_rejected() -> None:
+    """Old format without composite.version is no longer accepted."""
     payload = yaml.safe_load(_base_composite_yaml(with_version=False))
 
-    schema = validate_composite_config_payload(payload)
-
-    assert schema.composite.version == "1.0.0"
+    with pytest.raises(ValidationError, match="version"):
+        validate_composite_config_payload(payload)
