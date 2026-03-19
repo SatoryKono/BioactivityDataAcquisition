@@ -136,28 +136,24 @@ def validate_exemption_target_references(
     for registry_name, entries in sorted(registries.items()):
         if not isinstance(entries, dict):
             continue
+
         if registry_name in _CLASS_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="class",
-                        symbols_by_module=classes_by_module,
-                        global_counts=class_counts,
-                        errors=errors,
-                    )
+            kind, by_mod, counts = "class", classes_by_module, class_counts
         elif registry_name in _FUNCTION_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="function",
-                        symbols_by_module=functions_by_module,
-                        global_counts=function_counts,
-                        errors=errors,
-                    )
+            kind, by_mod, counts = "function", functions_by_module, function_counts
+        else:
+            continue
+
+        for key in sorted(entries):
+            if isinstance(key, str):
+                _validate_symbol_key_reference(
+                    registry_name=registry_name,
+                    key=key,
+                    symbol_kind=kind,
+                    symbols_by_module=by_mod,
+                    global_counts=counts,
+                    errors=errors,
+                )
 
     return errors
 
