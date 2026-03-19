@@ -204,6 +204,7 @@ class PipelineRegistry:
         with self._lock:
             self._registry.clear()
 
+
 def create_registry() -> PipelineRegistry:
     """Create a new isolated registry instance.
 
