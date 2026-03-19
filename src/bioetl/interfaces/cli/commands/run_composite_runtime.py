@@ -1,15 +1,11 @@
-"""Compatibility shim for run-composite runtime module."""
+"""Compatibility shim aliasing the canonical run-composite runtime module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.composite.runtime import (
-    build_runtime_config,
-    echo_composite_startup,
-    parse_enrich_only,
+# from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import (
+    CompositeRuntimeConfig,  # noqa: F401
 )
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = [
-    "build_runtime_config",
-    "echo_composite_startup",
-    "parse_enrich_only",
-]
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.composite.runtime")

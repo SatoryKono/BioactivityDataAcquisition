@@ -1,25 +1,7 @@
-"""Thin wrapper re-exporting canonical CLI execution-policy helpers."""
+"""Compatibility shim aliasing the canonical CLI execution-policy module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    BatchRunResultProtocol,
-    CLI_ENTRYPOINT_TYPED_ERRORS,
-    build_failure_context,
-    handle_cli_failure,
-    map_batch_run_result_to_exit_code,
-    map_run_status_to_exit_code,
-    map_success_flag_to_exit_code,
-    render_failure_context,
-)
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = [
-    "BatchRunResultProtocol",
-    "CLI_ENTRYPOINT_TYPED_ERRORS",
-    "build_failure_context",
-    "handle_cli_failure",
-    "map_batch_run_result_to_exit_code",
-    "map_run_status_to_exit_code",
-    "map_success_flag_to_exit_code",
-    "render_failure_context",
-]
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.shared.execution_policy")

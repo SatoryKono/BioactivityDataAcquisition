@@ -22,54 +22,54 @@ from bioetl.composition.execution_api import push_metrics_to_gateway
 from bioetl.composition.services_api import (
     get_pipeline_runner_service as _get_pipeline_runner_service_impl,
 )
-from bioetl.interfaces.cli.commands.health_server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-)
-from bioetl.interfaces.cli.commands.health_server_integration import (
-    echo_health_server_info as _echo_health_server_info_impl,
-)
-from bioetl.interfaces.cli.commands.health_server_integration import (
-    health_server_context as _health_server_context_impl,
-)
-from bioetl.interfaces.cli.commands.metrics_server_integration import (
+from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started as _ensure_metrics_server_started_impl,
 )
-from bioetl.interfaces.cli.commands.run_command_policy import (
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+)
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+    echo_health_server_info as _echo_health_server_info_impl,
+)
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+    health_server_context as _health_server_context_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.command_policy import (
     RunCommandInput,
     handle_cli_failure,
     map_status_to_exit_code,
     run_command_flow,
 )
-from bioetl.interfaces.cli.commands.run_helpers import (
+from bioetl.interfaces.cli.commands.domains.run.result_flow import (
+    finalize_run_result as _finalize_run_result_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.result_flow import (
+    present_run_health_info as _present_run_health_info_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.result_presenter import (
+    echo_run_result as _echo_run_result,
+)
+from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
+    build_run_command_input as _build_run_command_input_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
+    build_run_pipeline_callable as _build_run_pipeline_callable_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
+    run_pipeline_async as _run_pipeline_async_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
+    run_prepared_request_async as _run_prepared_request_async_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.service_access import (
+    get_cli_run_orchestration_service as _get_cli_run_orchestration_service_impl,
+)
+from bioetl.interfaces.cli.commands.domains.run.support import (
     get_runner_logger,
     handle_destructive_run_confirmation,
     resolve_context_registry,
     show_cleanup_preview,
     validate_pipeline_name,
-)
-from bioetl.interfaces.cli.commands.run_result_flow_helpers import (
-    finalize_run_result as _finalize_run_result_impl,
-)
-from bioetl.interfaces.cli.commands.run_result_flow_helpers import (
-    present_run_health_info as _present_run_health_info_impl,
-)
-from bioetl.interfaces.cli.commands.run_result_presenter import (
-    echo_run_result as _echo_run_result,
-)
-from bioetl.interfaces.cli.commands.run_runtime_helpers import (
-    build_run_command_input as _build_run_command_input_impl,
-)
-from bioetl.interfaces.cli.commands.run_runtime_helpers import (
-    build_run_pipeline_callable as _build_run_pipeline_callable_impl,
-)
-from bioetl.interfaces.cli.commands.run_runtime_helpers import (
-    run_pipeline_async as _run_pipeline_async_impl,
-)
-from bioetl.interfaces.cli.commands.run_runtime_helpers import (
-    run_prepared_request_async as _run_prepared_request_async_impl,
-)
-from bioetl.interfaces.cli.commands.run_service_access import (
-    get_cli_run_orchestration_service as _get_cli_run_orchestration_service_impl,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error

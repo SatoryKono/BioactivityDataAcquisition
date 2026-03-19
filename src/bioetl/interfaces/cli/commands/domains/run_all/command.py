@@ -18,7 +18,7 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     echo_health_server_info,
     health_server_context,
 )
-from bioetl.interfaces.cli.commands.domains.run.helpers import resolve_context_registry
+from bioetl.interfaces.cli.commands.domains.run.support import resolve_context_registry
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     build_run_all_command_input,
     exit_with_code,
@@ -35,28 +35,28 @@ from bioetl.interfaces.cli.commands.domains.run_all.execution import (
 from bioetl.interfaces.cli.commands.domains.run_all.execution import (
     run_batch_with_policy as _run_batch_with_policy_impl,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     emit_run_all_listing,
     emit_run_all_preview,
     should_prompt_for_destructive_run,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     determine_batch_exit_code as _determine_exit_code,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     echo_batch_summary as _echo_batch_summary_impl,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     filter_pipelines_by_provider as _filter_pipelines_by_provider,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     get_available_providers as _get_available_providers,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     handle_destructive_confirmation as _handle_destructive_confirmation_impl,
 )
-from bioetl.interfaces.cli.commands.domains.run_all.helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     validate_provider as _validate_provider,
 )
 from bioetl.interfaces.cli.formatters import echo_error, echo_info

@@ -146,7 +146,7 @@ The following field names have been renamed:
 - `structure-standard-inchi` → `standard-inchi`
 - `structure-standard-inchi-key` → `inchi-key`
 
-Use the migration script: `src/tools/scripts/migrations/rename_structure_fields.py`
+Use the migration script: `scripts/archive/migrations/rename_structure_fields.py`
 
 ---
 

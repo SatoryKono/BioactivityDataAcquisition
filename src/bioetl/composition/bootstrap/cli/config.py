@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services import ConfigService
 from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.infrastructure.config import (
     get_settings,
@@ -46,7 +47,11 @@ def bootstrap_config_service(
         >>> logger.info("environment", env=settings.env)
     """
     noop_logger = create_noop_logger()
-    effective_registry = registry if registry is not None else get_default_registry()
+    if registry is None:
+        register_all_pipelines()
+        effective_registry = get_default_registry()
+    else:
+        effective_registry = registry
 
     return ConfigService(
         logger=noop_logger,

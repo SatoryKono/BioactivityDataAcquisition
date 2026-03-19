@@ -10,12 +10,12 @@ from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import DeltaTransactionError
+from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _DeltaWriteRequest,
     _load_delta_table,
     _MergeExecutionTimeoutError,
 )
-from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort

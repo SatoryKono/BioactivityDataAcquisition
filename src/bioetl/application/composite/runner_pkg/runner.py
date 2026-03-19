@@ -9,11 +9,11 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_pkg.runner_execution_orchestrator import (
-    CompositeLockedExecutionRequest,
+    CompositeLockedExecutionContext,
     execute_locked_run_phases,
 )
 from bioetl.application.composite.runner_pkg.runner_key_flow import (
-    CompositeEnrichmentKeyRequest,
+    CompositeEnrichmentKeyContext,
     extract_enrichment_keys,
 )
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
@@ -225,7 +225,7 @@ class CompositePipelineRunner(
         result = await extract_enrichment_keys(
             key_extractor=self._key_extractor,
             logger=self._logger,
-            request=CompositeEnrichmentKeyRequest(
+            request=CompositeEnrichmentKeyContext(
                 composite_name=self._config.name,
                 silver_table=self._config.seed.silver_table,
                 output_keys=tuple(self._config.seed.output_keys),
@@ -240,7 +240,7 @@ class CompositePipelineRunner(
         """Execute composite phases in the canonical lock-held order."""
         result = await execute_locked_run_phases(
             self,
-            CompositeLockedExecutionRequest(state=state),
+            CompositeLockedExecutionContext(state=state),
         )
         return result.state, result.execution_context
 

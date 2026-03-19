@@ -1,7 +1,7 @@
-"""Thin wrapper re-exporting the canonical run command."""
+"""Compatibility shim aliasing the canonical run command module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.run.command import run
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = ["run"]
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.run.command")

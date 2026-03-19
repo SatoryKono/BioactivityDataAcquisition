@@ -94,20 +94,27 @@ This registry is the measurable compatibility-surface baseline for CI. It is the
 Snapshot for this cycle:
 
 - Curated inventory rows: `11`
-- Measured tracked modules: `36`
-- Measured-only modules outside curated inventory: `25`
+- Measured tracked modules: `46`
+- Measured-only modules outside curated inventory: `35`
 
 Tracked module paths:
 
 - `src/bioetl/application/composite/dependency_join_support.py`
-- `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/application/core/batch_execution_lifecycle.py`
 - `src/bioetl/application/core/batch_execution_run_service.py`
 - `src/bioetl/application/core/batch_execution_state_service.py`
+- `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/pipeline/construction.py`
+- `src/bioetl/composition/registry.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
+- `src/bioetl/infrastructure/adapters/pubmed/client.py`
+- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
+- `src/bioetl/infrastructure/config_loader.py`
+- `src/bioetl/infrastructure/quality/_decomposition_validation.py`
+- `src/bioetl/infrastructure/quality/exemptions_registry.py`
+- `src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py`
 - `src/bioetl/interfaces/cli/commands/archive.py`
 - `src/bioetl/interfaces/cli/commands/cleanup.py`
 - `src/bioetl/interfaces/cli/commands/execution_policy.py`
@@ -120,21 +127,24 @@ Tracked module paths:
 - `src/bioetl/interfaces/cli/commands/quarantine_execution.py`
 - `src/bioetl/interfaces/cli/commands/quarantine_rendering.py`
 - `src/bioetl/interfaces/cli/commands/quarantine_support.py`
+- `src/bioetl/interfaces/cli/commands/run.py`
+- `src/bioetl/interfaces/cli/commands/run_all.py`
 - `src/bioetl/interfaces/cli/commands/run_all_command_policy.py`
+- `src/bioetl/interfaces/cli/commands/run_all_execution.py`
+- `src/bioetl/interfaces/cli/commands/run_all_helpers.py`
+- `src/bioetl/interfaces/cli/commands/run_command_policy.py`
 - `src/bioetl/interfaces/cli/commands/run_composite.py`
 - `src/bioetl/interfaces/cli/commands/run_composite_execution.py`
 - `src/bioetl/interfaces/cli/commands/run_composite_helpers.py`
 - `src/bioetl/interfaces/cli/commands/run_composite_runtime.py`
+- `src/bioetl/interfaces/cli/commands/run_helpers.py`
+- `src/bioetl/interfaces/cli/commands/run_result_flow_helpers.py`
+- `src/bioetl/interfaces/cli/commands/run_result_presenter.py`
+- `src/bioetl/interfaces/cli/commands/run_runtime_helpers.py`
+- `src/bioetl/interfaces/cli/commands/run_service_access.py`
 - `src/bioetl/interfaces/cli/commands/vacuum.py`
 - `src/bioetl/interfaces/cli/registry_helpers.py`
-- `src/bioetl/composition/registry.py`
-- `src/bioetl/infrastructure/config_loader.py`
-- `src/bioetl/infrastructure/quality/_decomposition_validation.py`
-- `src/bioetl/infrastructure/quality/exemptions_registry.py`
-- `src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py`
 - `src/bioetl/application/composite/merger.py`
-- `src/bioetl/infrastructure/adapters/pubmed/client.py`
-- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
 
 ## Usage Notes
 

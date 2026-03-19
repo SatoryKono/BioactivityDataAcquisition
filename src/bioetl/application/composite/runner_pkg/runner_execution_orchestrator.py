@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
-    "CompositeLockedExecutionRequest",
+    "CompositeLockedExecutionContext",
     "CompositeLockedExecutionResult",
     "execute_locked_run_phases",
 ]
@@ -61,7 +61,7 @@ class _CompositeLockedExecutionHostProtocol(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class CompositeLockedExecutionRequest:
+class CompositeLockedExecutionContext:
     """Normalized state handoff into lock-held phase execution."""
 
     state: CompositeCheckpointState
@@ -77,7 +77,7 @@ class CompositeLockedExecutionResult:
 
 async def execute_locked_run_phases(
     host: _CompositeLockedExecutionHostProtocol,
-    request: CompositeLockedExecutionRequest,
+    request: CompositeLockedExecutionContext,
 ) -> CompositeLockedExecutionResult:
     """Execute composite phases in the canonical lock-held order."""
     state, seed_result = await host._execute_seed_phase(request.state)
@@ -99,3 +99,6 @@ async def execute_locked_run_phases(
             merge_result=merge_result,
         ),
     )
+
+
+CompositeLockedExecutionRequest = CompositeLockedExecutionContext

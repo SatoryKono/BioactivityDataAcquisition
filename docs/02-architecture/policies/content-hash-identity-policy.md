@@ -14,7 +14,7 @@ Cross-reference:
 - RULES.md §2.8.1, §6.1
 - ADR-014 (determinism context)
 - `src/bioetl/domain/constants.py` (`META_FIELDS`)
-- `src/bioetl/domain/transformations.py` (`_should_include_field`)
+- `src/bioetl/domain/transformations/hashing.py` (`_should_include_field`)
 
 ## Canonical Rule
 

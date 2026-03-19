@@ -1,19 +1,7 @@
-"""Thin wrapper re-exporting canonical quarantine helpers."""
+"""Compatibility shim aliasing the canonical quarantine support module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.quarantine.support import (
-    _inspect_quarantine,
-    _purge_quarantine,
-    _replay_quarantine,
-    _resolve_quarantine_record,
-    _show_quarantine_stats,
-)
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = [
-    "_inspect_quarantine",
-    "_purge_quarantine",
-    "_replay_quarantine",
-    "_resolve_quarantine_record",
-    "_show_quarantine_stats",
-]
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.quarantine.support")

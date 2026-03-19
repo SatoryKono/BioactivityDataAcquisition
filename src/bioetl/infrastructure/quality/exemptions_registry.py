@@ -38,7 +38,7 @@ def validate_exemption_key_normalization(
     path: Path | str | None = None,
 ) -> list[str]:
     """Compatibility wrapper preserving façade-level `_project_root` patch seam."""
-    policy_module = cast(Any, _policy_module)
+    policy_module = cast(Any, _policy_module)  # Any: dynamic compat patch target
     original = policy_module._project_root
     policy_module._project_root = _project_root
     try:
@@ -51,7 +51,7 @@ def validate_exemption_target_references(
     path: Path | str | None = None,
 ) -> list[str]:
     """Compatibility wrapper preserving façade-level `_project_root` patch seam."""
-    targets_module = cast(Any, _targets_module)
+    targets_module = cast(Any, _targets_module)  # Any: dynamic compat patch target
     original = targets_module._project_root
     targets_module._project_root = _project_root
     try:
@@ -66,11 +66,13 @@ def validate_exemptions_registry(
     today: date | None = None,
 ) -> tuple[list[str], list[str]]:
     """Compatibility wrapper preserving façade-level patch seams."""
-    policy_module = cast(Any, _policy_module)
-    targets_module = cast(Any, _targets_module)
+    policy_module = cast(Any, _policy_module)  # Any: dynamic compat patch target
+    targets_module = cast(Any, _targets_module)  # Any: dynamic compat patch target
     original_policy_root = policy_module._project_root
     original_targets_root = targets_module._project_root
-    original_policy_target_validation = policy_module.validate_exemption_target_references
+    original_policy_target_validation = (
+        policy_module.validate_exemption_target_references
+    )
     policy_module._project_root = _project_root
     targets_module._project_root = _project_root
     policy_module.validate_exemption_target_references = (

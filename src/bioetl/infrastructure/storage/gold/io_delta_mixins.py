@@ -261,7 +261,9 @@ class _GoldWriterExecutorArrowMixin:
         self, records: list[GoldRecord], column_order: list[str] | None = None
     ) -> pa.Table:
         """Convert records to PyArrow table with Delta-safe null handling."""
-        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import (
+            ArrowDataConverter,
+        )
 
         converter = ArrowDataConverter(logger=self.logger)
         return converter.convert_records_to_arrow(

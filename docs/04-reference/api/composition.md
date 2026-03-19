@@ -148,8 +148,9 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | `registration` | Provider registration orchestration over internal config builders |
 | `registration_*` | Internal provider config builders; not a canonical application-facing surface |
 | `decorators` | Provider adapter decorators (circuit breaker, retry) |
-| `factory_loader` | Provider factory loading |
 | `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) |
+| `_loading` | Leaf loading helpers behind the public `loader` lifecycle |
+| `_registration_contracts` | Leaf provider assembly/loading contracts used by registration helpers |
 | `_default_registry` | Approved module-level singleton helper for default provider registry |
 
 ---

@@ -123,7 +123,7 @@ the live entity config and contract sources before describing Gold behavior.
 | Pipeline config | `configs/entities/chembl/activity.yaml` |
 | Provider config | `configs/providers/chembl.yaml` |
 | Transformer | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
-| Domain entity | `src/bioetl/domain/entities/bioactivity.py` |
+| Domain entity | `src/bioetl/domain/entities/bioactivity/_entity.py` |
 | ChEMBL adapters | `src/bioetl/infrastructure/adapters/chembl/` |
 | Canonical Gold contracts | `src/bioetl/domain/contracts/gold/` |
 | Generated contract exports | `docs/04-reference/contracts/gold/` |

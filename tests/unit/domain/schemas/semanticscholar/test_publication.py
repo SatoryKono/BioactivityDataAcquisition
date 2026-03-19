@@ -13,7 +13,9 @@ def test_semanticscholar_publication_schema_extends_publication_base_schema() ->
     assert issubclass(SemanticScholarPublicationSchema, PublicationBaseSchema)
 
 
-def test_semanticscholar_publication_schema_declares_provider_specific_columns() -> None:
+def test_semanticscholar_publication_schema_declares_provider_specific_columns() -> (
+    None
+):
     schema = SemanticScholarPublicationSchema.to_schema()
     assert "paper_id" in schema.columns
     assert "_lookup_method" in schema.columns

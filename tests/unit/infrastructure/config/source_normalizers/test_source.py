@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.config.source_normalizers.source import normalize_source_config
+from bioetl.infrastructure.config.source_normalizers.source import (
+    normalize_source_config,
+)
 
 
 def test_normalize_source_config_merges_api_and_client_aliases() -> None:
@@ -31,7 +33,9 @@ def test_normalize_source_config_merges_api_and_client_aliases() -> None:
     }
 
 
-def test_normalize_source_config_rejects_retired_source_root_pagination_aliases() -> None:
+def test_normalize_source_config_rejects_retired_source_root_pagination_aliases() -> (
+    None
+):
     raw = {"source": {"batch_size": 100}}
 
     try:

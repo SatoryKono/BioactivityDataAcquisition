@@ -1,7 +1,7 @@
-"""Compatibility shim for run helper module."""
+"""Compatibility shim aliasing the canonical run helper module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands._compat import reexport_module
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-reexport_module(__name__, "bioetl.interfaces.cli.commands.domains.run.helpers")
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.run.support")

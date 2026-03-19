@@ -20,6 +20,7 @@ __all__ = [
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.transformer_runtime.attempts import (
     transform_record_attempt,
 )
@@ -44,7 +45,6 @@ from bioetl.application.core.transformer_runtime.state import (
 from bioetl.application.core.transformer_runtime.streaming import (
     StreamingBatchProcessor,
 )
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:

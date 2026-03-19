@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.health_server_integration import (
+from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     health_server_context,
-)
-from bioetl.interfaces.cli.commands.metrics_server_integration import (
-    ensure_metrics_server_started,
 )
 
 if TYPE_CHECKING:

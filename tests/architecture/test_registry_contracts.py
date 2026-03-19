@@ -268,6 +268,7 @@ class TestRegistryFactoryProtocol:
 
     def test_pipeline_factory_protocol_is_runtime_checkable(self) -> None:
         """PipelineFactoryPort must be @runtime_checkable."""
+
         # Test by attempting isinstance() - non-runtime_checkable raises TypeError
         class DummyImpl:
             """Dummy class for testing isinstance()."""

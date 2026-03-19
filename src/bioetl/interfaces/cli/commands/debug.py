@@ -15,7 +15,7 @@ import click
 from bioetl.application.services import RunOptions, RunResult
 from bioetl.application.services.pipeline_debug_service import DebugAbortError
 from bioetl.domain.ports import StageBreakpoint
-from bioetl.interfaces.cli.commands.run_helpers import (
+from bioetl.interfaces.cli.commands.domains.run.support import (
     resolve_context_registry,
     validate_pipeline_name,
 )

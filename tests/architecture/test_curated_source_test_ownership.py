@@ -23,7 +23,9 @@ ALLOWED_PREFIXES = (
 def _load_inventory() -> dict[str, object]:
     with INVENTORY_PATH.open(encoding="utf-8") as inventory_file:
         payload = yaml.safe_load(inventory_file) or {}
-    assert isinstance(payload, dict), "source_test_owner_inventory.yaml must be a mapping"
+    assert isinstance(payload, dict), (
+        "source_test_owner_inventory.yaml must be a mapping"
+    )
     return payload
 
 
@@ -37,7 +39,9 @@ def _expected_same_path_test(source_rel: str) -> str:
 @pytest.mark.architecture
 def test_curated_source_test_owner_inventory_has_expected_shape() -> None:
     payload = _load_inventory()
-    assert payload.get("version"), "Missing version in curated source-test owner inventory"
+    assert payload.get("version"), (
+        "Missing version in curated source-test owner inventory"
+    )
     assert payload.get("policy_scope") == "curated_behavior_heavy_modules"
 
     modules = payload.get("modules")
@@ -65,7 +69,9 @@ def test_curated_source_test_owner_inventory_references_existing_files() -> None
     for row in payload["modules"]:
         source_rel = str(row["source"])
         source_path = ROOT / source_rel
-        assert source_path.exists(), f"Curated ownership source is missing: {source_rel}"
+        assert source_path.exists(), (
+            f"Curated ownership source is missing: {source_rel}"
+        )
         assert source_rel.startswith(ALLOWED_PREFIXES), (
             "Curated ownership inventory should stay limited to the RF-FS-004 "
             f"behavior-heavy scope: {source_rel}"

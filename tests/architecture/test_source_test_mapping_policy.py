@@ -16,7 +16,9 @@ INVENTORY_PATH = ROOT / "configs" / "quality" / "source_test_mapping_exceptions.
 def _load_inventory() -> dict[str, object]:
     with INVENTORY_PATH.open(encoding="utf-8") as inventory_file:
         payload = yaml.safe_load(inventory_file) or {}
-    assert isinstance(payload, dict), "source_test_mapping_exceptions.yaml must be a mapping"
+    assert isinstance(payload, dict), (
+        "source_test_mapping_exceptions.yaml must be a mapping"
+    )
     return payload
 
 
@@ -77,9 +79,7 @@ def test_thin_package_modules_have_same_path_tests_or_documented_exemption() -> 
             continue
         if source_rel in exemptions:
             continue
-        missing.append(
-            f"{source_rel} -> {expected_test.relative_to(ROOT).as_posix()}"
-        )
+        missing.append(f"{source_rel} -> {expected_test.relative_to(ROOT).as_posix()}")
 
     assert not missing, (
         "Thin-package source modules must have a same-path owner test or a "

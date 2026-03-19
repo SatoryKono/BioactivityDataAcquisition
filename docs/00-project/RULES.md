@@ -1180,11 +1180,11 @@ jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 
 ```bash
 # 1. Проверить размер и структуру компонента
-wc -l src/bioetl/path/to/file.py
-grep -c "def \|async def " src/bioetl/path/to/file.py
+wc -l <path-to-python-file>
+grep -c "def \|async def " <path-to-python-file>
 
 # 2. Проверить делегирование (признак когезии vs god object)
-grep -n "self\.-.*\." src/bioetl/path/to/file.py | head -20
+grep -n "self\.-.*\." <path-to-python-file> | head -20
 
 # 3. При необходимости сверить активные docs и текущие task/report artifacts
 rg -n "ClassName|method-name|RF-|AUD-" docs/00-project docs/02-architecture reports docs/reports
@@ -1276,13 +1276,13 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 ```bash
 # 1. Измерить размер (порог: 500 LOC)
-wc -l src/bioetl/path/to/file.py
+wc -l <path-to-python-file>
 
 # 2. Найти делегирование (> 3 компонентов = НЕ монолит)
-grep -o "self\.-[a-z-]*" src/bioetl/path/to/file.py | sort -u | wc -l
+grep -o "self\.-[a-z-]*" <path-to-python-file> | sort -u | wc -l
 
 # 3. Проверить публичные методы
-grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
+grep -c "^    def \|^    async def " <path-to-python-file>
 
 # 4. При необходимости сверить активные review/task artifacts
 rg -n "ChemblAdapter|GoldWriter|PreflightService" reports docs/00-project docs/02-architecture
@@ -1322,14 +1322,14 @@ rg -n "ChemblAdapter|GoldWriter|PreflightService" reports docs/00-project docs/0
 
 ```bash
 # Структура компонента
-wc -l src/bioetl/path/to/file.py
-grep -c "def \|async def " src/bioetl/path/to/file.py
+wc -l <path-to-python-file>
+grep -c "def \|async def " <path-to-python-file>
 
 # Делегирование (ищем вызовы сервисов)
-grep -o "self\.-[a-z-]*\." src/bioetl/path/to/file.py | sort -u
+grep -o "self\.-[a-z-]*\." <path-to-python-file> | sort -u
 
 # Импорты в модуле
-grep "^from\|^import" src/bioetl/path/to/file.py | head -20
+grep "^from\|^import" <path-to-python-file> | head -20
 
 # Тесты для компонента
 find tests -name "*.py" -exec grep -l "ClassName" {} \;

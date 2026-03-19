@@ -8,7 +8,10 @@ import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.infrastructure.storage.support.atomic_ops import AtomicWriteError, atomic_write_text
+from bioetl.infrastructure.storage.delta.resilience import (
+    DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
+    AdaptiveRetryPolicy,
+)
 from bioetl.infrastructure.storage.metadata import writer_operations as _operations
 from bioetl.infrastructure.storage.metadata.writer_operations import (
     METADATA_FILENAME,
@@ -21,9 +24,9 @@ from bioetl.infrastructure.storage.metadata.writer_operations import (
     _PreparedMetadataWrite,
     _PreparedMetadataWriteOperation,
 )
-from bioetl.infrastructure.storage.delta.resilience import (
-    DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
-    AdaptiveRetryPolicy,
+from bioetl.infrastructure.storage.support.atomic_ops import (
+    AtomicWriteError,
+    atomic_write_text,
 )
 
 if TYPE_CHECKING:

@@ -25,7 +25,7 @@ from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
-        CompositeResultBuildRequest,
+        CompositeResultBuildContext,
     )
 
 
@@ -66,7 +66,7 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
     def _create_result_build_request(
         self,
         artifacts: CompositeExecutionContext,
-    ) -> CompositeResultBuildRequest: ...
+    ) -> CompositeResultBuildContext: ...
 
     def _log_composite_completion(
         self,

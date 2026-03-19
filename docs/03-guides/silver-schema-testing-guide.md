@@ -132,7 +132,7 @@ Snapshot tests capture the **current state** of a schema and detect ANY deviatio
 ### Step 1: Create Pandera Schema
 
 ```python
-# src/bioetl/domain/schemas/provider/entity.py
+# src/bioetl/domain/schemas/{provider}/{entity}.py
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -157,7 +157,7 @@ class EntitySchema(ETLRecordSchema):
 
 ```python
 # tests/contract/silver_schemas/conftest.py
-from bioetl.domain.schemas.provider.entity import EntitySchema
+from bioetl.domain.schemas.{provider}.{entity} import EntitySchema
 
 SILVER_SCHEMAS = {
     # ... existing schemas ...
@@ -169,18 +169,18 @@ SILVER_SCHEMAS = {
 
 ```bash
 # Run tests to create initial snapshot
-pytest tests/contract/silver_schemas/test_schema_stability.py -k provider-entity
+pytest tests/contract/silver_schemas/test_schema_stability.py -k {provider}-{entity}
 
 # Verify snapshot created
-ls tests/contract/silver_schemas/snapshots/provider-entity-schema.json
+ls tests/contract/silver_schemas/snapshots/{provider}-{entity}-schema.json
 ```
 
 ### Step 4: Commit Together
 
 ```bash
-git add src/bioetl/domain/schemas/provider/entity.py
+git add src/bioetl/domain/schemas/{provider}/{entity}.py
 git add tests/contract/silver_schemas/conftest.py
-git add tests/contract/silver_schemas/snapshots/provider-entity-schema.json
+git add tests/contract/silver_schemas/snapshots/{provider}-{entity}-schema.json
 git commit -m "feat(schemas): add EntitySchema for Provider"
 ```
 

@@ -189,21 +189,39 @@ cat logs/bioetl.log | \
 # Regex: ^10\.\d{4,9}/.+$
 # Некорректное значение: "doi:10.1234/test" (префикс "doi:")
 
-# Проверить реальные DOI в Bronze
-python -c "
-import pandas as pd
-df = pd.read-parquet('data/bronze/crossref/publication.parquet')
-print('Sample DOIs:')
-print(df['doi'].dropna().head(10))
-print('\nDOIs not matching regex:')
-print(df[~df['doi'].str.match(r'^10\.\d{4,9}/.+$', na=False)]['doi'].head(10))
-"
+# Проверить реальные DOI в Bronze batch (`data/output/bronze/.../*.jsonl.zst`)
+python - <<'PY'
+import io
+import json
+import re
+from pathlib import Path
+
+import zstandard as zstd
+
+batch_path = next(
+    Path("data/output/bronze/crossref/publication").rglob("batch-*.jsonl.zst")
+)
+with batch_path.open("rb") as fh:
+    reader = io.TextIOWrapper(zstd.ZstdDecompressor().stream_reader(fh), encoding="utf-8")
+    rows = [json.loads(line) for _, line in zip(range(200), reader)]
+
+sample_dois = [row.get("doi") for row in rows if row.get("doi")][:10]
+bad_dois = [doi for doi in sample_dois if not re.match(r"^10\.\d{4,9}/.+$", doi)]
+
+print("Batch:", batch_path)
+print("Sample DOIs:")
+for doi in sample_dois:
+    print(doi)
+print("\nSample DOIs not matching regex:")
+for doi in bad_dois:
+    print(doi)
+PY
 ```
 
 **Решение:**
 - Обновить трансформер для удаления префикса `doi:`:
   ```python
-  # src/bioetl/application/transformers/crossref-transformer.py
+  # src/bioetl/application/pipelines/crossref/transformer.py
   def transform-doi(raw-doi: str) -> str:
       doi = raw-doi.strip().lower()
       if doi.startswith("doi:"):
@@ -216,16 +234,27 @@ print(df[~df['doi'].str.match(r'^10\.\d{4,9}/.+$', na=False)]['doi'].head(10))
 **Проблема 2: NULL в non-nullable полях**
 
 ```bash
-# Проверить NULL в Primary Key
-python -c "
-import pandas as pd
-df = pd.read-parquet('data/bronze/pubmed/publication.parquet')
-null-pk = df[df['pmid'].isna()]
-print(f'Records with NULL pmid: {len(null-pk)}')
-if len(null-pk) > 0:
-    print('Sample records:')
-    print(null-pk[['pmid', 'doi', 'title']].head())
-"
+# Проверить NULL в Primary Key на sample Bronze batch
+python - <<'PY'
+import io
+import json
+from pathlib import Path
+
+import zstandard as zstd
+
+batch_path = next(
+    Path("data/output/bronze/pubmed/publication").rglob("batch-*.jsonl.zst")
+)
+with batch_path.open("rb") as fh:
+    reader = io.TextIOWrapper(zstd.ZstdDecompressor().stream_reader(fh), encoding="utf-8")
+    rows = [json.loads(line) for _, line in zip(range(500), reader)]
+
+null_pk = [row for row in rows if row.get("pmid") is None]
+print(f"Batch: {batch_path}")
+print(f"Records with NULL pmid in sample: {len(null_pk)}")
+for row in null_pk[:5]:
+    print({key: row.get(key) for key in ('pmid', 'doi', 'title')})
+PY
 ```
 
 **Решение:**

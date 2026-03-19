@@ -22,6 +22,7 @@ __all__ = [
     "reset_loader",
 ]
 
+
 def load_providers(force: bool = False) -> None:
     """Load and register all providers.
 

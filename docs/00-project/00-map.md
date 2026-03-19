@@ -1,15 +1,12 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.24 | Last updated: 2026-03-13*
+*Synced with RULES.md v5.24 | Last updated: 2026-03-19*
 
-> **Documentation Update:** 2026-03-10
-> - ADR inventory refreshed to ADR-043
-> - Architecture tree paths updated to `diagrams/`
-> - Quick-start and pipeline command references aligned with current CLI
-> - Inventory-style counts trimmed to avoid stale snapshot drift
-> - Active entry points clarified: `RULES.md` and `TOOLS.md`
-> - `99-archive/README.md` kept only as a historical entrypoint
-> - Legacy `docs/INDEX.md` entry point aligned with the active rules/requirements split
+> **Documentation Update:** 2026-03-19
+> - Compatibility inventory synced with the current measured CLI shim registry
+> - Source-code map updated for the storage subpackage decomposition (`bronze/`, `silver/`, `gold/`, `metadata/`, `delta/`, `support/`)
+> - Snapshot-style file/test counts removed from active navigation blocks to reduce drift
+> - Active entry points clarified: `RULES.md`, `TOOLS.md`, and canonical layer docs in `docs/02-architecture/`
 
 ## Quick Links
 
@@ -345,7 +342,7 @@ src/bioetl/
 │   ├── services/                # Application services
 │   └── observability/           # Application-level observability
 │
-├── composition/                 # Composition Root (DI container) — 54 files
+├── composition/                 # Composition Root (DI container)
 │   ├── bootstrap/               # Bootstrap helpers
 │   │   ├── assembly/            # Storage/checkpoint assembly
 │   │   ├── cli/                 # CLI bootstrap (adr, checkpoint, config, health, ...)
@@ -356,10 +353,10 @@ src/bioetl/
 │   ├── entrypoints.py           # CLI/runner entrypoints
 │   ├── observability.py         # Observability wiring
 │   ├── registry.py              # Pipeline discovery
-│   ├── providers/               # Provider registration (6 files)
+│   ├── providers/               # Provider registration
 │   ├── services/                # Composition services
 │   ├── runtime_builders/        # Runtime builder helpers
-│   └── factories/               # Consolidated factories (11 files)
+│   └── factories/               # Consolidated factories
 │       ├── pipeline_factory.py  # Pipeline factory
 │       ├── runner_factory.py    # Runner factory
 │       ├── storage_factory.py   # Multi-layer storage factory
@@ -368,7 +365,7 @@ src/bioetl/
 │       ├── transformer_factory.py   # Transformer factory
 │       └── ...
 │
-├── infrastructure/              # I/O adapters (§1.1) — 140 files
+├── infrastructure/              # I/O adapters (§1.1)
 │   ├── adapters/                # External API clients
 │   │   ├── http/                # HTTP client infrastructure (rate limiter, circuit breaker)
 │   │   ├── chembl/              # ChEMBL API adapter (8 files)
@@ -381,16 +378,22 @@ src/bioetl/
 │   │   ├── common/              # Shared adapter utilities
 │   │   ├── decorators/          # circuit_breaker, retry decorators
 │   │   └── input/               # CSV filter reader
-│   ├── storage/                 # Data persistence (12 files)
-│   │   ├── bronze_writer.py     # JSONL + zstd writer
-│   │   ├── base_delta_writer.py # Delta Lake merge/upsert
-│   │   ├── delta_writer.py      # Delta Lake writer
-│   │   ├── silver_writer.py     # Silver layer writer
-│   │   ├── gold_writer.py       # SCD Type 2 writer
-│   │   ├── delta_reader.py      # Delta table reader
-│   │   ├── metadata_writer.py   # Metadata persistence
-│   │   └── retention_manager.py # Data retention
-│   ├── config/                  # Config loaders (package, 10 files)
+│   ├── storage/                 # Data persistence with canonical public seams + internal subpackages
+│   │   ├── bronze/              # Bronze writer internals
+│   │   ├── silver/              # Silver writer internals
+│   │   ├── gold/                # Gold writer internals
+│   │   ├── metadata/            # Metadata builder/writer internals
+│   │   ├── delta/               # Shared Delta helpers
+│   │   ├── support/             # Retention/checkpoint/atomic helpers
+│   │   ├── bronze_writer.py     # Bronze layer public writer seam
+│   │   ├── silver_writer.py     # Silver layer public writer seam
+│   │   ├── gold_writer.py       # Gold layer public writer seam
+│   │   ├── base_delta_writer.py # Shared Delta writer seam
+│   │   ├── delta_reader.py      # Delta table reader seam
+│   │   ├── metadata_builder.py  # Metadata builder seam
+│   │   ├── metadata_writer.py   # Metadata writer seam
+│   │   └── atomic.py            # Atomic file-write facade
+│   ├── config/                  # Config loaders (package)
 │   ├── locking/                 # Distributed locking
 │   │   └── memory_lock.py       # In-memory (local-only, ADR-010)
 │   ├── checkpoint/              # Checkpoint persistence
@@ -403,20 +406,20 @@ src/bioetl/
 │   ├── config_loader.py         # Main config loader
 │   └── config_merge.py          # Config merge utility
 │
-└── interfaces/                  # External interfaces — 29 files
+└── interfaces/                  # External interfaces
     ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
     │   ├── __init__.py          # CLI package entry
     │   ├── __main__.py          # CLI module entrypoint
     │   ├── exit_codes.py        # CLI exit codes
     │   ├── formatters.py        # CLI output formatting
     │   ├── main.py              # Click command group
-    │   └── commands/            # 18 CLI subcommands (run, health, config, ...)
+    │   └── commands/            # CLI command entrypoints + support/compat modules
     ├── http/                    # HTTP interfaces (health server)
     │   ├── health_server.py     # Health server
     │   └── types.py             # HTTP types
     └── orchestration/           # Orchestration helpers
 
-tests/                           # 868 test files
+tests/
 ├── unit/                        # Isolated unit tests (mock I/O)
 │   ├── domain/                  # Domain logic tests
 │   ├── application/             # Pipeline/transformer tests
@@ -424,7 +427,7 @@ tests/                           # 868 test files
 ├── integration/                 # Integration tests (VCR cassettes)
 │   └── adapters/                # HTTP adapter tests
 ├── e2e/                         # E2E tests (Local-Only arch)
-├── architecture/                # Architecture validation tests (68 tests)
+├── architecture/                # Architecture validation tests
 └── fixtures/                    # Test fixtures
     └── vcr/                     # VCR cassettes for HTTP
 ```
@@ -488,17 +491,17 @@ graph TD
 | RULES.md                 | 2026-03-13   | v5.24 (Latest)               |
 | REQUIREMENTS.md          | 2026-03-13   | v1.8 (docs governance sync)  |
 | glossary.md              | 2026-03-08   | v2.7 (Ubiquitous Language)   |
-| 00-map.md                | 2026-03-13   | v8.1 Legacy index synced |
+| 00-map.md                | 2026-03-19   | v8.2 Active navigator synced |
 | rules-summary.md         | 2026-03-13   | v5.24 Synced                 |
 | TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |
-| 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
+| 03-guides/               | 2026-03-19   | Active guides index          |
 | 03-guides/development/   | 2026-01-26   | Config schema guidelines     |
 | ADR-001..043             | 2026-03-09   | Current ADR set documented   |
-| 05-operations/runbooks/  | 2026-03-02   | 16 active runbooks (Local-Only synced) |
-| domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
-| audits/                  | 2026-02-17   | Consolidated (audit/ merged) |
+| 05-operations/runbooks/  | 2026-03-19   | Active Local-Only runbooks   |
+| 04-reference/schemas/    | 2026-03-19   | Active schema references     |
+| docs/reports/            | 2026-03-19   | Historical evidence and audits |
 | 02-architecture/diagrams/ | 2026-03-10   | Canonical diagram source tree |
 
 ---
 
-*Last updated: 2026-03-13. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*
+*Last updated: 2026-03-19. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*

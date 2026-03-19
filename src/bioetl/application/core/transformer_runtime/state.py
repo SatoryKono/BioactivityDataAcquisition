@@ -5,8 +5,8 @@ from __future__ import annotations
 from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome,
     TransformAggregationState,
-    TransformResult,
     TransformedRecord,
+    TransformResult,
     accumulate_stream_transform_result,
     accumulate_transform_outcome,
     apply_stream_transform_result_to_state,

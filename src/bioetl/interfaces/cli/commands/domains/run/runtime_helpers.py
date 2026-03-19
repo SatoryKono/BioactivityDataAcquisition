@@ -11,14 +11,14 @@ from bioetl.application.services.cli_run_orchestration_models import (
 )
 from bioetl.composition import PipelineRegistry
 from bioetl.composition.services_api import get_pipeline_runner_service
-from bioetl.interfaces.cli.commands.health_server_integration import (
+from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     health_server_context,
 )
-from bioetl.interfaces.cli.commands.metrics_server_integration import (
-    ensure_metrics_server_started,
-)
-from bioetl.interfaces.cli.commands.run_command_policy import RunCommandInput
+from bioetl.interfaces.cli.commands.domains.run.command_policy import RunCommandInput
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable

@@ -10,7 +10,7 @@ import click
 
 from bioetl.composition.resources_api import get_quarantine_manager
 from bioetl.composition.services_api import get_quarantine_service
-from bioetl.interfaces.cli.commands.quarantine_support import (
+from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _inspect_quarantine,
     _purge_quarantine,
     _replay_quarantine,

@@ -27,14 +27,15 @@ def load_provider_registry(
     registry: ProviderRegistrarProtocol,
     *,
     force: bool = False,
-    register_providers: Callable[[ProviderRegistrarProtocol], None]
-    | None = None,
+    register_providers: Callable[[ProviderRegistrarProtocol], None] | None = None,
 ) -> None:
     """Load and register all providers into the supplied registry."""
     global _loaded
 
     register_fn = (
-        register_providers if register_providers is not None else _register_default_providers
+        register_providers
+        if register_providers is not None
+        else _register_default_providers
     )
 
     if get_provider_registry_loaded_status(registry) and not force:
@@ -54,8 +55,7 @@ def load_provider_registry(
 def ensure_provider_registry_loaded(
     registry: ProviderRegistrarProtocol,
     *,
-    register_providers: Callable[[ProviderRegistrarProtocol], None]
-    | None = None,
+    register_providers: Callable[[ProviderRegistrarProtocol], None] | None = None,
 ) -> None:
     """Ensure the supplied registry has been populated with providers."""
     if not get_provider_registry_loaded_status(registry):
@@ -79,4 +79,3 @@ def reset_provider_registry_loader(
     global _loaded
     _loaded = False
     registry.clear()
-

@@ -19,8 +19,6 @@ Consolidated modules (v5.2):
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 # Data source factory and registry
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
@@ -60,15 +58,6 @@ from bioetl.composition.factories.transformer_factory import (
     register_all_transformers,
     register_transformer,
 )
-
-if TYPE_CHECKING:
-    # For static analyzers only; runtime uses lazy __getattr__ below.
-    from bioetl.composition.factories.pipeline.registry import (
-        chembl_activity_factory,
-        pubchem_compound_factory,
-        pubmed_publication_factory,
-        uniprot_protein_factory,
-    )
 
 _PIPELINE_FACTORY_EXPORTS = frozenset(
     {

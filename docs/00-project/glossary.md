@@ -480,11 +480,11 @@ These terms should NOT be used in new code:
 
 ### Lint Script
 
-A terminology linter is available at `src/tools/scripts/qa/lint_terminology.py`:
+A terminology linter is available at `scripts/qa/lint_terminology.py`:
 
 ```bash
 # Check for deprecated terms
-python src/tools/scripts/qa/lint_terminology.py src/bioetl/
+python scripts/qa/lint_terminology.py src/bioetl/
 
 # Pre-commit hook (see .pre-commit-config.yaml)
 ```

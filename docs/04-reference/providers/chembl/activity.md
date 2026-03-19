@@ -63,7 +63,7 @@ quality:
 
 ### 3.1. Определение сущности Activity
 
-**Файл:** `src/bioetl/domain/entities/bioactivity.py`
+**Файл:** `src/bioetl/domain/entities/bioactivity/_entity.py`
 
 Сущность `Bioactivity` содержит **63 dataclass-поля** (включая унаследованные служебные поля `BaseEntity`), сгруппированных по категориям:
 
@@ -462,7 +462,7 @@ class BatchResult:
 | Компонент     | Путь                                                              |
 | ------------- | ----------------------------------------------------------------- |
 | Конфигурация  | `configs/entities/chembl/activity.yaml`                          |
-| Сущность      | `src/bioetl/domain/entities/bioactivity.py`                       |
+| Сущность      | `src/bioetl/domain/entities/bioactivity/_entity.py`               |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold sink     | Disabled in `configs/entities/chembl/activity.yaml`                |
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
