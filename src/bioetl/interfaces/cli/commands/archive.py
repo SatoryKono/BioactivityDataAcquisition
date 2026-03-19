@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical maintenance archive module."""
+"""Public maintenance archive CLI entrypoint backed by the canonical module."""
 
 from __future__ import annotations
 

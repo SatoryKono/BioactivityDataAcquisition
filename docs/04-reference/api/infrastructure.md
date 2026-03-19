@@ -211,11 +211,10 @@ Each provider has its own `models.py` with API response models:
 | `BaseConfigLoader` | Abstract base for config loaders |
 | `PublicationTypeClassificationLoader` | Loads publication type classifications |
 
-`bioetl.infrastructure.config_loader` is currently a `mixed-module`: the public
-loader API is canonical, while some normalization concerns remain transitional.
-New normalization helpers should be placed in dedicated config submodules (for example,
-`bioetl.infrastructure.config.pipeline_normalizers`) instead of expanding compatibility
-branches in `config_loader.py`.
+Pipeline/source config loading is canonical through `bioetl.infrastructure.config`,
+`bioetl.infrastructure.config.pipeline_config_api`, and the dedicated normalization
+submodules under `bioetl.infrastructure.config`. New normalization helpers should land
+in those config submodules instead of reintroducing a top-level compatibility shim.
 
 ---
 

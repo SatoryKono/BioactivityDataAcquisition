@@ -66,7 +66,7 @@ Legacy file-reference keys follow explicit status rules:
 
 | File | Role |
 |------|------|
-| `src/bioetl/infrastructure/config_loader.py` | Main 3-layer merge |
+| `src/bioetl/infrastructure/config/pipeline_config_api.py` | Canonical staged pipeline-config merge |
 | `src/bioetl/infrastructure/config_merge.py` | Deep merge utility |
 | `src/bioetl/infrastructure/config/contract_policy_loader.py` | Contract defaults |
 | `src/bioetl/infrastructure/config/dq_config_loader.py` | DQ hierarchy |

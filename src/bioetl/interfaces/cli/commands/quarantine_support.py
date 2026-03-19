@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical quarantine support module."""
+"""Public quarantine support seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

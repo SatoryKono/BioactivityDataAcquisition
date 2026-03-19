@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical maintenance cleanup module."""
+"""Public maintenance cleanup CLI entrypoint backed by the canonical module."""
 
 from __future__ import annotations
 

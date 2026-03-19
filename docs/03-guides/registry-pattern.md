@@ -22,8 +22,9 @@ Governance status for the two transition-heavy surfaces:
 
 - `bioetl.composition.registry` is currently a `mixed-module` (canonical instance API +
   transitional shared default-registry compatibility).
-- `bioetl.infrastructure.config_loader` is currently a `mixed-module` (canonical loader API +
-  transitional payload-normalization compatibility).
+- pipeline config loading is now canonical through `bioetl.infrastructure.config` and
+  `bioetl.infrastructure.config.pipeline_config_api`; the historical
+  `bioetl.infrastructure.config_loader` shim has been removed.
 
 See the curated ledger in
 [`docs/02-architecture/07-compatibility-facade-inventory.md`](../02-architecture/07-compatibility-facade-inventory.md)

@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical run service-access module."""
+"""Public run service-access seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

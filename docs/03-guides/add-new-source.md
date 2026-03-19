@@ -164,7 +164,7 @@ python -m scripts.schema validate-configs --verbose
 Loadability smoke (provider + one pipeline):
 
 ```bash
-python -c "from bioetl.infrastructure.config_loader import load_pipeline_config, load_source_config; load_source_config('myprovider'); load_pipeline_config('myprovider_publication'); print('ok')"
+python -c "from bioetl.infrastructure.config import load_pipeline_config, load_source_config; load_source_config('myprovider'); load_pipeline_config('myprovider_publication'); print('ok')"
 ```
 
 Architecture/registry smoke:

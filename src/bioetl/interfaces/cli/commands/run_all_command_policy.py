@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical run-all command-policy module."""
+"""Public run-all command-policy seam backed by the canonical domain module."""
 
 from __future__ import annotations
 
