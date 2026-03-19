@@ -28,8 +28,6 @@ INVENTORY_ROW_CELL_COUNT = 10
 
 REQUIRED_TRANSITION_DEBT_PATHS = frozenset(
     {
-        "src/bioetl/interfaces/cli/registry_helpers.py",
-        "src/bioetl/composition/registry.py",
         "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py",
     }
 )
@@ -363,35 +361,6 @@ def test_registry_config_and_merge_transition_rows_capture_compatibility_policy(
         for row in _iter_inventory_cells(INVENTORY_DOC.read_text(encoding="utf-8"))
     }
     expected = {
-        "src/bioetl/interfaces/cli/registry_helpers.py": {
-            "status": "compat-shim",
-            "migration_snippets": (
-                "bioetl.interfaces.cli.registry_helpers",
-                "get_default_registry()",
-            ),
-            "allowed_call_site_snippets": (
-                "tests/unit/interfaces/cli/test_registry_helpers.py",
-                "tests/unit/interfaces/cli/commands/test_run_helpers.py",
-                "tests/unit/interfaces/cli/test_run_all_service_mock.py",
-                "tests/e2e/test_cli_safety.py",
-                "tests/integration/interfaces/test_cli_exit_code_matrix.py",
-            ),
-        },
-        "src/bioetl/composition/registry.py": {
-            "status": "mixed-module",
-            "migration_snippets": (
-                "bioetl.composition",
-                "get_default_registry()",
-            ),
-            "allowed_call_site_snippets": (
-                "direct `bioetl.composition.registry` imports stay confined to "
-                "`src/bioetl/composition/__init__.py` and "
-                "`src/bioetl/composition/registry_default.py`",
-                "ordinary tests/runtime code use `bioetl.composition` for instance APIs",
-                "direct imports of `get_default_registry()` from "
-                "`bioetl.composition.registry` stay at zero in first-party `src`",
-            ),
-        },
         "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py": {
             "status": "compat-shim",
             "migration_snippets": (
