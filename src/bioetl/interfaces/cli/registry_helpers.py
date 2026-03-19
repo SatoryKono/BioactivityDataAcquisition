@@ -1,8 +1,8 @@
 """Registry helpers for CLI entrypoints.
 
-These helpers preserve the historical ``get_default_registry`` surface for CLI
-code paths while avoiding ambient global registry state. Each call returns a
-fresh, explicitly populated ``PipelineRegistry`` instance.
+These helpers provide the canonical explicit-registry path for CLI code paths
+without ambient global registry state. Each call returns a fresh, explicitly
+populated ``PipelineRegistry`` instance.
 """
 
 from __future__ import annotations
@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 __all__ = [
     "build_cli_registry",
     "create_registry",
-    "get_default_registry",
     "register_all_pipelines",
 ]
 
@@ -54,8 +53,3 @@ def build_cli_registry() -> PipelineRegistry:
         create_registry_fn=create_registry,
         register_all_pipelines_fn=register_all_pipelines,
     )
-
-
-def get_default_registry() -> PipelineRegistry:
-    """Compatibility alias returning an explicit CLI registry instance."""
-    return build_cli_registry()

@@ -83,8 +83,6 @@ This inventory is split into two curated ledgers:
 
 | Path | Compatibility role | Canonical target | Status | Owner | Introduced in | Allowed call sites | Remove by / review date | Migration path | Exit criteria |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `src/bioetl/interfaces/cli/registry_helpers.py` | Compatibility helper module that preserves the historical CLI `get_default_registry()` surface while routing callers to explicit per-invocation registry construction. | `bioetl.interfaces.cli.registry_helpers` | `compat-shim` | `bioetl.interfaces.cli` | `2026-03 CLI registry hardening` | `src`: canonical builder imports stay confined to CLI package entrypoints and command helpers, while direct imports of `get_default_registry` from `registry_helpers` stay at zero; local compat aliases may remain only as patch points inside those modules; `tests`: `tests/unit/interfaces/cli/test_registry_helpers.py`, `tests/unit/interfaces/cli/commands/test_run_helpers.py`, `tests/unit/interfaces/cli/commands/test_debug.py`, `tests/unit/interfaces/cli/test_cli_commands.py`, `tests/unit/interfaces/cli/test_cli_helpers.py`, `tests/unit/interfaces/cli/test_run_all_command.py`, `tests/unit/interfaces/cli/test_run_all_service_mock.py`, `tests/unit/interfaces/cli/test_cli_run_all_vacuum_formatters.py`, `tests/e2e/test_cli_safety.py`, `tests/integration/interfaces/test_cli_exit_code_matrix.py` | `2026-09-30` | Use `bioetl.interfaces.cli.registry_helpers` for the canonical CLI registry seam and prefer `build_cli_registry` or explicit `registry=` injection; keep `get_default_registry()` only as the historical compatibility alias. | First-party CLI/runtime paths stop importing `get_default_registry()` from `registry_helpers` outside dedicated compatibility coverage, and explicit registry passing becomes the default wiring mode. |
-| `src/bioetl/composition/registry.py` | Mixed registry seam whose instance API is canonical only through the package-root composition surface, while `get_default_registry()` is a narrow compatibility wrapper over dedicated shared state. | `bioetl.composition` | `mixed-module` | `bioetl.composition` | `2025-12 instance-registry migration` | `src`: canonical `PipelineRegistry`, `PipelineDefinition`, `create_registry()`, and shared default-registry imports go through `bioetl.composition`; direct `bioetl.composition.registry` imports stay confined to `src/bioetl/composition/__init__.py` and `src/bioetl/composition/registry_default.py`; direct imports of `get_default_registry()` from `bioetl.composition.registry` stay at zero in first-party `src`; `tests`: ordinary tests/runtime code use `bioetl.composition` for instance APIs and shared default-registry access; direct `bioetl.composition.registry` imports stay at zero in tests | `2026-09-30` | Use `bioetl.composition` for canonical instance-registry imports and shared default-registry access; prefer `create_registry()` plus explicit registration/wiring for new code and treat the module-local `get_default_registry()` implementation as transitional compatibility only. | Shared default-registry behavior stays implemented outside the canonical instance API, direct `bioetl.composition.registry` imports stay frozen to package-root compatibility seams, and ordinary tests/runtime code use `bioetl.composition` for instance APIs and shared-registry access. |
 | `src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py` | Compatibility wrapper module that preserves older infrastructure import paths for composite metadata parsing while delegating to pure domain helpers. | `bioetl.domain.services.composite_metadata_helpers` | `compat-shim` | `bioetl.infrastructure.storage` | `2026-03 metadata helper extraction` | `src`: no direct first-party imports are expected; owning storage modules import `bioetl.domain.services.composite_metadata_helpers` directly; `tests`: direct wrapper imports stay confined to `tests/unit/infrastructure/storage/test_metadata_builder_composite_helpers.py` | `2026-09-30` | Import `bioetl.domain.services.composite_metadata_helpers` directly in production code and keep the infrastructure wrapper as transitional re-export only. | First-party `src/` imports stay at zero and direct wrapper imports remain confined to the dedicated storage compatibility test. |
 
 ### Retained Public Entrypoints
@@ -111,11 +109,11 @@ This registry is the measurable compatibility-surface baseline for CI. It is the
 
 Snapshot for this cycle:
 
-- Curated inventory rows: `10`
-- Transition debt rows: `3`
+- Curated inventory rows: `8`
+- Transition debt rows: `1`
 - Retained public entrypoints: `7`
-- Measured tracked modules: `45`
-- Measured-only modules outside curated inventory: `35`
+- Measured tracked modules: `15`
+- Measured-only modules outside curated inventory: `7`
 
 Tracked module paths:
 
@@ -125,45 +123,15 @@ Tracked module paths:
 - `src/bioetl/application/core/batch_execution_state_service.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/pipeline/construction.py`
-- `src/bioetl/composition/registry.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
+- `src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py`
+- `src/bioetl/application/composite/merger.py`
 - `src/bioetl/infrastructure/quality/_decomposition_validation.py`
 - `src/bioetl/infrastructure/quality/exemptions_registry.py`
-- `src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py`
-- `src/bioetl/interfaces/cli/commands/archive.py`
-- `src/bioetl/interfaces/cli/commands/cleanup.py`
-- `src/bioetl/interfaces/cli/commands/execution_policy.py`
-- `src/bioetl/interfaces/cli/commands/health.py`
-- `src/bioetl/interfaces/cli/commands/health_rendering.py`
-- `src/bioetl/interfaces/cli/commands/health_server_integration.py`
-- `src/bioetl/interfaces/cli/commands/maintenance.py`
-- `src/bioetl/interfaces/cli/commands/metrics_server_integration.py`
-- `src/bioetl/interfaces/cli/commands/quarantine.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_execution.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_rendering.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_support.py`
-- `src/bioetl/interfaces/cli/commands/run.py`
-- `src/bioetl/interfaces/cli/commands/run_all.py`
-- `src/bioetl/interfaces/cli/commands/run_all_command_policy.py`
-- `src/bioetl/interfaces/cli/commands/run_all_execution.py`
-- `src/bioetl/interfaces/cli/commands/run_all_helpers.py`
-- `src/bioetl/interfaces/cli/commands/run_command_policy.py`
-- `src/bioetl/interfaces/cli/commands/run_composite.py`
-- `src/bioetl/interfaces/cli/commands/run_composite_execution.py`
-- `src/bioetl/interfaces/cli/commands/run_composite_helpers.py`
-- `src/bioetl/interfaces/cli/commands/run_composite_runtime.py`
-- `src/bioetl/interfaces/cli/commands/run_helpers.py`
-- `src/bioetl/interfaces/cli/commands/run_result_flow_helpers.py`
-- `src/bioetl/interfaces/cli/commands/run_result_presenter.py`
-- `src/bioetl/interfaces/cli/commands/run_runtime_helpers.py`
-- `src/bioetl/interfaces/cli/commands/run_service_access.py`
-- `src/bioetl/interfaces/cli/commands/vacuum.py`
-- `src/bioetl/interfaces/cli/registry_helpers.py`
-- `src/bioetl/application/composite/merger.py`
 
 ## Usage Notes
 
@@ -172,6 +140,10 @@ Tracked module paths:
 - `mixed-module` rows require symbol-level migration, not whole-module deletion by default.
 - `retained-entrypoint` rows live in the retained public-entrypoint ledger and are not counted
   as transition compatibility debt for the current cycle.
+- Top-level CLI command modules under `bioetl.interfaces.cli.commands` now count as sanctioned
+  public entrypoints/support seams rather than compatibility-only shims; they are no longer
+  tracked in the measured compatibility registry unless a module is explicitly marked as
+  transition-only again.
 - For provider adapters, first-party code should prefer provider package roots when those roots are
   the documented canonical path; retained `client.py` modules remain stable compatibility seams.
 
@@ -184,12 +156,7 @@ Snapshot for the current compatibility-governance cycle:
 - `src/` direct imports of `bioetl.composition._services` outside `src/bioetl/composition/`: `0`
 - `src/` direct imports of split `bioetl.domain.composite.config_*` internals outside `src/bioetl/domain/composite/`: `0`
 - `src/` direct imports of split activity/publication value-object internals outside `src/bioetl/domain/value_objects/`: `0`
-- `src/` direct imports of `get_default_registry` from `bioetl.interfaces.cli.registry_helpers`: `0`
-- `src/` direct imports of `bioetl.composition.registry` outside `src/bioetl/composition/__init__.py` and `src/bioetl/composition/registry_default.py`: `0`
-- `src/` direct imports of `get_default_registry` from `bioetl.composition.registry` outside `src/bioetl/composition/__init__.py`: `0`
 - `src/` direct imports of `bioetl.infrastructure.storage.metadata_builder_composite_helpers`: `0`
-- `tests/` direct imports of `get_default_registry` from `bioetl.interfaces.cli.registry_helpers`: `0`
-- `tests/` direct imports of `get_default_registry` from `bioetl.composition.registry`: `0`
 - `tests/` string patch mentions of local CLI `get_default_registry` compat aliases outside dedicated CLI tests: `0`
 - `src/` direct imports of `bioetl.infrastructure.adapters.pubmed.client` outside `src/bioetl/infrastructure/adapters/pubmed/__init__.py`: `0`
 - `src/` direct imports of `bioetl.infrastructure.adapters.semanticscholar.client` outside `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`: `0`

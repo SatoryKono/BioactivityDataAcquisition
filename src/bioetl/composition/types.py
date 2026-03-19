@@ -9,7 +9,7 @@ For actual runtime imports, use the specific modules:
 - StorageAdapter: from bioetl.composition.factories.storage.storage_factory
 - PipelineRegistry: from bioetl.composition
 - create_registry: from bioetl.composition (isolated instance for tests)
-- get_default_registry: compatibility-only re-export for shared default state
+- get_default_registry: shared default-registry export from the package root
 
 Typed contexts for bootstrap functions (replacing untyped tuples):
 - PipelineCallbacksContext: transform, gold_filter, gold_transform callbacks
