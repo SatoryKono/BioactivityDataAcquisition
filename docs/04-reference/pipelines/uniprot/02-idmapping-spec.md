@@ -1,5 +1,11 @@
 # UniProt ID Mapping Pipeline Specification
 
+> **Note**: This deep spec contains historical field-label examples. Current
+> entity config uses snake_case contract fields such as `target_id`,
+> `uniprot_accession`, `mapping_status`, `organism_scientific`,
+> `organism_common`, `taxonomy_id`, `protein_name`, `gene_primary`,
+> `sequence_length`.
+
 *Version 1.2.0 | Aligned with RULES.md v5.24*
 
 ---
@@ -57,25 +63,25 @@ ID Mapping enables **cross-database identifier translation**:
 import httpx
 
 # Step 1: Submit mapping job
-submit-url = "https://rest.uniprot.org/idmapping/run"
-job-response = await client.post(submit-url, data={
+submit_url = "https://rest.uniprot.org/idmapping/run"
+job_response = await client.post(submit_url, data={
     "from": "ChEMBL",
     "to": "UniProtKB",
-    "ids": ",".join(chembl_target-ids)  # Max 100,000 IDs
+    "ids": ",".join(chembl_target_ids)  # Max 100,000 IDs
 })
-job-id = job-response.json()["jobId"]
+job_id = job_response.json()["jobId"]
 
 # Step 2: Poll for results
-status-url = f"https://rest.uniprot.org/idmapping/status/{job-id}"
+status_url = f"https://rest.uniprot.org/idmapping/status/{job_id}"
 while True:
-    status = await client.get(status-url)
+    status = await client.get(status_url)
     if status.json().get("results"):
         break
     await asyncio.sleep(1)
 
 # Step 3: Fetch results with pagination
-results-url = f"https://rest.uniprot.org/idmapping/results/{job-id}"
-results = await client.get(results-url)
+results_url = f"https://rest.uniprot.org/idmapping/results/{job_id}"
+results = await client.get(results_url)
 ```
 
 ### 3.2. Response Fields

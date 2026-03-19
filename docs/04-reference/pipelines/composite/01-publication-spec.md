@@ -1,47 +1,32 @@
-# Composite Publication Pipeline
+# Composite Publication Pipeline Specification
 
-*Updated: 2026-02-15*
+> **Status**: Historical deep spec. Current canonical contract lives in
+> [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
+> and
+> [../../../../configs/composites/publication.yaml](../../../../configs/composites/publication.yaml).
 
-## Overview
+## Current Canonical Contract Summary
 
-Merges publication data from multiple providers into a unified composite publication table.
-
-## Identity
-
-| Field | Value |
-|-------|-------|
+| Parameter | Value |
+|-----------|-------|
 | Pipeline ID | `composite_publication` |
 | Provider | `composite` |
 | Entity | `publication` |
-| Version | `1.1.0` |
-| Config | `configs/composites/publication.yaml` |
+| Seed Pipeline | `chembl_publication` |
+| Enrichers | `crossref_publication`, `openalex_publication`, `pubmed_publication`, `semanticscholar_publication` |
+| Conflict Resolution | `seed_priority` |
+| Preserve All Sources | `true` |
+| Silver Output | `data/output/silver/composite/publication` |
+| Gold Output | `data/output/gold/composite/publication` |
 
-## Seed and Enrichers
+## Notes
 
-- **Seed**: `chembl_publication`
-- **Enrichers**: `crossref_publication`, `openalex_publication`, `pubmed_publication`, `semanticscholar_publication`
-- **Dependencies**: none
-
-## Outputs
-
-| Layer | Path |
-|-------|------|
-| Silver | `data/output/silver/composite/publication` |
-| Gold | `data/output/gold/composite/publication` |
-
-## Merge Features
-
-- **Conflict Resolution**: `seed-priority` — seed (ChEMBL) values always win over enricher values
-- **Preserve All Sources**: `true` — keeps provider-qualified columns (e.g., `crossref.publication.title`)
-- **Cross-Validation**: Compares paired fields (doi, title, volume, issue, page-first, page-last, publication-year, citations-received) between seed and each enricher before merge. Mismatches trigger warnings, errors, or quarantine.
-- **Exclude Fields**: 40 redundant enricher columns excluded from output (CV-validated fields that duplicate seed values, plus low-value fields)
-
-## Related Configs
-
-- Field map & filters: `configs/composites/publication.yaml`
-
-## Related ADRs
-
-- [ADR-026](../../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
-- [ADR-028](../../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
-- [ADR-029](../../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+- Current contract uses snake_case field names such as `publication_id`,
+  `publication_doi`, `publication_pmid`, `page_first`, `page_last`,
+  `publication_year`.
+- When `preserve_all_sources: true`, provider-qualified fields such as
+  `crossref.publication.title` remain part of the merged output unless the
+  config explicitly excludes them.
+- This page no longer republishes the older dashed field tables and merge notes.
+- For implementation, filters, DQ rules, and field priority changes, use the
+  composite YAML config above.

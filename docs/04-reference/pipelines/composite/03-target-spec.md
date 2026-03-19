@@ -1,44 +1,31 @@
-# Composite Target Pipeline
+# Composite Target Pipeline Specification
 
-*Updated: 2026-02-03*
+> **Status**: Historical deep spec. Current canonical contract lives in
+> [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
+> and
+> [../../../../configs/composites/target.yaml](../../../../configs/composites/target.yaml).
 
-## Overview
+## Current Canonical Contract Summary
 
-Builds a composite target table by chaining ChEMBL target data with dependent pipelines
-(target component, protein class) and UniProt mappings.
+| Parameter | Value |
+|-----------|-------|
+| Pipeline ID | `composite_target` |
+| Provider | `composite` |
+| Entity | `target` |
+| Seed Pipeline | `chembl_target` |
+| Dependencies | `chembl_target_component`, `chembl_protein_class`, `uniprot_idmapping`, `uniprot_protein` |
+| Join Flow | seed `target_id` / `primary_component_id` plus chained dependency keys |
+| Conflict Resolution | `seed_priority` |
+| Preserve All Sources | `false` |
+| Silver Output | `data/output/silver/composite/target` |
+| Gold Output | `data/output/gold/composite/target` |
 
-## Identity
+## Notes
 
-| Field       | Value                                     |
-| ----------- | ----------------------------------------- |
-| Pipeline ID | `composite_target`                        |
-| Provider    | `composite`                               |
-| Entity      | `target`                                  |
-| Version     | `1.2.0`                                   |
-| Config      | `configs/composites/target.yaml` |
-
-## Seed and Dependencies
-
-- **Seed**: `chembl_target`
-- **Dependencies**:
-  - `chembl_target_component` (join on `component-id`)
-  - `chembl_protein_class` (chained via `key-source=chembl_target_component`)
-  - `uniprot_idmapping` (join on `target-id`)
-  - `uniprot_protein` (chained via `key-source=uniprot_idmapping`)
-- **Enrichers**: none
-
-## Outputs
-
-| Layer  | Path                                  |
-| ------ | ------------------------------------- |
-| Silver | `data/output/silver/composite/target` |
-| Gold   | `data/output/gold/composite/target`   |
-
-## Related Configs
-
-- Filters: `configs/composites/target.yaml#filters`
-
-## Related ADRs
-
-- [ADR-026](../../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
-- [ADR-028](../../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+- Current contract uses snake_case keys such as `target_id`,
+  `primary_component_id`, `uniprot_accession`, `mapping_status`.
+- Chained dependency behavior is defined in the composite YAML via `key_source`,
+  `filter_field`, and `key_filter`; this page no longer republishes the older
+  dashed dependency tables.
+- For dependency order, merge priorities, and column groups, use the composite
+  YAML config above.

@@ -1,39 +1,32 @@
-# Composite Molecule Pipeline
+# Composite Molecule Pipeline Specification
 
-*Updated: 2026-02-03*
+> **Status**: Historical deep spec. Current canonical contract lives in
+> [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
+> and
+> [../../../../configs/composites/molecule.yaml](../../../../configs/composites/molecule.yaml).
 
-## Overview
+## Current Canonical Contract Summary
 
-Merges ChEMBL molecules with PubChem compound data to produce a composite molecule table.
-
-## Identity
-
-| Field | Value |
-|-------|-------|
+| Parameter | Value |
+|-----------|-------|
 | Pipeline ID | `composite_molecule` |
 | Provider | `composite` |
 | Entity | `molecule` |
-| Version | `1.0.0` |
-| Config | `configs/composites/molecule.yaml` |
+| Seed Pipeline | `chembl_molecule` |
+| Enrichers | `pubchem_compound` |
+| Join Keys | `inchi_key`, fallback `canonical_smiles` |
+| Conflict Resolution | `seed_priority` |
+| Preserve All Sources | `true` |
+| Silver Output | `data/output/silver/composite/molecule` |
+| Gold Output | `data/output/gold/composite/molecule` |
 
-## Seed and Enrichers
+## Notes
 
-- **Seed**: `chembl_molecule`
-- **Enricher**: `pubchem_compound`
-- **Join keys**: `inchi-key` (primary), `canonical-smiles` (fallback)
-
-## Outputs
-
-| Layer | Path |
-|-------|------|
-| Silver | `data/output/silver/composite/molecule` |
-| Gold | `data/output/gold/composite/molecule` |
-
-## Related Configs
-
-- Filters: `configs/composites/molecule.yaml#filters`
-
-## Related ADRs
-
-- [ADR-026](../../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
-- [ADR-028](../../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+- Current contract uses snake_case field names such as `molecule_id`,
+  `inchi_key`, `canonical_smiles`, `pref_name`, `molecular_weight`,
+  `standard_inchi`.
+- Canonical field aliasing between ChEMBL and PubChem is maintained in the
+  composite YAML config; this page no longer republishes the older dashed join
+  notes.
+- For merge priorities, field aliases, and output groups, use the composite
+  YAML config above.

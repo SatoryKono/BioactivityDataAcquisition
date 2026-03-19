@@ -10,7 +10,7 @@
 | **Provider**       | ChEMBL                                   |
 | **Entity**         | Activity                                 |
 | **Configuration**  | `configs/entities/chembl/activity.yaml` |
-| **Primary Key**    | `activity-id`                            |
+| **Primary Key**    | `activity_id`                            |
 | **Config Version** | 1.2.0                                    |
 
 ## Description
@@ -23,27 +23,27 @@ The Activity entity contains **55 fields**. Key fields:
 
 | Field                     | Type     | Required | Description                            |
 | ------------------------- | -------- | -------- | -------------------------------------- |
-| `activity-id`             | `string` | **Yes**  | Unique activity record ID              |
-| `molecule-id`             | `string` | **Yes**  | ChEMBL molecule ID (e.g., `CHEMBL25`)  |
-| `target-id`               | `string` | No       | ChEMBL target ID                       |
-| `standard-type`           | `string` | No       | Measurement type: IC50, Ki, EC50, etc. |
-| `standard-value`          | `float`  | No       | Standardized measurement value         |
-| `standard-units`          | `string` | No       | Units: nM, uM, etc.                    |
-| `pchembl-value`           | `float`  | No       | -log10(IC50 in molar)                  |
-| `canonical-smiles`        | `string` | No       | SMILES structure                       |
-| `action-type-action-type` | `string` | No       | Action type: INHIBITOR, AGONIST, etc.  |
-| `action-type-description` | `string` | No       | Description of action type             |
-| `action-type-parent-type` | `string` | No       | Parent grouping (nullable)             |
-| `entity-id`               | `string` | Auto     | `chembl:{activity-id}`                 |
-| `content-hash`            | `string` | Auto     | SHA256 hash for versioning             |
+| `activity_id`             | `string` | **Yes**  | Unique activity record ID              |
+| `molecule_id`             | `string` | **Yes**  | ChEMBL molecule ID (e.g., `CHEMBL25`)  |
+| `target_id`               | `string` | No       | ChEMBL target ID                       |
+| `standard_type`           | `string` | No       | Measurement type: IC50, Ki, EC50, etc. |
+| `standard_value`          | `float`  | No       | Standardized measurement value         |
+| `standard_units`          | `string` | No       | Units: nM, uM, etc.                    |
+| `pchembl_value`           | `float`  | No       | -log10(IC50 in molar)                  |
+| `canonical_smiles`        | `string` | No       | SMILES structure                       |
+| `action_type`             | `string` | No       | Action type: INHIBITOR, AGONIST, etc.  |
+| `action_type_description` | `string` | No       | Description of action type             |
+| `action_type_parent_type` | `string` | No       | Parent grouping (nullable)             |
+| `entity_id`               | `string` | Auto     | `chembl:{activity_id}`                 |
+| `content_hash`            | `string` | Auto     | SHA256 hash for versioning             |
 
 ## Data Quality Rules
 
 | Rule              | Condition                           | Action                 |
 | ----------------- | ----------------------------------- | ---------------------- |
-| Positive value    | `standard-value > 0`                | Quarantine if violated |
-| Known type        | `standard-type` in known enum       | Warning if unknown     |
-| Valid molecule ID | `molecule-id` matches `^CHEMBL\d+$` | Quarantine if invalid  |
+| Positive value    | `standard_value > 0`                | Quarantine if violated |
+| Known type        | `standard_type` in known enum       | Warning if unknown     |
+| Valid molecule ID | `molecule_id` matches `^CHEMBL\\d+$` | Quarantine if invalid  |
 
 ### Error Thresholds
 
@@ -57,18 +57,14 @@ The Activity entity contains **55 fields**. Key fields:
 | Layer  | Format       | Mode                   | Path Pattern                          |
 | ------ | ------------ | ---------------------- | ------------------------------------- |
 | Bronze | JSONL + Zstd | Append-only            | `data/output/bronze/chembl/activity/` |
-| Silver | Delta Lake   | Merge by `activity-id` | `data/output/silver/chembl/activity/` |
-| Gold   | Delta Lake   | Overwrite              | `data/output/gold/chembl/activity/`   |
+| Silver | Delta Lake   | Append                 | `data/output/silver/chembl/activity/` |
+| Gold   | Disabled in current config | `sink.gold.enabled: false` | — |
 
-### Gold Filter Criteria
+### Gold Layer Status
 
-Records pass to Gold layer only if:
-
-- `standard-value` is not null
-- `standard-units` is present
-- `target-id` is present
-- `standard-type` is IC50 or Ki
-- `data-validity-comment` is null (no data issues)
+Current entity config keeps Gold disabled for `chembl_activity`.
+Historical gold-filter rules may still exist in older notes, but they are not
+active for the current pipeline contract.
 
 ## CLI Usage
 
@@ -90,8 +86,8 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 
 | Component         | Path                                                              |
 | ----------------- | ----------------------------------------------------------------- |
-| Configuration     | `configs/entities/chembl/activity.yaml`                          |
-| Entity Definition | `src/bioetl/domain/entities/bioactivity.py`                       |
+| Configuration     | `configs/entities/chembl/activity.yaml`                           |
+| Entity Definition | `src/bioetl/domain/entities/bioactivity/`                         |
 | Transformer       | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold Filter       | `configs/entities/chembl/activity.yaml#filters`                   |
 | Data Quality      | `configs/entities/chembl/activity.yaml#quality`                   |
