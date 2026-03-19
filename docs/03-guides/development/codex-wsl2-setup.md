@@ -171,18 +171,17 @@ model = "gpt-5.4"
 model_provider = "openai"
 personality = "pragmatic"
 
-[model_providers.openai]
-api_key_env = "OPENAI_API_KEY"        # optional, device-auth preferred
-request_max_retries = 10
-stream_idle_timeout_ms = 600000
-stream_max_retries = 20
-
 [projects.'/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2']
 trust_level = "trusted"
 
 [features]
 multi_agent = true
 ```
+
+> Do not define `[model_providers.openai]` in modern Codex CLI configs.
+> `openai` is a built-in provider ID, and overriding it now fails during
+> startup. If you need API-key-based auth, set `OPENAI_API_KEY` in the
+> environment instead of redefining the built-in provider block.
 
 ### MCP Servers
 
