@@ -15,12 +15,12 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
-| `composition.factories` | Factory classes for creating wired components | `PipelineFactory`, `DataSourceFactory`, `StorageFactory` |
+| `composition.factories` | Factory classes for creating wired components | `GenericPipelineFactory`, `DataSourceFactory`, `StorageFactory`, `DQServicesFactory` |
 | `composition.bootstrap` | Application bootstrapping and initialization | assembly, runtime, CLI bootstrapping |
 | `composition.providers` | Provider registration and discovery | `ProviderRegistry`, provider decorators |
-| `composition.runtime_builders` | Runtime component builders | `RunnerBuilder`, `ObservabilityBuilder` |
-| `composition.services` | Composition-level service wiring | `MetadataCoordinator`, versioning |
-| `composition` (top-level) | Public composition seams, registry, observability bundle | `entrypoints`, `execution_api`, `services_api`, `resources_api`, `PipelineRegistry`, `ObservabilityBundle` |
+| `composition.runtime_builders` | Leaf runtime assembly helpers | `build_pipeline_runner`, `RunnerInputs`, `ResolvedVacuumSettings` |
+| `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, versioning helpers |
+| `composition` (top-level) | Public composition seams, registry, observability bundle | `entrypoints`, `execution_api`, `services_api`, `resources_api`, `composite_api`, `observability_api`, `PipelineRegistry`, `ObservabilityBundle` |
 
 ---
 
@@ -30,12 +30,13 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 | Class | Description |
 |---|---|
-| `PipelineFactory` | Main factory for creating configured pipelines |
 | `GenericPipelineFactory` | Generic pipeline factory with type parameter |
 | `PipelineFactoryConfig` | Named tuple with factory configuration |
 | `RunContextFactory` | Creates pipeline run contexts |
 | `DomainConfigResolver` | Resolves domain config from YAML sources |
 | `TransformerBuilder` | Builds transformer instances with dependencies |
+| `create_pipeline_factory()` | Narrow public helper for configured pipeline factory creation |
+| `assemble_runner()` | Public helper for runner assembly from a configured pipeline |
 
 ### Data Source Factories
 
@@ -103,6 +104,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | `runtime.composite_bootstrap_builders` | Composite pipeline builder helpers |
 | `runtime.composite_dq_loader` | Composite DQ config loading |
 | `runtime.composite_support_helpers` | Composite support service helpers |
+| `runtime.composite_infrastructure_context` | Typed container for shared composite infrastructure dependencies |
 
 | Class | Description |
 |---|---|
@@ -117,7 +119,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 |---|---|
 | `cli.config` | CLI config subcommand bootstrap |
 | `cli.health` | CLI health subcommand bootstrap |
-| `cli.checkpoint` | CLI checkpoint subcommand bootstrap |
+| `cli.checkpoint` | CLI checkpoint and quarantine bootstrap |
 | `cli.lock` | CLI lock subcommand bootstrap |
 | `cli.metrics` | CLI metrics subcommand bootstrap |
 | `cli.storage` | CLI storage subcommand bootstrap |
@@ -148,6 +150,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | `decorators` | Provider adapter decorators (circuit breaker, retry) |
 | `factory_loader` | Provider factory loading |
 | `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) |
+| `_default_registry` | Approved module-level singleton helper for default provider registry |
 
 ---
 
@@ -171,10 +174,10 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 ## Runtime Builders (`composition.runtime_builders`)
 
-| Class | Description |
+| Symbol | Description |
 |---|---|
-| `RunnerBuilder` | Builds runner instances from resolved configuration |
-| `ObservabilityBuilder` | Builds observability stack |
+| `build_pipeline_runner()` | Assembles a fully configured `PipelineRunner` from resolved inputs |
+| `build_observability_bundle()` | Builds logger + metrics + tracer bundle for a run |
 | `RunnerInputs` | Resolved runner input configuration |
 | `ResolvedVacuumSettings` | Resolved vacuum operation settings |
 
@@ -227,8 +230,7 @@ retained facade.
 
 | Module | Description |
 |---|---|
-| `metadata_assemblers` | Metadata assembler wiring |
-| `metadata_coordinator` | Metadata coordinator wiring |
+| `__init__` | Re-exports `MetadataCoordinator` plus metadata input types for convenience |
 | `versioning` | Version resolution service |
 
 ---
@@ -244,6 +246,8 @@ retained facade.
 | `execution_api` | Public execution-focused composition API |
 | `services_api` | Public services-focused composition API |
 | `resources_api` | Public resource-management composition API |
+| `composite_api` | Public composite-runtime composition API |
+| `observability_api` | Public observability composition API |
 | `types` | Type definitions for composition layer |
 | `_pipeline_execution` | Internal implementation module behind `entrypoints`/`execution_api` |
 | `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` |
