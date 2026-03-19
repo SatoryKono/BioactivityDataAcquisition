@@ -12,13 +12,20 @@ from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     CompositePipelineFinalizationRequest,
     finalize_pipeline,
 )
-from bioetl.application.composite.runner_pkg.runner_constants import (
-    CHECKPOINT_NON_FATAL_ERRORS,
-    PIPELINE_EXECUTION_ERRORS,
-)
-from bioetl.application.composite.runner_pkg.runner_helpers import (
-    get_mergeable_dependencies,
-    get_mergeable_enrichers,
+from bioetl.application.composite.runner_pkg.runner_merge_stage_flow import (
+    build_merge_inputs,
+    build_merge_request,
+    delete_checkpoint_safe,
+    execute_merge_stage,
+    execute_started_merge_phase,
+    handle_dry_run_merge_skip,
+    handle_merge_phase_exception,
+    handle_merge_success,
+    persist_completed_state,
+    run_prepared_merge_request,
+    start_merge_phase,
+    transition_to_completed_state,
+    transition_to_merging_state,
 )
 from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
@@ -32,9 +39,6 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     MergeResult,
 )
-from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import LoggerPort
 
 __all__ = ["CompositeRunnerMergeStageMixin"]
@@ -94,32 +98,14 @@ class CompositeRunnerMergeStageMixin:
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Return MERGING state and emit the corresponding FSM transition log."""
-        previous_state = state.state
-        self._fsm.validate_fsm_transition(
-            previous_state,
-            CompositePipelineState.MERGING,
-        )
-        merging_state = state.with_state(CompositePipelineState.MERGING)
-        self._fsm.log_fsm_transition(
-            from_state=previous_state,
-            to_state=CompositePipelineState.MERGING,
-            stage="merge_start",
-        )
-        return merging_state
+        return transition_to_merging_state(self, state)
 
     async def _start_merge_phase(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Transition checkpoint/FSM to MERGING and persist checkpoint."""
-        merging_state = self._transition_to_merging_state(state)
-        self._logger.info(
-            PipelineEvent.phase_started("merge"),
-            composite=self._config.name,
-            run_id=self._run_id_str,
-        )
-        await self._call_save_checkpoint_safe(merging_state, "merging")
-        return merging_state
+        return await start_merge_phase(self, state)
 
     async def _handle_merge_phase_exception(
         self: _CompositeRunnerMergeStageHostProtocol,
@@ -127,23 +113,7 @@ class CompositeRunnerMergeStageMixin:
         error: Exception,
     ) -> None:
         """Log merge-phase failure and persist FAILED checkpoint."""
-        log_kwargs: dict[str, object] = {
-            "composite": self._config.name,
-            "run_id": self._run_id_str,
-            "error": str(error),
-            "error_type": type(error).__name__,
-        }
-        if isinstance(error, BioETLError):
-            log_kwargs["reason_code"] = "unexpected_bioetl_error"
-        self._logger.error("Merge failed", **log_kwargs)
-        self._fsm.log_fsm_transition(
-            from_state=CompositePipelineState.MERGING,
-            to_state=CompositePipelineState.FAILED,
-            stage="merge_failed",
-            error=str(error),
-        )
-        failed_state = state.with_state(CompositePipelineState.FAILED)
-        await self._call_save_checkpoint_safe(failed_state, "merge_failed")
+        await handle_merge_phase_exception(self, state, error)
 
     def _build_merge_inputs(
         self: _CompositeRunnerMergeStageHostProtocol,
@@ -151,20 +121,7 @@ class CompositeRunnerMergeStageMixin:
         dependency_results: dict[str, DependencyResult] | None,
     ) -> _PreparedMergeInputs:
         """Build mergeable enrichers and dependencies for the merge stage."""
-        mergeable_enrichers = get_mergeable_enrichers(
-            enrichment_results,
-            self._config.enrichers,
-            self._logger,
-        )
-        mergeable_dependencies = get_mergeable_dependencies(
-            dependency_results or {},
-            self._config.dependencies,
-            self._logger,
-        )
-        return _PreparedMergeInputs(
-            enrichers=mergeable_enrichers,
-            dependencies=mergeable_dependencies,
-        )
+        return build_merge_inputs(self, enrichment_results, dependency_results)
 
     def _prepare_merge_request(
         self: _CompositeRunnerMergeStageHostProtocol,
@@ -172,34 +129,14 @@ class CompositeRunnerMergeStageMixin:
         dependency_results: dict[str, DependencyResult] | None,
     ) -> _PreparedMergeRequest:
         """Build the canonical merge request for the merger seam."""
-        prepared_inputs = self._build_merge_inputs(
-            enrichment_results,
-            dependency_results,
-        )
-        return _PreparedMergeRequest(
-            seed_table=self._config.seed.silver_table,
-            seed_pipeline=self._config.seed.pipeline,
-            enrichers=prepared_inputs.enrichers,
-            enrichment_results=enrichment_results,
-            run_id=self._run_id_str,
-            dependencies=prepared_inputs.dependencies,
-            dependency_results=dependency_results,
-        )
+        return build_merge_request(self, enrichment_results, dependency_results)
 
     async def _run_prepared_merge_request(
         self: _CompositeRunnerMergeStageHostProtocol,
         request: _PreparedMergeRequest,
     ) -> MergeResult:
         """Run merger through a normalized request context."""
-        return await self._merger.merge(
-            seed_table=request.seed_table,
-            enrichers=request.enrichers,
-            enrichment_results=request.enrichment_results,
-            run_id=request.run_id,
-            seed_pipeline=request.seed_pipeline,
-            dependencies=request.dependencies,
-            dependency_results=request.dependency_results,
-        )
+        return await run_prepared_merge_request(self, request)
 
     async def _execute_started_merge_phase(
         self: _CompositeRunnerMergeStageHostProtocol,
@@ -209,101 +146,46 @@ class CompositeRunnerMergeStageMixin:
         dependency_results: dict[str, DependencyResult] | None,
     ) -> MergeResult:
         """Run merge after the phase has been started and handle success/errors."""
-        try:
-            prepared_request = self._prepare_merge_request(
-                enrichment_results,
-                dependency_results,
-            )
-            merge_result = await self._run_prepared_merge_request(prepared_request)
-            await self._handle_merge_success(merge_result)
-        except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as merge_error:
-            await self._handle_merge_phase_exception(state, merge_error)
-            raise
-        return merge_result
+        return await execute_started_merge_phase(
+            self,
+            state,
+            enrichment_results=enrichment_results,
+            dependency_results=dependency_results,
+        )
 
     def _handle_dry_run_merge_skip(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Log dry-run merge skip and leave checkpoint state unchanged."""
-        self._fsm.log_fsm_transition(
-            from_state=state.state,
-            to_state=CompositePipelineState.COMPLETED,
-            stage="dry_run_skip_merge",
-            reason="dry_run_mode",
-        )
-        self._logger.info(
-            "Dry run: merge skipped, pipeline completing",
-            composite=self._config.name,
-            run_id=self._run_id_str,
-        )
-        return state
+        return handle_dry_run_merge_skip(self, state)
 
     async def _delete_checkpoint_safe(
         self: _CompositeRunnerMergeStageHostProtocol,
     ) -> None:
         """Delete checkpoint with graceful warning-only error handling."""
-        try:
-            await self._checkpoint_manager.delete()
-        except CHECKPOINT_NON_FATAL_ERRORS as delete_error:
-            self._logger.warning(
-                "Failed to delete checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(delete_error),
-                error_type=type(delete_error).__name__,
-            )
-        except BioETLError as delete_error:
-            self._logger.warning(
-                "Failed to delete checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(delete_error),
-                error_type=type(delete_error).__name__,
-                reason_code="checkpoint_delete_failed",
-            )
+        await delete_checkpoint_safe(self)
 
     def _transition_to_completed_state(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> CompositeCheckpointState:
         """Return finalized COMPLETED state, logging FSM transition only when needed."""
-        if state.state == CompositePipelineState.COMPLETED:
-            return state
-
-        previous_state = state.state
-        self._fsm.validate_fsm_transition(
-            previous_state,
-            CompositePipelineState.COMPLETED,
-        )
-        completed_state = state.with_state(CompositePipelineState.COMPLETED)
-        self._fsm.log_fsm_transition(
-            from_state=previous_state,
-            to_state=CompositePipelineState.COMPLETED,
-            stage="pipeline_complete",
-        )
-        return completed_state
+        return transition_to_completed_state(self, state)
 
     async def _persist_completed_state(
         self: _CompositeRunnerMergeStageHostProtocol,
         state: CompositeCheckpointState,
     ) -> None:
         """Persist finalized checkpoint state via the shared completed-operation seam."""
-        await self._call_save_checkpoint_safe(state, "completed")
+        await persist_completed_state(self, state)
 
     async def _handle_merge_success(
         self: _CompositeRunnerMergeStageHostProtocol,
         merge_result: MergeResult,
     ) -> None:
         """Emit merge success observability and post-merge side effects."""
-        self._logger.info(
-            PipelineEvent.phase_completed("merge"),
-            composite=self._config.name,
-            run_id=self._run_id_str,
-            records_merged=merge_result.records_merged,
-        )
-        await self._call_generate_dq_reports(merge_result)
-        await self._call_write_cv_quarantine(merge_result)
+        await handle_merge_success(self, merge_result)
 
     async def _execute_merge_stage(
         self: _CompositeRunnerMergeStageHostProtocol,
@@ -312,19 +194,12 @@ class CompositeRunnerMergeStageMixin:
         dependency_results: dict[str, DependencyResult] | None = None,
     ) -> tuple[CompositeCheckpointState, MergeResult | None]:
         """Execute merge stage or skip in dry-run mode."""
-        merge_result: MergeResult | None = None
-
-        if not self._runtime.dry_run:
-            state = await self._start_merge_phase(state)
-            merge_result = await self._execute_started_merge_phase(
-                state,
-                enrichment_results=enrichment_results,
-                dependency_results=dependency_results,
-            )
-        else:
-            state = self._handle_dry_run_merge_skip(state)
-
-        return state, merge_result
+        return await execute_merge_stage(
+            self,
+            state,
+            enrichment_results,
+            dependency_results,
+        )
 
     async def _finalize_pipeline(
         self: _CompositeRunnerMergeStageHostProtocol,

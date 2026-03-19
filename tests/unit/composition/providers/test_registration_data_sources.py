@@ -37,22 +37,18 @@ class TestChemblPublicationTermBranch:
     @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
     @patch("bioetl.composition.providers.registration_bio.PublicationTermDataSource")
     @patch("bioetl.composition.providers.registration_bio._get_adapter_config")
-    @patch("bioetl.composition.providers.registration_bio._get_factories")
     def test_wraps_publication_term_adapter(
         self,
-        mock_get_factories: MagicMock,
         mock_get_adapter_config: MagicMock,
         mock_publication_term_data_source: MagicMock,
         mock_wrap_with_filter: MagicMock,
     ) -> None:
-        mock_factory = MagicMock()
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (mock_factory, mock_http_factory)
+        support = MagicMock()
         mock_get_adapter_config.return_value = MagicMock()
         mock_base_adapter = MagicMock(name="base_adapter")
         mock_wrapped_adapter = MagicMock(name="publication_term_wrapper")
         mock_filtered_adapter = MagicMock(name="filtered")
-        mock_factory.create.return_value = mock_base_adapter
+        support.create_adapter.return_value = mock_base_adapter
         mock_publication_term_data_source.return_value = mock_wrapped_adapter
         mock_wrap_with_filter.return_value = mock_filtered_adapter
 
@@ -64,6 +60,7 @@ class TestChemblPublicationTermBranch:
             settings=MagicMock(),
             pipeline_config=pipeline_config,
             logger=MagicMock(),
+            assembly_support=support,
         )
 
         mock_publication_term_data_source.assert_called_once_with(mock_base_adapter)
@@ -314,18 +311,15 @@ class TestUniProtIdMappingCreatorBranches:
     @patch("bioetl.composition.providers.registration_bio.IDMappingDataSource")
     @patch("bioetl.composition.providers.registration_bio.IDMappingCsvReaderAdapter")
     @patch("bioetl.composition.providers.registration_bio.UniProtIDMappingClient")
-    @patch("bioetl.composition.providers.registration_bio._get_factories")
     def test_uses_api_overrides_and_seed_ids(
         self,
-        mock_get_factories: MagicMock,
         mock_uniprot_client: MagicMock,
         mock_idmapping_reader_adapter: MagicMock,
         mock_idmapping_data_source: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
+        support = MagicMock()
         mock_http_client = MagicMock()
-        mock_http_factory.create_for_provider.return_value = mock_http_client
+        support.create_http_client.return_value = mock_http_client
         mock_client = MagicMock()
         mock_uniprot_client.return_value = mock_client
         mock_reader = MagicMock()
@@ -349,6 +343,7 @@ class TestUniProtIdMappingCreatorBranches:
             logger=logger,
             filter_config=filter_config,
             metrics=MagicMock(),
+            assembly_support=support,
         )
 
         mock_idmapping_reader_adapter.assert_called_once_with(logger=logger)
@@ -367,17 +362,14 @@ class TestUniProtIdMappingCreatorBranches:
     @patch("bioetl.composition.providers.registration_bio.IDMappingDataSource")
     @patch("bioetl.composition.providers.registration_bio.IDMappingCsvReaderAdapter")
     @patch("bioetl.composition.providers.registration_bio.UniProtIDMappingClient")
-    @patch("bioetl.composition.providers.registration_bio._get_factories")
     def test_uses_defaults_when_api_and_filter_missing(
         self,
-        mock_get_factories: MagicMock,
         mock_uniprot_client: MagicMock,
         mock_idmapping_reader_adapter: MagicMock,
         mock_idmapping_data_source: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
-        mock_http_factory.create_for_provider.return_value = MagicMock()
+        support = MagicMock()
+        support.create_http_client.return_value = MagicMock()
         mock_uniprot_client.return_value = MagicMock()
         mock_reader = MagicMock()
         mock_idmapping_reader_adapter.return_value = mock_reader
@@ -393,6 +385,7 @@ class TestUniProtIdMappingCreatorBranches:
             pipeline_config=pipeline_config,
             logger=logger,
             filter_config=None,
+            assembly_support=support,
         )
 
         mock_idmapping_reader_adapter.assert_called_once_with(logger=logger)

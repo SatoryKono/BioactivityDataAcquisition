@@ -33,7 +33,7 @@ from types import TracebackType
 from typing import IO, Any
 
 from bioetl.domain.exceptions.infrastructure import InfrastructureError as _InfraBase
-from bioetl.infrastructure.storage.write_resilience import (
+from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
 )

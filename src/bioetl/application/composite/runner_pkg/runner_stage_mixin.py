@@ -13,6 +13,12 @@ from bioetl.application.composite.dependency_coordinator import (
 from bioetl.application.composite.runner_pkg.runner_constants import (
     PIPELINE_EXECUTION_ERRORS,
 )
+from bioetl.application.composite.runner_pkg.runner_stage_dependency_flow import (
+    build_dependencies_run_context,
+    build_dependency_phase_outcome,
+    collect_successful_dependencies,
+    validate_dependency_preconditions,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
     _CompositeRunnerStageEnrichmentMixin,
 )
@@ -30,7 +36,7 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.exceptions import BioETLError, InvalidStateError
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 __all__ = ["CompositeRunnerStageMixin"]
@@ -142,15 +148,7 @@ class CompositeRunnerStageMixin(
         self: _CompositeRunnerStageHostProtocol,
     ) -> _PreparedDependenciesRunContext:
         """Resolve dependency runtime collaborators and pipeline names for execution."""
-        coordinator, runner_factory = self._validate_dependency_preconditions()
-        dependency_pipeline_names = [
-            dependency.pipeline for dependency in self._config.dependencies
-        ]
-        return _PreparedDependenciesRunContext(
-            coordinator=coordinator,
-            runner_factory=runner_factory,
-            dependency_pipeline_names=dependency_pipeline_names,
-        )
+        return build_dependencies_run_context(self)
 
     async def _run_dependencies(
         self: _CompositeRunnerStageHostProtocol,
@@ -207,14 +205,7 @@ class CompositeRunnerStageMixin(
         dependency_results: dict[str, DependencyResult],
     ) -> _DependencyPhaseOutcome:
         """Normalize dependency results into a reusable finalization context."""
-        required_failed = self._find_required_failures(dependency_results)
-        succeeded, failed = self._summarize_dependency_outcomes(dependency_results)
-        return _DependencyPhaseOutcome(
-            dependency_results=dependency_results,
-            required_failed=required_failed,
-            succeeded=succeeded,
-            failed=failed,
-        )
+        return build_dependency_phase_outcome(self, dependency_results)
 
     def _validate_dependency_preconditions(
         self: _CompositeRunnerStageHostProtocol,
@@ -223,14 +214,7 @@ class CompositeRunnerStageMixin(
         Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ]:
         """Validate that dependency coordinator and runner factory are available."""
-        coordinator = self._dependency_coordinator
-        runner_factory = self._dependencies_runner_factory
-        if coordinator is None or runner_factory is None:
-            raise InvalidStateError(
-                "Dependency coordinator and runner factory must be set "
-                "when dependencies are configured"
-            )
-        return coordinator, runner_factory
+        return validate_dependency_preconditions(self)
 
     def _collect_successful_dependencies(
         self: _CompositeRunnerStageHostProtocol,
@@ -238,10 +222,7 @@ class CompositeRunnerStageMixin(
         dependency_results: dict[str, DependencyResult],
     ) -> CompositeCheckpointState:
         """Mark each successful dependency as completed on checkpoint state."""
-        for dep_name, dep_result in dependency_results.items():
-            if dep_result.is_success:
-                state = state.with_dependency_completed(dep_name, dep_result)
-        return state
+        return collect_successful_dependencies(state, dependency_results)
 
     async def _finalize_dependencies_phase(
         self: _CompositeRunnerStageHostProtocol,

@@ -5,6 +5,7 @@ Extracted from registration.py for LOC compliance.
 
 from __future__ import annotations
 
+from functools import partial
 from typing import TYPE_CHECKING, Any
 
 from bioetl.composition.factories.datasource.crossref import (
@@ -16,9 +17,10 @@ from bioetl.composition.providers._config_helpers import (
     _get_rate_limit_from_config,
     _normalize_optional_override,
 )
-from bioetl.composition.providers._models import (
-    HttpConfig,
-    ProviderConfig,
+from bioetl.composition.providers._models import HttpConfig, ProviderConfig
+from bioetl.composition.providers._registration_contracts import (
+    ProviderAssemblySupport,
+    create_provider_assembly_support,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
@@ -124,6 +126,8 @@ def _create_pubmed_data_source(
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create PubMed data source with optional CSV filtering.
 
@@ -157,6 +161,7 @@ def _create_pubmed_data_source(
         pipeline_name=pipeline_name,
         adapter_factory=PubMedAdapter,
         extra_kwargs={"email": email, "api_key": api_key},
+        assembly_support=assembly_support,
     )
 
 
@@ -167,6 +172,8 @@ def _create_crossref_data_source(
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create CrossRef data source with optional CSV filtering.
 
@@ -186,6 +193,7 @@ def _create_crossref_data_source(
         pipeline_name=pipeline_name,
         adapter_factory=create_crossref_adapter,
         extra_kwargs={"settings": settings, "mailto": mailto, "batch_size": batch_size},
+        assembly_support=assembly_support,
     )
 
 
@@ -196,6 +204,8 @@ def _create_openalex_data_source(
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create OpenAlex data source with optional CSV filtering.
 
@@ -215,6 +225,7 @@ def _create_openalex_data_source(
         pipeline_name=pipeline_name,
         adapter_factory=OpenAlexAdapter,
         extra_kwargs={"mailto": mailto, "batch_size": batch_size},
+        assembly_support=assembly_support,
     )
 
 
@@ -225,6 +236,8 @@ def _create_semanticscholar_data_source(
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create Semantic Scholar adapter and optionally wrap it with input filtering."""
     api_key = (
@@ -249,11 +262,16 @@ def _create_semanticscholar_data_source(
         pipeline_name=pipeline_name,
         adapter_factory=SemanticScholarAdapter,
         extra_kwargs={"api_key": api_key, "batch_size": batch_size},
+        assembly_support=assembly_support,
     )
 
 
-def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
+def _get_biblio_provider_configs(
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
+) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bibliographic providers."""
+    support = assembly_support or create_provider_assembly_support()
     pubmed = _get_rate_limit_from_config("pubmed")
     crossref = _get_rate_limit_from_config("crossref")
     openalex = _get_rate_limit_from_config("openalex")
@@ -270,7 +288,10 @@ def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
             requires_http_client=True,
             requires_logger=True,
             custom_creator=_create_pubmed_adapter_from_settings,
-            data_source_creator=_create_pubmed_data_source,
+            data_source_creator=partial(
+                _create_pubmed_data_source,
+                assembly_support=support,
+            ),
         ),
         "crossref": ProviderConfig(
             adapter_class=CrossRefAdapter,
@@ -278,7 +299,10 @@ def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
             requires_http_client=True,
             requires_logger=True,
             custom_creator=create_crossref_adapter,
-            data_source_creator=_create_crossref_data_source,
+            data_source_creator=partial(
+                _create_crossref_data_source,
+                assembly_support=support,
+            ),
         ),
         "openalex": ProviderConfig(
             adapter_class=OpenAlexAdapter,
@@ -286,7 +310,10 @@ def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
             requires_http_client=True,
             requires_logger=True,
             custom_creator=_create_openalex_adapter_from_settings,
-            data_source_creator=_create_openalex_data_source,
+            data_source_creator=partial(
+                _create_openalex_data_source,
+                assembly_support=support,
+            ),
         ),
         "semanticscholar": ProviderConfig(
             adapter_class=SemanticScholarAdapter,
@@ -296,6 +323,9 @@ def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
             ),
             requires_http_client=True,
             requires_logger=True,
-            data_source_creator=_create_semanticscholar_data_source,
+            data_source_creator=partial(
+                _create_semanticscholar_data_source,
+                assembly_support=support,
+            ),
         ),
     }

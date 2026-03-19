@@ -1,20 +1,7 @@
-"""Private service accessor seam for CLI run command orchestration."""
+"""Compatibility shim for run service-access helper module."""
 
 from __future__ import annotations
 
-from bioetl.application.services.cli_run_orchestration_service import (
-    CliRunOrchestrationService,
-)
+from bioetl.interfaces.cli.commands._compat import reexport_module
 
-_cli_run_orchestration_service: CliRunOrchestrationService | None = None
-
-
-def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
-    """Return process-local run orchestration service (lazy cached accessor seam)."""
-    global _cli_run_orchestration_service
-    if _cli_run_orchestration_service is None:
-        _cli_run_orchestration_service = CliRunOrchestrationService()
-    return _cli_run_orchestration_service
-
-
-__all__ = ["get_cli_run_orchestration_service"]
+reexport_module(__name__, "bioetl.interfaces.cli.commands.domains.run.service_access")

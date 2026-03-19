@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.storage.metadata_writer_operations import (
+from bioetl.infrastructure.storage.metadata.writer_operations import (
     METADATA_FILENAME,
     _MetadataWriteRequest,
     _MetadataWriteRetryState,

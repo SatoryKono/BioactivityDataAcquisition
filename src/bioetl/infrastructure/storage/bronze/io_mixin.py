@@ -13,7 +13,7 @@ import orjson
 import zstandard as zstd
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.storage._atomic import atomic_write_bytes
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort

@@ -24,34 +24,34 @@ from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.storage.arrow_converter import (
+from bioetl.infrastructure.storage.delta.arrow_converter import (
     ArrowDataConverter,
 )
-from bioetl.infrastructure.storage.arrow_converter import (
+from bioetl.infrastructure.storage.delta.arrow_converter import (
     get_string_fields as _get_string_fields_impl,
 )
-from bioetl.infrastructure.storage.arrow_converter import (
+from bioetl.infrastructure.storage.delta.arrow_converter import (
     serialize_value_for_arrow_schema as _serialize_value_impl,
 )
-from bioetl.infrastructure.storage.arrow_converter import (
+from bioetl.infrastructure.storage.delta.arrow_converter import (
     sort_arrow_table_by_primary_keys as _sort_by_primary_keys_impl,
 )
-from bioetl.infrastructure.storage.delta_schema_ops import (
+from bioetl.infrastructure.storage.delta.schema_ops import (
     coerce_null_types_for_delta as _coerce_null_types_for_delta_impl,
 )
-from bioetl.infrastructure.storage.delta_table_ops import (
+from bioetl.infrastructure.storage.delta.table_ops import (
     clear_delta_tables as _clear_delta_tables_impl,
 )
-from bioetl.infrastructure.storage.delta_table_ops import (
+from bioetl.infrastructure.storage.delta.table_ops import (
     get_delta_table_arrow_schema as _get_delta_table_arrow_schema_impl,
 )
-from bioetl.infrastructure.storage.delta_table_ops import (
+from bioetl.infrastructure.storage.delta.table_ops import (
     read_delta_records as _read_delta_records_impl,
 )
-from bioetl.infrastructure.storage.delta_table_ops import (
+from bioetl.infrastructure.storage.delta.table_ops import (
     resolve_delta_table_path as _resolve_delta_table_path_impl,
 )
-from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 __all__ = ["BaseDeltaWriter", "coerce_null_types_for_delta"]
 

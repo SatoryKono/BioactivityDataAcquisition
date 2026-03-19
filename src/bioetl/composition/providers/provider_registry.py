@@ -10,6 +10,7 @@ from bioetl.composition.providers._default_registry import (
     DefaultRegistryMethod,
     ProvidersDescriptor,
 )
+from bioetl.composition.providers._loading import ensure_provider_registry_loaded
 from bioetl.composition.providers._models import (
     AdapterCreator,
     DataSourceCreatorProtocol,
@@ -63,9 +64,7 @@ class ProviderRegistry:
     @classmethod
     def ensure_loaded(cls) -> None:
         """Ensure provider registrations are loaded into the registry."""
-        from bioetl.composition.providers.loader import ensure_providers_loaded
-
-        ensure_providers_loaded()
+        ensure_provider_registry_loaded(cls._get_default())
 
     @DefaultRegistryMethod
     def register(self, name: str, config: ProviderConfig) -> None:

@@ -79,6 +79,7 @@ ALLOWED_DATASOURCE_REGISTRY_TEST_FILES = frozenset(
 ALLOWED_REGISTER_ALL_PROVIDERS_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "providers" / "__init__.py",
+        ROOT / "src" / "bioetl" / "composition" / "providers" / "_loading.py",
         ROOT / "src" / "bioetl" / "composition" / "providers" / "loader.py",
         ROOT / "src" / "bioetl" / "composition" / "providers" / "registration.py",
     }
@@ -204,7 +205,9 @@ ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES = frozenset(
     }
 )
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
-    {}
+    {
+        ROOT / "src" / "bioetl" / "composition" / "__init__.py",
+    }
 )
 ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
     {
@@ -213,24 +216,10 @@ ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
     }
 )
 ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "architecture" / "test_registry_contracts.py",
-        ROOT / "tests" / "unit" / "composition" / "test_types.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "factories"
-        / "pipeline"
-        / "test_registry.py",
-    }
+    {}
 )
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "architecture" / "test_registry_contracts.py",
-        ROOT / "tests" / "unit" / "composition" / "test_types.py",
-        ROOT / "tests" / "unit" / "composition" / "factories" / "pipeline" / "test_registry.py",
-    }
+    {}
 )
 ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES = frozenset(
     {

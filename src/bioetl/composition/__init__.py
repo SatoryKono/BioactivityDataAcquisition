@@ -25,10 +25,12 @@ from bioetl.composition.registry import (
     PipelineDefinition,
     PipelineRegistry,
     create_registry,
+    get_default_registry,
 )
 
 __all__ = [
     "PipelineDefinition",
     "PipelineRegistry",
     "create_registry",
+    "get_default_registry",
 ]

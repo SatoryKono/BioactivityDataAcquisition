@@ -5,7 +5,7 @@ RunID parsing, timestamp normalization, operation mapping and AuditEntry
 construction are isolated here so that changes to audit handling do not
 ripple through the wider metadata / DQ / finalization pipeline.
 
-Mirrors the established pattern of ``gold_writer_metadata_audit.py``.
+Mirrors the established pattern of ``gold/metadata_audit.py``.
 """
 
 from __future__ import annotations

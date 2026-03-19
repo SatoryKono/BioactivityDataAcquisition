@@ -7,7 +7,7 @@ __all__ = ["BatchExtractionLoopService", "BatchProcessingServicePort"]
 
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core.batch_execution_lifecycle import BatchExecutionContext
+from bioetl.application.core.batch_execution import BatchExecutionContext
 from bioetl.application.core.batch_executor_loop_helpers import (
     BatchExtractionIterationContext,
     create_batch_extraction_loop_state,

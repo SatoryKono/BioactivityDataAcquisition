@@ -38,7 +38,7 @@ from bioetl.infrastructure.storage.bronze_write_result_helpers import (
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = [

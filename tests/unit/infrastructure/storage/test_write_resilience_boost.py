@@ -1,4 +1,4 @@
-"""Coverage boost tests for write_resilience.py.
+"""Coverage boost tests for delta/resilience.py.
 
 Targets uncovered lines: 41, 77, 83, 90, 135.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.infrastructure.storage.write_resilience import (
+from bioetl.infrastructure.storage.delta.resilience import (
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
     _deterministic_jitter_seconds,
@@ -189,7 +189,7 @@ class TestBuildDefaultAtomicReplaceRetryPolicy:
     ) -> None:
         """Line 133-134: on Windows (nt) returns WINDOWS policy."""
         monkeypatch.setattr(
-            "bioetl.infrastructure.storage.write_resilience.os.name", "nt"
+            "bioetl.infrastructure.storage.delta.resilience.os.name", "nt"
         )
         policy = build_default_atomic_replace_retry_policy()
         assert policy.max_retries == 20
@@ -200,7 +200,7 @@ class TestBuildDefaultAtomicReplaceRetryPolicy:
     ) -> None:
         """Line 135: on non-Windows returns NON_WINDOWS policy."""
         monkeypatch.setattr(
-            "bioetl.infrastructure.storage.write_resilience.os.name", "posix"
+            "bioetl.infrastructure.storage.delta.resilience.os.name", "posix"
         )
         policy = build_default_atomic_replace_retry_policy()
         assert policy.max_retries == 3

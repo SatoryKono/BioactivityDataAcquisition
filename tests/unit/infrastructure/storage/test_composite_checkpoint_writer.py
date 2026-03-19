@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
 

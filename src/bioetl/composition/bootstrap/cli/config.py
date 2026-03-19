@@ -9,9 +9,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services import ConfigService
-from bioetl.composition import create_registry
+from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.infrastructure.config import (
     get_settings,
@@ -23,13 +22,6 @@ __all__ = ["bootstrap_config_service"]
 
 if TYPE_CHECKING:
     from bioetl.composition import PipelineRegistry
-
-
-def get_default_registry() -> PipelineRegistry:
-    """Compatibility helper returning an explicit registered registry."""
-    registry = create_registry()
-    register_all_pipelines(registry=registry)
-    return registry
 
 
 def bootstrap_config_service(

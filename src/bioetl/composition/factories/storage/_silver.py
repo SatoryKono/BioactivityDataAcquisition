@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
-    from bioetl.infrastructure.storage.write_resilience import (
+    from bioetl.infrastructure.storage.delta.resilience import (
         AdaptiveRetryPolicy,
         SilverMergeResiliencePolicy,
     )

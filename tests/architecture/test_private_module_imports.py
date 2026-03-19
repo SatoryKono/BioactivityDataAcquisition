@@ -27,7 +27,7 @@ STRICT_PRIVATE_IMPORT_GUARD = True
 #   ("src/bioetl/domain/contracts/__init__.py",
 #    "bioetl.domain.contracts.gold._base"),
 #   ("src/bioetl/infrastructure/export/dq_report_writer.py",
-#    "bioetl.infrastructure.storage._atomic"),
+#    "bioetl.infrastructure.storage.support.atomic_ops"),
 # }
 ALLOWED_BASELINE_IMPORTS: frozenset[tuple[str, str]] = frozenset()
 

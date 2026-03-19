@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import BronzeRecord, MetaDict
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
-    from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
+    from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 
 class SilverWriterMaintenanceMixin:

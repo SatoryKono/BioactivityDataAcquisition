@@ -18,7 +18,7 @@ from bioetl.domain.services.composite_metadata_helpers import (
 from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.types import JsonDict, ScdConfig
 from bioetl.domain.version import get_version as _get_bioetl_version
-from bioetl.infrastructure.storage.metadata_builder_base import (
+from bioetl.infrastructure.storage.metadata.builder_base import (
     _get_git_commit_cached,
     _MetadataBuilderBase,
     _parse_table_name,

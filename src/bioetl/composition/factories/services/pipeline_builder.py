@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.core.batch_execution_state_service import (
+from bioetl.application.core.batch_execution import (
     BatchExecutionStateService,
 )
 from bioetl.application.core.batch_executor import (

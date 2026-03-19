@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pyarrow as pa
 import pytest
 
-from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+from bioetl.infrastructure.storage.gold.io_helpers import (
     initialize_scd2_records,
     write_scd2_once,
 )

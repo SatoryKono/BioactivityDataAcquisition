@@ -579,7 +579,7 @@ class TestPathTraversal:
     # Files where Path(request.*) is a typed internal dataclass, not user input
     KNOWN_SAFE_PATH_FILES = frozenset(
         {
-            "metadata_writer_operations.py",  # Path(request.base_path) — internal _MetadataWriteRequest dataclass
+            "writer_operations.py",  # Path(request.base_path) — internal _MetadataWriteRequest dataclass
         }
     )
 

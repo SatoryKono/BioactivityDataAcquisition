@@ -17,12 +17,8 @@ class TestCreateHttpDataSource:
     @patch(
         "bioetl.composition.factories.datasource.adapter_helpers.AdapterHelpersFactory",
     )
-    @patch(
-        "bioetl.composition.providers.factory_loader.get_http_client_factory",
-    )
     def test_assembles_adapter_with_helpers_and_wraps(
         self,
-        mock_get_http_factory: MagicMock,
         mock_helpers_factory_cls: MagicMock,
         mock_wrap: MagicMock,
     ) -> None:
@@ -31,10 +27,9 @@ class TestCreateHttpDataSource:
         )
 
         # Setup HTTP client factory
-        mock_http_factory = MagicMock()
-        mock_get_http_factory.return_value = mock_http_factory
+        support = MagicMock()
         mock_http_client = MagicMock(name="http_client")
-        mock_http_factory.create_for_provider.return_value = mock_http_client
+        support.create_http_client.return_value = mock_http_client
 
         # Setup helper services
         mock_helpers = MagicMock()
@@ -64,10 +59,11 @@ class TestCreateHttpDataSource:
             pipeline_name="test_pipeline",
             adapter_factory=adapter_factory,
             extra_kwargs={"custom_param": "value"},
+            assembly_support=support,
         )
 
         # Verify HTTP client created for provider
-        mock_http_factory.create_for_provider.assert_called_once_with(
+        support.create_http_client.assert_called_once_with(
             "test_provider", settings, metrics=metrics
         )
 

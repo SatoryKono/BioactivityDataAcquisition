@@ -11,7 +11,7 @@ from deltalake.exceptions import TableNotFoundError
 from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     normalize_scd_config,
     set_gold_write_span_attributes,
 )
@@ -596,7 +596,7 @@ class TestGoldWriterTypeSanitization:
     @pytest.fixture
     def arrow_converter(self):
         """Create an ArrowDataConverter instance for testing."""
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
         return ArrowDataConverter()
 
@@ -948,7 +948,7 @@ class TestGoldWriterArrowConversion:
         """Test sanitize_type_for_delta converts null to string."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter()
         result = converter.sanitize_type_for_delta(pa.null())
@@ -958,7 +958,7 @@ class TestGoldWriterArrowConversion:
         """Test sanitize_type_for_delta handles list<null>."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter()
         result = converter.sanitize_type_for_delta(pa.list_(pa.null()))
@@ -968,7 +968,7 @@ class TestGoldWriterArrowConversion:
         """Test sanitize_type_for_delta handles struct with null field."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter()
         struct_type = pa.struct([pa.field("null_field", pa.null())])
@@ -981,7 +981,7 @@ class TestGoldWriterArrowConversion:
         """Test sanitize_type_for_delta preserves non-null types."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter()
         # Test various normal types
@@ -993,7 +993,7 @@ class TestGoldWriterArrowConversion:
         """Test sanitize_type_for_delta handles map types."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter()
         map_type = pa.map_(pa.string(), pa.null())

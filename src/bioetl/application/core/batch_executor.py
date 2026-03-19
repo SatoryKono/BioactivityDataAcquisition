@@ -8,12 +8,10 @@ __all__ = ["BatchExecutor", "BatchResult"]
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.batch_execution_lifecycle import (
+from bioetl.application.core.batch_execution import (
     BatchExecutionContext,
-    prepare_execution_context,
-)
-from bioetl.application.core.batch_execution_run_service import (
     BatchExecutionRunService,
+    prepare_execution_context,
 )
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_protocols import (

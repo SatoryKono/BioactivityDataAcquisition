@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin import (
+from bioetl.infrastructure.storage.gold.read_cleanup_mixin import (
     GoldWriterReadCleanupMixin,
     _load_gold_writer_module,
 )
@@ -101,7 +101,7 @@ class TestReadGold:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             result = await reader.read_gold("test_table")
@@ -127,7 +127,7 @@ class TestReadGold:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             result = await reader.read_gold("test_table", columns=["entity_id"])
@@ -157,7 +157,7 @@ class TestReadGold:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             result = await reader.read_gold("test_table", current_only=True)
@@ -189,7 +189,7 @@ class TestGetHistory:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             result = await reader.get_history("test_table")
@@ -213,7 +213,7 @@ class TestGetHistory:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             result = await reader.get_history("test_table", limit=5)
@@ -237,7 +237,7 @@ class TestGetHistory:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             result = await reader.get_history("test_table", limit=0)
@@ -263,7 +263,7 @@ class TestGetHistory:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             await reader.get_history("test_table")
@@ -291,7 +291,7 @@ class TestGetHistory:
         mock_module.DeltaTable.return_value = mock_dt
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin._load_gold_writer_module",
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
             return_value=mock_module,
         ):
             result = await reader.get_history(

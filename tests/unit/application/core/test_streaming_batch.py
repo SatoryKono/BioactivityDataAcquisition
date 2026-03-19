@@ -9,13 +9,13 @@ from uuid import uuid4
 
 import pytest
 
-import bioetl.application.core.batch_transformer_orchestration as batch_transformer_orchestration
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import (
     BatchTransformer,
     StreamingBatchProcessor,
     TransformedRecord,
 )
+from bioetl.application.core.transformer_runtime import orchestration as batch_transformer_orchestration
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import MemoryConfig
 from bioetl.infrastructure.system.memory_monitor import MemoryMonitor

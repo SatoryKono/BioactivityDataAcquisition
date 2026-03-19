@@ -34,7 +34,7 @@ composition/
 │   ├── registration.py         # register_all_providers()
 │   ├── registration_biblio.py  # CrossRef, OpenAlex, PubMed, SemanticScholar
 │   ├── registration_bio.py     # ChEMBL, PubChem, UniProt
-│   └── factory_loader.py       # Dynamic loading of provider factories
+│   └── _registration_contracts.py  # Leaf contracts for provider assembly support
 │
 ├── runtime_builders/           # Late-stage runtime assembly
 │   ├── runner_builder.py       # RunnerBuilder — assembles PipelineRunner

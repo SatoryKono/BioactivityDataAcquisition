@@ -11,8 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.composition import PipelineRegistry, create_registry
-from bioetl.composition.registry import get_default_registry
+from bioetl.composition import PipelineRegistry, create_registry, get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
 
 

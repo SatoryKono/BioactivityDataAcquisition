@@ -5,12 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.composition import create_registry
+from bioetl.composition import create_registry, get_default_registry
 from bioetl.composition.factories.pipeline.registry import (
     register_all_pipelines,
     reset_registration,
 )
-from bioetl.composition.registry import get_default_registry
 
 
 @pytest.fixture(autouse=True)

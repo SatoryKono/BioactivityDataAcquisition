@@ -124,7 +124,7 @@ class TestTypesReExports:
 
     def test_get_default_registry_is_same(self) -> None:
         """get_default_registry from types returns the same shared instance."""
-        from bioetl.composition.registry import get_default_registry as direct_fn
+        from bioetl.composition import get_default_registry as direct_fn
         from bioetl.composition.types import get_default_registry as reexported_fn
 
         assert direct_fn() is reexported_fn()

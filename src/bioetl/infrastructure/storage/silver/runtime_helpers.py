@@ -17,7 +17,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.storage.write_resilience import (
+from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
     SilverMergeResiliencePolicy,
 )

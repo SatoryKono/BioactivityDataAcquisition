@@ -57,7 +57,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 from bioetl.infrastructure.storage.silver.validation_mixin import (
     SilverWriterValidationMixin,
 )
-from bioetl.infrastructure.storage.write_resilience import (
+from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
 

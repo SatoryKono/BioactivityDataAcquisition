@@ -9,18 +9,18 @@ from typing import TYPE_CHECKING, Protocol, cast
 import pyarrow as pa
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.infrastructure.storage.gold_writer_io_delta_mixins import (
+from bioetl.infrastructure.storage.gold.io_delta_mixins import (
     _GoldWriterExecutorArrowMixin,
     _GoldWriterScd2MergeMixin,
     _GoldWriterSimpleDeltaMixin,
 )
-from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext as _GoldWriteDispatchContext,
 )
-from bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin import (
+from bioetl.infrastructure.storage.gold.read_cleanup_mixin import (
     GoldWriterReadCleanupMixin,
 )
 

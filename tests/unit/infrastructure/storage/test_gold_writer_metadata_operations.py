@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.storage.gold_writer_metadata_operations import (
+from bioetl.infrastructure.storage.gold.metadata_operations import (
     _GoldMergedMetadataWriteRequest,
     _GoldMetadataWriteRequest,
     _PreparedGoldMetadataWrite,
@@ -92,7 +92,7 @@ class TestPrepareGoldMetadataWrite:
         from unittest.mock import patch
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_metadata_operations.build_gold_metadata_payload",
+            "bioetl.infrastructure.storage.gold.metadata_operations.build_gold_metadata_payload",
             return_value=metadata,
         ) as mock_build:
             prepared = _prepare_gold_metadata_write(host, request)

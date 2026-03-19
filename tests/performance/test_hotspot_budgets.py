@@ -31,7 +31,7 @@ import pytest
 
 from bioetl.infrastructure.adapters.crossref.batch import DoiBatchProcessor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
+from bioetl.infrastructure.storage.support.atomic_ops import AtomicWriteGroup
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 pytestmark = [pytest.mark.benchmark, pytest.mark.performance, pytest.mark.serial]
