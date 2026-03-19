@@ -207,7 +207,9 @@ def test_source_legacy_normalization_golden_snapshot() -> None:
 def test_retired_provider_pagination_aliases_are_rejected(
     payload: dict[str, Any], expected_fragment: str
 ) -> None:
-    with pytest.raises(ValueError, match="Retired source provider pagination aliases") as exc:
+    with pytest.raises(
+        ValueError, match="Retired source provider pagination aliases"
+    ) as exc:
         _dump_source_config(payload)
 
     assert expected_fragment in str(exc.value)

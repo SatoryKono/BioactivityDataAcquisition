@@ -1,7 +1,6 @@
 {
   "chembl_canonical_and_shorthand_batch": {
     "source": {
-      "batch_size": 100,
       "circuit_breaker": {
         "failure_threshold": 5,
         "recovery_timeout": 300
@@ -31,7 +30,6 @@
   },
   "chembl_canonical_and_shorthand_pagination": {
     "source": {
-      "batch_size": 100,
       "circuit_breaker": {
         "failure_threshold": 5,
         "recovery_timeout": 300

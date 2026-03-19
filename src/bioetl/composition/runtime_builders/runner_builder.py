@@ -5,10 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
+from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
-from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
     assemble_cached_bronze_context,

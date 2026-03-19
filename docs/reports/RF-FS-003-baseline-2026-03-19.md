@@ -5,6 +5,17 @@
 **Связанные находки:** `FS-002`  
 **Основной scope:** `tests/unit/` и mapping к `src/bioetl/application/core/`, `src/bioetl/application/composite/`, `src/bioetl/infrastructure/storage/`, `src/bioetl/infrastructure/adapters/`, частично `src/bioetl/domain/ports/`
 
+## Актуализация на 2026-03-19 16:58
+
+`RF-FS-003` уже частично исполнен двумя focused coverage waves, поэтому baseline больше нельзя читать как полностью нетронутый.
+
+- `Wave 3B` закрыла DQ direct ownership для `_checks_basic.py`, `_checks_business.py`, `_checks_integrity.py`, `_checks_statistical.py` и `silver_check_executor.py`.
+- `Wave 3C` закрыла non-DQ tail в `application/services`: `metadata_assemblers.py`, `dq_report_models.py`, `export_models.py`, `medallion_maintenance_mixin.py`, `medallion_types.py`.
+- В результате локальный `application/services` ownership gap больше не является приоритетной зоной этого RF.
+- Оставшийся meaningful scope смещён в `application/core`, `application/composite`, `infrastructure/storage`, behavior-heavy `infrastructure/adapters` и selective `domain/ports`.
+
+Отдельно: единственный оставшийся backlog из последних swarm-отчётов находится уже не в ownership структуры тестов как таковой, а в локальной нестабильности `pytest-cov`, поэтому его не стоит смешивать с основным объёмом `RF-FS-003`.
+
 ## Цель
 
 Цель `RF-FS-003` — не добиться формального 1:1 соответствия между каждым source-файлом и отдельным `test_<module>.py`. Такой подход дал бы красивую таблицу, но много шумовых тестов с низкой ценностью. Реальная задача — сделать ownership тестов явным для behavior-heavy модулей и устранить зоны, где у критичных файлов нет читаемого test owner. По baseline прямой naive mapping показывает сотни source-модулей без зеркального unit-теста. Это не означает, что код не покрыт. Во многих местах coverage clustered и построен разумно. Но именно файловая структура тестов перестала объяснять, какой тест “владеет” каким модулем, а это уже проблема поддержки, refactor cost и локального аудита.
@@ -17,7 +28,7 @@
 
 ## Приоритетные зоны
 
-По текущему baseline сильнее всего страдают:
+После закрытия `application/services` ownership seam сильнее всего страдают:
 - `application/core`;
 - `application/composite`;
 - `infrastructure/storage`;
@@ -46,11 +57,12 @@
 
 ## Конкретные действия
 
-1. Составить таблицу приоритетных source-модулей по пяти зонам и присвоить каждому статус: `direct_test`, `cluster_owner`, `arch_only`, `ignore`.
-2. Для `application/core`, `application/composite` и `infrastructure/storage` закрывать сначала behavior-heavy лидеров.
-3. В `infrastructure/adapters` идти по провайдерам и фиксировать ownership по provider suite, а не по каждой вспомогательной модели.
-4. В `domain/ports` не плодить unit tests на Protocols, если достаточно `mypy` и architecture contract tests.
-5. Для clustered suites при необходимости добавить краткие ownership comments, а не писать новые слабые тесты.
+1. Зафиксировать уже закрытый `application/services` кластер как выполненный подэтап, а не возвращать его в следующую wave.
+2. Составить таблицу оставшихся приоритетных source-модулей по четырём основным зонам и присвоить каждому статус: `direct_test`, `cluster_owner`, `arch_only`, `ignore`.
+3. Для `application/core`, `application/composite` и `infrastructure/storage` закрывать сначала behavior-heavy лидеров.
+4. В `infrastructure/adapters` идти по провайдерам и фиксировать ownership по provider suite, а не по каждой вспомогательной модели.
+5. В `domain/ports` не плодить unit tests на Protocols, если достаточно `mypy` и architecture contract tests.
+6. Для clustered suites при необходимости добавить краткие ownership comments, а не писать новые слабые тесты.
 
 ## Риски
 
@@ -92,6 +104,7 @@
 ## Definition of Done
 
 `RF-FS-003` можно считать завершённым, если:
+- уже закрытый `application/services` хвост не открывается повторно без новых structural причин;
 - у behavior-heavy модулей в приоритетных кластерах есть читаемый test owner;
 - clustered suites задокументированы там, где ownership неочевиден;
 - `domain/ports` не зашумлены бессмысленными mirror-тестами;

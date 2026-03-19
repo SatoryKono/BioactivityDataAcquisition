@@ -8,7 +8,13 @@ from hypothesis import strategies as st
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 
-_IDENT = st.from_regex(r"[a-z][a-z0-9]{0,7}", fullmatch=True)
+_LOWER_ALPHA = "abcdefghijklmnopqrstuvwxyz"
+_LOWER_ALNUM = f"{_LOWER_ALPHA}0123456789"
+_IDENT = st.builds(
+    lambda head, tail: head + "".join(tail),
+    st.sampled_from(tuple(_LOWER_ALPHA)),
+    st.lists(st.sampled_from(tuple(_LOWER_ALNUM)), min_size=0, max_size=7),
+)
 
 
 def _build_resolver() -> JoinKeyResolverService:

@@ -5,6 +5,10 @@
 **Связанные находки:** `FS-004`, `FS-005`, `FS-006`  
 **Основной scope:** `src/bioetl/composition/providers/`, `src/bioetl/composition/factories/datasource/`, `src/bioetl/composition/factories/pipeline/`, `src/bioetl/composition/factories/services/`, а также малые циклы в `application` и `infrastructure`
 
+## Актуализация на 2026-03-19 16:58
+
+По существу baseline для `RF-FS-001` не изменился. Последние test-ownership waves (`Wave 3B` и `Wave 3C`) улучшили диагностируемость `application/services`, но не уменьшили сам composition/runtime cycle debt. Этот RF по-прежнему остаётся архитектурным блокером перед полномасштабным `RF-FS-004` и перед широкими package-split waves из `RF-FS-002`.
+
 ## Цель
 
 Цель `RF-FS-001` не в том, чтобы механически переписать импорты до исчезновения циклов на графе зависимостей. Настоящая цель другая: восстановить односторонний поток зависимостей в bootstrap и runtime-сборке проекта так, чтобы composition снова выглядел как слой wiring, а не как самозамкнутый набор взаимно импортирующих factory-модулей. По текущему baseline это самый опасный архитектурный долг в файловой структуре: в composition обнаружен крупный цикл из девяти модулей вокруг `providers` и `datasource factory`, отдельный цикл из семи модулей вокруг `pipeline/services factory`, плюс несколько малых циклов в runtime hot spots. Это уже не косметика. Такие циклы затрудняют перенос кода, скрывают ownership, делают import-time behavior менее предсказуемым и мешают адресно тестировать factory/registry слой.

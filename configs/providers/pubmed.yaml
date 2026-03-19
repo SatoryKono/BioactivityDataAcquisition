@@ -1,7 +1,6 @@
 version: 1.0.0
 provider: pubmed
 source:
-    batch_size: 100
     provider_config:
         provider: pubmed
         base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils

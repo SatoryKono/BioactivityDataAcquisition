@@ -27,6 +27,25 @@ governance:
     historical_section: historical_baseline
     registry_sync_source: baseline
     rationale: "Stabilizing architecture metrics through baseline ratcheting."
+  coarse_budgets:
+    ruff_error_count:
+      max_count: 28
+      owner: "@bioetl-architecture"
+      linked_rf: "RF-ARCH-009"
+      rationale: "Temporary hold while composite runtime hotspot cleanup is still active."
+      ratchet_policy: "hold until RF-ARCH-009 removes current composite lint debt"
+    mypy_error_count:
+      max_count: 0
+      owner: "@bioetl-architecture"
+      linked_rf: "RF-ARCH-015"
+      rationale: "Strict typing is already stabilized repo-wide and stays zero-budget."
+      ratchet_policy: "ratchet only downward from zero"
+    architecture_skip_count:
+      max_count: 7
+      owner: "@bioetl-architecture"
+      linked_rf: "RF-ARCH-015"
+      rationale: "Marker-skip budget remains explicit until historical skip debt is fully retired."
+      ratchet_policy: "ratchet only after skip inventory shrinks"
   review_policy:
     new_exemption_requires:
       - value

@@ -697,7 +697,7 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     config = {
         "provider": "chembl",
-        "source": {"batch_size": 999},
+        "source": {"rate_limit": {"requests_per_second": 999}},
     }
     config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
     config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -706,7 +706,6 @@ def test_load_source_section_reuses_canonical_source_loader(
     base_source = SourceYamlConfig.model_validate(
         {
             "source": {
-                "batch_size": 100,
                 "provider_config": {"provider": "chembl"},
             }
         }
@@ -719,7 +718,7 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     _load_source_section(config, config_path)
 
-    assert config["source"]["batch_size"] == 999
+    assert config["source"]["rate_limit"]["requests_per_second"] == 999
     assert config["source"]["provider_config"]["provider"] == "chembl"
 
 
@@ -733,6 +732,10 @@ def test_load_source_section_reuses_canonical_source_loader(
         (
             {"provider_config": {"pagination": {"page_size": 999}}},
             "source.provider_config.pagination",
+        ),
+        (
+            {"batch_size": 999},
+            "source.batch_size",
         ),
         (
             {"batch": {"page_size": 999}},
@@ -761,7 +764,6 @@ def test_load_source_section_rejects_pipeline_source_pagination_overrides(
     base_source = SourceYamlConfig.model_validate(
         {
             "source": {
-                "batch_size": 100,
                 "provider_config": {"provider": "chembl"},
             }
         }

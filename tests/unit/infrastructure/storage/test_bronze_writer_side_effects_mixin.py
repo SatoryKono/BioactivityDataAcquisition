@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage.bronze_writer_side_effects_mixin import (
+from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
     BronzeWriterSideEffectsMixin,
 )
 
@@ -41,7 +41,7 @@ class TestBronzeWriterSideEffectsMixin:
     async def test_log_bronze_audit_calls_audit_log_write(self, tmp_path: Path) -> None:
         """Should call audit.log_write when audit port is configured."""
         host = _Host(tmp_path)
-        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         await host._log_bronze_audit(
             run_id=RunID("run-1"),
             ingestion_ts=ts,
@@ -68,7 +68,7 @@ class TestBronzeWriterSideEffectsMixin:
         """Should silently skip audit when audit port is None."""
         host = _Host(tmp_path)
         host._audit = None
-        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         await host._log_bronze_audit(
             run_id=RunID("run-2"),
             ingestion_ts=ts,
@@ -82,20 +82,6 @@ class TestBronzeWriterSideEffectsMixin:
             entity="activity",
         )
         # No exception raised, no audit call
-
-    def test_resolve_bronze_metadata_base_path_nested(self, tmp_path: Path) -> None:
-        """Should return nested path when flat_structure is False."""
-        host = _Host(tmp_path)
-        host._flat_structure = False
-        result = host._resolve_bronze_metadata_base_path("chembl", "compound")
-        assert result == tmp_path / "chembl" / "compound"
-
-    def test_resolve_bronze_metadata_base_path_flat(self, tmp_path: Path) -> None:
-        """Should return base_path when flat_structure is True."""
-        host = _Host(tmp_path)
-        host._flat_structure = True
-        result = host._resolve_bronze_metadata_base_path("chembl", "compound")
-        assert result == tmp_path
 
     @pytest.mark.asyncio
     async def test_build_bronze_write_result_includes_checksum(

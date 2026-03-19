@@ -93,8 +93,24 @@ def test_source_schema_does_not_advertise_retired_pagination_aliases() -> None:
     forbidden = {"batch_size", "page_size", "max_url_length"}
     present = sorted(forbidden.intersection(properties))
     assert not present, (
-        "source.json still advertises retired provider pagination aliases: "
-        f"{present}"
+        f"source.json still advertises retired provider pagination aliases: {present}"
+    )
+
+
+def test_source_schema_does_not_advertise_retired_root_batch_size() -> None:
+    """Source JSON schema must not expose retired source.batch_size."""
+    schema = _load_schema("source.json")
+    defs = schema.get("$defs")
+    assert isinstance(defs, dict), "source.json must contain $defs section"
+
+    source_section = defs.get("SourceSectionConfig")
+    assert isinstance(source_section, dict), "source.json missing SourceSectionConfig"
+
+    properties = source_section.get("properties")
+    assert isinstance(properties, dict), "SourceSectionConfig must define properties"
+
+    assert "batch_size" not in properties, (
+        "source.json still advertises retired source.batch_size"
     )
 
 
@@ -126,11 +142,15 @@ def test_configs_readme_tracks_current_legacy_status_policy() -> None:
     assert (
         "source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`"
         in readme
-    ), (
-        "configs/README.md must describe retired source provider pagination aliases"
+    ), "configs/README.md must describe retired source provider pagination aliases"
+    assert "source `batch_size`" in readme, (
+        "configs/README.md must describe source.batch_size as retired"
     )
     assert "composite `merge.column_groups_file`" in readme, (
         "configs/README.md must describe composite.merge.column_groups_file as retired"
+    )
+    assert "composite `composite.version`" in readme, (
+        "configs/README.md must describe composite.version as required"
     )
     assert "provider source `pagination.*`" in readme, (
         "configs/README.md must describe provider_config.pagination.* as the "
@@ -158,6 +178,9 @@ def test_pipeline_configuration_guide_tracks_source_pagination_policy() -> None:
         "pipeline configuration guide must mark source provider pagination "
         "aliases as retired"
     )
+    assert "Retired source root alias:" in guide, (
+        "pipeline configuration guide must mark source.batch_size as retired"
+    )
 
 
 def test_provider_configs_use_canonical_pagination_fields() -> None:
@@ -171,6 +194,9 @@ def test_provider_configs_use_canonical_pagination_fields() -> None:
         source = payload.get("source")
         if not isinstance(source, dict):
             continue
+        if "batch_size" in source:
+            rel = path.relative_to(PROJECT_ROOT)
+            violations.append(f"{rel}: source.batch_size")
         provider_config = source.get("provider_config")
         if not isinstance(provider_config, dict):
             continue
@@ -182,6 +208,5 @@ def test_provider_configs_use_canonical_pagination_fields() -> None:
 
     assert not violations, (
         "Provider YAML corpus must use canonical provider_config.pagination.* "
-        "fields and must not keep legacy pagination aliases.\n"
-        + "\n".join(violations)
+        "fields and must not keep legacy pagination aliases.\n" + "\n".join(violations)
     )

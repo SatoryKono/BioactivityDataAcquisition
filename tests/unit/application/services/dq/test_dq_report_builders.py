@@ -26,7 +26,9 @@ class _SamplePayload:
 class TestDqReportBuilders:
     """Direct tests for generic DQ report helper functions."""
 
-    def test_convert_value_serializes_dataclass_enum_datetime_and_collections(self) -> None:
+    def test_convert_value_serializes_dataclass_enum_datetime_and_collections(
+        self,
+    ) -> None:
         payload = _SamplePayload(
             created_at=datetime(2026, 3, 19, 10, 0, 0, tzinfo=UTC),
             status=DQCheckStatus.WARN,

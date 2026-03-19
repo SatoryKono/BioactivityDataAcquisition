@@ -24,10 +24,13 @@
 1. **Зависимости установлены:**
 
    ```bash
-   ./scripts/dev/dev_setup.sh   # рекомендуемый путь
-   # или вручную:
-   make install   # или: pip install -e ".[dev]"
+   make install
+   make test-deps
+   make setup-plugins
    ```
+
+   `scripts/dev/dev_setup.sh` остаётся legacy placeholder и не является
+   поддерживаемым bootstrap path.
 
 > **Note:** BioETL использует **Local-Only** архитектуру (ADR-010).
 > Docker и внешние сервисы (Redis, MinIO) **не требуются**.

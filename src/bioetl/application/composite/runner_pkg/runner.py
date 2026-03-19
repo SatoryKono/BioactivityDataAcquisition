@@ -6,9 +6,16 @@ Coordinates high-level execution flow while delegating stage logic to mixins.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, cast
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING
 
+from bioetl.application.composite.runner_pkg.runner_execution_orchestrator import (
+    CompositeLockedExecutionRequest,
+    execute_locked_run_phases,
+)
+from bioetl.application.composite.runner_pkg.runner_key_flow import (
+    CompositeEnrichmentKeyRequest,
+    extract_enrichment_keys,
+)
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
@@ -20,27 +27,34 @@ from bioetl.application.composite.runner_pkg.runner_models import (
 from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
 )
+from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
+    bind_runner_dependencies,
+    initialize_runner_runtime_state,
+    prepare_run_state,
+    resolve_original_run_id,
+    run_with_managed_lock,
+    validate_runner_can_start,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
     CompositeRunnerStageMixin,
 )
 from bioetl.application.composite.runner_pkg.runner_support_mixin import (
     CompositeRunnerSupportMixin,
 )
-from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
-from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import (
     BioETLError,
-    LockAcquisitionError,
-    RunnerAlreadyExecutedError,
 )
-from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
+    import polars as pl
+
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
+    from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.ports import LockPort
 
 
 __all__ = [
@@ -56,6 +70,9 @@ class CompositePipelineRunner(
     CompositeRunnerMergeStageMixin,
 ):
     """Facade/orchestrator for composite pipeline lifecycle."""
+
+    _lock: LockPort
+    _key_extractor: KeyExtractorService
 
     def __init__(
         self,
@@ -79,27 +96,8 @@ class CompositePipelineRunner(
         """
         self._config = config
         self._runtime = runtime
-        self._seed_runner_factory = deps.seed_runner_factory
-        self._enricher_runner_factory = deps.enricher_runner_factory
-        self._dependencies_runner_factory = deps.dependencies_runner_factory
-        self._key_extractor = deps.key_extractor
-        self._dependency_coordinator = deps.dependency_coordinator
-        self._coordinator = deps.coordinator
-        self._merger = deps.merger
-        self._checkpoint_manager = deps.checkpoint_manager
-        self._logger = deps.logger
-        self._lock = deps.lock
-        self._run_id_str = run_id or str(uuid4())
-        self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
-        self._started_at: datetime | None = None
-        self._original_run_id: str | None = None
-        self._finished = False
-        self._final_state: CompositePipelineState | None = None
-        self._dq_report_service = deps.dq_report_service
-        self._preflight_validator = deps.preflight_validator
-        self._quarantine_port = deps.quarantine_port
-        self._metrics = deps.metrics
-        self._fsm = deps.fsm_state_helper
+        bind_runner_dependencies(self, deps)
+        initialize_runner_runtime_state(self, run_id)
 
     @property
     def run_id(self) -> str:
@@ -135,57 +133,24 @@ class CompositePipelineRunner(
             log_kwargs["stage"] = stage
         self._logger.error(PipelineEvent.FAILED, **log_kwargs)
 
-    async def _run_with_managed_lock(self) -> CompositeResult:
-        """Acquire/release the distributed lock around the canonical run body.
-
-        A background :class:`HeartbeatTask` keeps the lock alive for the
-        entire duration of the composite pipeline execution, preventing TTL
-        expiration for long-running pipelines (>1 hour).
-        """
-        lock_key = self._config.lock_key
-        acquired = await self._lock.acquire(
-            key=lock_key,
-            owner_id=self._run_id,
-            ttl=self._runtime.lock_ttl_seconds,
+    def _handle_pipeline_execution_failure(self, error: Exception) -> None:
+        """Map execution-phase failures to canonical runner diagnostics."""
+        self._mark_finished(CompositePipelineState.FAILED)
+        self._log_failed_run(
+            error,
+            reason_code="composite_pipeline_execution_failed",
+            stage="run_with_lock",
         )
-        if not acquired:
-            raise LockAcquisitionError(key=lock_key)
 
-        shutdown_signal = ShutdownSignal()
-        heartbeat = HeartbeatTask(
-            lock_port=self._lock,
-            lock_key=lock_key,
-            owner_id=self._run_id,
-            exclusive=False,
-            interval=self._runtime.heartbeat_interval_seconds,
-            shutdown_signal=shutdown_signal,
-            logger=self._logger,
-        )
-        try:
-            await heartbeat.start()
-            result = await self._run_with_lock()
-            self._mark_finished(CompositePipelineState.COMPLETED)
-            return result
-        finally:
-            await heartbeat.stop()
-            await self._lock.release(key=lock_key, owner_id=self._run_id)
+    def _handle_bioetl_failure(self, error: BioETLError) -> None:
+        """Map unexpected BioETL failures to canonical runner diagnostics."""
+        self._mark_finished(CompositePipelineState.FAILED)
+        self._log_failed_run(error, reason_code="unexpected_bioetl_error")
 
-    async def run(self) -> CompositeResult:
-        """Execute full composite pipeline under distributed lock.
-
-        Returns:
-            CompositeResult summarising seed, enrichment, dependency, and merge outcomes.
-        """
-        if self._finished:
-            raise RunnerAlreadyExecutedError(
-                runner_type="CompositePipelineRunner",
-                run_id=self._run_id_str,
-                final_state=self._final_state.value if self._final_state else None,
-            )
-
+    def _start_run_lifecycle(self) -> None:
+        """Validate and log the start of one composite runner execution."""
         self._validate_config_consistency()
         self._run_preflight_validation()
-
         self._started_at = datetime.now(tz=UTC)
         self._logger.info(
             PipelineEvent.START,
@@ -193,6 +158,38 @@ class CompositePipelineRunner(
             run_id=self._run_id_str,
             stage="composite_start",
         )
+
+    async def _run_with_managed_lock(self) -> CompositeResult:
+        """Acquire/release the distributed lock around the canonical run body.
+
+        A background :class:`HeartbeatTask` keeps the lock alive for the
+        entire duration of the composite pipeline execution, preventing TTL
+        expiration for long-running pipelines (>1 hour).
+        """
+        result = await run_with_managed_lock(
+            lock_port=self._lock,
+            lock_key=self._config.lock_key,
+            owner_id=self._run_id,
+            lock_ttl_seconds=self._runtime.lock_ttl_seconds,
+            heartbeat_interval_seconds=self._runtime.heartbeat_interval_seconds,
+            logger=self._logger,
+            run_while_locked=self._run_with_lock,
+        )
+        self._mark_finished(CompositePipelineState.COMPLETED)
+        return result
+
+    async def run(self) -> CompositeResult:
+        """Execute full composite pipeline under distributed lock.
+
+        Returns:
+            CompositeResult summarising seed, enrichment, dependency, and merge outcomes.
+        """
+        validate_runner_can_start(
+            finished=self._finished,
+            run_id=self._run_id_str,
+            final_state=self._final_state,
+        )
+        self._start_run_lifecycle()
 
         # Resolve exception group at call-time to avoid stale module-state issues
         # from test-time monkeypatching/reloads.
@@ -203,66 +200,56 @@ class CompositePipelineRunner(
         try:
             return await self._run_with_managed_lock()
         except pipeline_execution_errors as error:
-            self._mark_finished(CompositePipelineState.FAILED)
-            self._log_failed_run(
-                error,
-                reason_code="composite_pipeline_execution_failed",
-                stage="run_with_lock",
-            )
+            self._handle_pipeline_execution_failure(error)
             raise
         except BioETLError as error:
-            self._mark_finished(CompositePipelineState.FAILED)
-            self._log_failed_run(error, reason_code="unexpected_bioetl_error")
+            self._handle_bioetl_failure(error)
             raise
 
     async def _prepare_run_state(self) -> CompositeCheckpointState:
         """Load checkpoint state and apply resume semantics when configured."""
-        state = await self._checkpoint_manager.load()
-
-        if self._runtime.resume and state.state == CompositePipelineState.FAILED:
-            state = self._fsm.handle_resume_from_failed(state)
-        if self._runtime.resume and state.is_resumable:
-            self._fsm.log_resume_context(state)
-            if state.run_id != self._run_id_str:
-                self._original_run_id = state.run_id
-
+        state = await prepare_run_state(
+            checkpoint_manager=self._checkpoint_manager,
+            runtime=self._runtime,
+            fsm=self._fsm,
+        )
+        self._original_run_id = resolve_original_run_id(
+            runtime=self._runtime,
+            state=state,
+            current_run_id=self._run_id_str,
+        )
         return state
+
+    async def _extract_enrichment_keys(self) -> pl.DataFrame:
+        """Extract seed keys once the seed phase has completed."""
+        result = await extract_enrichment_keys(
+            key_extractor=self._key_extractor,
+            logger=self._logger,
+            request=CompositeEnrichmentKeyRequest(
+                composite_name=self._config.name,
+                silver_table=self._config.seed.silver_table,
+                output_keys=tuple(self._config.seed.output_keys),
+            ),
+        )
+        return result.keys_df
+
+    async def _execute_locked_run_phases(
+        self,
+        state: CompositeCheckpointState,
+    ) -> tuple[CompositeCheckpointState, CompositeExecutionContext]:
+        """Execute composite phases in the canonical lock-held order."""
+        result = await execute_locked_run_phases(
+            self,
+            CompositeLockedExecutionRequest(state=state),
+        )
+        return result.state, result.execution_context
 
     async def _run_with_lock(self) -> CompositeResult:
         """Execute pipeline stages while lock is held."""
         state = await self._prepare_run_state()
-
-        state, seed_result = await self._execute_seed_phase(state)
-
-        keys_df = await self._key_extractor.extract(
-            silver_table=self._config.seed.silver_table,
-            keys=self._config.seed.output_keys,
-        )
-        self._logger.info(
-            "Extracted keys for enrichment",
-            composite=self._config.name,
-            keys_count=len(keys_df),
-        )
-
-        state, dependency_results = await self._execute_dependencies_phase(
-            state, keys_df
-        )
-        state, enrichment_results = await self._execute_enrichment_phase(state, keys_df)
-        state = await self._transition_to_enrichment_completed(state)
-        state, merge_result = await self._execute_merge_stage(
-            state,
-            enrichment_results,
-            dependency_results,
-        )
+        state, execution_context = await self._execute_locked_run_phases(state)
         await self._finalize_pipeline(state)
-        return self._build_composite_result(
-            CompositeExecutionContext(
-                seed_result=seed_result,
-                dependency_results=dependency_results,
-                enrichment_results=enrichment_results,
-                merge_result=merge_result,
-            )
-        )
+        return self._build_composite_result(execution_context)
 
 
 # Backward-compatible alias for iterative NAME-001 migration.

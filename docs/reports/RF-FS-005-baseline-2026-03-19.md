@@ -5,6 +5,10 @@
 **Связанные находки:** `FS-008`, `FS-009`  
 **Основной scope:** `src/bioetl/application/pipelines/chembl/_pipelines.py`, `src/bioetl/application/services/cli_run_orchestration_service.py`, а также связанные imports/re-exports в CLI
 
+## Актуализация на 2026-03-19 16:58
+
+Статус этого baseline остаётся актуальным: CLI-подэтап по-прежнему выглядит как partially completed closeout, а ChEMBL `_pipelines.py` всё ещё остаётся отдельным semantic hotspot. Недавние ownership waves в `application/services` снижают общий шум вокруг service-layer tests, но не закрывают сам `RF-FS-005`, потому что его core scope остаётся структурно-файловым, а не test-ownership oriented.
+
 ## Цель
 
 `RF-FS-005` — это намеренно локальная structural wave. В отличие от cycle cleanup или config topology, здесь не нужно перепроектировать слой целиком. Задача состоит в том, чтобы убрать два самых очевидных semantic hotspot-а, где имя модуля, число сущностей и фактическая ответственность больше не совпадают. Первый — `src/bioetl/application/pipelines/chembl/_pipelines.py`, где в одном underscored файле живёт четырнадцать public pipeline classes. Второй — `src/bioetl/application/services/cli_run_orchestration_service.py`, который исторически смешивал contracts, DTO/models и orchestration service. По baseline эта задача уже частично начата: models/contracts вынесены в отдельные модули, а CLI helpers переключены на новые canonical imports. Значит план для `RF-FS-005` должен исходить из текущего состояния, а не из старой картины “ничего ещё не сделано”.

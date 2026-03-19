@@ -5,6 +5,10 @@
 **Связанные находки:** `FS-007`  
 **Основной scope:** `configs/`, `src/bioetl/domain/config/`, `src/bioetl/domain/composite/`, `src/bioetl/infrastructure/config/`, `src/bioetl/infrastructure/schemas/`, `src/bioetl/composition/factories/pipeline/`
 
+## Актуализация на 2026-03-19 16:58
+
+Этот baseline по сути остаётся без изменений. Последние test-ownership waves не затронули config topology напрямую и не снимают prerequisite на composition cycle cleanup. `RF-FS-004` всё ещё лучше открывать только после адресного продвижения по `RF-FS-001`, иначе те же composition/config файлы будут перемещаться повторно.
+
 ## Цель
 
 `RF-FS-004` должен сделать ownership конфигурации однозначным. Сейчас проблема не в том, что проект “не умеет читать YAML”. Проблема в другом: config concerns одновременно живут в файловых `configs/`, в доменных config/value objects, в infrastructure loader/schema слоях и в composition helpers. Такая topology затрудняет ответ на базовый вопрос: где именно находится canonical truth о форме конфигурации, а где только адаптация или wiring. Для Hexagonal/DDD-системы это особенно вредно, потому что слой composition начинает впитывать config behavior, domain начинает выглядеть как storage schema каталог, а infrastructure держит и loading, и normalization, и compatibility seams одновременно.

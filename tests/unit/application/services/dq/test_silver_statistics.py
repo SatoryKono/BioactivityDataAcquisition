@@ -29,11 +29,11 @@ class TestSilverStatisticsCalculator:
         assert result.quarantine_rate == 0.2
         assert result.status == DQCheckStatus.WARN
 
-    def test_check_value_distribution_limits_processing_to_first_twenty_columns(self) -> None:
+    def test_check_value_distribution_limits_processing_to_first_twenty_columns(
+        self,
+    ) -> None:
         calculator = SilverStatisticsCalculator()
-        df = pl.DataFrame(
-            {f"c{i}": [i, i + 1, i + 2] for i in range(22)}
-        )
+        df = pl.DataFrame({f"c{i}": [i, i + 1, i + 2] for i in range(22)})
 
         result = calculator.check_value_distribution(df)
 
@@ -82,4 +82,3 @@ class TestSilverStatisticsCalculator:
         assert result["status"] == DQCheckStatus.PASS.value
         assert "score" in result["numeric_columns"]
         assert "category" in result["categorical_columns"]
-

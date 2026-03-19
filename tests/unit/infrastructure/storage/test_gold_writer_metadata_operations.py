@@ -73,8 +73,9 @@ class TestPrepareGoldMetadataWrite:
     def test_resolves_provider_entity_and_builds_metadata(self) -> None:
         """Should call host methods to resolve provider/entity and build metadata."""
         host = MagicMock()
-        host._resolve_provider_entity.return_value = ("chembl", "compound")
-        host._create_gold_metadata_payload.return_value = MagicMock()
+        host._metadata_coordinator = None
+        host._transform_version = "1.0.0"
+        host._transform_steps = ("normalize",)
 
         from bioetl.domain.medallion import GoldWriteMode
 
@@ -87,10 +88,20 @@ class TestPrepareGoldMetadataWrite:
             ingestion_ts=None,
             run_id=None,
         )
-        prepared = _prepare_gold_metadata_write(host, request)
+        metadata = MagicMock()
+        from unittest.mock import patch
+
+        with patch(
+            "bioetl.infrastructure.storage.gold_writer_metadata_operations.build_gold_metadata_payload",
+            return_value=metadata,
+        ) as mock_build:
+            prepared = _prepare_gold_metadata_write(host, request)
+
         assert isinstance(prepared, _PreparedGoldMetadataWrite)
         assert prepared.provider_name == "chembl"
         assert prepared.entity_name == "compound"
+        assert prepared.metadata is metadata
+        mock_build.assert_called_once()
 
 
 @pytest.mark.unit
@@ -143,6 +154,8 @@ class TestMaybePrepareGoldMergedMetadataWrite:
         """Should skip and log when metadata coordinator is not configured."""
         host = MagicMock()
         host._metadata_coordinator = None
+        host._transform_version = "1.0.0"
+        host._transform_steps = ()
         request = _GoldMergedMetadataWriteRequest(
             table_path="/tmp/gold/merged",
             table_name="merged_table",
@@ -151,3 +164,24 @@ class TestMaybePrepareGoldMergedMetadataWrite:
         result = _maybe_prepare_gold_merged_metadata_write(host, request)
         assert result is None
         host.logger.debug.assert_called_once()
+
+    def test_prepares_merged_metadata_via_module_helper(self) -> None:
+        host = MagicMock()
+        host._metadata_coordinator = MagicMock()
+        host._metadata_coordinator.create_gold_metadata.return_value = MagicMock()
+        host._transform_version = "2.0.0"
+        host._transform_steps = ("normalize",)
+        request = _GoldMergedMetadataWriteRequest(
+            table_path="/tmp/gold/merged",
+            table_name="composite.publication",
+            records=[{"id": 1}],
+        )
+
+        prepared = _maybe_prepare_gold_merged_metadata_write(host, request)
+
+        assert prepared is not None
+        host._metadata_coordinator.create_gold_metadata.assert_called_once()
+        input_arg = host._metadata_coordinator.create_gold_metadata.call_args.args[0]
+        assert input_arg.transform_version == "2.0.0"
+        assert prepared.provider_name == "composite"
+        assert prepared.entity_name == "publication"

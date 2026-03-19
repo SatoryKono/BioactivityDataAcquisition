@@ -5,9 +5,6 @@ Implements FilterableDataSourcePort for batch DOI resolution with title fallback
 
 from __future__ import annotations
 
-from bioetl.infrastructure.adapters.openalex.client import (
-    OpenAlexAdapter,
-    _create_openalex_adapter,
-)
+from bioetl.infrastructure.adapters.openalex.client import OpenAlexAdapter
 
-__all__ = ["OpenAlexAdapter", "_create_openalex_adapter"]
+__all__ = ["OpenAlexAdapter"]

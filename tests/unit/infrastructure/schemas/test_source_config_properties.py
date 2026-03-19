@@ -30,7 +30,6 @@ def _make_source_config(
     id_batch_size: int | None = None,
     max_url_length: int | None = None,
     strategy: str = "offset",
-    source_batch_size: int = 100,
 ) -> SourceYamlConfig:
     """Build a SourceYamlConfig with specific pagination values."""
     pagination_data: dict = {"strategy": strategy}
@@ -50,7 +49,6 @@ def _make_source_config(
     return SourceYamlConfig.model_validate(
         {
             "source": {
-                "batch_size": source_batch_size,
                 "provider_config": provider_data,
                 "circuit_breaker": {},
                 "rate_limit": {},
@@ -70,16 +68,16 @@ class TestBatchSizeResolution:
 
     def test_prefers_pagination_id_batch_size(self) -> None:
         """Canonical pagination.id_batch_size takes highest priority."""
-        cfg = _make_source_config(id_batch_size=500, source_batch_size=50)
+        cfg = _make_source_config(id_batch_size=500)
         assert cfg.batch_size == 500
 
-    def test_falls_back_to_source_batch_size(self) -> None:
-        """Falls back to source.batch_size when neither pagination nor provider set."""
-        cfg = _make_source_config(source_batch_size=75)
-        assert cfg.batch_size == 75
+    def test_falls_back_to_default_batch_size(self) -> None:
+        """Falls back to DEFAULT_BATCH_SIZE when pagination.id_batch_size is absent."""
+        cfg = _make_source_config()
+        assert cfg.batch_size == 100
 
-    def test_default_source_batch_size(self) -> None:
-        """Default source.batch_size is 100."""
+    def test_default_batch_size_is_100(self) -> None:
+        """Default ID batch size is 100."""
         cfg = _make_source_config()
         assert cfg.batch_size == 100
 
@@ -290,7 +288,9 @@ class TestRetiredLegacyAliases:
     def test_retired_aliases_are_rejected(
         self, payload: dict[str, object], expected_fragment: str
     ) -> None:
-        with pytest.raises(ValueError, match="Retired source provider pagination aliases") as exc:
+        with pytest.raises(
+            ValueError, match="Retired source provider pagination aliases"
+        ) as exc:
             SourceYamlConfig.model_validate(payload)
 
         assert expected_fragment in str(exc.value)

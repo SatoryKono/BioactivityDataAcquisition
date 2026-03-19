@@ -8,13 +8,16 @@ from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.storage.gold_writer_metadata_payloads import (
+    build_gold_merged_metadata_input,
+    build_gold_metadata_payload,
+)
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
     from bioetl.domain.models.metadata import GoldMetadata
     from bioetl.domain.ports import (
-        GoldMetadataInput,
         LoggerPort,
         MetadataCoordinatorPort,
     )
@@ -74,31 +77,8 @@ class _GoldMetadataWriteHostProtocol(Protocol):
     """Typed host contract for standard Gold metadata preparation."""
 
     _metadata_coordinator: MetadataCoordinatorPort | None
-
-    def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]: ...
-
-    def _create_gold_metadata_payload(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        mode: GoldWriteMode,
-        scd_config: ScdConfig | None,
-        ingestion_ts: datetime | None,
-        run_id: RunID | None,
-        silver_refs: list[SilverWriteResult] | None = None,
-        gold_schema: object | None = None,
-    ) -> GoldMetadata: ...
-
-    def _build_gold_merged_metadata_input(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        schema: DataFrameSchema | None,
-    ) -> GoldMetadataInput: ...
+    _transform_version: str | None
+    _transform_steps: tuple[str, ...]
 
     async def _write_gold_metadata_file(
         self,
@@ -139,8 +119,11 @@ def _prepare_gold_metadata_write(
     request: _GoldMetadataWriteRequest,
 ) -> _PreparedGoldMetadataWrite:
     """Resolve provider/entity and build standard Gold metadata payload."""
-    provider_name, entity_name = host._resolve_provider_entity(request.table_name)
-    metadata = host._create_gold_metadata_payload(
+    from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+    provider_name, entity_name = _parse_table_name(request.table_name)
+    metadata = build_gold_metadata_payload(
+        coordinator=host._metadata_coordinator,
         table_path=request.table_path,
         table_name=request.table_name,
         records=request.records,
@@ -150,6 +133,8 @@ def _prepare_gold_metadata_write(
         run_id=request.run_id,
         silver_refs=request.silver_refs,
         gold_schema=request.gold_schema,
+        transform_version=host._transform_version,
+        transform_steps=host._transform_steps,
     )
     return _PreparedGoldMetadataWrite(
         request=request,
@@ -183,11 +168,13 @@ def _prepare_gold_merged_metadata_write(
     provider_name, entity_name = _parse_table_name(request.table_name)
     assert host._metadata_coordinator is not None
     metadata = host._metadata_coordinator.create_gold_metadata(
-        host._build_gold_merged_metadata_input(
+        build_gold_merged_metadata_input(
             table_path=request.table_path,
             table_name=request.table_name,
             records=request.records,
             schema=request.schema,
+            transform_version=host._transform_version,
+            transform_steps=host._transform_steps,
         )
     )
     return _PreparedGoldMetadataWrite(

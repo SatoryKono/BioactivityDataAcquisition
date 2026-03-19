@@ -330,6 +330,8 @@ def extract_all_comments_raw(
     )
 
     return raw
+
+
 def extract_all_comments(
     comments: list[JsonDict] | None,
 ) -> dict[str, str | int | None]:

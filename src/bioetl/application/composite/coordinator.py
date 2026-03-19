@@ -16,10 +16,16 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import polars as pl
 
+from bioetl.application.composite.coordinator_planning import (
+    apply_enricher_filter,
+    build_enricher_tasks,
+    find_column_case_insensitive,
+)
 from bioetl.application.composite.coordinator_result_mixin import (
     EnrichmentCoordinatorResultMixin,
 )
@@ -53,49 +59,13 @@ _ENRICHER_EXECUTION_ERRORS = (
 __all__ = ["EnrichmentCoordinatorService"]
 
 
-def _create_enricher_semaphore(max_concurrency: int) -> asyncio.Semaphore:
-    """Build semaphore for enricher concurrency limiting."""
-    return asyncio.Semaphore(max_concurrency)
+@dataclass(frozen=True, slots=True)
+class _EnricherExecutionContext:
+    """Per-enricher execution context shared across policy branches."""
 
-
-def _build_enricher_task(
-    service: EnrichmentCoordinatorService,
-    *,
-    keys: pl.DataFrame,
-    enricher: EnricherConfig,
-    completed: frozenset[str],
-    runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
-) -> tuple[str, asyncio.Task[EnrichmentResult]] | None:
-    """Build async task for one enricher or return None when skipped."""
-    if enricher.pipeline in completed:
-        service._logger.debug(
-            "Skipping completed enricher",
-            enricher=enricher.pipeline,
-        )
-        return None
-
-    filtered_keys = service._apply_filter(keys, enricher)
-    if filtered_keys.is_empty():
-        service._logger.info(
-            "Filter excluded all records for enricher",
-            enricher=enricher.pipeline,
-            filter_condition=enricher.filter_condition,
-        )
-        return (
-            enricher.pipeline,
-            asyncio.create_task(service._return_skipped(enricher)),
-        )
-
-    return (
-        enricher.pipeline,
-        asyncio.create_task(
-            service._run_single_enricher(
-                enricher=enricher,
-                keys=filtered_keys,
-                runner_factory=runner_factory,
-            )
-        ),
-    )
+    enricher: EnricherConfig
+    records_input: int
+    started_at: datetime
 
 
 class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
@@ -126,7 +96,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         self._logger = logger
         self._dq_config = dq_config
         self._max_concurrency = max_concurrency
-        self._semaphore_factory = semaphore_factory or _create_enricher_semaphore
+        self._semaphore_factory = semaphore_factory or asyncio.Semaphore
         self._semaphore = self._semaphore_factory(max_concurrency)
 
     async def run_enrichers(
@@ -149,25 +119,18 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
             Mapping from enricher pipeline name to its EnrichmentResult, including
             skipped, failed, partial, and successful outcomes.
         """
-        task_specs = [
-            task_spec
-            for enricher in enrichers
-            if (
-                task_spec := _build_enricher_task(
-                    self,
-                    keys=keys,
-                    enricher=enricher,
-                    completed=completed,
-                    runner_factory=runner_factory,
-                )
-            )
-            is not None
-        ]
-        if not task_specs:
+        planned_tasks = build_enricher_tasks(
+            self,
+            keys=keys,
+            enrichers=enrichers,
+            completed=completed,
+            runner_factory=runner_factory,
+        )
+        if not planned_tasks:
             return {}
 
-        enricher_names = [name for name, _ in task_specs]
-        tasks = [task for _, task in task_specs]
+        enricher_names = [planned_task.pipeline for planned_task in planned_tasks]
+        tasks = [planned_task.task for planned_task in planned_tasks]
         self._logger.info(
             "Running enrichers",
             count=len(tasks),
@@ -180,57 +143,19 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         self, keys: pl.DataFrame, enricher: EnricherConfig
     ) -> pl.DataFrame:
         """Apply simple NULL/NOT NULL filter condition for enricher keys."""
-        import polars as pl
-
-        if not enricher.filter_condition:
-            return keys
-
-        try:
-            condition = enricher.filter_condition.strip()
-            condition_upper = condition.upper()
-
-            if " IS NOT NULL" in condition_upper:
-                raw_field = condition_upper.replace(" IS NOT NULL", "").strip()
-                matched = self._find_column_case_insensitive(keys, raw_field)
-                if matched:
-                    return keys.filter(pl.col(matched).is_not_null())
-
-            if " IS NULL" in condition_upper:
-                raw_field = condition_upper.replace(" IS NULL", "").strip()
-                matched = self._find_column_case_insensitive(keys, raw_field)
-                if matched:
-                    return keys.filter(pl.col(matched).is_null())
-
-            self._logger.warning(
-                "Complex filter condition not fully supported",
-                enricher=enricher.pipeline,
-                condition=condition,
-            )
-            return keys
-
-        except (*_FILTER_CONDITION_ERRORS, BioETLError) as e:
-            self._logger.warning(
-                "Failed to apply filter condition",
-                enricher=enricher.pipeline,
-                condition=enricher.filter_condition,
-                error=str(e),
-                error_type=type(e).__name__,
-                reason_code=(
-                    "unexpected_bioetl_error" if isinstance(e, BioETLError) else None
-                ),
-            )
-            return keys
+        return apply_enricher_filter(
+            logger=self._logger,
+            keys=keys,
+            enricher=enricher,
+            find_column=self._find_column_case_insensitive,
+            filter_errors=(*_FILTER_CONDITION_ERRORS, BioETLError),
+        )
 
     def _find_column_case_insensitive(
         self, df: pl.DataFrame, column: str
     ) -> str | None:
         """Find column name with case-insensitive matching."""
-        column_lower = column.lower()
-        col_name: str
-        for col_name in df.columns:
-            if col_name.lower() == column_lower:
-                return col_name
-        return None
+        return find_column_case_insensitive(df, column)
 
     async def _return_skipped(self, enricher: EnricherConfig) -> EnrichmentResult:
         """Return a skipped result for an enricher."""
@@ -247,49 +172,101 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
     ) -> EnrichmentResult:
         """Run a single enricher with timeout and error handling."""
         async with self._semaphore:
-            started_at = datetime.now(tz=UTC)
-            records_input = len(keys)
-            self._log_enricher_start(enricher, records_input)
+            execution_context = self._start_enricher_execution(enricher, keys)
 
             try:
                 runner, completed_at, duration = await self._run_with_timeout(
                     enricher=enricher,
                     keys=keys,
                     runner_factory=runner_factory,
-                    started_at=started_at,
+                    started_at=execution_context.started_at,
                 )
-                return self._build_enricher_result(
-                    enricher=enricher,
+                return self._complete_enricher_execution(
+                    execution_context=execution_context,
                     runner=runner,
-                    records_input=records_input,
-                    started_at=started_at,
                     completed_at=completed_at,
                     duration=duration,
                 )
             except TimeoutError:
-                if enricher.required:
-                    self._logger.error(
-                        "Required enricher timed out",
-                        enricher=enricher.pipeline,
-                        timeout_seconds=enricher.timeout_seconds,
-                    )
-                    raise
-                return self._build_timeout_result(enricher, records_input, started_at)
+                return self._handle_enricher_timeout(execution_context)
             except _ENRICHER_EXECUTION_ERRORS as e:
-                return self._handle_enricher_error(
+                return self._handle_enricher_execution_error(
                     e,
-                    enricher,
-                    records_input,
-                    started_at,
+                    execution_context=execution_context,
                 )
             except BioETLError as e:
-                return self._handle_enricher_error(
+                return self._handle_enricher_execution_error(
                     e,
-                    enricher,
-                    records_input,
-                    started_at,
+                    execution_context=execution_context,
                     reason_code="unexpected_bioetl_error",
                 )
+
+    def _start_enricher_execution(
+        self,
+        enricher: EnricherConfig,
+        keys: pl.DataFrame,
+    ) -> _EnricherExecutionContext:
+        """Create the canonical execution context and start log for one enricher."""
+        execution_context = _EnricherExecutionContext(
+            enricher=enricher,
+            records_input=len(keys),
+            started_at=datetime.now(tz=UTC),
+        )
+        self._log_enricher_start(enricher, execution_context.records_input)
+        return execution_context
+
+    def _complete_enricher_execution(
+        self,
+        *,
+        execution_context: _EnricherExecutionContext,
+        runner: ExecutionMetricsRunnerPort,
+        completed_at: datetime,
+        duration: float,
+    ) -> EnrichmentResult:
+        """Map a successful enricher execution into the canonical result shape."""
+        return self._build_enricher_result(
+            enricher=execution_context.enricher,
+            runner=runner,
+            records_input=execution_context.records_input,
+            started_at=execution_context.started_at,
+            completed_at=completed_at,
+            duration=duration,
+        )
+
+    def _handle_enricher_timeout(
+        self,
+        execution_context: _EnricherExecutionContext,
+    ) -> EnrichmentResult:
+        """Apply timeout policy, re-raising for required enrichers only."""
+        enricher = execution_context.enricher
+        if enricher.required:
+            self._logger.error(
+                "Required enricher timed out",
+                enricher=enricher.pipeline,
+                timeout_seconds=enricher.timeout_seconds,
+            )
+            raise
+        return self._build_timeout_result(
+            enricher,
+            execution_context.records_input,
+            execution_context.started_at,
+        )
+
+    def _handle_enricher_execution_error(
+        self,
+        error: Exception,
+        *,
+        execution_context: _EnricherExecutionContext,
+        reason_code: str | None = None,
+    ) -> EnrichmentResult:
+        """Apply canonical error mapping for enricher execution failures."""
+        return self._handle_enricher_error(
+            error,
+            execution_context.enricher,
+            execution_context.records_input,
+            execution_context.started_at,
+            reason_code=reason_code,
+        )
 
     def _log_enricher_start(self, enricher: EnricherConfig, records_input: int) -> None:
         self._logger.info(

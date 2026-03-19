@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.storage.bronze_writer_validation_mixin import (
+from bioetl.infrastructure.storage.bronze.validation_mixin import (
     BronzeWriterValidationMixin,
 )
 
@@ -86,7 +86,7 @@ class TestBronzeWriterValidationMixin:
     def test_validate_utc_datetime_valid(self) -> None:
         """UTC datetime should pass without error."""
         host = _Host()
-        utc_dt = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        utc_dt = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         host._validate_utc_datetime(utc_dt, "ingestion_ts")
 
     def test_validate_json_records_valid(self) -> None:

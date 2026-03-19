@@ -14,6 +14,7 @@ from bioetl.infrastructure.storage.gold_writer_io_delta_mixins import (
     _prepare_scd2_gold_write,
     _run_gold_write_with_retry,
 )
+from datetime import UTC
 
 
 @pytest.mark.unit
@@ -132,7 +133,7 @@ class TestPrepareScd2GoldWrite:
 
     def test_prepare_scd2_gold_write_sorts_by_business_keys(self) -> None:
         """Should sort records by business keys and populate SCD2 fields."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         scd_config = MagicMock()
         scd_config.business_keys = ["compound_id"]
@@ -147,7 +148,7 @@ class TestPrepareScd2GoldWrite:
             {"compound_id": "C1", "name": "a"},
             {"compound_id": "C2", "name": "b"},
         ]
-        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
 
         prepared = _prepare_scd2_gold_write(
             table_path="/tmp/gold/scd2",

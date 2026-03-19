@@ -251,6 +251,143 @@ class TestSilverWriterValidation:
         span.set_attribute.assert_any_call("table_name", "test.table")
         span.set_attribute.assert_any_call("mode", "merge")
         span.set_attribute.assert_any_call("record_count", 1)
+        span.set_attribute.assert_any_call("bioetl.table_name", "test.table")
+        span.set_attribute.assert_any_call("bioetl.write_mode", "merge")
+        span.set_attribute.assert_any_call("bioetl.record_count", 1)
+        span.set_attribute.assert_any_call("bioetl.provider", "test")
+        span.set_attribute.assert_any_call("bioetl.entity_type", "table")
+        span.set_attribute.assert_any_call("bioetl.pipeline_run_id", "uuid-123")
+        span.set_attribute.assert_any_call("bioetl.run_type", "incremental")
+
+    @pytest.mark.asyncio
+    async def test_execute_silver_write_with_tracing_emits_operational_context(
+        self,
+    ) -> None:
+        """Tracing helper should expose provider/entity/run context for operations."""
+        from datetime import UTC, datetime
+
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+            _SilverWriteExecutionContext,
+            _SilverWriteInvocation,
+            execute_silver_write_with_tracing,
+        )
+
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_run_id": "run-001",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        schema = pa.Table.from_pylist(records).schema
+        tracing = MagicMock()
+        tracer = MagicMock()
+        span_cm = MagicMock()
+        span = MagicMock()
+        tracing.get_tracer.return_value = tracer
+        tracer.start_as_current_span.return_value = span_cm
+        span_cm.__enter__.return_value = span
+        invocation = _SilverWriteInvocation(
+            table_name="chembl.activity",
+            records=records,
+            primary_keys=["entity_id"],
+            schema=schema,
+            mode="merge",
+            partition_cols=["entity_id"],
+            on_schema_mismatch="ignore",
+            column_order=None,
+            bronze_refs=None,
+            key_nullability_rules=None,
+        )
+
+        async def execute_pipeline(
+            *,
+            invocation: _SilverWriteInvocation,
+            ctx: _SilverWriteExecutionContext,
+        ) -> None:
+            assert ctx.table_name == "chembl.activity"
+
+        await execute_silver_write_with_tracing(
+            tracing=tracing,
+            module_name="bioetl.test",
+            invocation=invocation,
+            started_at=datetime.now(UTC),
+            start_perf=123.0,
+            execute_pipeline=execute_pipeline,
+        )
+
+        span.set_attribute.assert_any_call("bioetl.provider", "chembl")
+        span.set_attribute.assert_any_call("bioetl.entity_type", "activity")
+        span.set_attribute.assert_any_call("bioetl.pipeline_run_id", "run-001")
+        span.set_attribute.assert_any_call("bioetl.run_type", "incremental")
+
+    @pytest.mark.asyncio
+    async def test_execute_silver_write_with_tracing_omits_identity_when_unparseable(
+        self,
+    ) -> None:
+        """Tracing helper should not invent provider/entity for opaque table names."""
+        from datetime import UTC, datetime
+
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+            _SilverWriteExecutionContext,
+            _SilverWriteInvocation,
+            execute_silver_write_with_tracing,
+        )
+
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        schema = pa.Table.from_pylist(records).schema
+        tracing = MagicMock()
+        tracer = MagicMock()
+        span_cm = MagicMock()
+        span = MagicMock()
+        tracing.get_tracer.return_value = tracer
+        tracer.start_as_current_span.return_value = span_cm
+        span_cm.__enter__.return_value = span
+        invocation = _SilverWriteInvocation(
+            table_name="singletable",
+            records=records,
+            primary_keys=["entity_id"],
+            schema=schema,
+            mode="append",
+            partition_cols=None,
+            on_schema_mismatch="ignore",
+            column_order=None,
+            bronze_refs=None,
+            key_nullability_rules=None,
+        )
+
+        async def execute_pipeline(
+            *,
+            invocation: _SilverWriteInvocation,
+            ctx: _SilverWriteExecutionContext,
+        ) -> None:
+            assert ctx.table_name == "singletable"
+
+        await execute_silver_write_with_tracing(
+            tracing=tracing,
+            module_name="bioetl.test",
+            invocation=invocation,
+            started_at=datetime.now(UTC),
+            start_perf=123.0,
+            execute_pipeline=execute_pipeline,
+        )
+
+        attr_calls = [call.args for call in span.set_attribute.call_args_list]
+        assert ("bioetl.provider", "singletable") not in attr_calls
+        assert ("bioetl.entity_type", "singletable") not in attr_calls
+        assert ("bioetl.pipeline_run_id", "singletable") not in attr_calls
 
     @pytest.mark.asyncio
     async def test_execute_silver_write_pipeline_helper_runs_stages_in_order(

@@ -136,7 +136,12 @@ class ProviderConfigYaml(BaseModel):
 
         retired = [
             key
-            for key in ("batch_size", "page_size", "max_url_length", "cursor_pagination")
+            for key in (
+                "batch_size",
+                "page_size",
+                "max_url_length",
+                "cursor_pagination",
+            )
             if key in data
         ]
         if retired:
@@ -155,7 +160,6 @@ class SourceSectionConfig(BaseModel):
     This represents the 'source' section in configs/providers/*.yaml files.
 
     Attributes:
-        batch_size: Batch size for data loading.
         provider_config: Provider-specific settings.
         circuit_breaker: Circuit breaker configuration.
         rate_limit: Rate limiting configuration.
@@ -163,7 +167,6 @@ class SourceSectionConfig(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    batch_size: int = Field(default=DEFAULT_BATCH_SIZE, ge=1, le=10000)
     provider_config: ProviderConfigYaml = Field(
         default_factory=lambda: ProviderConfigYaml()
     )
@@ -182,7 +185,6 @@ class SourceYamlConfig(BaseModel):
 
     Example YAML:
         source:
-            batch_size: 100
             provider_config:
                 provider: chembl
                 base_url: https://www.ebi.ac.uk/chembl/api/data
@@ -232,12 +234,12 @@ class SourceYamlConfig(BaseModel):
 
         Resolution order:
         1. pagination.id_batch_size (canonical, if explicitly set)
-        2. source.batch_size (fallback)
+        2. DEFAULT_BATCH_SIZE (compatibility default)
         """
         pag = self.source.provider_config.pagination
         if pag.id_batch_size is not None:
             return pag.id_batch_size
-        return self.source.batch_size
+        return DEFAULT_BATCH_SIZE
 
     @property
     def page_size(self) -> int | None:

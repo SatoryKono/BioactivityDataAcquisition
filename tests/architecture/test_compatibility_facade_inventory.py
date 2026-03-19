@@ -131,10 +131,33 @@ def test_inventory_doc_exists_with_required_sections() -> None:
         "# Compatibility Facade Inventory",
         "## Status Model",
         "## Governance Freeze",
+        "## Mandatory Artifact Sync",
         "## Inventory",
         "## Measured Registry",
     ):
         assert heading in text, f"Missing heading in inventory doc: {heading}"
+
+
+@pytest.mark.architecture
+def test_inventory_doc_declares_canonical_sync_commands() -> None:
+    """Inventory doc must expose canonical drift-fix commands for key artifacts."""
+    text = INVENTORY_DOC.read_text(encoding="utf-8")
+
+    required_snippets = (
+        "docs/02-architecture/generated/module-dependency-map.md",
+        "docs/02-architecture/generated/module-dependency-map.json",
+        "./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --check",
+        "./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update",
+        "./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py -q",
+        "./.venv/Scripts/python.exe -m pytest tests/architecture/test_config_schema_legacy_status.py -q",
+        "./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --configs",
+    )
+
+    for snippet in required_snippets:
+        assert snippet in text, (
+            "Compatibility facade inventory must keep canonical sync guidance "
+            f"for mandatory artifacts: missing {snippet}"
+        )
 
 
 @pytest.mark.architecture
@@ -298,29 +321,26 @@ def test_registry_config_and_merge_transition_rows_capture_compatibility_policy(
         "src/bioetl/composition/registry.py": {
             "status": "mixed-module",
             "migration_snippets": (
-                "bioetl.composition.registry",
+                "bioetl.composition",
                 "get_default_registry()",
             ),
             "allowed_call_site_snippets": (
                 "tests/architecture/test_registry_contracts.py",
-                "tests/architecture/test_registry_threading.py",
                 "tests/unit/composition/test_types.py",
                 "tests/unit/composition/factories/pipeline/test_registry.py",
-                "tests/unit/composition/factories/pipeline/test_registry_consistency.py",
+                "direct instance imports now use `bioetl.composition`",
             ),
         },
         "src/bioetl/infrastructure/config_loader.py": {
-            "status": "mixed-module",
+            "status": "compat-shim",
             "migration_snippets": (
-                "bioetl.infrastructure.config_loader",
-                "bioetl.infrastructure.config.pipeline_normalizers",
+                "bioetl.infrastructure.config",
+                "bioetl.infrastructure.config.pipeline_config_api",
             ),
             "allowed_call_site_snippets": (
-                "tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py",
                 "tests/unit/infrastructure/test_config_dynamic.py",
-                "tests/integration/config/test_dq_config_loading.py",
-                "tests/architecture/test_config_golden_master.py",
-                "tests/architecture/test_config_strict_keys.py",
+                "tests/unit/infrastructure/test_config_loader_schema_path.py",
+                "ordinary contract/architecture tests load configs through `bioetl.infrastructure.config`",
             ),
         },
         "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py": {

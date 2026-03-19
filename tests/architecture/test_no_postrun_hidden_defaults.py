@@ -48,7 +48,10 @@ def test_postrun_collaborator_resolution_does_not_construct_noop_metrics() -> No
     tree = ast.parse(content)
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name == "resolve_postrun_collaborators":
+        if (
+            isinstance(node, ast.FunctionDef)
+            and node.name == "resolve_postrun_collaborators"
+        ):
             assert "NoOpMetrics" not in _iter_called_names(node), (
                 "resolve_postrun_collaborators must not construct NoOpMetrics; "
                 "build metrics defaults in composition or test support."

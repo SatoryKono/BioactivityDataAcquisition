@@ -156,6 +156,41 @@ def test_debt_scorecard_declares_enforceable_and_historical_baselines() -> None:
         assert historical_by_registry.get(registry_name, -1) >= enforceable_count
 
 
+def test_debt_scorecard_declares_explicit_coarse_budget_sync() -> None:
+    """Legacy coarse regression budgets must be sourced from live scorecard policy."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+
+    coarse = governance.get("coarse_budgets", {})
+    assert isinstance(coarse, dict)
+
+    for metric_name in (
+        "ruff_error_count",
+        "mypy_error_count",
+        "architecture_skip_count",
+    ):
+        metric = coarse.get(metric_name)
+        assert isinstance(metric, dict), (
+            f"governance.coarse_budgets.{metric_name} must be a mapping"
+        )
+        assert isinstance(metric.get("max_count"), int), (
+            f"governance.coarse_budgets.{metric_name}.max_count must be an int"
+        )
+        assert isinstance(metric.get("owner"), str) and metric["owner"], (
+            f"governance.coarse_budgets.{metric_name}.owner must be non-empty"
+        )
+        assert isinstance(metric.get("linked_rf"), str) and metric["linked_rf"], (
+            f"governance.coarse_budgets.{metric_name}.linked_rf must be non-empty"
+        )
+        assert isinstance(metric.get("rationale"), str) and metric["rationale"], (
+            f"governance.coarse_budgets.{metric_name}.rationale must be non-empty"
+        )
+        assert (
+            isinstance(metric.get("ratchet_policy"), str) and metric["ratchet_policy"]
+        ), f"governance.coarse_budgets.{metric_name}.ratchet_policy must be non-empty"
+
+
 def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:
     """Grace windows policy must be budget-only and explicitly timeboxed."""
     scorecard = load_debt_scorecard()

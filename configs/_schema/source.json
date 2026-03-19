@@ -280,15 +280,8 @@
       "type": "object"
     },
     "SourceSectionConfig": {
-      "description": "Source section configuration from YAML.\n\nThis represents the 'source' section in configs/providers/*.yaml files.\n\nAttributes:\n    batch_size: Batch size for data loading.\n    provider_config: Provider-specific settings.\n    circuit_breaker: Circuit breaker configuration.\n    rate_limit: Rate limiting configuration.",
+      "description": "Source section configuration from YAML.\n\nThis represents the 'source' section in configs/providers/*.yaml files.\n\nAttributes:\n    provider_config: Provider-specific settings.\n    circuit_breaker: Circuit breaker configuration.\n    rate_limit: Rate limiting configuration.",
       "properties": {
-        "batch_size": {
-          "default": 100,
-          "maximum": 10000,
-          "minimum": 1,
-          "title": "Batch Size",
-          "type": "integer"
-        },
         "provider_config": {
           "$ref": "#/$defs/ProviderConfigYaml"
         },
@@ -303,7 +296,7 @@
       "type": "object"
     }
   },
-  "description": "Root schema for source configuration files.\n\nValidates configs/providers/*.yaml files.\n\nExample YAML:\n    source:\n        batch_size: 100\n        provider_config:\n            provider: chembl\n            base_url: https://www.ebi.ac.uk/chembl/api/data\n        circuit_breaker:\n            failure_threshold: 5\n            recovery_timeout: 300\n        rate_limit:\n            requests_per_second: 5.0\n            burst: 10",
+  "description": "Root schema for source configuration files.\n\nValidates configs/providers/*.yaml files.\n\nExample YAML:\n    source:\n        provider_config:\n            provider: chembl\n            base_url: https://www.ebi.ac.uk/chembl/api/data\n        circuit_breaker:\n            failure_threshold: 5\n            recovery_timeout: 300\n        rate_limit:\n            requests_per_second: 5.0\n            burst: 10",
   "properties": {
     "source": {
       "$ref": "#/$defs/SourceSectionConfig"

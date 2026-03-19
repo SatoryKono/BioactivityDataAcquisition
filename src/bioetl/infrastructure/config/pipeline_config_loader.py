@@ -24,7 +24,7 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
-from bioetl.infrastructure.config_loader import (
+from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_uncached as load_yaml_config_uncached,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig

@@ -103,7 +103,9 @@ class TestNarrowPortMigration:
     def test_di_bundle_exceptions_remain_explicit(self) -> None:
         """Broad-port usage in application is allowed only for declared DI bundles."""
         files = _files_using_broad_storage_port()
-        extras = sorted(file_path for file_path in files if file_path in _DI_BUNDLE_EXCEPTIONS)
+        extras = sorted(
+            file_path for file_path in files if file_path in _DI_BUNDLE_EXCEPTIONS
+        )
         assert extras == sorted(_DI_BUNDLE_EXCEPTIONS), (
             "DI-bundle StoragePort exceptions drifted:\n"
             f"expected: {sorted(_DI_BUNDLE_EXCEPTIONS)}\n"
@@ -122,9 +124,7 @@ class TestNarrowPortMigration:
             "services/medallion_lifecycle.py",
         ]
         for svc in migrated:
-            assert svc not in files, (
-                f"{svc} should use a narrow port, not StoragePort"
-            )
+            assert svc not in files, f"{svc} should use a narrow port, not StoragePort"
 
     def test_composite_input_loader_has_no_storage_cast_fallback(self) -> None:
         """Composite read path should not rely on cast(SilverStoragePort, _storage)."""

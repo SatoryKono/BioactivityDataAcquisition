@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,
     maybe_start_metrics_server,
@@ -19,7 +20,6 @@ from bioetl.composition.bootstrap import (
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.providers.provider_registry import ProviderRegistry
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,

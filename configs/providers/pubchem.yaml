@@ -1,7 +1,6 @@
 version: 1.0.0
 provider: pubchem
 source:
-  batch_size: 50
   provider_config:
     provider: pubchem
     base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug

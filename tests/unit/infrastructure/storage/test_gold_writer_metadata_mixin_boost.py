@@ -18,7 +18,6 @@ from bioetl.domain.ports import AuditEntry
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold_writer_metadata_mixin import (
     GoldWriterMetadataMixin,
-    _GoldWriterMergedMetadataInputMixin,
 )
 
 
@@ -77,111 +76,6 @@ class _ConcreteGoldMixin(GoldWriterMetadataMixin):
     async def _run_in_executor(self, fn: Any, *args: Any, **kwargs: Any) -> Any:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, fn)
-
-
-@pytest.mark.unit
-class TestExtractCompletedAt:
-    """Tests for _extract_completed_at (lines 64-78)."""
-
-    def test_lineage_created_at_iso_string(self) -> None:
-        """Line 74-75: string is parsed via fromisoformat."""
-        mixin = _GoldWriterMergedMetadataInputMixin()
-        mixin._transform_version = "1.0"
-        mixin._transform_steps = ()
-
-        record = {"_lineage_created_at": "2025-01-15T10:00:00"}
-        result = mixin._extract_completed_at(record)
-
-        assert result is not None
-        assert result.year == 2025
-
-    def test_lineage_created_at_datetime_object(self) -> None:
-        """Line 76-77: datetime object returned as-is."""
-        mixin = _GoldWriterMergedMetadataInputMixin()
-        mixin._transform_version = "1.0"
-        mixin._transform_steps = ()
-
-        dt = datetime(2025, 3, 10, 12, 0, 0, tzinfo=UTC)
-        record = {"_lineage_created_at": dt}
-        result = mixin._extract_completed_at(record)
-
-        assert result is dt
-
-    def test_ingestion_ts_fallback(self) -> None:
-        """Line 71-72: falls back to _ingestion_ts when _lineage_created_at absent."""
-        mixin = _GoldWriterMergedMetadataInputMixin()
-        mixin._transform_version = "1.0"
-        mixin._transform_steps = ()
-
-        record = {"_ingestion_ts": "2025-06-01T08:00:00"}
-        result = mixin._extract_completed_at(record)
-
-        assert result is not None
-        assert result.month == 6
-
-    def test_no_timestamps_returns_none(self) -> None:
-        """Line 78: no timestamp field returns None."""
-        mixin = _GoldWriterMergedMetadataInputMixin()
-        mixin._transform_version = "1.0"
-        mixin._transform_steps = ()
-
-        record = {"activity_id": "CHEMBL1"}
-        result = mixin._extract_completed_at(record)
-
-        assert result is None
-
-    def test_non_string_non_datetime_returns_none(self) -> None:
-        """Line 78: non-string/datetime value returns None."""
-        mixin = _GoldWriterMergedMetadataInputMixin()
-        mixin._transform_version = "1.0"
-        mixin._transform_steps = ()
-
-        record = {"_lineage_created_at": 12345}
-        result = mixin._extract_completed_at(record)
-
-        assert result is None
-
-
-@pytest.mark.unit
-class TestBuildGoldMergedMetadataInput:
-    """Tests for _build_gold_merged_metadata_input (lines 48-62)."""
-
-    def test_build_metadata_input_overwrite_mode(self) -> None:
-        """Lines 48-62: builds GoldMetadataInput with OVERWRITE mode."""
-        mixin = _GoldWriterMergedMetadataInputMixin()
-        mixin._transform_version = "2.0.0"
-        mixin._transform_steps = ("normalize", "enrich")
-
-        records = [{"_lineage_created_at": "2025-01-15T10:00:00", "id": 1}]
-        result = mixin._build_gold_merged_metadata_input(
-            table_path="gold/publication",
-            table_name="composite_publication",
-            records=records,
-            schema=None,
-        )
-
-        assert result.mode == GoldWriteMode.OVERWRITE
-        assert result.transform_version == "2.0.0"
-        assert result.transform_steps == ("normalize", "enrich")
-        assert result.schema_validation_enabled is False
-
-    def test_build_metadata_input_with_schema(self) -> None:
-        """Lines 60-61: schema_validation_enabled=True when schema is not None."""
-        mixin = _GoldWriterMergedMetadataInputMixin()
-        mixin._transform_version = "1.0"
-        mixin._transform_steps = ()
-
-        mock_schema = MagicMock()
-        records = [{"id": 1}]
-        result = mixin._build_gold_merged_metadata_input(
-            table_path="gold/t",
-            table_name="t",
-            records=records,
-            schema=mock_schema,
-        )
-
-        assert result.schema_validation_enabled is True
-        assert result.schema_validation_strict is True
 
 
 @pytest.mark.unit
@@ -390,30 +284,23 @@ class TestWriteGoldMetadata:
         """Standard Gold metadata path should resolve provider/entity before persist."""
         metadata = MagicMock()
         mixin = _ConcreteGoldMixin(metadata_coordinator=MagicMock())
-        mixin._create_gold_metadata_payload = MagicMock(return_value=metadata)  # type: ignore[method-assign]
         mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
-        await mixin._write_gold_metadata(
-            table_path="gold/chembl/activity",
-            table_name="chembl.activity",
-            records=[{"id": 1}],
-            mode=GoldWriteMode.APPEND,
-            scd_config=None,
-            ingestion_ts=None,
-            run_id=None,
-        )
+        with patch(
+            "bioetl.infrastructure.storage.gold_writer_metadata_operations.build_gold_metadata_payload",
+            return_value=metadata,
+        ) as mock_build:
+            await mixin._write_gold_metadata(
+                table_path="gold/chembl/activity",
+                table_name="chembl.activity",
+                records=[{"id": 1}],
+                mode=GoldWriteMode.APPEND,
+                scd_config=None,
+                ingestion_ts=None,
+                run_id=None,
+            )
 
-        mixin._create_gold_metadata_payload.assert_called_once_with(
-            table_path="gold/chembl/activity",
-            table_name="chembl.activity",
-            records=[{"id": 1}],
-            mode=GoldWriteMode.APPEND,
-            scd_config=None,
-            ingestion_ts=None,
-            run_id=None,
-            silver_refs=None,
-            gold_schema=None,
-        )
+        mock_build.assert_called_once()
         mixin._write_gold_metadata_file.assert_awaited_once_with(
             table_path="gold/chembl/activity",
             metadata=metadata,
@@ -480,22 +367,25 @@ class TestWriteGoldMergedMetadata:
         coordinator = MagicMock()
         coordinator.create_gold_metadata = MagicMock(return_value=metadata)
         mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
-        mixin._build_gold_merged_metadata_input = MagicMock(  # type: ignore[method-assign]
-            return_value=MagicMock()
-        )
         mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
-        await mixin._write_gold_merged_metadata(
-            table_path="gold/composite/publication",
-            table_name="composite.publication",
-            records=[{"id": 1}],
-        )
+        with patch(
+            "bioetl.infrastructure.storage.gold_writer_metadata_operations.build_gold_merged_metadata_input",
+            return_value=MagicMock(),
+        ) as mock_build:
+            await mixin._write_gold_merged_metadata(
+                table_path="gold/composite/publication",
+                table_name="composite.publication",
+                records=[{"id": 1}],
+            )
 
-        mixin._build_gold_merged_metadata_input.assert_called_once_with(
+        mock_build.assert_called_once_with(
             table_path="gold/composite/publication",
             table_name="composite.publication",
             records=[{"id": 1}],
             schema=None,
+            transform_version="1.0.0",
+            transform_steps=("step1", "step2"),
         )
         mixin._write_gold_metadata_file.assert_awaited_once_with(
             table_path="gold/composite/publication",
@@ -504,104 +394,3 @@ class TestWriteGoldMergedMetadata:
             provider_name="composite",
             entity_name="publication",
         )
-
-
-@pytest.mark.unit
-class TestCreateGoldMetadataPayload:
-    """Tests for _create_gold_metadata_payload (lines 98-135)."""
-
-    def test_uses_coordinator_when_present(self) -> None:
-        """Line 117: coordinator path is used when coordinator is set."""
-        coordinator = MagicMock()
-        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
-
-        mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
-        records = [{"id": 1}]
-
-        mixin._create_gold_metadata_payload(
-            table_path="gold/t",
-            table_name="chembl.activity",
-            records=records,
-            mode=GoldWriteMode.OVERWRITE,
-            scd_config=None,
-            ingestion_ts=None,
-            run_id=None,
-        )
-
-        coordinator.create_gold_metadata.assert_called_once()
-
-    def test_uses_fallback_when_no_coordinator(self) -> None:
-        """Line 127-135: fallback builder used when coordinator is None."""
-        mixin = _ConcreteGoldMixin(metadata_coordinator=None)
-        records = [{"id": 1}]
-        run_id = _make_run_id()
-
-        with patch(
-            "bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder.build_fallback_metadata",
-            return_value=MagicMock(),
-        ) as mock_fallback:
-            mixin._create_gold_metadata_payload(
-                table_path="gold/t",
-                table_name="chembl.activity",
-                records=records,
-                mode=GoldWriteMode.OVERWRITE,
-                scd_config=None,
-                ingestion_ts=None,
-                run_id=run_id,
-            )
-
-            mock_fallback.assert_called_once()
-
-
-@pytest.mark.unit
-class TestCreateGoldMetadataViaCoordinator:
-    """Tests for _create_gold_metadata_via_coordinator (lines 154-181)."""
-
-    def test_silver_refs_converted_to_silver_ref_objects(self) -> None:
-        """Lines 156-166: silver_refs are converted to SilverRef objects."""
-        coordinator = MagicMock()
-        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
-
-        mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
-
-        silver_ref = MagicMock()
-        silver_ref.table_name = "chembl.activity"
-        silver_ref.table_path = "silver/chembl/activity"
-        silver_ref.delta_version = 5
-
-        mixin._create_gold_metadata_via_coordinator(
-            table_path="gold/t",
-            table_name="chembl.activity",
-            records=[{"id": 1}],
-            mode=GoldWriteMode.OVERWRITE,
-            scd_config=None,
-            ingestion_ts=None,
-            silver_refs=[silver_ref],
-            gold_schema=None,
-        )
-
-        coordinator.create_gold_metadata.assert_called_once()
-        input_arg = coordinator.create_gold_metadata.call_args[0][0]
-        assert input_arg.silver_refs is not None
-        assert len(input_arg.silver_refs) == 1
-
-    def test_no_silver_refs_passes_none(self) -> None:
-        """Lines 163-166: None silver_refs stays None."""
-        coordinator = MagicMock()
-        coordinator.create_gold_metadata = MagicMock(return_value=MagicMock())
-
-        mixin = _ConcreteGoldMixin(metadata_coordinator=coordinator)
-
-        mixin._create_gold_metadata_via_coordinator(
-            table_path="gold/t",
-            table_name="chembl.activity",
-            records=[{"id": 1}],
-            mode=GoldWriteMode.OVERWRITE,
-            scd_config=None,
-            ingestion_ts=None,
-            silver_refs=None,
-            gold_schema=None,
-        )
-
-        input_arg = coordinator.create_gold_metadata.call_args[0][0]
-        assert input_arg.silver_refs is None

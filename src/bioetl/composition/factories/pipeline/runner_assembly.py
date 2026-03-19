@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
@@ -46,6 +47,19 @@ if TYPE_CHECKING:
 __all__ = [
     "assemble_runner_impl",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class _RunnerAssemblyParts:
+    """Concrete runner collaborators assembled before PipelineRunner creation."""
+
+    checkpoint_manager: CheckpointManagerService
+    lifecycle_service: MedallionLifecycleService
+    lock_manager: LockCoordinator
+    preflight_service: PreflightService
+    postrun_service: PostrunService
+    observer: PipelineObserver
+    batch_executor: BatchExecutor
 
 
 def _build_checkpoint_manager(
@@ -111,19 +125,6 @@ def _build_preflight_service(
         health_aggregator=health_aggregator,
         medallion_validator=medallion_validator,
     )
-
-
-def _resolve_dq_configs(
-    *,
-    yaml_config: PipelineYamlConfig | None,
-    dq_configs_extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext]
-    | None,
-) -> DQConfigsContext:
-    extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext] = (
-        dq_configs_extractor
-        or (lambda cfg: DQConfigsContext(bronze=None, silver=None, gold=None))
-    )
-    return extractor(yaml_config)
 
 
 def _build_observer(
@@ -204,37 +205,21 @@ def _create_pipeline_runner(
     )
 
 
-def assemble_runner_impl(
+def _assemble_runner_parts(
+    *,
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
+    logger_port: LoggerPort,
+    yaml_config: PipelineYamlConfig | None,
     silver_schema: pa.Schema | None,
     gold_schema: GoldSchemaType,
     strict_gold_validation: bool,
-    yaml_config: PipelineYamlConfig | None = None,
-    dq_configs_extractor: (
-        Callable[
-            [PipelineYamlConfig | None],
-            DQConfigsContext,
-        ]
-        | None
-    ) = None,
-) -> PipelineRunner:
-    """Assemble a PipelineRunner from a configured pipeline instance.
-
-    Args:
-        pipeline: Configured pipeline instance with services, context, and runtime.
-        observability: Bundle containing logger, tracer, metrics, and DQ monitor.
-        silver_schema: Optional PyArrow schema for Silver layer validation.
-        gold_schema: Pandera DataFrameModel class for Gold layer validation.
-        strict_gold_validation: If True, raises on Gold schema violations.
-        yaml_config: Optional pre-loaded pipeline YAML config for DQ path extraction.
-        dq_configs_extractor: Optional callable to extract DQ configs from YAML config.
-
-    Returns:
-        Fully wired PipelineRunner ready for execution.
-    """
-    logger_port = observability.logger
-
+    dq_configs_extractor: Callable[
+        [PipelineYamlConfig | None],
+        DQConfigsContext,
+    ],
+) -> _RunnerAssemblyParts:
+    """Assemble runner collaborators before creating the PipelineRunner shell."""
     checkpoint_manager = _build_checkpoint_manager(
         pipeline=pipeline,
         logger_port=logger_port,
@@ -243,23 +228,17 @@ def assemble_runner_impl(
         storage=pipeline.services.storage,
         logger=logger_port,
     )
-
-    context_holder = LockContextHolder()
-
     lock_manager = _build_lock_manager(
         pipeline=pipeline,
         logger_port=logger_port,
         checkpoint_manager=checkpoint_manager,
-        context_holder=context_holder,
+        context_holder=LockContextHolder(),
     )
     preflight_service = _build_preflight_service(
         pipeline=pipeline,
         logger_port=logger_port,
     )
-    dq_configs = _resolve_dq_configs(
-        yaml_config=yaml_config,
-        dq_configs_extractor=dq_configs_extractor,
-    )
+    dq_configs = dq_configs_extractor(yaml_config)
     postrun_service = build_postrun_service(
         pipeline=pipeline,
         logger_port=logger_port,
@@ -282,15 +261,63 @@ def assemble_runner_impl(
         lock_manager=lock_manager,
         observability=observability,
     )
+    return _RunnerAssemblyParts(
+        checkpoint_manager=checkpoint_manager,
+        lifecycle_service=lifecycle_service,
+        lock_manager=lock_manager,
+        preflight_service=preflight_service,
+        postrun_service=postrun_service,
+        observer=observer,
+        batch_executor=batch_executor,
+    )
+
+
+def assemble_runner_impl(
+    pipeline: BasePipeline,
+    observability: ObservabilityBundle,
+    silver_schema: pa.Schema | None,
+    gold_schema: GoldSchemaType,
+    strict_gold_validation: bool,
+    dq_configs_extractor: Callable[
+        [PipelineYamlConfig | None],
+        DQConfigsContext,
+    ],
+    yaml_config: PipelineYamlConfig | None = None,
+) -> PipelineRunner:
+    """Assemble a PipelineRunner from a configured pipeline instance.
+
+    Args:
+        pipeline: Configured pipeline instance with services, context, and runtime.
+        observability: Bundle containing logger, tracer, metrics, and DQ monitor.
+        silver_schema: Optional PyArrow schema for Silver layer validation.
+        gold_schema: Pandera DataFrameModel class for Gold layer validation.
+        strict_gold_validation: If True, raises on Gold schema violations.
+        yaml_config: Optional pre-loaded pipeline YAML config for DQ path extraction.
+        dq_configs_extractor: Callable extracting DQ configs from YAML config.
+
+    Returns:
+        Fully wired PipelineRunner ready for execution.
+    """
+    logger_port = observability.logger
+    assembly_parts = _assemble_runner_parts(
+        pipeline=pipeline,
+        observability=observability,
+        logger_port=logger_port,
+        yaml_config=yaml_config,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        strict_gold_validation=strict_gold_validation,
+        dq_configs_extractor=dq_configs_extractor,
+    )
 
     return _create_pipeline_runner(
         pipeline=pipeline,
         observability=observability,
-        executor=batch_executor,
-        checkpoint_manager=checkpoint_manager,
-        lock_manager=lock_manager,
-        preflight_service=preflight_service,
-        postrun_service=postrun_service,
-        lifecycle_service=lifecycle_service,
-        observer=observer,
+        executor=assembly_parts.batch_executor,
+        checkpoint_manager=assembly_parts.checkpoint_manager,
+        lock_manager=assembly_parts.lock_manager,
+        preflight_service=assembly_parts.preflight_service,
+        postrun_service=assembly_parts.postrun_service,
+        lifecycle_service=assembly_parts.lifecycle_service,
+        observer=assembly_parts.observer,
     )

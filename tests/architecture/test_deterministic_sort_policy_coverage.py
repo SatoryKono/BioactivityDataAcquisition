@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 
-from bioetl.infrastructure.config_loader import load_pipeline_config
+from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )

@@ -65,7 +65,7 @@ class TestCheckDataFreshnessDirect:
         current_time = datetime(2024, 5, 20, 12, 0, tzinfo=UTC)
         df = pl.DataFrame(
             {
-                "_updated_at": ["invalid", "still-invalid"],
+                "_updated_at": [None, None],
                 "updated_at": [
                     current_time - timedelta(hours=48),
                     current_time - timedelta(hours=36),

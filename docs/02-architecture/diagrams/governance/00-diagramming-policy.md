@@ -1,4 +1,4 @@
-# Diagramming Policy
+# Historical Diagramming Policy
 
 *Synced with RULES.md v5.24 (2026-03-13)*
 

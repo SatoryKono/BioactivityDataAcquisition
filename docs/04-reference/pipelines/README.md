@@ -82,8 +82,8 @@ Each pipeline specification includes:
 | ID Type       | ChEMBL                         | UniProt      | PubChem     | PubMed | CrossRef | OpenAlex | S2     |
 | ------------- | ------------------------------ | ------------ | ----------- | ------ | -------- | -------- | ------ |
 | **InChI Key** | `structure-standard-inchi-key` | -            | `inchi-key` | -      | -        | -        | -      |
-| **DOI**       | `document.doi`                 | -            | -           | `doi`  | `DOI`    | `doi`    | `doi`  |
-| **PubMed ID** | `document.pubmed-id`           | -            | -           | `pmid` | -        | -        | `pmid` |
+| **DOI**       | `publication_doi`             | -            | -           | `doi`  | `publication_doi` | `publication_doi` | `doi`  |
+| **PubMed ID** | `publication_pmid`            | -            | -           | `pmid` | -        | -        | `pmid` |
 | **UniProt**   | `target-component.accession`   | `accession`  | -           | -      | -        | -        | -      |
 | **ChEMBL**    | ID                             | `chembl-ids` | -           | -      | -        | -        | -      |
 

@@ -12,6 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.bootstrap.runtime.assembly import assemble_filter_config
 from bioetl.composition.bootstrap.runtime.classification_init import (
     initialize_publication_type_classification,
@@ -21,7 +22,6 @@ from bioetl.composition.bootstrap.runtime.observability import (
 )
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.providers.provider_registry import ProviderRegistry
-from bioetl.composition.registry import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 

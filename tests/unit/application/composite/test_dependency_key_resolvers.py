@@ -92,7 +92,7 @@ class TestChainedKeyResolver:
         dep = _dep_config(key_source="nonexistent")
         delta_reader = AsyncMock()
 
-        with pytest.raises(ValueError, match="unknown.*key_source"):
+        with pytest.raises(ValueError, match=r"unknown.*key_source"):
             await resolver.resolve(
                 dependency=dep,
                 seed_keys=pl.DataFrame(),
@@ -187,7 +187,7 @@ class TestChainedKeyResolver:
         source_df = pl.DataFrame({"doi": ["10.1/x"]})
         delta_reader.read_table.return_value = source_df.to_arrow()
 
-        with pytest.raises(ValueError, match="Column.*not found"):
+        with pytest.raises(ValueError, match=r"Column.*not found"):
             await resolver.resolve(
                 dependency=dep,
                 seed_keys=pl.DataFrame(),

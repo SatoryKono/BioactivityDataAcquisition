@@ -37,6 +37,39 @@ Source of truth для тестовой governance:
 - **Application**: Тестирование трансформеров и логики пайплайнов. In-memory fakes предпочтительны, MagicMock допустим.
 - **Правило**: Никакого сетевого взаимодействия или реального ввода-вывода.
 
+#### 2.1.1. Source-to-Test Ownership
+
+Для тонких пакетов (`package/__init__.py` + один содержательный `.py`-модуль) проект
+держит явную source-to-test ownership symmetry:
+
+- по умолчанию такой модуль должен иметь same-path sibling
+  `tests/unit/.../test_<module>.py`;
+- исключения фиксируются machine-readable в
+  `configs/quality/source_test_mapping_exceptions.yaml`;
+- архитектурный guard находится в
+  `tests/architecture/test_source_test_mapping_policy.py`.
+
+Это правило staged и не требует на текущем этапе зеркального `test_<module>.py` для
+каждого файла в `src/bioetl/`. Для aggregate/contract/facade coverage исключения
+должны быть перечислены явно, чтобы contributor мог быстро понять canonical owner
+test для модуля.
+
+Для behavior-heavy модулей второго этапа используется отдельный curated inventory:
+
+- `configs/quality/source_test_owner_inventory.yaml`
+- `tests/architecture/test_curated_source_test_ownership.py`
+
+Текущий curated scope уже покрывает high-signal seams в `application/core`,
+`application/composite`, `infrastructure/storage` и `infrastructure/adapters`.
+Для таких модулей ownership фиксируется либо через direct same-path test, либо
+через явно перечисленный focused cluster-owner suite.
+
+Там допускаются два режима:
+
+- `direct_test`: same-path owner test обязателен;
+- `cluster_owner`: модуль intentionally owned через focused aggregate suite, и это
+  должно быть явно перечислено в inventory.
+
 ### 2.2. Integration Tests (`tests/integration/`)
 
 Проверка взаимодействия компонентов с внешними API и хранилищем.
@@ -116,14 +149,13 @@ pytest --cov=src/bioetl tests/
 | 2   | `source .venv/bin/activate` | Активировать окружение для дальнейших команд                         |
 | 3   | `make test`                 | Запустить локальный стабильный прогон с покрытием ≥85% (без E2E)     |
 | 4   | `uv run python -m pytest tests/e2e/ -m e2e -v` | Отдельно запустить E2E в Local-Only режиме |
-| 5   | `open htmlcov/index.html`   | Просмотреть детализированный отчёт покрытия локально                 |
+| 5   | `htmlcov/index.html`        | Открыть HTML coverage report локально в браузере                     |
 
 **Примечания:**
 
 - Если нужен быстрый прогон без HTML-отчёта и без бенчмарков, используйте `make test-fast`.
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
 - В CI для полного устойчивого прогона используется `make test-ci`; локальный запуск `make test` обязателен перед коммитом.
-- `make test-e2e` остаётся legacy Docker workflow и не является рекомендуемым способом проверки Local-Only архитектуры.
 
 ## 5. План по устранению избыточности (ChEMBL Target Component)
 
@@ -175,8 +207,8 @@ Hypothesis настроен с профилями для разных сцена
 
 ```bash
 # Использование профилей
-HYPOTHESIS-PROFILE=fast pytest tests/unit/
-HYPOTHESIS-PROFILE=thorough pytest tests/  # Перед релизом
+HYPOTHESIS_PROFILE=fast uv run python -m pytest tests/unit/
+HYPOTHESIS_PROFILE=thorough uv run python -m pytest tests/  # Перед релизом
 ```
 
 **Важно**: Тесты НЕ должны переопределять `max-examples` в декораторе `@settings()`, чтобы профили работали корректно.
@@ -187,13 +219,13 @@ HYPOTHESIS-PROFILE=thorough pytest tests/  # Перед релизом
 
 ```bash
 # Исключить медленные тесты
-pytest tests/ -m "not slow"
+uv run python -m pytest tests/ -m "not slow"
 
 # Только unit тесты
-pytest tests/ -m "unit"
+uv run python -m pytest tests/ -m "unit"
 
 # Только Hypothesis тесты
-pytest tests/ -m "hypothesis"
+uv run python -m pytest tests/ -m "hypothesis"
 
 # Быстрый smoke
 make test-smoke
@@ -220,17 +252,17 @@ Stage 1: Lint + Smoke (~30s)
 └── make test-smoke
 
 Stage 2: Unit + Architecture (~60s)
-├── pytest tests/unit/ -m "not slow"
-└── pytest tests/architecture/
+├── uv run python -m pytest tests/unit/ -m "not slow"
+└── uv run python -m pytest tests/architecture/
 
 Stage 3: Integration (~20s)
-└── pytest tests/integration/ --vcr-record=none
+└── uv run python -m pytest tests/integration/ --vcr-record=none
 
 Stage 4: E2E (на PR merge)
-└── pytest tests/e2e/ -m e2e
+└── uv run python -m pytest tests/e2e/ -m e2e
 
 Stage 5: Contract (ежемесячно)
-└── BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/ --network
+└── BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true uv run python -m pytest tests/contract/ --network
 ```
 
 ## 7. Воспроизводимость и Проверка Зависимостей
@@ -241,14 +273,15 @@ Stage 5: Contract (ежемесячно)
 
 Для первичной настройки или восстановления окружения используйте:
 ```bash
-# Рекомендуемый способ (требует установленного uv)
-make setup-dev
-
-# Универсальный скрипт (создаст venv и установит зависимости)
-./scripts/dev/dev_setup.sh
+# Канонический локальный bootstrap
+make install
+make test-deps
+make setup-plugins
 ```
 
-Команда `make setup-dev` выполняет полную синхронизацию зависимостей и запускает расширенный набор проверок `test-deps-dev`.
+`make setup-dev` остаётся удобным aggregate target поверх `make install` и
+dependency verification. `scripts/dev/dev_setup.sh` — legacy placeholder и не
+является поддерживаемым onboarding/testing path.
 
 ### 7.2. Smoke-check зависимостей и инструментов
 

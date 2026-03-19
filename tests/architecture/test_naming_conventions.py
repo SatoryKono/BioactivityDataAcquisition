@@ -13,7 +13,9 @@ def _should_skip_constant_name(name: str) -> bool:
     return name.startswith("_") or name.isupper() or name[0].isupper()
 
 
-def _iter_public_constant_assignments(tree: ast.Module) -> list[tuple[int, str, ast.expr]]:
+def _iter_public_constant_assignments(
+    tree: ast.Module,
+) -> list[tuple[int, str, ast.expr]]:
     assignments: list[tuple[int, str, ast.expr]] = []
     for node in tree.body:
         if not isinstance(node, ast.Assign):

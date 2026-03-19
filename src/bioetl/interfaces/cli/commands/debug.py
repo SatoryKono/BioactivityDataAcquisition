@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.pipeline_runner_service import (
         PipelineRunnerService,
     )
-    from bioetl.composition.registry import PipelineRegistry
+    from bioetl.composition import PipelineRegistry
 
 __all__ = ["debug"]
 

@@ -37,3 +37,31 @@ def test_semanticscholar_canonical_entrypoint_reexports_legacy_adapter() -> None
         "bioetl.infrastructure.adapters.semanticscholar.adapter"
     ).SemanticScholarAdapter
     assert canonical_cls is legacy_cls
+
+
+def test_openalex_package_root_does_not_reexport_private_factory() -> None:
+    """OpenAlex package root should expose the adapter, not the private factory helper."""
+    package_module = import_module("bioetl.infrastructure.adapters.openalex")
+
+    assert hasattr(package_module, "OpenAlexAdapter")
+    assert not hasattr(package_module, "_create_openalex_adapter")
+
+
+def test_crossref_package_root_stays_adapter_first() -> None:
+    """CrossRef package root should not expose decomposed helper components."""
+    package_module = import_module("bioetl.infrastructure.adapters.crossref")
+
+    assert hasattr(package_module, "CrossRefAdapter")
+    assert not hasattr(package_module, "CrossRefFetchFlow")
+    assert not hasattr(package_module, "CrossRefQueryBuilder")
+    assert not hasattr(package_module, "CrossRefResponseMapper")
+
+
+def test_uniprot_package_root_stays_adapter_first() -> None:
+    """UniProt package root should not expose the adjunct ID mapping client surface."""
+    package_module = import_module("bioetl.infrastructure.adapters.uniprot")
+
+    assert hasattr(package_module, "UniProtAdapter")
+    assert not hasattr(package_module, "UniProtIDMappingClient")
+    assert not hasattr(package_module, "IDMappingJobError")
+    assert not hasattr(package_module, "IDMappingTimeoutError")

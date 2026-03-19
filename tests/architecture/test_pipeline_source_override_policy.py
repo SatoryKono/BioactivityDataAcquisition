@@ -34,6 +34,8 @@ def _collect_forbidden_paths(path: Path) -> list[str]:
         return []
 
     forbidden: list[str] = []
+    if "batch_size" in source:
+        forbidden.append("pipeline.source.batch_size")
     provider_config = source.get("provider_config")
     if isinstance(provider_config, dict):
         pagination = provider_config.get("pagination")
@@ -61,6 +63,5 @@ def test_pipeline_configs_do_not_override_source_pagination_directly() -> None:
 
     assert not violations, (
         "Pipeline configs must not override provider source pagination directly. "
-        "Use pipeline.page_size_override instead.\n"
-        + "\n".join(violations)
+        "Use pipeline.page_size_override instead.\n" + "\n".join(violations)
     )

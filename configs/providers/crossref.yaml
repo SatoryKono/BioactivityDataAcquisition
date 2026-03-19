@@ -1,7 +1,6 @@
 version: 1.0.0
 provider: crossref
 source:
-    batch_size: 50
     provider_config:
         provider: crossref
         base_url: https://api.crossref.org

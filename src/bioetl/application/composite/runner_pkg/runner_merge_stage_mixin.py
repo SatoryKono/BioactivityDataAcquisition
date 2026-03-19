@@ -8,6 +8,10 @@ from bioetl.application.composite.checkpoint import (
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.merger import MergeService
+from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
+    CompositePipelineFinalizationRequest,
+    finalize_pipeline,
+)
 from bioetl.application.composite.runner_pkg.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
     PIPELINE_EXECUTION_ERRORS,
@@ -327,10 +331,7 @@ class CompositeRunnerMergeStageMixin:
         state: CompositeCheckpointState,
     ) -> None:
         """Finalize pipeline: set COMPLETED state, clean checkpoint, purge orphans."""
-        state = self._transition_to_completed_state(state)
-        await self._persist_completed_state(state)
-        await self._delete_checkpoint_safe()
-        try:
-            await self._checkpoint_manager.delete_orphaned()
-        except (*CHECKPOINT_NON_FATAL_ERRORS, BioETLError):
-            pass
+        await finalize_pipeline(
+            self,
+            CompositePipelineFinalizationRequest(state=state),
+        )

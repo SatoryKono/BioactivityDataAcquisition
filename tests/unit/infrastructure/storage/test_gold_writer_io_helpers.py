@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
@@ -26,7 +26,7 @@ class TestInitializeScd2Records:
         scd_config.valid_to_col = "_valid_to"
         scd_config.current_flag_col = "_is_current"
 
-        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=UTC)
         records: list[dict[str, object]] = [{"id": 1}, {"id": 2}]
 
         initialize_scd2_records(records, scd_config, ts)
@@ -45,7 +45,7 @@ class TestInitializeScd2Records:
         scd_config.valid_to_col = "_valid_to"
         scd_config.current_flag_col = "_is_current"
 
-        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=UTC)
         records: list[dict[str, object]] = [{"id": 1, "_version": 5}]
 
         initialize_scd2_records(records, scd_config, ts)
@@ -65,7 +65,7 @@ class TestWriteScd2Once:
         writer._merge_scd2 = AsyncMock()
 
         module = MagicMock()
-        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=UTC)
         scd_config = MagicMock()
         scd_config.business_keys = ["id"]
 
@@ -102,7 +102,7 @@ class TestWriteScd2Once:
         arrow_table = pa.table({"id": [1], "name": ["a"]})
         writer._to_arrow_table = MagicMock(return_value=arrow_table)
 
-        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=timezone.utc)
+        ts = datetime(2025, 6, 1, 10, 0, 0, tzinfo=UTC)
         scd_config = MagicMock()
         scd_config.business_keys = ["id"]
 

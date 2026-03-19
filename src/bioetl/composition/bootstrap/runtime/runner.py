@@ -16,12 +16,12 @@ from bioetl.application.services.pipeline_run_context_service import (
 from bioetl.application.services.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
 )
-from bioetl.composition.registry import PipelineRegistry
 
 __all__ = ["bootstrap_pipeline_runner_service"]
 
@@ -36,7 +36,7 @@ def bootstrap_pipeline_runner_service(
 
     Args:
         registry: Optional custom registry for test isolation.
-            If None, uses the default global registry.
+            If None, creates a fresh runtime registry through the composition seam.
 
     Returns:
         PipelineRunnerService ready for use.

@@ -1,0 +1,256 @@
+"""Direct unit tests for metadata assembly services."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+from uuid import uuid4
+
+import pytest
+
+from bioetl.application.services.metadata_assemblers import (
+    GoldMetadataService,
+    SilverMetadataService,
+)
+from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
+from bioetl.domain.models.metadata import (
+    EnvironmentMetadata,
+    PipelineMetadata,
+    RuntimeMetadata,
+)
+from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput, SilverRef
+from bioetl.domain.types import BatchID, RunID, RunType, ScdConfig
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.run_context import RunContext
+
+
+def _make_run_context() -> RunContext:
+    return RunContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime(2026, 3, 19, 10, 0, tzinfo=UTC),
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        transform_version="ctx-1.0.0",
+        transform_steps=("normalize", "dedup"),
+        pipeline_version="2.0.0",
+        git_commit="abc1234",
+        config_hash="cfg-001",
+    )
+
+
+def _make_environment() -> EnvironmentMetadata:
+    return EnvironmentMetadata(
+        hostname="test-host",
+        python_version="3.13.7",
+        bioetl_version="5.24.0",
+    )
+
+
+def _make_runtime_factory(run_context: RunContext):
+    calls: list[dict[str, object | None]] = []
+
+    def _factory(
+        *,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
+        duration_seconds: float | None = None,
+    ) -> RuntimeMetadata:
+        calls.append(
+            {
+                "started_at": started_at,
+                "completed_at": completed_at,
+                "duration_seconds": duration_seconds,
+            }
+        )
+        return RuntimeMetadata(
+            run_id=str(run_context.run_id),
+            run_type=run_context.run_type.value,
+            started_at_utc=started_at or run_context.started_at,
+            completed_at_utc=completed_at,
+            duration_seconds=duration_seconds,
+        )
+
+    return _factory, calls
+
+
+def _make_pipeline_factory(run_context: RunContext):
+    def _factory() -> PipelineMetadata:
+        return PipelineMetadata(
+            name=run_context.pipeline_name,
+            provider=run_context.provider,
+            entity=run_context.entity,
+            version=run_context.pipeline_version or "1.0.0",
+            git_commit=run_context.git_commit,
+            config_hash=run_context.config_hash,
+        )
+
+    return _factory
+
+
+def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
+    return BronzeWriteResult(
+        batch_id=BatchID(uuid4()),
+        relative_path=relative_path,
+        absolute_path=f"/tmp/{relative_path}",
+        record_count=3,
+        compressed_size=12,
+        uncompressed_size=24,
+        checksum_blake2="deadbeef",
+    )
+
+
+@pytest.mark.unit
+class TestSilverMetadataService:
+    def test_assemble_rejects_empty_payload_without_total_records(self) -> None:
+        run_context = _make_run_context()
+        runtime_factory, _calls = _make_runtime_factory(run_context)
+        service = SilverMetadataService(
+            run_context=run_context,
+            runtime_metadata_factory=runtime_factory,
+            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            environment_metadata=_make_environment(),
+        )
+        input_data = SilverMetadataInput(
+            table_path="/tmp/silver/activity",
+            primary_keys=["activity_id"],
+            mode=SilverWriteMode.MERGE,
+            records=[],
+            total_records=None,
+        )
+
+        with pytest.raises(ValueError, match="Cannot create Silver metadata"):
+            service.assemble(input_data)
+
+    def test_assemble_builds_complete_metadata(self) -> None:
+        run_context = _make_run_context()
+        runtime_factory, calls = _make_runtime_factory(run_context)
+        service = SilverMetadataService(
+            run_context=run_context,
+            runtime_metadata_factory=runtime_factory,
+            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            environment_metadata=_make_environment(),
+        )
+        started_at = datetime(2026, 3, 19, 10, 5, tzinfo=UTC)
+        completed_at = started_at + timedelta(seconds=15)
+        input_data = SilverMetadataInput(
+            table_path="/tmp/silver/activity",
+            primary_keys=["activity_id"],
+            mode=SilverWriteMode.MERGE,
+            records=[
+                {"activity_id": 1, "_source_batch_id": "batch-a"},
+                {"activity_id": 2, "_source_batch_id": "batch-b"},
+            ],
+            bronze_refs=[
+                _make_bronze_ref("chembl/activity/2026-03-19/batch_1.jsonl.zst")
+            ],
+            version_before=3,
+            version_after=4,
+            dq_report_path="/tmp/reports/silver_dq.json",
+            dq_rule_provenance=[{"rule_id": "DQ-1", "config_path": "configs/x.yaml"}],
+            governance=None,
+            partition_by=["activity_id"],
+            started_at=started_at,
+            completed_at=completed_at,
+            total_bytes=256,
+        )
+
+        result = service.assemble(input_data)
+
+        assert result.runtime.duration_seconds == 15.0
+        assert calls[0]["started_at"] == started_at
+        assert result.pipeline.name == "chembl_activity"
+        assert set(result.lineage.source_batch_ids) == {"batch-a", "batch-b"}
+        assert result.lineage.bronze_paths == [
+            "chembl/activity/2026-03-19/batch_1.jsonl.zst"
+        ]
+        assert result.lineage.transform_version == "ctx-1.0.0"
+        assert result.delta.operation == "merge"
+        assert result.delta.rows_inserted == 2
+        assert result.output.record_count == 2
+        assert result.output.total_bytes == 256
+        assert result.output_ext.delta_version_before == 3
+        assert result.output_ext.delta_version_after == 4
+        assert result.dq_summary.rule_provenance == [
+            {"rule_id": "DQ-1", "config_path": "configs/x.yaml"}
+        ]
+        assert result.dq_report_path == "/tmp/reports/silver_dq.json"
+
+
+@pytest.mark.unit
+class TestGoldMetadataService:
+    def test_assemble_rejects_empty_payload_without_total_records(self) -> None:
+        run_context = _make_run_context()
+        runtime_factory, _calls = _make_runtime_factory(run_context)
+        service = GoldMetadataService(
+            run_context=run_context,
+            runtime_metadata_factory=runtime_factory,
+            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            environment_metadata=_make_environment(),
+        )
+        input_data = GoldMetadataInput(
+            table_path="/tmp/gold/activity",
+            table_name="gold.activity",
+            mode=GoldWriteMode.APPEND,
+            records=[],
+            total_records=None,
+        )
+
+        with pytest.raises(ValueError, match="Cannot create Gold metadata"):
+            service.assemble(input_data)
+
+    def test_assemble_builds_composite_output_and_scd_metadata(self) -> None:
+        run_context = _make_run_context()
+        runtime_factory, calls = _make_runtime_factory(run_context)
+        service = GoldMetadataService(
+            run_context=run_context,
+            runtime_metadata_factory=runtime_factory,
+            pipeline_metadata_factory=_make_pipeline_factory(run_context),
+            environment_metadata=_make_environment(),
+        )
+        completed_at = datetime(2026, 3, 19, 11, 0, tzinfo=UTC)
+        input_data = GoldMetadataInput(
+            table_path="/tmp/gold/activity",
+            table_name="gold.activity",
+            mode=GoldWriteMode.SCD2,
+            records=[
+                {
+                    "activity_id": 1,
+                    "_composite_run_id": "cmp-001",
+                    "_source_providers": "['chembl', 'pubchem']",
+                    "_enrichment_status": "{'chembl': 'ok'}",
+                    "_lineage_created_at": "2026-03-19T10:30:00+00:00",
+                }
+            ],
+            silver_refs=[SilverRef("silver.activity", "/tmp/silver/activity", 9)],
+            scd_config=ScdConfig(
+                business_key="activity_id",
+                valid_from_col="_valid_from",
+                valid_to_col="_valid_to",
+                current_flag_col="_is_current",
+            ),
+            completed_at=completed_at,
+            partition_count=2,
+            schema_validation_enabled=True,
+            schema_validation_strict=False,
+            dq_report_path="/tmp/reports/gold_dq.json",
+            total_bytes=512,
+        )
+
+        result = service.assemble(input_data)
+
+        assert calls[0]["started_at"] is None
+        assert calls[0]["completed_at"] == completed_at
+        assert calls[0]["duration_seconds"] == 0.0
+        assert result.lineage.source_tables == {"silver.activity": 9}
+        assert result.dq_summary.total_records == 1
+        assert result.output.record_count == 1
+        assert result.output.total_bytes == 512
+        assert result.output_ext.partition_count == 2
+        assert result.output_ext.composite_run_id == "cmp-001"
+        assert result.output_ext.source_providers == ["chembl", "pubchem"]
+        assert result.output_ext.schema_validation.status == "passed"
+        assert result.scd is not None
+        assert result.scd.enabled is True
+        assert result.scd.effective_date_column == "_valid_from"
+        assert result.dq_report_path == "/tmp/reports/gold_dq.json"

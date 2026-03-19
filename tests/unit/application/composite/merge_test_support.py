@@ -25,6 +25,16 @@ from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeSer
 from bioetl.domain.composite.config import MergeConfig
 
 
+def _default_field_alias_resolver(_pipeline: str) -> dict[str, str] | None:
+    """Return no field aliases for default merge-test wiring."""
+    return None
+
+
+def _default_join_type_resolver() -> JoinHow:
+    """Return the canonical default join type for merge-test wiring."""
+    return "left"
+
+
 def build_join_planner_service(
     *,
     merge_config: MergeConfig,
@@ -38,9 +48,9 @@ def build_join_planner_service(
 ) -> JoinPlannerService:
     """Create JoinPlannerService with canonical collaborator wiring for tests."""
     if field_alias_resolver is None:
-        field_alias_resolver = lambda _pipeline: None
+        field_alias_resolver = _default_field_alias_resolver
     if join_type_resolver is None:
-        join_type_resolver = lambda: "left"
+        join_type_resolver = _default_join_type_resolver
 
     join_key_resolver = JoinKeyResolverService(
         normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
