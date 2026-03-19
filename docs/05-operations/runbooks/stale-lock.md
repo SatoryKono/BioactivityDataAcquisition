@@ -25,20 +25,21 @@ This runbook describes how to handle "Stale Lock" alerts.
    - If yes, is it stuck? (Check CPU/Memory usage).
 1. **Check Lock Status**:
    - Inspect local logs and identify lock owner `run-id`.
+   - Remember that `bioetl lock ...` operates on the `MemoryLock` instance in the current CLI process only.
 
 ## Recovery Actions
 
 1. **Kill Zombie Processes**:
    - If a worker is stuck, kill it.
-1. **Release Lock Manually**:
-   ```bash
-   bioetl lock release --pipeline {pipeline-name} --run-id {run-id}
-   ```
-   *Note: Ensure no other worker is actually writing to avoid data corruption.*
 1. **Restart Pipeline**:
    ```bash
    bioetl run --pipeline {pipeline-name}
    ```
+1. **Same-process diagnostics only**:
+   ```bash
+   bioetl lock check --pipeline {pipeline-name} --run-id {run-id}
+   ```
+   Use `bioetl lock release ...` only if you are debugging lock state in the same process that created it; it is not a cross-process stale-lock recovery tool.
 
 ## Prevention
 

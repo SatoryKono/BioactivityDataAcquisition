@@ -41,6 +41,4 @@ Current ownership metadata is governed by:
 - `configs/quality/architecture_metric_exemptions.yaml`
 
 Use the two config registries above as the canonical current state.
-Historical report snapshots remain evidence only:
-
-- `docs/reports/debt-ownership-dashboard-2026-03-06.md`
+If dashboard snapshots are regenerated, publish them under `docs/reports/` and treat them as evidence-only artifacts rather than source of truth.

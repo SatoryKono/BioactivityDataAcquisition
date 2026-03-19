@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate *-with-descriptions.md bundles for all diagram collections.
+"""Generate Markdown bundles for all diagram collections.
 
 Produces class-diagrams-quality descriptions by parsing mermaid metadata:
 - Title and focus from comments
@@ -11,6 +11,7 @@ Produces class-diagrams-quality descriptions by parsing mermaid metadata:
 
 from __future__ import annotations
 
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -25,10 +26,10 @@ MMD_BASE = DIAGRAM_ROOT
 
 # Collection definitions: (dir_name, file_ext, output_name, collection_title)
 COLLECTIONS = [
-    ("foundation", ".mmd", "foundation-diagrams-with-descriptions", "BioETL Foundation Diagrams With Descriptions"),
-    ("architecture", ".mmd", "architecture-diagrams-with-descriptions", "BioETL Architecture Diagrams With Descriptions"),
-    ("views", ".mermaid", "views-diagrams-with-descriptions", "BioETL Views Diagrams With Descriptions"),
-    ("class-diagrams", ".mmd", "class-diagrams-with-descriptions", "BioETL Class Diagrams With Descriptions"),
+    ("foundation", ".mmd", "foundation.bundle", "BioETL Foundation Diagrams Bundle"),
+    ("architecture", ".mmd", "architecture.bundle", "BioETL Architecture Diagrams Bundle"),
+    ("views", ".mermaid", "views.bundle", "BioETL Views Diagrams Bundle"),
+    ("class-diagrams", ".mmd", "class.bundle", "BioETL Class Diagrams Bundle"),
 ]
 
 # ── Diagram type labels for Russian descriptions ──
@@ -304,14 +305,13 @@ def generate_bundle(
     bundle_title: str,
     collection_key: str,
 ) -> int:
-    """Generate a single *-with-descriptions.md bundle."""
+    """Generate a single diagram bundle."""
     diagram_files = sorted(collection_dir.glob(f"*{file_ext}"))
     if not diagram_files:
         print(f"[ERROR] No {file_ext} files in {collection_dir.name}/")
         return 0
 
     png_dir = collection_dir / "png"
-    rel_prefix = collection_dir.name  # e.g. "foundation", "architecture", "views"
     output_md = bundle_markdown_path(collection_key)
 
     lines: list[str] = []
@@ -351,10 +351,13 @@ def generate_bundle(
 
         lines.append(f"## {stem} — {title}\n")
 
+        png_rel = Path(
+            os.path.relpath(png_dir / f"{stem}.png", output_md.parent)
+        ).as_posix()
         if png_file.exists():
-            lines.append(f"![{stem}]({rel_prefix}/png/{stem}.png)\n")
+            lines.append(f"![{stem}]({png_rel})\n")
         else:
-            lines.append(f"*PNG не найден: `{rel_prefix}/png/{stem}.png`*\n")
+            lines.append(f"*PNG не найден: `{png_rel}`*\n")
 
         lines.append("### Описание")
         lines.append(build_description(meta, collection_key))

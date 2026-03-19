@@ -14,8 +14,6 @@ source:
             page_size: 50
             id_batch_size: 50
             strategy: cursor
-        batch_size: 50
-        cursor_pagination: true
         fallback:
             enabled: true
             supported_filter_field: doi

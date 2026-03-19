@@ -17,16 +17,16 @@ TARGET_FILES = (
     Path(".codex/agents/py-plan-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
     Path(
-        "docs/02-architecture/mmd-diagrams/views/46-yaml-config-resolution-full.mermaid"
+        "docs/02-architecture/diagrams/views/46-yaml-config-resolution-full.mermaid"
     ),
-    Path("docs/02-architecture/mmd-diagrams/foundation/46-yaml-config-resolution.mmd"),
-    Path("docs/02-architecture/mmd-diagrams/architecture/11-configuration-system.mmd"),
+    Path("docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mmd"),
+    Path("docs/02-architecture/diagrams/architecture/11-configuration-system.mmd"),
     Path(
-        "docs/02-architecture/diagram-descriptions/mmd-diagrams/architecture/11-configuration-system.md"
+        "docs/02-architecture/diagrams/descriptions/architecture/11-configuration-system.md"
     ),
-    Path("docs/02-architecture/mmd-diagrams/architecture/11a-config-loading.mmd"),
+    Path("docs/02-architecture/diagrams/architecture/11a-config-loading.mmd"),
     Path(
-        "docs/02-architecture/diagram-descriptions/mmd-diagrams/architecture/11a-config-loading.md"
+        "docs/02-architecture/diagrams/descriptions/architecture/11a-config-loading.md"
     ),
 )
 

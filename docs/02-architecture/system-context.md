@@ -6,7 +6,9 @@
 
 C4 System Context diagram показывает BioETL как центральную систему и её взаимодействие с внешними системами.
 
-> **Note**: Текущая реализация — **Local-Only** (ADR-010). Redis и S3 отложены для будущего распределённого развёртывания.
+> **Note**: Текущая поддерживаемая реализация — **Local-Only** (ADR-010).
+> Активные архитектурные документы описывают только локальный runtime:
+> локальную файловую систему, локальные checkpoints и `MemoryLock`.
 
 ----------------------------------------------------------------------
 
@@ -88,8 +90,6 @@ flowchart TB
 | **OpenAlex**  | Academic knowledge graph | REST API     | Active               |
 | **Semantic Scholar** | Publication metadata | REST API (AI2) | Active          |
 | **Local FS** | Medallion layers storage | File I/O        | Active (Local-Only)  |
-| **S3/MinIO** | Object storage           | S3 API          | Future (Distributed) |
-| **Redis**    | Distributed locking      | Redis protocol  | Future (Distributed) |
 
 ----------------------------------------------------------------------
 
@@ -116,20 +116,19 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 
 - **Ports**: Protocol interfaces в Domain layer (`DataSourcePort`, `StoragePort`, `LockPort`)
 - **Adapters**: Infrastructure implementations
-  - **Local-Only**: `ChemblClient`, `SilverWriter`, `BronzeWriter`, `GoldWriter`, `MemoryLock`
-  - **Distributed (Future)**: `S3Writer`, `RedisLock`
+  - **Local-Only runtime**: `ChemblClient`, `SilverWriter`, `BronzeWriter`, `GoldWriter`, `MemoryLock`
 
 Это обеспечивает:
 
 - Независимость Domain от I/O
 - Тестируемость через mock-адаптеры
 - Расширяемость для новых провайдеров
-- Лёгкий переход между Local-Only и Distributed deployment
+- Явное разделение между доменными портами и локальными инфраструктурными реализациями
 
 ----------------------------------------------------------------------
 
 ## Related Documents
 
-- **Data Flow**: [data-flow.md](data-flow.md)
-- **Architecture Diagrams**: [00-diagramming-policy.md](mmd-diagrams/docs/00-diagramming-policy.md)
+- **Data Flow**: [data-flow.md](diagrams/guide/data-flow-reference.md)
+- **Architecture Diagrams**: [policy.md](diagrams/governance/policy.md)
 - **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)

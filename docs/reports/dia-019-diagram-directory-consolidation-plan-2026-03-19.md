@@ -21,8 +21,8 @@ Type: Non-normative refactoring plan
 
 В scope входят:
 
-- `docs/02-architecture/mmd-diagrams/**`
-- `docs/02-architecture/diagram-descriptions/**`
+- `docs/02-architecture/diagrams/**`
+- `docs/02-architecture/diagrams/descriptions/**`
 - diagram-only docs в `docs/02-architecture/`
 - `scripts/diagrams/**`
 - diagram wrappers/canonical agent scripts в `docs/00-project/ai/agents/scripts/diagrams/**`
@@ -39,8 +39,8 @@ Type: Non-normative refactoring plan
 
 Текущая структура размазана между:
 
-- `docs/02-architecture/mmd-diagrams/**`
-- `docs/02-architecture/diagram-descriptions/**`
+- `docs/02-architecture/diagrams/**`
+- `docs/02-architecture/diagrams/descriptions/**`
 - root docs: `06-diagram-policy.md`, `diagrams.md`, `architecture-diagrams.md`, `container-diagram.md`, `data-flow.md`
 
 Подтверждённые текущие объёмы:
@@ -134,7 +134,7 @@ docs/02-architecture/
 
 ### Render entrypoints and validators
 
-- `docs/02-architecture/mmd-diagrams/render.sh`
+- `docs/02-architecture/diagrams/tooling/render.sh`
 - `scripts/diagrams/validate_mermaid_syntax.sh`
 - `scripts/diagrams/run_diagram_checks.sh`
 - `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh`
@@ -211,7 +211,7 @@ docs/02-architecture/
    - root diagram docs в `docs/02-architecture/`
 2. Зафиксировать counts.
 3. Удалить временный lock/temp file:
-   - `docs/02-architecture/mmd-diagrams/~$ews-diagrams-with-descriptions.docx`
+   - `docs/02-architecture/diagrams/~$ews-diagrams-with-descriptions.docx`
 
 ### Verify
 
@@ -273,9 +273,9 @@ rg -n "mmd-diagrams|diagram-descriptions|06-diagram-policy|render.sh|with-descri
 
 ```bash
 ./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py
-bash docs/02-architecture/mmd-diagrams/render.sh --filter '12*'
-./.venv/Scripts/python.exe scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
-./.venv/Scripts/python.exe scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+bash docs/02-architecture/diagrams/tooling/render.sh --filter '12*'
+./.venv/Scripts/python.exe scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+./.venv/Scripts/python.exe scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 bash scripts/diagrams/validate_mermaid_syntax.sh
 ```
 
@@ -313,8 +313,8 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 ```bash
 rg -n "mmd-diagrams/" docs mkdocs.yml Makefile scripts docs/00-project -g '*.md' -g '*.py' -g '*.sh' -g '*.yml' -g '*.yaml' -g 'Makefile'
 ./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --links
-bash docs/02-architecture/diagrams/render.sh --filter '14*'
-./.venv/Scripts/python.exe scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/visual-smoke-manifest.txt
+bash docs/02-architecture/diagrams/tooling/render.sh --filter '14*'
+./.venv/Scripts/python.exe scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 ```
 
 ### DoD
@@ -338,7 +338,7 @@ bash docs/02-architecture/diagrams/render.sh --filter '14*'
    - `container-diagram.md -> diagrams/guide/container-reference.md`
    - `data-flow.md -> diagrams/guide/data-flow-reference.md`
 2. Move:
-   - `docs/02-architecture/diagram-descriptions/** -> docs/02-architecture/diagrams/descriptions/**`
+   - `docs/02-architecture/diagrams/descriptions/** -> docs/02-architecture/diagrams/descriptions/**`
 3. Keep temporary thin stubs only if nav transition requires them.
 
 ### Verify
@@ -372,7 +372,7 @@ rg -n "diagram-descriptions|06-diagram-policy\\.md|architecture-diagrams\\.md|co
 3. Rename:
    - `diagrams/docs -> diagrams/governance`
 4. Move tooling files:
-   - `diagrams/render.sh -> diagrams/tooling/render.sh`
+   - `diagrams/tooling/render.sh -> diagrams/tooling/render.sh`
    - `diagrams/svgo.config.js -> diagrams/tooling/svgo.config.js`
 
 ### Special caution
@@ -390,7 +390,7 @@ rg -n "diagram-descriptions|06-diagram-policy\\.md|architecture-diagrams\\.md|co
 ```bash
 ./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py
 bash docs/02-architecture/diagrams/tooling/render.sh --filter '16*'
-./.venv/Scripts/python.exe scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/visual-smoke-manifest.txt
+./.venv/Scripts/python.exe scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 ./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --links
 ```
 
@@ -413,8 +413,8 @@ bash docs/02-architecture/diagrams/tooling/render.sh --filter '16*'
    - `foundation-diagrams-with-descriptions.* -> bundles/foundation.bundle.*`
    - `views-diagrams-with-descriptions.* -> bundles/views.bundle.*`
 2. Rename manifests:
-   - `quality-gate-manifest.txt -> manifests/quality-gates.txt`
-   - `visual-smoke-manifest.txt -> manifests/visual-smoke.txt`
+   - `manifests/quality-gates.txt -> manifests/quality-gates.txt`
+   - `manifests/visual-smoke.txt -> manifests/visual-smoke.txt`
 3. Update generators, PDF/DOCX scripts, smoke and nightly scripts.
 
 ### Verify

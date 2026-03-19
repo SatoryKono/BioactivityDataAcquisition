@@ -23,8 +23,8 @@ from bioetl.interfaces.cli.commands.run_all import run_all
 from bioetl.interfaces.cli.commands.run_composite import run_composite
 from bioetl.interfaces.cli.registry_helpers import (
     _build_registered_registry,
+    build_cli_registry,
     create_registry,
-    get_default_registry,
     register_all_pipelines,
 )
 
@@ -32,6 +32,9 @@ __all__ = [
     "cli",
     "main",
 ]
+
+# Compatibility patch point retained for tests and legacy callers.
+get_default_registry = build_cli_registry
 
 
 def _build_main_registry() -> object:

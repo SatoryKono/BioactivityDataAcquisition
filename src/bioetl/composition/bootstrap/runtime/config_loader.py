@@ -101,39 +101,6 @@ def resolve_composite_config_path(name: str, *, config_dir: Path) -> Path:
     raise FileNotFoundError(f"Composite config not found: {config_path}")
 
 
-def _inject_column_groups_from_file(
-    raw_payload: dict[str, object], config_path: Path
-) -> None:
-    """Populate inline ``column_groups`` from external file when configured."""
-    composite_section = raw_payload.get("composite")
-    if not isinstance(composite_section, dict):
-        return
-
-    merge_section = composite_section.get("merge")
-    if not isinstance(merge_section, dict):
-        return
-
-    column_groups_file = merge_section.get("column_groups_file")
-    if not isinstance(column_groups_file, str) or "column_groups" in merge_section:
-        return
-
-    groups_path = config_path.parent / column_groups_file
-    if not groups_path.exists():
-        return
-
-    with groups_path.open(encoding="utf-8") as groups_file:
-        groups_raw = yaml.safe_load(groups_file) or {}
-
-    if isinstance(groups_raw, list):
-        merge_section["column_groups"] = groups_raw
-        return
-
-    if isinstance(groups_raw, dict):
-        column_groups = groups_raw.get("column_groups")
-        if isinstance(column_groups, list):
-            merge_section["column_groups"] = column_groups
-
-
 def load_composite_config(
     name: str,
     *,
@@ -173,7 +140,6 @@ def load_composite_config(
 
     mutable_payload = cast(JsonDict, raw_payload)
     dq_override_merger(mutable_payload, config_path)
-    _inject_column_groups_from_file(mutable_payload, config_path)
 
     try:
         schema = validate_payload(mutable_payload)

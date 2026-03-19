@@ -37,8 +37,8 @@
 
 | Документ | Описание | Охват |
 |----------|----------|-------|
-| **[Publication Fields Reference](publication-fields-reference.md)** | Полный справочник всех 191 полей с типами, regex, PK, категориями | 191 поле |
-| **[Validation Schema v3](schemas/publication_validation_schema_v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
+| **[Publication Fields Reference](publication-fields-reference.md)** | Historical/source artifact from older spreadsheet inventory; not the canonical publication contract | Historical only |
+| **[Validation Schema v3](schemas/publication_validation_schema_v3.xlsx)** | Supporting validation-rules matrix (XLSX + CSV export); canonical field names and aliases still live in provider refs and `configs/entities/{provider}/publication.yaml` | 191 правил × 5 уровней |
 | **[Glossary v2.5](../00-project/glossary.md)** | Ubiquitous Language: термины валидации, DQ-флаги, режимы | 12 новых терминов |
 
 ---
@@ -96,11 +96,11 @@ open docs/03-guides/publication-validation-guide.md
 ### 2. Найти поле
 
 ```bash
-# Открыть Field Reference
-open docs/04-reference/publication-fields-reference.md
+# Проверить provider-specific canonical reference
+open docs/04-reference/providers/chembl/publication.md
 
-    # Или поискать в валидационной схеме
-    grep "pmid" docs/04-reference/schemas/publication-validation-schema-v3.csv
+# Или поискать в валидационной схеме
+grep "pmid" docs/04-reference/schemas/publication_validation_schema_v3.csv
 ```
 
 **Пример записи:**
@@ -192,15 +192,16 @@ cat logs/bioetl.log | \
    - Добавить provider-specific tests по примерам
 
 4. **Документировать:**
-   - Обновить [Field Reference](publication-fields-reference.md) при добавлении полей
-    - Добавить правила в [Validation Schema](schemas/publication_validation_schema_v3.xlsx)
+   - Обновить provider-specific reference page в `docs/04-reference/providers/{provider}/publication.md`
+   - Синхронизировать aliases/contracts в `configs/entities/{provider}/publication.yaml`
+   - Добавить правила в [Validation Schema](schemas/publication_validation_schema_v3.xlsx)
 
 ---
 
 ### DevOps / Support (Эксплуатация)
 
 1. **Настроить мониторинг:**
-   - Prometheus metrics: `bioetl-validation-passed-total`, `bioetl-validation-warned-total`, `bioetl-validation-failed-total`
+   - Prometheus metrics: `bioetl_validation_passed_total`, `bioetl_validation_warned_total`, `bioetl_validation_failed_total`
    - Grafana dashboard: DQ Pass Rate, Top Failing Rules, Validation Latency
 
 2. **При алерте:**
@@ -241,9 +242,9 @@ cat logs/bioetl.log | \
 ### Добавление нового провайдера
 
 1. Определить поля в Pandera schema (`src/bioetl/domain/schemas/{provider}/publication.py`)
-2. Добавить правила в `publication-validation-schema-v3.xlsx`
+2. Добавить правила в `publication_validation_schema_v3.xlsx`
 3. Сгенерировать тесты из XLSX (автоматический генератор не зафиксирован в репозитории; выполнять вручную по шаблонам `tests/contract/`)
-4. Обновить [Field Reference](publication-fields-reference.md)
+4. Обновить provider-specific publication reference page и `field_aliases`/contracts для нового провайдера
 5. Добавить провайдера в конфигурацию External Verification
 
 ---

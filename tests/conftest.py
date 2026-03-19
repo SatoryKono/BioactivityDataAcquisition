@@ -71,9 +71,27 @@ except ImportError:  # pragma: no cover
     vcrpy = None  # type: ignore[assignment]
 
 
+def _selected_tests_are_runtime_independent(
+    request: pytest.FixtureRequest,
+) -> bool:
+    """Return True when the current selection does not need classification bootstrap."""
+    items = getattr(request.session, "items", ())
+    if not items:
+        return False
+    runtime_independent_prefixes = (
+        "tests/architecture/",
+        "tests/security/",
+        "tests/smoke/",
+    )
+    return all(item.nodeid.startswith(runtime_independent_prefixes) for item in items)
+
+
 @pytest.fixture(scope="session", autouse=True)
-def _init_publication_type_classification() -> None:
+def _init_publication_type_classification(request: pytest.FixtureRequest) -> None:
     """Initialize publication type classification data for all tests."""
+    if _selected_tests_are_runtime_independent(request):
+        return
+
     from bioetl.composition.bootstrap.runtime.classification_init import (
         initialize_publication_type_classification,
     )

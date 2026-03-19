@@ -322,8 +322,10 @@ composite:
         # Column Ordering by Canonical Categories
         # -------------------------------------------------------------------------
         # Defines the order of columns in the merged output.
-        # Categories and field order follow docs/schemas/publication_field_order.csv
-        # (6 canonical categories, 167 fully-qualified fields).
+        # Categories and field order follow the historical ordering artifact
+        # docs/04-reference/schemas/publication_field_order.csv.
+        # Canonical field names and aliases live in
+        # configs/entities/{provider}/publication.yaml and provider reference docs.
         #
         # The "system" group MUST be first: it captures ETL metadata columns
         # (entity_id, content_hash, _run_id, etc.) that would otherwise fall

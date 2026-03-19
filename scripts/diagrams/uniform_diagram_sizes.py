@@ -46,6 +46,10 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 try:
     from .diagram_paths import source_dir
 except ImportError:  # pragma: no cover - direct script execution

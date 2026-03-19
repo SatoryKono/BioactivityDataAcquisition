@@ -27,17 +27,21 @@ BioETL использует Delta Lake для Silver и Gold слоёв. Delta L
 
 ### Pipeline-интегрированный VACUUM
 
-VACUUM выполняется **автоматически** после каждого успешного pipeline run:
+Pipeline-integrated VACUUM **поддерживается, но выключен по умолчанию**.
+Он выполняется только если включён через YAML (`maintenance.auto_vacuum: true`)
+или через CLI `--vacuum-after-run` для конкретного запуска:
 
 ```
 PipelineRunner.run()
-    └── PostrunService.run_vacuum_if_enabled()
-            └── RetentionPolicy.vacuum(retention_hours=168)
+    └── PostrunService.run()
+            └── MedallionLifecycleService.finalize_run()
+                    └── StoragePort.optimize(...)
 ```
 
 **Реализация:**
-- `PostrunService` (`application/core/postrun_service.py:200-228`)
-- `RetentionPolicy` (`infrastructure/storage/retention_manager.py`)
+- `PostrunService` (`application/core/postrun/service.py`)
+- `MedallionLifecycleService.finalize_run()` (`application/services/medallion_lifecycle.py`)
+- YAML defaults: `configs/base/pipeline.yaml` (`maintenance.auto_vacuum: false`)
 
 ### Конфигурация
 
@@ -47,12 +51,14 @@ PipelineRunner.run()
 from bioetl.domain.config import RuntimeConfig
 
 config = RuntimeConfig(
-    vacuum_after_run=True,      # Включить автоматический VACUUM
+    vacuum_after_run=False,     # Default: VACUUM after run disabled
     vacuum_retention_days=7,    # Файлы старше 7 дней удаляются
 )
 ```
-Для CLI-run эти параметры также доступны через флаги `--vacuum-after-run` и
-`--vacuum-retention-days`.
+Чтобы включить VACUUM после успешного запуска, нужно явно задать
+`vacuum_after_run=True`, включить `maintenance.auto_vacuum: true` в YAML
+или передать CLI-флаг `--vacuum-after-run`. Retention настраивается через
+`vacuum_retention_days` / `--vacuum-retention-days`.
 
 ---
 

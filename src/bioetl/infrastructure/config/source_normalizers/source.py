@@ -12,6 +12,12 @@ from bioetl.infrastructure.config_merge import config_merge
 _ENDPOINT_KEYS: tuple[str, ...] = ("base_url", "api_version")
 _AUTH_KEYS: tuple[str, ...] = ("auth_type", "api_key")
 _BATCH_KEYS: tuple[str, ...] = ("batch_size", "page_size", "max_url_length")
+_RETIRED_PROVIDER_PAGINATION_KEYS: tuple[str, ...] = (
+    "batch_size",
+    "page_size",
+    "max_url_length",
+    "cursor_pagination",
+)
 
 
 def _deep_merge(
@@ -128,27 +134,21 @@ def _normalize_source_auth(
 
 def _apply_batch_to_pagination(
     batch: JsonDict | int | None,  # Any: normalizer; input types vary
-    provider_config: JsonDict,  # Any: normalizer; input types vary
     pagination: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Extract batch_size, page_size, max_url_length from legacy batch config."""
     if isinstance(batch, dict):
         if "batch_size" in batch:
-            provider_config.setdefault("batch_size", batch["batch_size"])
             pagination.setdefault("id_batch_size", batch["batch_size"])
         elif "size" in batch:
-            provider_config.setdefault("batch_size", batch["size"])
             pagination.setdefault("id_batch_size", batch["size"])
         elif "api_batch_size" in batch:
-            provider_config.setdefault("batch_size", batch["api_batch_size"])
             pagination.setdefault("id_batch_size", batch["api_batch_size"])
         if "page_size" in batch:
-            _copy_keys(batch, provider_config, ("page_size", "max_url_length"))
             pagination.setdefault("page_size", batch["page_size"])
         if "max_url_length" in batch:
             pagination.setdefault("max_url_length", batch["max_url_length"])
     elif isinstance(batch, int):
-        provider_config.setdefault("batch_size", batch)
         pagination.setdefault("id_batch_size", batch)
 
 
@@ -157,28 +157,22 @@ def _normalize_source_pagination(
     provider_config: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize pagination and batch configuration."""
+    retired_keys = [
+        key for key in _RETIRED_PROVIDER_PAGINATION_KEYS if key in provider_config
+    ]
+    if retired_keys:
+        raise ValueError(
+            "Retired source provider pagination aliases are not supported: "
+            f"{', '.join(sorted(retired_keys))}. "
+            "Use source.provider_config.pagination.* instead."
+        )
+
     pagination: JsonDict = _get_dict_or_empty(  # Any: values are heterogeneous
         provider_config, "pagination"
     )  # Any: normalizer; input types vary
 
-    if provider_config.get("batch_size") is not None:
-        pagination.setdefault("id_batch_size", provider_config["batch_size"])
-    if provider_config.get("page_size") is not None:
-        pagination.setdefault("page_size", provider_config["page_size"])
-    if provider_config.get("max_url_length") is not None:
-        pagination.setdefault("max_url_length", provider_config["max_url_length"])
-    if provider_config.get("cursor_pagination"):
-        pagination.setdefault("strategy", "cursor")
-
-    batch_norm = _get_dict_or_empty(source, "batch")
-    _copy_keys(provider_config, batch_norm, _BATCH_KEYS)
-    if "batch_size" in provider_config:
-        batch_norm.setdefault("size", provider_config["batch_size"])
-    if batch_norm:
-        source["batch"] = batch_norm
-
     batch = source.pop("batch", None)
-    _apply_batch_to_pagination(batch, provider_config, pagination)
+    _apply_batch_to_pagination(batch, pagination)
 
     if pagination:
         provider_config["pagination"] = pagination

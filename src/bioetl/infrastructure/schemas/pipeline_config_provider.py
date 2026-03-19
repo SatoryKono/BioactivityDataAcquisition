@@ -44,16 +44,19 @@ class ClientSourceConfig(BaseModel):
 
 
 class ProviderSourceConfig(BaseModel):
-    """Provider-specific configuration from source YAML."""
+    """Pipeline-level provider source overrides.
+
+    Pipeline configs may override provider identity and client wiring, but must
+    not redefine source pagination defaults here. Pagination is owned by the
+    provider source config and pipelines may only influence page size through
+    ``page_size_override`` on ``PipelineYamlConfig``.
+    """
 
     model_config = ConfigDict(extra="ignore")
 
     provider: str | None = None
     base_url: str | None = None
     client: ClientSourceConfig = Field(default_factory=ClientSourceConfig)
-    max_url_length: int = Field(default=2000, ge=500, le=8000)
-    batch_size: int = Field(default=100, ge=1, le=5000)
-    page_size: int = Field(default=1000, ge=100, le=10000)
     api_version: str | None = None
     default_email: str | None = None
 

@@ -12,7 +12,7 @@
 
 - **Реализация портов:** Классы в этом слое реализуют `Protocol` из `domain.ports`.
 - **Зависимости:** Здесь находятся все "грязные" детали: HTTP-клиенты, коннекторы к БД, специфичные SDK.
-- **Изменчивость:** Этот слой наиболее подвержен изменениям при смене технологий (например, переход с локальной ФС на объектное хранилище в будущем).
+- **Изменчивость:** Этот слой наиболее подвержен изменениям при смене технологий, но текущий поддерживаемый runtime в проекте остаётся Local-Only.
 
 **Центральные реализации:** `BronzeWriter`, `SilverWriter`, `GoldWriter` (medallion storage), `TokenBucketRateLimiter` и `CircuitBreakerGuard` (HTTP resilience), `MemoryLock` (local-only locking).
 
@@ -219,11 +219,10 @@ PubMedAdapter                         (pubchempy)
 - Однопроцессная изоляция (не распределённая)
 - Поддержка exclusive-режима для backfill/rebuild
 
-> **Note:** Redis-блокировки (ADR-003) superseded в пользу local-only стратегии.
-> См. [ADR-010](decisions/ADR-010-local-only-deployment.md) для обоснования.
+> **Note:** Redis-блокировки (ADR-003) superseded в пользу Local-Only стратегии.
+> См. [ADR-010](decisions/ADR-010-local-only-deployment.md) для обоснования и текущего supported runtime.
 
-**Расширяемость:** Порт `LockPort` остаётся неизменным — при необходимости можно добавить
-Redis-адаптер без изменения domain/application слоёв.
+`LockPort` сохраняется как архитектурная граница и для testability, но active project guidance использует только `MemoryLock`.
 
 ### 2.4. `checkpoint/` и `quarantine/`
 
@@ -256,12 +255,12 @@ Redis-адаптер без изменения domain/application слоёв.
 
 | Диаграмма              | Файл                                                                                                            | Описание                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mmd](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | Классы слоя Infrastructure                       |
-| Provider Adapters      | [30-port-adapter-mapping.mmd](mmd-diagrams/foundation/30-port-adapter-mapping.mmd)                                  | Обзор 7 провайдеров и их rate limits             |
-| HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mmd](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
-| Circuit Breaker        | [07-circuit-breaker-states.mmd](mmd-diagrams/foundation/07-circuit-breaker-states.mmd)                         | Состояния Circuit Breaker                        |
-| Storage Architecture   | [19-delta-lake-write-sequence.mmd](mmd-diagrams/foundation/19-delta-lake-write-sequence.mmd)                    | Bronze, Silver, Gold writers                     |
-| MemoryLock             | [16-memory-lock-class.mmd](mmd-diagrams/foundation/16-memory-lock-class.mmd)                                   | Класс MemoryLock                                 |
+| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mmd](diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | Классы слоя Infrastructure                       |
+| Provider Adapters      | [30-port-adapter-mapping.mmd](diagrams/foundation/30-port-adapter-mapping.mmd)                                  | Обзор 7 провайдеров и их rate limits             |
+| HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mmd](diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Circuit Breaker        | [07-circuit-breaker-states.mmd](diagrams/foundation/07-circuit-breaker-states.mmd)                         | Состояния Circuit Breaker                        |
+| Storage Architecture   | [19-delta-lake-write-sequence.mmd](diagrams/foundation/19-delta-lake-write-sequence.mmd)                    | Bronze, Silver, Gold writers                     |
+| MemoryLock             | [16-memory-lock-class.mmd](diagrams/foundation/16-memory-lock-class.mmd)                                   | Класс MemoryLock                                 |
 
 ### Связанные ADR
 

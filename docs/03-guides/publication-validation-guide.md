@@ -821,8 +821,8 @@ pytest tests/integration/validation/ --record-mode=once
 ## Связанная документация
 
 - **ADR-033:** Стратегия валидации публикаций
-- **Field Reference:** `docs/04-reference/publication-fields-reference.md`
-- **Validation Schema:** `docs/04-reference/schemas/publication-validation-schema-v3.xlsx`
+- **Canonical provider refs:** `docs/04-reference/providers/{provider}/publication.md`
+- **Validation Rules Matrix:** `docs/04-reference/schemas/publication_validation_schema_v3.xlsx` (supporting artifact; canonical field names/aliases live in provider refs and `configs/entities/{provider}/publication.yaml`)
 - **Operational Runbook:** `docs/05-operations/runbooks/publication-validation-runbook.md`
 - **Tests:** `tests/contract/` + `tests/unit/` (471 тест)
 

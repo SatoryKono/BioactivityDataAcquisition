@@ -48,7 +48,7 @@ _CASE_CHEMBL_LEGACY: dict[str, Any] = {
             "auth_type": "public",
             "api_version": "v1",
             "client": {"timeout_sec": 60.0, "max_retries": 3},
-            "batch_size": 25,
+            "pagination": {"id_batch_size": 25},
         },
         "rate_limit": {
             "requests_per_second": 3.0,
@@ -82,18 +82,69 @@ _CASE_CHEMBL_NEW: dict[str, Any] = {
     }
 }
 
+_CASE_CHEMBL_PAGINATION_LEGACY: dict[str, Any] = {
+    "source": {
+        "type": "api",
+        "load_strategy": "full",
+        "provider_config": {
+            "provider": "chembl",
+            "base_url": "https://example.chembl/api",
+            "auth_type": "public",
+            "api_version": "v1",
+            "client": {"timeout_sec": 60.0, "max_retries": 3},
+            "pagination": {
+                "page_size": 250,
+                "max_url_length": 2200,
+            },
+        },
+        "rate_limit": {
+            "requests_per_second": 3.0,
+            "burst": 10,
+            "with_api_key": {"requests_per_second": 6.0, "burst": 20},
+        },
+        "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+        "health_check": {"endpoint": "/health", "timeout": 5},
+    }
+}
+
+_CASE_CHEMBL_PAGINATION_NEW: dict[str, Any] = {
+    "source": {
+        "type": "api",
+        "load_strategy": "full",
+        "api": {
+            "base_url": "https://example.chembl/api",
+            "auth_type": "public",
+            "api_version": "v1",
+        },
+        "client": {"timeout": 60.0, "max_retries": 3},
+        "batch": {"page_size": 250, "max_url_length": 2200},
+        "provider_config": {"provider": "chembl"},
+        "rate_limit": {
+            "requests_per_second": 3.0,
+            "burst": 10,
+            "authenticated": {"requests_per_second": 6.0, "burst": 20},
+        },
+        "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+        "health_check": {"endpoint": "/health", "timeout_sec": 5},
+    }
+}
+
 _GOLDEN_CASES: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {
-    "chembl_aliases": (_CASE_CHEMBL_LEGACY, _CASE_CHEMBL_NEW),
+    "chembl_canonical_and_shorthand_batch": (_CASE_CHEMBL_LEGACY, _CASE_CHEMBL_NEW),
+    "chembl_canonical_and_shorthand_pagination": (
+        _CASE_CHEMBL_PAGINATION_LEGACY,
+        _CASE_CHEMBL_PAGINATION_NEW,
+    ),
 }
 
 
-@pytest.mark.parametrize("legacy_payload,new_payload", _GOLDEN_CASES.values())
-def test_legacy_and_new_payloads_are_equivalent(
-    legacy_payload: dict[str, Any], new_payload: dict[str, Any]
+@pytest.mark.parametrize("canonical_payload,shorthand_payload", _GOLDEN_CASES.values())
+def test_canonical_and_shorthand_payloads_are_equivalent(
+    canonical_payload: dict[str, Any], shorthand_payload: dict[str, Any]
 ) -> None:
-    legacy_dump = _dump_source_config(legacy_payload)
-    new_dump = _dump_source_config(new_payload)
-    assert legacy_dump == new_dump
+    canonical_dump = _dump_source_config(canonical_payload)
+    shorthand_dump = _dump_source_config(shorthand_payload)
+    assert canonical_dump == shorthand_dump
 
 
 def test_source_legacy_normalization_golden_snapshot() -> None:
@@ -113,6 +164,53 @@ def test_source_legacy_normalization_golden_snapshot() -> None:
             "Run with UPDATE_SNAPSHOTS=1 to create baseline."
         )
     assert current == snapshot
+
+
+@pytest.mark.parametrize(
+    ("payload", "expected_fragment"),
+    [
+        (
+            {
+                "source": {
+                    "provider_config": {
+                        "provider": "chembl",
+                        "batch_size": 25,
+                    }
+                }
+            },
+            "batch_size",
+        ),
+        (
+            {
+                "source": {
+                    "provider_config": {
+                        "provider": "chembl",
+                        "page_size": 250,
+                    }
+                }
+            },
+            "page_size",
+        ),
+        (
+            {
+                "source": {
+                    "provider_config": {
+                        "provider": "chembl",
+                        "cursor_pagination": True,
+                    }
+                }
+            },
+            "cursor_pagination",
+        ),
+    ],
+)
+def test_retired_provider_pagination_aliases_are_rejected(
+    payload: dict[str, Any], expected_fragment: str
+) -> None:
+    with pytest.raises(ValueError, match="Retired source provider pagination aliases") as exc:
+        _dump_source_config(payload)
+
+    assert expected_fragment in str(exc.value)
 
 
 def test_load_source_config_uncached_calls_pipeline_in_order(

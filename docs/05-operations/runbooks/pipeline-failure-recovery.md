@@ -55,10 +55,10 @@ cat data/output/checkpoints/{pipeline}.json
 
 Checkpoint contains:
 
-- `last-offset`: Last successfully processed offset
-- `last-run-id`: Previous run identifier
-- `last-run-timestamp`: When last run completed
-- `total-records-processed`: Cumulative count
+- `pipeline`: Pipeline name
+- `run_id`: Run identifier of the checkpoint owner
+- `metadata.records_processed`: Offset-like progress counter used for resume
+- `version`: Checkpoint payload version
 
 ### Step 4: Identify Error Type
 
@@ -93,8 +93,10 @@ bioetl run --pipeline chembl_activity --resume
 The pipeline will:
 
 1. Load checkpoint state
-1. Resume from `last-offset`
+1. Resume from `metadata.records_processed`
 1. Continue processing
+
+> **Important:** pipelines configured with `loading_strategy: full_scan_only` do not resume from checkpoint even when `--resume` is requested.
 
 ### Force Full Refresh
 
@@ -115,7 +117,7 @@ For schema issues or data corruption:
 # 1. Backup current Silver table
 mv data/output/silver/chembl/activity data/output/silver/chembl/activity.bak
 
-# 2. Clear checkpoint
+# 2. Clear checkpoint only after the failed process has stopped
 rm data/output/checkpoints/chembl_activity.json
 
 # 3. Full refresh
@@ -172,7 +174,7 @@ Set up alerts for:
 
 - Run VACUUM weekly (see [VACUUM Procedures](vacuum-procedures.md))
 - Monitor checkpoint file sizes
-- Review quarantine directory for patterns
+- Review the unified quarantine table for patterns (`bioetl quarantine stats --pipeline ...`)
 
 ## Escalation
 

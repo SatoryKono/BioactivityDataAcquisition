@@ -57,10 +57,10 @@ Workflow следует принципу "Safe-by-Design":
 
 ## 4. Expected outputs (BioETL v6.0.0)
 
-Отчеты сохраняются в `docs/99-archive/reports/<task-id>/` (согласно Johnny.Decimal).
+Для новых задач отчёты сохраняются в `reports/<task-id>/`.
 
 ```
-docs/99-archive/reports/<task-id>/
+reports/<task-id>/
 ├── 00-audit-baseline.md
 ├── 01-plan-initial.md
 ├── 02-test-baseline.md
@@ -98,4 +98,4 @@ docs/99-archive/reports/<task-id>/
 
 - Исторические отчёты в `docs/99-archive/reports/<task-id>/` могут использовать старые имена файлов (например, `04-refactoring-log.md` вместо `04-implementation-log.md`) и старую нумерацию ADR.
 - Такие артефакты считаются **валидными историческими данными** и НЕ являются ошибкой, если сохранён контекст задачи и трассируемость ID (`AUD-*`, `RF-*`, `DBG-*`, `DOC-*`, `CFG-*`).
-- Для новых задач MUST использовать текущую структуру и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.24 и ADR-001..ADR-043.
+- Для новых задач MUST использовать текущую структуру `reports/<task-id>/` и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.24 и ADR-001..ADR-043.

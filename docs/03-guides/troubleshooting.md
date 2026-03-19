@@ -31,12 +31,9 @@
 *   **Причина**: Уже запущен другой экземпляр того же пайплайна или предыдущий запуск завершился аварийно.
 *   **Решение**:
     1.  Проверьте наличие других процессов того же пайплайна.
-    2.  Если уверены, что процессов нет, проверьте lock owner (`run-id`) и освободите lock вручную:
-        ```bash
-        bioetl lock check --pipeline your-pipeline-name --run-id <owner-uuid>
-        bioetl lock release --pipeline your-pipeline-name --run-id <owner-uuid>
-        ```
-    3.  В Local-Only режиме блокировки in-memory, поэтому операции lock применимы в рамках текущего процесса.
+    2.  Если процесс завис, завершите именно его на уровне ОС и затем перезапустите пайплайн.
+    3.  При необходимости используйте `bioetl lock check --pipeline ... --run-id ...` только как локальную диагностику текущего процесса.
+    4.  В Local-Only режиме блокировки находятся в `MemoryLock`, поэтому `bioetl lock release` не является cross-process механизмом снятия чужого lock.
 
 ### Ошибка: `pydantic.ValidationError`
 *   **Симптом**: Пайплайн падает на стадии `transform` или `load` с ошибкой валидации Pydantic.
@@ -54,7 +51,7 @@
 *   **Решение**:
     1.  Просмотрите карантинные записи:
         ```bash
-        make quarantine-inspect PIPELINE=your-pipeline-name
+        bioetl quarantine inspect --pipeline your-pipeline-name --limit 20
         ```
     2.  Проанализируйте `error-code` и `payload`, чтобы определить первопричину (например, неожиданные `null` или неверные SMILES).
     3.  Скорректируйте правила качества данных или логику трансформации в соответствующем адаптере.

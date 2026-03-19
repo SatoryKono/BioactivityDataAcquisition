@@ -115,7 +115,7 @@ bioetl run --pipeline chembl_cell_line --input-csv data/input/cell.csv
 | Трансформер | `src/bioetl/application/pipelines/chembl/cell_line_transformer.py` |
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 | Схема | `src/bioetl/domain/schemas/chembl/cell_line.py` |
-| Сущность | `src/bioetl/domain/entities.py` |
+| Сущность | `src/bioetl/domain/entities/chembl_structures_foundation.py` |
 | Фабрика | `src/bioetl/composition/factories/pipeline/registry.py` |
 
 ---

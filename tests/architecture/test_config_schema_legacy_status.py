@@ -6,8 +6,13 @@ import json
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_DIR = PROJECT_ROOT / "configs" / "_schema"
+CONFIG_README = PROJECT_ROOT / "configs" / "README.md"
+PIPELINE_GUIDE = PROJECT_ROOT / "docs" / "03-guides" / "pipeline-configuration.md"
+PROVIDERS_DIR = PROJECT_ROOT / "configs" / "providers"
 
 
 def _load_schema(name: str) -> dict[str, Any]:
@@ -49,8 +54,32 @@ def test_pipeline_schema_marks_filter_batch_size_as_deprecated_transition() -> N
     )
 
 
-def test_source_schema_marks_legacy_pagination_aliases_as_deprecated() -> None:
-    """Legacy source pagination aliases must be migration-only in JSON schema."""
+def test_pipeline_source_schema_does_not_advertise_source_pagination_aliases() -> None:
+    """Pipeline JSON schema must not expose direct source pagination override keys."""
+    schema = _load_schema("pipeline.json")
+    defs = schema.get("$defs")
+    assert isinstance(defs, dict), "pipeline.json must contain $defs section"
+
+    provider_source = defs.get("ProviderSourceConfig")
+    assert isinstance(provider_source, dict), (
+        "pipeline.json missing ProviderSourceConfig definition"
+    )
+
+    properties = provider_source.get("properties")
+    assert isinstance(properties, dict), (
+        "ProviderSourceConfig must define properties in pipeline.json"
+    )
+
+    forbidden = {"batch_size", "page_size", "max_url_length"}
+    present = sorted(forbidden.intersection(properties))
+    assert not present, (
+        "pipeline.json still advertises direct source pagination override keys "
+        f"inside ProviderSourceConfig: {present}"
+    )
+
+
+def test_source_schema_does_not_advertise_retired_pagination_aliases() -> None:
+    """Source JSON schema must not expose retired provider pagination aliases."""
     schema = _load_schema("source.json")
     defs = schema.get("$defs")
     assert isinstance(defs, dict), "source.json must contain $defs section"
@@ -61,18 +90,16 @@ def test_source_schema_marks_legacy_pagination_aliases_as_deprecated() -> None:
     properties = provider_cfg.get("properties")
     assert isinstance(properties, dict), "ProviderConfigYaml must define properties"
 
-    for key in ("batch_size", "page_size", "max_url_length"):
-        field = properties.get(key)
-        assert isinstance(field, dict), (
-            f"ProviderConfigYaml must keep {key} as explicit migration alias"
-        )
-        assert field.get("deprecated") is True, (
-            f"ProviderConfigYaml.{key} must be marked deprecated=true"
-        )
+    forbidden = {"batch_size", "page_size", "max_url_length"}
+    present = sorted(forbidden.intersection(properties))
+    assert not present, (
+        "source.json still advertises retired provider pagination aliases: "
+        f"{present}"
+    )
 
 
-def test_composite_schema_marks_column_groups_file_as_deprecated() -> None:
-    """Composite legacy merge.column_groups_file must remain explicitly deprecated."""
+def test_composite_schema_does_not_advertise_retired_column_groups_file() -> None:
+    """Composite JSON schema must not expose retired merge.column_groups_file."""
     schema = _load_schema("composite.json")
     defs = schema.get("$defs")
     assert isinstance(defs, dict), "composite.json must contain $defs section"
@@ -83,10 +110,78 @@ def test_composite_schema_marks_column_groups_file_as_deprecated() -> None:
     properties = merge_schema.get("properties")
     assert isinstance(properties, dict), "MergeSchema must define properties"
 
-    column_groups_file = properties.get("column_groups_file")
-    assert isinstance(column_groups_file, dict), (
-        "MergeSchema must keep column_groups_file for compatibility migration seam"
+    assert "column_groups_file" not in properties, (
+        "composite.json still advertises retired merge.column_groups_file"
     )
-    assert column_groups_file.get("deprecated") is True, (
-        "composite.merge.column_groups_file must be marked deprecated=true"
+
+
+def test_configs_readme_tracks_current_legacy_status_policy() -> None:
+    """Active config docs must describe the same field-status policy as schemas."""
+    readme = CONFIG_README.read_text(encoding="utf-8")
+
+    assert "pipeline `filter_batch_size`" in readme, (
+        "configs/README.md must list pipeline.filter_batch_size as transitional "
+        "migration-only field"
+    )
+    assert (
+        "source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`"
+        in readme
+    ), (
+        "configs/README.md must describe retired source provider pagination aliases"
+    )
+    assert "composite `merge.column_groups_file`" in readme, (
+        "configs/README.md must describe composite.merge.column_groups_file as retired"
+    )
+    assert "provider source `pagination.*`" in readme, (
+        "configs/README.md must describe provider_config.pagination.* as the "
+        "canonical source pagination contract"
+    )
+    assert "pipeline `page_size_override`" in readme, (
+        "configs/README.md must describe pipeline.page_size_override as the "
+        "canonical pipeline-level pagination override"
+    )
+
+
+def test_pipeline_configuration_guide_tracks_source_pagination_policy() -> None:
+    """Active pipeline guide must describe current source pagination policy."""
+    guide = PIPELINE_GUIDE.read_text(encoding="utf-8")
+
+    assert "source.provider_config.pagination.*" in guide, (
+        "pipeline configuration guide must describe provider_config.pagination.* "
+        "as the canonical source pagination contract"
+    )
+    assert "page_size_override" in guide, (
+        "pipeline configuration guide must describe page_size_override as the "
+        "only pipeline-level pagination override"
+    )
+    assert "Retired source provider pagination aliases:" in guide, (
+        "pipeline configuration guide must mark source provider pagination "
+        "aliases as retired"
+    )
+
+
+def test_provider_configs_use_canonical_pagination_fields() -> None:
+    """Repository provider configs should use canonical pagination.* fields only."""
+    violations: list[str] = []
+
+    for path in sorted(PROVIDERS_DIR.glob("*.yaml")):
+        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if not isinstance(payload, dict):
+            continue
+        source = payload.get("source")
+        if not isinstance(source, dict):
+            continue
+        provider_config = source.get("provider_config")
+        if not isinstance(provider_config, dict):
+            continue
+
+        for key in ("batch_size", "page_size", "max_url_length", "cursor_pagination"):
+            if key in provider_config:
+                rel = path.relative_to(PROJECT_ROOT)
+                violations.append(f"{rel}: provider_config.{key}")
+
+    assert not violations, (
+        "Provider YAML corpus must use canonical provider_config.pagination.* "
+        "fields and must not keep legacy pagination aliases.\n"
+        + "\n".join(violations)
     )

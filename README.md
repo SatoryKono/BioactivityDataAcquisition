@@ -103,39 +103,26 @@ but active docs in `docs/00-05` remain the source of truth.
 
 ### Installation
 
-#### Option A: Automated Setup (Recommended)
+#### Option A: Supported Make-Based Setup (Recommended)
 
-Use the `scripts/dev/dev_setup.sh` script for a complete automated setup:
+Use the maintained Make targets for local bootstrap:
 
 ```bash
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
 cd BioactivityDataAcquisition2
-./scripts/dev/dev_setup.sh
+make install
+make test-deps
+make setup-plugins
 ```
 
-The script will:
+Notes:
 
-- Check required prerequisites (Python 3.11+, Git, Make, uv) and optional extras (Docker, Node.js)
-- Create virtual environment and install dependencies
-- Set up pre-commit hooks
-- Configure environment variables and create data directories
-- Detect AI tools (Claude Code, Codex) and sync plugins
-- Run verification checks with a summary table
+- `make install` uses `uv sync --extra dev --extra tracing` when `uv` is available; otherwise it creates `.venv` and installs the editable package with dev extras.
+- `make setup-plugins` configures local pytest/pre-commit tooling.
+- If you use Codex or GitHub Copilot MCP, run `python -m scripts.dev setup-mcp` after install.
+- `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
-Available modes:
-
-| Flag | Description |
-| ---- | ----------- |
-| `--quick` / `-q` | Fast install, skip tests and linters |
-| `--skip-tests` | Run linters but skip test suite |
-| `--force` / `-f` | Recreate virtual environment from scratch |
-| `--ci` | CI mode: no colors, non-interactive |
-| `--verbose` / `-v` | Show detailed dependency installation output |
-| `--no-color` | Disable colored output (also via `NO_COLOR=1`) |
-
-Environment variables: `BIOETL_SKIP_PRECOMMIT=1`, `BIOETL_SKIP_DOCKER=1`.
-
-#### Option B: Manual Setup
+#### Option B: Manual Setup Without `make`
 
 1. **Clone and Install**:
    Initialize the virtual environment and install project dependencies.
@@ -143,7 +130,14 @@ Environment variables: `BIOETL_SKIP_PRECOMMIT=1`, `BIOETL_SKIP_DOCKER=1`.
    ```bash
    git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
    cd BioactivityDataAcquisition2
-   make install
+
+   # Preferred manual path
+   uv sync --extra dev --extra tracing
+
+   # Fallback without uv
+   python3 -m venv .venv
+   . .venv/bin/activate
+   pip install -e ".[dev,tracing]"
    ```
 
 1. **Configure Environment** *(optional)*:

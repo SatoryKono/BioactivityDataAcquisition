@@ -209,16 +209,16 @@ def test_load_name_without_separator_raises(setup_configs):
         load_pipeline_config("simple")
 
 
-def test_load_source_config_legacy_and_new_format_equivalent_chembl(
+def test_load_source_config_canonical_and_shorthand_format_equivalent_chembl(
     tmp_path, monkeypatch
 ):
-    """New source format should normalize to same result as legacy format (chembl)."""
+    """Canonical and shorthand source formats should normalize equivalently."""
     load_source_config.cache_clear()
 
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
-    legacy = {
+    canonical = {
         "source": {
             "type": "api",
             "load_strategy": "full",
@@ -228,7 +228,7 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
                 "auth_type": "public",
                 "api_version": "v1",
                 "client": {"timeout_sec": 60.0, "max_retries": 3},
-                "batch_size": 25,
+                "pagination": {"id_batch_size": 25},
             },
             "rate_limit": {
                 "requests_per_second": 3.0,
@@ -262,16 +262,16 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
     }
 
     monkeypatch.chdir(tmp_path)
-    (providers_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
+    (providers_dir / "chembl_canonical.yaml").write_text(yaml.dump(canonical))
     (providers_dir / "chembl_new.yaml").write_text(yaml.dump(new))
 
-    assert normalize_source_config(legacy) == normalize_source_config(new)
+    assert normalize_source_config(canonical) == normalize_source_config(new)
 
-    cfg_legacy = load_source_config("chembl_legacy")
+    cfg_canonical = load_source_config("chembl_canonical")
     load_source_config.cache_clear()
     cfg_new = load_source_config("chembl_new")
 
-    assert _dump_source_config(cfg_legacy) == _dump_source_config(cfg_new)
+    assert _dump_source_config(cfg_canonical) == _dump_source_config(cfg_new)
 
 
 def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
@@ -310,16 +310,16 @@ def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
     assert cfg.batch_size == 22
 
 
-def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
+def test_load_source_config_canonical_and_shorthand_format_equivalent_pubmed(
     tmp_path, monkeypatch
 ):
-    """New source format should normalize to same result as legacy format (pubmed)."""
+    """Canonical and shorthand source formats should normalize equivalently."""
     load_source_config.cache_clear()
 
     providers_dir = tmp_path / "configs" / "providers"
     providers_dir.mkdir(parents=True)
 
-    legacy = {
+    canonical = {
         "source": {
             "type": "api",
             "load_strategy": "full",
@@ -329,7 +329,7 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
                 "auth_type": "api_key",
                 "api_key": "${BIOETL_PUBMED_API_KEY}",
                 "client": {"timeout": 45.0, "max_retries": 4},
-                "batch_size": 100,
+                "pagination": {"id_batch_size": 100},
             },
             "rate_limit": {
                 "requests_per_second": 5.0,
@@ -363,16 +363,16 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
     }
 
     monkeypatch.chdir(tmp_path)
-    (providers_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
+    (providers_dir / "pubmed_canonical.yaml").write_text(yaml.dump(canonical))
     (providers_dir / "pubmed_new.yaml").write_text(yaml.dump(new))
 
-    assert normalize_source_config(legacy) == normalize_source_config(new)
+    assert normalize_source_config(canonical) == normalize_source_config(new)
 
-    cfg_legacy = load_source_config("pubmed_legacy")
+    cfg_canonical = load_source_config("pubmed_canonical")
     load_source_config.cache_clear()
     cfg_new = load_source_config("pubmed_new")
 
-    assert _dump_source_config(cfg_legacy) == _dump_source_config(cfg_new)
+    assert _dump_source_config(cfg_canonical) == _dump_source_config(cfg_new)
 
 
 def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
@@ -382,8 +382,8 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
             "provider_config": {
                 "provider": "pubmed",
                 "client": {"timeout": 42.0, "max_retries": 3},
-                "batch_size": 30,
             },
+            "batch": {"batch_size": 30},
             "rate_limit": {
                 "requests_per_second": 5.0,
                 "with_api_key": {"requests_per_second": 8.0, "burst": 20},
@@ -398,7 +398,7 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
     assert source["rate_limit"]["authenticated"] == source["rate_limit"]["with_api_key"]
     assert source["health_check"]["timeout_sec"] == 9
     assert source["provider_config"]["client"]["timeout_sec"] == 42.0
-    assert source["provider_config"]["batch_size"] == 30
+    assert source["provider_config"]["pagination"]["id_batch_size"] == 30
 
 
 def test_load_source_config_rejects_missing_source_section(
@@ -721,6 +721,61 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     assert config["source"]["batch_size"] == 999
     assert config["source"]["provider_config"]["provider"] == "chembl"
+
+
+@pytest.mark.parametrize(
+    ("source_override", "expected_fragment"),
+    [
+        (
+            {"provider_config": {"page_size": 999}},
+            "source.provider_config.page_size",
+        ),
+        (
+            {"provider_config": {"pagination": {"page_size": 999}}},
+            "source.provider_config.pagination",
+        ),
+        (
+            {"batch": {"page_size": 999}},
+            "source.batch",
+        ),
+    ],
+)
+def test_load_source_section_rejects_pipeline_source_pagination_overrides(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+    source_override: dict[str, Any],
+    expected_fragment: str,
+) -> None:
+    """Pipeline source merges must reject direct pagination override seams."""
+    from bioetl.infrastructure.config_loader import _load_source_section
+    from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+    config = {
+        "provider": "chembl",
+        "source": source_override,
+    }
+    config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text("pipeline: {}\n", encoding="utf-8")
+
+    base_source = SourceYamlConfig.model_validate(
+        {
+            "source": {
+                "batch_size": 100,
+                "provider_config": {"provider": "chembl"},
+            }
+        }
+    )
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.config.source_config_loader.load_source_config",
+        lambda provider: base_source,
+    )
+
+    with pytest.raises(ValueError, match="page_size_override") as exc_info:
+        _load_source_section(config, config_path)
+
+    assert expected_fragment in str(exc_info.value)
 
 
 def test_pipeline_source_file_is_rejected_as_legacy_key(setup_configs):

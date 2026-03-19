@@ -198,7 +198,7 @@ lint-diagrams: ## Lint all Mermaid source files in docs/ (excluding docs/99-arch
 
 report-diagrams-policy: ## Generate non-blocking diagram lint summary report
 	@echo "$(BLUE)Generating diagram lint summary report...$(NC)"
-	$(PY_RUN) scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
+	$(PY_RUN) scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true
 	$(PY_RUN) scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
 
 validate-diagrams-syntax: diagram-preflight ## Validate Mermaid syntax for docs/**/*.mmd|*.mermaid
@@ -207,23 +207,23 @@ validate-diagrams-syntax: diagram-preflight ## Validate Mermaid syntax for docs/
 
 render-diagrams-all: diagram-preflight ## Render all docs diagrams to SVG+PNG (excluding docs/99-archive/**)
 	@echo "$(BLUE)Rendering all diagrams (SVG+PNG)...$(NC)"
-	bash docs/02-architecture/mmd-diagrams/render.sh
+	bash docs/02-architecture/diagrams/tooling/render.sh
 
 render-diagrams: render-diagrams-all ## Backward-compatible alias for full diagram rendering
 
 render-diagrams-svg: diagram-preflight ## Render all docs diagrams to SVG only
 	@echo "$(BLUE)Rendering all diagrams (SVG only)...$(NC)"
-	bash docs/02-architecture/mmd-diagrams/render.sh --svg-only
+	bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
 
 render-diagrams-png: diagram-preflight ## Render all docs diagrams to PNG only
 	@echo "$(BLUE)Rendering all diagrams (PNG only)...$(NC)"
-	bash docs/02-architecture/mmd-diagrams/render.sh --png-only
+	bash docs/02-architecture/diagrams/tooling/render.sh --png-only
 
-render-diagrams-descriptions-pdf: ## Generate *-with-descriptions.pdf bundles with print-safe fit and bounds check
+render-diagrams-descriptions-pdf: ## Generate diagram PDF bundles with print-safe fit and bounds check
 	@echo "$(BLUE)Generating diagram description PDFs...$(NC)"
 	$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py
 
-render-diagrams-descriptions-docx: ## Generate *-with-descriptions.docx bundles from Markdown
+render-diagrams-descriptions-docx: ## Generate diagram DOCX bundles from Markdown
 	@echo "$(BLUE)Generating diagram description DOCX...$(NC)"
 	$(PY_RUN) scripts/diagrams/generate_with_descriptions_docx.py
 
@@ -231,14 +231,14 @@ run-diagram-docs-agent: ## Full diagram docs pipeline (checks + docx + pdf)
 	@echo "$(BLUE)Running diagram docs agent pipeline...$(NC)"
 	bash scripts/diagrams/run_diagram_docs_agent.sh
 
-check-diagrams-pdf-bounds: ## Validate existing with-descriptions PDF bundles for image clipping/overflow
-	@echo "$(BLUE)Checking with-descriptions PDF bounds...$(NC)"
-	$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.pdf
-	$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.pdf
+check-diagrams-pdf-bounds: ## Validate existing diagram PDF bundles for image clipping/overflow
+	@echo "$(BLUE)Checking diagram PDF bounds...$(NC)"
+	$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/class.bundle.pdf
+	$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/foundation.bundle.pdf
 
 check-diagrams-visibility: ## Check text visibility in baseline SVG smoke set
 	@echo "$(BLUE)Checking SVG text visibility (smoke manifest)...$(NC)"
-	$(PY_RUN) scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+	$(PY_RUN) scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
 diagrams-all: lint-diagrams validate-diagrams-syntax render-diagrams-all check-diagrams-visibility ## Full diagram pipeline (lint + validate + render + visibility check)
 	@echo "$(GREEN)Diagram pipeline complete.$(NC)"

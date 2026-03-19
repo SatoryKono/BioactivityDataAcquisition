@@ -16,6 +16,9 @@ INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
 )
 CLI_REGISTRY_HELPER_MODULE = "bioetl.interfaces.cli.registry_helpers"
 CONFIG_LOADER_MODULE = "bioetl.infrastructure.config_loader"
+METADATA_BUILDER_COMPAT_MODULE = (
+    "bioetl.infrastructure.storage.metadata_builder_composite_helpers"
+)
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
         "deduplicator",
@@ -102,51 +105,52 @@ CANONICAL_DATASOURCE_DOC_FILES = frozenset(
         ROOT
         / "docs"
         / "02-architecture"
-        / "mmd-diagrams"
+        / "diagrams"
         / "class-diagrams"
         / "16-factories-bootstrap.mmd",
         ROOT
         / "docs"
         / "02-architecture"
-        / "mmd-diagrams"
+        / "diagrams"
         / "architecture"
         / "12a-bootstrap-factories.mmd",
         ROOT
         / "docs"
         / "02-architecture"
-        / "mmd-diagrams"
+        / "diagrams"
         / "architecture"
         / "12-bootstrap-di-container.mmd",
-        ROOT / "docs" / "02-architecture" / "mmd-diagrams" / "diagram-descriptions.md",
         ROOT
         / "docs"
         / "02-architecture"
-        / "mmd-diagrams"
-        / "diagram-descriptions"
-        / "class-diagrams-descriptions.md",
+        / "diagrams"
+        / "descriptions"
+        / "class-summary.md",
         ROOT
         / "docs"
         / "02-architecture"
-        / "mmd-diagrams"
-        / "class-diagrams-with-descriptions.md",
+        / "diagrams"
+        / "bundles"
+        / "class.bundle.md",
         ROOT
         / "docs"
         / "02-architecture"
-        / "mmd-diagrams"
-        / "architecture-diagrams-with-descriptions.md",
+        / "diagrams"
+        / "bundles"
+        / "architecture.bundle.md",
         ROOT
         / "docs"
         / "02-architecture"
-        / "diagram-descriptions"
-        / "mmd-diagrams"
+        / "diagrams"
+        / "descriptions"
         / "architecture"
         / "12a-bootstrap-factories.md",
         ROOT
         / "docs"
         / "02-architecture"
-        / "diagram-descriptions"
-        / "mmd-diagrams"
-        / "class-diagrams"
+        / "diagrams"
+        / "descriptions"
+        / "class"
         / "16-factories-bootstrap.md",
     }
 )
@@ -180,11 +184,58 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
     }
 )
+ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES = frozenset(
+    {
+        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_cli_commands.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "interfaces"
+        / "cli"
+        / "test_cli_helpers.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "interfaces"
+        / "cli"
+        / "test_run_all_command.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "interfaces"
+        / "cli"
+        / "test_run_all_service_mock.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "interfaces"
+        / "cli"
+        / "test_cli_run_all_vacuum_formatters.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "test_run_helpers.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "test_debug.py",
+        ROOT / "tests" / "e2e" / "test_cli_safety.py",
+        ROOT
+        / "tests"
+        / "integration"
+        / "interfaces"
+        / "test_cli_exit_code_matrix.py",
+    }
+)
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "types.py",
-        ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py",
-        ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "storage.py",
         ROOT
         / "src"
         / "bioetl"
@@ -192,6 +243,19 @@ ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
         / "factories"
         / "pipeline"
         / "registry.py",
+    }
+)
+ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset(
+    {
+        ROOT / "tests" / "architecture" / "test_registry_contracts.py",
+        ROOT / "tests" / "unit" / "composition" / "test_types.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "composition"
+        / "factories"
+        / "pipeline"
+        / "test_registry.py",
     }
 )
 ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES = frozenset(
@@ -202,6 +266,17 @@ ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES = frozenset(
         / "infrastructure"
         / "config"
         / "test_pipeline_config_legacy_normalization.py",
+        ROOT / "tests" / "unit" / "infrastructure" / "test_config_dynamic.py",
+    }
+)
+ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES = frozenset(
+    {
+        ROOT
+        / "tests"
+        / "unit"
+        / "infrastructure"
+        / "storage"
+        / "test_metadata_builder_composite_helpers.py",
     }
 )
 ALLOWED_MERGE_SERVICE_SRC_FILES = frozenset(
@@ -440,6 +515,40 @@ def test_cli_registry_helper_module_is_confined_to_cli_src_entrypoints(
 
 
 @pytest.mark.architecture
+def test_cli_registry_helper_get_default_registry_import_is_absent_from_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should import the canonical builder, not the compat alias."""
+    violations = _iter_imported_symbol_violations(
+        source_ast_cache,
+        module_names=frozenset({CLI_REGISTRY_HELPER_MODULE}),
+        symbol="get_default_registry",
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "CLI src still imports registry_helpers.get_default_registry directly:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_cli_registry_helper_get_default_registry_import_is_absent_from_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests should patch local CLI compat seams, not import the registry-helper alias."""
+    violations = _iter_imported_symbol_violations(
+        test_ast_cache,
+        module_names=frozenset({CLI_REGISTRY_HELPER_MODULE}),
+        symbol="get_default_registry",
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "Tests still import registry_helpers.get_default_registry directly:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
 def test_default_registry_import_is_confined_to_known_src_compatibility_seams(
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
@@ -457,9 +566,30 @@ def test_default_registry_import_is_confined_to_known_src_compatibility_seams(
 
 
 @pytest.mark.architecture
+def test_default_registry_import_is_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Ordinary tests must not accumulate new direct imports of default registry access."""
+    violations = _iter_imported_symbol_violations(
+        test_ast_cache,
+        module_names=frozenset({"bioetl.composition.registry"}),
+        symbol="get_default_registry",
+        allowed_files=ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES,
+    )
+    assert not violations, (
+        "composition.registry.get_default_registry leaked into new test call sites:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
 @pytest.mark.parametrize(
     "symbol",
-    ("read_pipeline_config_payload", "normalize_pipeline_config_payload"),
+    (
+        "read_pipeline_config_payload",
+        "normalize_pipeline_config_payload",
+        "_load_source_section",
+    ),
 )
 def test_config_loader_private_compat_helpers_are_confined(
     symbol: str,
@@ -487,6 +617,38 @@ def test_config_loader_private_compat_helpers_are_confined(
     assert not test_violations, (
         f"{symbol} leaked beyond dedicated config compatibility coverage:\n"
         + "\n".join(test_violations)
+    )
+
+
+@pytest.mark.architecture
+def test_metadata_builder_compat_module_is_not_used_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src must import composite metadata helpers from the domain seam."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=METADATA_BUILDER_COMPAT_MODULE,
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "metadata_builder_composite_helpers leaked into first-party src/ imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_metadata_builder_compat_module_is_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests must not treat the storage metadata compat wrapper as a normal API."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name=METADATA_BUILDER_COMPAT_MODULE,
+        allowed_files=ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES,
+    )
+    assert not violations, (
+        "metadata_builder_composite_helpers leaked beyond dedicated compatibility "
+        "coverage:\n" + "\n".join(violations)
     )
 
 
@@ -715,5 +877,31 @@ def test_internal_composition_entrypoint_module_strings_are_not_used_in_unit_tes
     )
     assert not violations, (
         "Internal composition entrypoint module gained new string references in unit tests:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize(
+    "needle",
+    (
+        "bioetl.interfaces.cli.main.get_default_registry",
+        "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+        "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+    ),
+)
+def test_cli_local_get_default_registry_patch_points_are_confined_to_dedicated_tests(
+    needle: str,
+    test_content_cache: dict[Path, str],
+) -> None:
+    """CLI compat patch-point aliases must stay confined to dedicated test coverage."""
+    violations = _iter_string_mentions(
+        test_content_cache,
+        needle=needle,
+        allowed_files=ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES
+        | frozenset({Path(__file__).resolve()}),
+    )
+    assert not violations, (
+        "CLI get_default_registry compat patch points leaked into new test files:\n"
         + "\n".join(violations)
     )

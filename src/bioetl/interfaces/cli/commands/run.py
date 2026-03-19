@@ -19,14 +19,20 @@ from bioetl.application.services.cli_run_orchestration_service import (
 )
 from bioetl.composition.execution_api import push_metrics_to_gateway
 from bioetl.composition.registry import PipelineRegistry
-from bioetl.composition.services_api import get_pipeline_runner_service
+from bioetl.composition.services_api import (
+    get_pipeline_runner_service as _get_pipeline_runner_service_impl,
+)
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
-    echo_health_server_info,
-    health_server_context,
+)
+from bioetl.interfaces.cli.commands.health_server_integration import (
+    echo_health_server_info as _echo_health_server_info_impl,
+)
+from bioetl.interfaces.cli.commands.health_server_integration import (
+    health_server_context as _health_server_context_impl,
 )
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
-    ensure_metrics_server_started,
+    ensure_metrics_server_started as _ensure_metrics_server_started_impl,
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
     RunCommandInput,
@@ -54,6 +60,9 @@ from bioetl.interfaces.cli.commands.run_runtime_helpers import (
     build_run_command_input as _build_run_command_input_impl,
 )
 from bioetl.interfaces.cli.commands.run_runtime_helpers import (
+    build_run_pipeline_callable as _build_run_pipeline_callable_impl,
+)
+from bioetl.interfaces.cli.commands.run_runtime_helpers import (
     run_pipeline_async as _run_pipeline_async_impl,
 )
 from bioetl.interfaces.cli.commands.run_runtime_helpers import (
@@ -66,13 +75,24 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 __all__ = [
-    "build_run_options",
-    "execute_run",
-    "get_cli_run_orchestration_service",
-    "handle_cli_failure",
-    "run",
-    "validate_options",
+    "build_run_options", "execute_run", "get_cli_run_orchestration_service",
+    "handle_cli_failure", "run", "validate_options",
 ]
+
+# Inventory of retained run-command seams. Update tests alongside intentional changes.
+_RUN_CANONICAL_BOUNDARY_SEAMS = (
+    "get_cli_run_orchestration_service", "_build_run_command_input",
+    "_build_run_pipeline_callable", "_map_status_to_exit_code",
+    "_present_run_health_info", "_finalize_run_result",
+    "_run_pipeline_async", "_run_prepared_request_async",
+)
+
+_RUN_COMPATIBILITY_SEAMS = (
+    "_get_runner_logger", "_handle_destructive_run_confirmation",
+    "_preview_cleanup", "_validate_start_offset",
+    "echo_health_server_info", "ensure_metrics_server_started",
+    "health_server_context", "get_pipeline_runner_service",
+)
 
 
 def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
@@ -141,15 +161,19 @@ def execute_run(
     """Execute run and flush metrics at command boundary."""
     return get_cli_run_orchestration_service().execute_pipeline(
         request=request,
-        run_pipeline_async=partial(_run_prepared_request_async, registry=registry),
+        run_pipeline_async=_build_run_pipeline_callable(
+            registry=registry,
+            run_pipeline_async_callable=_run_pipeline_async,
+        ),
         run_coroutine=asyncio.run,
         flush_metrics=push_metrics_to_gateway,
     )
 
 
-# Canonical helper aliases (kept patchable for tests and compatibility seams).
+# PATCH_POINT: retained thin helper aliases for tests and CLI patch seams.
 _build_run_command_input = _build_run_command_input_impl
 _map_status_to_exit_code = map_status_to_exit_code
+_build_run_pipeline_callable = _build_run_pipeline_callable_impl
 
 
 def _present_run_health_info(request: RunExecutionRequest) -> None:
@@ -364,8 +388,12 @@ def run(
 
 
 # ---------------------------------------------------------------------------
-# Compatibility-only re-exports for tests and legacy patch seams
+# PATCH_POINT: compatibility-only re-exports for tests and legacy patch seams.
 # ---------------------------------------------------------------------------
+echo_health_server_info = _echo_health_server_info_impl
+ensure_metrics_server_started = _ensure_metrics_server_started_impl
+health_server_context = _health_server_context_impl
+get_pipeline_runner_service = _get_pipeline_runner_service_impl
 _get_runner_logger = get_runner_logger
 _handle_destructive_run_confirmation = handle_destructive_run_confirmation
 _preview_cleanup = show_cleanup_preview

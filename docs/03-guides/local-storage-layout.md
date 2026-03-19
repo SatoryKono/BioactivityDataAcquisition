@@ -127,27 +127,29 @@ df = pl.read-delta("data/output/silver/chembl/activity", version=5)
 
 **Flat structure** (not nested):
 ```
-data/output/checkpoints/
-├── chembl_activity.json
-├── chembl_molecule.json
-├── pubchem_compound.json
-└── composite/
-    └── composite_publication-enrichment-abc123.json
+	data/output/checkpoints/
+	├── chembl_activity.json
+	├── chembl_molecule.json
+	├── pubchem_compound.json
+	└── composite_publication.json
 ```
+
+Checkpoint files use a flat layout: `data/output/checkpoints/{pipeline}.json`.
 
 **Checkpoint structure:**
 ```json
 {
   "pipeline": "chembl_activity",
-  "run-id": "550e8400-e29b-41d4-a716-446655440000",
+  "run_id": "550e8400-e29b-41d4-a716-446655440000",
   "metadata": {
-    "last-processed-id": "CHEMBL12345",
-    "last-processed-ts": "2025-01-15T10:30:00Z",
-    "batch-count": 42
+    "records_processed": 4200
   },
   "version": "2.0"
 }
 ```
+
+Checkpoint resume is offset-based. Pipelines with `loading_strategy: full_scan_only`
+ignore checkpoint resume even when `--resume` is passed.
 
 ## Atomic Writes
 
@@ -177,7 +179,8 @@ dt.vacuum(retention_hours=168)  # 7 days
 ### Checkpoint Cleanup
 
 After successful pipeline completion, checkpoints are automatically deleted.
-For manual cleanup:
+For manual cleanup after the owning process has stopped and you intentionally want
+to discard resume state:
 
 ```bash
 rm data/output/checkpoints/{pipeline-name}.json
@@ -186,7 +189,7 @@ rm data/output/checkpoints/{pipeline-name}.json
 ### Quarantine Purge
 
 ```bash
-make quarantine-purge PIPELINE=chembl_activity
+bioetl quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
 ```
 
 ## Configuration

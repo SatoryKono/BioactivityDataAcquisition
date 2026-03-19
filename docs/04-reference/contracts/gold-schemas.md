@@ -249,7 +249,7 @@ gold_filters:
 | `pref_name` | str | Yes | Название |
 | `target_type` | str | Yes | Тип мишени |
 | `organism` | str | Yes | Организм |
-| `tax_id` | float | Yes | NCBI Taxonomy ID |
+| `taxonomy_id` | float | Yes | NCBI Taxonomy ID |
 | `component_accessions` | list[str] | Yes | UniProt accessions |
 
 ---
@@ -280,27 +280,27 @@ gold_filters:
 
 #### chembl_publication
 
-**Primary Key**: `document_chembl_id`
+**Primary Key**: `publication_id`
 **Назначение**: Научные публикации из ChEMBL API (silver-table/gold-table: `chembl_publication`)
 
 ##### Gold-фильтры
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| `doc_type` | `[PUBLICATION]` | Только публикации |
-| `year` | `> 1950` | Современные публикации |
-| required | `document_chembl_id, doc_type, title` | Базовые метаданные (PubMed ID/DOI могут отсутствовать) |
+| `publication_type` | `[journal-article, book, dataset, patent]` | Канонические типы публикаций |
+| `publication_year` | `>= 1500` | Базовая временная валидация |
+| required | `publication_id, title` | Базовые метаданные для записи в Gold |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `document_chembl_id` | str | No | ChEMBL Document ID |
-| `pubmed_id` | float | Yes | PubMed ID |
-| `doi` | str | Yes | DOI |
+| `publication_id` | str | No | ChEMBL Publication ID |
+| `publication_pmid` | str | Yes | PubMed ID |
+| `publication_doi` | str | Yes | DOI |
 | `title` | str | Yes | Заголовок |
 | `journal` | str | Yes | Журнал |
-| `year` | float | Yes | Год публикации |
+| `publication_year` | float | Yes | Год публикации |
 | `authors` | str | Yes | Авторы |
 
 ---
@@ -314,7 +314,7 @@ gold_filters:
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| required | `molecule_id, document_chembl_id` | Полнота связей |
+| required | `molecule_id, publication_id` | Полнота связей |
 
 ##### Ключевые поля
 
@@ -322,7 +322,7 @@ gold_filters:
 |------|-----|----------|----------|
 | `record_id` | float | No | Record ID |
 | `molecule_id` | str | No | ChEMBL Molecule ID |
-| `document_chembl_id` | str | No | ChEMBL Document ID |
+| `publication_id` | str | No | ChEMBL Publication ID |
 | `compound_key` | str | Yes | Название в публикации |
 | `compound_name` | str | Yes | Полное название |
 
@@ -330,7 +330,7 @@ gold_filters:
 
 #### chembl_cell_line
 
-**Primary Key**: `cell_chembl_id`
+**Primary Key**: `cell_id`
 **Назначение**: Клеточные линии
 
 ##### Gold-фильтры
@@ -343,7 +343,7 @@ gold_filters:
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `cell_chembl_id` | str | No | ChEMBL Cell Line ID |
+| `cell_id` | str | No | ChEMBL Cell Line ID |
 | `cell_name` | str | No | Название |
 | `cell_description` | str | Yes | Описание |
 | `cell_source_tissue` | str | Yes | Ткань-источник |
@@ -901,9 +901,9 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 | ChEMBL | assay | `assay_id` | 3 column | ~45 |
 | ChEMBL | target | `target_id` | 1 col + list filters | ~25 |
 | ChEMBL | target_component | `component_id` | 1 column | ~13 |
-| ChEMBL | document | `document_chembl_id` | 1 col + 1 range | ~17 |
+| ChEMBL | publication | `publication_id` | required + enum/range validation | ~17 |
 | ChEMBL | compound_record | `record_id` | required only | ~8 |
-| ChEMBL | cell_line | `cell_chembl_id` | required only | ~12 |
+| ChEMBL | cell_line | `cell_id` | required only | ~12 |
 | PubChem | compound | `cid` | required only | ~10 |
 | UniProt | protein | `accession` | 1 column | ~8 |
 | PubMed | publication | `pmid` | required only | ~24 |

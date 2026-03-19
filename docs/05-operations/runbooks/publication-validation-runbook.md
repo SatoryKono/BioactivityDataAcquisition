@@ -47,7 +47,10 @@
 
 **Триггер:**
 ```promql
-(bioetl-validation-failed-total / bioetl-validation-total) > 0.10
+(
+  bioetl_validation_failed_total /
+  (bioetl_validation_passed_total + bioetl_validation_warned_total + bioetl_validation_failed_total)
+) > 0.10
 ```
 
 **Описание:** Более 10% записей отклонены валидацией
@@ -80,7 +83,7 @@
 
 **Триггер:**
 ```promql
-histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
+histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 ```
 
 **Описание:** P95 validation latency > 5 минут
@@ -120,7 +123,10 @@ histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
 
 **Триггер:**
 ```promql
-(bioetl-validation-warned-total / bioetl-validation-total) > 0.20
+(
+  bioetl_validation_warned_total /
+  (bioetl_validation_passed_total + bioetl_validation_warned_total + bioetl_validation_failed_total)
+) > 0.20
 ```
 
 **Описание:** Более 20% записей в карантине (`-dq-warn=True`)
@@ -711,7 +717,7 @@ print(reasons.value-counts().head(10))
 
 **Симптомы:**
 - Grafana dashboard пустой
-- Prometheus `/metrics` endpoint не показывает `bioetl-validation-*` метрики
+- Prometheus `/metrics` endpoint не показывает `bioetl_validation_*` метрики
 
 **Диагностика:**
 ```bash
@@ -719,7 +725,7 @@ print(reasons.value-counts().head(10))
 curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job == "bioetl")'
 
 # Проверить метрики напрямую
-curl http://localhost:8000/metrics | grep bioetl-validation
+curl http://localhost:8000/metrics | grep bioetl_validation
 ```
 
 **Решение:**
@@ -796,7 +802,7 @@ scrape-configs:
 
 - **ADR-033:** Стратегия валидации (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
-- **Field Reference:** `docs/04-reference/publication-fields-reference.md`
+- **Canonical provider refs:** `docs/04-reference/providers/{provider}/publication.md`
 - **Test Suite:** `tests/contract/` + `tests/unit/` (471 тест)
 
 ---

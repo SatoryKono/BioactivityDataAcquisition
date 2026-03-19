@@ -16,8 +16,6 @@ source:
             page_size: 100
             id_batch_size: 50
             strategy: offset
-        batch_size: 50
-        page_size: 100
         fallback:
             enabled: true
             supported_filter_field: doi

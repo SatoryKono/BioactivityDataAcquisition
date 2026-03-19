@@ -123,7 +123,7 @@ docs/
 |   +-- REQUIREMENTS.md         # Testable requirements
 +-- 02-architecture/
 |   +-- decisions/              # ADRs (ADR-001 through ADR-043)
-|   +-- mmd-diagrams/           # Canonical Mermaid sources and rendered views
+|   +-- diagrams/           # Canonical Mermaid sources and rendered views
 |   +-- policies/               # Architecture and review policies
 +-- 03-guides/
 |   +-- development/            # Developer guides and implementation manuals
@@ -146,18 +146,18 @@ docs/
 ## Диаграммы (ex py-diagram-bot)
 
 **Зона файлов:**
-- `docs/02-architecture/mmd-diagrams/**`
-- `docs/02-architecture/diagram-descriptions/**`
+- `docs/02-architecture/diagrams/**`
+- `docs/02-architecture/diagrams/descriptions/**`
 - `scripts/diagrams/**`
 
-**Следуй:** ADR-040, `docs/02-architecture/mmd-diagrams/README.md`
+**Следуй:** ADR-040, `docs/02-architecture/diagrams/README.md`
 
 ### Инструменты
 
 | Действие | Команда |
 |----------|---------|
 | Unified checks | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr` |
-| Рендер SVG/PNG | `bash docs/02-architecture/mmd-diagrams/render.sh` |
+| Рендер SVG/PNG | `bash docs/02-architecture/diagrams/tooling/render.sh` |
 | PDF bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` |
 | DOCX bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` |
 | Full pipeline | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` |

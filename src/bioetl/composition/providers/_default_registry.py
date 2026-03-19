@@ -6,9 +6,8 @@ from collections.abc import Callable
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
-    Concatenate,
+    Any,
     Generic,
-    ParamSpec,
     Protocol,
     TypeVar,
     overload,
@@ -17,19 +16,14 @@ from typing import (
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
 
-
-P = ParamSpec("P")
 R = TypeVar("R")
-DefaultRegistryT = TypeVar("DefaultRegistryT", bound="_SupportsDefaultRegistry")
 
 
 class _SupportsDefaultRegistry(Protocol):
     """Protocol for registries exposing a lazy default instance."""
 
     @classmethod
-    def _get_default(
-        cls: type[DefaultRegistryT],
-    ) -> DefaultRegistryT:
+    def _get_default(cls) -> Any:
         """Return the lazy default registry instance."""
 
 
@@ -49,10 +43,10 @@ RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)
 ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistryStore)
 
 
-class DefaultRegistryMethod(Generic[RegistryT, P, R]):
+class DefaultRegistryMethod(Generic[R]):
     """Dispatch class access to the lazy default registry and instance access locally."""
 
-    def __init__(self, func: Callable[Concatenate[RegistryT, P], R]) -> None:
+    def __init__(self, func: Callable[..., R]) -> None:
         self._func = func
         self.__doc__ = func.__doc__
         self.__name__ = func.__name__
@@ -62,20 +56,20 @@ class DefaultRegistryMethod(Generic[RegistryT, P, R]):
         self,
         obj: RegistryT,
         objtype: type[RegistryT] | None = None,
-    ) -> Callable[P, R]: ...
+    ) -> Callable[..., R]: ...
 
     @overload
     def __get__(
         self,
         obj: None,
         objtype: type[RegistryT],
-    ) -> Callable[P, R]: ...
+    ) -> Callable[..., R]: ...
 
     def __get__(
         self,
         obj: RegistryT | None,
         objtype: type[RegistryT] | None = None,
-    ) -> Callable[P, R]:
+    ) -> Callable[..., R]:
         if obj is not None:
             target = obj
         else:
@@ -84,7 +78,7 @@ class DefaultRegistryMethod(Generic[RegistryT, P, R]):
             target = objtype._get_default()
 
         @wraps(self._func)
-        def bound(*args: P.args, **kwargs: P.kwargs) -> R:
+        def bound(*args: object, **kwargs: object) -> R:
             return self._func(target, *args, **kwargs)
 
         return bound

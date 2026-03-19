@@ -192,7 +192,7 @@
       "type": "object"
     },
     "ProviderConfigYaml": {
-      "description": "Provider-specific configuration from YAML.\n\nAttributes:\n    provider: Provider name (chembl, pubchem, uniprot, pubmed).\n    base_url: Base URL for the API.\n    client: HTTP client settings.\n    pagination: API pagination settings (single source of truth).\n    batch_size: Deprecated — use pagination.id_batch_size.\n    page_size: Deprecated — use pagination.page_size.\n    max_url_length: Deprecated — use pagination.max_url_length.\n    default_email: Default email for NCBI APIs (PubMed specific).",
+      "description": "Provider-specific configuration from YAML.\n\nAttributes:\n    provider: Provider name (chembl, pubchem, uniprot, pubmed).\n    base_url: Base URL for the API.\n    client: HTTP client settings.\n    pagination: API pagination settings (single source of truth).\n    default_email: Default email for NCBI APIs (PubMed specific).",
       "properties": {
         "provider": {
           "default": "",
@@ -216,54 +216,6 @@
         },
         "pagination": {
           "$ref": "#/$defs/PaginationConfig"
-        },
-        "batch_size": {
-          "anyOf": [
-            {
-              "maximum": 10000,
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "deprecated": true,
-          "description": "Deprecated migration alias. Use pagination.id_batch_size.",
-          "title": "Batch Size"
-        },
-        "page_size": {
-          "anyOf": [
-            {
-              "maximum": 10000,
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "deprecated": true,
-          "description": "Deprecated migration alias. Use pagination.page_size.",
-          "title": "Page Size"
-        },
-        "max_url_length": {
-          "anyOf": [
-            {
-              "maximum": 10000,
-              "minimum": 100,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "deprecated": true,
-          "description": "Deprecated migration alias. Use pagination.max_url_length.",
-          "title": "Max Url Length"
         },
         "api_version": {
           "anyOf": [

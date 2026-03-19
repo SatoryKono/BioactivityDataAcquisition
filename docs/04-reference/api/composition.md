@@ -42,7 +42,6 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | Class | Description |
 |---|---|
 | `DataSourceFactory` | Creates data source adapters for all providers |
-| `DataSourceRegistry` | Legacy compatibility facade; prefer `DataSourceFactory` or `get_data_source_creator()` |
 | `HttpClientFactory` | Creates configured HTTP clients with retry/rate limiting |
 | `ResolvedHttpConfig` | Resolved HTTP client configuration |
 | `CrossrefAdapterFactory` | CrossRef-specific adapter factory |

@@ -1,0 +1,494 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="class" class="classDiagram" style="max-width:7514.95px;background-color:white" viewBox="0 0 7514.947 1703.5"><style>#my-svg{font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px; 
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="clusters"><g id="Core" class="cluster undefined" data-look="classic"><path d="M6011.953 8h1494.994v1188H6011.953z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="17.344" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6742.106 8)"><tspan x="17.344">Core</tspan></text></g></g><g id="Services" class="cluster undefined" data-look="classic"><path d="M1811.422 791h4180.531v405H1811.422z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="30.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3871.008 791)"><tspan x="30.68">Services</tspan></text></g></g><g id="Transformers" class="cluster undefined" data-look="classic"><path d="M8 411.5h1783.422v1284H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="47.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(852.445 411.5)"><tspan x="47.266">Transformers</tspan></text></g></g></g><g class="edgePaths"><path id="id_BaseChemblTransformer_BaseTransformer_1" marker-end="url(#my-svg_class-extensionEnd)" d="M904.898 1093.5v89.167c0 20.833 0 28.333.037 32.961.037 4.627.111 6.382.147 7.26l.037.877" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_BaseChemblTransformer_BaseTransformer_1" data-points="W3sieCI6OTA0Ljg5ODQzNzUsInkiOjEwOTMuNX0seyJ4Ijo5MDQuODk4NDM3NSwieSI6MTE5Nn0seyJ4Ijo5MDQuODk4NDM3NSwieSI6MTIxOC41fSx7IngiOjkwNS44NDE4MzM3MjY0MTUxLCJ5IjoxMjQxfV0="/><path id="id_ActivityTransformer_BaseChemblTransformer_2" marker-end="url(#my-svg_class-extensionEnd)" d="M239.059 674v82.5c0 19.5 0 27 75.17 53.611s225.509 72.334 300.679 95.195l75.17 22.861" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_ActivityTransformer_BaseChemblTransformer_2" data-points="W3sieCI6MjM5LjA1ODU5Mzc1LCJ5Ijo2NzR9LHsieCI6MjM5LjA1ODU5Mzc1LCJ5Ijo3NjguNX0seyJ4IjoyMzkuMDU4NTkzNzUsInkiOjc5MX0seyJ4Ijo3MDYuNTgyMDMxMjUsInkiOjkzMy4xODY1ODg4MzU3NjMxfV0="/><path id="id_MoleculeTransformer_BaseChemblTransformer_3" marker-end="url(#my-svg_class-extensionEnd)" d="M683.84 674v82.5c0 19.5 0 27 16.529 45.891 16.529 18.892 49.587 49.174 66.116 64.316l16.529 15.141" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_MoleculeTransformer_BaseChemblTransformer_3" data-points="W3sieCI6NjgzLjgzOTg0Mzc1LCJ5Ijo2NzR9LHsieCI6NjgzLjgzOTg0Mzc1LCJ5Ijo3NjguNX0seyJ4Ijo2ODMuODM5ODQzNzUsInkiOjc5MX0seyJ4Ijo3OTUuNzMzNjk5ODQ1Njc5LCJ5Ijo4OTMuNX1d"/><path id="id_AssayTransformer_BaseChemblTransformer_4" marker-end="url(#my-svg_class-extensionEnd)" d="M1125.957 674v82.5c0 19.5 0 27-16.529 45.891-16.529 18.892-49.587 49.174-66.116 64.316l-16.529 15.141" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_AssayTransformer_BaseChemblTransformer_4" data-points="W3sieCI6MTEyNS45NTcwMzEyNSwieSI6Njc0fSx7IngiOjExMjUuOTU3MDMxMjUsInkiOjc2OC41fSx7IngiOjExMjUuOTU3MDMxMjUsInkiOjc5MX0seyJ4IjoxMDE0LjA2MzE3NTE1NDMyMSwieSI6ODkzLjV9XQ=="/><path id="id_TargetTransformer_BaseChemblTransformer_5" marker-end="url(#my-svg_class-extensionEnd)" d="M1562.887 674v82.5c0 19.5 0 27-73.864 53.482s-221.593 71.947-295.457 94.679l-73.864 22.732" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_TargetTransformer_BaseChemblTransformer_5" data-points="W3sieCI6MTU2Mi44ODY3MTg3NSwieSI6Njc0fSx7IngiOjE1NjIuODg2NzE4NzUsInkiOjc2OC41fSx7IngiOjE1NjIuODg2NzE4NzUsInkiOjc5MX0seyJ4IjoxMTAzLjIxNDg0Mzc1LCJ5Ijo5MzIuNDY2ODg4MzAxODE5Nn1d"/><path id="id_PipelineRunner_BasePipeline_6" marker-end="url(#my-svg_class-dependencyEnd)" d="m6666.602 260.194 56.005 21.468c56.006 21.467 168.017 64.403 224.022 89.62 56.006 25.218 56.006 32.718 60.697 39.875 4.692 7.158 14.075 13.973 18.766 17.38l4.692 3.408" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_PipelineRunner_BasePipeline_6" data-points="W3sieCI6NjY2Ni42MDE1NjI1LCJ5IjoyNjAuMTkzOTg1MTg0MDIwNzN9LHsieCI6NzAwMi42MzQ3NjU2MjUsInkiOjM4OX0seyJ4Ijo3MDAyLjYzNDc2NTYyNSwieSI6NDExLjV9LHsieCI6NzAzNS42Mzg2NzE4NzUsInkiOjQzNS40NzA3OTQzOTI1MjM0fV0="/><path id="id_PipelineRunner_RunnerServices_7" marker-end="url(#my-svg_class-dependencyEnd)" d="m6344.703 309.98-19.014 13.17c-19.015 13.17-57.043 39.51-76.057 56.43s-19.015 24.42-19.015 32.92V440" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_PipelineRunner_RunnerServices_7" data-points="W3sieCI6NjM0NC43MDMxMjUsInkiOjMwOS45Nzk2NjE2OTA5Nzd9LHsieCI6NjIzMC42MTcxODc1LCJ5IjozODl9LHsieCI6NjIzMC42MTcxODc1LCJ5Ijo0MTEuNX0seyJ4Ijo2MjMwLjYxNzE4NzUsInkiOjQ0Nn1d"/><path id="id_PipelineExecutor_BasePipeline_8" marker-end="url(#my-svg_class-dependencyEnd)" d="m7226.967 319.265 22.552 11.622c22.553 11.623 67.657 34.868 90.21 50.24s22.552 22.873 20.698 29.53c-1.855 6.657-5.564 12.471-7.419 15.378l-1.854 2.907" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_PipelineExecutor_BasePipeline_8" data-points="W3sieCI6NzIyNi45NjY3OTY4NzUsInkiOjMxOS4yNjQ3MTM5NjM0MDQ2M30seyJ4Ijo3MzYyLjI4MTI1LCJ5IjozODl9LHsieCI6NzM2Mi4yODEyNSwieSI6NDExLjV9LHsieCI6NzM0Ny45MjY1MTk4MjY2OCwieSI6NDM0fV0="/><path id="id_PipelineExecutor_RecordProcessor_9" marker-end="url(#my-svg_class-dependencyEnd)" d="m6781.296 342.5-11.374 7.75c-11.375 7.75-34.123 23.25-45.497 34.75s-11.374 19-11.374 29.5V452" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_PipelineExecutor_RecordProcessor_9" data-points="W3sieCI6Njc4MS4yOTU2OTA4MjE4NSwieSI6MzQyLjV9LHsieCI6NjcxMy4wNTA3ODEyNSwieSI6Mzg5fSx7IngiOjY3MTMuMDUwNzgxMjUsInkiOjQxMS41fSx7IngiOjY3MTMuMDUwNzgxMjUsInkiOjQ1OH1d"/><path id="id_RecordProcessor_BatchTransformer_10" marker-end="url(#my-svg_class-dependencyEnd)" d="m6749.35 722 2.131 7.75c2.131 7.75 6.393 23.25 8.525 34.75 2.131 11.5 2.131 19 2.131 37.5v77.5" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RecordProcessor_BatchTransformer_10" data-points="W3sieCI6Njc0OS4zNDk2MjU3ODc4MTUsInkiOjcyMn0seyJ4Ijo2NzYyLjEzNjcxODc1LCJ5Ijo3NjguNX0seyJ4Ijo2NzYyLjEzNjcxODc1LCJ5Ijo3OTF9LHsieCI6Njc2Mi4xMzY3MTg3NSwieSI6ODg1LjV9XQ=="/><path id="id_RecordProcessor_QuarantineManager_11" marker-end="url(#my-svg_class-dependencyEnd)" d="m6464.281 668.186-53.196 16.719c-53.196 16.719-159.589 50.157-212.785 70.626s-53.196 27.969-545.295 63.285-1476.296 98.448-1968.395 130.013l-492.099 31.566" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RecordProcessor_QuarantineManager_11" data-points="W3sieCI6NjQ2NC4yODEyNSwieSI6NjY4LjE4NTcxMTk3NjcyNTR9LHsieCI6NjE0NS4xMDM1MTU2MjUsInkiOjc2OC41fSx7IngiOjYxNDUuMTAzNTE1NjI1LCJ5Ijo3OTF9LHsieCI6MzE4Ni41MjM0Mzc1LCJ5Ijo5ODAuNzc5NDA4ODA3NzQ3NX1d"/><path id="id_RecordProcessor_BatchMetricsRecorder_12" marker-end="url(#my-svg_class-dependencyEnd)" d="m6730.664 722 1.034 7.75c1.035 7.75 3.103 23.25 4.137 34.75s1.034 19-127.972 49.055c-129.006 30.054-387.019 82.664-516.025 108.968l-129.006 26.305" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RecordProcessor_BatchMetricsRecorder_12" data-points="W3sieCI6NjczMC42NjQzNTc5MzA2NzIsInkiOjcyMn0seyJ4Ijo2NzM2Ljg2OTE0MDYyNSwieSI6NzY4LjV9LHsieCI6NjczNi44NjkxNDA2MjUsInkiOjc5MX0seyJ4Ijo1OTU2Ljk1MzEyNSwieSI6OTUwLjAyNjYxMTcxODQ3ODF9XQ=="/><path id="id_BatchTransformer_BaseTransformer_13" marker-end="url(#my-svg_class-dependencyEnd)" d="M6762.137 1101.5v15.75c0 15.75 0 47.25-853.344 66.75s-2560.031 27-3493.005 56.867-1092.233 82.101-1171.863 108.219l-79.63 26.117" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_BatchTransformer_BaseTransformer_13" data-points="W3sieCI6Njc2Mi4xMzY3MTg3NSwieSI6MTEwMS41fSx7IngiOjY3NjIuMTM2NzE4NzUsInkiOjExOTZ9LHsieCI6MTY0Mi4wNzQyMTg3NSwieSI6MTIxOC41fSx7IngiOjExNTguNTkzNzUsInkiOjEzNzcuMDcyNTE0MDYwNzEyMX1d"/><path id="id_BasePipeline_PipelineServices_14" marker-end="url(#my-svg_class-dependencyEnd)" d="M7248.4 746v61.5" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_BasePipeline_PipelineServices_14" data-points="W3sieCI6NzI0OC40MDAzOTA2MjUsInkiOjc0Nn0seyJ4Ijo3MjQ4LjQwMDM5MDYyNSwieSI6NzY4LjV9LHsieCI6NzI0OC40MDAzOTA2MjUsInkiOjc5MX0seyJ4Ijo3MjQ4LjQwMDM5MDYyNSwieSI6ODEzLjV9XQ=="/><path id="id_RunnerServices_LockCoordinator_15" marker-end="url(#my-svg_class-dependencyEnd)" d="m6145.497 734-3.399 5.75c-3.399 5.75-10.197 17.25-13.596 26.75-3.398 9.5-3.398 17-643.041 52.643s-1918.926 99.431-2558.568 131.324L2287.25 982.36" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RunnerServices_LockCoordinator_15" data-points="W3sieCI6NjE0NS40OTY5MTQzOTA3NTY1LCJ5Ijo3MzR9LHsieCI6NjEyNS4xMDM1MTU2MjUsInkiOjc2OC41fSx7IngiOjYxMjUuMTAzNTE1NjI1LCJ5Ijo3OTF9LHsieCI6MjI4MS4yNTc4MTI1LCJ5Ijo5ODIuNjU5MjUxMzQ5MDg4NH1d"/><path id="id_RunnerServices_PreflightService_16" marker-end="url(#my-svg_class-dependencyEnd)" d="m6177.766 734-2.111 5.75c-2.11 5.75-6.331 17.25-8.441 26.75s-2.11 17-420.211 51.859S4492.701 915.435 4074.6 946.544l-418.101 31.109" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RunnerServices_PreflightService_16" data-points="W3sieCI6NjE3Ny43NjU4MjE5NTM3ODIsInkiOjczNH0seyJ4Ijo2MTY1LjEwMzUxNTYyNSwieSI6NzY4LjV9LHsieCI6NjE2NS4xMDM1MTU2MjUsInkiOjc5MX0seyJ4IjozNjUwLjUxNTYyNSwieSI6OTc4LjA5ODQxNDI5NjU5MTd9XQ=="/><path id="id_RunnerServices_PostrunService_17" marker-end="url(#my-svg_class-dependencyEnd)" d="m6249.832 734 .767 5.75c.768 5.75 2.302 17.25 3.069 26.75.768 9.5.768 17-351.341 51.27C5550.218 852.039 4846 913.078 4493.891 943.598l-352.109 30.519" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RunnerServices_PostrunService_17" data-points="W3sieCI6NjI0OS44MzE5OTg0MjQzNywieSI6NzM0fSx7IngiOjYyNTQuNDM1NTQ2ODc1LCJ5Ijo3NjguNX0seyJ4Ijo2MjU0LjQzNTU0Njg3NSwieSI6NzkxfSx7IngiOjQxMzUuODA0Njg3NSwieSI6OTc0LjYzNTM0OTk4NzAwMDJ9XQ=="/><path id="id_RunnerServices_LifecycleOrchestrator_18" marker-end="url(#my-svg_class-dependencyEnd)" d="m6414.281 718.547 11.895 8.326c11.896 8.325 35.686 24.976 47.581 37.052 11.895 12.075 11.895 19.575-297.126 53.41-309.021 33.836-927.063 94.006-1236.084 124.092l-309.021 30.085" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RunnerServices_LifecycleOrchestrator_18" data-points="W3sieCI6NjQxNC4yODEyNSwieSI6NzE4LjU0NzEyMTI2MDg1NTZ9LHsieCI6NjQ4NS42NTIzNDM3NSwieSI6NzY4LjV9LHsieCI6NjQ4NS42NTIzNDM3NSwieSI6NzkxfSx7IngiOjQ2MjUuNTU0Njg3NSwieSI6OTcyLjA5MzYxODgzMTM3NzR9XQ=="/><path id="id_RunnerServices_PipelineObserver_19" marker-end="url(#my-svg_class-dependencyEnd)" d="m6414.281 709.199 15.229 9.884c15.228 9.883 45.685 29.65 60.914 43.284 15.228 13.633 15.228 21.133-222.759 54.413-237.988 33.28-713.962 92.34-951.95 121.87l-237.987 29.529" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_RunnerServices_PipelineObserver_19" data-points="W3sieCI6NjQxNC4yODEyNSwieSI6NzA5LjE5OTQzNDczMTM1NTR9LHsieCI6NjUwNS42NTIzNDM3NSwieSI6NzY4LjV9LHsieCI6NjUwNS42NTIzNDM3NSwieSI6NzkxfSx7IngiOjUwNzEuNzczNDM3NSwieSI6OTY4LjkxODIzNzQzNTY0MzR9XQ=="/></g><g class="nodes"><g id="classId-BasePipeline-0" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M7035.639 434h425.523v312H7035.64"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M7035.639 434h425.523m-425.523 0h425.523m0 0v312m0-312v312m0 0H7035.64m425.523 0H7035.64m0 0V434m0 312V434"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="37.359" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7211.041 454)"><tspan x="37.359">«abstract»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="49.805" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7198.596 478)"><tspan x="49.805">BasePipeline</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="81.836" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7051.639 534)"><tspan x="81.836">#config:</tspan><tspan x="81.836" dy="16.8">PipelineConfig</tspan></text></g><g class="label"><text xml:space="preserve" x="88.484" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7051.639 558)"><tspan x="88.484">#runtime:</tspan><tspan x="88.484" dy="16.8">RuntimeConfig</tspan></text></g><g class="label"><text xml:space="preserve" x="97.375" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7051.639 582)"><tspan x="97.375">#services:</tspan><tspan x="97.375" dy="16.8">PipelineServices</tspan></text></g></g><g class="methods-group text"><g class="label" style="text-decoration:underline"><text xml:space="preserve" x="171.859" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7051.639 638)"><tspan x="171.859">+create(config, runtime, services) :</tspan><tspan x="171.859" dy="16.8">BasePipeline</tspan></text></g><g class="label"><text xml:space="preserve" x="77.594" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7051.639 662)"><tspan x="77.594">+pipeline_name() : str</tspan></text></g><g class="label"><text xml:space="preserve" x="54.461" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7051.639 686)"><tspan x="54.461">+provider() : str</tspan></text></g><g class="label"><text xml:space="preserve" x="61.586" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7051.639 710)"><tspan x="61.586">+run_id() : RunID</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M7035.639 514h425.523m-425.523 0h425.523M7035.639 618h425.523m-425.523 0h425.523" class="divider"/></g><g id="classId-PipelineRunner-1" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M6344.703 30.5h321.899v336h-321.899"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M6344.703 30.5h321.899m-321.899 0h321.899m0 0v336m0-336v336m0 0h-321.899m321.899 0h-321.899m0 0v-336m0 336v-336"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="58.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6446.973 50.5)"><tspan x="58.68">PipelineRunner</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="85.836" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 106.5)"><tspan x="85.836">-_pipeline:</tspan><tspan x="85.836" dy="16.8">BasePipeline</tspan></text></g><g class="label"><text xml:space="preserve" x="97.812" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 130.5)"><tspan x="97.812">-_services:</tspan><tspan x="97.812" dy="16.8">RunnerServices</tspan></text></g><g class="label"><text xml:space="preserve" x="51.57" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 154.5)"><tspan x="51.57">-_lock_key: str</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="65.586" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 210.5)"><tspan x="65.586">+run() : RunResult</tspan></text></g><g class="label"><text xml:space="preserve" x="79.148" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 234.5)"><tspan x="79.148">-_acquire_lock() : bool</tspan></text></g><g class="label"><text xml:space="preserve" x="115.609" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 258.5)"><tspan x="115.609">-_run_preflight() : PreflightResult</tspan></text></g><g class="label"><text xml:space="preserve" x="104.938" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 282.5)"><tspan x="104.938">-_execute() : ExecutionResult</tspan></text></g><g class="label"><text xml:space="preserve" x="112.055" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 306.5)"><tspan x="112.055">-_run_postrun() : PostrunResult</tspan></text></g><g class="label"><text xml:space="preserve" x="83.148" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6360.703 330.5)"><tspan x="83.148">-_release_lock() : None</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M6344.703 86.5h321.899m-321.899 0h321.899M6344.703 190.5h321.899m-321.899 0h321.899" class="divider"/></g><g id="classId-PipelineExecutor-2" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M6758.303 54.5h468.664v288h-468.664"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M6758.303 54.5h468.664m-468.664 0h468.664m0 0v288m0-288v288m0 0h-468.664m468.664 0h-468.664m0 0v-288m0 288v-288"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="64.914" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6927.72 74.5)"><tspan x="64.914">PipelineExecutor</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="85.836" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6774.303 130.5)"><tspan x="85.836">-_pipeline:</tspan><tspan x="85.836" dy="16.8">BasePipeline</tspan></text></g><g class="label"><text xml:space="preserve" x="108.484" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6774.303 154.5)"><tspan x="108.484">-_processor:</tspan><tspan x="108.484" dy="16.8">RecordProcessor</tspan></text></g><g class="label"><text xml:space="preserve" x="80.719" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6774.303 178.5)"><tspan x="80.719">-_batch_size: int</tspan><tspan x="80.719" dy="16.8">= 100</tspan></text></g><g class="label"><text xml:space="preserve" x="115.406" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6774.303 202.5)"><tspan x="115.406">-_checkpoint_interval:</tspan><tspan x="115.406" dy="16.8">int = 1000</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="102.5" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6774.303 258.5)"><tspan x="102.5">+execute() : ExecutionResult</tspan></text></g><g class="label"><text xml:space="preserve" x="185.875" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6774.303 282.5)"><tspan x="185.875">-_fetch_and_process() :</tspan><tspan x="185.875" dy="16.8">AsyncIterator&lt;BatchResult&gt;</tspan></text></g><g class="label"><text xml:space="preserve" x="100.5" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6774.303 306.5)"><tspan x="100.5">-_adaptive_batch_size() : int</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M6758.303 110.5h468.664m-468.664 0h468.664M6758.303 238.5h468.664m-468.664 0h468.664" class="divider"/></g><g id="classId-RecordProcessor-3" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M6464.281 458h497.54v264h-497.54"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M6464.281 458h497.54m-497.54 0h497.54m0 0v264m0-264v264m0 0h-497.54m497.54 0h-497.54m0 0V458m0 264V458"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="66.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6646.355 478)"><tspan x="66.695">RecordProcessor</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="116.18" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6480.281 534)"><tspan x="116.18">-_transformer:</tspan><tspan x="116.18" dy="16.8">BatchTransformer</tspan></text></g><g class="label"><text xml:space="preserve" x="72.758" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6480.281 558)"><tspan x="72.758">-_writer:</tspan><tspan x="72.758" dy="16.8">BatchWriter</tspan></text></g><g class="label"><text xml:space="preserve" x="120.523" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6480.281 582)"><tspan x="120.523">-_quarantine:</tspan><tspan x="120.523" dy="16.8">QuarantineManager</tspan></text></g><g class="label"><text xml:space="preserve" x="116.477" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6480.281 606)"><tspan x="116.477">-_metrics:</tspan><tspan x="116.477" dy="16.8">BatchMetricsRecorder</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="138.508" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6480.281 662)"><tspan x="138.508">+process_batch(records) : BatchResult</tspan></text></g><g class="label"><text xml:space="preserve" x="199.422" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6480.281 686)"><tspan x="199.422">+process_stream(records) :</tspan><tspan x="199.422" dy="16.8">AsyncIterator&lt;BatchResult&gt;</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M6464.281 514h497.54m-497.54 0h497.54M6464.281 642h497.54m-497.54 0h497.54" class="divider"/></g><g id="classId-BatchTransformer-4" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M6490.79 885.5h542.694v216H6490.79"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M6490.79 885.5h542.694m-542.695 0h542.695m0 0v216m0-216v216m0 0H6490.79m542.695 0H6490.79m0 0v-216m0 216v-216"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="68.914" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6693.223 905.5)"><tspan x="68.914">BatchTransformer</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="113.961" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6506.79 961.5)"><tspan x="113.961">-_transformer:</tspan><tspan x="113.961" dy="16.8">BaseTransformer</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6506.79 985.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="159.836" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6506.79 1041.5)"><tspan x="159.836">+transform_batch(records) : TransformResult</tspan></text></g><g class="label"><text xml:space="preserve" x="220.891" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6506.79 1065.5)"><tspan x="220.891">+transform_stream(records) :</tspan><tspan x="220.891" dy="16.8">AsyncIterator&lt;TransformResult&gt;</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M6490.79 941.5h542.694m-542.695 0h542.695M6490.79 1021.5h542.694m-542.695 0h542.695" class="divider"/></g><g id="classId-PipelineServices-5" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M7088.752 813.5h319.297v360h-319.297"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M7088.752 813.5h319.297m-319.297 0h319.297m0 0v360m0-360v360m0 0h-319.297m319.297 0h-319.297m0 0v-360m0 360v-360"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7181.244 833.5)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="63.594" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7184.807 857.5)"><tspan x="63.594">PipelineServices</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="110.07" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 913.5)"><tspan x="110.07">+data_source: DataSource</tspan><tspan x="110.07" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="78.492" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 937.5)"><tspan x="78.492">+storage: Storage</tspan><tspan x="78.492" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="54.914" y="12" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 961.5)"><tspan x="54.914">+lock: LockPort</tspan></text></g><g class="label"><text xml:space="preserve" x="102.062" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 985.5)"><tspan x="102.062">+checkpoint:</tspan><tspan x="102.062" dy="16.8">Checkpoint Port</tspan></text></g><g class="label"><text xml:space="preserve" x="101.18" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 1009.5)"><tspan x="101.18">+quarantine:</tspan><tspan x="101.18" dy="16.8">Quarantine Port</tspan></text></g><g class="label"><text xml:space="preserve" x="75.344" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 1033.5)"><tspan x="75.344">+metrics: Metrics</tspan><tspan x="75.344" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="74.039" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 1057.5)"><tspan x="74.039">+tracing: Tracing</tspan><tspan x="74.039" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="70.938" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 1081.5)"><tspan x="70.938">+logger: Logger</tspan><tspan x="70.938" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="106.938" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(7104.752 1105.5)"><tspan x="106.938">+dq_monitor: DQMonitor</tspan><tspan x="106.938" dy="16.8">Port?</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M7088.752 893.5h319.297m-319.297 0h319.297M7088.752 1141.5h319.297m-319.297 0h319.297" class="divider"/></g><g id="classId-RunnerServices-6" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M6046.953 446h367.328v288h-367.328"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M6046.953 446h367.328m-367.328 0h367.328m0 0v288m0-288v288m0 0h-367.328m367.328 0h-367.328m0 0V446m0 288V446"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6163.46 466)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="60.922" y="12" class="fo-fallback" text-anchor="middle" transform="translate(6169.695 490)"><tspan x="60.922">RunnerServices</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="118.07" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6062.953 546)"><tspan x="118.07">+lock_manager: Lock</tspan><tspan x="118.07" dy="16.8">Coordinator</tspan></text></g><g class="label"><text xml:space="preserve" x="93.602" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6062.953 570)"><tspan x="93.602">+preflight:</tspan><tspan x="93.602" dy="16.8">PreflightService</tspan></text></g><g class="label"><text xml:space="preserve" x="90.047" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6062.953 594)"><tspan x="90.047">+postrun:</tspan><tspan x="90.047" dy="16.8">PostrunService</tspan></text></g><g class="label"><text xml:space="preserve" x="133.164" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6062.953 618)"><tspan x="133.164">+lifecycle_orch:</tspan><tspan x="133.164" dy="16.8">LifecycleOrchestrator</tspan></text></g><g class="label"><text xml:space="preserve" x="101.609" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6062.953 642)"><tspan x="101.609">+observer:</tspan><tspan x="101.609" dy="16.8">PipelineObserver</tspan></text></g><g class="label"><text xml:space="preserve" x="134.086" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(6062.953 666)"><tspan x="134.086">+context_holder:</tspan><tspan x="134.086" dy="16.8">LockContextHolder?</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M6046.953 526h367.328m-367.328 0h367.328M6046.953 702h367.328m-367.328 0h367.328" class="divider"/></g><g id="classId-LockCoordinator-7" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M1846.422 849.5h434.836v288h-434.836"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M1846.422 849.5h434.836m-434.836 0h434.836m0 0v288m0-288v288m0 0h-434.836m434.836 0h-434.836m0 0v-288m0 288v-288"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="64.445" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1999.395 869.5)"><tspan x="64.445">LockCoordinator</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="57.359" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1862.422 925.5)"><tspan x="57.359">-_lock: LockPort</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1862.422 949.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="44.25" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1862.422 973.5)"><tspan x="44.25">-_ttl: int = 90</tspan></text></g><g class="label"><text xml:space="preserve" x="102.07" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1862.422 997.5)"><tspan x="102.07">-_heartbeat_interval:</tspan><tspan x="102.07" dy="16.8">int = 30</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="169.195" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1862.422 1053.5)"><tspan x="169.195">+acquire_lock(resource, owner_id) : LockResult</tspan></text></g><g class="label"><text xml:space="preserve" x="144.742" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1862.422 1077.5)"><tspan x="144.742">+release_lock(resource, owner_id) : bool</tspan></text></g><g class="label"><text xml:space="preserve" x="143.406" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1862.422 1101.5)"><tspan x="143.406">+refresh_lock(resource, owner_id) : bool</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M1846.422 905.5h434.836m-434.836 0h434.836M1846.422 1033.5h434.836m-434.836 0h434.836" class="divider"/></g><g id="classId-CheckpointManager-8" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M2331.258 873.5h408.648v240h-408.648"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M2331.258 873.5h408.648m-408.648 0h408.648m0 0v240m0-240v240m0 0h-408.648m408.648 0h-408.648m0 0v-240m0 240v-240"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="76.461" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2459.121 893.5)"><tspan x="76.461">CheckpointManager</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="104.5" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2347.258 949.5)"><tspan x="104.5">-_checkpoint:</tspan><tspan x="104.5" dy="16.8">Checkpoint Port</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2347.258 973.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="150.094" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2347.258 1029.5)"><tspan x="150.094">+load_checkpoint(key) : CheckpointState?</tspan></text></g><g class="label"><text xml:space="preserve" x="129.031" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2347.258 1053.5)"><tspan x="129.031">+save_checkpoint(key, state) : None</tspan></text></g><g class="label"><text xml:space="preserve" x="112.734" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2347.258 1077.5)"><tspan x="112.734">+delete_checkpoint(key) : None</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M2331.258 929.5h408.648m-408.648 0h408.648M2331.258 1009.5h408.648m-408.648 0h408.648" class="divider"/></g><g id="classId-QuarantineManager-9" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M2789.906 885.5h396.617v216h-396.617"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M2789.906 885.5h396.617m-396.617 0h396.617m0 0v216m0-216v216m0 0h-396.617m396.617 0h-396.617m0 0v-216m0 216v-216"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="75.133" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2913.082 905.5)"><tspan x="75.133">QuarantineManager</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="103.625" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2805.906 961.5)"><tspan x="103.625">-_quarantine:</tspan><tspan x="103.625" dy="16.8">Quarantine Port</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2805.906 985.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="144.742" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2805.906 1041.5)"><tspan x="144.742">+quarantine_record(record, error) : None</tspan></text></g><g class="label"><text xml:space="preserve" x="138.961" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2805.906 1065.5)"><tspan x="138.961">+quarantine_batch(records, errors) : int</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M2789.906 941.5h396.617m-396.617 0h396.617M2789.906 1021.5h396.617m-396.617 0h396.617" class="divider"/></g><g id="classId-PreflightService-10" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M3236.523 861.5h413.993v264h-413.993"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M3236.523 861.5h413.993m-413.993 0h413.993m0 0v264m0-264v264m0 0h-413.993m413.993 0h-413.993m0 0v-264m0 264v-264"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="60.914" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3382.605 881.5)"><tspan x="60.914">PreflightService</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="112.508" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3252.523 937.5)"><tspan x="112.508">-_data_source: DataSource</tspan><tspan x="112.508" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="80.938" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3252.523 961.5)"><tspan x="80.938">-_storage: Storage</tspan><tspan x="80.938" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3252.523 985.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="109.602" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3252.523 1041.5)"><tspan x="109.602">+run_checks() : PreflightResult</tspan></text></g><g class="label"><text xml:space="preserve" x="160.539" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3252.523 1065.5)"><tspan x="160.539">-_check_data_source_health() : HealthStatus</tspan></text></g><g class="label"><text xml:space="preserve" x="112.516" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3252.523 1089.5)"><tspan x="112.516">-_check_storage_health() : bool</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M3236.523 917.5h413.993m-413.993 0h413.993M3236.523 1021.5h413.993m-413.993 0h413.993" class="divider"/></g><g id="classId-PostrunService-11" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M3700.516 849.5h435.289v288h-435.29"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M3700.516 849.5h435.289m-435.29 0h435.29m0 0v288m0-288v288m0 0h-435.29m435.29 0h-435.29m0 0v-288m0 288v-288"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="58.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3859.465 869.5)"><tspan x="58.695">PostrunService</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="80.938" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3716.516 925.5)"><tspan x="80.938">-_storage: Storage</tspan><tspan x="80.938" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="77.789" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3716.516 949.5)"><tspan x="77.789">-_metrics: Metrics</tspan><tspan x="77.789" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3716.516 973.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="81.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3716.516 997.5)"><tspan x="81.383">-_dq_config:</tspan><tspan x="81.383" dy="16.8">DQConfig</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="172.297" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3716.516 1053.5)"><tspan x="172.297">+run_checks(execution_metrics) : PostrunResult</tspan></text></g><g class="label"><text xml:space="preserve" x="152.07" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3716.516 1077.5)"><tspan x="152.07">-_check_dq_thresholds() : DQCheckResult</tspan></text></g><g class="label"><text xml:space="preserve" x="96.922" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3716.516 1101.5)"><tspan x="96.922">-_emit_dq_metrics() : None</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M3700.516 905.5h435.289m-435.29 0h435.29M3700.516 1033.5h435.289m-435.29 0h435.29" class="divider"/></g><g id="classId-LifecycleOrchestrator-12" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M4185.805 885.5h439.75v216h-439.75"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M4185.805 885.5h439.75m-439.75 0h439.75m0 0v216m0-216v216m0 0h-439.75m439.75 0h-439.75m0 0v-216m0 216v-216"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="82.703" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(4322.977 905.5)"><tspan x="82.703">LifecycleOrchestra</tspan><tspan x="82.703" dy="16.8">tor</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="161.844" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(4201.805 961.5)"><tspan x="161.844">-_lifecycle_service:</tspan><tspan x="161.844" dy="16.8">MedallionLifecycleService</tspan></text></g><g class="label"><text xml:space="preserve" x="87.594" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(4201.805 985.5)"><tspan x="87.594">-_policy:</tspan><tspan x="87.594" dy="16.8">MedallionPolicy</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(4201.805 1009.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="162.523" y="12" class="fo-fallback" text-anchor="middle" transform="translate(4201.805 1065.5)"><tspan x="162.523">+clear_for_run(run_type, tables) : ClearResult</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M4185.805 941.5h439.75m-439.75 0h439.75M4185.805 1045.5h439.75m-439.75 0h439.75" class="divider"/></g><g id="classId-PipelineObserver-13" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M4675.555 861.5h396.218v264h-396.218"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M4675.555 861.5h396.218m-396.218 0h396.218m0 0v264m0-264v264m0 0h-396.218m396.218 0h-396.218m0 0v-264m0 264v-264"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="65.812" y="12" class="fo-fallback" text-anchor="middle" transform="translate(4807.852 881.5)"><tspan x="65.812">PipelineObserver</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="72.914" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(4691.555 937.5)"><tspan x="72.914">-_tracer: Tracing</tspan><tspan x="72.914" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="77.789" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(4691.555 961.5)"><tspan x="77.789">-_metrics: Metrics</tspan><tspan x="77.789" dy="16.8">Port</tspan></text></g><g class="label"><text xml:space="preserve" x="73.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(4691.555 985.5)"><tspan x="73.383">-_logger: Logger</tspan><tspan x="73.383" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="149.203" y="12" class="fo-fallback" text-anchor="middle" transform="translate(4691.555 1041.5)"><tspan x="149.203">+observe_batch(batch_id, records) : Span</tspan></text></g><g class="label"><text xml:space="preserve" x="144.758" y="12" class="fo-fallback" text-anchor="middle" transform="translate(4691.555 1065.5)"><tspan x="144.758">+record_duration(stage, duration) : None</tspan></text></g><g class="label"><text xml:space="preserve" x="116.273" y="12" class="fo-fallback" text-anchor="middle" transform="translate(4691.555 1089.5)"><tspan x="116.273">+record_error(error_type) : None</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M4675.555 917.5h396.218m-396.218 0h396.218M4675.555 1021.5h396.218m-396.218 0h396.218" class="divider"/></g><g id="classId-MemoryMonitor-14" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M5121.773 873.5h358.766v240h-358.766"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M5121.773 873.5h358.766m-358.766 0h358.766m0 0v240m0-240v240m0 0h-358.766m358.766 0h-358.766m0 0v-240m0 240v-240"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="60" y="12" class="fo-fallback" text-anchor="middle" transform="translate(5241.156 893.5)"><tspan x="60">MemoryMonitor</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="94.953" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(5137.773 949.5)"><tspan x="94.953">-_threshold_pct:</tspan><tspan x="94.953" dy="16.8">float = 0.8</tspan></text></g><g class="label"><text xml:space="preserve" x="118.953" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(5137.773 973.5)"><tspan x="118.953">-_monitor_interval_ms: int</tspan><tspan x="118.953" dy="16.8">= 1000</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="129.594" y="12" class="fo-fallback" text-anchor="middle" transform="translate(5137.773 1029.5)"><tspan x="129.594">+get_memory_stats() : MemoryStats</tspan></text></g><g class="label"><text xml:space="preserve" x="108.297" y="12" class="fo-fallback" text-anchor="middle" transform="translate(5137.773 1053.5)"><tspan x="108.297">+should_reduce_batch() : bool</tspan></text></g><g class="label"><text xml:space="preserve" x="133.383" y="12" class="fo-fallback" text-anchor="middle" transform="translate(5137.773 1077.5)"><tspan x="133.383">-_get_stats_estimate() : MemoryStats</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M5121.773 929.5h358.766m-358.766 0h358.766M5121.773 1009.5h358.766m-358.766 0h358.766" class="divider"/></g><g id="classId-BatchMetricsRecorder-15" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M5530.54 885.5h426.413v216H5530.54"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M5530.54 885.5h426.413m-426.414 0h426.414m0 0v216m0-216v216m0 0H5530.54m426.414 0H5530.54m0 0v-216m0 216v-216"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="85.367" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(5658.379 905.5)"><tspan x="85.367">BatchMetricsRecorde</tspan><tspan x="85.367" dy="16.8">r</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="77.789" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(5546.54 961.5)"><tspan x="77.789">-_metrics: Metrics</tspan><tspan x="77.789" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="133.188" y="12" class="fo-fallback" text-anchor="middle" transform="translate(5546.54 1017.5)"><tspan x="133.188">+record_fetch(count, duration) : None</tspan></text></g><g class="label"><text xml:space="preserve" x="149.633" y="12" class="fo-fallback" text-anchor="middle" transform="translate(5546.54 1041.5)"><tspan x="149.633">+record_transform(count, duration) : None</tspan></text></g><g class="label"><text xml:space="preserve" x="154.523" y="12" class="fo-fallback" text-anchor="middle" transform="translate(5546.54 1065.5)"><tspan x="154.523">+record_write(count, duration, layer) : None</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M5530.54 941.5h426.413m-426.414 0h426.414M5530.54 997.5h426.413m-426.414 0h426.414" class="divider"/></g><g id="classId-BaseTransformer-16" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M671.203 1241h487.39v432h-487.39"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M671.203 1241h487.39m-487.39 0h487.39m0 0v432m0-432v432m0 0h-487.39m487.39 0h-487.39m0 0v-432m0 432v-432"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="37.359" y="12" class="fo-fallback" text-anchor="middle" transform="translate(877.54 1261)"><tspan x="37.359">«abstract»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="65.812" y="12" class="fo-fallback" text-anchor="middle" transform="translate(849.086 1285)"><tspan x="65.812">BaseTransformer</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="81.836" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1341)"><tspan x="81.836">#config:</tspan><tspan x="81.836" dy="16.8">PipelineConfig</tspan></text></g><g class="label"><text xml:space="preserve" x="88.484" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1365)"><tspan x="88.484">#runtime:</tspan><tspan x="88.484" dy="16.8">RuntimeConfig</tspan></text></g><g class="label"><text xml:space="preserve" x="70.719" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1389)"><tspan x="70.719">#logger: Logger</tspan><tspan x="70.719" dy="16.8">Port</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="174.508" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1445)"><tspan x="174.508">+transform(record: BronzeRecord) : SilverRecord</tspan></text></g><g class="label"><text xml:space="preserve" x="166.062" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1469)"><tspan x="166.062">+transform_batch(records) : list&lt;SilverRecord&gt;</tspan></text></g><g class="label" style="font-style:italic"><text xml:space="preserve" x="142.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1493)"><tspan x="142.266">#_transform_impl(record) : SilverRecord</tspan></text></g><g class="label"><text xml:space="preserve" x="194.789" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1517)"><tspan x="194.789">#compute_content_hash(provider, data) :</tspan><tspan x="194.789" dy="16.8">ContentHash</tspan></text></g><g class="label"><text xml:space="preserve" x="92.93" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1541)"><tspan x="92.93">#serialize_json(value) : str</tspan></text></g><g class="label"><text xml:space="preserve" x="161.844" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1565)"><tspan x="161.844">#entity_to_silver_record(entity) : SilverRecord</tspan></text></g><g class="label"><text xml:space="preserve" x="140.086" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1589)"><tspan x="140.086">#_get_required_field(record, field) : Any</tspan></text></g><g class="label"><text xml:space="preserve" x="133.859" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1613)"><tspan x="133.859">#_extract_nested(record, path) : Any?</tspan></text></g><g class="label"><text xml:space="preserve" x="136.508" y="12" class="fo-fallback" text-anchor="middle" transform="translate(687.203 1637)"><tspan x="136.508">#_create_entity(**kwargs) : BaseEntity</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M671.203 1321h487.39m-487.39 0h487.39M671.203 1425h487.39m-487.39 0h487.39" class="divider"/></g><g id="classId-BaseChemblTransformer-17" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M706.582 893.5h396.633v200H706.582"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M706.582 893.5h396.633m-396.633 0h396.633m0 0v200m0-200v200m0 0H706.582m396.633 0H706.582m0 0v-200m0 200v-200"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="37.359" y="12" class="fo-fallback" text-anchor="middle" transform="translate(867.54 913.5)"><tspan x="37.359">«abstract»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="95.148" y="12" class="fo-fallback" text-anchor="middle" transform="translate(809.75 937.5)"><tspan x="95.148">BaseChemblTransformer</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="111.602" y="12" class="fo-fallback" text-anchor="middle" transform="translate(722.582 1033.5)"><tspan x="111.602">#_normalize_chembl_id(id) : str</tspan></text></g><g class="label"><text xml:space="preserve" x="134.742" y="12" class="fo-fallback" text-anchor="middle" transform="translate(722.582 1057.5)"><tspan x="134.742">#_normalize_units(value, units) : tuple</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M706.582 973.5h396.633m-396.633 0h396.633M706.582 1005.5h396.633m-396.633 0h396.633" class="divider"/></g><g id="classId-ActivityTransformer-18" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 506h392.117v168H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 506h392.117M43 506h392.117m0 0v168m0-168v168m0 0H43m392.117 0H43m0 0V506m0 168V506"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="75.586" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(163.473 526)"><tspan x="75.586">ActivityTransforme</tspan><tspan x="75.586" dy="16.8">r</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="76.375" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 582)"><tspan x="76.375">+entity: str =</tspan><tspan x="76.375" dy="16.8">&quot;activity&quot;</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="142.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 638)"><tspan x="142.266">#_transform_impl(record) : SilverRecord</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 562h392.117M43 562h392.117M43 618h392.117M43 618h392.117" class="divider"/></g><g id="classId-MoleculeTransformer-19" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M485.117 506h397.446v168H485.117"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M485.117 506h397.446m-397.446 0h397.446m0 0v168m0-168v168m0 0H485.117m397.446 0H485.117m0 0V506m0 168V506"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="80.914" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(602.926 526)"><tspan x="80.914">MoleculeTransforme</tspan><tspan x="80.914" dy="16.8">r</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="83.938" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(501.117 582)"><tspan x="83.938">+entity: str =</tspan><tspan x="83.938" dy="16.8">&quot;molecule&quot;</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="142.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(501.117 638)"><tspan x="142.266">#_transform_impl(record) : SilverRecord</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M485.117 562h397.446m-397.446 0h397.446M485.117 618h397.446m-397.446 0h397.446" class="divider"/></g><g id="classId-AssayTransformer-20" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M932.563 506h386.789v168h-386.79"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M932.563 506h386.789m-386.79 0h386.79m0 0v168m0-168v168m0 0h-386.79m386.79 0h-386.79m0 0V506m0 168V506"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="70.258" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1055.7 526)"><tspan x="70.258">AssayTransformer</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="72.82" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(948.563 582)"><tspan x="72.82">+entity: str =</tspan><tspan x="72.82" dy="16.8">&quot;assay&quot;</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="142.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(948.563 638)"><tspan x="142.266">#_transform_impl(record) : SilverRecord</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M932.563 562h386.789m-386.79 0h386.79M932.563 618h386.789m-386.79 0h386.79" class="divider"/></g><g id="classId-TargetTransformer-21" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M1369.352 506h387.07v168h-387.07"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M1369.352 506h387.07m-387.07 0h387.07m0 0v168m0-168v168m0 0h-387.07m387.07 0h-387.07m0 0V506m0 168V506"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="70.539" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1492.348 526)"><tspan x="70.539">TargetTransformer</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="72.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1385.352 582)"><tspan x="72.383">+entity: str =</tspan><tspan x="72.383" dy="16.8">&quot;target&quot;</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="142.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1385.352 638)"><tspan x="142.266">#_transform_impl(record) : SilverRecord</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M1369.352 562h387.07m-387.07 0h387.07M1369.352 618h387.07m-387.07 0h387.07" class="divider"/></g></g></g></svg>

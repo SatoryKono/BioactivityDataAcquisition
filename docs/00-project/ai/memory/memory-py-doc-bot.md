@@ -32,7 +32,7 @@ docs/
 │   └── REQUIREMENTS.md             # Testable requirements
 ├── 02-architecture/
 │   ├── decisions/                  # ADRs (ADR-001 through ADR-043)
-│   ├── mmd-diagrams/               # Canonical Mermaid source/render trees
+│   ├── diagrams/                   # Canonical diagram source/render/docs tree
 │   └── policies/                   # Architecture and review policies
 ├── 03-guides/                      # Guides & manuals
 │   └── development/                # Developer-focused guides

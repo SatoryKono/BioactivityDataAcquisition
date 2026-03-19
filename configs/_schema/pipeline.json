@@ -951,7 +951,7 @@
       "type": "object"
     },
     "ProviderSourceConfig": {
-      "description": "Provider-specific configuration from source YAML.",
+      "description": "Pipeline-level provider source overrides.\n\nPipeline configs may override provider identity and client wiring, but must\nnot redefine source pagination defaults here. Pagination is owned by the\nprovider source config and pipelines may only influence page size through\n``page_size_override`` on ``PipelineYamlConfig``.",
       "properties": {
         "provider": {
           "anyOf": [
@@ -979,27 +979,6 @@
         },
         "client": {
           "$ref": "#/$defs/ClientSourceConfig"
-        },
-        "max_url_length": {
-          "default": 2000,
-          "maximum": 8000,
-          "minimum": 500,
-          "title": "Max Url Length",
-          "type": "integer"
-        },
-        "batch_size": {
-          "default": 100,
-          "maximum": 5000,
-          "minimum": 1,
-          "title": "Batch Size",
-          "type": "integer"
-        },
-        "page_size": {
-          "default": 1000,
-          "maximum": 10000,
-          "minimum": 100,
-          "title": "Page Size",
-          "type": "integer"
         },
         "api_version": {
           "anyOf": [

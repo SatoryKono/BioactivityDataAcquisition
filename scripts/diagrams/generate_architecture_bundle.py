@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Generate architecture-diagrams-with-descriptions.md bundle from architecture/ mmd files."""
+"""Generate bundles/architecture.bundle.md bundle from architecture/ mmd files."""
 
 from __future__ import annotations
 
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -130,10 +131,13 @@ def main() -> int:
         first = False
 
         lines.append(f"## {stem}\n")
+        png_rel = Path(
+            os.path.relpath(png_file, OUTPUT_MD.parent)
+        ).as_posix()
         if png_file.exists():
-            lines.append(f"![{stem}](architecture/png/{stem}.png)\n")
+            lines.append(f"![{stem}]({png_rel})\n")
         else:
-            lines.append(f"*PNG не найден: `architecture/png/{stem}.png`*\n")
+            lines.append(f"*PNG не найден: `{png_rel}`*\n")
 
         lines.append(f"- Исходная диаграмма: `{source_ref('architecture', mf.name)}`\n")
 

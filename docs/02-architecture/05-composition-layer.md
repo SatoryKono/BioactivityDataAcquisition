@@ -225,10 +225,10 @@ runner = bootstrap_composite_runner(
 
 | Диаграмма               | Файл                                                                                               | Описание                           |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Composition Root        | [28-composition-root-di-graph.mermaid](mmd-diagrams/foundation/28-composition-root-di-graph.mmd)     | DI container, factories, bootstrap |
-| Factory Pattern         | [38-runtime-assembly-sequence.mermaid](mmd-diagrams/foundation/38-runtime-assembly-sequence.mmd)            | Использование Factory паттерна     |
-| Five Layer Architecture | [01-high-level.mermaid](mmd-diagrams/foundation/01-high-level.mmd)                                   | Composition слой в архитектуре     |
-| Layers Interaction      | [05-layers-interaction.mermaid](mmd-diagrams/foundation/05-layers-interaction.mmd)                    | Bootstrap → Factories → Runner     |
+| Composition Root        | [28-composition-root-di-graph.mermaid](diagrams/foundation/28-composition-root-di-graph.mmd)     | DI container, factories, bootstrap |
+| Factory Pattern         | [38-runtime-assembly-sequence.mermaid](diagrams/foundation/38-runtime-assembly-sequence.mmd)            | Использование Factory паттерна     |
+| Five Layer Architecture | [01-high-level.mermaid](diagrams/foundation/01-high-level.mmd)                                   | Composition слой в архитектуре     |
+| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/foundation/05-layers-interaction.mmd)                    | Bootstrap → Factories → Runner     |
 
 ### Связанные ADR
 

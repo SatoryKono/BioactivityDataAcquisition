@@ -11,13 +11,13 @@
 
 BioETL содержит два каталога диаграмм с разными форматами и назначением:
 
-**Canonical sources** (`docs/02-architecture/mmd-diagrams/`):
+**Canonical sources** (`docs/02-architecture/diagrams/`):
 - `architecture/` — 32 `.mmd` файла (18 core + decomposed subdomain files)
 - `class-diagrams/` — 16 `.mmd` файлов (class diagram families)
 - `foundation/` — 54 `.mmd` файла (historical + TOP-25)
 - Итого: **103 `.mmd` файлов** (включая `_template.mmd`)
 
-**Decomposed views** (`docs/02-architecture/mmd-diagrams/views/`):
+**Decomposed views** (`docs/02-architecture/diagrams/views/`):
 - 31 parent diagram × 5 views (`-full`, `-overview`, `-domain`, `-infra`, `-dataflow`)
 - + `00-legend.mermaid`
 - Итого: **156 `.mermaid` файлов**
@@ -42,8 +42,8 @@ BioETL содержит два каталога диаграмм с разным
 - Тема: `theme/mermaid-config.json` + `theme/custom.css` (строки 140–151)
 - Рендер: `render.sh` (SVG + PNG, 300 DPI)
 - Lint: `scripts/diagrams/lint_diagrams.py`
-- Шаблон: `mmd-diagrams/_template.mmd`
-- Политика LLM: `docs/02-architecture/06-diagram-policy.md` (POL-LLM-DIAGRAMS-001)
+- Шаблон: `diagrams/_template.mmd`
+- Политика LLM: `docs/02-architecture/diagrams/governance/policy.md` (POL-LLM-DIAGRAMS-001)
 
 ---
 
@@ -72,7 +72,7 @@ BioETL содержит два каталога диаграмм с разным
 ### D2: Dual Repository Structure
 
 ```
-mmd-diagrams/          ← canonical .mmd (rendered via render.sh)
+diagrams/          ← canonical .mmd (rendered via render.sh)
   architecture/        ← system/component-level diagrams
   class-diagrams/      ← class structure diagrams
   foundation/          ← historical reference + TOP-25
@@ -86,8 +86,8 @@ mmd-diagrams/          ← canonical .mmd (rendered via render.sh)
   _template.mmd        ← шаблон для новых диаграмм
 ```
 
-Новые **architecture views** создаются как `.mmd` в `mmd-diagrams/architecture/`.
-Foundation views создаются как `.mermaid` в `mmd-diagrams/views/`.
+Новые **architecture views** создаются как `.mmd` в `diagrams/architecture/`.
+Foundation views создаются как `.mermaid` в `diagrams/views/`.
 
 ### D3: View-based Decomposition Rules
 
@@ -240,7 +240,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 | Гармонизация цветовой схемы | 106 `.mermaid` файлов | 300 замен, старая Tailwind-палитра удалена |
 | Удаление emoji из subgraph labels | 106 файлов | 286 emoji убрано |
 | linkStyle дифференциация | 16 flowchart файлов | 5 типов связей |
-| Создание `_template.mmd` | `mmd-diagrams/` | Единый шаблон для новых диаграмм |
+| Создание `_template.mmd` | `diagrams/` | Единый шаблон для новых диаграмм |
 | `@nodes` в architecture/ | 29 файлов | Уже присутствовали |
 
 ---
@@ -258,14 +258,14 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 ### Negative
 
 - Два каталога + два расширения — когнитивная нагрузка при навигации
-- Синхронизация `foundation/*.mmd` ↔ `mmd-diagrams/views/*-full.mermaid` ручная
+- Синхронизация `foundation/*.mmd` ↔ `diagrams/views/*-full.mermaid` ручная
 - linkStyle индексы хрупкие: любое добавление/удаление связи требует пересчёта
 
 ### Risks
 
 - **linkStyle fragility**: изменение порядка связей ломает индексацию. Митигация: комментарий `%% linkStyle: ...` как проверочная документация
 - **Эвристика `@nodes`**: подсчёт узлов ±20% от реального (subgraph границы). Митигация: lint проверяет только >35 threshold
-- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `mmd-diagrams/views/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
+- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `diagrams/views/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
 
 ---
 
@@ -273,4 +273,4 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 - **ADR-005** — Layered Architecture (Hexagonal / Ports & Adapters)
 - **ADR-020** — Composition Layer isolation
-- **POL-LLM-DIAGRAMS-001** — `docs/02-architecture/06-diagram-policy.md`
+- **POL-LLM-DIAGRAMS-001** — `docs/02-architecture/diagrams/governance/policy.md`

@@ -22,6 +22,10 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 try:
     from .diagram_paths import DIAGRAM_ROOT
 except ImportError:  # pragma: no cover - direct script execution
@@ -160,7 +164,7 @@ def _build_parser() -> argparse.ArgumentParser:
         nargs="*",
         type=Path,
         default=[DEFAULT_SCOPE],
-        help="Files or directories to process (default: docs/02-architecture/mmd-diagrams)",
+        help="Files or directories to process (default: docs/02-architecture/diagrams)",
     )
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument(

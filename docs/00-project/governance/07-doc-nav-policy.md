@@ -27,7 +27,7 @@ traceability, but they are not normative for current project behavior.
 | `docs/00-project/ai/prompts/**` | `internal-published` + `internal-generated` | Curated prompt indexes MAY be shown under `Internal / Extended`; collected/raw prompt copies MAY remain non-nav | [docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md](../ai/prompts/COLLECTED_PROMPTS_INDEX.md) |
 | `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../ai/skills/README.md) |
 | `docs/plans/**` | `internal-published` | Curated pages MAY be shown under `Internal / Extended -> Plans` | [docs/plans/README.md](../../plans/README.md) or curated nav node |
-| `docs/reports/**` | `internal-published` + `internal` | Curated pages MAY be in `Internal / Extended -> Reports`; bulk report artifacts MAY remain non-nav | [docs/reports/index.md](../../reports/index.md) |
+| `docs/reports/**` | `internal-published` + `internal` | Curated evidence/report pages MAY be in `Internal / Extended -> Reports`; active planning SHOULD prefer `docs/plans/**` or `reports/plans/**` | [docs/reports/index.md](../../reports/index.md) |
 | `docs/99-archive/**` | `archive` | SHOULD remain non-nav by default; curated archive entrypoints MAY appear in nav with explicit historical labeling | [docs/99-archive/README.md](../../99-archive/README.md) (or equivalent archive index) |
 
 Notes:
@@ -113,7 +113,7 @@ Failure policy:
 | Class | Typical Paths | Default Action |
 |---|---|---|
 | `published` | policy, requirements, active runbooks | MUST be in primary nav |
-| `internal-published` | selected `plans/**`, `reports/**`, `00-project/ai/{agents,memory,prompts,skills}/**`, architecture extras | SHOULD be in `Internal / Extended` |
+| `internal-published` | selected `plans/**`, evidence-style `reports/**`, `00-project/ai/{agents,memory,prompts,skills}/**`, architecture extras | SHOULD be in `Internal / Extended` |
 | `internal-generated` | generated indexes/variants (for example some diagram artifact indexes) | MAY stay outside nav, but MUST be linked from an index |
 | `archive` | `99-archive/**` | SHOULD stay outside nav by default; curated archive entrypoints MAY appear with explicit historical labeling |
 
@@ -166,7 +166,7 @@ Ratified baseline for residual non-nav backlog:
 3. Any deviation requires explicit governance revision.
 
 Decision record:
-- `docs/99-archive/plans/wave-8-policy-decisions-2026-03-03.md` *(archived)*
+- retained in this policy revision; no separate archived `wave-8` decision file is currently kept in the repository
 
 ----------------------------------------------------------------------
 
