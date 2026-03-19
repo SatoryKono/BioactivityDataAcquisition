@@ -17,11 +17,11 @@ from unittest.mock import MagicMock
 import pyarrow as pa
 import pytest
 
+from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry import PipelineRegistry, create_registry
 
 if TYPE_CHECKING:
-    from bioetl.composition.registry import PipelineFactoryPort
+    from bioetl.domain.ports import PipelineFactoryPort
 
 
 def create_mock_factory(name: str) -> PipelineFactoryPort:

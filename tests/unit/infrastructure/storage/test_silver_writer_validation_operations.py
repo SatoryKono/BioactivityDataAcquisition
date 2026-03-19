@@ -9,7 +9,7 @@ import pytest
 
 from bioetl.domain.exceptions import PolicyViolationError, SchemaViolationError
 from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
-from bioetl.infrastructure.storage.silver_writer_validation_operations import (
+from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
     _enforce_write_policy,
     _to_policy_write_mode_impl,

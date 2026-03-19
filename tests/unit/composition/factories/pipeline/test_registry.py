@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.composition import create_registry
 from bioetl.composition.factories.pipeline.registry import (
     register_all_pipelines,
     reset_registration,
@@ -113,8 +114,6 @@ def test_registry_empty_raises_runtime_error(isolated_registry):
 
 def test_isolated_registry_is_independent(isolated_registry):
     """Test that isolated registries are independent of each other."""
-    from bioetl.composition.registry import create_registry
-
     registry1 = isolated_registry
     registry2 = create_registry()
 
@@ -134,8 +133,6 @@ def test_isolated_registry_is_independent(isolated_registry):
 
 def test_multiple_registries_in_same_process():
     """Test that we can create 2 registries in one process."""
-    from bioetl.composition.registry import create_registry
-
     registry1 = create_registry()
     registry2 = create_registry()
 

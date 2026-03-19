@@ -13,16 +13,16 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
 )
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode
-from bioetl.infrastructure.storage.silver_writer_key_nullability_operations import (
+from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _collect_key_violations as _collect_key_violations,
 )
-from bioetl.infrastructure.storage.silver_writer_key_nullability_operations import (
+from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _count_null_violations as _count_null_violations,
 )
-from bioetl.infrastructure.storage.silver_writer_key_nullability_operations import (
+from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _validate_key_nullability_impl as _validate_key_nullability_impl,
 )
-from bioetl.infrastructure.storage.silver_writer_schema_drift_operations import (
+from bioetl.infrastructure.storage.silver.schema_drift_operations import (
     _build_schema_drift_info,
     _build_silver_schema_drift_diff,
     _check_schema_drift,

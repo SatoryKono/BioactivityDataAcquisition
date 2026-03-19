@@ -17,7 +17,7 @@ from bioetl.composition.factories.pipeline.runner import (
     MetricsExtractor,
     RunnerFactory,
 )
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 
 
 @pytest.mark.unit

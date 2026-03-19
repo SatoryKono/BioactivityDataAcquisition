@@ -411,7 +411,7 @@ class TestSilverWriterPreparePayloadExecutor:
         import pyarrow as pa
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
-        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+        from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
 
@@ -448,7 +448,7 @@ class TestSilverWriterPreparePayloadExecutor:
                 ),
             ) as mock_sync,
             patch(
-                "bioetl.infrastructure.storage.silver_writer_validation_mixin.asyncio.to_thread",
+                "bioetl.infrastructure.storage.silver.validation_mixin.asyncio.to_thread",
                 wraps=asyncio.to_thread,
             ) as mock_to_thread,
         ):
@@ -484,7 +484,7 @@ class TestSilverWriterPreparePayloadExecutor:
         import pyarrow as pa
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
-        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+        from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
 
@@ -553,7 +553,7 @@ class TestSilverWriterPreparePayloadExecutor:
         import pyarrow as pa
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
-        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+        from bioetl.infrastructure.storage.silver.validation_mixin import (
             _SilverWritePreparationRequest,
             _ValidatedSilverWriteContext,
         )

@@ -2298,7 +2298,7 @@ bash scripts/docs/build_docs_site.sh --strict
 **Зависимости bioetl:**
 - `bioetl.application.core.base.BasePipeline`
 - `bioetl.application.core.base-transformer.BaseTransformer`
-- `bioetl.composition.registry.register-pipeline`
+- `bioetl.composition.factories.pipeline.registry.register_all_pipelines`
 - `bioetl.domain.context.PipelineContext`
 
 **Создаёт:**
@@ -38458,14 +38458,16 @@ All registries in BioETL follow the unified `RegistryProtocol` for consistent AP
 Registry for pipeline factories. Located in `src/bioetl/composition/registry.py`.
 
 ```python
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
+
+registry = PipelineRegistry()
 
 # List all registered pipelines
-pipelines = PipelineRegistry.list_keys()
+pipelines = registry.list_keys()
 
 # Check if pipeline exists
-if PipelineRegistry.contains("chembl_activity"):
-    definition = PipelineRegistry.get("chembl_activity")
+if registry.contains("chembl_activity"):
+    definition = registry.get("chembl_activity")
 ```
 
 ### ProviderRegistry (Primary)

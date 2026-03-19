@@ -16,10 +16,10 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
 )
 from bioetl.domain.medallion import SilverWriteMode
-from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
+from bioetl.infrastructure.storage.silver.delta_mixin import (
     SilverWriterDeltaMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_delta_helpers import (
+from bioetl.infrastructure.storage.silver.delta_helpers import (
     _build_dispatch_policy,
     _DeltaWriteRequest,
     _MergeExecutionTimeoutError,

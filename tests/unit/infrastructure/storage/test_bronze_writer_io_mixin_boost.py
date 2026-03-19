@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.storage.bronze_writer_io_mixin import BronzeWriterIOMixin
+from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 
 
 class _ConcreteBronzeMixin(BronzeWriterIOMixin):

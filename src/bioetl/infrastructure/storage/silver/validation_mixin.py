@@ -15,7 +15,7 @@ from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
 from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
-from bioetl.infrastructure.storage.silver_writer_validation_operations import (
+from bioetl.infrastructure.storage.silver.validation_operations import (
     _check_schema_drift,
     _deduplicate_by_primary_keys_impl,
     _detect_schema_drift,

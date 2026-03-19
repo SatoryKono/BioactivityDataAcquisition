@@ -10,8 +10,8 @@ from click.testing import CliRunner
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.application.services import PipelineRunResult, RunResult
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry import PipelineRegistry
 from bioetl.interfaces.cli import cli, main
 from bioetl.interfaces.cli.exit_codes import ExitCode
 

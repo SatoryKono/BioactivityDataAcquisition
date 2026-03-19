@@ -498,7 +498,7 @@ class TestSilverWriterDQMetrics:
         started_at = datetime(2026, 3, 11, 12, 0, tzinfo=UTC)
 
         with patch(
-            "bioetl.infrastructure.storage.silver_writer_metadata_mixin.time.perf_counter",
+            "bioetl.infrastructure.storage.silver.metadata_mixin.time.perf_counter",
             return_value=5.5,
         ):
             context = await writer._prepare_silver_write_finalization_context(
@@ -515,7 +515,7 @@ class TestSilverWriterDQMetrics:
 
     def test_build_silver_write_result_uses_version_after(self):
         """Final result helper should return None or a SilverWriteResult by version."""
-        from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
+        from bioetl.infrastructure.storage.silver.metadata_mixin import (
             _build_silver_write_result,
         )
 

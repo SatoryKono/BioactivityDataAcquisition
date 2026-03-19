@@ -6,11 +6,6 @@ Implements RULES.md Appendix A - UniProt data source.
 from __future__ import annotations
 
 from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
-from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
-    IDMappingJobError,
-    IDMappingTimeoutError,
-    UniProtIDMappingClient,
-)
 from bioetl.infrastructure.adapters.uniprot.models import (
     UNIPROT_RECORD_MODELS,
     UniProtFeatureRecord,
@@ -21,11 +16,8 @@ from bioetl.infrastructure.adapters.uniprot.models import (
 
 __all__ = [
     "UNIPROT_RECORD_MODELS",
-    "IDMappingJobError",
-    "IDMappingTimeoutError",
     "UniProtAdapter",
     "UniProtFeatureRecord",
-    "UniProtIDMappingClient",
     "UniProtProteinRecord",
     "UniProtSearchResponse",
     "UniProtSequenceRecord",

@@ -16,7 +16,7 @@ from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
 )
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 
 
 def _make_mock_runner() -> MagicMock:
