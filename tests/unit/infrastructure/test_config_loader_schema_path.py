@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.infrastructure.config_loader import (
+from bioetl.infrastructure.config.pipeline_payload_normalization import (
     _apply_file_reference_defaults,
 )
 
