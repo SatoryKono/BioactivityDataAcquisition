@@ -5,10 +5,10 @@ from __future__ import annotations
 import threading
 from typing import TYPE_CHECKING
 
-from bioetl.composition.providers._creation import (
-    create_provider_adapter,
-    create_provider_data_source,
-    provider_has_data_source_creator,
+from bioetl.composition.providers._creation import ProviderCreator
+from bioetl.composition.providers._default_registry import (
+    DefaultRegistryMethod,
+    ProvidersDescriptor,
 )
 from bioetl.composition.providers._models import (
     AdapterCreator,
@@ -16,12 +16,7 @@ from bioetl.composition.providers._models import (
     HttpConfig,
     ProviderConfig,
 )
-from bioetl.composition.providers._store import (
-    get_provider_config,
-    is_provider_registered,
-    list_provider_names,
-    register_provider_config,
-)
+from bioetl.composition.providers._store import ProviderStore
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
@@ -43,26 +38,19 @@ __all__ = [
 # Backward-compatible alias kept during the RF-008 terminology cleanup.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
-
 class ProviderRegistry:
     """Unified data provider registry (thread-safe, instance-scoped)."""
 
-    def __init__(self) -> None:
-        self._providers: dict[str, ProviderConfig] = {}  # type: ignore[no-redef]
+    def __init__(
+        self,
+        store: ProviderStore | None = None,
+        creator: ProviderCreator | None = None,
+    ) -> None:
+        self._store = store if store is not None else ProviderStore()
+        self._creator = creator if creator is not None else ProviderCreator()
         self._lock = threading.RLock()
 
-    class _ProvidersDescriptor:
-        """Expose the default singleton's _providers on class-level access."""
-
-        def __get__(
-            self, obj: ProviderRegistry | None, objtype: type[ProviderRegistry]
-        ) -> dict[str, ProviderConfig]:
-            if obj is not None:
-                result: dict[str, ProviderConfig] = obj.__dict__["_providers"]
-                return result
-            return get_default_provider_registry()._providers
-
-    _providers = _ProvidersDescriptor()
+    _providers = ProvidersDescriptor()
 
     @classmethod
     def _get_default(cls) -> ProviderRegistry:
@@ -75,55 +63,48 @@ class ProviderRegistry:
 
         ensure_providers_loaded()
 
-    @classmethod
-    def register(cls, name: str, config: ProviderConfig) -> None:
+    @DefaultRegistryMethod
+    def register(self, name: str, config: ProviderConfig) -> None:
         """Register a provider (re-registration overwrites, thread-safe)."""
-        inst = cls._get_default()
-        with inst._lock:
-            register_provider_config(inst._providers, name, config)
+        with self._lock:
+            self._store.register(name, config)
 
-    @classmethod
-    def get(cls, name: str) -> ProviderConfig:
+    @DefaultRegistryMethod
+    def get(self, name: str) -> ProviderConfig:
         """Return provider configuration; raises KeyError if unknown."""
-        inst = cls._get_default()
-        with inst._lock:
-            return get_provider_config(inst._providers, name)
+        with self._lock:
+            return self._store.get(name)
 
-    @classmethod
-    def is_registered(cls, name: str) -> bool:
+    @DefaultRegistryMethod
+    def is_registered(self, name: str) -> bool:
         """Check whether a provider is registered."""
-        inst = cls._get_default()
-        with inst._lock:
-            return is_provider_registered(inst._providers, name)
+        with self._lock:
+            return self._store.is_registered(name)
 
-    @classmethod
-    def list_providers(cls) -> list[str]:
+    @DefaultRegistryMethod
+    def list_providers(self) -> list[str]:
         """Return sorted list of registered provider names."""
-        inst = cls._get_default()
-        with inst._lock:
-            return list_provider_names(inst._providers)
+        with self._lock:
+            return self._store.list_names()
 
-    @classmethod
-    def has_data_source_creator(cls, name: str) -> bool:
+    @DefaultRegistryMethod
+    def has_data_source_creator(self, name: str) -> bool:
         """Check whether a provider has a data_source_creator."""
-        inst = cls._get_default()
-        with inst._lock:
-            if not is_provider_registered(inst._providers, name):
+        with self._lock:
+            if not self._store.is_registered(name):
                 return False
-            return provider_has_data_source_creator(
-                get_provider_config(inst._providers, name)
-            )
+            config = self._store.get(name)
+            return self._creator.has_data_source_creator(config)
 
-    @classmethod
-    def clear(cls) -> None:
+    @DefaultRegistryMethod
+    def clear(self) -> None:
         """Clear the registry (testing only, thread-safe)."""
-        inst = cls._get_default()
-        with inst._lock:
-            inst._providers.clear()
+        with self._lock:
+            self._store.clear()
 
-    @classmethod
+    @DefaultRegistryMethod
     def create_adapter(
-        cls,
+        self,
         name: str,
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
@@ -131,10 +112,9 @@ class ProviderRegistry:
         **kwargs: object,
     ) -> DataSourcePort:
         """Create a provider adapter instance using registry metadata."""
-        inst = cls._get_default()
-        with inst._lock:
-            config = get_provider_config(inst._providers, name)
-        return create_provider_adapter(
+        with self._lock:
+            config = self._store.get(name)
+        return self._creator.create_adapter(
             name=name,
             config=config,
             http_client=http_client,
@@ -143,14 +123,14 @@ class ProviderRegistry:
             **kwargs,
         )
 
-    @classmethod
-    def get_http_config(cls, name: str) -> HttpConfig | None:
+    @DefaultRegistryMethod
+    def get_http_config(self, name: str) -> HttpConfig | None:
         """Return the HTTP configuration for a provider, or None."""
-        return cls.get(name).http_config
+        return self.get(name).http_config
 
-    @classmethod
+    @DefaultRegistryMethod
     def create_data_source(
-        cls,
+        self,
         name: str,
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
@@ -160,10 +140,9 @@ class ProviderRegistry:
         pipeline_name: str = "unknown",
     ) -> DataSourcePort:
         """Create a fully configured data source with filtering support."""
-        inst = cls._get_default()
-        with inst._lock:
-            config = get_provider_config(inst._providers, name)
-        return create_provider_data_source(
+        with self._lock:
+            config = self._store.get(name)
+        return self._creator.create_data_source(
             name=name,
             config=config,
             settings=settings,
@@ -174,48 +153,32 @@ class ProviderRegistry:
             pipeline_name=pipeline_name,
         )
 
-    @classmethod
-    def build_data_source_creator(cls, name: str) -> DataSourceCreatorProtocol:
+    @DefaultRegistryMethod
+    def build_data_source_creator(self, name: str) -> DataSourceCreatorProtocol:
         """Return a provider-bound data-source creator closure."""
-        cls.ensure_loaded()
-        if not cls.is_registered(name):
-            available = ", ".join(cls.list_providers())
-            raise KeyError(f"Unknown provider: {name}. Available: {available}")
-        if not cls.has_data_source_creator(name):
-            raise KeyError(
-                f"Provider '{name}' does not have a data_source_creator. "
-                "Ensure it is registered with data_source_creator in registration.py."
-            )
+        if self is get_default_provider_registry():
+            type(self).ensure_loaded()
 
-        def creator(
-            settings: Settings,
-            pipeline_config: PipelineYamlConfig,
-            logger: LoggerPort,
-            filter_config: InputFilterConfig | None = None,
-            metrics: MetricsPort | None = None,
-            pipeline_name: str = "unknown",
-        ) -> DataSourcePort:
-            return cls.create_data_source(
+        with self._lock:
+            config = self._store.get(name)
+        self._creator.require_data_source_creator(name=name, config=config)
+        return self._creator.build_bound_creator(
+            name=name,
+            create_data_source_fn=lambda **kwargs: self.create_data_source(
                 name=name,
-                settings=settings,
-                pipeline_config=pipeline_config,
-                logger=logger,
-                filter_config=filter_config,
-                metrics=metrics,
-                pipeline_name=pipeline_name,
-            )
+                **kwargs,
+            ),
+        )
 
-        return creator
-
-    @classmethod
-    def list_keys(cls) -> list[str]:
+    @DefaultRegistryMethod
+    def list_keys(self) -> list[str]:
         """List all registered provider names (unified API)."""
-        return cls.list_providers()
+        return self.list_providers()
 
-    @classmethod
-    def contains(cls, key: str) -> bool:
+    @DefaultRegistryMethod
+    def contains(self, key: str) -> bool:
         """Check if provider is registered (unified API)."""
-        return cls.is_registered(key)
+        return self.is_registered(key)
 
 
 _default_provider_registry: ProviderRegistry | None = None

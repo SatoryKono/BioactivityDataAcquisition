@@ -14,11 +14,26 @@ import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SOURCE_MANIFEST = Path("docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt")
-DEFAULT_RENDER_MANIFEST = Path("docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt")
-DEFAULT_CONFIG = Path("docs/02-architecture/mmd-diagrams/theme/mermaid-config.json")
-DEFAULT_CSS = Path("docs/02-architecture/mmd-diagrams/theme/custom.css")
+try:
+    from .diagram_paths import (
+        DIAGRAM_THEME_DIR,
+        QUALITY_GATE_MANIFEST,
+        REPO_ROOT,
+        VISUAL_SMOKE_MANIFEST,
+    )
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import (
+        DIAGRAM_THEME_DIR,
+        QUALITY_GATE_MANIFEST,
+        REPO_ROOT,
+        VISUAL_SMOKE_MANIFEST,
+    )
+
+
+DEFAULT_SOURCE_MANIFEST = QUALITY_GATE_MANIFEST
+DEFAULT_RENDER_MANIFEST = VISUAL_SMOKE_MANIFEST
+DEFAULT_CONFIG = DIAGRAM_THEME_DIR / "mermaid-config.json"
+DEFAULT_CSS = DIAGRAM_THEME_DIR / "custom.css"
 
 SVG_NS = "http://www.w3.org/2000/svg"
 NS = {"svg": SVG_NS}

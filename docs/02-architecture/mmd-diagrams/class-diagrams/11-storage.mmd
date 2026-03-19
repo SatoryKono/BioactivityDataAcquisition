@@ -1,11 +1,11 @@
 %% BioETL — Class Diagram: Storage Components
 %% Bronze/Silver/Gold writers and supporting classes.
 
-%% @version 1.1.0
-%% @date    2026-03-01
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @nodes   16
+%% @nodes   19
 %% @uniform class width=240 height=156 max_title_len=22 max_desc_lines=6
 
 classDiagram
@@ -65,7 +65,9 @@ classDiagram
     }
 
     class MetadataWriter {
-        +write(path, metadata)
+        +write_bronze_metadata(base_path, metadata)
+        +write_silver_metadata(base_path, metadata)
+        +write_gold_metadata(base_path, metadata)
     }
 
     class BronzeMetadataBuilder {
@@ -78,6 +80,23 @@ classDiagram
 
     class GoldMetadataBuilder {
         +build(config, result)
+    }
+
+    class MetadataWriteOperations {
+        +prepare(request)
+        +build_retry_callback(...)
+        +emit_final_telemetry(...)
+    }
+
+    class CompositeMetadataHelpers {
+        +extract_composite_output_ext(records)
+        +parse_composite_list(value)
+        +parse_composite_status(value)
+    }
+
+    class MetadataBuilderCompositeHelpers {
+        <<compat wrapper>>
+        +build_composite_output_ext(records)
     }
 
     class AtomicWriteGroup {
@@ -122,6 +141,10 @@ classDiagram
     BronzeWriter o-- BronzeMetadataBuilder
     SilverWriter o-- SilverMetadataBuilder
     GoldWriter o-- GoldMetadataBuilder
+    MetadataWriter --> MetadataWriteOperations
+    SilverMetadataBuilder --> CompositeMetadataHelpers
+    GoldMetadataBuilder --> CompositeMetadataHelpers
+    MetadataBuilderCompositeHelpers ..> CompositeMetadataHelpers
 
     style BaseDeltaWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
     style BronzeWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
@@ -134,6 +157,9 @@ classDiagram
     style BronzeMetadataBuilder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style SilverMetadataBuilder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style GoldMetadataBuilder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style MetadataWriteOperations fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CompositeMetadataHelpers fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetadataBuilderCompositeHelpers fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5
     style AtomicWriteGroup fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style CsvExporter fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PanderaSilverValidator fill:#eff6ff,stroke:#2563eb,stroke-width:2px

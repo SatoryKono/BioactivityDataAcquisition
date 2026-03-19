@@ -233,17 +233,17 @@ nav:
                     -   "Protein Class": 04-reference/pipelines/chembl/01-protein-class-spec.md
                     -   "Cell Line": 04-reference/pipelines/chembl/02-cell-line-spec.md
                     -   "Molecule": 04-reference/pipelines/chembl/03-molecule-spec.md
-                    -   "Target": 04-reference/pipelines/chembl/04-target-spec.md
+                    -   "Target (historical)": 04-reference/pipelines/chembl/04-target-spec.md
                     -   "Activity": 04-reference/pipelines/chembl/05-activity-spec.md
-                    -   "Assay": 04-reference/pipelines/chembl/06-assay-spec.md
-                    -   "Publication": 04-reference/pipelines/chembl/07-publication-spec.md
+                    -   "Assay (historical)": 04-reference/pipelines/chembl/06-assay-spec.md
+                    -   "Publication (historical)": 04-reference/pipelines/chembl/07-publication-spec.md
                     -   "Assay Parameters": 04-reference/pipelines/chembl/08-assay-parameters-spec.md
                     -   "Compound Record": 04-reference/pipelines/chembl/09-compound-record-spec.md
-                    -   "Target Component": 04-reference/pipelines/chembl/10-target-component-spec.md
-                    -   "Publication Term": 04-reference/pipelines/chembl/11-publication-term-spec.md
-                    -   "Publication Similarity": 04-reference/pipelines/chembl/12-publication-similarity-spec.md
+                    -   "Target Component (historical)": 04-reference/pipelines/chembl/10-target-component-spec.md
+                    -   "Publication Term (historical)": 04-reference/pipelines/chembl/11-publication-term-spec.md
+                    -   "Publication Similarity (historical)": 04-reference/pipelines/chembl/12-publication-similarity-spec.md
                     -   "Subcellular Fraction": 04-reference/pipelines/chembl/14-subcellular-fraction-spec.md
-                    -   "Tissue": 04-reference/pipelines/chembl/15-tissue-spec.md
+                    -   "Tissue (historical)": 04-reference/pipelines/chembl/15-tissue-spec.md
             -   PubChem:
                     -   "Compound": 04-reference/pipelines/pubchem/01-compound-spec.md
             -   UniProt:
@@ -254,15 +254,15 @@ nav:
             -   CrossRef:
                     -   "Publication": 04-reference/pipelines/crossref/01-publication-spec.md
             -   OpenAlex:
-                    -   "Publication": 04-reference/pipelines/openalex/01-publication-spec.md
+                    -   "Publication (historical)": 04-reference/pipelines/openalex/01-publication-spec.md
             -   SemanticScholar:
-                    -   "Publication": 04-reference/pipelines/semanticscholar/01-publication-spec.md
+                    -   "Publication (historical)": 04-reference/pipelines/semanticscholar/01-publication-spec.md
             -   Composite:
-                    -   "Publication": 04-reference/pipelines/composite/01-publication-spec.md
-                    -   "Molecule": 04-reference/pipelines/composite/02-molecule-spec.md
-                    -   "Target": 04-reference/pipelines/composite/03-target-spec.md
-                    -   "Activity": 04-reference/pipelines/composite/04-activity-spec.md
-                    -   "Assay": 04-reference/pipelines/composite/05-assay-spec.md
+                    -   "Publication (historical)": 04-reference/pipelines/composite/01-publication-spec.md
+                    -   "Molecule (historical)": 04-reference/pipelines/composite/02-molecule-spec.md
+                    -   "Target (historical)": 04-reference/pipelines/composite/03-target-spec.md
+                    -   "Activity (historical)": 04-reference/pipelines/composite/04-activity-spec.md
+                    -   "Assay (historical)": 04-reference/pipelines/composite/05-assay-spec.md
     -   "Data Contracts":
             -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
             -   "Observability Metrics": 04-reference/contracts/observability.md
@@ -681,15 +681,6 @@ nav:
                 -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
             -   "Reports":
                 -   "Overview": reports/index.md
-                -   "Documentation Cascade Audit 2026 02 27": reports/documentation-cascade-audit-2026-02-27.md
-                -   "Documentation Audit 2026 02 25": reports/documentation-audit-2026-02-25.md
-                -   "Scripts Inventory 2026 03 01": reports/scripts-inventory-2026-03-01.md
-                -   "Codex Branches Summary 2026 02 24": reports/codex-branches-summary-2026-02-24.md
-                -   "Documentation Audit 2026 03 03 Main": reports/documentation-audit-2026-03-03-main.md
-                -   "Documentation Audit 2026 03 03 Exhaustive": reports/documentation-audit-2026-03-03-exhaustive.md
-                -   "Branch Full Diff Matrix 2026 03 01": reports/branch-full-diff-matrix-2026-03-01.md
-                -   "Branch Full Diff Matrix Diagram Scope 2026 03 01": reports/branch-full-diff-matrix-diagram-scope-2026-03-01.md
-                -   "Branch Render Settings Diff Matrix 2026 03 01": reports/branch-render-settings-diff-matrix-2026-03-01.md
             -   "Skills":
                 -   "Overview": 00-project/ai/skills/README.md
                 -   "Global Skills":

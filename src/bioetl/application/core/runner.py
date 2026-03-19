@@ -22,7 +22,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.ports import NoOpTracing
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -136,7 +135,8 @@ class PipelineRunner:
             lifecycle_service: Medallion lifecycle service for clearing and vacuum.
             observer: Pipeline observability wrapper for tracing, metrics, logging.
             pipeline: Optional pipeline instance.
-            tracer: Optional tracing port.
+            tracer: Tracing port. Build NoOpTracing in composition or tests when
+                tracing is intentionally disabled.
             logger: Optional logger override; defaults to context.logger.
         """
         self._config = config
@@ -151,7 +151,12 @@ class PipelineRunner:
         legacy_logger = cast("LoggerPort | None", legacy_kwargs.get("logger"))
         self._logger = logger or legacy_logger or context.logger
         self._pipeline = pipeline
-        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
+        if tracer is None:
+            raise TypeError(
+                "PipelineRunner requires explicit tracer injection. "
+                "Build NoOpTracing in composition or test support when needed."
+            )
+        self._tracer = tracer
 
         # Services injected directly via DI (created in composition layer)
         self._lock_manager = dependencies.lock_manager

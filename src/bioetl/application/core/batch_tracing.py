@@ -15,8 +15,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.domain.ports import NoOpTracing
-
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
@@ -49,14 +47,20 @@ class BatchTracingManagerService:
         """Initialize batch tracing manager.
 
         Args:
-            tracer: OpenTelemetry tracer port. If None, uses NoOpTracing.
+            tracer: OpenTelemetry tracer port. Build NoOpTracing in composition or
+                tests when tracing is intentionally disabled.
             context: Pipeline execution context.
             config: Record processor configuration.
             initial_batch_size: Initial batch size for tracking.
             adaptive_sizing_enabled: Whether adaptive batch sizing is enabled.
 
         """
-        self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
+        if tracer is None:
+            raise TypeError(
+                "BatchTracingManagerService requires explicit tracer injection. "
+                "Build NoOpTracing in composition or test support when needed."
+            )
+        self._tracer = tracer
         self._context = context
         self._config = config
         self._initial_batch_size = initial_batch_size

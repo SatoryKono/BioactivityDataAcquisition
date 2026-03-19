@@ -1,11 +1,11 @@
 %% BioETL — CLI / Interface Layer
-%% Shows current CLI routing through registry helpers, composition entrypoints, and bootstrap services.
+%% Shows current CLI routing through registry helpers, narrow composition APIs, and runtime/bootstrap services.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   18
+%% @nodes   17
 %% @reference  Decomposed into 14a-cli-commands, 14b-cli-routing
 
 %%{init: {
@@ -32,9 +32,10 @@ graph LR
     end
 
     subgraph Composition["composition boundary"]
-        ENTRY["composition.entrypoints<br/>retained public facade"]:::size-md
-        BOOTR["bootstrap.runtime<br/>pipeline + composite execution"]:::size-md
-        BOOTC["bootstrap.cli<br/>admin / maintenance services"]:::size-md
+        EXEC["execution_api<br/>run / composite runtime"]:::size-md
+        SVC["services_api<br/>runner + admin services"]:::size-md
+        RES["resources_api<br/>cleanup / quarantine / lifecycle"]:::size-md
+        ENTRY["entrypoints<br/>retained broad public seam"]:::size-md
         PIPE["PipelineRegistry"]:::size-md
     end
 
@@ -51,20 +52,22 @@ graph LR
     MAIN --> ADM
 
     RUN --> REG --> PIPE
-    RUN --> ENTRY
-    RC --> ENTRY
-    ADM --> ENTRY
+    RUN --> EXEC
+    RUN --> SVC
+    RC --> EXEC
+    ADM --> SVC
+    ADM --> RES
 
-    ENTRY --> BOOTR
-    ENTRY --> BOOTC
-
-    BOOTR --> PRUN
-    BOOTR --> CRUN
-    BOOTC --> ASVC
+    EXEC --> PRUN
+    EXEC --> CRUN
+    SVC --> PRUN
+    SVC --> ASVC
+    RES --> ASVC
     ADM -.->|"server mode"| HSRV
-    ENTRY -.->|"health deps"| HSRV
+    SVC -.->|"health deps"| HSRV
 
-    NOTE["CLI main avoids direct composition imports for registry setup;<br/>command modules load composition entrypoints on demand."]:::size-md
+    NOTE["CLI prefers narrow APIs.<br/>Use execution_api, services_api,<br/>and resources_api for command paths.<br/>entrypoints kept for broad callers/tests."]:::size-md
+    ENTRY -.-> NOTE
     REG -.-> NOTE
 
     classDef user fill:#f1f5f9,stroke:#64748b
@@ -74,5 +77,5 @@ graph LR
 
     class TERM user
     class MAIN,REG,RUN,RC,ADM cli
-    class ENTRY,BOOTR,BOOTC,PIPE comp
+    class EXEC,SVC,RES,ENTRY,PIPE comp
     class PRUN,CRUN,ASVC,HSRV,NOTE app

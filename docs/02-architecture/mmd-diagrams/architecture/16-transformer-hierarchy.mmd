@@ -1,11 +1,11 @@
 %% BioETL — Transformer Hierarchy
-%% Shows the Template Method pattern and all provider-specific transformers.
+%% Shows the Template Method pattern, declarative publication blocks, and provider-specific helper seams.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   35
+%% @nodes   27
 %% @reference  Decomposed into 16a-transformer-base, 16b-transformer-pub-other
 %% Legend: docs/02-architecture/mmd-diagrams/views/00-legend.mermaid
 
@@ -32,8 +32,8 @@ graph TB
     end
 
     subgraph Publications["Publication Transformers"]
-        BPT["BasePublicationTransformer<br/>validate -> extract -> build<br/>_extract_fields + _build_entity"]:::size-lg
-        PMT["PubMedPublicationTransformer<br/>XML parsing + extractor stack"]:::size-lg
+        BPT["BasePublicationTransformer<br/>validate -> extract -> build<br/>extraction_blocks + entity construction"]:::size-lg
+        PMT["PubMedPublicationTransformer<br/>cached XML root + extraction_blocks"]:::size-lg
     end
 
     subgraph UniProtTrans["UniProt Transformers"]
@@ -45,9 +45,10 @@ graph TB
         PCCT["PubChemCompoundTransformer"]:::size-lg
     end
 
-    subgraph Extractors["Extractor Pattern"]
-        BFE["BaseFieldExtractor (ABC)<br/>extract(record) -> dict"]:::size-lg
-        AE["AbstractExtractor"]:::size-lg
+    subgraph Helpers["Block + Helper Strategy"]
+        EBP["ExtractionBlock Protocol<br/>extract(record) -> JsonDict"]:::size-lg
+        PHE["PubMed helper extractors<br/>abstract / author / date<br/>identifier / classification"]:::size-lg
+        UHE["UniProt helper extractors<br/>taxonomy / gene / feature<br/>comments / xrefs"]:::size-lg
     end
 
     %% Inheritance
@@ -61,22 +62,21 @@ graph TB
 
     BPT --> PMT & CRfT & OAT & SST
 
-    %% Extractors
-    BFE --> AE & AuE & DE & CE & IE & TE & GE & FE & CRE & CME
-
-    PMT -.->|uses| AuE & DE & CE & IE & AE
-    UPT -.->|uses| TE & GE & FE & CRE & CME
+    %% Helper contracts
+    BPT -.->|iterates| EBP
+    PMT -.->|uses| EBP & PHE
+    UPT -.->|uses| UHE
 
     classDef base fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
     classDef chembl fill:#fff7ed,stroke:#f59e0b
     classDef pub fill:#f0fdf4,stroke:#16a34a
     classDef uniprot fill:#f5f3ff,stroke:#7c3aed
     classDef other fill:#f1f5f9,stroke:#64748b
-    classDef extractor fill:#fefce8,stroke:#ca8a04
+    classDef helper fill:#fefce8,stroke:#ca8a04
 
     class BT,BCT,BPT base
     class AT,AST,APT,MT,TGT,TCT,PT,PTT,PST,TIT,CLT,PCT,SFT,CRT chembl
     class PMT,CRfT,OAT,SST pub
     class UPT,IDMT uniprot
     class PCCT other
-    class BFE,AE,AuE,DE,CE,IE,TE,GE,FE,CRE,CME extractor
+    class EBP,PHE,UHE helper

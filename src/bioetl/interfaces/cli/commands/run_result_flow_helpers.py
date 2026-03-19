@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, NoReturn
 
 from bioetl.application.services import RunResult
-from bioetl.application.services.cli_run_orchestration_service import (
+from bioetl.application.services.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
 from bioetl.interfaces.cli.commands.health_server_integration import (

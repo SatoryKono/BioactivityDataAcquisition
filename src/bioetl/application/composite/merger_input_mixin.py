@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 import polars as pl
 
@@ -44,6 +44,14 @@ _MERGE_READ_ERRORS = (
 )
 
 
+@runtime_checkable
+class _LegacySilverReadable(Protocol):
+    """Narrow compatibility protocol for legacy storage-backed silver reads."""
+
+    async def read_silver(self, table_name: str) -> list[object]:
+        """Read one Silver table by logical table name."""
+
+
 @dataclass(frozen=True, slots=True)
 class _MergeInputLoadSpec:
     """Describes one optional merge input that should be loaded."""
@@ -68,6 +76,17 @@ class _PreparedSeedDataframe:
     seed_df: pl.DataFrame
     records_from_seed: int
     effective_seed_pipeline: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _BoundLegacySilverReader:
+    """Adapter for legacy storage objects that only expose ``read_silver``."""
+
+    read_silver_fn: Callable[[str], Awaitable[list[object]]]
+
+    async def read_silver(self, table_name: str) -> list[object]:
+        """Delegate legacy Silver reads through the captured callable."""
+        return await self.read_silver_fn(table_name)
 
 
 class _MergeInputLoaderMixin:
@@ -233,16 +252,27 @@ class _MergeInputLoaderMixin:
         # Compatibility path:
         # - legacy callers may not define `_silver_reader` at all -> use `_storage`.
         # - if `_silver_reader` exists and is None, treat it as explicit misconfiguration.
-        silver_reader = self._silver_reader if "_silver_reader" in self.__dict__ else None
-        if silver_reader is None and isinstance(self._storage, SilverStoragePort):
-            silver_reader = self._storage
-        if silver_reader is None:
+        silver_reader = (
+            self._silver_reader if "_silver_reader" in self.__dict__ else None
+        )
+        legacy_storage_reader: _LegacySilverReadable | None = None
+        storage_read_silver = (
+            getattr(self._storage, "read_silver", None)
+            if silver_reader is None and "_silver_reader" not in self.__dict__
+            else None
+        )
+        if callable(storage_read_silver):
+            legacy_storage_reader = _BoundLegacySilverReader(storage_read_silver)
+        if silver_reader is None and legacy_storage_reader is None:
             raise RuntimeError(
                 "MergeService requires delta_reader or silver_reader for silver reads"
             )
 
         table_name = table_path_to_name(path)
-        records = await silver_reader.read_silver(table_name)
+        if silver_reader is not None:
+            records = await silver_reader.read_silver(table_name)
+        else:
+            records = await legacy_storage_reader.read_silver(table_name)
         if not records:
             return pl.DataFrame()
         return pl.DataFrame(records)

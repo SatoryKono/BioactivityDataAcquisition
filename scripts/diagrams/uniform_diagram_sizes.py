@@ -46,12 +46,17 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+try:
+    from .diagram_paths import source_dir
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import source_dir
+
 # ── Defaults ────────────────────────────────────────────────────────────────
 
 DIAGRAM_DIRS = [
-    Path("docs/02-architecture/mmd-diagrams/architecture"),
-    Path("docs/02-architecture/mmd-diagrams/class-diagrams"),
-    Path("docs/02-architecture/mmd-diagrams/foundation"),
+    source_dir("architecture"),
+    source_dir("class-diagrams"),
+    source_dir("foundation"),
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 

@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.providers._models import ProviderConfig
+from bioetl.composition.providers._models import (
+    DataSourceCreatorProtocol,
+    ProviderConfig,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
@@ -12,6 +15,74 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+class ProviderCreator:
+    """Consolidated provider adapter and data-source creation logic."""
+
+    def create_adapter(
+        self,
+        *,
+        name: str,
+        config: ProviderConfig,
+        http_client: UnifiedHTTPClient | None = None,
+        logger: LoggerPort | None = None,
+        settings: Settings | None = None,
+        **kwargs: object,
+    ) -> DataSourcePort:
+        """Create a provider adapter instance."""
+        return create_provider_adapter(
+            name=name,
+            config=config,
+            http_client=http_client,
+            logger=logger,
+            settings=settings,
+            **kwargs,
+        )
+
+    def create_data_source(
+        self,
+        *,
+        name: str,
+        config: ProviderConfig,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
+        filter_config: InputFilterConfig | None = None,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str = "unknown",
+    ) -> DataSourcePort:
+        """Create a fully configured provider data source."""
+        return create_provider_data_source(
+            name=name,
+            config=config,
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
+        )
+
+    def has_data_source_creator(self, config: ProviderConfig) -> bool:
+        """Return whether the provider config exposes a data-source creator."""
+        return provider_has_data_source_creator(config)
+
+    def require_data_source_creator(self, *, name: str, config: ProviderConfig) -> None:
+        """Raise a stable error when a provider lacks data-source creator support."""
+        require_provider_data_source_creator(name=name, config=config)
+
+    def build_bound_creator(
+        self,
+        *,
+        name: str,
+        create_data_source_fn: DataSourceCreatorProtocol,
+    ) -> DataSourceCreatorProtocol:
+        """Return a provider-bound data-source creator closure."""
+        return build_bound_data_source_creator(
+            name=name,
+            create_data_source=create_data_source_fn,
+        )
 
 
 def create_provider_adapter(
@@ -82,6 +153,47 @@ def create_provider_data_source(
 def provider_has_data_source_creator(config: ProviderConfig) -> bool:
     """Return whether the provider config exposes a data-source creator."""
     return config.data_source_creator is not None
+
+
+def require_provider_data_source_creator(
+    *,
+    name: str,
+    config: ProviderConfig,
+) -> None:
+    """Raise a stable error when a provider lacks data-source creator support."""
+    if provider_has_data_source_creator(config):
+        return
+    raise KeyError(
+        f"Provider '{name}' does not have a data_source_creator. "
+        "Ensure it is registered with data_source_creator in registration.py."
+    )
+
+
+def build_bound_data_source_creator(
+    *,
+    name: str,
+    create_data_source: DataSourceCreatorProtocol,
+) -> DataSourceCreatorProtocol:
+    """Return a provider-bound data-source creator closure."""
+
+    def creator(
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
+        filter_config: InputFilterConfig | None = None,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str = "unknown",
+    ) -> DataSourcePort:
+        return create_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
+        )
+
+    return creator
 
 
 def _inject_http_client(

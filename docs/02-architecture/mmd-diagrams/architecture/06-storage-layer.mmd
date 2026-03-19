@@ -1,11 +1,11 @@
 %% BioETL — Storage Layer Components
-%% Shows Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.
+%% Shows Bronze/Silver/Gold writers, metadata sidecar zones, Delta Lake, and validation.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   21
+%% @nodes   23
 %% @reference  Decomposed into 06a-storage-writers, 06b-storage-support
 
 %%{init: {
@@ -34,11 +34,11 @@ graph LR
 
         subgraph SilverStorage["Silver Storage"]
             BDW["BaseDeltaWriter<br/>base_path + logger + retention<br/>get_table_path / clear<br/>prepare_arrow_data"]:::size-lg
-            SWR["SilverWriter<br/>csv_exporter + write_policy<br/>silver_validator<br/>write_silver / merge / clear"]:::size-lg
+            SWR["SilverWriter<br/>csv_exporter + metadata_writer<br/>silver_validator<br/>write_silver / merge / clear"]:::size-lg
         end
 
         subgraph GoldStorage["Gold Storage"]
-            GWR["GoldWriter<br/>csv_exporter + audit + metadata_writer<br/>write_gold / clear_gold"]:::size-lg
+            GWR["GoldWriter<br/>csv_exporter + audit + metadata_writer<br/>write_gold / clear_gold / merged metadata"]:::size-lg
         end
 
         subgraph Reader["Delta Reader"]
@@ -48,7 +48,8 @@ graph LR
     subgraph Support["Support Components"]
         AC["ArrowDataConverter<br/>(records → PyArrow)"]:::size-lg
         RM["RetentionPolicy<br/>(vacuum/retention)"]:::size-lg
-        MW["MetadataWriter<br/>(_metadata.yaml)"]:::size-lg
+        MW["MetadataWriter<br/>write_bronze / write_silver / write_gold"]:::size-lg
+        MWO["metadata_writer_operations<br/>target resolve + YAML serialize<br/>retry / final telemetry"]:::size-lg
         CSV["CsvExporter<br/>(Delta → CSV export)"]:::size-lg
         DQW["DQReportWriter<br/>(DQ reports JSON)"]:::size-lg
     end
@@ -83,6 +84,7 @@ graph LR
     GWR --> RM
     SWR --> MW
     GWR --> MW
+    MW --> MWO
     SWR --> CSV
     GWR --> CSV
     SWR --> PSV
@@ -97,11 +99,16 @@ graph LR
         BMB["BronzeMetadataBuilder"]:::size-lg
         SMB["SilverMetadataBuilder"]:::size-lg
         GMB["GoldMetadataBuilder"]:::size-lg
+        CMH["composite_metadata_helpers<br/>canonical shared parsing seam"]:::size-lg
+        CMW["metadata_builder_composite_helpers<br/>compat wrapper"]:::size-lg
     end
 
     BW --> BMB
     SWR --> SMB
     GWR --> GMB
+    SMB --> CMH
+    GMB --> CMH
+    CMW -.-> CMH
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     classDef writer fill:#fff1f2,stroke:#dc2626,stroke-width:2px
@@ -111,6 +118,6 @@ graph LR
 
     class SP port
     class BW,SWR,GWR,DR,BDW writer
-    class AC,RM,MW,CSV,DQW,BMB,SMB,GMB,AWG support
+    class AC,RM,MW,MWO,CSV,DQW,BMB,SMB,GMB,CMH,CMW,AWG support
     class PSV,PGV,NOV valid
     class FS_B,FS_S,FS_G fs

@@ -6,7 +6,7 @@ from contextlib import AbstractAsyncContextManager
 from typing import TYPE_CHECKING
 
 from bioetl.application.services import RunOptions, RunResult
-from bioetl.application.services.cli_run_orchestration_service import (
+from bioetl.application.services.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
 from bioetl.composition.registry import PipelineRegistry

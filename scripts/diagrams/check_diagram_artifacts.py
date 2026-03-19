@@ -15,7 +15,13 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-DEFAULT_MANIFEST = Path("docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt")
+try:
+    from .diagram_paths import VISUAL_SMOKE_MANIFEST
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import VISUAL_SMOKE_MANIFEST
+
+
+DEFAULT_MANIFEST = VISUAL_SMOKE_MANIFEST
 
 
 @dataclass(frozen=True)

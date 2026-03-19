@@ -95,7 +95,7 @@ Composite pipelines используют отдельный оркестрато
 
 1. **Без трансформеров**: Composite не использует `*Transformer` классы
 2. **Оркестрация**: `application/composite/` содержит 15 модулей сервисов
-3. **Merge**: `MergeService` выполняет JOIN по `join-key` из конфига
+3. **Merge**: `MergeService` выполняет JOIN по `join_keys` из composite-конфига
 4. **Fan-out**: Enrichers могут выполняться параллельно (если `optional: true`)
 
 См. [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)

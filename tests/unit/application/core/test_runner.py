@@ -24,6 +24,7 @@ from bioetl.application.services.medallion_lifecycle import (
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.ports import NoOpTracing
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
 
@@ -33,6 +34,7 @@ _MOCK_TOKEN = FencingToken(
     owner_id=RunID(UUID("00000000-0000-0000-0000-000000000000")),
     issued_at=0.0,
 )
+_NOOP_TRACER = NoOpTracing()
 
 
 @pytest.fixture
@@ -320,6 +322,7 @@ def runner(
         postrun=mock_postrun_service,
         lifecycle_service=mock_lifecycle_service,
         observer=mock_observer,
+        tracer=_NOOP_TRACER,
     )
 
 
@@ -358,6 +361,7 @@ class TestPipelineRunnerInit:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         assert runner._config == pipeline_config
@@ -402,6 +406,7 @@ class TestPipelineRunnerInit:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         # The exact same instances should be used (DI)
@@ -442,6 +447,7 @@ class TestPipelineRunnerInit:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         assert runner.execution_metrics == {
@@ -616,6 +622,7 @@ class TestPipelineRunnerRun:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()
@@ -683,6 +690,7 @@ class TestPipelineRunnerClearViaLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner._prepare_medallion_layers()
@@ -745,6 +753,7 @@ class TestPipelineRunnerClearViaLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()
@@ -828,6 +837,7 @@ class TestPipelineRunnerCheckDataQuality:
             postrun=postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         runner._check_data_quality()
@@ -901,6 +911,7 @@ class TestPipelineRunnerCheckDataQuality:
             postrun=postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()

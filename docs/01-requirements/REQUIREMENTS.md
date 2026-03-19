@@ -287,12 +287,12 @@
 
 #### REQ-LOAD-001
 - **Уровень**: MUST
-- **Описание**: Для `loading-strategy: full-scan-only` checkpoint resume MUST быть отключён
-- **Проверка**: Unit/architecture тесты `CheckpointManager` блокируют resume для `full-scan-only`
+- **Описание**: Для `loading_strategy: full_scan_only` checkpoint resume MUST быть отключён
+- **Проверка**: Unit/architecture тесты `CheckpointManager` блокируют resume для `full_scan_only`
 
 #### REQ-LOAD-002
 - **Уровень**: MUST
-- **Описание**: Publication-related pipeline configs MUST явно задавать `loading-strategy: full-scan-only`
+- **Описание**: Publication-related pipeline configs MUST явно задавать `loading_strategy: full_scan_only`
 - **Проверка**: Архитектурный тест `tests/architecture/test_force_full_scan_publication.py`
 
 ### 2.12 Entity ID Generation

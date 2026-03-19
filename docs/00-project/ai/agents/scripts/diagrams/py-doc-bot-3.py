@@ -22,12 +22,17 @@ def _resolve_repo_root() -> Path:
 
 
 REPO_ROOT = _resolve_repo_root()
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.diagrams.diagram_paths import DIAGRAM_THEME_DIR, bundle_markdown_path
+
 PAGEBREAK_LUA = REPO_ROOT / "scripts" / "diagrams" / "pagebreak.lua"
 DEFAULT_INPUTS = [
-    Path("docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md"),
-    Path("docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.md"),
+    bundle_markdown_path("class-diagrams").relative_to(REPO_ROOT),
+    bundle_markdown_path("foundation").relative_to(REPO_ROOT),
 ]
-DEFAULT_CSS = Path("docs/02-architecture/mmd-diagrams/theme/with-descriptions-print.css")
+DEFAULT_CSS = (DIAGRAM_THEME_DIR / "with-descriptions-print.css").relative_to(REPO_ROOT)
 DEFAULT_BOUNDS_CHECKER = Path("scripts/diagrams/check_pdf_image_bounds.py")
 
 

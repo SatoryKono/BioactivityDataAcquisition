@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams With Descriptions
 
-- Generated: 2026-03-16T10:12:25
+- Generated: 2026-03-19T10:51:26
 - Diagram count: 55
 
 ## Table of Contents
@@ -38,12 +38,12 @@
 - [25-circuit-breaker-observer-class — Circuit Breaker and Observer Classes](#25-circuit-breaker-observer-class)
 - [26-hexagonal-ports-adapters — Hexagonal Architecture — Ports and Adapters Overview](#26-hexagonal-ports-adapters)
 - [27-import-matrix-enforcement — Five-Layer Import Matrix Enforcement (ARCH-001)](#27-import-matrix-enforcement)
-- [28-composition-root-di-graph — Composition Root Wiring — Full DI Graph](#28-composition-root-di-graph)
+- [28-composition-root-di-graph — Composition Root Wiring — Public APIs and Assembly](#28-composition-root-di-graph)
 - [29-composite-pipeline-workflow — Composite Pipeline Full Workflow — Seed to Gold (ADR-026)](#29-composite-pipeline-workflow)
 - [30-port-adapter-mapping — Port-to-Adapter Mapping Table Diagram](#30-port-adapter-mapping)
 - [31-pipeline-run-lifecycle — Pipeline Run Lifecycle — From Config to Completion](#31-pipeline-run-lifecycle)
 - [32-single-record-journey — Record Processing Pipeline — Single Record Journey](#32-single-record-journey)
-- [33-cli-run-interaction — CLI Run Command → PipelineRunner Full Interaction](#33-cli-run-interaction)
+- [33-cli-run-interaction — CLI Run Command → Current Execution Flow](#33-cli-run-interaction)
 - [34-batch-processing-flow — Batch Processing Flow — Extract to Write](#34-batch-processing-flow)
 - [35-bootstrap-sequence — Composition Layer Bootstrap Sequence](#35-bootstrap-sequence)
 - [36-architecture-principles-mindmap — Architecture Principles Mind Map](#36-architecture-principles-mindmap)
@@ -326,12 +326,12 @@
 ![10-infrastructure-layer-class-diagram](foundation/png/10-infrastructure-layer-class-diagram.png)
 
 ### Описание
-Диаграмма «Infrastructure Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience). На схеме отражено примерно 18 узлов и 25 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: HTTP Infrastructure, DataSource Adapters, Storage Writers, Locking, Quarantine, Checkpoint. Показательные узлы для быстрого чтения: UnifiedHTTPClient, CircuitBreaker, TokenBucket, RetryPolicy, ChemblAdapter, PubchemAdapter.
+Диаграмма «Infrastructure Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience), RF-014. На схеме отражено примерно 18 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: HTTP Infrastructure, DataSource Adapters, Storage Writers, Coordination, Observability. Показательные узлы для быстрого чтения: UnifiedHTTPClient, CircuitBreaker, TokenBucket, ChemblAdapter, PubchemAdapter, UniprotAdapter.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Дата: `2026-03-19`
 - Узлы (metadata): `18`
 
 \newpage
@@ -547,13 +547,13 @@
 ![23-silver-writer-class](foundation/png/23-silver-writer-class.png)
 
 ### Описание
-Диаграмма «SilverWriter Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake). На схеме отражено примерно 8 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: StoragePort, SilverWriter, WriteResult, MergeResult, SilverWriteMode, WriteModePolicy.
+Диаграмма «SilverWriter Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake), RF-010, RF-014. На схеме отражено примерно 9 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: SilverStoragePort, MergedStoragePort, StorageMaintenancePort, SilverWriter, SilverWriterRuntimeServices, WriteModePolicy.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
-- Узлы (metadata): `8`
+- Дата: `2026-03-19`
+- Узлы (metadata): `9`
 
 \newpage
 
@@ -627,18 +627,18 @@
 
 <div style="page-break-before: always;"></div>
 
-## 28-composition-root-di-graph — Composition Root Wiring — Full DI Graph
+## 28-composition-root-di-graph — Composition Root Wiring — Public APIs and Assembly
 
 ![28-composition-root-di-graph](foundation/png/28-composition-root-di-graph.png)
 
 ### Описание
-Диаграмма «Composition Root Wiring — Full DI Graph» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005. На схеме отражено примерно 28 узлов и 35 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Entry Point, Composition Factories, Logger & Observability, Client & Data Source, Storage & Services, Pipeline Construction. Показательные узлы для быстрого чтения: CLI run command, bootstrap/runtime/assembly.py, BootstrapLogger • configure structlog, DQServicesFactory • create() → DQ analyzers + monitor, HttpClientFactory • create(provider) → UnifiedHTTPClient, DataSourceFactory • create(provider, config) → DataSourcePort impl.
+Диаграмма «Composition Root Wiring — Public APIs and Assembly» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Module)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005, RF-011. На схеме отражено примерно 17 узлов и 20 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Interfaces, Public composition APIs, Composition assembly, Created runtime objects. Показательные узлы для быстрого чтения: CLI / interfaces layer, execution_api runner creation + metrics flush, services_api service accessors, resources_api cleanup / checkpoint / archive helpers, entrypoints.py retained broad facade, bootstrap_pipeline_runner().
 
 ### Метаданные
 - Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
-- Узлы (metadata): `28`
+- Уровень: `Mixed (System / Component / Module)`
+- Дата: `2026-03-19`
+- Узлы (metadata): `17`
 
 \newpage
 
@@ -712,18 +712,18 @@
 
 <div style="page-break-before: always;"></div>
 
-## 33-cli-run-interaction — CLI Run Command → PipelineRunner Full Interaction
+## 33-cli-run-interaction — CLI Run Command → Current Execution Flow
 
 ![33-cli-run-interaction](foundation/png/33-cli-run-interaction.png)
 
 ### Описание
-Диаграмма «CLI Run Command → PipelineRunner Full Interaction» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Interfaces → Composition → Application). На схеме отражено примерно 13 узлов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «CLI Run Command → Current Execution Flow» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Mixed (System / Component / Module)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Interfaces → Composition → Application), RF-011. На схеме отражено примерно 10 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
 
 ### Метаданные
 - Тип: `sequenceDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
-- Узлы (metadata): `13`
+- Уровень: `Mixed (System / Component / Module)`
+- Дата: `2026-03-19`
+- Узлы (metadata): `10`
 
 \newpage
 

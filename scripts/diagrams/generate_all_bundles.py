@@ -15,17 +15,13 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-
-def _resolve_repo_root() -> Path:
-    current = Path(__file__).resolve()
-    for parent in current.parents:
-        if (parent / "pyproject.toml").exists() and (parent / "scripts").exists():
-            return parent
-    return current.parents[0]
+try:
+    from .diagram_paths import DIAGRAM_ROOT, bundle_markdown_path
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import DIAGRAM_ROOT, bundle_markdown_path
 
 
-REPO_ROOT = _resolve_repo_root()
-MMD_BASE = REPO_ROOT / "docs" / "02-architecture" / "mmd-diagrams"
+MMD_BASE = DIAGRAM_ROOT
 
 # Collection definitions: (dir_name, file_ext, output_name, collection_title)
 COLLECTIONS = [
@@ -316,7 +312,7 @@ def generate_bundle(
 
     png_dir = collection_dir / "png"
     rel_prefix = collection_dir.name  # e.g. "foundation", "architecture", "views"
-    output_md = MMD_BASE / f"{output_name}.md"
+    output_md = bundle_markdown_path(collection_key)
 
     lines: list[str] = []
     lines.append(f"# {bundle_title}\n")

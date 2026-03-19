@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams With Descriptions
 
-- Generated: 2026-03-16T10:12:25
+- Generated: 2026-03-19T10:51:26
 - Diagram count: 52
 
 ## Table of Contents
@@ -34,7 +34,7 @@
 - [11a-config-loading — Configuration: Loading Pipeline](#11a-config-loading)
 - [11b-config-domain — Configuration: Domain & Application Config](#11b-config-domain)
 - [12-bootstrap-di-container — Bootstrap / DI Container (Composition Root)](#12-bootstrap-di-container)
-- [12a-bootstrap-factories — Bootstrap: Registries and Factory Seams](#12a-bootstrap-factories)
+- [12a-bootstrap-factories — Bootstrap: Registries, Public APIs, and Factory Seams](#12a-bootstrap-factories)
 - [12b-bootstrap-wiring — Bootstrap: Runtime and Admin Wiring](#12b-bootstrap-wiring)
 - [13-port-protocol-contracts — Port/Protocol Contracts (Full Map)](#13-port-protocol-contracts)
 - [13a-data-storage-ports — DataSource and Storage Ports](#13a-data-storage-ports)
@@ -52,7 +52,7 @@
 - [15-batch-executor-internals — BatchExecutor Internal Architecture](#15-batch-executor-internals)
 - [16-transformer-hierarchy — Transformer Hierarchy](#16-transformer-hierarchy)
 - [16a-transformer-base — Base Transformer and ChEMBL Transformers](#16a-transformer-base)
-- [16b-transformer-pub-other — Publication, UniProt, Other Transformers and Extractors](#16b-transformer-pub-other)
+- [16b-transformer-pub-other — Publication, UniProt, Other Transformers and Blocks](#16b-transformer-pub-other)
 - [17-security-pii-audit — Security, PII Hashing, and Audit Trail](#17-security-pii-audit)
 - [18-lock-checkpoint-shutdown — Locking, Checkpoint, and Graceful Shutdown](#18-lock-checkpoint-shutdown)
 - [18a-lock-system — Lock System](#18a-lock-system)
@@ -272,13 +272,13 @@
 ![06-storage-layer](architecture/png/06-storage-layer.png)
 
 ### Описание
-Диаграмма «Storage Layer Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.. На схеме отражено примерно 21 узлов и 23 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Storage Writers, Bronze Storage, Silver Storage, Gold Storage, Delta Reader. Показательные узлы для быстрого чтения: StoragePort (Protocol), AtomicWriteGroup ━━━━━━━━━━━━━━━━━ Atomic multi-file writes with rollback, GoldWriter csv_exporter + audit + metadata_writer write_gold / clear_gold, ArrowDataConverter (records → PyArrow), RetentionPolicy (vacuum/retention), MetadataWriter (_metadata.yaml). Примечание: Decomposed into 06a-storage-writers, 06b-storage-support.
+Диаграмма «Storage Layer Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Bronze/Silver/Gold writers, metadata sidecar zones, Delta Lake, and validation.. На схеме отражено примерно 23 узлов и 27 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Storage Writers, Bronze Storage, Silver Storage, Gold Storage, Delta Reader. Показательные узлы для быстрого чтения: StoragePort (Protocol), AtomicWriteGroup ━━━━━━━━━━━━━━━━━ Atomic multi-file writes with rollback, ArrowDataConverter (records → PyArrow), RetentionPolicy (vacuum/retention), MetadataWriter write_bronze / write_silver / write_gold, CsvExporter (Delta → CSV export). Примечание: Decomposed into 06a-storage-writers, 06b-storage-support.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-24`
-- Узлы (metadata): `21`
+- Дата: `2026-03-19`
+- Узлы (metadata): `23`
 
 \newpage
 
@@ -306,13 +306,13 @@
 ![06b-storage-support](architecture/png/06b-storage-support.png)
 
 ### Описание
-Диаграмма «Storage Support Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Support utilities, validators, and metadata builders for the storage layer.. На схеме отражено примерно 11 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Support Components, Validation, Metadata Builders. Показательные узлы для быстрого чтения: ArrowDataConverter records → PyArrow, RetentionPolicy vacuum / retention, MetadataWriter _metadata.yaml, CsvExporter Delta → CSV export, DQReportWriter DQ reports JSON, PanderaSilverValidator SilverValidatorPort impl.
+Диаграмма «Storage Support Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Support utilities, metadata write-preparation zones, validators, and metadata builders for the storage layer.. На схеме отражено примерно 14 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Support Components, Validation, Metadata Builders. Показательные узлы для быстрого чтения: ArrowDataConverter records → PyArrow, RetentionPolicy vacuum / retention, MetadataWriter layer-specific metadata writes, metadata_writer_operations target + YAML + retry telemetry, CsvExporter Delta → CSV export, DQReportWriter DQ reports JSON.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
-- Узлы (metadata): `11`
+- Дата: `2026-03-19`
+- Узлы (metadata): `14`
 
 \newpage
 
@@ -544,30 +544,30 @@
 ![12-bootstrap-di-container](architecture/png/12-bootstrap-di-container.png)
 
 ### Описание
-Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the current composition-root seams used to assemble runtime and admin services.. На схеме отражено примерно 20 узлов и 26 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Public composition seams, Internal composition modules, Registries + factories, Runtime bootstrap, CLI/bootstrap services, Created collaborators. Показательные узлы для быстрого чтения: Entry callers CLI + tests/scripts + future API, composition.entrypoints canonical retained facade, composition.bootstrap runtime / cli / assembly, ProviderRegistry provider configs + creators, PipelineRegistry pipeline definitions, DataSourceFactory canonical provider adapter path. Примечание: Decomposed into 12a, 12b sub-diagrams.
+Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the current narrow public APIs plus retained broad seam used to assemble runtime and admin services.. На схеме отражено примерно 20 узлов и 31 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Public composition seams, Internal composition modules, Registries + factories, Runtime bootstrap, CLI/bootstrap services, Created collaborators. Показательные узлы для быстрого чтения: Entry callers CLI + tests/scripts + future API, composition.execution_api preferred execution seam, composition.services_api preferred services seam, composition.resources_api preferred resource seam, composition.entrypoints retained broad facade, composition.bootstrap runtime / cli / assembly. Примечание: Decomposed into 12a, 12b sub-diagrams.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-16`
+- Дата: `2026-03-19`
 - Узлы (metadata): `20`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-## 12a-bootstrap-factories — Bootstrap: Registries and Factory Seams
+## 12a-bootstrap-factories — Bootstrap: Registries, Public APIs, and Factory Seams
 
 ![12a-bootstrap-factories](architecture/png/12a-bootstrap-factories.png)
 
 ### Описание
-Диаграмма «Bootstrap: Registries and Factory Seams» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Focuses on current registries, provider wiring, and canonical factory seams.. На схеме отражено примерно 8 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Registries + factories. Показательные узлы для быстрого чтения: composition.entrypoints, composition.bootstrap, ProviderRegistry, PipelineRegistry, DataSourceFactory, RunnerFactory.
+Диаграмма «Bootstrap: Registries, Public APIs, and Factory Seams» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Focuses on current public composition APIs, registries, provider wiring, and canonical factory seams.. На схеме отражено примерно 11 узлов и 12 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Registries + factories. Показательные узлы для быстрого чтения: composition.execution_api, composition.services_api, composition.resources_api, composition.entrypoints retained broad seam, composition.bootstrap, ProviderRegistry.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-16`
-- Узлы (metadata): `8`
+- Дата: `2026-03-19`
+- Узлы (metadata): `11`
 
 \newpage
 
@@ -578,13 +578,13 @@
 ![12b-bootstrap-wiring](architecture/png/12b-bootstrap-wiring.png)
 
 ### Описание
-Диаграмма «Bootstrap: Runtime and Admin Wiring» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers the current runtime/admin assembly outputs created from composition bootstrap.. На схеме отражено примерно 15 узлов и 15 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composition bootstrap, Infrastructure collaborators, Created services. Показательные узлы для быстрого чтения: bootstrap.runtime, bootstrap.cli, bootstrap.assembly, RunnerFactoryBuilderService, CompositeSupportServicesFactory, Provider adapter DataSourcePort.
+Диаграмма «Bootstrap: Runtime and Admin Wiring» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers how narrow public composition APIs and the retained broad seam expose runtime/admin assembly outputs.. На схеме отражено примерно 19 узлов и 24 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Public composition APIs, Composition bootstrap, Infrastructure collaborators, Created services. Показательные узлы для быстрого чтения: execution_api, services_api, resources_api, entrypoints retained broad seam, bootstrap.runtime, bootstrap.cli.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-16`
-- Узлы (metadata): `15`
+- Дата: `2026-03-19`
+- Узлы (metadata): `19`
 
 \newpage
 
@@ -663,12 +663,12 @@
 ![13b-port-contracts-storage](architecture/png/13b-port-contracts-storage.png)
 
 ### Описание
-Диаграмма «Port Contracts: Storage» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers StoragePort, DeltaReaderPort, and MetadataWriterPort implementations.. На схеме отражено примерно 9 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: StoragePort, DeltaReaderPort, MetadataWriterPort, BronzeWriter, DeltaReader, MetadataWriter.
+Диаграмма «Port Contracts: Storage» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers StoragePort, DeltaReaderPort, and layer-specific MetadataWriterPort implementations.. На схеме отражено примерно 9 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: StoragePort, DeltaReaderPort, MetadataWriterPort write_bronze / write_silver / write_gold, BronzeWriter, DeltaReader, MetadataWriter atomic metadata sidecars.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-25`
+- Дата: `2026-03-19`
 - Узлы (metadata): `9`
 
 \newpage
@@ -765,13 +765,13 @@
 ![14-cli-interface-layer](architecture/png/14-cli-interface-layer.png)
 
 ### Описание
-Диаграмма «CLI / Interface Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: current CLI routing through registry helpers, composition entrypoints, and bootstrap services.. На схеме отражено примерно 18 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: interfaces/cli, composition boundary, Created runtime services. Показательные узлы для быстрого чтения: Terminal user, cli.main Click group, registry_helpers fresh explicit PipelineRegistry, run / run-all, run-composite, health / export / quarantine / checkpoint config / lock / maintenance. Примечание: Decomposed into 14a-cli-commands, 14b-cli-routing.
+Диаграмма «CLI / Interface Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: current CLI routing through registry helpers, narrow composition APIs, and runtime/bootstrap services.. На схеме отражено примерно 17 узлов и 20 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: interfaces/cli, composition boundary, Created runtime services. Показательные узлы для быстрого чтения: Terminal user, cli.main Click group, registry_helpers fresh explicit PipelineRegistry, run / run-all, run-composite, health / export / quarantine / checkpoint config / lock / maintenance. Примечание: Decomposed into 14a-cli-commands, 14b-cli-routing.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-16`
-- Узлы (metadata): `18`
+- Дата: `2026-03-19`
+- Узлы (metadata): `17`
 
 \newpage
 
@@ -799,13 +799,13 @@
 ![14b-cli-routing](architecture/png/14b-cli-routing.png)
 
 ### Описание
-Диаграмма «CLI: Routing to Composition Boundary» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how command families route through registry helpers, composition.entrypoints, and bootstrap services.. На схеме отражено примерно 13 узлов и 13 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: interfaces/cli helpers, composition boundary, Runtime services. Показательные узлы для быстрого чтения: run / run-all, run-composite, health / export / quarantine checkpoint / config / lock / maintenance, registry_helpers, composition.entrypoints, bootstrap.runtime.
+Диаграмма «CLI: Routing to Composition Boundary» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how command families route through registry helpers and narrow composition APIs, while entrypoints remains a retained broad seam.. На схеме отражено примерно 14 узлов и 15 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: interfaces/cli helpers, composition boundary, Runtime services. Показательные узлы для быстрого чтения: run / run-all, run-composite, health / export / quarantine checkpoint / config / lock / maintenance, registry_helpers, execution_api, services_api.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-16`
-- Узлы (metadata): `13`
+- Дата: `2026-03-19`
+- Узлы (metadata): `14`
 
 \newpage
 
@@ -833,13 +833,13 @@
 ![16-transformer-hierarchy](architecture/png/16-transformer-hierarchy.png)
 
 ### Описание
-Диаграмма «Transformer Hierarchy» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the Template Method pattern and all provider-specific transformers.. На схеме отражено примерно 35 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Template Method Pattern, ChEMBL Transformers, Publication Transformers, UniProt Transformers, Other Transformers, Extractor Pattern. Показательные узлы для быстрого чтения: BaseChemblTransformer entity_class + primary_id_field _extract_business_data(), ActivityTransformer, PubMedPublicationTransformer XML parsing + extractor stack, UniProtProteinTransformer taxonomy/gene/feature extractors, IDMappingTransformer, PubChemCompoundTransformer. Примечание: Decomposed into 16a-transformer-base, 16b-transformer-pub-other.
+Диаграмма «Transformer Hierarchy» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the Template Method pattern, declarative publication blocks, and provider-specific helper seams.. На схеме отражено примерно 27 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Template Method Pattern, ChEMBL Transformers, Publication Transformers, UniProt Transformers, Other Transformers, Block + Helper Strategy. Показательные узлы для быстрого чтения: BaseChemblTransformer entity_class + primary_id_field _extract_business_data(), ActivityTransformer, PubMedPublicationTransformer cached XML root + extraction_blocks, UniProtProteinTransformer taxonomy/gene/feature extractors, IDMappingTransformer, PubChemCompoundTransformer. Примечание: Decomposed into 16a-transformer-base, 16b-transformer-pub-other.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-24`
-- Узлы (metadata): `35`
+- Дата: `2026-03-19`
+- Узлы (metadata): `27`
 
 \newpage
 
@@ -862,18 +862,18 @@
 
 <div style="page-break-before: always;"></div>
 
-## 16b-transformer-pub-other — Publication, UniProt, Other Transformers and Extractors
+## 16b-transformer-pub-other — Publication, UniProt, Other Transformers and Blocks
 
 ![16b-transformer-pub-other](architecture/png/16b-transformer-pub-other.png)
 
 ### Описание
-Диаграмма «Publication, UniProt, Other Transformers and Extractors» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Provider-specific transformers and field extractor hierarchy.. На схеме отражено примерно 18 узлов и 3 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Publication Transformers, UniProt Transformers, Other Transformers, Field Extractors. Показательные узлы для быстрого чтения: BasePublicationTransformer, PubMedPublicationTransformer, CrossRefTransformer, OpenAlexTransformer, SemanticScholarTransformer, UniProtProteinTransformer.
+Диаграмма «Publication, UniProt, Other Transformers and Blocks» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Provider-specific transformers, declarative PubMed blocks, and helper extractor seams.. На схеме отражено примерно 16 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Publication Transformers, UniProt Transformers, Other Transformers, Blocks + Helper Extractors. Показательные узлы для быстрого чтения: BasePublicationTransformer, PubMedPublicationTransformer, CrossRefPublicationTransformer, OpenAlexPublicationTransformer, SemanticScholarPublicationTransformer, UniProtProteinTransformer.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
-- Узлы (metadata): `18`
+- Дата: `2026-03-19`
+- Узлы (metadata): `16`
 
 \newpage
 

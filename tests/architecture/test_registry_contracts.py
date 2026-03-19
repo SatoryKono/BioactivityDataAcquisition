@@ -172,6 +172,40 @@ class TestRegistryInstanceVariables:
         default_providers = ProviderRegistry._providers
         assert default_providers is get_default_provider_registry()._providers
 
+    def test_provider_registry_instance_api_uses_instance_store(self) -> None:
+        """ProviderRegistry instance methods must not write through the default singleton."""
+        from bioetl.composition.providers.provider_registry import (
+            ProviderRegistry,
+            get_default_provider_registry,
+        )
+        from bioetl.composition.providers._models import ProviderConfig
+
+        class DummyAdapter:
+            def __init__(self, http_client=None, logger=None) -> None:
+                self.http_client = http_client
+                self.logger = logger
+
+        default_registry = get_default_provider_registry()
+        original_default = dict(default_registry._providers)
+        default_registry._providers.clear()
+
+        try:
+            reg = ProviderRegistry()
+            config = ProviderConfig(
+                adapter_class=DummyAdapter,
+                requires_http_client=False,
+                requires_logger=False,
+            )
+
+            reg.register("isolated_provider", config)
+
+            assert reg.get("isolated_provider") is config
+            assert "isolated_provider" in reg._providers
+            assert "isolated_provider" not in default_registry._providers
+        finally:
+            default_registry._providers.clear()
+            default_registry._providers.update(original_default)
+
 
 class TestRegistryReturnTypes:
     """Registries must return proper types."""

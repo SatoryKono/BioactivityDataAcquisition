@@ -15,6 +15,7 @@ from bioetl.composition.providers import (
     HttpConfig,
     ProviderConfig,
     ProviderRegistry,
+    create_provider_registry,
     register_provider,
 )
 from bioetl.composition.providers.loader import (
@@ -211,6 +212,74 @@ class TestProviderRegistry:
 
         assert ProviderRegistry.list_providers() == []
 
+    def test_isolated_registry_keeps_state_local(self):
+        """Instance-scoped registries must not leak writes into the default singleton."""
+        isolated = create_provider_registry()
+        config = ProviderConfig(
+            adapter_class=MockAdapter,
+            requires_http_client=False,
+            requires_logger=False,
+        )
+
+        isolated.register("isolated_provider", config)
+
+        assert isolated.is_registered("isolated_provider") is True
+        assert isolated.get("isolated_provider") is config
+        assert "isolated_provider" in isolated._providers
+        assert "isolated_provider" not in ProviderRegistry._providers
+
+    def test_injected_store_and_creator_are_used_by_instance_api(self):
+        """Injected collaborators must power instance-scoped adapter creation."""
+        from bioetl.composition.providers._store import ProviderStore
+
+        sentinel_adapter = object()
+
+        class StubCreator:
+            def __init__(self) -> None:
+                self.calls: list[tuple[str, str]] = []
+
+            def create_adapter(self, **kwargs: object) -> object:
+                self.calls.append(("create_adapter", str(kwargs["name"])))
+                return sentinel_adapter
+
+            def create_data_source(self, **kwargs: object) -> object:
+                self.calls.append(("create_data_source", str(kwargs["name"])))
+                return object()
+
+            def has_data_source_creator(self, config: ProviderConfig) -> bool:
+                return config.data_source_creator is not None
+
+            def require_data_source_creator(
+                self,
+                *,
+                name: str,
+                config: ProviderConfig,
+            ) -> None:
+                if config.data_source_creator is None:
+                    raise KeyError(name)
+
+            def build_bound_creator(self, *, name: str, create_data_source_fn):
+                self.calls.append(("build_bound_creator", name))
+                return create_data_source_fn
+
+        store = ProviderStore(
+            {
+                "injected_provider": ProviderConfig(
+                    adapter_class=MockAdapter,
+                    requires_http_client=False,
+                    requires_logger=False,
+                )
+            }
+        )
+        creator = StubCreator()
+        isolated = ProviderRegistry(store=store, creator=creator)
+
+        result = isolated.create_adapter("injected_provider")
+
+        assert result is sentinel_adapter
+        assert creator.calls == [("create_adapter", "injected_provider")]
+        assert ProviderRegistry._providers == {}
+
 
 class TestProviderRegistryAdapterCreation:
     """Tests for adapter creation through ProviderRegistry."""
@@ -351,6 +420,56 @@ class TestProviderRegistryAdapterCreation:
 
         with pytest.raises(ValueError, match="requires http_client"):
             ProviderRegistry.create_adapter("http_required_test", http_client=None)
+
+
+class TestProviderRegistryDataSourceCreator:
+    """Tests for provider-bound data-source creator closures."""
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown(self):
+        """Reset registry before and after each test."""
+        original_providers = dict(ProviderRegistry._providers)
+        ProviderRegistry._providers.clear()
+
+        yield
+
+        ProviderRegistry._providers.clear()
+        ProviderRegistry._providers.update(original_providers)
+
+    def test_build_data_source_creator_delegates_to_registered_creator(self):
+        """ProviderRegistry should return a provider-bound creator callback."""
+        data_source = MagicMock()
+        data_source_creator = MagicMock(return_value=data_source)
+        ProviderRegistry.register(
+            "creator_test",
+            ProviderConfig(
+                adapter_class=MockAdapter,
+                data_source_creator=data_source_creator,
+            ),
+        )
+
+        creator = ProviderRegistry.build_data_source_creator("creator_test")
+        result = creator(
+            settings=MagicMock(),
+            pipeline_config=MagicMock(),
+            logger=MagicMock(),
+            filter_config=MagicMock(),
+            metrics=MagicMock(),
+            pipeline_name="creator_pipeline",
+        )
+
+        assert result is data_source
+        data_source_creator.assert_called_once()
+
+    def test_build_data_source_creator_raises_without_registered_creator(self):
+        """Providers without a registered creator should fail clearly."""
+        ProviderRegistry.register(
+            "missing_creator",
+            ProviderConfig(adapter_class=MockAdapter),
+        )
+
+        with pytest.raises(KeyError, match="does not have a data_source_creator"):
+            ProviderRegistry.build_data_source_creator("missing_creator")
 
 
 class TestRegisterProviderDecorator:

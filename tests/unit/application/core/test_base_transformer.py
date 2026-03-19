@@ -70,6 +70,19 @@ def test_base_transformer_requires_explicit_dependencies() -> None:
 
 
 @pytest.mark.unit
+def test_base_transformer_rejects_partial_named_collaborators() -> None:
+    """Named collaborator args must not trigger hidden default construction."""
+    with pytest.raises(
+        TypeError,
+        match="no longer assembles partial collaborator defaults",
+    ):
+        ConcreteTransformer(
+            provider="test",
+            tracer=MagicMock(),
+        )
+
+
+@pytest.mark.unit
 class TestTransformationError:
     """Tests for TransformationError exception."""
 

@@ -15,6 +15,11 @@ import re
 import sys
 from pathlib import Path
 
+try:
+    from .diagram_paths import DIAGRAM_ROOT
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import DIAGRAM_ROOT
+
 # Page break block that works for both DOCX (pandoc) and PDF (wkhtmltopdf)
 PAGE_BREAK = (
     '\n\\newpage\n'
@@ -99,8 +104,7 @@ def fix_bundle(md_path: Path) -> int:
 
 
 def main() -> int:
-    repo_root = Path(__file__).resolve().parents[2]
-    mmd_dir = repo_root / "docs" / "02-architecture" / "mmd-diagrams"
+    mmd_dir = DIAGRAM_ROOT
 
     bundles = sorted(mmd_dir.glob("*-with-descriptions.md"))
     if not bundles:

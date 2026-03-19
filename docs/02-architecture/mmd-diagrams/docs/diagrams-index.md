@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams Index
 
-*Updated: 2026-02-27*
+*Updated: 2026-03-19*
 
 > **Canonical root:** [docs/02-architecture/mmd-diagrams/](../README.md)
 > **Policy:** [POL-LLM-DIAGRAMS-001](../../06-diagram-policy.md)
@@ -9,11 +9,11 @@
 ## Repository Layout
 
 - Canonical `.mmd` sources:
-  - `architecture/` — 32 files
-  - `class-diagrams/` — 16 files
-  - `foundation/` — 54 files
+  - `architecture/` — 52 files
+  - `class-diagrams/` — 19 files
+  - `foundation/` — 55 files
 - Decomposed `.mermaid` views:
-  - `views/` — 156 files
+  - `views/` — 162 files
 - Template:
   - `_template.mmd`
 
@@ -28,7 +28,7 @@
 
 ## Canonical Families
 
-- Architecture core (18):
+- Architecture core (18 primary topics; 52 `.mmd` files including decomposed sub-diagrams):
   - `architecture/01-high-level-hexagonal.mmd`
   - `architecture/02-layer-dependency-matrix.mmd`
   - `architecture/03-medallion-data-flow.mmd`
@@ -47,8 +47,8 @@
   - `architecture/16-transformer-hierarchy.mmd`
   - `architecture/17-security-pii-audit.mmd`
   - `architecture/18-lock-checkpoint-shutdown.mmd`
-- Class families (16): `class-diagrams/01-*.mmd` ... `class-diagrams/16-*.mmd`
-- Foundation set (54): `foundation/01-*.mmd` ... `foundation/50-*.mmd` (with historical number gaps)
+- Class families (19 `.mmd` files): `class-diagrams/01-*.mmd` ... `class-diagrams/16-*.mmd`, including focused method/operation catalogs (`01a`, `08a`, `14a`)
+- Foundation set (55 `.mmd` files): `foundation/01-*.mmd` ... `foundation/50-*.mmd` (with historical number gaps)
 
 ## Render And Validation
 
@@ -72,4 +72,5 @@ python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-archi
 
 - New canonical diagrams must be added as `.mmd` under `mmd-diagrams/**`.
 - Decomposed views are maintained in `mmd-diagrams/views/*.mermaid`.
+- Rendered `svg/png` artifacts under sibling `svg/` and `png/` directories are maintained outputs and must be refreshed when source diagrams change.
 - Legacy snapshots may still exist in `docs/02-architecture/diagrams/mermaid/`, but they are not canonical for new work.

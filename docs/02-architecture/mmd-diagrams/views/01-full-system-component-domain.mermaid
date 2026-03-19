@@ -1,5 +1,16 @@
 %% View: Domain-Focus | Parent: 01-full-system-component-full.mermaid
 %% @uniform width=192 height=56 max_title_len=19 max_desc_lines=0
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 flowchart TB
 %% keep-orphan: N12, N13, N14, N15, N16, N17, N18, N19, N20
 

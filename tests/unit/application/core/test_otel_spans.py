@@ -25,7 +25,7 @@ from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.ports import NoOpTracing, TracingPort
+from bioetl.domain.ports import NoOpMetrics, NoOpTracing, TracingPort
 from bioetl.domain.types import RunID, RunType
 
 
@@ -281,11 +281,10 @@ class TestPipelineRunnerSpan:
         assert str(exit_args[1]) == "forced error"
 
     @pytest.mark.asyncio
-    async def test_pipeline_run_noop_tracer_no_errors(self) -> None:
-        """Verify run() works without errors when tracer is None (NoOpTracing path)."""
-        runner = self._build_runner(tracer=None)
-        # Should not raise — NoOpTracing is used transparently
-        await runner.run()
+    async def test_pipeline_run_none_tracer_is_rejected(self) -> None:
+        """Runner must reject hidden tracer defaults in application layer."""
+        with pytest.raises(TypeError, match="requires explicit tracer injection"):
+            self._build_runner(tracer=None)
 
     @pytest.mark.asyncio
     async def test_pipeline_run_explicit_noop_tracer(self) -> None:
@@ -293,10 +292,10 @@ class TestPipelineRunnerSpan:
         runner = self._build_runner(tracer=NoOpTracing())
         await runner.run()
 
-    def test_tracer_stored_as_noop_when_none(self) -> None:
-        """Verify that passing tracer=None stores a NoOpTracing instance."""
-        runner = self._build_runner(tracer=None)
-        assert isinstance(runner._tracer, NoOpTracing)
+    def test_none_tracer_is_rejected(self) -> None:
+        """Construction fails fast when tracer defaults are left unresolved."""
+        with pytest.raises(TypeError, match="requires explicit tracer injection"):
+            self._build_runner(tracer=None)
 
     def test_tracer_stored_when_provided(self) -> None:
         """Verify that an explicit tracer is stored as-is."""
@@ -390,7 +389,7 @@ class TestPostrunServiceSpan:
             dq_service=dq_service,
             lifecycle_service=lifecycle_service,
             storage=storage,
-            metrics=None,
+            metrics=NoOpMetrics(warn_on_use=False),
             logger=mock_logger,
             dependencies=dependencies,
             tracer=cast(TracingPort | None, tracer),
@@ -480,10 +479,10 @@ class TestPostrunServiceSpan:
         assert str(exit_args[1]) == "dq error"
 
     @pytest.mark.asyncio
-    async def test_postrun_run_noop_tracer_no_errors(self) -> None:
-        """Verify run() works without errors when tracer is None (NoOpTracing path)."""
-        service = self._build_postrun_service(tracer=None)
-        await service.run(executor=self._make_executor())
+    async def test_postrun_run_none_tracer_is_rejected(self) -> None:
+        """PostrunService must reject hidden tracer defaults in application layer."""
+        with pytest.raises(TypeError, match="requires explicit tracer injection"):
+            self._build_postrun_service(tracer=None)
 
     @pytest.mark.asyncio
     async def test_postrun_run_explicit_noop_tracer(self) -> None:
@@ -491,10 +490,10 @@ class TestPostrunServiceSpan:
         service = self._build_postrun_service(tracer=NoOpTracing())
         await service.run(executor=self._make_executor())
 
-    def test_tracer_stored_as_noop_when_none(self) -> None:
-        """Verify that passing tracer=None stores a NoOpTracing instance."""
-        service = self._build_postrun_service(tracer=None)
-        assert isinstance(service._tracer, NoOpTracing)
+    def test_postrun_none_tracer_is_rejected(self) -> None:
+        """Construction fails fast when tracer defaults are unresolved."""
+        with pytest.raises(TypeError, match="requires explicit tracer injection"):
+            self._build_postrun_service(tracer=None)
 
     def test_tracer_stored_when_provided(self) -> None:
         """Verify that an explicit tracer is stored as-is."""
@@ -562,7 +561,9 @@ class TestRecordProcessorSpanRegression:
         from bioetl.domain.types import BatchID
 
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
-        await cast(Any, processor).process_batch(records=[{"id": "1"}], batch_id=batch_id)
+        await cast(Any, processor).process_batch(
+            records=[{"id": "1"}], batch_id=batch_id
+        )
 
         # get_tracer("bioetl.processor") should be called for span creation
         tracer_names = [c.args[0] for c in mock_tracer.get_tracer.call_args_list]

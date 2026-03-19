@@ -14,14 +14,17 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+try:
+    from .diagram_paths import SOURCE_FAMILIES, render_dir
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import SOURCE_FAMILIES, render_dir
+
 SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG_NS)
 
 SVG_DIRS = [
-    Path("docs/02-architecture/mmd-diagrams/architecture/svg"),
-    Path("docs/02-architecture/mmd-diagrams/class-diagrams/svg"),
-    Path("docs/02-architecture/mmd-diagrams/foundation/svg"),
-    Path("docs/02-architecture/mmd-diagrams/views/svg"),
+    render_dir(family, "svg")
+    for family in SOURCE_FAMILIES
 ]
 
 

@@ -1,8 +1,15 @@
-# Каталог Диаграмм BioETL
+# Исторический Каталог Диаграмм BioETL
 
-*Версия: 1.0 | Дата: 2026-01-20*
+*Статус: historical planning artifact | Версия: 1.0 | Дата: 2026-01-20 | Актуализировано: 2026-03-19*
 
-Комплексный каталог из 500 диаграмм для документирования архитектуры, потоков данных, компонентов и взаимодействий проекта BioETL.
+Этот документ сохраняется как historical/planning artifact и не является текущим canonical inventory.
+Актуальный measured inventory и governance baseline ведутся через:
+
+- `docs/02-architecture/mmd-diagrams/docs/diagrams-index.md`
+- `docs/02-architecture/mmd-diagrams/docs/diagram-views-inventory.md`
+- `docs/02-architecture/06-diagram-policy.md`
+
+Содержимое ниже отражает раннюю catalog/program wave и может расходиться с текущим tracked set диаграмм.
 
 ---
 

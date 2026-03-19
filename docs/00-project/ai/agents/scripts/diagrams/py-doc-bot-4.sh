@@ -42,8 +42,8 @@ Options:
 Examples:
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --profile pr --enforce-budget
-  docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
-  docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --input-md docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md
+  docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --diagram <repo-relative-diagram-path>
+  docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --input-md <repo-relative-bundle-path>
 EOF
 }
 
