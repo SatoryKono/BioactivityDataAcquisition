@@ -15,6 +15,10 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 try:
     from .diagram_paths import DIAGRAM_ROOT, QUALITY_GATE_MANIFEST, REPO_ROOT, source_dir
 except ImportError:  # pragma: no cover - direct script execution
@@ -239,6 +243,7 @@ def check_large_diagram_decomposition(path: Path, lines: list[str], threshold: i
     if nodes is None or nodes < threshold or path.suffix != ".mmd":
         return violations
 
+    views_dir = source_dir("views")
     views = sibling_views_for(path)
     has_full = any(view.name.endswith("-full.mermaid") for view in views)
     has_detail = any(

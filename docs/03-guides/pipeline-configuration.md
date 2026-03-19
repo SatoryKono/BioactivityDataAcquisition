@@ -428,30 +428,35 @@ gold_filters:
 ```yaml
 # configs/providers/chembl.yaml
 source:
-  type: api
-  loading_strategy: full
-  batch_size: 20
+  batch_size: 10
 
-  provider-config:
+  provider_config:
     provider: chembl
     base_url: https://www.ebi.ac.uk/chembl/api/data
+    auth_type: public
     client:
       timeout_sec: 60.0
       max_retries: 3
-    max_url_length: 2000
-    batch_size: 20
-    page-size: 1000
+    pagination:
+      page_size: 1000
+      id_batch_size: 20
+      strategy: offset
+      max_url_length: 1000
+    # Transitional migration-only aliases may still appear in existing configs:
+    # batch_size: 20
+    # page_size: 1000
+    # max_url_length: 2000
 
-  circuit-breaker:
+  circuit_breaker:
     failure_threshold: 5
     recovery_timeout: 300
 
   rate_limit:
-    requests_per_second: 5
+    requests_per_second: 3
     burst: 10
 
   health_check:
-    endpoint: /chembl/api/data/status
+    endpoint: /chembl/api/data/status.json
     timeout: 5
 
 entities:
@@ -462,17 +467,27 @@ entities:
   # ... и 8 других entities для ChEMBL
 ```
 
+Canonical current source pagination contract:
+- `source.provider_config.pagination.*` is the single source of truth for provider pagination.
+- Pipelines may override pagination only through `page_size_override`.
+
+Retired source provider pagination aliases:
+- `source.provider_config.batch_size`
+- `source.provider_config.page_size`
+- `source.provider_config.max_url_length`
+- `source.provider_config.cursor_pagination`
+
 ### Rate Limits по провайдерам (7 source configs)
 
 | Provider        | Source Config                  | Rate Limit   | Burst | Batch Size |
 | --------------- | ------------------------------ | ------------ | ----- | ---------- |
-| ChEMBL          | `sources/chembl.yaml`          | 5 req/sec    | 10    | 20         |
-| PubChem         | `sources/pubchem.yaml`         | 5 req/sec    | 10    | 1          |
-| UniProt         | `sources/uniprot.yaml`         | 100 req/sec  | 200   | 100        |
-| CrossRef        | `sources/crossref.yaml`        | 10 req/sec   | 20    | 50         |
-| OpenAlex        | `sources/openalex.yaml`        | 10 req/sec   | 20    | 50         |
-| PubMed          | `sources/pubmed.yaml`          | 3 req/sec    | 5     | 10         |
-| SemanticScholar | `sources/semanticscholar.yaml` | 100 req/5min | —     | 100        |
+| ChEMBL          | `configs/providers/chembl.yaml`          | 3 req/sec    | 10    | 20         |
+| PubChem         | `configs/providers/pubchem.yaml`         | 5 req/sec    | 10    | 50         |
+| UniProt         | `configs/providers/uniprot.yaml`         | 10 req/sec   | 20    | 200        |
+| CrossRef        | `configs/providers/crossref.yaml`        | 50 req/sec   | 100   | 50         |
+| OpenAlex        | `configs/providers/openalex.yaml`        | 10 req/sec   | 20    | 50         |
+| PubMed          | `configs/providers/pubmed.yaml`          | 3 req/sec    | 5     | 100        |
+| SemanticScholar | `configs/providers/semanticscholar.yaml` | 0.1 req/sec  | 1     | 50         |
 
 ----------------------------------------------------------------------
 

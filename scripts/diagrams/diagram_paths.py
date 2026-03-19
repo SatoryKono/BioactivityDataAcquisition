@@ -3,6 +3,11 @@
 
 These helpers intentionally auto-detect the active diagram root so the same
 toolchain can work before and after the `mmd-diagrams -> diagrams` migration.
+They also support the staged internal layout migration:
+
+- `docs/` -> `governance/`
+- root `render.sh`/`svgo.config.js` -> `tooling/`
+- root manifests -> `manifests/`
 """
 
 from __future__ import annotations
@@ -30,19 +35,61 @@ def resolve_diagram_root() -> Path:
     return ARCHITECTURE_DOCS_ROOT / "mmd-diagrams"
 
 
+def _resolve_first_existing(*candidates: Path) -> Path:
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
 DIAGRAM_ROOT = resolve_diagram_root()
 DIAGRAM_ROOT_BASENAME = DIAGRAM_ROOT.name
 DIAGRAM_THEME_DIR = DIAGRAM_ROOT / "theme"
-QUALITY_GATE_MANIFEST = DIAGRAM_ROOT / "quality-gate-manifest.txt"
-VISUAL_SMOKE_MANIFEST = DIAGRAM_ROOT / "visual-smoke-manifest.txt"
+DIAGRAM_GOVERNANCE_DIR = _resolve_first_existing(
+    DIAGRAM_ROOT / "governance",
+    DIAGRAM_ROOT / "docs",
+)
+DIAGRAM_TOOLING_DIR = _resolve_first_existing(
+    DIAGRAM_ROOT / "tooling",
+    DIAGRAM_ROOT,
+)
+DIAGRAM_RENDER_SCRIPT = _resolve_first_existing(
+    DIAGRAM_TOOLING_DIR / "render.sh",
+    DIAGRAM_ROOT / "render.sh",
+)
+DIAGRAM_SVGO_CONFIG = _resolve_first_existing(
+    DIAGRAM_TOOLING_DIR / "svgo.config.js",
+    DIAGRAM_ROOT / "svgo.config.js",
+)
+DIAGRAM_MANIFESTS_DIR = _resolve_first_existing(
+    DIAGRAM_ROOT / "manifests",
+    DIAGRAM_ROOT,
+)
+QUALITY_GATE_MANIFEST = _resolve_first_existing(
+    DIAGRAM_MANIFESTS_DIR / "quality-gates.txt",
+    DIAGRAM_ROOT / "manifests/quality-gates.txt",
+)
+VISUAL_SMOKE_MANIFEST = _resolve_first_existing(
+    DIAGRAM_MANIFESTS_DIR / "visual-smoke.txt",
+    DIAGRAM_ROOT / "manifests/visual-smoke.txt",
+)
 
 SOURCE_FAMILIES = ("architecture", "class-diagrams", "foundation", "views")
 
-_BUNDLE_BASENAMES = {
+DIAGRAM_BUNDLES_DIR = DIAGRAM_ROOT / "bundles"
+
+_LEGACY_BUNDLE_BASENAMES = {
     "architecture": "architecture-diagrams-with-descriptions",
     "class-diagrams": "class-diagrams-with-descriptions",
     "foundation": "foundation-diagrams-with-descriptions",
     "views": "views-diagrams-with-descriptions",
+}
+
+_BUNDLE_STUBS = {
+    "architecture": "architecture.bundle",
+    "class-diagrams": "class.bundle",
+    "foundation": "foundation.bundle",
+    "views": "views.bundle",
 }
 
 
@@ -55,13 +102,16 @@ def render_dir(family: str, kind: str) -> Path:
 
 
 def bundle_markdown_path(collection: str) -> Path:
-    return DIAGRAM_ROOT / f"{_BUNDLE_BASENAMES[collection]}.md"
+    if DIAGRAM_BUNDLES_DIR.exists():
+        return DIAGRAM_BUNDLES_DIR / f"{_BUNDLE_STUBS[collection]}.md"
+    return DIAGRAM_ROOT / f"{_LEGACY_BUNDLE_BASENAMES[collection]}.md"
 
 
 def bundle_output_path(collection: str, suffix: str) -> Path:
-    return DIAGRAM_ROOT / f"{_BUNDLE_BASENAMES[collection]}{suffix}"
+    if DIAGRAM_BUNDLES_DIR.exists():
+        return DIAGRAM_BUNDLES_DIR / f"{_BUNDLE_STUBS[collection]}{suffix}"
+    return DIAGRAM_ROOT / f"{_LEGACY_BUNDLE_BASENAMES[collection]}{suffix}"
 
 
 def source_ref(family: str, filename: str) -> str:
     return f"{DIAGRAM_ROOT_BASENAME}/{family}/{filename}"
-

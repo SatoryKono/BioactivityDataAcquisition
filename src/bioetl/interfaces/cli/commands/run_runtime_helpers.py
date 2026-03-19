@@ -24,6 +24,10 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
     from typing import Protocol
 
+    from bioetl.application.services.cli_run_orchestration_contracts import (
+        RunPreparedPipelineCallable,
+    )
+
     class PipelineRunnerService(Protocol):
         """Protocol for pipeline runner services used by CLI runtime helpers."""
 
@@ -128,7 +132,7 @@ def build_run_pipeline_callable(
     run_pipeline_async_callable: Callable[
         ..., Awaitable[RunResult]
     ] = run_pipeline_async,
-) -> Callable[[RunExecutionRequest], Awaitable[RunResult]]:
+) -> RunPreparedPipelineCallable:
     """Return a stable async callable for prepared execution requests."""
 
     async def _run(request: RunExecutionRequest) -> RunResult:

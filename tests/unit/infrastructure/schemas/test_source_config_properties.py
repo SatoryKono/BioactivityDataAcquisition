@@ -5,7 +5,7 @@ Focuses on the property resolution logic:
 - page_size resolution order
 - max_url_length resolution order
 - to_adapter_config() with override
-- Legacy field promotion via model_validator
+- retired legacy alias rejection
 """
 
 from __future__ import annotations
@@ -31,9 +31,6 @@ def _make_source_config(
     max_url_length: int | None = None,
     strategy: str = "offset",
     source_batch_size: int = 100,
-    provider_batch_size: int | None = None,
-    provider_page_size: int | None = None,
-    provider_max_url_length: int | None = None,
 ) -> SourceYamlConfig:
     """Build a SourceYamlConfig with specific pagination values."""
     pagination_data: dict = {"strategy": strategy}
@@ -49,12 +46,6 @@ def _make_source_config(
         "base_url": "https://api.example.com",
         "pagination": pagination_data,
     }
-    if provider_batch_size is not None:
-        provider_data["batch_size"] = provider_batch_size
-    if provider_page_size is not None:
-        provider_data["page_size"] = provider_page_size
-    if provider_max_url_length is not None:
-        provider_data["max_url_length"] = provider_max_url_length
 
     return SourceYamlConfig.model_validate(
         {
@@ -79,15 +70,8 @@ class TestBatchSizeResolution:
 
     def test_prefers_pagination_id_batch_size(self) -> None:
         """Canonical pagination.id_batch_size takes highest priority."""
-        cfg = _make_source_config(
-            id_batch_size=500, provider_batch_size=200, source_batch_size=50
-        )
+        cfg = _make_source_config(id_batch_size=500, source_batch_size=50)
         assert cfg.batch_size == 500
-
-    def test_falls_back_to_provider_batch_size(self) -> None:
-        """Falls back to provider_config.batch_size when pagination not set."""
-        cfg = _make_source_config(provider_batch_size=200, source_batch_size=50)
-        assert cfg.batch_size == 200
 
     def test_falls_back_to_source_batch_size(self) -> None:
         """Falls back to source.batch_size when neither pagination nor provider set."""
@@ -111,13 +95,8 @@ class TestPageSizeResolution:
 
     def test_prefers_pagination_page_size(self) -> None:
         """Canonical pagination.page_size takes highest priority."""
-        cfg = _make_source_config(page_size=1000, provider_page_size=500)
+        cfg = _make_source_config(page_size=1000)
         assert cfg.page_size == 1000
-
-    def test_falls_back_to_provider_page_size(self) -> None:
-        """Falls back to provider_config.page_size."""
-        cfg = _make_source_config(provider_page_size=500)
-        assert cfg.page_size == 500
 
     def test_returns_none_when_not_set(self) -> None:
         """Returns None when neither pagination nor provider page_size set."""
@@ -136,13 +115,8 @@ class TestMaxUrlLengthResolution:
 
     def test_prefers_pagination_max_url_length(self) -> None:
         """Canonical pagination.max_url_length takes highest priority."""
-        cfg = _make_source_config(max_url_length=8000, provider_max_url_length=4000)
+        cfg = _make_source_config(max_url_length=8000)
         assert cfg.max_url_length == 8000
-
-    def test_falls_back_to_provider_max_url_length(self) -> None:
-        """Falls back to provider_config.max_url_length."""
-        cfg = _make_source_config(provider_max_url_length=4000)
-        assert cfg.max_url_length == 4000
 
     def test_returns_none_when_not_set(self) -> None:
         """Returns None when neither set."""
@@ -256,82 +230,67 @@ class TestToAdapterConfig:
 
 
 # ---------------------------------------------------------------------------
-# Legacy field promotion (model_validator)
+# Retired legacy aliases
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestLegacyFieldPromotion:
-    """Tests for _promote_legacy_pagination model_validator."""
+class TestRetiredLegacyAliases:
+    """Tests for retired provider-level pagination aliases."""
 
-    def test_legacy_batch_size_promoted_to_id_batch_size(self) -> None:
-        """Legacy batch_size at provider level is promoted to pagination.id_batch_size."""
-        cfg = SourceYamlConfig.model_validate(
-            {
-                "source": {
-                    "provider_config": {
-                        "provider": "test",
-                        "batch_size": 250,  # legacy field
+    @pytest.mark.parametrize(
+        ("payload", "expected_fragment"),
+        [
+            (
+                {
+                    "source": {
+                        "provider_config": {
+                            "provider": "test",
+                            "batch_size": 250,
+                        }
                     }
-                }
-            }
-        )
-        # Should be promoted
-        assert cfg.source.provider_config.pagination.id_batch_size == 250
+                },
+                "batch_size",
+            ),
+            (
+                {
+                    "source": {
+                        "provider_config": {
+                            "provider": "test",
+                            "page_size": 500,
+                        }
+                    }
+                },
+                "page_size",
+            ),
+            (
+                {
+                    "source": {
+                        "provider_config": {
+                            "provider": "test",
+                            "max_url_length": 5000,
+                        }
+                    }
+                },
+                "max_url_length",
+            ),
+            (
+                {
+                    "source": {
+                        "provider_config": {
+                            "provider": "test",
+                            "cursor_pagination": True,
+                        }
+                    }
+                },
+                "cursor_pagination",
+            ),
+        ],
+    )
+    def test_retired_aliases_are_rejected(
+        self, payload: dict[str, object], expected_fragment: str
+    ) -> None:
+        with pytest.raises(ValueError, match="Retired source provider pagination aliases") as exc:
+            SourceYamlConfig.model_validate(payload)
 
-    def test_legacy_page_size_promoted(self) -> None:
-        """Legacy page_size at provider level is promoted to pagination.page_size."""
-        cfg = SourceYamlConfig.model_validate(
-            {
-                "source": {
-                    "provider_config": {
-                        "provider": "test",
-                        "page_size": 500,
-                    }
-                }
-            }
-        )
-        assert cfg.source.provider_config.pagination.page_size == 500
-
-    def test_explicit_pagination_overrides_legacy(self) -> None:
-        """Explicit pagination section overrides legacy field values."""
-        cfg = SourceYamlConfig.model_validate(
-            {
-                "source": {
-                    "provider_config": {
-                        "provider": "test",
-                        "page_size": 500,  # legacy
-                        "pagination": {"page_size": 1000},  # explicit
-                    }
-                }
-            }
-        )
-        assert cfg.source.provider_config.pagination.page_size == 1000
-
-    def test_cursor_strategy_promoted_from_legacy(self) -> None:
-        """cursor_pagination legacy field sets strategy to cursor."""
-        cfg = SourceYamlConfig.model_validate(
-            {
-                "source": {
-                    "provider_config": {
-                        "provider": "test",
-                        "cursor_pagination": True,
-                    }
-                }
-            }
-        )
-        assert cfg.source.provider_config.pagination.strategy == "cursor"
-
-    def test_max_url_length_promoted_from_legacy(self) -> None:
-        """Legacy max_url_length is promoted to pagination.max_url_length."""
-        cfg = SourceYamlConfig.model_validate(
-            {
-                "source": {
-                    "provider_config": {
-                        "provider": "test",
-                        "max_url_length": 5000,
-                    }
-                }
-            }
-        )
-        assert cfg.source.provider_config.pagination.max_url_length == 5000
+        assert expected_fragment in str(exc.value)

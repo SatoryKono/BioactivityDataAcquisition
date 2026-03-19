@@ -193,10 +193,10 @@ Split internal modules остаются implementation detail owner packages и 
 
 | Диаграмма | Файл | Описание |
 |---|---|---|
-| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](mmd-diagrams/foundation/04-domain-layer-class-diagram.mmd) | Порты, сущности, типы |
-| Domain DDD | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd) | Агрегаты и доменные события |
-| Domain Models | [13-domain-models-relationship.mermaid](mmd-diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей |
-| Ports Architecture | [26-hexagonal-ports-adapters.mermaid](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd) | Карта портов и адаптеров |
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/foundation/04-domain-layer-class-diagram.mmd) | Порты, сущности, типы |
+| Domain DDD | [08-domain-ddd.mermaid](diagrams/foundation/08-domain-ddd.mmd) | Агрегаты и доменные события |
+| Domain Models | [13-domain-models-relationship.mermaid](diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей |
+| Ports Architecture | [26-hexagonal-ports-adapters.mermaid](diagrams/foundation/26-hexagonal-ports-adapters.mmd) | Карта портов и адаптеров |
 
 ### Связанные ADR
 

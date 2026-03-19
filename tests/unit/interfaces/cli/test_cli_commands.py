@@ -1387,6 +1387,108 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
 
 
 @pytest.mark.unit
+def test_run_module_declares_expected_seam_inventory() -> None:
+    """run.py should keep an explicit inventory of canonical and compatibility seams."""
+    from bioetl.interfaces.cli.commands import run as run_module
+
+    assert run_module._RUN_CANONICAL_BOUNDARY_SEAMS == (
+        "get_cli_run_orchestration_service",
+        "_build_run_command_input",
+        "_build_run_pipeline_callable",
+        "_map_status_to_exit_code",
+        "_present_run_health_info",
+        "_finalize_run_result",
+        "_run_pipeline_async",
+        "_run_prepared_request_async",
+    )
+    assert run_module._RUN_COMPATIBILITY_SEAMS == (
+        "_get_runner_logger",
+        "_handle_destructive_run_confirmation",
+        "_preview_cleanup",
+        "_validate_start_offset",
+        "echo_health_server_info",
+        "ensure_metrics_server_started",
+        "health_server_context",
+        "get_pipeline_runner_service",
+    )
+
+    for seam_name in (
+        *run_module._RUN_CANONICAL_BOUNDARY_SEAMS,
+        *run_module._RUN_COMPATIBILITY_SEAMS,
+    ):
+        assert hasattr(run_module, seam_name)
+
+    assert (
+        run_module._build_run_command_input
+        is run_module._build_run_command_input_impl
+    )
+    assert (
+        run_module._build_run_pipeline_callable
+        is run_module._build_run_pipeline_callable_impl
+    )
+    assert run_module._map_status_to_exit_code is run_module.map_status_to_exit_code
+    assert run_module._get_runner_logger is run_module.get_runner_logger
+    assert (
+        run_module._handle_destructive_run_confirmation
+        is run_module.handle_destructive_run_confirmation
+    )
+    assert run_module._preview_cleanup is run_module.show_cleanup_preview
+    assert run_module._validate_start_offset is run_module.validate_options
+    assert (
+        run_module.echo_health_server_info
+        is run_module._echo_health_server_info_impl
+    )
+    assert (
+        run_module.ensure_metrics_server_started
+        is run_module._ensure_metrics_server_started_impl
+    )
+    assert run_module.health_server_context is run_module._health_server_context_impl
+    assert (
+        run_module.get_pipeline_runner_service
+        is run_module._get_pipeline_runner_service_impl
+    )
+
+
+@pytest.mark.unit
+def test_execute_run_uses_canonical_runtime_callable_builder() -> None:
+    """execute_run should delegate prepared-request runtime wiring to helper builder."""
+    from bioetl.interfaces.cli.commands import run as run_module
+
+    request = MagicMock(name="prepared_request")
+    registry = MagicMock(name="registry")
+    expected = MagicMock(name="run_result")
+    run_pipeline_callable = AsyncMock(name="run_pipeline_callable")
+    service = MagicMock(name="cli_run_service")
+    service.execute_pipeline.return_value = expected
+
+    with (
+        patch.object(
+            run_module,
+            "_build_run_pipeline_callable",
+            return_value=run_pipeline_callable,
+        ) as mock_build_callable,
+        patch.object(
+            run_module,
+            "get_cli_run_orchestration_service",
+            return_value=service,
+        ),
+    ):
+        result = run_module.execute_run(request, registry=registry)
+
+    assert result is expected
+    mock_build_callable.assert_called_once_with(
+        registry=registry,
+        run_pipeline_async_callable=run_module._run_pipeline_async,
+    )
+    service.execute_pipeline.assert_called_once_with(
+        request=request,
+        run_pipeline_async=run_pipeline_callable,
+        run_coroutine=run_module.asyncio.run,
+        flush_metrics=run_module.push_metrics_to_gateway,
+    )
+
+
+@pytest.mark.unit
 def test_finalize_run_result_presents_and_exits() -> None:
     """CLI finalizer should render output before terminating with mapped exit code."""
     from bioetl.application.services import PipelineRunResult, RunResult

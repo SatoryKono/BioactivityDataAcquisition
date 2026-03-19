@@ -1,0 +1,122 @@
+"""Focused unit tests for PipelineRunContextService."""
+
+from __future__ import annotations
+
+from uuid import uuid4
+
+import pytest
+
+from bioetl.application.services.pipeline_run_context_service import (
+    PipelineRunContextService,
+)
+from bioetl.application.services.pipeline_runner_models import RunOptions
+from bioetl.domain.types import RunID
+
+
+@pytest.mark.unit
+class TestMergeOptions:
+    """Direct branch coverage for option merge semantics."""
+
+    def test_returns_explicit_options_without_factory_call(self) -> None:
+        service = PipelineRunContextService()
+        options = RunOptions(run_type="backfill", dry_run=True)
+        calls: list[bool] = []
+
+        def default_options_factory(dry_run: bool) -> RunOptions:
+            calls.append(dry_run)
+            return RunOptions(dry_run=dry_run)
+
+        result = service.merge_options(
+            options=options,
+            dry_run=False,
+            default_options_factory=default_options_factory,
+        )
+
+        assert result is options
+        assert calls == []
+
+    def test_builds_default_options_when_explicit_options_missing(self) -> None:
+        service = PipelineRunContextService()
+        calls: list[bool] = []
+
+        def default_options_factory(dry_run: bool) -> RunOptions:
+            calls.append(dry_run)
+            return RunOptions(dry_run=dry_run, limit=25)
+
+        result = service.merge_options(
+            options=None,
+            dry_run=True,
+            default_options_factory=default_options_factory,
+        )
+
+        assert result == RunOptions(dry_run=True, limit=25)
+        assert calls == [True]
+
+
+@pytest.mark.unit
+class TestBuildContext:
+    """Direct coverage for PipelineRunContext assembly branches."""
+
+    def test_build_context_with_csv_filter_uses_fallback_column(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_publication",
+            run_id=RunID(uuid4()),
+            options=RunOptions(
+                run_type="backfill",
+                input_csv="ids.csv",
+                filter_column="publication_id",
+                filter_field="doi",
+                fallback_column="pmid",
+                vacuum_after_run=True,
+            ),
+        )
+
+        assert context.pipeline_name == "chembl_publication"
+        assert context.run_type.value == "backfill"
+        assert context.has_input_filter is True
+        assert context.input_filter.source_path == "ids.csv"
+        assert context.input_filter.column_name == "publication_id"
+        assert context.input_filter.filter_field == "doi"
+        assert context.input_filter.fallback_column == "pmid"
+        assert context.vacuum_enabled is True
+        assert context.vacuum.retention_days == 7
+
+    def test_build_context_with_filter_ids_defaults_filter_field_to_doi(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="crossref_publication",
+            run_id=RunID(uuid4()),
+            options=RunOptions(
+                filter_ids=("10.1000/1", "10.1000/2"),
+                fallback_mapping={"10.1000/1": "PMID:1"},
+                use_cached_bronze=True,
+                cached_bronze_path="bronze/cache",
+                cached_bronze_date="2026-03-18",
+            ),
+        )
+
+        assert context.has_input_filter is True
+        assert context.input_filter.filter_ids == ("10.1000/1", "10.1000/2")
+        assert context.input_filter.filter_field == "doi"
+        assert context.input_filter.fallback_mapping == {"10.1000/1": "PMID:1"}
+        assert context.has_cached_bronze is True
+        assert context.cached_bronze.bronze_path == "bronze/cache"
+        assert context.cached_bronze.bronze_date == "2026-03-18"
+
+    def test_build_context_disables_filter_and_cached_bronze_by_default(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="pubmed_publication",
+            run_id=RunID(uuid4()),
+            options=RunOptions(),
+        )
+
+        assert context.has_input_filter is False
+        assert context.has_cached_bronze is False
+        assert context.vacuum_enabled is None
+        assert context.vacuum.retention_days == 7
+        assert context.log_level == "INFO"

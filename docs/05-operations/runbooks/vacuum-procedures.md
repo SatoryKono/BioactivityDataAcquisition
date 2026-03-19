@@ -8,7 +8,7 @@
 
 Delta Lake tables accumulate old versions of data files for time travel and ACID transactions. VACUUM removes files older than the retention period to reclaim storage.
 
-**Note**: VACUUM is automated after each successful pipeline run via `PostrunService`. This runbook covers manual VACUUM operations.
+**Note**: Pipeline-integrated VACUUM поддерживается, но по умолчанию выключен. Этот runbook покрывает ручные VACUUM операции и explicit enablement.
 
 ## When to Run Manual VACUUM
 
@@ -25,19 +25,24 @@ Delta Lake tables accumulate old versions of data files for time travel and ACID
 
 ## Automatic VACUUM
 
-VACUUM runs automatically after successful pipeline completion:
+VACUUM выполняется после успешного pipeline run только если он явно включён:
 
 ```python
-# From postrun_service.py
+# From PostrunService / MedallionLifecycleService
 await self.run_vacuum_if_enabled()
 ```
 
 Configuration in pipeline YAML:
 ```yaml
-storage:
-  vacuum:
-    enabled: true
-    retention-hours: 168  # 7 days default
+maintenance:
+  auto_vacuum: true
+  vacuum_retention_days: 7
+```
+
+CLI override for a single run:
+
+```bash
+bioetl run --pipeline chembl_activity --vacuum-after-run --vacuum-retention-days 7
 ```
 
 ## Manual VACUUM Procedures

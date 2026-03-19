@@ -17,6 +17,10 @@ from pathlib import Path
 SVG_NS = "http://www.w3.org/2000/svg"
 NS = {"svg": SVG_NS}
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 try:
     from .diagram_paths import VISUAL_SMOKE_MANIFEST
 except ImportError:  # pragma: no cover - direct script execution

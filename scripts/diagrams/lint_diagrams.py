@@ -18,7 +18,7 @@ Usage:
     python scripts/diagrams/lint_diagrams.py
 
     # Check specific paths (files and/or directories)
-    python scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams/
+    python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams/
     python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams/mermaid/01-high-level.mermaid
 
     # Output JSON format

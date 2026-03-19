@@ -61,7 +61,7 @@ from bioetl.interfaces.cli.commands.run_all_helpers import (
 from bioetl.interfaces.cli.commands.run_helpers import resolve_context_registry
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 from bioetl.interfaces.cli.registry_helpers import (
-    get_default_registry as _legacy_get_default_registry,
+    build_cli_registry as _build_cli_registry,
 )
 
 if TYPE_CHECKING:
@@ -70,7 +70,8 @@ if TYPE_CHECKING:
     )
     from bioetl.composition.registry import PipelineRegistry
 
-get_default_registry = _legacy_get_default_registry
+# Compatibility patch point retained for tests and legacy callers.
+get_default_registry = _build_cli_registry
 
 
 def get_pipeline_runner_service(

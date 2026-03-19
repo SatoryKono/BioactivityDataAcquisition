@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from bioetl.domain.composite.config import ColumnGroupConfig, MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
@@ -80,6 +80,8 @@ class ColumnGroupSchema(BaseModel):
 class MergeSchema(BaseModel):
     """Pydantic schema for merge step configuration."""
 
+    model_config = ConfigDict(extra="forbid")
+
     strategy: Literal["left_outer", "inner", "union"] = Field(
         default="left_outer", description="Join strategy for merging"
     )
@@ -109,12 +111,6 @@ class MergeSchema(BaseModel):
     column_groups: list[ColumnGroupSchema] = Field(
         default_factory=list,
         description="Column ordering by semantic groups",
-    )
-    column_groups_file: str | None = Field(
-        default=None,
-        description="Deprecated migration alias for external column groups file. "
-        "Prefer inline merge.column_groups.",
-        deprecated=True,
     )
     exclude_fields: list[str] = Field(
         default_factory=list,

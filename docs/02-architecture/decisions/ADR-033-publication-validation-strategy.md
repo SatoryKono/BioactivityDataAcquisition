@@ -482,7 +482,7 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 
 **Документация:**
 
-- [Publication Fields Reference](../../04-reference/publication-fields-reference.md)
+- [Publication Validation Index](../../04-reference/publication-validation-index.md)
 - [Validation Guide](../../03-guides/publication-validation-guide.md)
 - [Operational Runbook](../../05-operations/runbooks/publication-validation-runbook.md)
 
@@ -494,7 +494,7 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 
 **Конфигурация:**
 
-- `docs/04-reference/schemas/publication-validation-schema-v3.xlsx` — источник правил
+- `docs/04-reference/schemas/publication_validation_schema_v3.xlsx` — источник правил
 - `configs/entities/{provider}/{entity}.yaml` — runtime конфигурация (DQ rules in `dq_rules` section)
 
 ----------------------------------------------------------------------

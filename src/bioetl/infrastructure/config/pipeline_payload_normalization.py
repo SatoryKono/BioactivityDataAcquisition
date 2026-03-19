@@ -21,6 +21,13 @@ from bioetl.infrastructure.config_loader_filtering import (
 )
 from bioetl.infrastructure.config_merge import config_merge
 
+_FORBIDDEN_PIPELINE_SOURCE_PROVIDER_PAGINATION_KEYS: tuple[str, ...] = (
+    "batch_size",
+    "page_size",
+    "max_url_length",
+    "cursor_pagination",
+)
+
 
 @dataclass(frozen=True)
 class PipelineConfigReadPayload:
@@ -91,6 +98,28 @@ def apply_convention_defaults(
     return config
 
 
+def _collect_forbidden_pipeline_source_overrides(
+    entity_source: JsonDict,  # Any: YAML config has heterogeneous values
+) -> list[str]:
+    """Collect pipeline-level source override paths that violate pagination policy."""
+    forbidden: list[str] = []
+
+    provider_config = entity_source.get("provider_config")
+    if isinstance(provider_config, dict):
+        pagination = provider_config.get("pagination")
+        if isinstance(pagination, dict) and pagination:
+            forbidden.append("source.provider_config.pagination")
+        for key in _FORBIDDEN_PIPELINE_SOURCE_PROVIDER_PAGINATION_KEYS:
+            if key in provider_config:
+                forbidden.append(f"source.provider_config.{key}")
+
+    batch = entity_source.get("batch")
+    if isinstance(batch, dict) and batch:
+        forbidden.append("source.batch")
+
+    return forbidden
+
+
 def load_source_section(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: Path,
@@ -108,6 +137,17 @@ def load_source_section(
 
     base_source = source_config.model_dump(exclude_none=True).get("source", {})
     entity_source = config.get("source", {})
+    if isinstance(entity_source, dict):
+        forbidden_overrides = _collect_forbidden_pipeline_source_overrides(
+            entity_source
+        )
+        if forbidden_overrides:
+            joined = ", ".join(sorted(forbidden_overrides))
+            raise ValueError(
+                "Pipeline source overrides must not redefine source pagination "
+                f"settings via {joined}. Use pipeline.page_size_override for "
+                "page-size overrides."
+            )
     config["source"] = config_merge(base_source, entity_source)
 
 

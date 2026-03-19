@@ -23,7 +23,7 @@ def _load_module() -> ModuleType:
 
 def test_derive_png_path_replaces_svg_segment() -> None:
     module = _load_module()
-    svg = Path("docs/02-architecture/mmd-diagrams/views/svg/demo.svg")
+    svg = Path("docs/02-architecture/diagrams/views/svg/demo.svg")
 
     png = module.derive_png_path(svg)
 

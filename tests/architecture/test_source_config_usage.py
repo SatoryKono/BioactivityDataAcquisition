@@ -175,7 +175,7 @@ class TestSourceConfigSchema:
         assert config.page_size >= 100, "ChEMBL page_size should be at least 100"
 
     def test_source_config_batch_size_property(self) -> None:
-        """batch_size property should return provider_config.batch_size if set."""
+        """batch_size property should prefer canonical pagination.id_batch_size."""
         from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
         config = SourceYamlConfig.model_validate(
@@ -184,13 +184,13 @@ class TestSourceConfigSchema:
                     "batch_size": 100,
                     "provider_config": {
                         "provider": "test",
-                        "batch_size": 50,
+                        "pagination": {"id_batch_size": 50},
                     },
                 }
             }
         )
 
-        # provider_config.batch_size takes precedence
+        # pagination.id_batch_size takes precedence
         assert config.batch_size == 50
 
     def test_source_config_falls_back_to_source_batch_size(self) -> None:

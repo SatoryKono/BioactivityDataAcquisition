@@ -65,7 +65,7 @@ BioETL supports multi-source data enrichment through Composite Pipelines:
 bioetl run-composite --composite publication --seed-limit 1000
 ```
 
-See [Composite Pipeline Diagram](../02-architecture/mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd) for workflow visualization.
+See [Composite Pipeline Diagram](../02-architecture/diagrams/foundation/29-composite-pipeline-workflow.mmd) for workflow visualization.
 
 ## Current Version
 

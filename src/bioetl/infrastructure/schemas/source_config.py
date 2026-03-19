@@ -34,15 +34,6 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseRateLimitConfig,
     HttpClientConfig,
 )
-from bioetl.infrastructure.schemas.source_config_pagination_helpers import (
-    build_pagination_from_legacy as _build_pagination_from_legacy,
-)
-from bioetl.infrastructure.schemas.source_config_pagination_helpers import (
-    collect_legacy_pagination_values as _collect_legacy_pagination_values,
-)
-from bioetl.infrastructure.schemas.source_config_pagination_helpers import (
-    merge_legacy_into_pagination as _merge_legacy_into_pagination,
-)
 
 RateLimitYamlConfig = BaseRateLimitConfig
 RateLimitYamlConfig.__doc__ = """Rate limit configuration from YAML."""
@@ -120,9 +111,6 @@ class ProviderConfigYaml(BaseModel):
         base_url: Base URL for the API.
         client: HTTP client settings.
         pagination: API pagination settings (single source of truth).
-        batch_size: Deprecated — use pagination.id_batch_size.
-        page_size: Deprecated — use pagination.page_size.
-        max_url_length: Deprecated — use pagination.max_url_length.
         default_email: Default email for NCBI APIs (PubMed specific).
     """
 
@@ -132,61 +120,31 @@ class ProviderConfigYaml(BaseModel):
     base_url: str | None = None
     client: ClientYamlConfig = Field(default_factory=ClientYamlConfig)
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
-    # Legacy fields — kept as migration-only compatibility aliases.
-    # When set, they are promoted into ``pagination`` by the model_validator.
-    batch_size: int | None = Field(
-        default=None,
-        ge=1,
-        le=10000,
-        description="Deprecated migration alias. Use pagination.id_batch_size.",
-        deprecated=True,
-    )
-    page_size: int | None = Field(
-        default=None,
-        ge=1,
-        le=10000,
-        description="Deprecated migration alias. Use pagination.page_size.",
-        deprecated=True,
-    )
-    max_url_length: int | None = Field(
-        default=None,
-        ge=100,
-        le=10000,
-        description="Deprecated migration alias. Use pagination.max_url_length.",
-        deprecated=True,
-    )
     api_version: str | None = None
     default_email: str | None = None
     fallback: FallbackPolicyYamlConfig | None = None
 
     @model_validator(mode="before")
     @classmethod
-    def _promote_legacy_pagination(
+    def _reject_retired_pagination_aliases(
         cls,
         data: JsonDict,  # Any: YAML config has heterogeneous values
     ) -> JsonDict:  # Any: YAML config has heterogeneous values
-        """Promote legacy batch_size/page_size/max_url_length into pagination.
-
-        When the ``pagination`` section is absent but legacy fields are set,
-        this validator builds the ``pagination`` dict from them.
-        Explicit ``pagination`` values always take precedence.
-
-        Returns:
-            Input data dict with pagination section populated from legacy fields.
-        """
+        """Fail fast on retired provider-level pagination aliases."""
         if not isinstance(data, dict):
             return data
 
-        pagination = data.get("pagination")
-        if isinstance(pagination, dict):
-            _merge_legacy_into_pagination(
-                pagination, _collect_legacy_pagination_values(data)
+        retired = [
+            key
+            for key in ("batch_size", "page_size", "max_url_length", "cursor_pagination")
+            if key in data
+        ]
+        if retired:
+            raise ValueError(
+                "Retired source provider pagination aliases are not supported: "
+                f"{', '.join(sorted(retired))}. "
+                "Use pagination.id_batch_size/page_size/max_url_length/strategy."
             )
-            return data
-
-        built_pagination = _build_pagination_from_legacy(data)
-        if built_pagination:
-            data["pagination"] = built_pagination
 
         return data
 
@@ -274,41 +232,28 @@ class SourceYamlConfig(BaseModel):
 
         Resolution order:
         1. pagination.id_batch_size (canonical, if explicitly set)
-        2. provider_config.batch_size (legacy)
-        3. source.batch_size (fallback)
+        2. source.batch_size (fallback)
         """
         pag = self.source.provider_config.pagination
         if pag.id_batch_size is not None:
             return pag.id_batch_size
-        if self.source.provider_config.batch_size is not None:
-            return self.source.provider_config.batch_size
         return self.source.batch_size
 
     @property
     def page_size(self) -> int | None:
         """Get page size for paginated APIs.
 
-        Resolution order:
-        1. pagination.page_size (canonical)
-        2. provider_config.page_size (legacy)
+        Resolution order: pagination.page_size (canonical only).
         """
-        pag = self.source.provider_config.pagination
-        if pag.page_size is not None:
-            return pag.page_size
-        return self.source.provider_config.page_size
+        return self.source.provider_config.pagination.page_size
 
     @property
     def max_url_length(self) -> int | None:
         """Get max URL length for APIs.
 
-        Resolution order:
-        1. pagination.max_url_length (canonical)
-        2. provider_config.max_url_length (legacy)
+        Resolution order: pagination.max_url_length (canonical only).
         """
-        pag = self.source.provider_config.pagination
-        if pag.max_url_length is not None:
-            return pag.max_url_length
-        return self.source.provider_config.max_url_length
+        return self.source.provider_config.pagination.max_url_length
 
     @property
     def timeout_sec(self) -> float:

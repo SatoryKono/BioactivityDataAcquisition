@@ -19,8 +19,42 @@ fi
 
 DIAGRAM_ROOT_REL="${DIAGRAM_ROOT#$REPO_ROOT/}"
 DIAGRAM_THEME_DIR="$DIAGRAM_ROOT/theme"
-DIAGRAM_RENDER_SCRIPT="$DIAGRAM_ROOT/render.sh"
-DIAGRAM_QUALITY_MANIFEST="$DIAGRAM_ROOT/quality-gate-manifest.txt"
-DIAGRAM_VISUAL_MANIFEST="$DIAGRAM_ROOT/visual-smoke-manifest.txt"
+
+if [[ -d "$DIAGRAM_ROOT/governance" ]]; then
+  DIAGRAM_GOVERNANCE_DIR="$DIAGRAM_ROOT/governance"
+else
+  DIAGRAM_GOVERNANCE_DIR="$DIAGRAM_ROOT/docs"
+fi
+
+if [[ -d "$DIAGRAM_ROOT/tooling" ]]; then
+  DIAGRAM_TOOLING_DIR="$DIAGRAM_ROOT/tooling"
+else
+  DIAGRAM_TOOLING_DIR="$DIAGRAM_ROOT"
+fi
+
+if [[ -d "$DIAGRAM_ROOT/manifests" ]]; then
+  DIAGRAM_MANIFESTS_DIR="$DIAGRAM_ROOT/manifests"
+else
+  DIAGRAM_MANIFESTS_DIR="$DIAGRAM_ROOT"
+fi
+
+if [[ -f "$DIAGRAM_TOOLING_DIR/render.sh" ]]; then
+  DIAGRAM_RENDER_SCRIPT="$DIAGRAM_TOOLING_DIR/render.sh"
+else
+  DIAGRAM_RENDER_SCRIPT="$DIAGRAM_ROOT/render.sh"
+fi
+
+if [[ -f "$DIAGRAM_MANIFESTS_DIR/quality-gates.txt" ]]; then
+  DIAGRAM_QUALITY_MANIFEST="$DIAGRAM_MANIFESTS_DIR/quality-gates.txt"
+else
+  DIAGRAM_QUALITY_MANIFEST="$DIAGRAM_ROOT/manifests/quality-gates.txt"
+fi
+
+if [[ -f "$DIAGRAM_MANIFESTS_DIR/visual-smoke.txt" ]]; then
+  DIAGRAM_VISUAL_MANIFEST="$DIAGRAM_MANIFESTS_DIR/visual-smoke.txt"
+else
+  DIAGRAM_VISUAL_MANIFEST="$DIAGRAM_ROOT/manifests/visual-smoke.txt"
+fi
+
 DIAGRAM_CLASS_SOURCE_DIR="$DIAGRAM_ROOT/class-diagrams"
 DIAGRAM_CLASS_SVG_DIR="$DIAGRAM_CLASS_SOURCE_DIR/svg"

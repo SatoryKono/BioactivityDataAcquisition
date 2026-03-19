@@ -1186,8 +1186,8 @@ grep -c "def \|async def " src/bioetl/path/to/file.py
 # 2. Проверить делегирование (признак когезии vs god object)
 grep -n "self\.-.*\." src/bioetl/path/to/file.py | head -20
 
-# 3. При необходимости сверить historical false-positive ledger
-grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/99-archive/refactoring-plan.md
+# 3. При необходимости сверить активные docs и текущие task/report artifacts
+rg -n "ClassName|method-name|RF-|AUD-" docs/00-project docs/02-architecture reports docs/reports
 
 # 4. Найти существующие реализации
 grep -r "class ClassName\|def method-name" src/bioetl/
@@ -1198,7 +1198,7 @@ grep -r "class ClassName\|def method-name" src/bioetl/
 - [ ] Файл прочитан полностью (не только упоминания)
 - [ ] Размер компонента измерен (LOC, количество методов)
 - [ ] Делегирование проанализировано
-- [ ] При необходимости проверен historical false-positive ledger
+- [ ] При необходимости проверены активные docs / текущие task artifacts
 - [ ] Проверено, что не реализовано ранее
 
 #### 7.1.2. Вторая верификация (при документировании)
@@ -1284,8 +1284,8 @@ grep -o "self\.-[a-z-]*" src/bioetl/path/to/file.py | sort -u | wc -l
 # 3. Проверить публичные методы
 grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
 
-# 4. При необходимости сверить historical false-positive ledger
-grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/99-archive/refactoring-plan.md
+# 4. При необходимости сверить активные review/task artifacts
+rg -n "ChemblAdapter|GoldWriter|PreflightService" reports docs/00-project docs/02-architecture
 ```
 
 **Критерии "монолита" (ВСЕ должны выполняться):**

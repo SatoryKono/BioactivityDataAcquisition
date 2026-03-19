@@ -301,7 +301,7 @@ class PostrunService:
         }
 
     def _resolve_delta_version(
-        self, table_path: str, *, layer: Literal["silver", "gold"]
+        self, table_path: str, layer: Literal["silver", "gold"]
     ) -> int | None:
         """Resolve Delta table version with warning-mode fallback and allowlist."""
         return self._metadata_version_resolver.resolve_delta_version(

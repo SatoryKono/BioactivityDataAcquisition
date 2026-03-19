@@ -31,6 +31,7 @@ from bioetl.domain.ports import (
     MergedStoragePort,
     SilverStoragePort,
 )
+from bioetl.domain.types import BronzeRecord
 
 _MERGE_READ_ERRORS = (
     StorageError,
@@ -48,7 +49,11 @@ _MERGE_READ_ERRORS = (
 class _LegacySilverReadable(Protocol):
     """Narrow compatibility protocol for legacy storage-backed silver reads."""
 
-    async def read_silver(self, table_name: str) -> list[object]:
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[BronzeRecord]:
         """Read one Silver table by logical table name."""
 
 
@@ -82,9 +87,13 @@ class _PreparedSeedDataframe:
 class _BoundLegacySilverReader:
     """Adapter for legacy storage objects that only expose ``read_silver``."""
 
-    read_silver_fn: Callable[[str], Awaitable[list[object]]]
+    read_silver_fn: Callable[[str], Awaitable[list[BronzeRecord]]]
 
-    async def read_silver(self, table_name: str) -> list[object]:
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[BronzeRecord]:
         """Delegate legacy Silver reads through the captured callable."""
         return await self.read_silver_fn(table_name)
 
@@ -243,39 +252,68 @@ class _MergeInputLoaderMixin:
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
         """Read a Silver table using DeltaReaderPort or explicit SilverStoragePort."""
         if self._delta_reader is not None:
-            arrow_table = await self._delta_reader.read_table(path)
-            result = pl.from_arrow(arrow_table)
-            if isinstance(result, pl.Series):
-                return result.to_frame()
-            return result
+            return await self._read_delta_silver_table(self._delta_reader, path)
+
+        records = await self._read_legacy_silver_records(path)
+        if not records:
+            return pl.DataFrame()
+        return pl.DataFrame(records)
+
+    async def _read_delta_silver_table(
+        self,
+        delta_reader: DeltaReaderPort,
+        path: str,
+    ) -> pl.DataFrame:
+        """Read Silver data through the injected DeltaReaderPort."""
+        arrow_table = await delta_reader.read_table(path)
+        return self._coerce_polars_dataframe(pl.from_arrow(arrow_table))
+
+    def _coerce_polars_dataframe(
+        self,
+        result: pl.DataFrame | pl.Series,
+    ) -> pl.DataFrame:
+        """Normalize Polars read results to a DataFrame."""
+        if isinstance(result, pl.Series):
+            return result.to_frame()
+        return result
+
+    async def _read_legacy_silver_records(self, path: str) -> list[BronzeRecord]:
+        """Read Silver records through the explicit or compatibility reader path."""
+        silver_reader = self._resolve_legacy_silver_reader()
+        table_name = table_path_to_name(path)
+        return await silver_reader.read_silver(table_name)
+
+    def _resolve_legacy_silver_reader(self) -> _LegacySilverReadable:
+        """Resolve the legacy Silver reader or fail on explicit misconfiguration."""
+        explicit_silver_reader = self._get_explicit_silver_reader()
+        if explicit_silver_reader is not None:
+            return explicit_silver_reader
+
+        legacy_storage_reader = self._build_legacy_storage_reader()
+        if legacy_storage_reader is not None:
+            return legacy_storage_reader
 
         # Compatibility path:
         # - legacy callers may not define `_silver_reader` at all -> use `_storage`.
         # - if `_silver_reader` exists and is None, treat it as explicit misconfiguration.
-        silver_reader = (
-            self._silver_reader if "_silver_reader" in self.__dict__ else None
+        raise RuntimeError(
+            "MergeService requires delta_reader or silver_reader for silver reads"
         )
-        legacy_storage_reader: _LegacySilverReadable | None = None
-        storage_read_silver = (
-            getattr(self._storage, "read_silver", None)
-            if silver_reader is None and "_silver_reader" not in self.__dict__
-            else None
-        )
-        if callable(storage_read_silver):
-            legacy_storage_reader = _BoundLegacySilverReader(storage_read_silver)
-        if silver_reader is None and legacy_storage_reader is None:
-            raise RuntimeError(
-                "MergeService requires delta_reader or silver_reader for silver reads"
-            )
 
-        table_name = table_path_to_name(path)
-        if silver_reader is not None:
-            records = await silver_reader.read_silver(table_name)
-        else:
-            records = await legacy_storage_reader.read_silver(table_name)
-        if not records:
-            return pl.DataFrame()
-        return pl.DataFrame(records)
+    def _get_explicit_silver_reader(self) -> _LegacySilverReadable | None:
+        """Return the explicitly configured SilverStoragePort when present."""
+        if "_silver_reader" not in self.__dict__:
+            return None
+        return self._silver_reader
+
+    def _build_legacy_storage_reader(self) -> _LegacySilverReadable | None:
+        """Adapt legacy storage objects exposing ``read_silver`` directly."""
+        if "_silver_reader" in self.__dict__:
+            return None
+        storage_read_silver = getattr(self._storage, "read_silver", None)
+        if not callable(storage_read_silver):
+            return None
+        return _BoundLegacySilverReader(storage_read_silver)
 
 
 __all__ = ["_MergeInputLoaderMixin", "_PreparedSeedDataframe"]

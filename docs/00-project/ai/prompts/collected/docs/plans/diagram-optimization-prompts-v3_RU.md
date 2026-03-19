@@ -319,7 +319,7 @@ style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 Существующий `scripts/lint-diagrams.py` (387 строк) работает ТОЛЬКО
 с `docs/02-architecture/diagrams/*.mermaid` (legacy каталог).
 Теперь в проекте ДВА каталога диаграмм:
-1. `docs/02-architecture/mmd-diagrams/**/*.mermaid` — 84 канонических файла
+1. `docs/02-architecture/diagrams/**/*.mermaid` — 84 канонических файла
 2. `docs/02-architecture/diagrams/mermaid/*.mermaid` — 156 decomposed views
 
 Текущие проверки lint-diagrams.py:
@@ -504,7 +504,7 @@ Decomposed views используют `%% View: ... | Parent: ...`.
 
 ### Шаг 1: Создать -template.mermaid
 
-Создать `docs/02-architecture/mmd-diagrams/-template.mermaid`:
+Создать `docs/02-architecture/diagrams/-template.mermaid`:
 
 ```
 %% <TITLE — one-line description>
@@ -636,7 +636,7 @@ Accepted
 
 ## Context
 BioETL содержит два каталога диаграмм:
-- `docs/02-architecture/mmd-diagrams/` — 84 канонических `.mermaid` файла
+- `docs/02-architecture/diagrams/` — 84 канонических `.mermaid` файла
   (architecture: 18, class-diagrams: 16, foundation: 50)
 - `docs/02-architecture/diagrams/mermaid/` — 156 decomposed `.mermaid` views
   (31 parent × 5 views + legend)

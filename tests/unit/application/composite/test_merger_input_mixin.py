@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
@@ -241,3 +240,14 @@ class TestReadSilverTable:
         result = await mixin._read_silver_table("silver/empty")
 
         assert len(result) == 0
+
+    @pytest.mark.asyncio
+    async def test_explicit_none_silver_reader_disables_storage_fallback(self) -> None:
+        storage = AsyncMock()
+        storage.read_silver.return_value = [{"id": 1}]
+        mixin = _make_mixin(_storage=storage, _delta_reader=None, _silver_reader=None)
+
+        with pytest.raises(RuntimeError, match="requires delta_reader or silver_reader"):
+            await mixin._read_silver_table("silver/my_table")
+
+        storage.read_silver.assert_not_called()

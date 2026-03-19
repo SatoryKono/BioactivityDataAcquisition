@@ -685,6 +685,7 @@
       "type": "object"
     },
     "MergeSchema": {
+      "additionalProperties": false,
       "description": "Pydantic schema for merge step configuration.",
       "properties": {
         "strategy": {
@@ -751,20 +752,6 @@
           },
           "title": "Column Groups",
           "type": "array"
-        },
-        "column_groups_file": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "deprecated": true,
-          "description": "Deprecated migration alias for external column groups file. Prefer inline merge.column_groups.",
-          "title": "Column Groups File"
         },
         "exclude_fields": {
           "description": "Columns to drop from merged output (supports glob patterns)",

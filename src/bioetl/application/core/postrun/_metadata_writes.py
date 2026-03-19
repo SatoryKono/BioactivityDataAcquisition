@@ -112,7 +112,7 @@ def _build_silver_metadata_write_coro(
         return None
 
     silver_path = storage.get_table_path(silver_table, layer="silver")
-    version_after = resolve_delta_version(str(silver_path), layer="silver")
+    version_after = resolve_delta_version(str(silver_path), "silver")
     silver_input = SilverMetadataInput(
         table_path=str(silver_path),
         primary_keys=list(config.table.primary_keys),

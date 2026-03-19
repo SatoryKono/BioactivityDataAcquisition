@@ -4,7 +4,7 @@
 
 > **Documentation Update:** 2026-03-10
 > - ADR inventory refreshed to ADR-043
-> - Architecture tree paths updated to `mmd-diagrams/`
+> - Architecture tree paths updated to `diagrams/`
 > - Quick-start and pipeline command references aligned with current CLI
 > - Inventory-style counts trimmed to avoid stale snapshot drift
 > - Active entry points clarified: `RULES.md` and `TOOLS.md`
@@ -63,7 +63,7 @@ docs/
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
 │   ├── decisions/               # ADRs (ADR-001..043)
-│   ├── mmd-diagrams/            # Canonical Mermaid source files and rendered views
+│   ├── diagrams/            # Canonical Mermaid source files and rendered views
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
 │
 ├── 03-guides/                   # Guides & Manuals
@@ -105,8 +105,8 @@ docs/
 | Document                                                                                     | Covers                                   | RULES.md |
 |----------------------------------------------------------------------------------------------|------------------------------------------|----------|
 | [system-context.md](../02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
-| [container-diagram.md](../02-architecture/container-diagram.md)                               | C4 Container, Docker services            | §5.6     |
-| [data-flow.md](../02-architecture/data-flow.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
+| [container-diagram.md](../02-architecture/diagrams/guide/container-reference.md)                               | C4 Container, Docker services            | §5.6     |
+| [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
 | [05-composition-layer.md](../02-architecture/05-composition-layer.md)                           | Composition Root, DI, Factories          | §1.1     |
 | [ADR-001: Delta Lake](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |
 | [ADR-002: Medallion](../02-architecture/decisions/ADR-002-medallion-architecture.md)            | Data layering pattern                    | §1       |
@@ -156,7 +156,7 @@ docs/
 
 | Topic            | Document                                                                                            | RULES.md |
 |------------------|-----------------------------------------------------------------------------------------------------|----------|
-| Medallion Layers | [data-flow.md](../02-architecture/data-flow.md)                                                        | §2.1     |
+| Medallion Layers | [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md)                                                        | §2.1     |
 | Schema Drift     | [RULES.md](RULES.md#22-политика-дрейфа-схемы-schema-drift)   | §2.2     |
 | Data Lineage     | [system-context.md](../02-architecture/system-context.md)                                              | §2.3     |
 | Backfill/Replay  | [RULES.md](RULES.md#24-политика-backfill--replay)            | §2.4     |
@@ -497,7 +497,7 @@ graph TD
 | 05-operations/runbooks/  | 2026-03-02   | 16 active runbooks (Local-Only synced) |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | audits/                  | 2026-02-17   | Consolidated (audit/ merged) |
-| 02-architecture/mmd-diagrams/ | 2026-03-10   | Canonical diagram source tree |
+| 02-architecture/diagrams/ | 2026-03-10   | Canonical diagram source tree |
 
 ---
 

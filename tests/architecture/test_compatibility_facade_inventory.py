@@ -323,6 +323,16 @@ def test_registry_config_and_merge_transition_rows_capture_compatibility_policy(
                 "tests/architecture/test_config_strict_keys.py",
             ),
         },
+        "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py": {
+            "status": "compat-shim",
+            "migration_snippets": (
+                "bioetl.domain.services.composite_metadata_helpers",
+                "transitional re-export only",
+            ),
+            "allowed_call_site_snippets": (
+                "tests/unit/infrastructure/storage/test_metadata_builder_composite_helpers.py",
+            ),
+        },
         "src/bioetl/application/composite/merger.py": {
             "status": "retained-entrypoint",
             "migration_snippets": (

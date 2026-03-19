@@ -23,7 +23,7 @@ def _load_module() -> ModuleType:
 
 def test_to_png_path_converts_svg_segment() -> None:
     module = _load_module()
-    svg = Path("docs/02-architecture/mmd-diagrams/foundation/svg/01-sample.svg")
+    svg = Path("docs/02-architecture/diagrams/foundation/svg/01-sample.svg")
 
     png = module.to_png_path(svg)
 

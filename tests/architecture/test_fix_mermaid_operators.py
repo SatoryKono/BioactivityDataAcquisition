@@ -115,7 +115,7 @@ def test_fix_file_dry_run_does_not_modify_file(tmp_path: Path) -> None:
 def test_repo_regression_has_no_thick_arrows_in_class_sequence_sources() -> None:
     module = _load_module()
     repo_root = Path(__file__).resolve().parents[2]
-    scope = repo_root / "docs" / "02-architecture" / "mmd-diagrams"
+    scope = repo_root / "docs" / "02-architecture" / "diagrams"
 
     files = sorted(list(scope.rglob("*.mmd")) + list(scope.rglob("*.mermaid")))
     offending: list[str] = []

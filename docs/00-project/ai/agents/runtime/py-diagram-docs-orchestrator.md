@@ -26,7 +26,7 @@ bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh
 
 # Полный цикл для одной диаграммы
 bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh \
-  --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  --diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
 
 # Только пересборка бандлов без checks
 bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks
@@ -51,9 +51,9 @@ bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks
 
 - Обновлённые `svg/png` рендеры диаграмм (при необходимости).
 - Обновлённые:
-  - `docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.docx`
-  - `docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.docx`
-  - `docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.pdf`
-  - `docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.pdf`
+  - `docs/02-architecture/diagrams/bundles/class.bundle.docx`
+  - `docs/02-architecture/diagrams/bundles/foundation.bundle.docx`
+  - `docs/02-architecture/diagrams/bundles/class.bundle.pdf`
+  - `docs/02-architecture/diagrams/bundles/foundation.bundle.pdf`
 
 Примечание: пересборка выполняется для Markdown-бандлов, доступных как источники `*-with-descriptions.md`.

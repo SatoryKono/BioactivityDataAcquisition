@@ -7,22 +7,24 @@ TL;DR for setting up and running BioETL locally.
 
 ## Setup (3 minutes)
 
-### Option A: Automated (Recommended)
+### Option A: Supported Local Bootstrap (Recommended)
 
 ```bash
 # Clone and enter directory
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
 cd BioactivityDataAcquisition2
 
-# Full automated setup (checks prereqs, installs deps, configures env)
-./scripts/dev/dev_setup.sh
+# Install dependencies and create/refresh the local environment
+make install
 
-# Or quick setup without tests:
-# ./scripts/dev/dev_setup.sh --quick
+# Verify runtime dependencies
+make test-deps
 
-# CI-friendly (no colors, non-interactive):
-# ./scripts/dev/dev_setup.sh --ci
+# Optional: configure pytest/pre-commit plugins
+make setup-plugins
 ```
+
+`scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
 ### Option B: Manual Fallback
 
@@ -31,11 +33,13 @@ cd BioactivityDataAcquisition2
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
 cd BioactivityDataAcquisition2
 
-# Install dependencies manually (fallback path)
-make install
+# Preferred manual path without make
+uv sync --extra dev --extra tracing
 
-# Optional: Configure environment
-cp .env.example .env
+# Fallback without uv
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -e ".[dev,tracing]"
 ```
 
 ## Run Your First Pipeline
@@ -69,7 +73,8 @@ make lint
 
 | Task                   | Command                                           |
 | ---------------------- | ------------------------------------------------- |
-| Install dependencies   | `./scripts/dev/dev_setup.sh`                      |
+| Install dependencies   | `make install`                                    |
+| Configure plugins      | `make setup-plugins`                              |
 | Verify dependencies    | `make test-deps`                                  |
 | Run all tests          | `make test`                                       |
 | Run linting            | `make lint`                                       |

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 
 from bioetl.infrastructure.config.source_normalizers.source import (
     _apply_batch_to_pagination,
@@ -137,56 +138,44 @@ class TestApplyBatchToPagination:
 
     def test_batch_dict_with_batch_size(self) -> None:
         """Should extract batch_size from dict."""
-        provider_config: dict = {}
         pagination: dict = {}
-        _apply_batch_to_pagination({"batch_size": 500}, provider_config, pagination)
-        assert provider_config.get("batch_size") == 500
+        _apply_batch_to_pagination({"batch_size": 500}, pagination)
         assert pagination.get("id_batch_size") == 500
 
     def test_batch_dict_with_size_alias(self) -> None:
         """Should use 'size' as alias for batch_size."""
-        provider_config: dict = {}
         pagination: dict = {}
-        _apply_batch_to_pagination({"size": 200}, provider_config, pagination)
-        assert provider_config.get("batch_size") == 200
+        _apply_batch_to_pagination({"size": 200}, pagination)
+        assert pagination.get("id_batch_size") == 200
 
     def test_batch_dict_with_api_batch_size(self) -> None:
         """Should use 'api_batch_size' as alias."""
-        provider_config: dict = {}
         pagination: dict = {}
-        _apply_batch_to_pagination({"api_batch_size": 100}, provider_config, pagination)
-        assert provider_config.get("batch_size") == 100
+        _apply_batch_to_pagination({"api_batch_size": 100}, pagination)
+        assert pagination.get("id_batch_size") == 100
 
     def test_batch_dict_with_page_size(self) -> None:
         """Should extract page_size."""
-        provider_config: dict = {}
         pagination: dict = {}
-        _apply_batch_to_pagination({"page_size": 50}, provider_config, pagination)
+        _apply_batch_to_pagination({"page_size": 50}, pagination)
         assert pagination.get("page_size") == 50
 
     def test_batch_dict_with_max_url_length(self) -> None:
         """Should extract max_url_length."""
-        provider_config: dict = {}
         pagination: dict = {}
-        _apply_batch_to_pagination(
-            {"max_url_length": 2000}, provider_config, pagination
-        )
+        _apply_batch_to_pagination({"max_url_length": 2000}, pagination)
         assert pagination.get("max_url_length") == 2000
 
     def test_batch_int(self) -> None:
         """Should use int batch as batch_size and id_batch_size."""
-        provider_config: dict = {}
         pagination: dict = {}
-        _apply_batch_to_pagination(300, provider_config, pagination)
-        assert provider_config.get("batch_size") == 300
+        _apply_batch_to_pagination(300, pagination)
         assert pagination.get("id_batch_size") == 300
 
     def test_batch_none(self) -> None:
         """Should be a no-op when batch is None."""
-        provider_config: dict = {}
         pagination: dict = {}
-        _apply_batch_to_pagination(None, provider_config, pagination)
-        assert provider_config == {}
+        _apply_batch_to_pagination(None, pagination)
         assert pagination == {}
 
 
@@ -215,7 +204,7 @@ class TestNormalizeSourceConfig:
                 "rate_limit": {"with_api_key": {"rate": 10}},
                 "health_check": {"timeout": 5},
                 "provider_config": {
-                    "batch_size": 100,
+                    "pagination": {"id_batch_size": 100},
                 },
             }
         }
@@ -237,3 +226,39 @@ class TestNormalizeSourceConfig:
         source = result["source"]
         provider_config = source.get("provider_config", {})
         assert provider_config.get("base_url") == "https://example.com"
+
+    def test_rejects_retired_provider_pagination_aliases(self) -> None:
+        """Retired provider pagination aliases should fail fast."""
+        raw = {
+            "source": {
+                "provider_config": {
+                    "provider": "chembl",
+                    "batch_size": 25,
+                    "page_size": 250,
+                    "cursor_pagination": True,
+                }
+            }
+        }
+
+        with pytest.raises(ValueError, match="Retired source provider pagination aliases"):
+            normalize_source_config(raw)
+
+    def test_canonical_provider_pagination_is_accepted(self) -> None:
+        """Canonical pagination-only source config should stay valid."""
+        raw = {
+            "source": {
+                "provider_config": {
+                    "provider": "chembl",
+                    "pagination": {
+                        "id_batch_size": 25,
+                        "page_size": 250,
+                        "strategy": "offset",
+                    },
+                }
+            }
+        }
+
+        result = normalize_source_config(raw)
+        pagination = result["source"]["provider_config"]["pagination"]
+        assert pagination["id_batch_size"] == 25
+        assert pagination["page_size"] == 250

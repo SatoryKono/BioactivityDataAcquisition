@@ -119,8 +119,8 @@ docs/
 | Document                                                                                     | Covers                                   | RULES.md |
 |----------------------------------------------------------------------------------------------|------------------------------------------|----------|
 | [system-context.md](../02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
-| [container-diagram.md](../02-architecture/container-diagram.md)                               | C4 Container, Docker services            | §5.6     |
-| [data-flow.md](../02-architecture/data-flow.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
+| [container-diagram.md](../02-architecture/diagrams/guide/container-reference.md)                               | C4 Container, Docker services            | §5.6     |
+| [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
 | [05-composition-layer.md](../02-architecture/05-composition-layer.md)                           | Composition Root, DI, Factories          | §1.1     |
 | [ADR-001: Delta Lake](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |
 | [ADR-002: Medallion](../02-architecture/decisions/ADR-002-medallion-architecture.md)            | Data layering pattern                    | §1       |
@@ -166,7 +166,7 @@ docs/
 
 | Topic            | Document                                                                                            | RULES.md |
 |------------------|-----------------------------------------------------------------------------------------------------|----------|
-| Medallion Layers | [data-flow.md](../02-architecture/data-flow.md)                                                        | §2.1     |
+| Medallion Layers | [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md)                                                        | §2.1     |
 | Schema Drift     | [RULES.md](RULES.md#22-политика-дрейфа-схемы-schema-drift)   | §2.2     |
 | Data Lineage     | [system-context.md](../02-architecture/system-context.md)                                              | §2.3     |
 | Backfill/Replay  | [RULES.md](RULES.md#24-политика-backfill--replay)            | §2.4     |
@@ -4075,7 +4075,7 @@ bash scripts/diagrams/run_diagram_docs_agent.sh
 
 # Полный цикл для одной диаграммы
 bash scripts/diagrams/run_diagram_docs_agent.sh \
-  --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  --diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
 
 # Только пересборка бандлов без checks
 bash scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
@@ -4100,10 +4100,10 @@ bash scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
 
 - Обновлённые `svg/png` рендеры диаграмм (при необходимости).
 - Обновлённые:
-  - `docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.docx`
-  - `docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.docx`
-  - `docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.pdf`
-  - `docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.pdf`
+  - `docs/02-architecture/diagrams/bundles/class.bundle.docx`
+  - `docs/02-architecture/diagrams/bundles/foundation.bundle.docx`
+  - `docs/02-architecture/diagrams/bundles/class.bundle.pdf`
+  - `docs/02-architecture/diagrams/bundles/foundation.bundle.pdf`
 
 Примечание: пересборка выполняется для Markdown-бандлов, доступных как источники `*-with-descriptions.md`.
 
@@ -4388,7 +4388,7 @@ You are now ready to begin. Await the target scope and testing type.
 |---|---|
 | Domain Objects | [01-domain-layer.md](../02-architecture/01-domain-layer.md) |
 | ETL Layers | [data-layers.md](../02-architecture/data-layers.md) |
-| Data Flow | [data-flow.md](../02-architecture/data-flow.md) |
+| Data Flow | [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md) |
 | Duplication Reduction | [module-consolidation-migration-requirements.md](../02-architecture/module-consolidation-migration-requirements.md) |
 | Physical Layout | [03-file-policy.md](governance/03-file-policy.md) + [local-storage-layout.md](../03-guides/local-storage-layout.md) |
 
@@ -6226,7 +6226,7 @@ BioETL supports multi-source data enrichment through Composite Pipelines:
 bioetl run --pipeline composite_publication --limit 1000
 ```
 
-See [Composite Pipeline Diagram](../02-architecture/mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd) for workflow visualization.
+See [Composite Pipeline Diagram](../02-architecture/diagrams/foundation/29-composite-pipeline-workflow.mmd) for workflow visualization.
 
 ## Current Version
 
@@ -7374,8 +7374,8 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 ### Diagrams
 
 - [mmd-diagrams/](mmd-diagrams/README.md) — Canonical Mermaid source files (`.mmd`)
-- [mmd-diagrams/views inventory](mmd-diagrams/docs/diagram-views-inventory.md) — Decomposed views (`.mermaid`)
-- [mmd-diagrams/docs/diagrams-index.md](mmd-diagrams/docs/diagrams-index.md) — Full diagram index
+- [mmd-diagrams/views inventory](mmd-diagrams/governance/diagram-views-inventory.md) — Decomposed views (`.mermaid`)
+- [mmd-diagrams/governance/diagrams-index.md](mmd-diagrams/governance/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
 
 ### Architecture Decision Records (ADRs)
@@ -8449,7 +8449,7 @@ runner = bootstrap_composite_runner(
 
 \newpage
 
-# Source: `02-architecture/06-diagram-policy.md`
+# Source: `02-architecture/diagrams/governance/policy.md`
 
 # POL-LLM-DIAGRAMS-001
 
@@ -8465,10 +8465,10 @@ runner = bootstrap_composite_runner(
 
 ## 2. Источник истины и каталоги
 
-1. Канонический policy: `docs/02-architecture/06-diagram-policy.md`.
-2. Исторический policy (контекст): `docs/02-architecture/mmd-diagrams/docs/00-diagramming-policy.md`.
-3. Канонические исходники диаграмм: `docs/02-architecture/mmd-diagrams/**/*.mmd`.
-4. Decomposed views: `docs/02-architecture/mmd-diagrams/views/*.mermaid`.
+1. Канонический policy: `docs/02-architecture/diagrams/governance/policy.md`.
+2. Исторический policy (контекст): `docs/02-architecture/diagrams/governance/00-diagramming-policy.md`.
+3. Канонические исходники диаграмм: `docs/02-architecture/diagrams/**/*.mmd`.
+4. Decomposed views: `docs/02-architecture/diagrams/views/*.mermaid`.
 5. Рендеры: gitignored, регенерируются через `render.sh`.
 
 ## 3. Форматы и именование
@@ -8581,7 +8581,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 
 \newpage
 
-# Source: `02-architecture/architecture-diagrams.md`
+# Source: `02-architecture/diagrams/guide/architecture-reference.md`
 
 # Architecture Diagrams - BioETL
 
@@ -8649,7 +8649,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 - ✅ Infrastructure реализует Domain Ports
 - ✅ Composition собирает зависимости
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/01-high-level.mermaid`](mmd-diagrams/foundation/01-high-level.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/01-high-level.mermaid`](mmd-diagrams/foundation/01-high-level.mmd)
 
 ----------------------------------------------------------------------
 
@@ -8688,7 +8688,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 - TracingPort, MetricsPort, LoggerPort
 - И другие...
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/26-hexagonal-ports-adapters.mermaid`](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mermaid`](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)
 
 ----------------------------------------------------------------------
 
@@ -8722,7 +8722,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Нарушение = Блокер PR**
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/27-import-matrix-enforcement.mermaid`](mmd-diagrams/foundation/27-import-matrix-enforcement.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/27-import-matrix-enforcement.mermaid`](mmd-diagrams/foundation/27-import-matrix-enforcement.mmd)
 
 ----------------------------------------------------------------------
 
@@ -8769,7 +8769,7 @@ Bronze → Silver → Gold уровни хранения данных.
 - Delta Time Travel (7-day history)
 - VACUUM cleanup (weekly)
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/architecture/03-medallion-data-flow.mermaid`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+**Файл:** [`docs/02-architecture/diagrams/architecture/03-medallion-data-flow.mermaid`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
 
 ----------------------------------------------------------------------
 
@@ -8862,7 +8862,7 @@ End-to-end поток данных от API провайдера до Gold layer
 
 - SIGTERM → Finish current batch → Save checkpoint → Exit(0)
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/08-complete-etl-workflow.mermaid`](mmd-diagrams/foundation/08-complete-etl-workflow.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/08-complete-etl-workflow.mermaid`](mmd-diagrams/foundation/08-complete-etl-workflow.mmd)
 
 ----------------------------------------------------------------------
 
@@ -8919,7 +8919,7 @@ Delta merge by content-hash — критическая операция для i
 - ✓ Automatic deduplication
 - ✓ Optimistic concurrency
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/19-delta-lake-write-sequence.mermaid`](mmd-diagrams/foundation/19-delta-lake-write-sequence.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/19-delta-lake-write-sequence.mermaid`](mmd-diagrams/foundation/19-delta-lake-write-sequence.mmd)
 
 ----------------------------------------------------------------------
 
@@ -8956,7 +8956,7 @@ Delta merge by content-hash — критическая операция для i
 - DataNormalizationService, IdentityService
 - UnitConverter, ActivityAggregator, ValueValidator
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/13-domain-models-relationship.mermaid`](mmd-diagrams/foundation/13-domain-models-relationship.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/13-domain-models-relationship.mermaid`](mmd-diagrams/foundation/13-domain-models-relationship.mmd)
 
 ----------------------------------------------------------------------
 
@@ -8992,7 +8992,7 @@ Delta merge by content-hash — критическая операция для i
 - StructlogLogger → LoggerPort
 - NoOpTracing/NoOpMetrics → Null Object Pattern
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mermaid`](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mermaid`](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)
 
 ----------------------------------------------------------------------
 
@@ -9047,7 +9047,7 @@ Delta merge by content-hash — критическая операция для i
 
 - PreflightService, PostrunService, PipelineObserver
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/40-application-core-collaboration.mermaid`](mmd-diagrams/foundation/40-application-core-collaboration.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/40-application-core-collaboration.mermaid`](mmd-diagrams/foundation/40-application-core-collaboration.mmd)
 
 ----------------------------------------------------------------------
 
@@ -9099,7 +9099,7 @@ Delta merge by content-hash — критическая операция для i
   - RecoverableError (429, 5xx)
   - DataQualityError (invalid data)
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/41-error-classification-tree.mermaid`](mmd-diagrams/foundation/41-error-classification-tree.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/41-error-classification-tree.mermaid`](mmd-diagrams/foundation/41-error-classification-tree.mmd)
 
 ----------------------------------------------------------------------
 
@@ -9146,7 +9146,7 @@ delay = (backoff-factor ^ retry-count) * base-delay + random(jitter-min, jitter-
 - 400 Bad Request
 - 404 Not Found
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/04-error-flow.mermaid`](mmd-diagrams/foundation/04-error-flow.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/04-error-flow.mermaid`](mmd-diagrams/foundation/04-error-flow.mmd)
 
 ----------------------------------------------------------------------
 
@@ -9195,7 +9195,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - `circuit-breaker-state` (gauge)
 - `circuit-breaker-failure-count` (gauge)
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/07-circuit-breaker-states.mermaid`](mmd-diagrams/foundation/07-circuit-breaker-states.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/07-circuit-breaker-states.mermaid`](mmd-diagrams/foundation/07-circuit-breaker-states.mmd)
 
 ----------------------------------------------------------------------
 
@@ -9239,7 +9239,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - last-batch-id
 - timestamp
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/05-pipeline-lifecycle-states.mermaid`](mmd-diagrams/foundation/05-pipeline-lifecycle-states.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/05-pipeline-lifecycle-states.mermaid`](mmd-diagrams/foundation/05-pipeline-lifecycle-states.mmd)
 
 ----------------------------------------------------------------------
 
@@ -9302,7 +9302,7 @@ bioetl run --pipeline chembl_activity \
   --data-dir /path/to/data
 ```
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/46-yaml-config-resolution.mermaid`](mmd-diagrams/foundation/46-yaml-config-resolution.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mermaid`](mmd-diagrams/foundation/46-yaml-config-resolution.mmd)
 
 ----------------------------------------------------------------------
 
@@ -9310,7 +9310,7 @@ bioetl run --pipeline chembl_activity \
 
 ### Полный Список Диаграмм
 
-См. [`diagram-catalog.md`](mmd-diagrams/docs/diagram-catalog.md) для каталога диаграмм.
+См. [`diagram-catalog.md`](mmd-diagrams/governance/diagram-catalog.md) для каталога диаграмм.
 
 ### TOP-50 Таблица
 
@@ -9318,11 +9318,11 @@ bioetl run --pipeline chembl_activity \
 
 ### Mermaid Исходники
 
-Все `.mermaid` файлы находятся в [`docs/02-architecture/mmd-diagrams/`](mmd-diagrams/README.md).
+Все `.mermaid` файлы находятся в [`docs/02-architecture/diagrams/`](mmd-diagrams/README.md).
 
 ### Рендеринг
 
-Скрипт рендеринга: [`render.sh`](mmd-diagrams/render.sh) или `make render-diagrams`.
+Скрипт рендеринга: [`render.sh`](mmd-diagrams/tooling/render.sh) или `make render-diagrams`.
 
 ----------------------------------------------------------------------
 
@@ -9331,7 +9331,7 @@ bioetl run --pipeline chembl_activity \
 
 \newpage
 
-# Source: `02-architecture/container-diagram.md`
+# Source: `02-architecture/diagrams/guide/container-reference.md`
 
 # C4: Диаграмма Контейнеров
 
@@ -9351,7 +9351,7 @@ bioetl run --pipeline chembl_activity \
 
 \newpage
 
-# Source: `02-architecture/data-flow.md`
+# Source: `02-architecture/diagrams/guide/data-flow-reference.md`
 
 # Data Flow
 
@@ -9483,7 +9483,7 @@ flowchart TD
 ## Related Documents
 
 - **System Context**: [system-context.md](system-context.md)
-- **Architecture Diagrams**: [00-diagramming-policy.md](mmd-diagrams/docs/00-diagramming-policy.md)
+- **Architecture Diagrams**: [00-diagramming-policy.md](mmd-diagrams/governance/00-diagramming-policy.md)
 
 
 \newpage
@@ -18744,13 +18744,13 @@ contracts:
 
 BioETL содержит два каталога диаграмм с разными форматами и назначением:
 
-**Canonical sources** (`docs/02-architecture/mmd-diagrams/`):
+**Canonical sources** (`docs/02-architecture/diagrams/`):
 - `architecture/` — 32 `.mmd` файла (18 core + decomposed subdomain files)
 - `class-diagrams/` — 16 `.mmd` файлов (class diagram families)
 - `foundation/` — 54 `.mmd` файла (historical + TOP-25)
 - Итого: **103 `.mmd` файлов** (включая `_template.mmd`)
 
-**Decomposed views** (`docs/02-architecture/mmd-diagrams/views/`):
+**Decomposed views** (`docs/02-architecture/diagrams/views/`):
 - 31 parent diagram × 5 views (`-full`, `-overview`, `-domain`, `-infra`, `-dataflow`)
 - + `00-legend.mermaid`
 - Итого: **156 `.mermaid` файлов**
@@ -18776,7 +18776,7 @@ BioETL содержит два каталога диаграмм с разным
 - Рендер: `render.sh` (SVG + PNG, 300 DPI)
 - Lint: `scripts/diagrams/lint_diagrams.py`
 - Шаблон: `mmd-diagrams/_template.mmd`
-- Политика LLM: `docs/02-architecture/06-diagram-policy.md` (POL-LLM-DIAGRAMS-001)
+- Политика LLM: `docs/02-architecture/diagrams/governance/policy.md` (POL-LLM-DIAGRAMS-001)
 
 ---
 
@@ -19006,7 +19006,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 - **ADR-005** — Layered Architecture (Hexagonal / Ports & Adapters)
 - **ADR-020** — Composition Layer isolation
-- **POL-LLM-DIAGRAMS-001** — `docs/02-architecture/06-diagram-policy.md`
+- **POL-LLM-DIAGRAMS-001** — `docs/02-architecture/diagrams/governance/policy.md`
 
 
 \newpage
@@ -19262,7 +19262,7 @@ ADR files follow the pattern: `ADR-NNN-kebab-case-title.md`
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/INDEX.md`
+# Source: `02-architecture/diagrams/descriptions/INDEX.md`
 
 # Diagram Descriptions Index
 
@@ -19275,7 +19275,7 @@ _Автогенерация: 2026-02-27_
 
 - [Architecture/Class descriptions index](./mmd-diagrams/class-diagrams/INDEX.md)
 - [MMD diagram descriptions map](../mmd-diagrams/diagram-descriptions.md)
-- [Class diagrams with descriptions](../mmd-diagrams/class-diagrams-with-descriptions.md)
+- [Class diagrams with descriptions](../mmd-diagrams/bundles/class.bundle.md)
 
 - [mmd-diagrams/architecture/01-high-level-hexagonal.mmd](./mmd-diagrams/architecture/01-high-level-hexagonal.md)
 - [mmd-diagrams/architecture/01a-hexagonal-overview.mmd](./mmd-diagrams/architecture/01a-hexagonal-overview.md)
@@ -19571,7 +19571,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/01-full-system-component-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/01-full-system-component-full.md`
 
 # Full System Component Diagram
 
@@ -19588,7 +19588,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/04-domain-layer-class-diagram-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/04-domain-layer-class-diagram-full.md`
 
 # Domain Layer Class Diagram
 
@@ -19605,7 +19605,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/21-activity-entity-data-flow-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/21-activity-entity-data-flow-full.md`
 
 # Activity Entity Data Flow (Extract → Transform → Load)
 
@@ -19622,7 +19622,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/26-hexagonal-ports-adapters-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/26-hexagonal-ports-adapters-full.md`
 
 # Hexagonal Architecture — Ports and Adapters Overview
 
@@ -19639,7 +19639,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/28-composition-root-di-graph-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/28-composition-root-di-graph-full.md`
 
 # Composition Root Wiring — Full DI Graph
 
@@ -19656,7 +19656,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/29-composite-pipeline-workflow-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/29-composite-pipeline-workflow-full.md`
 
 # Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
 
@@ -19673,7 +19673,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/30-port-adapter-mapping-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/30-port-adapter-mapping-full.md`
 
 # Port-to-Adapter Mapping Table Diagram
 
@@ -19690,7 +19690,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/32-single-record-journey-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/32-single-record-journey-full.md`
 
 # Record Processing Pipeline — Single Record Journey
 
@@ -19707,7 +19707,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/35-bootstrap-sequence-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/35-bootstrap-sequence-full.md`
 
 # Composition Layer Bootstrap Sequence
 
@@ -19724,7 +19724,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/39-medallion-invariants-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/39-medallion-invariants-full.md`
 
 # Medallion Architecture Invariants (ARCH-007)
 
@@ -19741,7 +19741,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/44-cross-provider-enrichment-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/44-cross-provider-enrichment-full.md`
 
 # Cross-Provider Data Enrichment Flow — Publication
 
@@ -19758,7 +19758,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/diagrams/mermaid/46-yaml-config-resolution-full.md`
+# Source: `02-architecture/diagrams/descriptions/diagrams/mermaid/46-yaml-config-resolution-full.md`
 
 # YAML Configuration Resolution Chain
 
@@ -19775,7 +19775,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/01-high-level-hexagonal.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/01-high-level-hexagonal.md`
 
 # High-Level Hexagonal Architecture
 
@@ -19792,7 +19792,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/01a-hexagonal-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/01a-hexagonal-overview.md`
 
 # Hexagonal Overview
 
@@ -19809,7 +19809,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/01b-hexagonal-domain-app.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/01b-hexagonal-domain-app.md`
 
 # Hexagonal Domain and Application
 
@@ -19826,7 +19826,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/01c-hexagonal-infra-comp.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/01c-hexagonal-infra-comp.md`
 
 # Hexagonal Infrastructure and Composition
 
@@ -19843,7 +19843,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/01d-hexagonal-overview-rounded.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/01d-hexagonal-overview-rounded.md`
 
 # Hexagonal Overview (Rounded Nodes)
 
@@ -19860,7 +19860,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/02-layer-dependency-matrix.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/02-layer-dependency-matrix.md`
 
 # Layer Dependency Matrix (ARCH-001)
 
@@ -19877,7 +19877,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/03-medallion-data-flow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/03-medallion-data-flow.md`
 
 # Medallion Architecture Data Flow (Bronze → Silver → Gold)
 
@@ -19894,7 +19894,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/03a-medallion-layers-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/03a-medallion-layers-overview.md`
 
 # Medallion Layers Overview
 
@@ -19911,7 +19911,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/04-pipeline-execution-flow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/04-pipeline-execution-flow.md`
 
 # Pipeline Execution Lifecycle
 
@@ -19928,7 +19928,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/05-provider-adapter-hierarchy.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/05-provider-adapter-hierarchy.md`
 
 # Provider Adapter Hierarchy
 
@@ -19945,7 +19945,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/05a-adapter-hierarchy-base.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/05a-adapter-hierarchy-base.md`
 
 # Adapter Hierarchy: Base Types
 
@@ -19962,7 +19962,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/05b-adapter-hierarchy-providers.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/05b-adapter-hierarchy-providers.md`
 
 # Adapter Hierarchy: Provider Implementations
 
@@ -19979,7 +19979,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/06-storage-layer.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/06-storage-layer.md`
 
 # Storage Layer Components
 
@@ -19996,7 +19996,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/06a-storage-writers.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/06a-storage-writers.md`
 
 # Storage Writers
 
@@ -20013,7 +20013,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/06b-storage-support.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/06b-storage-support.md`
 
 # Storage Support Components
 
@@ -20030,7 +20030,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/07-dq-system.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/07-dq-system.md`
 
 # Data Quality (DQ) System
 
@@ -20047,7 +20047,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/07a-dq-analysis.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/07a-dq-analysis.md`
 
 # DQ Analysis Services
 
@@ -20064,7 +20064,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/07b-dq-pipeline.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/07b-dq-pipeline.md`
 
 # DQ Pipeline Integration
 
@@ -20081,7 +20081,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/08-composite-pipeline.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/08-composite-pipeline.md`
 
 # Composite Pipeline Architecture
 
@@ -20098,7 +20098,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/08a-composite-config.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/08a-composite-config.md`
 
 # Composite Pipeline Configuration & FSM
 
@@ -20115,7 +20115,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/08b-composite-execution.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/08b-composite-execution.md`
 
 # Composite Pipeline Execution
 
@@ -20132,7 +20132,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/09-observability-stack.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/09-observability-stack.md`
 
 # Observability Stack
 
@@ -20149,7 +20149,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/09a-observability-app.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/09a-observability-app.md`
 
 # Observability: Application Layer
 
@@ -20166,7 +20166,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/09b-observability-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/09b-observability-infra.md`
 
 # Observability: Infrastructure Layer
 
@@ -20183,7 +20183,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/10-resilience-patterns.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/10-resilience-patterns.md`
 
 # Resilience Patterns
 
@@ -20200,7 +20200,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/11-configuration-system.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/11-configuration-system.md`
 
 # Configuration System
 
@@ -20217,7 +20217,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/11a-config-loading.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/11a-config-loading.md`
 
 # Configuration: Loading Pipeline
 
@@ -20234,7 +20234,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/11b-config-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/11b-config-domain.md`
 
 # Configuration: Domain & Application Config
 
@@ -20251,7 +20251,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/12-bootstrap-di-container.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/12-bootstrap-di-container.md`
 
 # Bootstrap / DI Container (Composition Root)
 
@@ -20268,7 +20268,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/12a-bootstrap-factories.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/12a-bootstrap-factories.md`
 
 # Bootstrap: Factories and Registries
 
@@ -20285,7 +20285,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/12b-bootstrap-wiring.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/12b-bootstrap-wiring.md`
 
 # Bootstrap: Wiring Graph
 
@@ -20302,7 +20302,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13-port-protocol-contracts.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13-port-protocol-contracts.md`
 
 # Port/Protocol Contracts (Full Map)
 
@@ -20319,7 +20319,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13a-data-storage-ports.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13a-data-storage-ports.md`
 
 # DataSource and Storage Ports
 
@@ -20336,7 +20336,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13a-port-contracts-data-sources.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13a-port-contracts-data-sources.md`
 
 # Port Contracts: Data Sources
 
@@ -20353,7 +20353,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13b-operational-ports.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13b-operational-ports.md`
 
 # Operational and Observability Ports
 
@@ -20370,7 +20370,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13b-port-contracts-storage.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13b-port-contracts-storage.md`
 
 # Port Contracts: Storage
 
@@ -20387,7 +20387,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13c-port-contracts-observability.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13c-port-contracts-observability.md`
 
 # Port Contracts: Observability and Resilience
 
@@ -20404,7 +20404,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13c-validation-dq-ports.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13c-validation-dq-ports.md`
 
 # Validation and Data Quality Ports
 
@@ -20421,7 +20421,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13d-port-contracts-services.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13d-port-contracts-services.md`
 
 # Port Contracts: Services and Controls
 
@@ -20438,7 +20438,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13e-operational-ports-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13e-operational-ports-domain.md`
 
 # Domain Operational Ports
 
@@ -20455,7 +20455,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/13f-operational-ports-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/13f-operational-ports-infra.md`
 
 # Infrastructure Operational Implementations
 
@@ -20472,7 +20472,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/14-cli-interface-layer.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/14-cli-interface-layer.md`
 
 # CLI / Interface Layer
 
@@ -20489,7 +20489,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/14a-cli-commands.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/14a-cli-commands.md`
 
 # CLI: Command Structure
 
@@ -20506,7 +20506,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/14b-cli-routing.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/14b-cli-routing.md`
 
 # CLI: Routing to Composition & Application
 
@@ -20523,7 +20523,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/15-batch-executor-internals.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/15-batch-executor-internals.md`
 
 # BatchExecutor Internal Architecture
 
@@ -20540,7 +20540,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/16-transformer-hierarchy.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/16-transformer-hierarchy.md`
 
 # Transformer Hierarchy
 
@@ -20557,7 +20557,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/16a-transformer-base.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/16a-transformer-base.md`
 
 # Base Transformer and ChEMBL Transformers
 
@@ -20574,7 +20574,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/16b-transformer-pub-other.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/16b-transformer-pub-other.md`
 
 # Publication, UniProt, Other Transformers and Extractors
 
@@ -20591,7 +20591,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/17-security-pii-audit.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/17-security-pii-audit.md`
 
 # Security, PII Hashing, and Audit Trail
 
@@ -20608,7 +20608,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/18-lock-checkpoint-shutdown.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/18-lock-checkpoint-shutdown.md`
 
 # Locking, Checkpoint, and Graceful Shutdown
 
@@ -20625,7 +20625,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/18a-lock-system.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/18a-lock-system.md`
 
 # Lock System
 
@@ -20642,7 +20642,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/architecture/18b-checkpoint-shutdown.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/architecture/18b-checkpoint-shutdown.md`
 
 # Checkpoint and Shutdown System
 
@@ -20659,7 +20659,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/01-domain-ports.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/01-domain-ports.md`
 
 # Class Diagram: 01 Domain Ports
 
@@ -20676,7 +20676,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/02-entities-aggregates.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/02-entities-aggregates.md`
 
 # Class Diagram: 02 Entities Aggregates
 
@@ -20693,7 +20693,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/03-value-objects.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/03-value-objects.md`
 
 # Class Diagram: 03 Value Objects
 
@@ -20710,7 +20710,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/04-types-enums.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/04-types-enums.md`
 
 # Class Diagram: 04 Types Enums
 
@@ -20727,7 +20727,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/05-exceptions.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/05-exceptions.md`
 
 # Class Diagram: 05 Exceptions
 
@@ -20744,7 +20744,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/06-config-classes.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/06-config-classes.md`
 
 # Class Diagram: 06 Config Classes
 
@@ -20761,7 +20761,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/07-application-core-services.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/07-application-core-services.md`
 
 # Class Diagram: 07 Application Core Services
 
@@ -20778,7 +20778,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/08-application-services.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/08-application-services.md`
 
 # Class Diagram: 08 Application Services
 
@@ -20795,7 +20795,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/09-transformers.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/09-transformers.md`
 
 # Class Diagram: 09 Transformers
 
@@ -20812,7 +20812,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/10-adapters.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/10-adapters.md`
 
 # Class Diagram: 10 Adapters
 
@@ -20829,7 +20829,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/11-storage.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/11-storage.md`
 
 # Class Diagram: 11 Storage
 
@@ -20846,7 +20846,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/12-composite-pipeline.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/12-composite-pipeline.md`
 
 # Class Diagram: 12 Composite Pipeline
 
@@ -20863,7 +20863,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/13-domain-services.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/13-domain-services.md`
 
 # Class Diagram: 13 Domain Services
 
@@ -20880,7 +20880,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/14-observability.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/14-observability.md`
 
 # Class Diagram: 14 Observability
 
@@ -20897,7 +20897,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/15-extractors.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/15-extractors.md`
 
 # Class Diagram: 15 Extractors
 
@@ -20914,7 +20914,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/16-factories-bootstrap.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/16-factories-bootstrap.md`
 
 # Class Diagram: 16 Factories Bootstrap
 
@@ -20931,7 +20931,7 @@ _Автогенерация: 2026-02-27_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/INDEX.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/class-diagrams/INDEX.md`
 
 # Class Diagrams — Descriptions Index
 
@@ -20957,7 +20957,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/01-full-system-component.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/01-full-system-component.md`
 
 # Title: Full System Component Diagram
 
@@ -20974,7 +20974,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/01-high-level.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/01-high-level.md`
 
 # Title: High-Level System Architecture
 
@@ -20991,7 +20991,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/02-full-medallion-data-flow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/02-full-medallion-data-flow.md`
 
 # Title: Full Medallion Data Flow with Lineage and DQ
 
@@ -21008,7 +21008,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/03-pipeline-execution-happy-path.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/03-pipeline-execution-happy-path.md`
 
 # Title: Pipeline Execution — Happy Path
 
@@ -21025,7 +21025,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/04-domain-layer-class-diagram.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/04-domain-layer-class-diagram.md`
 
 # Title: Domain Layer Class Diagram
 
@@ -21042,7 +21042,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/04-error-flow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/04-error-flow.md`
 
 # Title: Error Handling and Quarantine Flow
 
@@ -21059,7 +21059,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/05-layers-interaction.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/05-layers-interaction.md`
 
 # Title: Layer Interaction — Hexagonal Architecture
 
@@ -21076,7 +21076,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/05-pipeline-lifecycle-states.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/05-pipeline-lifecycle-states.md`
 
 # Title: Pipeline Lifecycle State Machine
 
@@ -21093,7 +21093,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/06-application-layer-class-diagram.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/06-application-layer-class-diagram.md`
 
 # Title: Application Layer Class Diagram
 
@@ -21110,7 +21110,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/06-pipeline-execution.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/06-pipeline-execution.md`
 
 # Title: Pipeline Execution Sequence (Full)
 
@@ -21127,7 +21127,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/07-circuit-breaker-states.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/07-circuit-breaker-states.md`
 
 # Title: Circuit Breaker State Machine
 
@@ -21144,7 +21144,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/07-medallion-flow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/07-medallion-flow.md`
 
 # Title: Medallion Data Flow (Sources → Bronze → Silver → Gold)
 
@@ -21161,7 +21161,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/08-complete-etl-workflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/08-complete-etl-workflow.md`
 
 # Title: Complete ETL Workflow (6 Phases)
 
@@ -21178,7 +21178,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/08-domain-ddd.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/08-domain-ddd.md`
 
 # Title: Domain Layer — DDD Components
 
@@ -21195,7 +21195,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/09-full-er-diagram.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/09-full-er-diagram.md`
 
 # Title: Entity-Relationship Diagram (All Providers)
 
@@ -21212,7 +21212,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.md`
 
 # Title: Infrastructure Layer Class Diagram
 
@@ -21229,7 +21229,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/11-lock-acquisition-sequence.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/11-lock-acquisition-sequence.md`
 
 # Title: Lock Acquisition Sequence (Two Workers)
 
@@ -21246,7 +21246,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/12-local-deployment-architecture.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/12-local-deployment-architecture.md`
 
 # Title: Local Deployment Architecture
 
@@ -21263,7 +21263,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/13-domain-models-relationship.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/13-domain-models-relationship.md`
 
 # Title: Domain Models Relationship Hierarchy
 
@@ -21280,7 +21280,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/14-provider-health-states.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/14-provider-health-states.md`
 
 # Title: Provider Health State Machine
 
@@ -21297,7 +21297,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/15-dq-check-workflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/15-dq-check-workflow.md`
 
 # Title: Data Quality Check Workflow
 
@@ -21314,7 +21314,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/16-memory-lock-class.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/16-memory-lock-class.md`
 
 # Title: MemoryLock Class Diagram
 
@@ -21331,7 +21331,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/17-pipeline-hierarchy.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/17-pipeline-hierarchy.md`
 
 # Title: Pipeline and Transformer Class Hierarchy
 
@@ -21348,7 +21348,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/18-bronze-write-sequence.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/18-bronze-write-sequence.md`
 
 # Title: Bronze Write Sequence (JSONL + zstd)
 
@@ -21365,7 +21365,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/19-delta-lake-write-sequence.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/19-delta-lake-write-sequence.md`
 
 # Title: Delta Lake Write Sequence (Silver Layer)
 
@@ -21382,7 +21382,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/20-quarantine-record-states.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/20-quarantine-record-states.md`
 
 # Title: Quarantine Record State Machine
 
@@ -21399,7 +21399,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/21-activity-entity-data-flow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/21-activity-entity-data-flow.md`
 
 # Title: Activity Entity Data Flow (Extract → Transform → Load)
 
@@ -21416,7 +21416,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/22-client-api-request-sequence.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/22-client-api-request-sequence.md`
 
 # Title: HTTP Client API Request Sequence
 
@@ -21433,7 +21433,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/23-silver-writer-class.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/23-silver-writer-class.md`
 
 # Title: SilverWriter Class Diagram
 
@@ -21450,7 +21450,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/24-hash-service-class.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/24-hash-service-class.md`
 
 # Title: ContentHashService Class Diagram
 
@@ -21467,7 +21467,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/25-circuit-breaker-observer-class.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/25-circuit-breaker-observer-class.md`
 
 # Title: Circuit Breaker and Observer Classes
 
@@ -21484,7 +21484,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/26-hexagonal-ports-adapters.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/26-hexagonal-ports-adapters.md`
 
 # Title: Hexagonal Architecture — Ports and Adapters Overview
 
@@ -21501,7 +21501,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/27-import-matrix-enforcement.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/27-import-matrix-enforcement.md`
 
 # Title: Five-Layer Import Matrix Enforcement (ARCH-001)
 
@@ -21518,7 +21518,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/28-composition-root-di-graph.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/28-composition-root-di-graph.md`
 
 # Title: Composition Root Wiring — Full DI Graph
 
@@ -21535,7 +21535,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/29-composite-pipeline-workflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/29-composite-pipeline-workflow.md`
 
 # Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
 
@@ -21552,7 +21552,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/30-port-adapter-mapping.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/30-port-adapter-mapping.md`
 
 # Title: Port-to-Adapter Mapping Table Diagram
 
@@ -21569,7 +21569,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/31-pipeline-run-lifecycle.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/31-pipeline-run-lifecycle.md`
 
 # Title: Pipeline Run Lifecycle — From Config to Completion
 
@@ -21586,7 +21586,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/32-single-record-journey.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/32-single-record-journey.md`
 
 # Title: Record Processing Pipeline — Single Record Journey
 
@@ -21603,7 +21603,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/33-cli-run-interaction.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/33-cli-run-interaction.md`
 
 # Title: CLI Run Command → PipelineRunner Full Interaction
 
@@ -21620,7 +21620,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/34-batch-processing-flow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/34-batch-processing-flow.md`
 
 # Title: Batch Processing Flow — Extract to Write
 
@@ -21637,7 +21637,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/36-architecture-principles-mindmap.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/36-architecture-principles-mindmap.md`
 
 # Title: Architecture Principles Mind Map
 
@@ -21654,7 +21654,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/37-cli-entry-full-chain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/37-cli-entry-full-chain.md`
 
 # Title: CLI Entry Point to Pipeline Execution Full Chain
 
@@ -21671,7 +21671,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/38-runtime-assembly-sequence.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/38-runtime-assembly-sequence.md`
 
 # Title: Runtime Assembly Sequence — bootstrap/runtime/assembly.py
 
@@ -21688,7 +21688,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/39-medallion-invariants.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/39-medallion-invariants.md`
 
 # Title: Medallion Architecture Invariants (ARCH-007)
 
@@ -21705,7 +21705,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/40-application-core-collaboration.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/40-application-core-collaboration.md`
 
 # Title: Application Core Component Collaboration
 
@@ -21722,7 +21722,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/41-error-classification-tree.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/41-error-classification-tree.md`
 
 # Title: Error Classification Decision Tree — Full Logic
 
@@ -21739,7 +21739,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/42-pipeline-runner-class.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/42-pipeline-runner-class.md`
 
 # Title: PipelineRunner Internal Component Diagram
 
@@ -21756,7 +21756,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/43-fan-out-fan-in-pattern.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/43-fan-out-fan-in-pattern.md`
 
 # Title: Fan-Out/Fan-In Pattern — Composite Pipeline Enrichment
 
@@ -21773,7 +21773,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/44-cross-provider-enrichment.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/44-cross-provider-enrichment.md`
 
 # Title: Cross-Provider Data Enrichment Flow — Publication
 
@@ -21790,7 +21790,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/46-yaml-config-resolution.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/46-yaml-config-resolution.md`
 
 # Title: YAML Configuration Resolution Chain
 
@@ -21807,7 +21807,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/47-publication-merge-sources.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/47-publication-merge-sources.md`
 
 # Title: Publication Composite — Merge All Sources
 
@@ -21824,7 +21824,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/48-composite-phase-lifecycle.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/48-composite-phase-lifecycle.md`
 
 # Title: Composite Pipeline Phase Lifecycle (FSM)
 
@@ -21841,7 +21841,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/49-composite-runner-class.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/49-composite-runner-class.md`
 
 # Title: CompositePipelineRunner — Component Diagram
 
@@ -21858,7 +21858,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/foundation/50-exception-hierarchy.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/foundation/50-exception-hierarchy.md`
 
 # Title: Exception Hierarchy — Full Tree
 
@@ -21875,7 +21875,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/00-legend.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/00-legend.md`
 
 # Legend
 
@@ -21892,7 +21892,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-full-system-component-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-full-system-component-dataflow.md`
 
 # Full System Component Dataflow
 
@@ -21909,7 +21909,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-full-system-component-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-full-system-component-domain.md`
 
 # Full System Component Domain
 
@@ -21926,7 +21926,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-full-system-component-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-full-system-component-full.md`
 
 # Full System Component Full
 
@@ -21943,7 +21943,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-full-system-component-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-full-system-component-infra.md`
 
 # Full System Component Infra
 
@@ -21960,7 +21960,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-full-system-component-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-full-system-component-overview.md`
 
 # Full System Component Overview
 
@@ -21977,7 +21977,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-high-level-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-high-level-dataflow.md`
 
 # High Level Dataflow
 
@@ -21994,7 +21994,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-high-level-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-high-level-domain.md`
 
 # High Level Domain
 
@@ -22011,7 +22011,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-high-level-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-high-level-full.md`
 
 # High Level Full
 
@@ -22028,7 +22028,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-high-level-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-high-level-infra.md`
 
 # High Level Infra
 
@@ -22045,7 +22045,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/01-high-level-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/01-high-level-overview.md`
 
 # High Level Overview
 
@@ -22062,7 +22062,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/02-medallion-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/02-medallion-dataflow.md`
 
 # Medallion Dataflow
 
@@ -22079,7 +22079,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/02-medallion-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/02-medallion-domain.md`
 
 # Medallion Domain
 
@@ -22096,7 +22096,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/02-medallion-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/02-medallion-full.md`
 
 # Medallion Full
 
@@ -22113,7 +22113,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/02-medallion-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/02-medallion-infra.md`
 
 # Medallion Infra
 
@@ -22130,7 +22130,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/02-medallion-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/02-medallion-overview.md`
 
 # Medallion Overview
 
@@ -22147,7 +22147,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-dataflow.md`
 
 # Domain Layer Class Diagram Dataflow
 
@@ -22164,7 +22164,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-domain.md`
 
 # Domain Layer Class Diagram Domain
 
@@ -22181,7 +22181,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-full.md`
 
 # Domain Layer Class Diagram Full
 
@@ -22198,7 +22198,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-infra.md`
 
 # Domain Layer Class Diagram Infra
 
@@ -22215,7 +22215,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/04-domain-layer-class-diagram-overview.md`
 
 # Domain Layer Class Diagram Overview
 
@@ -22232,7 +22232,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-layers-interaction-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-layers-interaction-dataflow.md`
 
 # Layers Interaction Dataflow
 
@@ -22249,7 +22249,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-layers-interaction-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-layers-interaction-domain.md`
 
 # Layers Interaction Domain
 
@@ -22266,7 +22266,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-layers-interaction-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-layers-interaction-full.md`
 
 # Layers Interaction Full
 
@@ -22283,7 +22283,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-layers-interaction-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-layers-interaction-infra.md`
 
 # Layers Interaction Infra
 
@@ -22300,7 +22300,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-layers-interaction-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-layers-interaction-overview.md`
 
 # Layers Interaction Overview
 
@@ -22317,7 +22317,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-dataflow.md`
 
 # Pipeline Lifecycle States Dataflow
 
@@ -22334,7 +22334,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-domain.md`
 
 # Pipeline Lifecycle States Domain
 
@@ -22351,7 +22351,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-full.md`
 
 # Pipeline Lifecycle States Full
 
@@ -22368,7 +22368,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-infra.md`
 
 # Pipeline Lifecycle States Infra
 
@@ -22385,7 +22385,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/05-pipeline-lifecycle-states-overview.md`
 
 # Pipeline Lifecycle States Overview
 
@@ -22402,7 +22402,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/06-application-layer-class-diagram-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/06-application-layer-class-diagram-dataflow.md`
 
 # Application Layer Class Diagram Dataflow
 
@@ -22419,7 +22419,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/06-application-layer-class-diagram-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/06-application-layer-class-diagram-domain.md`
 
 # Application Layer Class Diagram Domain
 
@@ -22436,7 +22436,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/06-application-layer-class-diagram-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/06-application-layer-class-diagram-full.md`
 
 # Application Layer Class Diagram Full
 
@@ -22453,7 +22453,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/06-application-layer-class-diagram-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/06-application-layer-class-diagram-infra.md`
 
 # Application Layer Class Diagram Infra
 
@@ -22470,7 +22470,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/06-application-layer-class-diagram-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/06-application-layer-class-diagram-overview.md`
 
 # Application Layer Class Diagram Overview
 
@@ -22487,7 +22487,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/07-circuit-breaker-states-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/07-circuit-breaker-states-dataflow.md`
 
 # Circuit Breaker States Dataflow
 
@@ -22504,7 +22504,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/07-circuit-breaker-states-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/07-circuit-breaker-states-domain.md`
 
 # Circuit Breaker States Domain
 
@@ -22521,7 +22521,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/07-circuit-breaker-states-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/07-circuit-breaker-states-full.md`
 
 # Circuit Breaker States Full
 
@@ -22538,7 +22538,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/07-circuit-breaker-states-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/07-circuit-breaker-states-infra.md`
 
 # Circuit Breaker States Infra
 
@@ -22555,7 +22555,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/07-circuit-breaker-states-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/07-circuit-breaker-states-overview.md`
 
 # Circuit Breaker States Overview
 
@@ -22572,7 +22572,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-complete-etl-workflow-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-complete-etl-workflow-dataflow.md`
 
 # Complete Etl Workflow Dataflow
 
@@ -22589,7 +22589,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-complete-etl-workflow-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-complete-etl-workflow-domain.md`
 
 # Complete Etl Workflow Domain
 
@@ -22606,7 +22606,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-complete-etl-workflow-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-complete-etl-workflow-full.md`
 
 # Complete Etl Workflow Full
 
@@ -22623,7 +22623,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-complete-etl-workflow-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-complete-etl-workflow-infra.md`
 
 # Complete Etl Workflow Infra
 
@@ -22640,7 +22640,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-complete-etl-workflow-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-complete-etl-workflow-overview.md`
 
 # Complete Etl Workflow Overview
 
@@ -22657,7 +22657,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-domain-ddd-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-domain-ddd-dataflow.md`
 
 # Domain Ddd Dataflow
 
@@ -22674,7 +22674,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-domain-ddd-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-domain-ddd-domain.md`
 
 # Domain Ddd Domain
 
@@ -22691,7 +22691,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-domain-ddd-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-domain-ddd-full.md`
 
 # Domain Ddd Full
 
@@ -22708,7 +22708,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-domain-ddd-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-domain-ddd-infra.md`
 
 # Domain Ddd Infra
 
@@ -22725,7 +22725,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/08-domain-ddd-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/08-domain-ddd-overview.md`
 
 # Domain Ddd Overview
 
@@ -22742,7 +22742,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-dataflow.md`
 
 # Infrastructure Layer Class Diagram Dataflow
 
@@ -22759,7 +22759,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-domain.md`
 
 # Infrastructure Layer Class Diagram Domain
 
@@ -22776,7 +22776,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-full.md`
 
 # Infrastructure Layer Class Diagram Full
 
@@ -22793,7 +22793,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-infra.md`
 
 # Infrastructure Layer Class Diagram Infra
 
@@ -22810,7 +22810,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/10-infrastructure-layer-class-diagram-overview.md`
 
 # Infrastructure Layer Class Diagram Overview
 
@@ -22827,7 +22827,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/12-local-deployment-architecture-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/12-local-deployment-architecture-dataflow.md`
 
 # Local Deployment Architecture Dataflow
 
@@ -22844,7 +22844,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/12-local-deployment-architecture-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/12-local-deployment-architecture-domain.md`
 
 # Local Deployment Architecture Domain
 
@@ -22861,7 +22861,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/12-local-deployment-architecture-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/12-local-deployment-architecture-full.md`
 
 # Local Deployment Architecture Full
 
@@ -22878,7 +22878,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/12-local-deployment-architecture-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/12-local-deployment-architecture-infra.md`
 
 # Local Deployment Architecture Infra
 
@@ -22895,7 +22895,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/12-local-deployment-architecture-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/12-local-deployment-architecture-overview.md`
 
 # Local Deployment Architecture Overview
 
@@ -22912,7 +22912,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/14-provider-health-states-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/14-provider-health-states-dataflow.md`
 
 # Provider Health States Dataflow
 
@@ -22929,7 +22929,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/14-provider-health-states-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/14-provider-health-states-domain.md`
 
 # Provider Health States Domain
 
@@ -22946,7 +22946,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/14-provider-health-states-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/14-provider-health-states-full.md`
 
 # Provider Health States Full
 
@@ -22963,7 +22963,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/14-provider-health-states-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/14-provider-health-states-infra.md`
 
 # Provider Health States Infra
 
@@ -22980,7 +22980,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/14-provider-health-states-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/14-provider-health-states-overview.md`
 
 # Provider Health States Overview
 
@@ -22997,7 +22997,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/15-dq-check-workflow-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/15-dq-check-workflow-dataflow.md`
 
 # Dq Check Workflow Dataflow
 
@@ -23014,7 +23014,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/15-dq-check-workflow-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/15-dq-check-workflow-domain.md`
 
 # Dq Check Workflow Domain
 
@@ -23031,7 +23031,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/15-dq-check-workflow-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/15-dq-check-workflow-full.md`
 
 # Dq Check Workflow Full
 
@@ -23048,7 +23048,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/15-dq-check-workflow-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/15-dq-check-workflow-infra.md`
 
 # Dq Check Workflow Infra
 
@@ -23065,7 +23065,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/15-dq-check-workflow-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/15-dq-check-workflow-overview.md`
 
 # Dq Check Workflow Overview
 
@@ -23082,7 +23082,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/21-activity-entity-data-flow-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/21-activity-entity-data-flow-dataflow.md`
 
 # Activity Entity Data Flow Dataflow
 
@@ -23099,7 +23099,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/21-activity-entity-data-flow-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/21-activity-entity-data-flow-domain.md`
 
 # Activity Entity Data Flow Domain
 
@@ -23116,7 +23116,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/21-activity-entity-data-flow-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/21-activity-entity-data-flow-full.md`
 
 # Activity Entity Data Flow Full
 
@@ -23133,7 +23133,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/21-activity-entity-data-flow-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/21-activity-entity-data-flow-infra.md`
 
 # Activity Entity Data Flow Infra
 
@@ -23150,7 +23150,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/21-activity-entity-data-flow-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/21-activity-entity-data-flow-overview.md`
 
 # Activity Entity Data Flow Overview
 
@@ -23167,7 +23167,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-dataflow.md`
 
 # Hexagonal Ports Adapters Dataflow
 
@@ -23184,7 +23184,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-domain.md`
 
 # Hexagonal Ports Adapters Domain
 
@@ -23201,7 +23201,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-full.md`
 
 # Hexagonal Ports Adapters Full
 
@@ -23218,7 +23218,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-infra.md`
 
 # Hexagonal Ports Adapters Infra
 
@@ -23235,7 +23235,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/26-hexagonal-ports-adapters-overview.md`
 
 # Hexagonal Ports Adapters Overview
 
@@ -23252,7 +23252,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/28-composition-root-di-graph-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/28-composition-root-di-graph-dataflow.md`
 
 # Composition Root Di Graph Dataflow
 
@@ -23269,7 +23269,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/28-composition-root-di-graph-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/28-composition-root-di-graph-domain.md`
 
 # Composition Root Di Graph Domain
 
@@ -23286,7 +23286,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/28-composition-root-di-graph-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/28-composition-root-di-graph-full.md`
 
 # Composition Root Di Graph Full
 
@@ -23303,7 +23303,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/28-composition-root-di-graph-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/28-composition-root-di-graph-infra.md`
 
 # Composition Root Di Graph Infra
 
@@ -23320,7 +23320,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/28-composition-root-di-graph-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/28-composition-root-di-graph-overview.md`
 
 # Composition Root Di Graph Overview
 
@@ -23337,7 +23337,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-dataflow.md`
 
 # Composite Pipeline Workflow Dataflow
 
@@ -23354,7 +23354,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-domain.md`
 
 # Composite Pipeline Workflow Domain
 
@@ -23371,7 +23371,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-full.md`
 
 # Composite Pipeline Workflow Full
 
@@ -23388,7 +23388,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-infra.md`
 
 # Composite Pipeline Workflow Infra
 
@@ -23405,7 +23405,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/29-composite-pipeline-workflow-overview.md`
 
 # Composite Pipeline Workflow Overview
 
@@ -23422,7 +23422,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/30-port-adapter-mapping-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/30-port-adapter-mapping-dataflow.md`
 
 # Port Adapter Mapping Dataflow
 
@@ -23439,7 +23439,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/30-port-adapter-mapping-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/30-port-adapter-mapping-domain.md`
 
 # Port Adapter Mapping Domain
 
@@ -23456,7 +23456,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/30-port-adapter-mapping-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/30-port-adapter-mapping-full.md`
 
 # Port Adapter Mapping Full
 
@@ -23473,7 +23473,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/30-port-adapter-mapping-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/30-port-adapter-mapping-infra.md`
 
 # Port Adapter Mapping Infra
 
@@ -23490,7 +23490,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/30-port-adapter-mapping-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/30-port-adapter-mapping-overview.md`
 
 # Port Adapter Mapping Overview
 
@@ -23507,7 +23507,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-dataflow.md`
 
 # Pipeline Run Lifecycle Dataflow
 
@@ -23524,7 +23524,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-domain.md`
 
 # Pipeline Run Lifecycle Domain
 
@@ -23541,7 +23541,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-full.md`
 
 # Pipeline Run Lifecycle Full
 
@@ -23558,7 +23558,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-infra.md`
 
 # Pipeline Run Lifecycle Infra
 
@@ -23575,7 +23575,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/31-pipeline-run-lifecycle-overview.md`
 
 # Pipeline Run Lifecycle Overview
 
@@ -23592,7 +23592,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/32-single-record-journey-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/32-single-record-journey-dataflow.md`
 
 # Single Record Journey Dataflow
 
@@ -23609,7 +23609,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/32-single-record-journey-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/32-single-record-journey-domain.md`
 
 # Single Record Journey Domain
 
@@ -23626,7 +23626,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/32-single-record-journey-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/32-single-record-journey-full.md`
 
 # Single Record Journey Full
 
@@ -23643,7 +23643,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/32-single-record-journey-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/32-single-record-journey-infra.md`
 
 # Single Record Journey Infra
 
@@ -23660,7 +23660,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/32-single-record-journey-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/32-single-record-journey-overview.md`
 
 # Single Record Journey Overview
 
@@ -23677,7 +23677,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/33-cli-run-interaction-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/33-cli-run-interaction-dataflow.md`
 
 # Cli Run Interaction Dataflow
 
@@ -23694,7 +23694,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/33-cli-run-interaction-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/33-cli-run-interaction-domain.md`
 
 # Cli Run Interaction Domain
 
@@ -23711,7 +23711,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/33-cli-run-interaction-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/33-cli-run-interaction-full.md`
 
 # Cli Run Interaction Full
 
@@ -23728,7 +23728,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/33-cli-run-interaction-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/33-cli-run-interaction-infra.md`
 
 # Cli Run Interaction Infra
 
@@ -23745,7 +23745,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/33-cli-run-interaction-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/33-cli-run-interaction-overview.md`
 
 # Cli Run Interaction Overview
 
@@ -23762,7 +23762,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/34-batch-processing-flow-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/34-batch-processing-flow-dataflow.md`
 
 # Batch Processing Flow Dataflow
 
@@ -23779,7 +23779,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/34-batch-processing-flow-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/34-batch-processing-flow-domain.md`
 
 # Batch Processing Flow Domain
 
@@ -23796,7 +23796,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/34-batch-processing-flow-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/34-batch-processing-flow-full.md`
 
 # Batch Processing Flow Full
 
@@ -23813,7 +23813,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/34-batch-processing-flow-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/34-batch-processing-flow-infra.md`
 
 # Batch Processing Flow Infra
 
@@ -23830,7 +23830,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/34-batch-processing-flow-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/34-batch-processing-flow-overview.md`
 
 # Batch Processing Flow Overview
 
@@ -23847,7 +23847,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/35-bootstrap-sequence-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/35-bootstrap-sequence-dataflow.md`
 
 # Bootstrap Sequence Dataflow
 
@@ -23864,7 +23864,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/35-bootstrap-sequence-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/35-bootstrap-sequence-domain.md`
 
 # Bootstrap Sequence Domain
 
@@ -23881,7 +23881,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/35-bootstrap-sequence-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/35-bootstrap-sequence-full.md`
 
 # Bootstrap Sequence Full
 
@@ -23898,7 +23898,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/35-bootstrap-sequence-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/35-bootstrap-sequence-infra.md`
 
 # Bootstrap Sequence Infra
 
@@ -23915,7 +23915,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/35-bootstrap-sequence-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/35-bootstrap-sequence-overview.md`
 
 # Bootstrap Sequence Overview
 
@@ -23932,7 +23932,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-dataflow.md`
 
 # Architecture Principles Mindmap Dataflow
 
@@ -23949,7 +23949,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-domain.md`
 
 # Architecture Principles Mindmap Domain
 
@@ -23966,7 +23966,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-full.md`
 
 # Architecture Principles Mindmap Full
 
@@ -23983,7 +23983,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-infra.md`
 
 # Architecture Principles Mindmap Infra
 
@@ -24000,7 +24000,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/36-architecture-principles-mindmap-overview.md`
 
 # Architecture Principles Mindmap Overview
 
@@ -24017,7 +24017,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/39-medallion-invariants-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/39-medallion-invariants-dataflow.md`
 
 # Medallion Invariants Dataflow
 
@@ -24034,7 +24034,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/39-medallion-invariants-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/39-medallion-invariants-domain.md`
 
 # Medallion Invariants Domain
 
@@ -24051,7 +24051,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/39-medallion-invariants-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/39-medallion-invariants-full.md`
 
 # Medallion Invariants Full
 
@@ -24068,7 +24068,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/39-medallion-invariants-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/39-medallion-invariants-infra.md`
 
 # Medallion Invariants Infra
 
@@ -24085,7 +24085,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/39-medallion-invariants-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/39-medallion-invariants-overview.md`
 
 # Medallion Invariants Overview
 
@@ -24102,7 +24102,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/41-error-classification-tree-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/41-error-classification-tree-dataflow.md`
 
 # Error Classification Tree Dataflow
 
@@ -24119,7 +24119,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/41-error-classification-tree-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/41-error-classification-tree-domain.md`
 
 # Error Classification Tree Domain
 
@@ -24136,7 +24136,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/41-error-classification-tree-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/41-error-classification-tree-full.md`
 
 # Error Classification Tree Full
 
@@ -24153,7 +24153,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/41-error-classification-tree-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/41-error-classification-tree-infra.md`
 
 # Error Classification Tree Infra
 
@@ -24170,7 +24170,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/41-error-classification-tree-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/41-error-classification-tree-overview.md`
 
 # Error Classification Tree Overview
 
@@ -24187,7 +24187,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/44-cross-provider-enrichment-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/44-cross-provider-enrichment-dataflow.md`
 
 # Cross Provider Enrichment Dataflow
 
@@ -24204,7 +24204,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/44-cross-provider-enrichment-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/44-cross-provider-enrichment-domain.md`
 
 # Cross Provider Enrichment Domain
 
@@ -24221,7 +24221,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/44-cross-provider-enrichment-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/44-cross-provider-enrichment-full.md`
 
 # Cross Provider Enrichment Full
 
@@ -24238,7 +24238,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/44-cross-provider-enrichment-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/44-cross-provider-enrichment-infra.md`
 
 # Cross Provider Enrichment Infra
 
@@ -24255,7 +24255,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/44-cross-provider-enrichment-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/44-cross-provider-enrichment-overview.md`
 
 # Cross Provider Enrichment Overview
 
@@ -24272,7 +24272,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/46-yaml-config-resolution-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/46-yaml-config-resolution-dataflow.md`
 
 # Yaml Config Resolution Dataflow
 
@@ -24289,7 +24289,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/46-yaml-config-resolution-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/46-yaml-config-resolution-domain.md`
 
 # Yaml Config Resolution Domain
 
@@ -24306,7 +24306,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/46-yaml-config-resolution-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/46-yaml-config-resolution-full.md`
 
 # Yaml Config Resolution Full
 
@@ -24323,7 +24323,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/46-yaml-config-resolution-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/46-yaml-config-resolution-infra.md`
 
 # Yaml Config Resolution Infra
 
@@ -24340,7 +24340,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/46-yaml-config-resolution-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/46-yaml-config-resolution-overview.md`
 
 # Yaml Config Resolution Overview
 
@@ -24357,7 +24357,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-dataflow.md`
 
 # Composite Phase Lifecycle Dataflow
 
@@ -24374,7 +24374,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-domain.md`
 
 # Composite Phase Lifecycle Domain
 
@@ -24391,7 +24391,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-full.md`
 
 # Composite Phase Lifecycle Full
 
@@ -24408,7 +24408,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-infra.md`
 
 # Composite Phase Lifecycle Infra
 
@@ -24425,7 +24425,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/48-composite-phase-lifecycle-overview.md`
 
 # Composite Phase Lifecycle Overview
 
@@ -24442,7 +24442,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/50-exception-hierarchy-dataflow.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/50-exception-hierarchy-dataflow.md`
 
 # Exception Hierarchy Dataflow
 
@@ -24459,7 +24459,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/50-exception-hierarchy-domain.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/50-exception-hierarchy-domain.md`
 
 # Exception Hierarchy Domain
 
@@ -24476,7 +24476,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/50-exception-hierarchy-full.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/50-exception-hierarchy-full.md`
 
 # Exception Hierarchy Full
 
@@ -24493,7 +24493,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/50-exception-hierarchy-infra.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/50-exception-hierarchy-infra.md`
 
 # Exception Hierarchy Infra
 
@@ -24510,7 +24510,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagram-descriptions/mmd-diagrams/views/50-exception-hierarchy-overview.md`
+# Source: `02-architecture/diagrams/descriptions/mmd-diagrams/views/50-exception-hierarchy-overview.md`
 
 # Exception Hierarchy Overview
 
@@ -24527,7 +24527,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 
 \newpage
 
-# Source: `02-architecture/diagrams.md`
+# Source: `02-architecture/diagrams/guide/index.md`
 
 # Diagrams
 
@@ -24663,7 +24663,7 @@ For a more detailed look at the runtime instances and interactions between the s
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/README.md`
+# Source: `02-architecture/diagrams/README.md`
 
 # BioETL Architecture & Class Diagrams
 
@@ -24691,7 +24691,7 @@ These artifacts are intentionally outside primary nav but linked here for discov
 - [views/svg/INDEX.md](views/svg/INDEX.md)
 - [views/png/INDEX.md](views/png/INDEX.md)
 - [diagram-descriptions/class-diagrams-descriptions.md](diagram-descriptions/class-diagrams-descriptions.md)
-- [foundation-diagrams-with-descriptions.md](foundation-diagrams-with-descriptions.md)
+- [bundles/foundation.bundle.md](bundles/foundation.bundle.md)
 
 ---
 
@@ -24884,13 +24884,13 @@ make render-diagrams-svg
 make check-diagrams-visibility
 
 # Or run the script directly
-bash docs/02-architecture/mmd-diagrams/render.sh
+bash docs/02-architecture/diagrams/tooling/render.sh
 
 # Single diagram with theme
-mmdc -i docs/02-architecture/mmd-diagrams/architecture/01-high-level-hexagonal.mmd \
+mmdc -i docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd \
      -o output.svg \
-     -c docs/02-architecture/mmd-diagrams/theme/mermaid-config.json \
-     --cssFile docs/02-architecture/mmd-diagrams/theme/custom.css
+     -c docs/02-architecture/diagrams/theme/mermaid-config.json \
+     --cssFile docs/02-architecture/diagrams/theme/custom.css
 
 # Build print-safe PDF bundles with descriptions
 make render-diagrams-descriptions-pdf
@@ -24906,23 +24906,23 @@ Description PDF generation uses:
 - `scripts/diagrams/generate_with_descriptions_pdf.py`
 - `scripts/diagrams/generate_with_descriptions_docx.py`
 - unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`
-- print CSS: `docs/02-architecture/mmd-diagrams/theme/with-descriptions-print.css`
+- print CSS: `docs/02-architecture/diagrams/theme/with-descriptions-print.css`
 - post-check: `scripts/diagrams/check_pdf_image_bounds.py`
 
 ### Render options
 
 ```bash
 # Filter by name glob
-bash docs/02-architecture/mmd-diagrams/render.sh --filter "01-*"
+bash docs/02-architecture/diagrams/tooling/render.sh --filter "01-*"
 
 # Single directory only
-bash docs/02-architecture/mmd-diagrams/render.sh --dir docs/02-architecture/mmd-diagrams/architecture
+bash docs/02-architecture/diagrams/tooling/render.sh --dir docs/02-architecture/diagrams/architecture
 
 # Adjust PNG resolution globally
-bash docs/02-architecture/mmd-diagrams/render.sh --scale 4 --width 3200 --height 2400
+bash docs/02-architecture/diagrams/tooling/render.sh --scale 4 --width 3200 --height 2400
 
 # Auto-boost resolution for large diagrams by @nodes metadata
-bash docs/02-architecture/mmd-diagrams/render.sh \
+bash docs/02-architecture/diagrams/tooling/render.sh \
   --large-threshold 30 \
   --large-scale 4 \
   --large-png-dpi 450
@@ -24933,13 +24933,13 @@ bash docs/02-architecture/mmd-diagrams/render.sh \
 # (works for both .mmd and .mermaid files)
 
 # CI mode (Puppeteer sandbox disabled)
-bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-config.json
+bash docs/02-architecture/diagrams/tooling/render.sh --puppeteer /tmp/puppeteer-config.json
 
 # Text-layer mode (recommended for Chrome/SVG export parity)
 # dual          : keep foreignObject + add fallback text
 # fo-only       : keep only foreignObject labels
 # fallback-only : add fallback text and strip foreignObject labels
-bash docs/02-architecture/mmd-diagrams/render.sh --text-layer fallback-only
+bash docs/02-architecture/diagrams/tooling/render.sh --text-layer fallback-only
 
 # Syntax validation (shows explicit hint if Chrome runtime is missing)
 bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
@@ -24948,7 +24948,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-conf
 ### Output layout
 
 ```
-docs/02-architecture/mmd-diagrams/
+docs/02-architecture/diagrams/
   architecture/
     *.mmd           # source diagrams (32)
     svg/*.svg       # rendered vector (scalable)
@@ -24996,7 +24996,7 @@ Local run (PR budget):
 ```bash
 mkdir -p reports/diagrams
 python3 scripts/diagrams/check_diagram_quality_gates.py \
-  --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt \
+  --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
   --json-out reports/diagrams/diagram-quality-report.json
 python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json \
   > reports/diagrams/diagram-lint-report.json || true
@@ -25028,7 +25028,7 @@ Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart obj
 python3 scripts/diagrams/uniform_diagram_sizes.py --check
 
 # Fix specific files
-python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd
+python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd
 ```
 
 Grouped diagrams support width strategy override:
@@ -25100,7 +25100,7 @@ descriptive children of a connected subgraph container.
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/architecture/png/INDEX.md`
+# Source: `02-architecture/diagrams/architecture/png/INDEX.md`
 
 # BioETL Diagrams — PNG Index
 
@@ -25108,313 +25108,313 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## High Level Hexagonal
 
-![01-high-level-hexagonal](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/01-high-level-hexagonal.png)
+![01-high-level-hexagonal](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/01-high-level-hexagonal.png)
 
 ---
 
 ## 01ahexagonal Overview
 
-![01a-hexagonal-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/01a-hexagonal-overview.png)
+![01a-hexagonal-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/01a-hexagonal-overview.png)
 
 ---
 
 ## 01bhexagonal Domain App
 
-![01b-hexagonal-domain-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/01b-hexagonal-domain-app.png)
+![01b-hexagonal-domain-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/01b-hexagonal-domain-app.png)
 
 ---
 
 ## 01chexagonal Infra Comp
 
-![01c-hexagonal-infra-comp](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/01c-hexagonal-infra-comp.png)
+![01c-hexagonal-infra-comp](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/01c-hexagonal-infra-comp.png)
 
 ---
 
 ## 01dhexagonal Overview Rounded
 
-![01d-hexagonal-overview-rounded](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/01d-hexagonal-overview-rounded.png)
+![01d-hexagonal-overview-rounded](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/01d-hexagonal-overview-rounded.png)
 
 ---
 
 ## Layer Dependency Matrix
 
-![02-layer-dependency-matrix](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/02-layer-dependency-matrix.png)
+![02-layer-dependency-matrix](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/02-layer-dependency-matrix.png)
 
 ---
 
 ## Medallion Data Flow
 
-![03-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/03-medallion-data-flow.png)
+![03-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/03-medallion-data-flow.png)
 
 ---
 
 ## 03amedallion Layers Overview
 
-![03a-medallion-layers-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/03a-medallion-layers-overview.png)
+![03a-medallion-layers-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/03a-medallion-layers-overview.png)
 
 ---
 
 ## Pipeline Execution Flow
 
-![04-pipeline-execution-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/04-pipeline-execution-flow.png)
+![04-pipeline-execution-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/04-pipeline-execution-flow.png)
 
 ---
 
 ## Provider Adapter Hierarchy
 
-![05-provider-adapter-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/05-provider-adapter-hierarchy.png)
+![05-provider-adapter-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/05-provider-adapter-hierarchy.png)
 
 ---
 
 ## 05aadapter Hierarchy Base
 
-![05a-adapter-hierarchy-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/05a-adapter-hierarchy-base.png)
+![05a-adapter-hierarchy-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/05a-adapter-hierarchy-base.png)
 
 ---
 
 ## 05badapter Hierarchy Providers
 
-![05b-adapter-hierarchy-providers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/05b-adapter-hierarchy-providers.png)
+![05b-adapter-hierarchy-providers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/05b-adapter-hierarchy-providers.png)
 
 ---
 
 ## Storage Layer
 
-![06-storage-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/06-storage-layer.png)
+![06-storage-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/06-storage-layer.png)
 
 ---
 
 ## 06astorage Writers
 
-![06a-storage-writers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/06a-storage-writers.png)
+![06a-storage-writers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/06a-storage-writers.png)
 
 ---
 
 ## 06bstorage Support
 
-![06b-storage-support](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/06b-storage-support.png)
+![06b-storage-support](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/06b-storage-support.png)
 
 ---
 
 ## Dq System
 
-![07-dq-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/07-dq-system.png)
+![07-dq-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/07-dq-system.png)
 
 ---
 
 ## 07adq Analysis
 
-![07a-dq-analysis](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/07a-dq-analysis.png)
+![07a-dq-analysis](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/07a-dq-analysis.png)
 
 ---
 
 ## 07bdq Pipeline
 
-![07b-dq-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/07b-dq-pipeline.png)
+![07b-dq-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/07b-dq-pipeline.png)
 
 ---
 
 ## Composite Pipeline
 
-![08-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/08-composite-pipeline.png)
+![08-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/08-composite-pipeline.png)
 
 ---
 
 ## 08acomposite Config
 
-![08a-composite-config](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/08a-composite-config.png)
+![08a-composite-config](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/08a-composite-config.png)
 
 ---
 
 ## 08bcomposite Execution
 
-![08b-composite-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/08b-composite-execution.png)
+![08b-composite-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/08b-composite-execution.png)
 
 ---
 
 ## Observability Stack
 
-![09-observability-stack](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/09-observability-stack.png)
+![09-observability-stack](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/09-observability-stack.png)
 
 ---
 
 ## 09aobservability App
 
-![09a-observability-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/09a-observability-app.png)
+![09a-observability-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/09a-observability-app.png)
 
 ---
 
 ## 09bobservability Infra
 
-![09b-observability-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/09b-observability-infra.png)
+![09b-observability-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/09b-observability-infra.png)
 
 ---
 
 ## Resilience Patterns
 
-![10-resilience-patterns](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/10-resilience-patterns.png)
+![10-resilience-patterns](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/10-resilience-patterns.png)
 
 ---
 
 ## Configuration System
 
-![11-configuration-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/11-configuration-system.png)
+![11-configuration-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/11-configuration-system.png)
 
 ---
 
 ## 11aconfig Loading
 
-![11a-config-loading](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/11a-config-loading.png)
+![11a-config-loading](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/11a-config-loading.png)
 
 ---
 
 ## 11bconfig Domain
 
-![11b-config-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/11b-config-domain.png)
+![11b-config-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/11b-config-domain.png)
 
 ---
 
 ## Bootstrap Di Container
 
-![12-bootstrap-di-container](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/12-bootstrap-di-container.png)
+![12-bootstrap-di-container](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/12-bootstrap-di-container.png)
 
 ---
 
 ## 12abootstrap Factories
 
-![12a-bootstrap-factories](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/12a-bootstrap-factories.png)
+![12a-bootstrap-factories](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/12a-bootstrap-factories.png)
 
 ---
 
 ## 12bbootstrap Wiring
 
-![12b-bootstrap-wiring](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/12b-bootstrap-wiring.png)
+![12b-bootstrap-wiring](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/12b-bootstrap-wiring.png)
 
 ---
 
 ## Port Protocol Contracts
 
-![13-port-protocol-contracts](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13-port-protocol-contracts.png)
+![13-port-protocol-contracts](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13-port-protocol-contracts.png)
 
 ---
 
 ## 13adata Storage Ports
 
-![13a-data-storage-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13a-data-storage-ports.png)
+![13a-data-storage-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13a-data-storage-ports.png)
 
 ---
 
 ## 13aport Contracts Data Sources
 
-![13a-port-contracts-data-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13a-port-contracts-data-sources.png)
+![13a-port-contracts-data-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13a-port-contracts-data-sources.png)
 
 ---
 
 ## 13boperational Ports
 
-![13b-operational-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13b-operational-ports.png)
+![13b-operational-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13b-operational-ports.png)
 
 ---
 
 ## 13bport Contracts Storage
 
-![13b-port-contracts-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13b-port-contracts-storage.png)
+![13b-port-contracts-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13b-port-contracts-storage.png)
 
 ---
 
 ## 13cport Contracts Observability
 
-![13c-port-contracts-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13c-port-contracts-observability.png)
+![13c-port-contracts-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13c-port-contracts-observability.png)
 
 ---
 
 ## 13cvalidation Dq Ports
 
-![13c-validation-dq-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13c-validation-dq-ports.png)
+![13c-validation-dq-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13c-validation-dq-ports.png)
 
 ---
 
 ## 13dport Contracts Services
 
-![13d-port-contracts-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13d-port-contracts-services.png)
+![13d-port-contracts-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13d-port-contracts-services.png)
 
 ---
 
 ## 13eoperational Ports Domain
 
-![13e-operational-ports-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13e-operational-ports-domain.png)
+![13e-operational-ports-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13e-operational-ports-domain.png)
 
 ---
 
 ## 13foperational Ports Infra
 
-![13f-operational-ports-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/13f-operational-ports-infra.png)
+![13f-operational-ports-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/13f-operational-ports-infra.png)
 
 ---
 
 ## Cli Interface Layer
 
-![14-cli-interface-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/14-cli-interface-layer.png)
+![14-cli-interface-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/14-cli-interface-layer.png)
 
 ---
 
 ## 14acli Commands
 
-![14a-cli-commands](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/14a-cli-commands.png)
+![14a-cli-commands](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/14a-cli-commands.png)
 
 ---
 
 ## 14bcli Routing
 
-![14b-cli-routing](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/14b-cli-routing.png)
+![14b-cli-routing](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/14b-cli-routing.png)
 
 ---
 
 ## Batch Executor Internals
 
-![15-batch-executor-internals](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/15-batch-executor-internals.png)
+![15-batch-executor-internals](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/15-batch-executor-internals.png)
 
 ---
 
 ## Transformer Hierarchy
 
-![16-transformer-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/16-transformer-hierarchy.png)
+![16-transformer-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/16-transformer-hierarchy.png)
 
 ---
 
 ## 16atransformer Base
 
-![16a-transformer-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/16a-transformer-base.png)
+![16a-transformer-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/16a-transformer-base.png)
 
 ---
 
 ## 16btransformer Pub Other
 
-![16b-transformer-pub-other](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/16b-transformer-pub-other.png)
+![16b-transformer-pub-other](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/16b-transformer-pub-other.png)
 
 ---
 
 ## Security Pii Audit
 
-![17-security-pii-audit](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/17-security-pii-audit.png)
+![17-security-pii-audit](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/17-security-pii-audit.png)
 
 ---
 
 ## Lock Checkpoint Shutdown
 
-![18-lock-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/18-lock-checkpoint-shutdown.png)
+![18-lock-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/18-lock-checkpoint-shutdown.png)
 
 ---
 
 ## 18alock System
 
-![18a-lock-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/18a-lock-system.png)
+![18a-lock-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/18a-lock-system.png)
 
 ---
 
 ## 18bcheckpoint Shutdown
 
-![18b-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/png/18b-checkpoint-shutdown.png)
+![18b-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/png/18b-checkpoint-shutdown.png)
 
 ---
 
@@ -25422,7 +25422,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/architecture/svg/INDEX.md`
+# Source: `02-architecture/diagrams/architecture/svg/INDEX.md`
 
 # BioETL Diagrams — SVG Index
 
@@ -25430,313 +25430,313 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## High Level Hexagonal
 
-![01-high-level-hexagonal](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/01-high-level-hexagonal.svg)
+![01-high-level-hexagonal](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/01-high-level-hexagonal.svg)
 
 ---
 
 ## 01ahexagonal Overview
 
-![01a-hexagonal-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/01a-hexagonal-overview.svg)
+![01a-hexagonal-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/01a-hexagonal-overview.svg)
 
 ---
 
 ## 01bhexagonal Domain App
 
-![01b-hexagonal-domain-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/01b-hexagonal-domain-app.svg)
+![01b-hexagonal-domain-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/01b-hexagonal-domain-app.svg)
 
 ---
 
 ## 01chexagonal Infra Comp
 
-![01c-hexagonal-infra-comp](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/01c-hexagonal-infra-comp.svg)
+![01c-hexagonal-infra-comp](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/01c-hexagonal-infra-comp.svg)
 
 ---
 
 ## 01dhexagonal Overview Rounded
 
-![01d-hexagonal-overview-rounded](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/01d-hexagonal-overview-rounded.svg)
+![01d-hexagonal-overview-rounded](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/01d-hexagonal-overview-rounded.svg)
 
 ---
 
 ## Layer Dependency Matrix
 
-![02-layer-dependency-matrix](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/02-layer-dependency-matrix.svg)
+![02-layer-dependency-matrix](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/02-layer-dependency-matrix.svg)
 
 ---
 
 ## Medallion Data Flow
 
-![03-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/03-medallion-data-flow.svg)
+![03-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/03-medallion-data-flow.svg)
 
 ---
 
 ## 03amedallion Layers Overview
 
-![03a-medallion-layers-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/03a-medallion-layers-overview.svg)
+![03a-medallion-layers-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/03a-medallion-layers-overview.svg)
 
 ---
 
 ## Pipeline Execution Flow
 
-![04-pipeline-execution-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/04-pipeline-execution-flow.svg)
+![04-pipeline-execution-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/04-pipeline-execution-flow.svg)
 
 ---
 
 ## Provider Adapter Hierarchy
 
-![05-provider-adapter-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/05-provider-adapter-hierarchy.svg)
+![05-provider-adapter-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/05-provider-adapter-hierarchy.svg)
 
 ---
 
 ## 05aadapter Hierarchy Base
 
-![05a-adapter-hierarchy-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/05a-adapter-hierarchy-base.svg)
+![05a-adapter-hierarchy-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/05a-adapter-hierarchy-base.svg)
 
 ---
 
 ## 05badapter Hierarchy Providers
 
-![05b-adapter-hierarchy-providers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/05b-adapter-hierarchy-providers.svg)
+![05b-adapter-hierarchy-providers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/05b-adapter-hierarchy-providers.svg)
 
 ---
 
 ## Storage Layer
 
-![06-storage-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/06-storage-layer.svg)
+![06-storage-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/06-storage-layer.svg)
 
 ---
 
 ## 06astorage Writers
 
-![06a-storage-writers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/06a-storage-writers.svg)
+![06a-storage-writers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/06a-storage-writers.svg)
 
 ---
 
 ## 06bstorage Support
 
-![06b-storage-support](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/06b-storage-support.svg)
+![06b-storage-support](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/06b-storage-support.svg)
 
 ---
 
 ## Dq System
 
-![07-dq-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/07-dq-system.svg)
+![07-dq-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/07-dq-system.svg)
 
 ---
 
 ## 07adq Analysis
 
-![07a-dq-analysis](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/07a-dq-analysis.svg)
+![07a-dq-analysis](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/07a-dq-analysis.svg)
 
 ---
 
 ## 07bdq Pipeline
 
-![07b-dq-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/07b-dq-pipeline.svg)
+![07b-dq-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/07b-dq-pipeline.svg)
 
 ---
 
 ## Composite Pipeline
 
-![08-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/08-composite-pipeline.svg)
+![08-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/08-composite-pipeline.svg)
 
 ---
 
 ## 08acomposite Config
 
-![08a-composite-config](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/08a-composite-config.svg)
+![08a-composite-config](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/08a-composite-config.svg)
 
 ---
 
 ## 08bcomposite Execution
 
-![08b-composite-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/08b-composite-execution.svg)
+![08b-composite-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/08b-composite-execution.svg)
 
 ---
 
 ## Observability Stack
 
-![09-observability-stack](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/09-observability-stack.svg)
+![09-observability-stack](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/09-observability-stack.svg)
 
 ---
 
 ## 09aobservability App
 
-![09a-observability-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/09a-observability-app.svg)
+![09a-observability-app](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/09a-observability-app.svg)
 
 ---
 
 ## 09bobservability Infra
 
-![09b-observability-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/09b-observability-infra.svg)
+![09b-observability-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/09b-observability-infra.svg)
 
 ---
 
 ## Resilience Patterns
 
-![10-resilience-patterns](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/10-resilience-patterns.svg)
+![10-resilience-patterns](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/10-resilience-patterns.svg)
 
 ---
 
 ## Configuration System
 
-![11-configuration-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/11-configuration-system.svg)
+![11-configuration-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/11-configuration-system.svg)
 
 ---
 
 ## 11aconfig Loading
 
-![11a-config-loading](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/11a-config-loading.svg)
+![11a-config-loading](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/11a-config-loading.svg)
 
 ---
 
 ## 11bconfig Domain
 
-![11b-config-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/11b-config-domain.svg)
+![11b-config-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/11b-config-domain.svg)
 
 ---
 
 ## Bootstrap Di Container
 
-![12-bootstrap-di-container](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/12-bootstrap-di-container.svg)
+![12-bootstrap-di-container](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/12-bootstrap-di-container.svg)
 
 ---
 
 ## 12abootstrap Factories
 
-![12a-bootstrap-factories](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/12a-bootstrap-factories.svg)
+![12a-bootstrap-factories](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/12a-bootstrap-factories.svg)
 
 ---
 
 ## 12bbootstrap Wiring
 
-![12b-bootstrap-wiring](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/12b-bootstrap-wiring.svg)
+![12b-bootstrap-wiring](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/12b-bootstrap-wiring.svg)
 
 ---
 
 ## Port Protocol Contracts
 
-![13-port-protocol-contracts](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13-port-protocol-contracts.svg)
+![13-port-protocol-contracts](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13-port-protocol-contracts.svg)
 
 ---
 
 ## 13adata Storage Ports
 
-![13a-data-storage-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13a-data-storage-ports.svg)
+![13a-data-storage-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13a-data-storage-ports.svg)
 
 ---
 
 ## 13aport Contracts Data Sources
 
-![13a-port-contracts-data-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13a-port-contracts-data-sources.svg)
+![13a-port-contracts-data-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13a-port-contracts-data-sources.svg)
 
 ---
 
 ## 13boperational Ports
 
-![13b-operational-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13b-operational-ports.svg)
+![13b-operational-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13b-operational-ports.svg)
 
 ---
 
 ## 13bport Contracts Storage
 
-![13b-port-contracts-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13b-port-contracts-storage.svg)
+![13b-port-contracts-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13b-port-contracts-storage.svg)
 
 ---
 
 ## 13cport Contracts Observability
 
-![13c-port-contracts-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13c-port-contracts-observability.svg)
+![13c-port-contracts-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13c-port-contracts-observability.svg)
 
 ---
 
 ## 13cvalidation Dq Ports
 
-![13c-validation-dq-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13c-validation-dq-ports.svg)
+![13c-validation-dq-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13c-validation-dq-ports.svg)
 
 ---
 
 ## 13dport Contracts Services
 
-![13d-port-contracts-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13d-port-contracts-services.svg)
+![13d-port-contracts-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13d-port-contracts-services.svg)
 
 ---
 
 ## 13eoperational Ports Domain
 
-![13e-operational-ports-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13e-operational-ports-domain.svg)
+![13e-operational-ports-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13e-operational-ports-domain.svg)
 
 ---
 
 ## 13foperational Ports Infra
 
-![13f-operational-ports-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/13f-operational-ports-infra.svg)
+![13f-operational-ports-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/13f-operational-ports-infra.svg)
 
 ---
 
 ## Cli Interface Layer
 
-![14-cli-interface-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/14-cli-interface-layer.svg)
+![14-cli-interface-layer](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/14-cli-interface-layer.svg)
 
 ---
 
 ## 14acli Commands
 
-![14a-cli-commands](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/14a-cli-commands.svg)
+![14a-cli-commands](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/14a-cli-commands.svg)
 
 ---
 
 ## 14bcli Routing
 
-![14b-cli-routing](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/14b-cli-routing.svg)
+![14b-cli-routing](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/14b-cli-routing.svg)
 
 ---
 
 ## Batch Executor Internals
 
-![15-batch-executor-internals](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/15-batch-executor-internals.svg)
+![15-batch-executor-internals](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/15-batch-executor-internals.svg)
 
 ---
 
 ## Transformer Hierarchy
 
-![16-transformer-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/16-transformer-hierarchy.svg)
+![16-transformer-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/16-transformer-hierarchy.svg)
 
 ---
 
 ## 16atransformer Base
 
-![16a-transformer-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/16a-transformer-base.svg)
+![16a-transformer-base](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/16a-transformer-base.svg)
 
 ---
 
 ## 16btransformer Pub Other
 
-![16b-transformer-pub-other](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/16b-transformer-pub-other.svg)
+![16b-transformer-pub-other](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/16b-transformer-pub-other.svg)
 
 ---
 
 ## Security Pii Audit
 
-![17-security-pii-audit](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/17-security-pii-audit.svg)
+![17-security-pii-audit](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/17-security-pii-audit.svg)
 
 ---
 
 ## Lock Checkpoint Shutdown
 
-![18-lock-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/18-lock-checkpoint-shutdown.svg)
+![18-lock-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/18-lock-checkpoint-shutdown.svg)
 
 ---
 
 ## 18alock System
 
-![18a-lock-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/18a-lock-system.svg)
+![18a-lock-system](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/18a-lock-system.svg)
 
 ---
 
 ## 18bcheckpoint Shutdown
 
-![18b-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/architecture/svg/18b-checkpoint-shutdown.svg)
+![18b-checkpoint-shutdown](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/architecture/svg/18b-checkpoint-shutdown.svg)
 
 ---
 
@@ -25744,7 +25744,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/class-diagrams/png/INDEX.md`
+# Source: `02-architecture/diagrams/class-diagrams/png/INDEX.md`
 
 # BioETL Diagrams — PNG Index
 
@@ -25752,115 +25752,115 @@ _Generated: 2026-03-03T12:49:52+03:00_
 
 ## Domain Ports
 
-![01-domain-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/01-domain-ports.png)
+![01-domain-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/01-domain-ports.png)
 
 ---
 
 ## 01adomain Ports Method Catalog
 
-![01a-domain-ports-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/01a-domain-ports-method-catalog.png)
+![01a-domain-ports-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/01a-domain-ports-method-catalog.png)
 
 ---
 
 ## Entities Aggregates
 
-![02-entities-aggregates](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/02-entities-aggregates.png)
+![02-entities-aggregates](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/02-entities-aggregates.png)
 
 ---
 
 ## Value Objects
 
-![03-value-objects](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/03-value-objects.png)
+![03-value-objects](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/03-value-objects.png)
 
 ---
 
 ## Types Enums
 
-![04-types-enums](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/04-types-enums.png)
+![04-types-enums](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/04-types-enums.png)
 
 ---
 
 ## Exceptions
 
-![05-exceptions](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/05-exceptions.png)
+![05-exceptions](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/05-exceptions.png)
 
 ---
 
 ## Config Classes
 
-![06-config-classes](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/06-config-classes.png)
+![06-config-classes](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/06-config-classes.png)
 
 ---
 
 ## Application Core Services
 
-![07-application-core-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/07-application-core-services.png)
+![07-application-core-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/07-application-core-services.png)
 
 ---
 
 ## Application Services
 
-![08-application-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/08-application-services.png)
+![08-application-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/08-application-services.png)
 
 ---
 
 ## 08aapplication Services Operation Catalog
 
-![08a-application-services-operation-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/08a-application-services-operation-catalog.png)
+![08a-application-services-operation-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/08a-application-services-operation-catalog.png)
 
 ---
 
 ## Transformers
 
-![09-transformers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/09-transformers.png)
+![09-transformers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/09-transformers.png)
 
 ---
 
 ## Adapters
 
-![10-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/10-adapters.png)
+![10-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/10-adapters.png)
 
 ---
 
 ## Storage
 
-![11-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/11-storage.png)
+![11-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/11-storage.png)
 
 ---
 
 ## Composite Pipeline
 
-![12-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/12-composite-pipeline.png)
+![12-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/12-composite-pipeline.png)
 
 ---
 
 ## Domain Services
 
-![13-domain-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/13-domain-services.png)
+![13-domain-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/13-domain-services.png)
 
 ---
 
 ## Observability
 
-![14-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/14-observability.png)
+![14-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/14-observability.png)
 
 ---
 
 ## 14aobservability Method Catalog
 
-![14a-observability-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/14a-observability-method-catalog.png)
+![14a-observability-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/14a-observability-method-catalog.png)
 
 ---
 
 ## Extractors
 
-![15-extractors](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/15-extractors.png)
+![15-extractors](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/15-extractors.png)
 
 ---
 
 ## Factories Bootstrap
 
-![16-factories-bootstrap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/16-factories-bootstrap.png)
+![16-factories-bootstrap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/16-factories-bootstrap.png)
 
 ---
 
@@ -25868,7 +25868,7 @@ _Generated: 2026-03-03T12:49:52+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/class-diagrams/svg/INDEX.md`
+# Source: `02-architecture/diagrams/class-diagrams/svg/INDEX.md`
 
 # BioETL Diagrams — SVG Index
 
@@ -25876,115 +25876,115 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## Domain Ports
 
-![01-domain-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/01-domain-ports.svg)
+![01-domain-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/01-domain-ports.svg)
 
 ---
 
 ## 01adomain Ports Method Catalog
 
-![01a-domain-ports-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/01a-domain-ports-method-catalog.svg)
+![01a-domain-ports-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/01a-domain-ports-method-catalog.svg)
 
 ---
 
 ## Entities Aggregates
 
-![02-entities-aggregates](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/02-entities-aggregates.svg)
+![02-entities-aggregates](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/02-entities-aggregates.svg)
 
 ---
 
 ## Value Objects
 
-![03-value-objects](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/03-value-objects.svg)
+![03-value-objects](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/03-value-objects.svg)
 
 ---
 
 ## Types Enums
 
-![04-types-enums](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/04-types-enums.svg)
+![04-types-enums](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/04-types-enums.svg)
 
 ---
 
 ## Exceptions
 
-![05-exceptions](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/05-exceptions.svg)
+![05-exceptions](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/05-exceptions.svg)
 
 ---
 
 ## Config Classes
 
-![06-config-classes](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/06-config-classes.svg)
+![06-config-classes](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/06-config-classes.svg)
 
 ---
 
 ## Application Core Services
 
-![07-application-core-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/07-application-core-services.svg)
+![07-application-core-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/07-application-core-services.svg)
 
 ---
 
 ## Application Services
 
-![08-application-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/08-application-services.svg)
+![08-application-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/08-application-services.svg)
 
 ---
 
 ## 08aapplication Services Operation Catalog
 
-![08a-application-services-operation-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/08a-application-services-operation-catalog.svg)
+![08a-application-services-operation-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/08a-application-services-operation-catalog.svg)
 
 ---
 
 ## Transformers
 
-![09-transformers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/09-transformers.svg)
+![09-transformers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/09-transformers.svg)
 
 ---
 
 ## Adapters
 
-![10-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/10-adapters.svg)
+![10-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/10-adapters.svg)
 
 ---
 
 ## Storage
 
-![11-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/11-storage.svg)
+![11-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/11-storage.svg)
 
 ---
 
 ## Composite Pipeline
 
-![12-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/12-composite-pipeline.svg)
+![12-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/12-composite-pipeline.svg)
 
 ---
 
 ## Domain Services
 
-![13-domain-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/13-domain-services.svg)
+![13-domain-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/13-domain-services.svg)
 
 ---
 
 ## Observability
 
-![14-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/14-observability.svg)
+![14-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/14-observability.svg)
 
 ---
 
 ## 14aobservability Method Catalog
 
-![14a-observability-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/14a-observability-method-catalog.svg)
+![14a-observability-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/14a-observability-method-catalog.svg)
 
 ---
 
 ## Extractors
 
-![15-extractors](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/15-extractors.svg)
+![15-extractors](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/15-extractors.svg)
 
 ---
 
 ## Factories Bootstrap
 
-![16-factories-bootstrap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/svg/16-factories-bootstrap.svg)
+![16-factories-bootstrap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/svg/16-factories-bootstrap.svg)
 
 ---
 
@@ -25992,7 +25992,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md`
+# Source: `02-architecture/diagrams/bundles/class.bundle.md`
 
 # BioETL Class Diagrams with Descriptions
 
@@ -26001,7 +26001,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 Всего диаграмм: 19
 ## 01-domain-ports — Domain Port Protocols
 
-![01-domain-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/01-domain-ports.png)
+![01-domain-ports](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/01-domain-ports.png)
 
 ### Описание
 Диаграмма Domain Port Protocols показывает архитектурную модель модуля `01-domain-ports` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: All Protocol interfaces defined in domain/ports/. На схеме отражено примерно 19 классов и 1 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
@@ -26010,7 +26010,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 01a-domain-ports-method-catalog — Domain Port Method Catalog (L2)
 
-![01a-domain-ports-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/01a-domain-ports-method-catalog.png)
+![01a-domain-ports-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/01a-domain-ports-method-catalog.png)
 
 ### Описание
 Диаграмма «Domain Port Method Catalog (L2)» описывает модуль `01a-domain-ports-method-catalog` и фиксирует ключевые классы, контракты и связи на уровне `Class / Interface`. Основной фокус: Detailed method surface extracted from 01-domain-ports L1 overview.
@@ -26019,7 +26019,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 02-entities-aggregates — Entities & Aggregates
 
-![02-entities-aggregates](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/02-entities-aggregates.png)
+![02-entities-aggregates](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/02-entities-aggregates.png)
 
 ### Описание
 Диаграмма Entities & Aggregates показывает архитектурную модель модуля `02-entities-aggregates` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Domain entities, aggregate roots, and their relationships. На схеме отражено примерно 13 классов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BaseEntity, Bioactivity, BioactivityState, PublicationBase, Batch, BatchRecord.
@@ -26028,7 +26028,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 03-value-objects — Value Objects
 
-![03-value-objects](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/03-value-objects.png)
+![03-value-objects](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/03-value-objects.png)
 
 ### Описание
 Диаграмма Value Objects показывает архитектурную модель модуля `03-value-objects` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Immutable domain value objects. На схеме отражено примерно 17 классов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BronzeWriteResult, SilverWriteResult, RunContext, HealthCheckResult, FencingToken, LockContext.
@@ -26037,7 +26037,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 04-types-enums — Types & Enums
 
-![04-types-enums](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/04-types-enums.png)
+![04-types-enums](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/04-types-enums.png)
 
 ### Описание
 Диаграмма Types & Enums показывает архитектурную модель модуля `04-types-enums` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: All type aliases, NewTypes, and enumerations. На схеме отражено примерно 19 классов и 0 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: RunID, EntityID, ContentHash, BatchID, RunType, PublicationType.
@@ -26046,7 +26046,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 05-exceptions — Exception Hierarchy
 
-![05-exceptions](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/05-exceptions.png)
+![05-exceptions](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/05-exceptions.png)
 
 ### Описание
 Диаграмма Exception Hierarchy показывает архитектурную модель модуля `05-exceptions` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Domain exception tree. На схеме отражено примерно 19 классов и 18 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BioETLError, CriticalError, RecoverableError, DataQualityError, ValidationError, SchemaViolationError.
@@ -26055,7 +26055,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 06-config-classes — Configuration Classes
 
-![06-config-classes](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/06-config-classes.png)
+![06-config-classes](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/06-config-classes.png)
 
 ### Описание
 Диаграмма Configuration Classes показывает архитектурную модель модуля `06-config-classes` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Domain and application configuration hierarchy. На схеме отражено примерно 14 классов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: RuntimeConfig, PipelineConfig, TableConfig, DQConfig, SilverFilterConfig, GoldFilterConfig.
@@ -26064,7 +26064,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 07-application-core-services — Application Core Services
 
-![07-application-core-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/07-application-core-services.png)
+![07-application-core-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/07-application-core-services.png)
 
 ### Описание
 Диаграмма Application Core Services показывает архитектурную модель модуля `07-application-core-services` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: PipelineRunner, BatchExecutor, and their composition. На схеме отражено примерно 16 классов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: PipelineRunner, PipelineServices, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
@@ -26073,7 +26073,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 08-application-services — Application Services
 
-![08-application-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/08-application-services.png)
+![08-application-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/08-application-services.png)
 
 ### Описание
 Диаграмма Application Services показывает архитектурную модель модуля `08-application-services` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: High-level application services. На схеме отражено примерно 19 классов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: DataQualityService, DQReportService, MedallionLifecycleService, VacuumService, PipelineObserver, LifecyclePhase.
@@ -26082,7 +26082,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 08a-application-services-operation-catalog — Application Service Operation Catalog (L2)
 
-![08a-application-services-operation-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/08a-application-services-operation-catalog.png)
+![08a-application-services-operation-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/08a-application-services-operation-catalog.png)
 
 ### Описание
 Диаграмма «Application Service Operation Catalog (L2)» описывает модуль `08a-application-services-operation-catalog` и фиксирует ключевые классы, контракты и связи на уровне `Class / Interface`. Основной фокус: Detailed operational methods extracted from 08-application-services L1 overview.
@@ -26091,7 +26091,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 09-transformers — Transformers
 
-![09-transformers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/09-transformers.png)
+![09-transformers](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/09-transformers.png)
 
 ### Описание
 Диаграмма Transformers показывает архитектурную модель модуля `09-transformers` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: BaseTransformer hierarchy and provider-specific implementations. На схеме отражено примерно 20 классов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BaseTransformer, BaseChemblTransformer, BasePublicationTransformer, ActivityTransformer, AssayTransformer, MoleculeTransformer.
@@ -26100,7 +26100,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 10-adapters — Infrastructure Adapters
 
-![10-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/10-adapters.png)
+![10-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/10-adapters.png)
 
 ### Описание
 Диаграмма Infrastructure Adapters показывает архитектурную модель модуля `10-adapters` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: HTTP adapter class hierarchy with mixins. На схеме отражено примерно 18 классов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: HealthCheckMixin, HealthCheckProviderMixin, BaseHttpAdapter, BaseSyncAdapter, UnifiedHTTPClient, ChemblAdapter.
@@ -26109,7 +26109,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 11-storage — Storage Components
 
-![11-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/11-storage.png)
+![11-storage](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/11-storage.png)
 
 ### Описание
 Диаграмма Storage Components показывает архитектурную модель модуля `11-storage` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Bronze/Silver/Gold writers and supporting classes. На схеме отражено примерно 16 классов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BaseDeltaWriter, BronzeWriter, SilverWriter, GoldWriter, DeltaReader, ArrowDataConverter.
@@ -26118,7 +26118,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 12-composite-pipeline — Composite Pipeline Components
 
-![12-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/12-composite-pipeline.png)
+![12-composite-pipeline](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/12-composite-pipeline.png)
 
 ### Описание
 Диаграмма Composite Pipeline Components показывает архитектурную модель модуля `12-composite-pipeline` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Runner, coordinators, merge service, and FSM. На схеме отражено примерно 14 классов и 13 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: CompositePipelineRunner, CompositeRuntimeConfig, EnrichmentCoordinator, DependencyCoordinator, MergeService, EnricherAggregator.
@@ -26127,7 +26127,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 13-domain-services — Domain Services
 
-![13-domain-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/13-domain-services.png)
+![13-domain-services](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/13-domain-services.png)
 
 ### Описание
 Диаграмма Domain Services показывает архитектурную модель модуля `13-domain-services` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Pure domain services without I/O. На схеме отражено примерно 10 классов и 0 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: IdentityService, NormalizationService, DataNormalizationService, AuthorNormalizationService, ActivityAggregator, UnitConverter.
@@ -26136,7 +26136,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 14-observability — Observability Components
 
-![14-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/14-observability.png)
+![14-observability](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/14-observability.png)
 
 ### Описание
 Диаграмма Observability Components показывает архитектурную модель модуля `14-observability` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Logging, metrics, tracing implementations. На схеме отражено примерно 19 классов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: LoggerPort, UnifiedLogger, StructlogLogger, NoOpLogger, MetricsPort, MetricsCollector.
@@ -26145,7 +26145,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 14a-observability-method-catalog — Observability Method Catalog (L2)
 
-![14a-observability-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/14a-observability-method-catalog.png)
+![14a-observability-method-catalog](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/14a-observability-method-catalog.png)
 
 ### Описание
 Диаграмма «Observability Method Catalog (L2)» описывает модуль `14a-observability-method-catalog` и фиксирует ключевые классы, контракты и связи на уровне `Class / Interface`. Основной фокус: Detailed method surface extracted from 14-observability L1 overview.
@@ -26154,7 +26154,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 15-extractors — Field Extractors
 
-![15-extractors](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/15-extractors.png)
+![15-extractors](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/15-extractors.png)
 
 ### Описание
 Диаграмма Field Extractors показывает архитектурную модель модуля `15-extractors` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Extractor pattern used in transformers. На схеме отражено примерно 12 классов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: BaseFieldExtractor, AbstractExtractor, AuthorExtractor, DateExtractor, ClassificationExtractor, IdentifierExtractor.
@@ -26163,7 +26163,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 ## 16-factories-bootstrap — Factories & Bootstrap
 
-![16-factories-bootstrap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/class-diagrams/png/16-factories-bootstrap.png)
+![16-factories-bootstrap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/class-diagrams/png/16-factories-bootstrap.png)
 
 ### Описание
 Диаграмма Factories & Bootstrap показывает архитектурную модель модуля `16-factories-bootstrap` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Composition layer factories and DI assembly. На схеме отражено примерно 13 классов и 12 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: DataSourceRegistry, TransformerFactory, RunnerFactory, DQFactory, RuntimeAssembly, RunnerBootstrap.
@@ -26173,7 +26173,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/diagram-descriptions/class-diagrams-descriptions.md`
+# Source: `02-architecture/diagrams/diagram-descriptions/class-diagrams-descriptions.md`
 
 # Class Diagram Descriptions
 
@@ -26259,7 +26259,7 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/diagram-descriptions.md`
+# Source: `02-architecture/diagrams/diagram-descriptions.md`
 
 # Class Diagram Descriptions
 
@@ -26345,14 +26345,14 @@ _Generated: 2026-03-03T12:49:51+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/00-diagramming-policy.md`
+# Source: `02-architecture/diagrams/governance/00-diagramming-policy.md`
 
 # Diagramming Policy
 
 *Synced with RULES.md v5.24 (2026-02-24)*
 
-> **Canonical policy:** [`docs/02-architecture/06-diagram-policy.md`](../../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
-> **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../README.md).
+> **Canonical policy:** [`docs/02-architecture/diagrams/governance/policy.md`](../../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
+> **Canonical diagrams:** [`docs/02-architecture/diagrams/`](../README.md).
 > This file is kept for historical reference. All new diagram work should follow the canonical policy.
 > **Historical note:** examples below are preserved for context; prefer canonical `.mmd` paths from `mmd-diagrams/`.
 
@@ -26389,7 +26389,7 @@ This document defines standards for creating, maintaining, and versioning archit
 ### 2.1 Directory Structure
 
 ```
-docs/02-architecture/mmd-diagrams/     # Единый корень диаграмм
+docs/02-architecture/diagrams/     # Единый корень диаграмм
 ├── architecture/*.mmd                 # System/component diagrams
 ├── class-diagrams/*.mmd               # Class structure diagrams
 ├── foundation/*.mmd                   # Historical + TOP-25
@@ -26522,7 +26522,7 @@ Recommended color scheme:
   - Вместо `Result[dict[str, list[tuple[str, int]]], ValidationError]` используйте алиас типа в комментарии/легенде
 - После изменения class-diagram запускайте проверки:
   - `python scripts/diagrams/lint_diagrams.py <diagram.mmd>`
-  - `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/mmd-diagrams/class-diagrams --svg-dir docs/02-architecture/mmd-diagrams/class-diagrams/svg`
+  - `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`
 
 Пример (корректно):
 
@@ -26654,7 +26654,7 @@ Worker -> MemoryLock: release lock
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/DIAGRAM-WORKFLOW-GUIDE.md`
+# Source: `02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md`
 
 # Руководство по работе с диаграммами BioETL
 
@@ -26668,7 +26668,7 @@ Worker -> MemoryLock: release lock
 
 ### 1.1. Двойная структура хранения
 
-**Канонические исходники** — `docs/02-architecture/mmd-diagrams/`:
+**Канонические исходники** — `docs/02-architecture/diagrams/`:
 
 | Каталог | Файлов | Назначение |
 |---------|--------|------------|
@@ -26676,7 +26676,7 @@ Worker -> MemoryLock: release lock
 | `class-diagrams/` | 16 | UML-классы: порты, сущности, агрегаты, конфиги |
 | `foundation/` | 54 | Исторические эталонные диаграммы, TOP-25 архитектурных |
 
-**Декомпозированные представления** — `docs/02-architecture/mmd-diagrams/views/` (156 файлов):
+**Декомпозированные представления** — `docs/02-architecture/diagrams/views/` (156 файлов):
 
 Каждая родительская диаграмма из `foundation/` разбивается на **5 представлений (views)**:
 
@@ -26823,7 +26823,7 @@ python src/tools/apply_elk_layout.py --dry-run
 python src/tools/apply_elk_layout.py
 
 # Применить ко всем .mmd в foundation/
-python src/tools/apply_elk_layout.py --dir docs/02-architecture/mmd-diagrams/foundation
+python src/tools/apply_elk_layout.py --dir docs/02-architecture/diagrams/foundation
 
 # Свой порог (по умолчанию 20)
 python src/tools/apply_elk_layout.py --threshold 15
@@ -26910,8 +26910,8 @@ python scripts/diagrams/lint_diagrams.py                  # Проверить �
 python scripts/diagrams/lint_diagrams.py --json           # JSON-вывод для CI
 python scripts/diagrams/lint_diagrams.py --stale-days 120 # Свой порог
 python scripts/diagrams/check_class_method_render_integrity.py \
-  --source-dir docs/02-architecture/mmd-diagrams/class-diagrams \
-  --svg-dir docs/02-architecture/mmd-diagrams/class-diagrams/svg
+  --source-dir docs/02-architecture/diagrams/class-diagrams \
+  --svg-dir docs/02-architecture/diagrams/class-diagrams/svg
 ```
 
 ### 6.2. Управление orphan-нодами
@@ -26951,8 +26951,8 @@ python scripts/diagrams/prune_orphan_nodes.py --grandfather   # Пометить
 - наличие инжектированных CSS-правил для `.edgeLabel span` и `text.fo-fallback`.
 
 ```bash
-python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
-python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt --json
+python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json
 ```
 
 ---
@@ -26988,7 +26988,7 @@ python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architec
 
 ```bash
 # Linux/WSL/Windows (Git Bash, WSL, CI)
-bash docs/02-architecture/mmd-diagrams/render.sh
+bash docs/02-architecture/diagrams/tooling/render.sh
 ```
 
 Формат вывода: SVG + PNG (base 300 DPI). Применяется тема из `theme/mermaid-config.json` и `theme/custom.css`. SVG-файлы дополнительно оптимизируются через SVGO (`svgo.config.js`).
@@ -27013,11 +27013,11 @@ bash docs/02-architecture/mmd-diagrams/render.sh
 5. **Применить ELK** (если @nodes > 20): `python src/tools/apply_elk_layout.py`
 6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`
 7. **Проверить orphan-ноды:** `python scripts/diagrams/prune_orphan_nodes.py --check`
-8. **Отрендерить:** `bash docs/02-architecture/mmd-diagrams/render.sh`
+8. **Отрендерить:** `bash docs/02-architecture/diagrams/tooling/render.sh`
    Для усиленного рендера больших схем можно задать: `--large-threshold`, `--large-scale`, `--large-png-dpi`.
-9. **Проверить артефакты SVG/PNG:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
-10. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
-11. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt`
+9. **Проверить артефакты SVG/PNG:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
+10. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
+11. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`
 12. **Добавить в индекс:** обновить `README.md` каталога
 
 ### 9.1. PR-checklist для `classDiagram`
@@ -27028,8 +27028,8 @@ bash docs/02-architecture/mmd-diagrams/render.sh
 2. Внутри одного файла не смешиваются стили return-нотации (`): Type` и `) Type`), правило `CLASS-002`.
 3. Нет перегруженных сигнатур методов длиннее ~88 символов, правило `CLASS-003`.
 4. L1-диаграмма содержит только ключевые методы, вторичные операции вынесены в companion L2 (`01a/08a/14a` и т.д.).
-5. Выполнен `python scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams/class-diagrams`.
-6. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/mmd-diagrams/class-diagrams --svg-dir docs/02-architecture/mmd-diagrams/class-diagrams/svg`.
+5. Выполнен `python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams/class-diagrams`.
+6. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`.
 7. Перерендерены изменённые диаграммы через `render.sh`, а `svg/png` артефакты обновлены.
 8. Нет drift между `.mmd` и рендер-артефактами в PR.
 
@@ -27071,13 +27071,13 @@ scripts/diagrams/run_diagram_checks.sh --profile pr
 1. `--strict-nightly` — nightly падает не только на error, но и на warning.
 2. `--skip-render` — пропускает render-шаг в `pr`/`nightly`.
 3. `--puppeteer /tmp/puppeteer-config.json` — переопределение пути к Puppeteer config.
-4. `--diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd` — запуск проверок только для одной диаграммы.
+4. `--diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd` — запуск проверок только для одной диаграммы.
 
 Пример single-file запуска:
 
 ```bash
 scripts/diagrams/run_diagram_checks.sh --profile pr \
-  --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  --diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
 ```
 
 ---
@@ -27087,7 +27087,7 @@ scripts/diagrams/run_diagram_checks.sh --profile pr \
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md`
+# Source: `02-architecture/diagrams/governance/PROMPT-diagram-expansion.md`
 
 # Промт: Расширение Диаграмм Проекта BioETL
 
@@ -27124,7 +27124,7 @@ docs/02-architecture/02-application-layer.md — Application Layer
 docs/02-architecture/03-infrastructure-layer.md — Infrastructure Layer
 docs/02-architecture/04-interfaces-layer.md  — Interfaces Layer
 docs/02-architecture/05-composition-layer.md — Composition Layer
-docs/02-architecture/data-flow.md            — Data Flow
+docs/02-architecture/diagrams/guide/data-flow-reference.md            — Data Flow
 docs/02-architecture/data-layers.md          — Data Layers
 docs/02-architecture/system-context.md       — System Context
 docs/02-architecture/observability-layers.md — Observability
@@ -27175,7 +27175,7 @@ docs/02-architecture/decisions/ADR-038-enum-externalization.md
 
 ### 0.3 Существующие диаграммы (НЕ дублировать!)
 
-В проекте уже есть **34 mermaid-диаграммы** в `docs/02-architecture/mmd-diagrams/*.mermaid`.
+В проекте уже есть **34 mermaid-диаграммы** в `docs/02-architecture/diagrams/*.mermaid`.
 Прочитай **каждую** из них, чтобы не создавать дубликатов:
 
 ```
@@ -27416,7 +27416,7 @@ src/bioetl/interfaces/http/health-server.py
 
 ### 0.5 Diagramming Policy (стандарты)
 
-Прочитай `docs/02-architecture/mmd-diagrams/00-diagramming-policy.md`. Ключевые правила:
+Прочитай `docs/02-architecture/diagrams/00-diagramming-policy.md`. Ключевые правила:
 
 - **Формат**: Mermaid (`.mermaid` расширение)
 - **Naming**: `NN-topic-name.mermaid` (kebab-case, NN-prefix для сортировки)
@@ -27531,7 +27531,7 @@ src/bioetl/interfaces/http/health-server.py
 
 ### 4.1 Создание Mermaid-файла
 
-- Создай файл в `docs/02-architecture/mmd-diagrams/`
+- Создай файл в `docs/02-architecture/diagrams/`
 - Формат именования: `NN-topic-name.mermaid` (NN = следующий свободный номер, начиная с 26)
 - Каждый файл начинается с:
   ```
@@ -27563,13 +27563,13 @@ EOF
 # Рендер каждой диаграммы
 # Используй scale=3 для ~300 DPI (base 96 DPI × 3 = 288 DPI)
 # Для сложных диаграмм с мелким текстом — scale=4 (384 DPI)
-for f in docs/02-architecture/mmd-diagrams/2[6-9]-*.mermaid \
-         docs/02-architecture/mmd-diagrams/3[0-9]-*.mermaid \
-         docs/02-architecture/mmd-diagrams/4[0-9]-*.mermaid \
-         docs/02-architecture/mmd-diagrams/50-*.mermaid; do
+for f in docs/02-architecture/diagrams/2[6-9]-*.mermaid \
+         docs/02-architecture/diagrams/3[0-9]-*.mermaid \
+         docs/02-architecture/diagrams/4[0-9]-*.mermaid \
+         docs/02-architecture/diagrams/50-*.mermaid; do
     base=$(basename "$f" .mermaid)
     mmdc -i "$f" \
-         -o "docs/02-architecture/mmd-diagrams/png/${base}.png" \
+         -o "docs/02-architecture/diagrams/png/${base}.png" \
          -s 3 \
          -w 2400 \
          -b white \
@@ -27588,8 +27588,8 @@ done
 
 После создания всех файлов обнови:
 
-1. `docs/02-architecture/mmd-diagrams/diagrams-index.md` — добавь новые диаграммы
-1. Создай директорию `docs/02-architecture/mmd-diagrams/png/` если не существует
+1. `docs/02-architecture/diagrams/diagrams-index.md` — добавь новые диаграммы
+1. Создай директорию `docs/02-architecture/diagrams/png/` если не существует
 
 ----------------------------------------------------------------------
 
@@ -27621,7 +27621,7 @@ grep -rn "class ИмяКласса" src/bioetl/ --include="*.py"
 
 ### 5.4 Рендер
 
-- Все 25 PNG файлов существуют в `docs/02-architecture/mmd-diagrams/png/`
+- Все 25 PNG файлов существуют в `docs/02-architecture/diagrams/png/`
 - Каждый PNG весит > 50KB (не пустой/битый)
 - Текст на каждой диаграмме читаем при 100% масштабе
 
@@ -27709,7 +27709,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/diagram-catalog.md`
+# Source: `02-architecture/diagrams/governance/diagram-catalog.md`
 
 # Каталог Диаграмм BioETL
 
@@ -28342,7 +28342,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/diagram-modernization-program.md`
+# Source: `02-architecture/diagrams/governance/diagram-modernization-program.md`
 
 # Программа Модификации Диаграмм (Draft)
 
@@ -28456,7 +28456,7 @@ _Основание: POL-LLM-DIAGRAMS-001, ADR-040, DIAGRAM-WORKFLOW-GUIDE.md_
 1. `scripts/diagrams/lint_diagrams.py`
 2. `scripts/diagrams/check_diagram_visual_smoke.py`
 3. `scripts/diagrams/validate_mermaid_syntax.sh`
-4. `docs/02-architecture/mmd-diagrams/render.sh`
+4. `docs/02-architecture/diagrams/tooling/render.sh`
 5. `scripts/diagrams/add_svg_text_fallback.py`
 6. `.github/workflows/docs.yml`
 7. `.github/workflows/validate-mermaid.yml`
@@ -28487,7 +28487,7 @@ _Основание: POL-LLM-DIAGRAMS-001, ADR-040, DIAGRAM-WORKFLOW-GUIDE.md_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/diagram-regression-test-plan.md`
+# Source: `02-architecture/diagrams/governance/diagram-regression-test-plan.md`
 
 _Дата: 2026-02-27_  
 _Статус: Phase 1 + Phase 2 Nightly implemented (2026-02-27)_  
@@ -28591,7 +28591,7 @@ _Связанные документы: diagram-modernization-program.md, 06-dia
 ## 5. Минимальный стартовый набор (обязательный до rollout)
 
 1. DIAG-T001, T002, T007, T009, T010, T011, T012, T013, T017.
-2. Эталонный пул: минимум 5 диаграмм из `visual-smoke-manifest.txt`.
+2. Эталонный пул: минимум 5 диаграмм из `manifests/visual-smoke.txt`.
 3. Авто-отчет в PR: статус всех обязательных тестов + ссылки на SVG/PNG artifacts.
 
 ## 6. Кандидаты в эталонный пул
@@ -28629,7 +28629,7 @@ _Связанные документы: diagram-modernization-program.md, 06-dia
 ## 9. Реализовано в Phase 1
 
 1. Добавлен `scripts/diagrams/check_diagram_quality_gates.py` (DIAG-T018..T023).
-2. Добавлен source-manifest `quality-gate-manifest.txt` для эталонного пула.
+2. Добавлен source-manifest `manifests/quality-gates.txt` для эталонного пула.
 3. Расширен `.github/workflows/docs.yml`:
    - запуск `check_diagram_artifacts.py` (DIAG-T010/T011/T012);
    - запуск quality-gates после render/smoke/check_svg_text_visibility;
@@ -28674,14 +28674,14 @@ scripts/diagrams/run_diagram_checks.sh --profile quick
 
 ```bash
 scripts/diagrams/run_diagram_checks.sh --profile pr \
-  --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  --diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
 ```
 
 5. Для single-file быстрой проверки:
 
 ```bash
 scripts/diagrams/run_diagram_checks.sh --profile quick \
-  --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  --diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
 ```
 
 Примечание: для `DIAG-T001`/`DIAG-T009` нужен рабочий `mmdc` + браузер Puppeteer (`chrome-headless-shell`).
@@ -28689,11 +28689,11 @@ scripts/diagrams/run_diagram_checks.sh --profile quick \
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/diagram-views-inventory.md`
+# Source: `02-architecture/diagrams/governance/diagram-views-inventory.md`
 
 # Diagram Inventory (.mermaid/.puml)
 
-Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Mermaid sources). Decomposed views in `views/*.mermaid`.
+Source scope: `docs/02-architecture/diagrams/foundation/*.mmd` (canonical Mermaid sources). Decomposed views in `views/*.mermaid`.
 
 | File | Type | Nodes | Edges | Status |
 |---|---|---:|---:|---|
@@ -28754,7 +28754,7 @@ Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Me
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/diagram-views-plan.md`
+# Source: `02-architecture/diagrams/governance/diagram-views-plan.md`
 
 # Diagram Decomposition Plan
 
@@ -28792,13 +28792,13 @@ Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Me
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/docs/diagrams-index.md`
+# Source: `02-architecture/diagrams/governance/diagrams-index.md`
 
 # BioETL Architecture Diagrams Index
 
 *Updated: 2026-02-27*
 
-> **Canonical root:** [docs/02-architecture/mmd-diagrams/](../README.md)
+> **Canonical root:** [docs/02-architecture/diagrams/](../README.md)
 > **Policy:** [POL-LLM-DIAGRAMS-001](../../06-diagram-policy.md)
 > **ADR:** [ADR-040](../../decisions/ADR-040-diagram-governance.md)
 
@@ -28850,7 +28850,7 @@ Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Me
 
 ```bash
 scripts/diagrams/run_diagram_checks.sh --profile pr
-scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mmd
 
 # Or run checks individually:
 python3 scripts/diagrams/lint_diagrams.py docs
@@ -28858,10 +28858,10 @@ python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --js
 python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
 python3 scripts/docs/check_doc_links.py --links
 bash scripts/diagrams/validate_mermaid_syntax.sh
-bash docs/02-architecture/mmd-diagrams/render.sh
-python3 scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
-python3 scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
-python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt
+bash docs/02-architecture/diagrams/tooling/render.sh
+python3 scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+python3 scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt
 ```
 
 ## Notes
@@ -28873,7 +28873,7 @@ python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-archi
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/foundation/png/INDEX.md`
+# Source: `02-architecture/diagrams/foundation/png/INDEX.md`
 
 # BioETL Diagrams — PNG Index
 
@@ -28881,325 +28881,325 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## Full System Component
 
-![01-full-system-component](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/01-full-system-component.png)
+![01-full-system-component](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/01-full-system-component.png)
 
 ---
 
 ## High Level
 
-![01-high-level](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/01-high-level.png)
+![01-high-level](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/01-high-level.png)
 
 ---
 
 ## Full Medallion Data Flow
 
-![02-full-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/02-full-medallion-data-flow.png)
+![02-full-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/02-full-medallion-data-flow.png)
 
 ---
 
 ## Pipeline Execution Happy Path
 
-![03-pipeline-execution-happy-path](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/03-pipeline-execution-happy-path.png)
+![03-pipeline-execution-happy-path](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/03-pipeline-execution-happy-path.png)
 
 ---
 
 ## Domain Layer Class Diagram
 
-![04-domain-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/04-domain-layer-class-diagram.png)
+![04-domain-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/04-domain-layer-class-diagram.png)
 
 ---
 
 ## Error Flow
 
-![04-error-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/04-error-flow.png)
+![04-error-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/04-error-flow.png)
 
 ---
 
 ## Layers Interaction
 
-![05-layers-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/05-layers-interaction.png)
+![05-layers-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/05-layers-interaction.png)
 
 ---
 
 ## Pipeline Lifecycle States
 
-![05-pipeline-lifecycle-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/05-pipeline-lifecycle-states.png)
+![05-pipeline-lifecycle-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/05-pipeline-lifecycle-states.png)
 
 ---
 
 ## Application Layer Class Diagram
 
-![06-application-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/06-application-layer-class-diagram.png)
+![06-application-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/06-application-layer-class-diagram.png)
 
 ---
 
 ## Pipeline Execution
 
-![06-pipeline-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/06-pipeline-execution.png)
+![06-pipeline-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/06-pipeline-execution.png)
 
 ---
 
 ## Circuit Breaker States
 
-![07-circuit-breaker-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/07-circuit-breaker-states.png)
+![07-circuit-breaker-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/07-circuit-breaker-states.png)
 
 ---
 
 ## Medallion Flow
 
-![07-medallion-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/07-medallion-flow.png)
+![07-medallion-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/07-medallion-flow.png)
 
 ---
 
 ## Complete Etl Workflow
 
-![08-complete-etl-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/08-complete-etl-workflow.png)
+![08-complete-etl-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/08-complete-etl-workflow.png)
 
 ---
 
 ## Domain Ddd
 
-![08-domain-ddd](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/08-domain-ddd.png)
+![08-domain-ddd](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/08-domain-ddd.png)
 
 ---
 
 ## Full Er Diagram
 
-![09-full-er-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/09-full-er-diagram.png)
+![09-full-er-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/09-full-er-diagram.png)
 
 ---
 
 ## Infrastructure Layer Class Diagram
 
-![10-infrastructure-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/10-infrastructure-layer-class-diagram.png)
+![10-infrastructure-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/10-infrastructure-layer-class-diagram.png)
 
 ---
 
 ## Lock Acquisition Sequence
 
-![11-lock-acquisition-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/11-lock-acquisition-sequence.png)
+![11-lock-acquisition-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/11-lock-acquisition-sequence.png)
 
 ---
 
 ## Local Deployment Architecture
 
-![12-local-deployment-architecture](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/12-local-deployment-architecture.png)
+![12-local-deployment-architecture](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/12-local-deployment-architecture.png)
 
 ---
 
 ## Domain Models Relationship
 
-![13-domain-models-relationship](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/13-domain-models-relationship.png)
+![13-domain-models-relationship](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/13-domain-models-relationship.png)
 
 ---
 
 ## Provider Health States
 
-![14-provider-health-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/14-provider-health-states.png)
+![14-provider-health-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/14-provider-health-states.png)
 
 ---
 
 ## Dq Check Workflow
 
-![15-dq-check-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/15-dq-check-workflow.png)
+![15-dq-check-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/15-dq-check-workflow.png)
 
 ---
 
 ## Memory Lock Class
 
-![16-memory-lock-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/16-memory-lock-class.png)
+![16-memory-lock-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/16-memory-lock-class.png)
 
 ---
 
 ## Pipeline Hierarchy
 
-![17-pipeline-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/17-pipeline-hierarchy.png)
+![17-pipeline-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/17-pipeline-hierarchy.png)
 
 ---
 
 ## Bronze Write Sequence
 
-![18-bronze-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/18-bronze-write-sequence.png)
+![18-bronze-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/18-bronze-write-sequence.png)
 
 ---
 
 ## Delta Lake Write Sequence
 
-![19-delta-lake-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/19-delta-lake-write-sequence.png)
+![19-delta-lake-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/19-delta-lake-write-sequence.png)
 
 ---
 
 ## Quarantine Record States
 
-![20-quarantine-record-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/20-quarantine-record-states.png)
+![20-quarantine-record-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/20-quarantine-record-states.png)
 
 ---
 
 ## Activity Entity Data Flow
 
-![21-activity-entity-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/21-activity-entity-data-flow.png)
+![21-activity-entity-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/21-activity-entity-data-flow.png)
 
 ---
 
 ## Client Api Request Sequence
 
-![22-client-api-request-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/22-client-api-request-sequence.png)
+![22-client-api-request-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/22-client-api-request-sequence.png)
 
 ---
 
 ## Silver Writer Class
 
-![23-silver-writer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/23-silver-writer-class.png)
+![23-silver-writer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/23-silver-writer-class.png)
 
 ---
 
 ## Hash Service Class
 
-![24-hash-service-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/24-hash-service-class.png)
+![24-hash-service-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/24-hash-service-class.png)
 
 ---
 
 ## Circuit Breaker Observer Class
 
-![25-circuit-breaker-observer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/25-circuit-breaker-observer-class.png)
+![25-circuit-breaker-observer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/25-circuit-breaker-observer-class.png)
 
 ---
 
 ## Hexagonal Ports Adapters
 
-![26-hexagonal-ports-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/26-hexagonal-ports-adapters.png)
+![26-hexagonal-ports-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/26-hexagonal-ports-adapters.png)
 
 ---
 
 ## Import Matrix Enforcement
 
-![27-import-matrix-enforcement](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/27-import-matrix-enforcement.png)
+![27-import-matrix-enforcement](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/27-import-matrix-enforcement.png)
 
 ---
 
 ## Composition Root Di Graph
 
-![28-composition-root-di-graph](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/28-composition-root-di-graph.png)
+![28-composition-root-di-graph](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/28-composition-root-di-graph.png)
 
 ---
 
 ## Composite Pipeline Workflow
 
-![29-composite-pipeline-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/29-composite-pipeline-workflow.png)
+![29-composite-pipeline-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/29-composite-pipeline-workflow.png)
 
 ---
 
 ## Port Adapter Mapping
 
-![30-port-adapter-mapping](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/30-port-adapter-mapping.png)
+![30-port-adapter-mapping](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/30-port-adapter-mapping.png)
 
 ---
 
 ## Pipeline Run Lifecycle
 
-![31-pipeline-run-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/31-pipeline-run-lifecycle.png)
+![31-pipeline-run-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/31-pipeline-run-lifecycle.png)
 
 ---
 
 ## Single Record Journey
 
-![32-single-record-journey](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/32-single-record-journey.png)
+![32-single-record-journey](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/32-single-record-journey.png)
 
 ---
 
 ## Cli Run Interaction
 
-![33-cli-run-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/33-cli-run-interaction.png)
+![33-cli-run-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/33-cli-run-interaction.png)
 
 ---
 
 ## Batch Processing Flow
 
-![34-batch-processing-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/34-batch-processing-flow.png)
+![34-batch-processing-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/34-batch-processing-flow.png)
 
 ---
 
 ## Architecture Principles Mindmap
 
-![36-architecture-principles-mindmap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/36-architecture-principles-mindmap.png)
+![36-architecture-principles-mindmap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/36-architecture-principles-mindmap.png)
 
 ---
 
 ## Cli Entry Full Chain
 
-![37-cli-entry-full-chain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/37-cli-entry-full-chain.png)
+![37-cli-entry-full-chain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/37-cli-entry-full-chain.png)
 
 ---
 
 ## Runtime Assembly Sequence
 
-![38-runtime-assembly-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/38-runtime-assembly-sequence.png)
+![38-runtime-assembly-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/38-runtime-assembly-sequence.png)
 
 ---
 
 ## Medallion Invariants
 
-![39-medallion-invariants](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/39-medallion-invariants.png)
+![39-medallion-invariants](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/39-medallion-invariants.png)
 
 ---
 
 ## Application Core Collaboration
 
-![40-application-core-collaboration](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/40-application-core-collaboration.png)
+![40-application-core-collaboration](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/40-application-core-collaboration.png)
 
 ---
 
 ## Error Classification Tree
 
-![41-error-classification-tree](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/41-error-classification-tree.png)
+![41-error-classification-tree](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/41-error-classification-tree.png)
 
 ---
 
 ## Pipeline Runner Class
 
-![42-pipeline-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/42-pipeline-runner-class.png)
+![42-pipeline-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/42-pipeline-runner-class.png)
 
 ---
 
 ## Fan Out Fan In Pattern
 
-![43-fan-out-fan-in-pattern](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/43-fan-out-fan-in-pattern.png)
+![43-fan-out-fan-in-pattern](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/43-fan-out-fan-in-pattern.png)
 
 ---
 
 ## Cross Provider Enrichment
 
-![44-cross-provider-enrichment](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/44-cross-provider-enrichment.png)
+![44-cross-provider-enrichment](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/44-cross-provider-enrichment.png)
 
 ---
 
 ## Yaml Config Resolution
 
-![46-yaml-config-resolution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/46-yaml-config-resolution.png)
+![46-yaml-config-resolution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/46-yaml-config-resolution.png)
 
 ---
 
 ## Publication Merge Sources
 
-![47-publication-merge-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/47-publication-merge-sources.png)
+![47-publication-merge-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/47-publication-merge-sources.png)
 
 ---
 
 ## Composite Phase Lifecycle
 
-![48-composite-phase-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/48-composite-phase-lifecycle.png)
+![48-composite-phase-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/48-composite-phase-lifecycle.png)
 
 ---
 
 ## Composite Runner Class
 
-![49-composite-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/49-composite-runner-class.png)
+![49-composite-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/49-composite-runner-class.png)
 
 ---
 
 ## Exception Hierarchy
 
-![50-exception-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/50-exception-hierarchy.png)
+![50-exception-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/50-exception-hierarchy.png)
 
 ---
 
@@ -29207,7 +29207,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/foundation/svg/INDEX.md`
+# Source: `02-architecture/diagrams/foundation/svg/INDEX.md`
 
 # BioETL Diagrams — SVG Index
 
@@ -29215,325 +29215,325 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## Full System Component
 
-![01-full-system-component](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/01-full-system-component.svg)
+![01-full-system-component](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/01-full-system-component.svg)
 
 ---
 
 ## High Level
 
-![01-high-level](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/01-high-level.svg)
+![01-high-level](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/01-high-level.svg)
 
 ---
 
 ## Full Medallion Data Flow
 
-![02-full-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/02-full-medallion-data-flow.svg)
+![02-full-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/02-full-medallion-data-flow.svg)
 
 ---
 
 ## Pipeline Execution Happy Path
 
-![03-pipeline-execution-happy-path](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/03-pipeline-execution-happy-path.svg)
+![03-pipeline-execution-happy-path](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/03-pipeline-execution-happy-path.svg)
 
 ---
 
 ## Domain Layer Class Diagram
 
-![04-domain-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/04-domain-layer-class-diagram.svg)
+![04-domain-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/04-domain-layer-class-diagram.svg)
 
 ---
 
 ## Error Flow
 
-![04-error-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/04-error-flow.svg)
+![04-error-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/04-error-flow.svg)
 
 ---
 
 ## Layers Interaction
 
-![05-layers-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/05-layers-interaction.svg)
+![05-layers-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/05-layers-interaction.svg)
 
 ---
 
 ## Pipeline Lifecycle States
 
-![05-pipeline-lifecycle-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/05-pipeline-lifecycle-states.svg)
+![05-pipeline-lifecycle-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/05-pipeline-lifecycle-states.svg)
 
 ---
 
 ## Application Layer Class Diagram
 
-![06-application-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/06-application-layer-class-diagram.svg)
+![06-application-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/06-application-layer-class-diagram.svg)
 
 ---
 
 ## Pipeline Execution
 
-![06-pipeline-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/06-pipeline-execution.svg)
+![06-pipeline-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/06-pipeline-execution.svg)
 
 ---
 
 ## Circuit Breaker States
 
-![07-circuit-breaker-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/07-circuit-breaker-states.svg)
+![07-circuit-breaker-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/07-circuit-breaker-states.svg)
 
 ---
 
 ## Medallion Flow
 
-![07-medallion-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/07-medallion-flow.svg)
+![07-medallion-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/07-medallion-flow.svg)
 
 ---
 
 ## Complete Etl Workflow
 
-![08-complete-etl-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/08-complete-etl-workflow.svg)
+![08-complete-etl-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/08-complete-etl-workflow.svg)
 
 ---
 
 ## Domain Ddd
 
-![08-domain-ddd](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/08-domain-ddd.svg)
+![08-domain-ddd](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/08-domain-ddd.svg)
 
 ---
 
 ## Full Er Diagram
 
-![09-full-er-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/09-full-er-diagram.svg)
+![09-full-er-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/09-full-er-diagram.svg)
 
 ---
 
 ## Infrastructure Layer Class Diagram
 
-![10-infrastructure-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/10-infrastructure-layer-class-diagram.svg)
+![10-infrastructure-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/10-infrastructure-layer-class-diagram.svg)
 
 ---
 
 ## Lock Acquisition Sequence
 
-![11-lock-acquisition-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/11-lock-acquisition-sequence.svg)
+![11-lock-acquisition-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/11-lock-acquisition-sequence.svg)
 
 ---
 
 ## Local Deployment Architecture
 
-![12-local-deployment-architecture](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/12-local-deployment-architecture.svg)
+![12-local-deployment-architecture](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/12-local-deployment-architecture.svg)
 
 ---
 
 ## Domain Models Relationship
 
-![13-domain-models-relationship](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/13-domain-models-relationship.svg)
+![13-domain-models-relationship](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/13-domain-models-relationship.svg)
 
 ---
 
 ## Provider Health States
 
-![14-provider-health-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/14-provider-health-states.svg)
+![14-provider-health-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/14-provider-health-states.svg)
 
 ---
 
 ## Dq Check Workflow
 
-![15-dq-check-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/15-dq-check-workflow.svg)
+![15-dq-check-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/15-dq-check-workflow.svg)
 
 ---
 
 ## Memory Lock Class
 
-![16-memory-lock-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/16-memory-lock-class.svg)
+![16-memory-lock-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/16-memory-lock-class.svg)
 
 ---
 
 ## Pipeline Hierarchy
 
-![17-pipeline-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/17-pipeline-hierarchy.svg)
+![17-pipeline-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/17-pipeline-hierarchy.svg)
 
 ---
 
 ## Bronze Write Sequence
 
-![18-bronze-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/18-bronze-write-sequence.svg)
+![18-bronze-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/18-bronze-write-sequence.svg)
 
 ---
 
 ## Delta Lake Write Sequence
 
-![19-delta-lake-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/19-delta-lake-write-sequence.svg)
+![19-delta-lake-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/19-delta-lake-write-sequence.svg)
 
 ---
 
 ## Quarantine Record States
 
-![20-quarantine-record-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/20-quarantine-record-states.svg)
+![20-quarantine-record-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/20-quarantine-record-states.svg)
 
 ---
 
 ## Activity Entity Data Flow
 
-![21-activity-entity-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/21-activity-entity-data-flow.svg)
+![21-activity-entity-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/21-activity-entity-data-flow.svg)
 
 ---
 
 ## Client Api Request Sequence
 
-![22-client-api-request-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/22-client-api-request-sequence.svg)
+![22-client-api-request-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/22-client-api-request-sequence.svg)
 
 ---
 
 ## Silver Writer Class
 
-![23-silver-writer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/23-silver-writer-class.svg)
+![23-silver-writer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/23-silver-writer-class.svg)
 
 ---
 
 ## Hash Service Class
 
-![24-hash-service-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/24-hash-service-class.svg)
+![24-hash-service-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/24-hash-service-class.svg)
 
 ---
 
 ## Circuit Breaker Observer Class
 
-![25-circuit-breaker-observer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/25-circuit-breaker-observer-class.svg)
+![25-circuit-breaker-observer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/25-circuit-breaker-observer-class.svg)
 
 ---
 
 ## Hexagonal Ports Adapters
 
-![26-hexagonal-ports-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/26-hexagonal-ports-adapters.svg)
+![26-hexagonal-ports-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/26-hexagonal-ports-adapters.svg)
 
 ---
 
 ## Import Matrix Enforcement
 
-![27-import-matrix-enforcement](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/27-import-matrix-enforcement.svg)
+![27-import-matrix-enforcement](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/27-import-matrix-enforcement.svg)
 
 ---
 
 ## Composition Root Di Graph
 
-![28-composition-root-di-graph](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/28-composition-root-di-graph.svg)
+![28-composition-root-di-graph](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/28-composition-root-di-graph.svg)
 
 ---
 
 ## Composite Pipeline Workflow
 
-![29-composite-pipeline-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/29-composite-pipeline-workflow.svg)
+![29-composite-pipeline-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/29-composite-pipeline-workflow.svg)
 
 ---
 
 ## Port Adapter Mapping
 
-![30-port-adapter-mapping](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/30-port-adapter-mapping.svg)
+![30-port-adapter-mapping](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/30-port-adapter-mapping.svg)
 
 ---
 
 ## Pipeline Run Lifecycle
 
-![31-pipeline-run-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/31-pipeline-run-lifecycle.svg)
+![31-pipeline-run-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/31-pipeline-run-lifecycle.svg)
 
 ---
 
 ## Single Record Journey
 
-![32-single-record-journey](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/32-single-record-journey.svg)
+![32-single-record-journey](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/32-single-record-journey.svg)
 
 ---
 
 ## Cli Run Interaction
 
-![33-cli-run-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/33-cli-run-interaction.svg)
+![33-cli-run-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/33-cli-run-interaction.svg)
 
 ---
 
 ## Batch Processing Flow
 
-![34-batch-processing-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/34-batch-processing-flow.svg)
+![34-batch-processing-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/34-batch-processing-flow.svg)
 
 ---
 
 ## Architecture Principles Mindmap
 
-![36-architecture-principles-mindmap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/36-architecture-principles-mindmap.svg)
+![36-architecture-principles-mindmap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/36-architecture-principles-mindmap.svg)
 
 ---
 
 ## Cli Entry Full Chain
 
-![37-cli-entry-full-chain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/37-cli-entry-full-chain.svg)
+![37-cli-entry-full-chain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/37-cli-entry-full-chain.svg)
 
 ---
 
 ## Runtime Assembly Sequence
 
-![38-runtime-assembly-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/38-runtime-assembly-sequence.svg)
+![38-runtime-assembly-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/38-runtime-assembly-sequence.svg)
 
 ---
 
 ## Medallion Invariants
 
-![39-medallion-invariants](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/39-medallion-invariants.svg)
+![39-medallion-invariants](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/39-medallion-invariants.svg)
 
 ---
 
 ## Application Core Collaboration
 
-![40-application-core-collaboration](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/40-application-core-collaboration.svg)
+![40-application-core-collaboration](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/40-application-core-collaboration.svg)
 
 ---
 
 ## Error Classification Tree
 
-![41-error-classification-tree](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/41-error-classification-tree.svg)
+![41-error-classification-tree](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/41-error-classification-tree.svg)
 
 ---
 
 ## Pipeline Runner Class
 
-![42-pipeline-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/42-pipeline-runner-class.svg)
+![42-pipeline-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/42-pipeline-runner-class.svg)
 
 ---
 
 ## Fan Out Fan In Pattern
 
-![43-fan-out-fan-in-pattern](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/43-fan-out-fan-in-pattern.svg)
+![43-fan-out-fan-in-pattern](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/43-fan-out-fan-in-pattern.svg)
 
 ---
 
 ## Cross Provider Enrichment
 
-![44-cross-provider-enrichment](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/44-cross-provider-enrichment.svg)
+![44-cross-provider-enrichment](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/44-cross-provider-enrichment.svg)
 
 ---
 
 ## Yaml Config Resolution
 
-![46-yaml-config-resolution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/46-yaml-config-resolution.svg)
+![46-yaml-config-resolution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/46-yaml-config-resolution.svg)
 
 ---
 
 ## Publication Merge Sources
 
-![47-publication-merge-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/47-publication-merge-sources.svg)
+![47-publication-merge-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/47-publication-merge-sources.svg)
 
 ---
 
 ## Composite Phase Lifecycle
 
-![48-composite-phase-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/48-composite-phase-lifecycle.svg)
+![48-composite-phase-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/48-composite-phase-lifecycle.svg)
 
 ---
 
 ## Composite Runner Class
 
-![49-composite-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/49-composite-runner-class.svg)
+![49-composite-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/49-composite-runner-class.svg)
 
 ---
 
 ## Exception Hierarchy
 
-![50-exception-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/svg/50-exception-hierarchy.svg)
+![50-exception-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/svg/50-exception-hierarchy.svg)
 
 ---
 
@@ -29541,7 +29541,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.md`
+# Source: `02-architecture/diagrams/bundles/foundation.bundle.md`
 
 # BioETL Foundation Diagrams With Descriptions
 
@@ -29609,7 +29609,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 01-full-system-component
 
-![01-full-system-component](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/01-full-system-component.png)
+![01-full-system-component](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/01-full-system-component.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/01-full-system-component.mmd`
 
@@ -29627,7 +29627,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 01-high-level
 
-![01-high-level](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/01-high-level.png)
+![01-high-level](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/01-high-level.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/01-high-level.mmd`
 
@@ -29645,7 +29645,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 02-full-medallion-data-flow
 
-![02-full-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/02-full-medallion-data-flow.png)
+![02-full-medallion-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/02-full-medallion-data-flow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/02-full-medallion-data-flow.mmd`
 
@@ -29663,7 +29663,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 03-pipeline-execution-happy-path
 
-![03-pipeline-execution-happy-path](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/03-pipeline-execution-happy-path.png)
+![03-pipeline-execution-happy-path](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/03-pipeline-execution-happy-path.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/03-pipeline-execution-happy-path.mmd`
 
@@ -29681,7 +29681,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 04-domain-layer-class-diagram
 
-![04-domain-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/04-domain-layer-class-diagram.png)
+![04-domain-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/04-domain-layer-class-diagram.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/04-domain-layer-class-diagram.mmd`
 
@@ -29699,7 +29699,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 04-error-flow
 
-![04-error-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/04-error-flow.png)
+![04-error-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/04-error-flow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/04-error-flow.mmd`
 
@@ -29717,7 +29717,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 05-layers-interaction
 
-![05-layers-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/05-layers-interaction.png)
+![05-layers-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/05-layers-interaction.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/05-layers-interaction.mmd`
 
@@ -29735,7 +29735,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 05-pipeline-lifecycle-states
 
-![05-pipeline-lifecycle-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/05-pipeline-lifecycle-states.png)
+![05-pipeline-lifecycle-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/05-pipeline-lifecycle-states.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/05-pipeline-lifecycle-states.mmd`
 
@@ -29753,7 +29753,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 06-application-layer-class-diagram
 
-![06-application-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/06-application-layer-class-diagram.png)
+![06-application-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/06-application-layer-class-diagram.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/06-application-layer-class-diagram.mmd`
 
@@ -29771,7 +29771,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 06-pipeline-execution
 
-![06-pipeline-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/06-pipeline-execution.png)
+![06-pipeline-execution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/06-pipeline-execution.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/06-pipeline-execution.mmd`
 
@@ -29789,7 +29789,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 07-circuit-breaker-states
 
-![07-circuit-breaker-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/07-circuit-breaker-states.png)
+![07-circuit-breaker-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/07-circuit-breaker-states.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/07-circuit-breaker-states.mmd`
 
@@ -29807,7 +29807,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 07-medallion-flow
 
-![07-medallion-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/07-medallion-flow.png)
+![07-medallion-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/07-medallion-flow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/07-medallion-flow.mmd`
 
@@ -29825,7 +29825,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 08-complete-etl-workflow
 
-![08-complete-etl-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/08-complete-etl-workflow.png)
+![08-complete-etl-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/08-complete-etl-workflow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/08-complete-etl-workflow.mmd`
 
@@ -29843,7 +29843,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 08-domain-ddd
 
-![08-domain-ddd](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/08-domain-ddd.png)
+![08-domain-ddd](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/08-domain-ddd.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/08-domain-ddd.mmd`
 
@@ -29861,7 +29861,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 09-full-er-diagram
 
-![09-full-er-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/09-full-er-diagram.png)
+![09-full-er-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/09-full-er-diagram.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/09-full-er-diagram.mmd`
 
@@ -29879,7 +29879,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 10-infrastructure-layer-class-diagram
 
-![10-infrastructure-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/10-infrastructure-layer-class-diagram.png)
+![10-infrastructure-layer-class-diagram](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/10-infrastructure-layer-class-diagram.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd`
 
@@ -29897,7 +29897,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 11-lock-acquisition-sequence
 
-![11-lock-acquisition-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/11-lock-acquisition-sequence.png)
+![11-lock-acquisition-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/11-lock-acquisition-sequence.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/11-lock-acquisition-sequence.mmd`
 
@@ -29915,7 +29915,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 12-local-deployment-architecture
 
-![12-local-deployment-architecture](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/12-local-deployment-architecture.png)
+![12-local-deployment-architecture](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/12-local-deployment-architecture.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/12-local-deployment-architecture.mmd`
 
@@ -29933,7 +29933,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 13-domain-models-relationship
 
-![13-domain-models-relationship](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/13-domain-models-relationship.png)
+![13-domain-models-relationship](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/13-domain-models-relationship.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/13-domain-models-relationship.mmd`
 
@@ -29951,7 +29951,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 14-provider-health-states
 
-![14-provider-health-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/14-provider-health-states.png)
+![14-provider-health-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/14-provider-health-states.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/14-provider-health-states.mmd`
 
@@ -29969,7 +29969,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 15-dq-check-workflow
 
-![15-dq-check-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/15-dq-check-workflow.png)
+![15-dq-check-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/15-dq-check-workflow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/15-dq-check-workflow.mmd`
 
@@ -29987,7 +29987,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 16-memory-lock-class
 
-![16-memory-lock-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/16-memory-lock-class.png)
+![16-memory-lock-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/16-memory-lock-class.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/16-memory-lock-class.mmd`
 
@@ -30005,7 +30005,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 17-pipeline-hierarchy
 
-![17-pipeline-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/17-pipeline-hierarchy.png)
+![17-pipeline-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/17-pipeline-hierarchy.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/17-pipeline-hierarchy.mmd`
 
@@ -30023,7 +30023,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 18-bronze-write-sequence
 
-![18-bronze-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/18-bronze-write-sequence.png)
+![18-bronze-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/18-bronze-write-sequence.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/18-bronze-write-sequence.mmd`
 
@@ -30041,7 +30041,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 19-delta-lake-write-sequence
 
-![19-delta-lake-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/19-delta-lake-write-sequence.png)
+![19-delta-lake-write-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/19-delta-lake-write-sequence.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/19-delta-lake-write-sequence.mmd`
 
@@ -30059,7 +30059,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 20-quarantine-record-states
 
-![20-quarantine-record-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/20-quarantine-record-states.png)
+![20-quarantine-record-states](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/20-quarantine-record-states.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/20-quarantine-record-states.mmd`
 
@@ -30077,7 +30077,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 21-activity-entity-data-flow
 
-![21-activity-entity-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/21-activity-entity-data-flow.png)
+![21-activity-entity-data-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/21-activity-entity-data-flow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/21-activity-entity-data-flow.mmd`
 
@@ -30095,7 +30095,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 22-client-api-request-sequence
 
-![22-client-api-request-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/22-client-api-request-sequence.png)
+![22-client-api-request-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/22-client-api-request-sequence.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/22-client-api-request-sequence.mmd`
 
@@ -30113,7 +30113,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 23-silver-writer-class
 
-![23-silver-writer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/23-silver-writer-class.png)
+![23-silver-writer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/23-silver-writer-class.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/23-silver-writer-class.mmd`
 
@@ -30131,7 +30131,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 24-hash-service-class
 
-![24-hash-service-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/24-hash-service-class.png)
+![24-hash-service-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/24-hash-service-class.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/24-hash-service-class.mmd`
 
@@ -30149,7 +30149,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 25-circuit-breaker-observer-class
 
-![25-circuit-breaker-observer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/25-circuit-breaker-observer-class.png)
+![25-circuit-breaker-observer-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/25-circuit-breaker-observer-class.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/25-circuit-breaker-observer-class.mmd`
 
@@ -30167,7 +30167,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 26-hexagonal-ports-adapters
 
-![26-hexagonal-ports-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/26-hexagonal-ports-adapters.png)
+![26-hexagonal-ports-adapters](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/26-hexagonal-ports-adapters.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd`
 
@@ -30185,7 +30185,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 27-import-matrix-enforcement
 
-![27-import-matrix-enforcement](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/27-import-matrix-enforcement.png)
+![27-import-matrix-enforcement](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/27-import-matrix-enforcement.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/27-import-matrix-enforcement.mmd`
 
@@ -30203,7 +30203,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 28-composition-root-di-graph
 
-![28-composition-root-di-graph](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/28-composition-root-di-graph.png)
+![28-composition-root-di-graph](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/28-composition-root-di-graph.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/28-composition-root-di-graph.mmd`
 
@@ -30221,7 +30221,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 29-composite-pipeline-workflow
 
-![29-composite-pipeline-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/29-composite-pipeline-workflow.png)
+![29-composite-pipeline-workflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/29-composite-pipeline-workflow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd`
 
@@ -30239,7 +30239,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 30-port-adapter-mapping
 
-![30-port-adapter-mapping](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/30-port-adapter-mapping.png)
+![30-port-adapter-mapping](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/30-port-adapter-mapping.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/30-port-adapter-mapping.mmd`
 
@@ -30257,7 +30257,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 31-pipeline-run-lifecycle
 
-![31-pipeline-run-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/31-pipeline-run-lifecycle.png)
+![31-pipeline-run-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/31-pipeline-run-lifecycle.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/31-pipeline-run-lifecycle.mmd`
 
@@ -30275,7 +30275,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 32-single-record-journey
 
-![32-single-record-journey](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/32-single-record-journey.png)
+![32-single-record-journey](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/32-single-record-journey.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/32-single-record-journey.mmd`
 
@@ -30293,7 +30293,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 33-cli-run-interaction
 
-![33-cli-run-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/33-cli-run-interaction.png)
+![33-cli-run-interaction](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/33-cli-run-interaction.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/33-cli-run-interaction.mmd`
 
@@ -30311,7 +30311,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 34-batch-processing-flow
 
-![34-batch-processing-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/34-batch-processing-flow.png)
+![34-batch-processing-flow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/34-batch-processing-flow.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/34-batch-processing-flow.mmd`
 
@@ -30329,7 +30329,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 36-architecture-principles-mindmap
 
-![36-architecture-principles-mindmap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/36-architecture-principles-mindmap.png)
+![36-architecture-principles-mindmap](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/36-architecture-principles-mindmap.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/36-architecture-principles-mindmap.mmd`
 
@@ -30347,7 +30347,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 37-cli-entry-full-chain
 
-![37-cli-entry-full-chain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/37-cli-entry-full-chain.png)
+![37-cli-entry-full-chain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/37-cli-entry-full-chain.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/37-cli-entry-full-chain.mmd`
 
@@ -30365,7 +30365,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 38-runtime-assembly-sequence
 
-![38-runtime-assembly-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/38-runtime-assembly-sequence.png)
+![38-runtime-assembly-sequence](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/38-runtime-assembly-sequence.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/38-runtime-assembly-sequence.mmd`
 
@@ -30383,7 +30383,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 39-medallion-invariants
 
-![39-medallion-invariants](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/39-medallion-invariants.png)
+![39-medallion-invariants](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/39-medallion-invariants.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/39-medallion-invariants.mmd`
 
@@ -30401,7 +30401,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 40-application-core-collaboration
 
-![40-application-core-collaboration](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/40-application-core-collaboration.png)
+![40-application-core-collaboration](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/40-application-core-collaboration.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/40-application-core-collaboration.mmd`
 
@@ -30419,7 +30419,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 41-error-classification-tree
 
-![41-error-classification-tree](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/41-error-classification-tree.png)
+![41-error-classification-tree](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/41-error-classification-tree.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/41-error-classification-tree.mmd`
 
@@ -30437,7 +30437,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 42-pipeline-runner-class
 
-![42-pipeline-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/42-pipeline-runner-class.png)
+![42-pipeline-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/42-pipeline-runner-class.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/42-pipeline-runner-class.mmd`
 
@@ -30455,7 +30455,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 43-fan-out-fan-in-pattern
 
-![43-fan-out-fan-in-pattern](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/43-fan-out-fan-in-pattern.png)
+![43-fan-out-fan-in-pattern](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/43-fan-out-fan-in-pattern.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/43-fan-out-fan-in-pattern.mmd`
 
@@ -30473,7 +30473,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 44-cross-provider-enrichment
 
-![44-cross-provider-enrichment](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/44-cross-provider-enrichment.png)
+![44-cross-provider-enrichment](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/44-cross-provider-enrichment.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/44-cross-provider-enrichment.mmd`
 
@@ -30491,7 +30491,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 46-yaml-config-resolution
 
-![46-yaml-config-resolution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/46-yaml-config-resolution.png)
+![46-yaml-config-resolution](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/46-yaml-config-resolution.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/46-yaml-config-resolution.mmd`
 
@@ -30509,7 +30509,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 47-publication-merge-sources
 
-![47-publication-merge-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/47-publication-merge-sources.png)
+![47-publication-merge-sources](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/47-publication-merge-sources.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/47-publication-merge-sources.mmd`
 
@@ -30527,7 +30527,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 48-composite-phase-lifecycle
 
-![48-composite-phase-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/48-composite-phase-lifecycle.png)
+![48-composite-phase-lifecycle](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/48-composite-phase-lifecycle.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/48-composite-phase-lifecycle.mmd`
 
@@ -30545,7 +30545,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 49-composite-runner-class
 
-![49-composite-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/49-composite-runner-class.png)
+![49-composite-runner-class](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/49-composite-runner-class.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/49-composite-runner-class.mmd`
 
@@ -30563,7 +30563,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 ## 50-exception-hierarchy
 
-![50-exception-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/foundation/png/50-exception-hierarchy.png)
+![50-exception-hierarchy](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/foundation/png/50-exception-hierarchy.png)
 
 - Исходная диаграмма: `mmd-diagrams/foundation/50-exception-hierarchy.mmd`
 
@@ -30579,7 +30579,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/views/png/INDEX.md`
+# Source: `02-architecture/diagrams/views/png/INDEX.md`
 
 # BioETL Diagrams — PNG Index
 
@@ -30587,973 +30587,973 @@ _Generated: 2026-03-03T12:49:53+03:00_
 
 ## Legend
 
-![00-legend](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/00-legend.png)
+![00-legend](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/00-legend.png)
 
 ---
 
 ## Full System Component Dataflow
 
-![01-full-system-component-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-full-system-component-dataflow.png)
+![01-full-system-component-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-full-system-component-dataflow.png)
 
 ---
 
 ## Full System Component Domain
 
-![01-full-system-component-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-full-system-component-domain.png)
+![01-full-system-component-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-full-system-component-domain.png)
 
 ---
 
 ## Full System Component Full
 
-![01-full-system-component-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-full-system-component-full.png)
+![01-full-system-component-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-full-system-component-full.png)
 
 ---
 
 ## Full System Component Infra
 
-![01-full-system-component-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-full-system-component-infra.png)
+![01-full-system-component-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-full-system-component-infra.png)
 
 ---
 
 ## Full System Component Overview
 
-![01-full-system-component-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-full-system-component-overview.png)
+![01-full-system-component-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-full-system-component-overview.png)
 
 ---
 
 ## High Level Dataflow
 
-![01-high-level-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-high-level-dataflow.png)
+![01-high-level-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-high-level-dataflow.png)
 
 ---
 
 ## High Level Domain
 
-![01-high-level-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-high-level-domain.png)
+![01-high-level-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-high-level-domain.png)
 
 ---
 
 ## High Level Full
 
-![01-high-level-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-high-level-full.png)
+![01-high-level-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-high-level-full.png)
 
 ---
 
 ## High Level Infra
 
-![01-high-level-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-high-level-infra.png)
+![01-high-level-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-high-level-infra.png)
 
 ---
 
 ## High Level Overview
 
-![01-high-level-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/01-high-level-overview.png)
+![01-high-level-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/01-high-level-overview.png)
 
 ---
 
 ## Medallion Dataflow
 
-![02-medallion-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/02-medallion-dataflow.png)
+![02-medallion-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/02-medallion-dataflow.png)
 
 ---
 
 ## Medallion Domain
 
-![02-medallion-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/02-medallion-domain.png)
+![02-medallion-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/02-medallion-domain.png)
 
 ---
 
 ## Medallion Full
 
-![02-medallion-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/02-medallion-full.png)
+![02-medallion-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/02-medallion-full.png)
 
 ---
 
 ## Medallion Infra
 
-![02-medallion-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/02-medallion-infra.png)
+![02-medallion-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/02-medallion-infra.png)
 
 ---
 
 ## Medallion Overview
 
-![02-medallion-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/02-medallion-overview.png)
+![02-medallion-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/02-medallion-overview.png)
 
 ---
 
 ## Medallion Data Flow Full
 
-![03-medallion-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/03-medallion-data-flow-full.png)
+![03-medallion-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/03-medallion-data-flow-full.png)
 
 ---
 
 ## Medallion Data Flow Overview
 
-![03-medallion-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/03-medallion-data-flow-overview.png)
+![03-medallion-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/03-medallion-data-flow-overview.png)
 
 ---
 
 ## Domain Layer Class Diagram Dataflow
 
-![04-domain-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/04-domain-layer-class-diagram-dataflow.png)
+![04-domain-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/04-domain-layer-class-diagram-dataflow.png)
 
 ---
 
 ## Domain Layer Class Diagram Domain
 
-![04-domain-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/04-domain-layer-class-diagram-domain.png)
+![04-domain-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/04-domain-layer-class-diagram-domain.png)
 
 ---
 
 ## Domain Layer Class Diagram Full
 
-![04-domain-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/04-domain-layer-class-diagram-full.png)
+![04-domain-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/04-domain-layer-class-diagram-full.png)
 
 ---
 
 ## Domain Layer Class Diagram Infra
 
-![04-domain-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/04-domain-layer-class-diagram-infra.png)
+![04-domain-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/04-domain-layer-class-diagram-infra.png)
 
 ---
 
 ## Domain Layer Class Diagram Overview
 
-![04-domain-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/04-domain-layer-class-diagram-overview.png)
+![04-domain-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/04-domain-layer-class-diagram-overview.png)
 
 ---
 
 ## Layers Interaction Dataflow
 
-![05-layers-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-layers-interaction-dataflow.png)
+![05-layers-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-layers-interaction-dataflow.png)
 
 ---
 
 ## Layers Interaction Domain
 
-![05-layers-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-layers-interaction-domain.png)
+![05-layers-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-layers-interaction-domain.png)
 
 ---
 
 ## Layers Interaction Full
 
-![05-layers-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-layers-interaction-full.png)
+![05-layers-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-layers-interaction-full.png)
 
 ---
 
 ## Layers Interaction Infra
 
-![05-layers-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-layers-interaction-infra.png)
+![05-layers-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-layers-interaction-infra.png)
 
 ---
 
 ## Layers Interaction Overview
 
-![05-layers-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-layers-interaction-overview.png)
+![05-layers-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-layers-interaction-overview.png)
 
 ---
 
 ## Pipeline Lifecycle States Dataflow
 
-![05-pipeline-lifecycle-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-pipeline-lifecycle-states-dataflow.png)
+![05-pipeline-lifecycle-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-pipeline-lifecycle-states-dataflow.png)
 
 ---
 
 ## Pipeline Lifecycle States Domain
 
-![05-pipeline-lifecycle-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-pipeline-lifecycle-states-domain.png)
+![05-pipeline-lifecycle-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-pipeline-lifecycle-states-domain.png)
 
 ---
 
 ## Pipeline Lifecycle States Full
 
-![05-pipeline-lifecycle-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-pipeline-lifecycle-states-full.png)
+![05-pipeline-lifecycle-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-pipeline-lifecycle-states-full.png)
 
 ---
 
 ## Pipeline Lifecycle States Infra
 
-![05-pipeline-lifecycle-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-pipeline-lifecycle-states-infra.png)
+![05-pipeline-lifecycle-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-pipeline-lifecycle-states-infra.png)
 
 ---
 
 ## Pipeline Lifecycle States Overview
 
-![05-pipeline-lifecycle-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/05-pipeline-lifecycle-states-overview.png)
+![05-pipeline-lifecycle-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/05-pipeline-lifecycle-states-overview.png)
 
 ---
 
 ## Application Layer Class Diagram Dataflow
 
-![06-application-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/06-application-layer-class-diagram-dataflow.png)
+![06-application-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/06-application-layer-class-diagram-dataflow.png)
 
 ---
 
 ## Application Layer Class Diagram Domain
 
-![06-application-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/06-application-layer-class-diagram-domain.png)
+![06-application-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/06-application-layer-class-diagram-domain.png)
 
 ---
 
 ## Application Layer Class Diagram Full
 
-![06-application-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/06-application-layer-class-diagram-full.png)
+![06-application-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/06-application-layer-class-diagram-full.png)
 
 ---
 
 ## Application Layer Class Diagram Infra
 
-![06-application-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/06-application-layer-class-diagram-infra.png)
+![06-application-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/06-application-layer-class-diagram-infra.png)
 
 ---
 
 ## Application Layer Class Diagram Overview
 
-![06-application-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/06-application-layer-class-diagram-overview.png)
+![06-application-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/06-application-layer-class-diagram-overview.png)
 
 ---
 
 ## Circuit Breaker States Dataflow
 
-![07-circuit-breaker-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/07-circuit-breaker-states-dataflow.png)
+![07-circuit-breaker-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/07-circuit-breaker-states-dataflow.png)
 
 ---
 
 ## Circuit Breaker States Domain
 
-![07-circuit-breaker-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/07-circuit-breaker-states-domain.png)
+![07-circuit-breaker-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/07-circuit-breaker-states-domain.png)
 
 ---
 
 ## Circuit Breaker States Full
 
-![07-circuit-breaker-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/07-circuit-breaker-states-full.png)
+![07-circuit-breaker-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/07-circuit-breaker-states-full.png)
 
 ---
 
 ## Circuit Breaker States Infra
 
-![07-circuit-breaker-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/07-circuit-breaker-states-infra.png)
+![07-circuit-breaker-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/07-circuit-breaker-states-infra.png)
 
 ---
 
 ## Circuit Breaker States Overview
 
-![07-circuit-breaker-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/07-circuit-breaker-states-overview.png)
+![07-circuit-breaker-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/07-circuit-breaker-states-overview.png)
 
 ---
 
 ## Complete Etl Workflow Dataflow
 
-![08-complete-etl-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-complete-etl-workflow-dataflow.png)
+![08-complete-etl-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-complete-etl-workflow-dataflow.png)
 
 ---
 
 ## Complete Etl Workflow Domain
 
-![08-complete-etl-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-complete-etl-workflow-domain.png)
+![08-complete-etl-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-complete-etl-workflow-domain.png)
 
 ---
 
 ## Complete Etl Workflow Full
 
-![08-complete-etl-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-complete-etl-workflow-full.png)
+![08-complete-etl-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-complete-etl-workflow-full.png)
 
 ---
 
 ## Complete Etl Workflow Infra
 
-![08-complete-etl-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-complete-etl-workflow-infra.png)
+![08-complete-etl-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-complete-etl-workflow-infra.png)
 
 ---
 
 ## Complete Etl Workflow Overview
 
-![08-complete-etl-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-complete-etl-workflow-overview.png)
+![08-complete-etl-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-complete-etl-workflow-overview.png)
 
 ---
 
 ## Domain Ddd Dataflow
 
-![08-domain-ddd-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-domain-ddd-dataflow.png)
+![08-domain-ddd-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-domain-ddd-dataflow.png)
 
 ---
 
 ## Domain Ddd Domain
 
-![08-domain-ddd-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-domain-ddd-domain.png)
+![08-domain-ddd-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-domain-ddd-domain.png)
 
 ---
 
 ## Domain Ddd Full
 
-![08-domain-ddd-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-domain-ddd-full.png)
+![08-domain-ddd-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-domain-ddd-full.png)
 
 ---
 
 ## Domain Ddd Infra
 
-![08-domain-ddd-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-domain-ddd-infra.png)
+![08-domain-ddd-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-domain-ddd-infra.png)
 
 ---
 
 ## Domain Ddd Overview
 
-![08-domain-ddd-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/08-domain-ddd-overview.png)
+![08-domain-ddd-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/08-domain-ddd-overview.png)
 
 ---
 
 ## Infrastructure Layer Class Diagram Dataflow
 
-![10-infrastructure-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/10-infrastructure-layer-class-diagram-dataflow.png)
+![10-infrastructure-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/10-infrastructure-layer-class-diagram-dataflow.png)
 
 ---
 
 ## Infrastructure Layer Class Diagram Domain
 
-![10-infrastructure-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/10-infrastructure-layer-class-diagram-domain.png)
+![10-infrastructure-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/10-infrastructure-layer-class-diagram-domain.png)
 
 ---
 
 ## Infrastructure Layer Class Diagram Full
 
-![10-infrastructure-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/10-infrastructure-layer-class-diagram-full.png)
+![10-infrastructure-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/10-infrastructure-layer-class-diagram-full.png)
 
 ---
 
 ## Infrastructure Layer Class Diagram Infra
 
-![10-infrastructure-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/10-infrastructure-layer-class-diagram-infra.png)
+![10-infrastructure-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/10-infrastructure-layer-class-diagram-infra.png)
 
 ---
 
 ## Infrastructure Layer Class Diagram Overview
 
-![10-infrastructure-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/10-infrastructure-layer-class-diagram-overview.png)
+![10-infrastructure-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/10-infrastructure-layer-class-diagram-overview.png)
 
 ---
 
 ## Local Deployment Architecture Dataflow
 
-![12-local-deployment-architecture-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/12-local-deployment-architecture-dataflow.png)
+![12-local-deployment-architecture-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/12-local-deployment-architecture-dataflow.png)
 
 ---
 
 ## Local Deployment Architecture Domain
 
-![12-local-deployment-architecture-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/12-local-deployment-architecture-domain.png)
+![12-local-deployment-architecture-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/12-local-deployment-architecture-domain.png)
 
 ---
 
 ## Local Deployment Architecture Full
 
-![12-local-deployment-architecture-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/12-local-deployment-architecture-full.png)
+![12-local-deployment-architecture-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/12-local-deployment-architecture-full.png)
 
 ---
 
 ## Local Deployment Architecture Infra
 
-![12-local-deployment-architecture-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/12-local-deployment-architecture-infra.png)
+![12-local-deployment-architecture-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/12-local-deployment-architecture-infra.png)
 
 ---
 
 ## Local Deployment Architecture Overview
 
-![12-local-deployment-architecture-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/12-local-deployment-architecture-overview.png)
+![12-local-deployment-architecture-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/12-local-deployment-architecture-overview.png)
 
 ---
 
 ## Port Protocol Contracts Full
 
-![13-port-protocol-contracts-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/13-port-protocol-contracts-full.png)
+![13-port-protocol-contracts-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/13-port-protocol-contracts-full.png)
 
 ---
 
 ## Port Protocol Contracts Overview
 
-![13-port-protocol-contracts-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/13-port-protocol-contracts-overview.png)
+![13-port-protocol-contracts-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/13-port-protocol-contracts-overview.png)
 
 ---
 
 ## Provider Health States Dataflow
 
-![14-provider-health-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/14-provider-health-states-dataflow.png)
+![14-provider-health-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/14-provider-health-states-dataflow.png)
 
 ---
 
 ## Provider Health States Domain
 
-![14-provider-health-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/14-provider-health-states-domain.png)
+![14-provider-health-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/14-provider-health-states-domain.png)
 
 ---
 
 ## Provider Health States Full
 
-![14-provider-health-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/14-provider-health-states-full.png)
+![14-provider-health-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/14-provider-health-states-full.png)
 
 ---
 
 ## Provider Health States Infra
 
-![14-provider-health-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/14-provider-health-states-infra.png)
+![14-provider-health-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/14-provider-health-states-infra.png)
 
 ---
 
 ## Provider Health States Overview
 
-![14-provider-health-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/14-provider-health-states-overview.png)
+![14-provider-health-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/14-provider-health-states-overview.png)
 
 ---
 
 ## Dq Check Workflow Dataflow
 
-![15-dq-check-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/15-dq-check-workflow-dataflow.png)
+![15-dq-check-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/15-dq-check-workflow-dataflow.png)
 
 ---
 
 ## Dq Check Workflow Domain
 
-![15-dq-check-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/15-dq-check-workflow-domain.png)
+![15-dq-check-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/15-dq-check-workflow-domain.png)
 
 ---
 
 ## Dq Check Workflow Full
 
-![15-dq-check-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/15-dq-check-workflow-full.png)
+![15-dq-check-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/15-dq-check-workflow-full.png)
 
 ---
 
 ## Dq Check Workflow Infra
 
-![15-dq-check-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/15-dq-check-workflow-infra.png)
+![15-dq-check-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/15-dq-check-workflow-infra.png)
 
 ---
 
 ## Dq Check Workflow Overview
 
-![15-dq-check-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/15-dq-check-workflow-overview.png)
+![15-dq-check-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/15-dq-check-workflow-overview.png)
 
 ---
 
 ## Transformer Hierarchy Full
 
-![16-transformer-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/16-transformer-hierarchy-full.png)
+![16-transformer-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/16-transformer-hierarchy-full.png)
 
 ---
 
 ## Transformer Hierarchy Overview
 
-![16-transformer-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/16-transformer-hierarchy-overview.png)
+![16-transformer-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/16-transformer-hierarchy-overview.png)
 
 ---
 
 ## Activity Entity Data Flow Dataflow
 
-![21-activity-entity-data-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/21-activity-entity-data-flow-dataflow.png)
+![21-activity-entity-data-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/21-activity-entity-data-flow-dataflow.png)
 
 ---
 
 ## Activity Entity Data Flow Domain
 
-![21-activity-entity-data-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/21-activity-entity-data-flow-domain.png)
+![21-activity-entity-data-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/21-activity-entity-data-flow-domain.png)
 
 ---
 
 ## Activity Entity Data Flow Full
 
-![21-activity-entity-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/21-activity-entity-data-flow-full.png)
+![21-activity-entity-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/21-activity-entity-data-flow-full.png)
 
 ---
 
 ## Activity Entity Data Flow Infra
 
-![21-activity-entity-data-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/21-activity-entity-data-flow-infra.png)
+![21-activity-entity-data-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/21-activity-entity-data-flow-infra.png)
 
 ---
 
 ## Activity Entity Data Flow Overview
 
-![21-activity-entity-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/21-activity-entity-data-flow-overview.png)
+![21-activity-entity-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/21-activity-entity-data-flow-overview.png)
 
 ---
 
 ## Hexagonal Ports Adapters Dataflow
 
-![26-hexagonal-ports-adapters-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/26-hexagonal-ports-adapters-dataflow.png)
+![26-hexagonal-ports-adapters-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/26-hexagonal-ports-adapters-dataflow.png)
 
 ---
 
 ## Hexagonal Ports Adapters Domain
 
-![26-hexagonal-ports-adapters-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/26-hexagonal-ports-adapters-domain.png)
+![26-hexagonal-ports-adapters-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/26-hexagonal-ports-adapters-domain.png)
 
 ---
 
 ## Hexagonal Ports Adapters Full
 
-![26-hexagonal-ports-adapters-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/26-hexagonal-ports-adapters-full.png)
+![26-hexagonal-ports-adapters-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/26-hexagonal-ports-adapters-full.png)
 
 ---
 
 ## Hexagonal Ports Adapters Infra
 
-![26-hexagonal-ports-adapters-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/26-hexagonal-ports-adapters-infra.png)
+![26-hexagonal-ports-adapters-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/26-hexagonal-ports-adapters-infra.png)
 
 ---
 
 ## Hexagonal Ports Adapters Overview
 
-![26-hexagonal-ports-adapters-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/26-hexagonal-ports-adapters-overview.png)
+![26-hexagonal-ports-adapters-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/26-hexagonal-ports-adapters-overview.png)
 
 ---
 
 ## Composition Root Di Graph Dataflow
 
-![28-composition-root-di-graph-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/28-composition-root-di-graph-dataflow.png)
+![28-composition-root-di-graph-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/28-composition-root-di-graph-dataflow.png)
 
 ---
 
 ## Composition Root Di Graph Domain
 
-![28-composition-root-di-graph-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/28-composition-root-di-graph-domain.png)
+![28-composition-root-di-graph-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/28-composition-root-di-graph-domain.png)
 
 ---
 
 ## Composition Root Di Graph Full
 
-![28-composition-root-di-graph-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/28-composition-root-di-graph-full.png)
+![28-composition-root-di-graph-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/28-composition-root-di-graph-full.png)
 
 ---
 
 ## Composition Root Di Graph Infra
 
-![28-composition-root-di-graph-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/28-composition-root-di-graph-infra.png)
+![28-composition-root-di-graph-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/28-composition-root-di-graph-infra.png)
 
 ---
 
 ## Composition Root Di Graph Overview
 
-![28-composition-root-di-graph-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/28-composition-root-di-graph-overview.png)
+![28-composition-root-di-graph-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/28-composition-root-di-graph-overview.png)
 
 ---
 
 ## Composite Pipeline Workflow Dataflow
 
-![29-composite-pipeline-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/29-composite-pipeline-workflow-dataflow.png)
+![29-composite-pipeline-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/29-composite-pipeline-workflow-dataflow.png)
 
 ---
 
 ## Composite Pipeline Workflow Domain
 
-![29-composite-pipeline-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/29-composite-pipeline-workflow-domain.png)
+![29-composite-pipeline-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/29-composite-pipeline-workflow-domain.png)
 
 ---
 
 ## Composite Pipeline Workflow Full
 
-![29-composite-pipeline-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/29-composite-pipeline-workflow-full.png)
+![29-composite-pipeline-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/29-composite-pipeline-workflow-full.png)
 
 ---
 
 ## Composite Pipeline Workflow Infra
 
-![29-composite-pipeline-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/29-composite-pipeline-workflow-infra.png)
+![29-composite-pipeline-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/29-composite-pipeline-workflow-infra.png)
 
 ---
 
 ## Composite Pipeline Workflow Overview
 
-![29-composite-pipeline-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/29-composite-pipeline-workflow-overview.png)
+![29-composite-pipeline-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/29-composite-pipeline-workflow-overview.png)
 
 ---
 
 ## Port Adapter Mapping Dataflow
 
-![30-port-adapter-mapping-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/30-port-adapter-mapping-dataflow.png)
+![30-port-adapter-mapping-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/30-port-adapter-mapping-dataflow.png)
 
 ---
 
 ## Port Adapter Mapping Domain
 
-![30-port-adapter-mapping-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/30-port-adapter-mapping-domain.png)
+![30-port-adapter-mapping-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/30-port-adapter-mapping-domain.png)
 
 ---
 
 ## Port Adapter Mapping Full
 
-![30-port-adapter-mapping-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/30-port-adapter-mapping-full.png)
+![30-port-adapter-mapping-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/30-port-adapter-mapping-full.png)
 
 ---
 
 ## Port Adapter Mapping Infra
 
-![30-port-adapter-mapping-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/30-port-adapter-mapping-infra.png)
+![30-port-adapter-mapping-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/30-port-adapter-mapping-infra.png)
 
 ---
 
 ## Port Adapter Mapping Overview
 
-![30-port-adapter-mapping-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/30-port-adapter-mapping-overview.png)
+![30-port-adapter-mapping-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/30-port-adapter-mapping-overview.png)
 
 ---
 
 ## Pipeline Run Lifecycle Dataflow
 
-![31-pipeline-run-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/31-pipeline-run-lifecycle-dataflow.png)
+![31-pipeline-run-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/31-pipeline-run-lifecycle-dataflow.png)
 
 ---
 
 ## Pipeline Run Lifecycle Domain
 
-![31-pipeline-run-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/31-pipeline-run-lifecycle-domain.png)
+![31-pipeline-run-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/31-pipeline-run-lifecycle-domain.png)
 
 ---
 
 ## Pipeline Run Lifecycle Full
 
-![31-pipeline-run-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/31-pipeline-run-lifecycle-full.png)
+![31-pipeline-run-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/31-pipeline-run-lifecycle-full.png)
 
 ---
 
 ## Pipeline Run Lifecycle Infra
 
-![31-pipeline-run-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/31-pipeline-run-lifecycle-infra.png)
+![31-pipeline-run-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/31-pipeline-run-lifecycle-infra.png)
 
 ---
 
 ## Pipeline Run Lifecycle Overview
 
-![31-pipeline-run-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/31-pipeline-run-lifecycle-overview.png)
+![31-pipeline-run-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/31-pipeline-run-lifecycle-overview.png)
 
 ---
 
 ## Single Record Journey Dataflow
 
-![32-single-record-journey-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/32-single-record-journey-dataflow.png)
+![32-single-record-journey-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/32-single-record-journey-dataflow.png)
 
 ---
 
 ## Single Record Journey Domain
 
-![32-single-record-journey-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/32-single-record-journey-domain.png)
+![32-single-record-journey-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/32-single-record-journey-domain.png)
 
 ---
 
 ## Single Record Journey Full
 
-![32-single-record-journey-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/32-single-record-journey-full.png)
+![32-single-record-journey-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/32-single-record-journey-full.png)
 
 ---
 
 ## Single Record Journey Infra
 
-![32-single-record-journey-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/32-single-record-journey-infra.png)
+![32-single-record-journey-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/32-single-record-journey-infra.png)
 
 ---
 
 ## Single Record Journey Overview
 
-![32-single-record-journey-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/32-single-record-journey-overview.png)
+![32-single-record-journey-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/32-single-record-journey-overview.png)
 
 ---
 
 ## Cli Run Interaction Dataflow
 
-![33-cli-run-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/33-cli-run-interaction-dataflow.png)
+![33-cli-run-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/33-cli-run-interaction-dataflow.png)
 
 ---
 
 ## Cli Run Interaction Domain
 
-![33-cli-run-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/33-cli-run-interaction-domain.png)
+![33-cli-run-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/33-cli-run-interaction-domain.png)
 
 ---
 
 ## Cli Run Interaction Full
 
-![33-cli-run-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/33-cli-run-interaction-full.png)
+![33-cli-run-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/33-cli-run-interaction-full.png)
 
 ---
 
 ## Cli Run Interaction Infra
 
-![33-cli-run-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/33-cli-run-interaction-infra.png)
+![33-cli-run-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/33-cli-run-interaction-infra.png)
 
 ---
 
 ## Cli Run Interaction Overview
 
-![33-cli-run-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/33-cli-run-interaction-overview.png)
+![33-cli-run-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/33-cli-run-interaction-overview.png)
 
 ---
 
 ## Batch Processing Flow Dataflow
 
-![34-batch-processing-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/34-batch-processing-flow-dataflow.png)
+![34-batch-processing-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/34-batch-processing-flow-dataflow.png)
 
 ---
 
 ## Batch Processing Flow Domain
 
-![34-batch-processing-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/34-batch-processing-flow-domain.png)
+![34-batch-processing-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/34-batch-processing-flow-domain.png)
 
 ---
 
 ## Batch Processing Flow Full
 
-![34-batch-processing-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/34-batch-processing-flow-full.png)
+![34-batch-processing-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/34-batch-processing-flow-full.png)
 
 ---
 
 ## Batch Processing Flow Infra
 
-![34-batch-processing-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/34-batch-processing-flow-infra.png)
+![34-batch-processing-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/34-batch-processing-flow-infra.png)
 
 ---
 
 ## Batch Processing Flow Overview
 
-![34-batch-processing-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/34-batch-processing-flow-overview.png)
+![34-batch-processing-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/34-batch-processing-flow-overview.png)
 
 ---
 
 ## Bootstrap Sequence Dataflow
 
-![35-bootstrap-sequence-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/35-bootstrap-sequence-dataflow.png)
+![35-bootstrap-sequence-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/35-bootstrap-sequence-dataflow.png)
 
 ---
 
 ## Bootstrap Sequence Domain
 
-![35-bootstrap-sequence-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/35-bootstrap-sequence-domain.png)
+![35-bootstrap-sequence-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/35-bootstrap-sequence-domain.png)
 
 ---
 
 ## Bootstrap Sequence Full
 
-![35-bootstrap-sequence-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/35-bootstrap-sequence-full.png)
+![35-bootstrap-sequence-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/35-bootstrap-sequence-full.png)
 
 ---
 
 ## Bootstrap Sequence Infra
 
-![35-bootstrap-sequence-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/35-bootstrap-sequence-infra.png)
+![35-bootstrap-sequence-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/35-bootstrap-sequence-infra.png)
 
 ---
 
 ## Bootstrap Sequence Overview
 
-![35-bootstrap-sequence-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/35-bootstrap-sequence-overview.png)
+![35-bootstrap-sequence-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/35-bootstrap-sequence-overview.png)
 
 ---
 
 ## Architecture Principles Mindmap Dataflow
 
-![36-architecture-principles-mindmap-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/36-architecture-principles-mindmap-dataflow.png)
+![36-architecture-principles-mindmap-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/36-architecture-principles-mindmap-dataflow.png)
 
 ---
 
 ## Architecture Principles Mindmap Domain
 
-![36-architecture-principles-mindmap-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/36-architecture-principles-mindmap-domain.png)
+![36-architecture-principles-mindmap-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/36-architecture-principles-mindmap-domain.png)
 
 ---
 
 ## Architecture Principles Mindmap Full
 
-![36-architecture-principles-mindmap-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/36-architecture-principles-mindmap-full.png)
+![36-architecture-principles-mindmap-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/36-architecture-principles-mindmap-full.png)
 
 ---
 
 ## Architecture Principles Mindmap Infra
 
-![36-architecture-principles-mindmap-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/36-architecture-principles-mindmap-infra.png)
+![36-architecture-principles-mindmap-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/36-architecture-principles-mindmap-infra.png)
 
 ---
 
 ## Architecture Principles Mindmap Overview
 
-![36-architecture-principles-mindmap-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/36-architecture-principles-mindmap-overview.png)
+![36-architecture-principles-mindmap-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/36-architecture-principles-mindmap-overview.png)
 
 ---
 
 ## Medallion Invariants Dataflow
 
-![39-medallion-invariants-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/39-medallion-invariants-dataflow.png)
+![39-medallion-invariants-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/39-medallion-invariants-dataflow.png)
 
 ---
 
 ## Medallion Invariants Domain
 
-![39-medallion-invariants-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/39-medallion-invariants-domain.png)
+![39-medallion-invariants-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/39-medallion-invariants-domain.png)
 
 ---
 
 ## Medallion Invariants Full
 
-![39-medallion-invariants-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/39-medallion-invariants-full.png)
+![39-medallion-invariants-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/39-medallion-invariants-full.png)
 
 ---
 
 ## Medallion Invariants Infra
 
-![39-medallion-invariants-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/39-medallion-invariants-infra.png)
+![39-medallion-invariants-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/39-medallion-invariants-infra.png)
 
 ---
 
 ## Medallion Invariants Overview
 
-![39-medallion-invariants-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/39-medallion-invariants-overview.png)
+![39-medallion-invariants-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/39-medallion-invariants-overview.png)
 
 ---
 
 ## Error Classification Tree Dataflow
 
-![41-error-classification-tree-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/41-error-classification-tree-dataflow.png)
+![41-error-classification-tree-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/41-error-classification-tree-dataflow.png)
 
 ---
 
 ## Error Classification Tree Domain
 
-![41-error-classification-tree-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/41-error-classification-tree-domain.png)
+![41-error-classification-tree-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/41-error-classification-tree-domain.png)
 
 ---
 
 ## Error Classification Tree Full
 
-![41-error-classification-tree-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/41-error-classification-tree-full.png)
+![41-error-classification-tree-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/41-error-classification-tree-full.png)
 
 ---
 
 ## Error Classification Tree Infra
 
-![41-error-classification-tree-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/41-error-classification-tree-infra.png)
+![41-error-classification-tree-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/41-error-classification-tree-infra.png)
 
 ---
 
 ## Error Classification Tree Overview
 
-![41-error-classification-tree-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/41-error-classification-tree-overview.png)
+![41-error-classification-tree-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/41-error-classification-tree-overview.png)
 
 ---
 
 ## Cross Provider Enrichment Dataflow
 
-![44-cross-provider-enrichment-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/44-cross-provider-enrichment-dataflow.png)
+![44-cross-provider-enrichment-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/44-cross-provider-enrichment-dataflow.png)
 
 ---
 
 ## Cross Provider Enrichment Domain
 
-![44-cross-provider-enrichment-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/44-cross-provider-enrichment-domain.png)
+![44-cross-provider-enrichment-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/44-cross-provider-enrichment-domain.png)
 
 ---
 
 ## Cross Provider Enrichment Full
 
-![44-cross-provider-enrichment-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/44-cross-provider-enrichment-full.png)
+![44-cross-provider-enrichment-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/44-cross-provider-enrichment-full.png)
 
 ---
 
 ## Cross Provider Enrichment Infra
 
-![44-cross-provider-enrichment-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/44-cross-provider-enrichment-infra.png)
+![44-cross-provider-enrichment-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/44-cross-provider-enrichment-infra.png)
 
 ---
 
 ## Cross Provider Enrichment Overview
 
-![44-cross-provider-enrichment-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/44-cross-provider-enrichment-overview.png)
+![44-cross-provider-enrichment-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/44-cross-provider-enrichment-overview.png)
 
 ---
 
 ## Yaml Config Resolution Dataflow
 
-![46-yaml-config-resolution-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/46-yaml-config-resolution-dataflow.png)
+![46-yaml-config-resolution-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/46-yaml-config-resolution-dataflow.png)
 
 ---
 
 ## Yaml Config Resolution Domain
 
-![46-yaml-config-resolution-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/46-yaml-config-resolution-domain.png)
+![46-yaml-config-resolution-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/46-yaml-config-resolution-domain.png)
 
 ---
 
 ## Yaml Config Resolution Full
 
-![46-yaml-config-resolution-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/46-yaml-config-resolution-full.png)
+![46-yaml-config-resolution-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/46-yaml-config-resolution-full.png)
 
 ---
 
 ## Yaml Config Resolution Infra
 
-![46-yaml-config-resolution-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/46-yaml-config-resolution-infra.png)
+![46-yaml-config-resolution-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/46-yaml-config-resolution-infra.png)
 
 ---
 
 ## Yaml Config Resolution Overview
 
-![46-yaml-config-resolution-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/46-yaml-config-resolution-overview.png)
+![46-yaml-config-resolution-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/46-yaml-config-resolution-overview.png)
 
 ---
 
 ## Composite Phase Lifecycle Dataflow
 
-![48-composite-phase-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/48-composite-phase-lifecycle-dataflow.png)
+![48-composite-phase-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/48-composite-phase-lifecycle-dataflow.png)
 
 ---
 
 ## Composite Phase Lifecycle Domain
 
-![48-composite-phase-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/48-composite-phase-lifecycle-domain.png)
+![48-composite-phase-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/48-composite-phase-lifecycle-domain.png)
 
 ---
 
 ## Composite Phase Lifecycle Full
 
-![48-composite-phase-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/48-composite-phase-lifecycle-full.png)
+![48-composite-phase-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/48-composite-phase-lifecycle-full.png)
 
 ---
 
 ## Composite Phase Lifecycle Infra
 
-![48-composite-phase-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/48-composite-phase-lifecycle-infra.png)
+![48-composite-phase-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/48-composite-phase-lifecycle-infra.png)
 
 ---
 
 ## Composite Phase Lifecycle Overview
 
-![48-composite-phase-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/48-composite-phase-lifecycle-overview.png)
+![48-composite-phase-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/48-composite-phase-lifecycle-overview.png)
 
 ---
 
 ## Exception Hierarchy Dataflow
 
-![50-exception-hierarchy-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/50-exception-hierarchy-dataflow.png)
+![50-exception-hierarchy-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/50-exception-hierarchy-dataflow.png)
 
 ---
 
 ## Exception Hierarchy Domain
 
-![50-exception-hierarchy-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/50-exception-hierarchy-domain.png)
+![50-exception-hierarchy-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/50-exception-hierarchy-domain.png)
 
 ---
 
 ## Exception Hierarchy Full
 
-![50-exception-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/50-exception-hierarchy-full.png)
+![50-exception-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/50-exception-hierarchy-full.png)
 
 ---
 
 ## Exception Hierarchy Infra
 
-![50-exception-hierarchy-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/50-exception-hierarchy-infra.png)
+![50-exception-hierarchy-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/50-exception-hierarchy-infra.png)
 
 ---
 
 ## Exception Hierarchy Overview
 
-![50-exception-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/png/50-exception-hierarchy-overview.png)
+![50-exception-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/png/50-exception-hierarchy-overview.png)
 
 ---
 
@@ -31561,7 +31561,7 @@ _Generated: 2026-03-03T12:49:53+03:00_
 
 \newpage
 
-# Source: `02-architecture/mmd-diagrams/views/svg/INDEX.md`
+# Source: `02-architecture/diagrams/views/svg/INDEX.md`
 
 # BioETL Diagrams — SVG Index
 
@@ -31569,973 +31569,973 @@ _Generated: 2026-03-03T12:49:52+03:00_
 
 ## Legend
 
-![00-legend](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/00-legend.svg)
+![00-legend](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/00-legend.svg)
 
 ---
 
 ## Full System Component Dataflow
 
-![01-full-system-component-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-full-system-component-dataflow.svg)
+![01-full-system-component-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-full-system-component-dataflow.svg)
 
 ---
 
 ## Full System Component Domain
 
-![01-full-system-component-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-full-system-component-domain.svg)
+![01-full-system-component-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-full-system-component-domain.svg)
 
 ---
 
 ## Full System Component Full
 
-![01-full-system-component-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-full-system-component-full.svg)
+![01-full-system-component-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-full-system-component-full.svg)
 
 ---
 
 ## Full System Component Infra
 
-![01-full-system-component-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-full-system-component-infra.svg)
+![01-full-system-component-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-full-system-component-infra.svg)
 
 ---
 
 ## Full System Component Overview
 
-![01-full-system-component-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-full-system-component-overview.svg)
+![01-full-system-component-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-full-system-component-overview.svg)
 
 ---
 
 ## High Level Dataflow
 
-![01-high-level-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-high-level-dataflow.svg)
+![01-high-level-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-high-level-dataflow.svg)
 
 ---
 
 ## High Level Domain
 
-![01-high-level-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-high-level-domain.svg)
+![01-high-level-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-high-level-domain.svg)
 
 ---
 
 ## High Level Full
 
-![01-high-level-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-high-level-full.svg)
+![01-high-level-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-high-level-full.svg)
 
 ---
 
 ## High Level Infra
 
-![01-high-level-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-high-level-infra.svg)
+![01-high-level-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-high-level-infra.svg)
 
 ---
 
 ## High Level Overview
 
-![01-high-level-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/01-high-level-overview.svg)
+![01-high-level-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/01-high-level-overview.svg)
 
 ---
 
 ## Medallion Dataflow
 
-![02-medallion-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/02-medallion-dataflow.svg)
+![02-medallion-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/02-medallion-dataflow.svg)
 
 ---
 
 ## Medallion Domain
 
-![02-medallion-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/02-medallion-domain.svg)
+![02-medallion-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/02-medallion-domain.svg)
 
 ---
 
 ## Medallion Full
 
-![02-medallion-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/02-medallion-full.svg)
+![02-medallion-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/02-medallion-full.svg)
 
 ---
 
 ## Medallion Infra
 
-![02-medallion-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/02-medallion-infra.svg)
+![02-medallion-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/02-medallion-infra.svg)
 
 ---
 
 ## Medallion Overview
 
-![02-medallion-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/02-medallion-overview.svg)
+![02-medallion-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/02-medallion-overview.svg)
 
 ---
 
 ## Medallion Data Flow Full
 
-![03-medallion-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/03-medallion-data-flow-full.svg)
+![03-medallion-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/03-medallion-data-flow-full.svg)
 
 ---
 
 ## Medallion Data Flow Overview
 
-![03-medallion-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/03-medallion-data-flow-overview.svg)
+![03-medallion-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/03-medallion-data-flow-overview.svg)
 
 ---
 
 ## Domain Layer Class Diagram Dataflow
 
-![04-domain-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/04-domain-layer-class-diagram-dataflow.svg)
+![04-domain-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/04-domain-layer-class-diagram-dataflow.svg)
 
 ---
 
 ## Domain Layer Class Diagram Domain
 
-![04-domain-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/04-domain-layer-class-diagram-domain.svg)
+![04-domain-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/04-domain-layer-class-diagram-domain.svg)
 
 ---
 
 ## Domain Layer Class Diagram Full
 
-![04-domain-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/04-domain-layer-class-diagram-full.svg)
+![04-domain-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/04-domain-layer-class-diagram-full.svg)
 
 ---
 
 ## Domain Layer Class Diagram Infra
 
-![04-domain-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/04-domain-layer-class-diagram-infra.svg)
+![04-domain-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/04-domain-layer-class-diagram-infra.svg)
 
 ---
 
 ## Domain Layer Class Diagram Overview
 
-![04-domain-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/04-domain-layer-class-diagram-overview.svg)
+![04-domain-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/04-domain-layer-class-diagram-overview.svg)
 
 ---
 
 ## Layers Interaction Dataflow
 
-![05-layers-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-layers-interaction-dataflow.svg)
+![05-layers-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-layers-interaction-dataflow.svg)
 
 ---
 
 ## Layers Interaction Domain
 
-![05-layers-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-layers-interaction-domain.svg)
+![05-layers-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-layers-interaction-domain.svg)
 
 ---
 
 ## Layers Interaction Full
 
-![05-layers-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-layers-interaction-full.svg)
+![05-layers-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-layers-interaction-full.svg)
 
 ---
 
 ## Layers Interaction Infra
 
-![05-layers-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-layers-interaction-infra.svg)
+![05-layers-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-layers-interaction-infra.svg)
 
 ---
 
 ## Layers Interaction Overview
 
-![05-layers-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-layers-interaction-overview.svg)
+![05-layers-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-layers-interaction-overview.svg)
 
 ---
 
 ## Pipeline Lifecycle States Dataflow
 
-![05-pipeline-lifecycle-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-pipeline-lifecycle-states-dataflow.svg)
+![05-pipeline-lifecycle-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-pipeline-lifecycle-states-dataflow.svg)
 
 ---
 
 ## Pipeline Lifecycle States Domain
 
-![05-pipeline-lifecycle-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-pipeline-lifecycle-states-domain.svg)
+![05-pipeline-lifecycle-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-pipeline-lifecycle-states-domain.svg)
 
 ---
 
 ## Pipeline Lifecycle States Full
 
-![05-pipeline-lifecycle-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-pipeline-lifecycle-states-full.svg)
+![05-pipeline-lifecycle-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-pipeline-lifecycle-states-full.svg)
 
 ---
 
 ## Pipeline Lifecycle States Infra
 
-![05-pipeline-lifecycle-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-pipeline-lifecycle-states-infra.svg)
+![05-pipeline-lifecycle-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-pipeline-lifecycle-states-infra.svg)
 
 ---
 
 ## Pipeline Lifecycle States Overview
 
-![05-pipeline-lifecycle-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/05-pipeline-lifecycle-states-overview.svg)
+![05-pipeline-lifecycle-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/05-pipeline-lifecycle-states-overview.svg)
 
 ---
 
 ## Application Layer Class Diagram Dataflow
 
-![06-application-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/06-application-layer-class-diagram-dataflow.svg)
+![06-application-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/06-application-layer-class-diagram-dataflow.svg)
 
 ---
 
 ## Application Layer Class Diagram Domain
 
-![06-application-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/06-application-layer-class-diagram-domain.svg)
+![06-application-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/06-application-layer-class-diagram-domain.svg)
 
 ---
 
 ## Application Layer Class Diagram Full
 
-![06-application-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/06-application-layer-class-diagram-full.svg)
+![06-application-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/06-application-layer-class-diagram-full.svg)
 
 ---
 
 ## Application Layer Class Diagram Infra
 
-![06-application-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/06-application-layer-class-diagram-infra.svg)
+![06-application-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/06-application-layer-class-diagram-infra.svg)
 
 ---
 
 ## Application Layer Class Diagram Overview
 
-![06-application-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/06-application-layer-class-diagram-overview.svg)
+![06-application-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/06-application-layer-class-diagram-overview.svg)
 
 ---
 
 ## Circuit Breaker States Dataflow
 
-![07-circuit-breaker-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/07-circuit-breaker-states-dataflow.svg)
+![07-circuit-breaker-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/07-circuit-breaker-states-dataflow.svg)
 
 ---
 
 ## Circuit Breaker States Domain
 
-![07-circuit-breaker-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/07-circuit-breaker-states-domain.svg)
+![07-circuit-breaker-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/07-circuit-breaker-states-domain.svg)
 
 ---
 
 ## Circuit Breaker States Full
 
-![07-circuit-breaker-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/07-circuit-breaker-states-full.svg)
+![07-circuit-breaker-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/07-circuit-breaker-states-full.svg)
 
 ---
 
 ## Circuit Breaker States Infra
 
-![07-circuit-breaker-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/07-circuit-breaker-states-infra.svg)
+![07-circuit-breaker-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/07-circuit-breaker-states-infra.svg)
 
 ---
 
 ## Circuit Breaker States Overview
 
-![07-circuit-breaker-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/07-circuit-breaker-states-overview.svg)
+![07-circuit-breaker-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/07-circuit-breaker-states-overview.svg)
 
 ---
 
 ## Complete Etl Workflow Dataflow
 
-![08-complete-etl-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-complete-etl-workflow-dataflow.svg)
+![08-complete-etl-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-complete-etl-workflow-dataflow.svg)
 
 ---
 
 ## Complete Etl Workflow Domain
 
-![08-complete-etl-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-complete-etl-workflow-domain.svg)
+![08-complete-etl-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-complete-etl-workflow-domain.svg)
 
 ---
 
 ## Complete Etl Workflow Full
 
-![08-complete-etl-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-complete-etl-workflow-full.svg)
+![08-complete-etl-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-complete-etl-workflow-full.svg)
 
 ---
 
 ## Complete Etl Workflow Infra
 
-![08-complete-etl-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-complete-etl-workflow-infra.svg)
+![08-complete-etl-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-complete-etl-workflow-infra.svg)
 
 ---
 
 ## Complete Etl Workflow Overview
 
-![08-complete-etl-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-complete-etl-workflow-overview.svg)
+![08-complete-etl-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-complete-etl-workflow-overview.svg)
 
 ---
 
 ## Domain Ddd Dataflow
 
-![08-domain-ddd-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-domain-ddd-dataflow.svg)
+![08-domain-ddd-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-domain-ddd-dataflow.svg)
 
 ---
 
 ## Domain Ddd Domain
 
-![08-domain-ddd-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-domain-ddd-domain.svg)
+![08-domain-ddd-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-domain-ddd-domain.svg)
 
 ---
 
 ## Domain Ddd Full
 
-![08-domain-ddd-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-domain-ddd-full.svg)
+![08-domain-ddd-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-domain-ddd-full.svg)
 
 ---
 
 ## Domain Ddd Infra
 
-![08-domain-ddd-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-domain-ddd-infra.svg)
+![08-domain-ddd-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-domain-ddd-infra.svg)
 
 ---
 
 ## Domain Ddd Overview
 
-![08-domain-ddd-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/08-domain-ddd-overview.svg)
+![08-domain-ddd-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/08-domain-ddd-overview.svg)
 
 ---
 
 ## Infrastructure Layer Class Diagram Dataflow
 
-![10-infrastructure-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/10-infrastructure-layer-class-diagram-dataflow.svg)
+![10-infrastructure-layer-class-diagram-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/10-infrastructure-layer-class-diagram-dataflow.svg)
 
 ---
 
 ## Infrastructure Layer Class Diagram Domain
 
-![10-infrastructure-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/10-infrastructure-layer-class-diagram-domain.svg)
+![10-infrastructure-layer-class-diagram-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/10-infrastructure-layer-class-diagram-domain.svg)
 
 ---
 
 ## Infrastructure Layer Class Diagram Full
 
-![10-infrastructure-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/10-infrastructure-layer-class-diagram-full.svg)
+![10-infrastructure-layer-class-diagram-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/10-infrastructure-layer-class-diagram-full.svg)
 
 ---
 
 ## Infrastructure Layer Class Diagram Infra
 
-![10-infrastructure-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/10-infrastructure-layer-class-diagram-infra.svg)
+![10-infrastructure-layer-class-diagram-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/10-infrastructure-layer-class-diagram-infra.svg)
 
 ---
 
 ## Infrastructure Layer Class Diagram Overview
 
-![10-infrastructure-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/10-infrastructure-layer-class-diagram-overview.svg)
+![10-infrastructure-layer-class-diagram-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/10-infrastructure-layer-class-diagram-overview.svg)
 
 ---
 
 ## Local Deployment Architecture Dataflow
 
-![12-local-deployment-architecture-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/12-local-deployment-architecture-dataflow.svg)
+![12-local-deployment-architecture-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/12-local-deployment-architecture-dataflow.svg)
 
 ---
 
 ## Local Deployment Architecture Domain
 
-![12-local-deployment-architecture-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/12-local-deployment-architecture-domain.svg)
+![12-local-deployment-architecture-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/12-local-deployment-architecture-domain.svg)
 
 ---
 
 ## Local Deployment Architecture Full
 
-![12-local-deployment-architecture-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/12-local-deployment-architecture-full.svg)
+![12-local-deployment-architecture-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/12-local-deployment-architecture-full.svg)
 
 ---
 
 ## Local Deployment Architecture Infra
 
-![12-local-deployment-architecture-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/12-local-deployment-architecture-infra.svg)
+![12-local-deployment-architecture-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/12-local-deployment-architecture-infra.svg)
 
 ---
 
 ## Local Deployment Architecture Overview
 
-![12-local-deployment-architecture-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/12-local-deployment-architecture-overview.svg)
+![12-local-deployment-architecture-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/12-local-deployment-architecture-overview.svg)
 
 ---
 
 ## Port Protocol Contracts Full
 
-![13-port-protocol-contracts-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/13-port-protocol-contracts-full.svg)
+![13-port-protocol-contracts-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/13-port-protocol-contracts-full.svg)
 
 ---
 
 ## Port Protocol Contracts Overview
 
-![13-port-protocol-contracts-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/13-port-protocol-contracts-overview.svg)
+![13-port-protocol-contracts-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/13-port-protocol-contracts-overview.svg)
 
 ---
 
 ## Provider Health States Dataflow
 
-![14-provider-health-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/14-provider-health-states-dataflow.svg)
+![14-provider-health-states-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/14-provider-health-states-dataflow.svg)
 
 ---
 
 ## Provider Health States Domain
 
-![14-provider-health-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/14-provider-health-states-domain.svg)
+![14-provider-health-states-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/14-provider-health-states-domain.svg)
 
 ---
 
 ## Provider Health States Full
 
-![14-provider-health-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/14-provider-health-states-full.svg)
+![14-provider-health-states-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/14-provider-health-states-full.svg)
 
 ---
 
 ## Provider Health States Infra
 
-![14-provider-health-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/14-provider-health-states-infra.svg)
+![14-provider-health-states-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/14-provider-health-states-infra.svg)
 
 ---
 
 ## Provider Health States Overview
 
-![14-provider-health-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/14-provider-health-states-overview.svg)
+![14-provider-health-states-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/14-provider-health-states-overview.svg)
 
 ---
 
 ## Dq Check Workflow Dataflow
 
-![15-dq-check-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/15-dq-check-workflow-dataflow.svg)
+![15-dq-check-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/15-dq-check-workflow-dataflow.svg)
 
 ---
 
 ## Dq Check Workflow Domain
 
-![15-dq-check-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/15-dq-check-workflow-domain.svg)
+![15-dq-check-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/15-dq-check-workflow-domain.svg)
 
 ---
 
 ## Dq Check Workflow Full
 
-![15-dq-check-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/15-dq-check-workflow-full.svg)
+![15-dq-check-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/15-dq-check-workflow-full.svg)
 
 ---
 
 ## Dq Check Workflow Infra
 
-![15-dq-check-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/15-dq-check-workflow-infra.svg)
+![15-dq-check-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/15-dq-check-workflow-infra.svg)
 
 ---
 
 ## Dq Check Workflow Overview
 
-![15-dq-check-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/15-dq-check-workflow-overview.svg)
+![15-dq-check-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/15-dq-check-workflow-overview.svg)
 
 ---
 
 ## Transformer Hierarchy Full
 
-![16-transformer-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/16-transformer-hierarchy-full.svg)
+![16-transformer-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/16-transformer-hierarchy-full.svg)
 
 ---
 
 ## Transformer Hierarchy Overview
 
-![16-transformer-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/16-transformer-hierarchy-overview.svg)
+![16-transformer-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/16-transformer-hierarchy-overview.svg)
 
 ---
 
 ## Activity Entity Data Flow Dataflow
 
-![21-activity-entity-data-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/21-activity-entity-data-flow-dataflow.svg)
+![21-activity-entity-data-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/21-activity-entity-data-flow-dataflow.svg)
 
 ---
 
 ## Activity Entity Data Flow Domain
 
-![21-activity-entity-data-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/21-activity-entity-data-flow-domain.svg)
+![21-activity-entity-data-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/21-activity-entity-data-flow-domain.svg)
 
 ---
 
 ## Activity Entity Data Flow Full
 
-![21-activity-entity-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/21-activity-entity-data-flow-full.svg)
+![21-activity-entity-data-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/21-activity-entity-data-flow-full.svg)
 
 ---
 
 ## Activity Entity Data Flow Infra
 
-![21-activity-entity-data-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/21-activity-entity-data-flow-infra.svg)
+![21-activity-entity-data-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/21-activity-entity-data-flow-infra.svg)
 
 ---
 
 ## Activity Entity Data Flow Overview
 
-![21-activity-entity-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/21-activity-entity-data-flow-overview.svg)
+![21-activity-entity-data-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/21-activity-entity-data-flow-overview.svg)
 
 ---
 
 ## Hexagonal Ports Adapters Dataflow
 
-![26-hexagonal-ports-adapters-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/26-hexagonal-ports-adapters-dataflow.svg)
+![26-hexagonal-ports-adapters-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/26-hexagonal-ports-adapters-dataflow.svg)
 
 ---
 
 ## Hexagonal Ports Adapters Domain
 
-![26-hexagonal-ports-adapters-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/26-hexagonal-ports-adapters-domain.svg)
+![26-hexagonal-ports-adapters-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/26-hexagonal-ports-adapters-domain.svg)
 
 ---
 
 ## Hexagonal Ports Adapters Full
 
-![26-hexagonal-ports-adapters-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/26-hexagonal-ports-adapters-full.svg)
+![26-hexagonal-ports-adapters-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/26-hexagonal-ports-adapters-full.svg)
 
 ---
 
 ## Hexagonal Ports Adapters Infra
 
-![26-hexagonal-ports-adapters-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/26-hexagonal-ports-adapters-infra.svg)
+![26-hexagonal-ports-adapters-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/26-hexagonal-ports-adapters-infra.svg)
 
 ---
 
 ## Hexagonal Ports Adapters Overview
 
-![26-hexagonal-ports-adapters-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/26-hexagonal-ports-adapters-overview.svg)
+![26-hexagonal-ports-adapters-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/26-hexagonal-ports-adapters-overview.svg)
 
 ---
 
 ## Composition Root Di Graph Dataflow
 
-![28-composition-root-di-graph-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/28-composition-root-di-graph-dataflow.svg)
+![28-composition-root-di-graph-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/28-composition-root-di-graph-dataflow.svg)
 
 ---
 
 ## Composition Root Di Graph Domain
 
-![28-composition-root-di-graph-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/28-composition-root-di-graph-domain.svg)
+![28-composition-root-di-graph-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/28-composition-root-di-graph-domain.svg)
 
 ---
 
 ## Composition Root Di Graph Full
 
-![28-composition-root-di-graph-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/28-composition-root-di-graph-full.svg)
+![28-composition-root-di-graph-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/28-composition-root-di-graph-full.svg)
 
 ---
 
 ## Composition Root Di Graph Infra
 
-![28-composition-root-di-graph-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/28-composition-root-di-graph-infra.svg)
+![28-composition-root-di-graph-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/28-composition-root-di-graph-infra.svg)
 
 ---
 
 ## Composition Root Di Graph Overview
 
-![28-composition-root-di-graph-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/28-composition-root-di-graph-overview.svg)
+![28-composition-root-di-graph-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/28-composition-root-di-graph-overview.svg)
 
 ---
 
 ## Composite Pipeline Workflow Dataflow
 
-![29-composite-pipeline-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/29-composite-pipeline-workflow-dataflow.svg)
+![29-composite-pipeline-workflow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/29-composite-pipeline-workflow-dataflow.svg)
 
 ---
 
 ## Composite Pipeline Workflow Domain
 
-![29-composite-pipeline-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/29-composite-pipeline-workflow-domain.svg)
+![29-composite-pipeline-workflow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/29-composite-pipeline-workflow-domain.svg)
 
 ---
 
 ## Composite Pipeline Workflow Full
 
-![29-composite-pipeline-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/29-composite-pipeline-workflow-full.svg)
+![29-composite-pipeline-workflow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/29-composite-pipeline-workflow-full.svg)
 
 ---
 
 ## Composite Pipeline Workflow Infra
 
-![29-composite-pipeline-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/29-composite-pipeline-workflow-infra.svg)
+![29-composite-pipeline-workflow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/29-composite-pipeline-workflow-infra.svg)
 
 ---
 
 ## Composite Pipeline Workflow Overview
 
-![29-composite-pipeline-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/29-composite-pipeline-workflow-overview.svg)
+![29-composite-pipeline-workflow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/29-composite-pipeline-workflow-overview.svg)
 
 ---
 
 ## Port Adapter Mapping Dataflow
 
-![30-port-adapter-mapping-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/30-port-adapter-mapping-dataflow.svg)
+![30-port-adapter-mapping-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/30-port-adapter-mapping-dataflow.svg)
 
 ---
 
 ## Port Adapter Mapping Domain
 
-![30-port-adapter-mapping-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/30-port-adapter-mapping-domain.svg)
+![30-port-adapter-mapping-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/30-port-adapter-mapping-domain.svg)
 
 ---
 
 ## Port Adapter Mapping Full
 
-![30-port-adapter-mapping-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/30-port-adapter-mapping-full.svg)
+![30-port-adapter-mapping-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/30-port-adapter-mapping-full.svg)
 
 ---
 
 ## Port Adapter Mapping Infra
 
-![30-port-adapter-mapping-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/30-port-adapter-mapping-infra.svg)
+![30-port-adapter-mapping-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/30-port-adapter-mapping-infra.svg)
 
 ---
 
 ## Port Adapter Mapping Overview
 
-![30-port-adapter-mapping-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/30-port-adapter-mapping-overview.svg)
+![30-port-adapter-mapping-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/30-port-adapter-mapping-overview.svg)
 
 ---
 
 ## Pipeline Run Lifecycle Dataflow
 
-![31-pipeline-run-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/31-pipeline-run-lifecycle-dataflow.svg)
+![31-pipeline-run-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/31-pipeline-run-lifecycle-dataflow.svg)
 
 ---
 
 ## Pipeline Run Lifecycle Domain
 
-![31-pipeline-run-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/31-pipeline-run-lifecycle-domain.svg)
+![31-pipeline-run-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/31-pipeline-run-lifecycle-domain.svg)
 
 ---
 
 ## Pipeline Run Lifecycle Full
 
-![31-pipeline-run-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/31-pipeline-run-lifecycle-full.svg)
+![31-pipeline-run-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/31-pipeline-run-lifecycle-full.svg)
 
 ---
 
 ## Pipeline Run Lifecycle Infra
 
-![31-pipeline-run-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/31-pipeline-run-lifecycle-infra.svg)
+![31-pipeline-run-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/31-pipeline-run-lifecycle-infra.svg)
 
 ---
 
 ## Pipeline Run Lifecycle Overview
 
-![31-pipeline-run-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/31-pipeline-run-lifecycle-overview.svg)
+![31-pipeline-run-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/31-pipeline-run-lifecycle-overview.svg)
 
 ---
 
 ## Single Record Journey Dataflow
 
-![32-single-record-journey-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/32-single-record-journey-dataflow.svg)
+![32-single-record-journey-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/32-single-record-journey-dataflow.svg)
 
 ---
 
 ## Single Record Journey Domain
 
-![32-single-record-journey-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/32-single-record-journey-domain.svg)
+![32-single-record-journey-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/32-single-record-journey-domain.svg)
 
 ---
 
 ## Single Record Journey Full
 
-![32-single-record-journey-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/32-single-record-journey-full.svg)
+![32-single-record-journey-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/32-single-record-journey-full.svg)
 
 ---
 
 ## Single Record Journey Infra
 
-![32-single-record-journey-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/32-single-record-journey-infra.svg)
+![32-single-record-journey-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/32-single-record-journey-infra.svg)
 
 ---
 
 ## Single Record Journey Overview
 
-![32-single-record-journey-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/32-single-record-journey-overview.svg)
+![32-single-record-journey-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/32-single-record-journey-overview.svg)
 
 ---
 
 ## Cli Run Interaction Dataflow
 
-![33-cli-run-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/33-cli-run-interaction-dataflow.svg)
+![33-cli-run-interaction-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/33-cli-run-interaction-dataflow.svg)
 
 ---
 
 ## Cli Run Interaction Domain
 
-![33-cli-run-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/33-cli-run-interaction-domain.svg)
+![33-cli-run-interaction-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/33-cli-run-interaction-domain.svg)
 
 ---
 
 ## Cli Run Interaction Full
 
-![33-cli-run-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/33-cli-run-interaction-full.svg)
+![33-cli-run-interaction-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/33-cli-run-interaction-full.svg)
 
 ---
 
 ## Cli Run Interaction Infra
 
-![33-cli-run-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/33-cli-run-interaction-infra.svg)
+![33-cli-run-interaction-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/33-cli-run-interaction-infra.svg)
 
 ---
 
 ## Cli Run Interaction Overview
 
-![33-cli-run-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/33-cli-run-interaction-overview.svg)
+![33-cli-run-interaction-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/33-cli-run-interaction-overview.svg)
 
 ---
 
 ## Batch Processing Flow Dataflow
 
-![34-batch-processing-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/34-batch-processing-flow-dataflow.svg)
+![34-batch-processing-flow-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/34-batch-processing-flow-dataflow.svg)
 
 ---
 
 ## Batch Processing Flow Domain
 
-![34-batch-processing-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/34-batch-processing-flow-domain.svg)
+![34-batch-processing-flow-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/34-batch-processing-flow-domain.svg)
 
 ---
 
 ## Batch Processing Flow Full
 
-![34-batch-processing-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/34-batch-processing-flow-full.svg)
+![34-batch-processing-flow-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/34-batch-processing-flow-full.svg)
 
 ---
 
 ## Batch Processing Flow Infra
 
-![34-batch-processing-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/34-batch-processing-flow-infra.svg)
+![34-batch-processing-flow-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/34-batch-processing-flow-infra.svg)
 
 ---
 
 ## Batch Processing Flow Overview
 
-![34-batch-processing-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/34-batch-processing-flow-overview.svg)
+![34-batch-processing-flow-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/34-batch-processing-flow-overview.svg)
 
 ---
 
 ## Bootstrap Sequence Dataflow
 
-![35-bootstrap-sequence-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/35-bootstrap-sequence-dataflow.svg)
+![35-bootstrap-sequence-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/35-bootstrap-sequence-dataflow.svg)
 
 ---
 
 ## Bootstrap Sequence Domain
 
-![35-bootstrap-sequence-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/35-bootstrap-sequence-domain.svg)
+![35-bootstrap-sequence-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/35-bootstrap-sequence-domain.svg)
 
 ---
 
 ## Bootstrap Sequence Full
 
-![35-bootstrap-sequence-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/35-bootstrap-sequence-full.svg)
+![35-bootstrap-sequence-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/35-bootstrap-sequence-full.svg)
 
 ---
 
 ## Bootstrap Sequence Infra
 
-![35-bootstrap-sequence-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/35-bootstrap-sequence-infra.svg)
+![35-bootstrap-sequence-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/35-bootstrap-sequence-infra.svg)
 
 ---
 
 ## Bootstrap Sequence Overview
 
-![35-bootstrap-sequence-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/35-bootstrap-sequence-overview.svg)
+![35-bootstrap-sequence-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/35-bootstrap-sequence-overview.svg)
 
 ---
 
 ## Architecture Principles Mindmap Dataflow
 
-![36-architecture-principles-mindmap-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/36-architecture-principles-mindmap-dataflow.svg)
+![36-architecture-principles-mindmap-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/36-architecture-principles-mindmap-dataflow.svg)
 
 ---
 
 ## Architecture Principles Mindmap Domain
 
-![36-architecture-principles-mindmap-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/36-architecture-principles-mindmap-domain.svg)
+![36-architecture-principles-mindmap-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/36-architecture-principles-mindmap-domain.svg)
 
 ---
 
 ## Architecture Principles Mindmap Full
 
-![36-architecture-principles-mindmap-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/36-architecture-principles-mindmap-full.svg)
+![36-architecture-principles-mindmap-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/36-architecture-principles-mindmap-full.svg)
 
 ---
 
 ## Architecture Principles Mindmap Infra
 
-![36-architecture-principles-mindmap-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/36-architecture-principles-mindmap-infra.svg)
+![36-architecture-principles-mindmap-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/36-architecture-principles-mindmap-infra.svg)
 
 ---
 
 ## Architecture Principles Mindmap Overview
 
-![36-architecture-principles-mindmap-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/36-architecture-principles-mindmap-overview.svg)
+![36-architecture-principles-mindmap-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/36-architecture-principles-mindmap-overview.svg)
 
 ---
 
 ## Medallion Invariants Dataflow
 
-![39-medallion-invariants-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/39-medallion-invariants-dataflow.svg)
+![39-medallion-invariants-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/39-medallion-invariants-dataflow.svg)
 
 ---
 
 ## Medallion Invariants Domain
 
-![39-medallion-invariants-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/39-medallion-invariants-domain.svg)
+![39-medallion-invariants-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/39-medallion-invariants-domain.svg)
 
 ---
 
 ## Medallion Invariants Full
 
-![39-medallion-invariants-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/39-medallion-invariants-full.svg)
+![39-medallion-invariants-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/39-medallion-invariants-full.svg)
 
 ---
 
 ## Medallion Invariants Infra
 
-![39-medallion-invariants-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/39-medallion-invariants-infra.svg)
+![39-medallion-invariants-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/39-medallion-invariants-infra.svg)
 
 ---
 
 ## Medallion Invariants Overview
 
-![39-medallion-invariants-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/39-medallion-invariants-overview.svg)
+![39-medallion-invariants-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/39-medallion-invariants-overview.svg)
 
 ---
 
 ## Error Classification Tree Dataflow
 
-![41-error-classification-tree-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/41-error-classification-tree-dataflow.svg)
+![41-error-classification-tree-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/41-error-classification-tree-dataflow.svg)
 
 ---
 
 ## Error Classification Tree Domain
 
-![41-error-classification-tree-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/41-error-classification-tree-domain.svg)
+![41-error-classification-tree-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/41-error-classification-tree-domain.svg)
 
 ---
 
 ## Error Classification Tree Full
 
-![41-error-classification-tree-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/41-error-classification-tree-full.svg)
+![41-error-classification-tree-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/41-error-classification-tree-full.svg)
 
 ---
 
 ## Error Classification Tree Infra
 
-![41-error-classification-tree-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/41-error-classification-tree-infra.svg)
+![41-error-classification-tree-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/41-error-classification-tree-infra.svg)
 
 ---
 
 ## Error Classification Tree Overview
 
-![41-error-classification-tree-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/41-error-classification-tree-overview.svg)
+![41-error-classification-tree-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/41-error-classification-tree-overview.svg)
 
 ---
 
 ## Cross Provider Enrichment Dataflow
 
-![44-cross-provider-enrichment-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/44-cross-provider-enrichment-dataflow.svg)
+![44-cross-provider-enrichment-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/44-cross-provider-enrichment-dataflow.svg)
 
 ---
 
 ## Cross Provider Enrichment Domain
 
-![44-cross-provider-enrichment-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/44-cross-provider-enrichment-domain.svg)
+![44-cross-provider-enrichment-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/44-cross-provider-enrichment-domain.svg)
 
 ---
 
 ## Cross Provider Enrichment Full
 
-![44-cross-provider-enrichment-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/44-cross-provider-enrichment-full.svg)
+![44-cross-provider-enrichment-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/44-cross-provider-enrichment-full.svg)
 
 ---
 
 ## Cross Provider Enrichment Infra
 
-![44-cross-provider-enrichment-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/44-cross-provider-enrichment-infra.svg)
+![44-cross-provider-enrichment-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/44-cross-provider-enrichment-infra.svg)
 
 ---
 
 ## Cross Provider Enrichment Overview
 
-![44-cross-provider-enrichment-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/44-cross-provider-enrichment-overview.svg)
+![44-cross-provider-enrichment-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/44-cross-provider-enrichment-overview.svg)
 
 ---
 
 ## Yaml Config Resolution Dataflow
 
-![46-yaml-config-resolution-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/46-yaml-config-resolution-dataflow.svg)
+![46-yaml-config-resolution-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/46-yaml-config-resolution-dataflow.svg)
 
 ---
 
 ## Yaml Config Resolution Domain
 
-![46-yaml-config-resolution-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/46-yaml-config-resolution-domain.svg)
+![46-yaml-config-resolution-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/46-yaml-config-resolution-domain.svg)
 
 ---
 
 ## Yaml Config Resolution Full
 
-![46-yaml-config-resolution-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/46-yaml-config-resolution-full.svg)
+![46-yaml-config-resolution-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/46-yaml-config-resolution-full.svg)
 
 ---
 
 ## Yaml Config Resolution Infra
 
-![46-yaml-config-resolution-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/46-yaml-config-resolution-infra.svg)
+![46-yaml-config-resolution-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/46-yaml-config-resolution-infra.svg)
 
 ---
 
 ## Yaml Config Resolution Overview
 
-![46-yaml-config-resolution-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/46-yaml-config-resolution-overview.svg)
+![46-yaml-config-resolution-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/46-yaml-config-resolution-overview.svg)
 
 ---
 
 ## Composite Phase Lifecycle Dataflow
 
-![48-composite-phase-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/48-composite-phase-lifecycle-dataflow.svg)
+![48-composite-phase-lifecycle-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/48-composite-phase-lifecycle-dataflow.svg)
 
 ---
 
 ## Composite Phase Lifecycle Domain
 
-![48-composite-phase-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/48-composite-phase-lifecycle-domain.svg)
+![48-composite-phase-lifecycle-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/48-composite-phase-lifecycle-domain.svg)
 
 ---
 
 ## Composite Phase Lifecycle Full
 
-![48-composite-phase-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/48-composite-phase-lifecycle-full.svg)
+![48-composite-phase-lifecycle-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/48-composite-phase-lifecycle-full.svg)
 
 ---
 
 ## Composite Phase Lifecycle Infra
 
-![48-composite-phase-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/48-composite-phase-lifecycle-infra.svg)
+![48-composite-phase-lifecycle-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/48-composite-phase-lifecycle-infra.svg)
 
 ---
 
 ## Composite Phase Lifecycle Overview
 
-![48-composite-phase-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/48-composite-phase-lifecycle-overview.svg)
+![48-composite-phase-lifecycle-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/48-composite-phase-lifecycle-overview.svg)
 
 ---
 
 ## Exception Hierarchy Dataflow
 
-![50-exception-hierarchy-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/50-exception-hierarchy-dataflow.svg)
+![50-exception-hierarchy-dataflow](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/50-exception-hierarchy-dataflow.svg)
 
 ---
 
 ## Exception Hierarchy Domain
 
-![50-exception-hierarchy-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/50-exception-hierarchy-domain.svg)
+![50-exception-hierarchy-domain](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/50-exception-hierarchy-domain.svg)
 
 ---
 
 ## Exception Hierarchy Full
 
-![50-exception-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/50-exception-hierarchy-full.svg)
+![50-exception-hierarchy-full](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/50-exception-hierarchy-full.svg)
 
 ---
 
 ## Exception Hierarchy Infra
 
-![50-exception-hierarchy-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/50-exception-hierarchy-infra.svg)
+![50-exception-hierarchy-infra](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/50-exception-hierarchy-infra.svg)
 
 ---
 
 ## Exception Hierarchy Overview
 
-![50-exception-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/mmd-diagrams/views/svg/50-exception-hierarchy-overview.svg)
+![50-exception-hierarchy-overview](file:///mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/diagrams/views/svg/50-exception-hierarchy-overview.svg)
 
 ---
 
@@ -32960,7 +32960,7 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 ## Related Documents
 
 - **Data Flow**: [data-flow.md](data-flow.md)
-- **Architecture Diagrams**: [00-diagramming-policy.md](mmd-diagrams/docs/00-diagramming-policy.md)
+- **Architecture Diagrams**: [00-diagramming-policy.md](mmd-diagrams/governance/00-diagramming-policy.md)
 - **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)
 
 
@@ -37401,7 +37401,7 @@ bioetl config validate chembl_activity
 
 ## Порядок выполнения PipelineRunner.run()
 
-> **Diagram:** See [`04-pipeline-execution-flow.mmd`](../02-architecture/mmd-diagrams/architecture/04-pipeline-execution-flow.mmd)
+> **Diagram:** See [`04-pipeline-execution-flow.mmd`](../02-architecture/diagrams/architecture/04-pipeline-execution-flow.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
 ## Очистка слоёв по типу запуска
@@ -37481,7 +37481,7 @@ metrics:
 Composite pipelines используют отдельный оркестратор (`CompositePipelineRunner`)
 вместо стандартного `PipelineRunner` + `Transformer`.
 
-> **Diagram:** See [`08-composite-pipeline.mmd`](../02-architecture/mmd-diagrams/architecture/08-composite-pipeline.mmd)
+> **Diagram:** See [`08-composite-pipeline.mmd`](../02-architecture/diagrams/architecture/08-composite-pipeline.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
 ### Ключевые отличия

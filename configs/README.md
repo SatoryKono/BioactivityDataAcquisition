@@ -57,9 +57,9 @@ merged into entity-level `silver_filters` / `gold_filters` by
 | `source` | API-specific params merged from provider-level defaults (no legacy source_file) |
 
 Legacy file-reference keys follow explicit status rules:
-- Retired now: pipeline `schema_file`, `data_schema_file`, `column_groups_file`, `source_file` are not part of the active pipeline runtime contract.
-- Transitional migration-only: source `provider_config.batch_size/page_size/max_url_length` and composite `merge.column_groups_file` remain compatibility aliases and are deprecated in schema/models.
-- Canonical current: `pagination.*` in provider source config and pipeline `page_size_override`.
+- Retired now: pipeline `schema_file`, `data_schema_file`, `column_groups_file`, `source_file`, source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`, and composite `merge.column_groups_file` are not part of the active runtime contract.
+- Transitional migration-only: pipeline `filter_batch_size` remains a compatibility alias and is deprecated in schema/models.
+- Canonical current: provider source `pagination.*` and pipeline `page_size_override`. Pipeline configs may override pagination only through `page_size_override`.
 
 ## Relevant Code
 

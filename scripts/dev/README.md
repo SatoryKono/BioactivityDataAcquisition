@@ -2,6 +2,19 @@
 
 Local developer setup and test utilities.
 
+## Canonical Bootstrap
+
+For normal local onboarding, prefer the maintained project entrypoints:
+
+```bash
+make install
+make test-deps
+make setup-plugins
+python -m scripts.dev setup-mcp  # optional MCP tooling
+```
+
+`dev_setup.sh` is still wired into `python -m scripts.dev setup`, but it is currently a legacy placeholder rather than the supported bootstrap path.
+
 ## Unified Entry Point
 
 ```bash
@@ -13,10 +26,10 @@ python -m scripts.dev <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `setup` | `dev_setup.sh` | Full developer environment setup (shell) |
-| `setup --quick` | `dev_setup.sh` | Fast setup, skip tests/linters (shell) |
-| `setup --ci` | `dev_setup.sh` | CI mode, non-interactive (shell) |
-| `install-deps` | `install_deps.py` | Install project dependencies |
+| `setup` | `dev_setup.sh` | Legacy shell facade; currently not the supported onboarding path |
+| `setup --quick` | `dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
+| `setup --ci` | `dev_setup.sh` | Legacy placeholder mode; not recommended for current setup |
+| `install-deps` | `install_deps.py` | Auxiliary helper script, not a full project bootstrap |
 | `run-tests` | `run_tests.py` | Run tests |
 | `mock-metrics` | `metrics_mock_server.py` | Start mock metrics server |
 | `test-changed` | `test_changed.sh` | Run tests for changed files only (shell) |
@@ -26,10 +39,10 @@ python -m scripts.dev <command> [args...]
 
 | Command | When | Trigger |
 |---------|------|---------|
-| `setup` | First time cloning the repo or after major dependency changes; installs everything, runs linters and tests | Manual, initial onboarding |
-| `setup --quick` | Quick re-setup after minor changes; skips tests and linters | Manual, fast iteration |
-| `setup --ci` | CI pipeline environment setup; non-interactive mode | CI pipeline (automatic) |
-| `install-deps` | After modifying `pyproject.toml` or when dependencies are out of date | Manual, after dependency changes |
+| `setup` | Legacy compatibility entrypoint only; use `make install` instead | Manual, only if intentionally testing the shell facade |
+| `setup --quick` | Legacy compatibility entrypoint only; use `make install` + targeted verify commands instead | Manual, exceptional use only |
+| `setup --ci` | Legacy compatibility entrypoint only; CI should use the maintained repo commands | CI migration/legacy compatibility only |
+| `install-deps` | Specialized helper for one auxiliary package; not for normal repo setup | Manual, rare maintenance task |
 | `run-tests` | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `cov` | Manual, during development |
 | `mock-metrics` | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data | Manual, during dashboard development |
 | `test-changed` | Quick feedback during development; runs tests only for files changed since last commit | Manual, during development |

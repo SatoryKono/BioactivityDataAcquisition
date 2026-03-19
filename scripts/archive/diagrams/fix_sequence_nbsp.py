@@ -35,7 +35,7 @@ def fix_file(filepath: str) -> bool:
 
 
 fixed = []
-for f in glob.glob("docs/02-architecture/mmd-diagrams/**/*.mmd", recursive=True):
+for f in glob.glob("docs/02-architecture/diagrams/**/*.mmd", recursive=True):
     if fix_file(f):
         fixed.append(f)
 

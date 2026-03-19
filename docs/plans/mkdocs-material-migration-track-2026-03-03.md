@@ -14,7 +14,7 @@ Mitigate forward-compatibility risk around MkDocs/Material while preserving curr
 
 - Owner: Documentation/Governance maintainers
 - Cadence: weekly checkpoint until decision is accepted
-- Reporting channel: `docs/reports/documentation-audit-2026-03-03-exhaustive.md`
+- Reporting channel: update this plan directly and publish any derived evidence snapshots under `docs/reports/` (index: `docs/reports/index.md`)
 
 ## Strategy
 

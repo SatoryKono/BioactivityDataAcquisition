@@ -34,7 +34,7 @@ schema:
         - name: system
           fields: [entity_id, content_hash, _run_id, _run_type, _source_batch_id, _ingestion_ts, _index]
         - name: business
-          fields: [assay_id, target_id, document_chembl_id, assay_type, confidence_score, description]
+          fields: [assay_id, target_id, publication_id, assay_type, confidence_score, description]
     silver:
         include_groups: [system, business, dq]
     gold:
@@ -75,7 +75,7 @@ filters:
 
 ### 3.1. Определение сущности Assay
 
-**Файл:** `src/bioetl/domain/entities.py`
+**Файл:** `src/bioetl/domain/entities/chembl_activity.py`
 
 Сущность `Assay` содержит **39 полей**, сгруппированных по категориям:
 
@@ -85,9 +85,9 @@ filters:
 |------|-----|--------------|----------|
 | `assay_id` | `str` | **Да** | Уникальный идентификатор анализа (например, `CHEMBL1234567`) |
 | `target_id` | `str` | Нет | ChEMBL ID мишени |
-| `document_chembl_id` | `str` | Нет | ChEMBL ID публикации |
-| `cell_chembl_id` | `str` | Нет | ChEMBL ID клеточной линии |
-| `tissue_chembl_id` | `str` | Нет | ChEMBL ID ткани |
+| `publication_id` | `str` | Нет | ChEMBL ID публикации |
+| `cell_id` | `str` | Нет | ChEMBL ID клеточной линии |
+| `tissue_id` | `str` | Нет | ChEMBL ID ткани |
 | `src_id` | `int` | Нет | ID источника данных |
 | `src_assay_id` | `str` | Нет | ID анализа в источнике |
 | `aidx` | `str` | Нет | Внутренний индекс |
@@ -107,7 +107,7 @@ filters:
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `assay_organism` | `str` | Организм (например, `Homo sapiens`) |
-| `assay_tax_id` | `int` | Таксономический ID |
+| `assay_taxonomy_id` | `int` | NCBI Taxonomy ID |
 | `assay_cell_type` | `str` | Тип клетки |
 | `assay_tissue` | `str` | Ткань |
 | `assay_strain` | `str` | Штамм |
@@ -148,7 +148,7 @@ filters:
 | `variant_mutation` | `str` | Описание мутации (например, V600E) |
 | `variant_organism` | `str` | Организм варианта |
 | `variant_sequence` | `str` | Аминокислотная последовательность |
-| `variant_tax_id` | `int` | NCBI Taxonomy ID |
+| `variant_taxonomy_id` | `int` | NCBI Taxonomy ID |
 | `variant_sequence_json` | `str` | Оригинальный JSON (для forensic-анализа) |
 
 > **Примечание**: Поля `variant_*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Поле `variant_sequence_json` сохраняет оригинальную структуру для аудита.
@@ -283,7 +283,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema([
     pa.field("content_hash", pa.string()),
     pa.field("assay_id", pa.string()),
     pa.field("target_id", pa.string()),
-    pa.field("document_chembl_id", pa.string()),
+    pa.field("publication_id", pa.string()),
     pa.field("assay_type", pa.string()),
     pa.field("assay_type_description", pa.string()),
     pa.field("assay_organism", pa.string()),
@@ -340,7 +340,8 @@ def should_include(self, -context, record) -> bool:
 
 По умолчанию в Gold попадают анализы:
 - `assay_type` = `B` (Binding) или `F` (Functional)
-- `confidence_score` >= 4
+- `confidence_score` ∈ {`8`, `9`}
+- `relationship_type` = `D`
 
 ---
 
@@ -414,12 +415,12 @@ ChEMBL API (/assay.json)
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/entities/chembl/assay.yaml` |
-| Сущность | `src/bioetl/domain/entities.py` |
+| Сущность | `src/bioetl/domain/entities/chembl_activity.py` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
 | Gold-фильтр | `configs/entities/chembl/assay.yaml` (`filters.gold_filters`) |
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
+| Gold Schema | `src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py` |
 | Data Contract | `docs/04-reference/contracts/gold/chembl_assay_v1.0.json` |
 
 ---

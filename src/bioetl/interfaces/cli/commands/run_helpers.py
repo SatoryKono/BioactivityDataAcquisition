@@ -37,11 +37,14 @@ from bioetl.interfaces.cli.formatters import (
     echo_info,
     echo_warning,
 )
-from bioetl.interfaces.cli.registry_helpers import get_default_registry
+from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.ports import LoggerPort
+
+# Compatibility patch point retained for tests and legacy callers.
+get_default_registry = build_cli_registry
 
 
 def resolve_context_registry(

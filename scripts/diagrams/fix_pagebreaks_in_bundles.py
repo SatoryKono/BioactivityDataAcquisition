@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fix page breaks in *-with-descriptions.md bundles.
+"""Fix page breaks in diagram Markdown bundles.
 
 Ensures each diagram section (## Name) starts on a new page by inserting
 both \\newpage (for pandoc DOCX) and <div style="page-break-before: always;">
@@ -104,9 +104,11 @@ def fix_bundle(md_path: Path) -> int:
 
 
 def main() -> int:
-    mmd_dir = DIAGRAM_ROOT
-
-    bundles = sorted(mmd_dir.glob("*-with-descriptions.md"))
+    bundles_dir = DIAGRAM_ROOT / "bundles"
+    if bundles_dir.exists():
+        bundles = sorted(bundles_dir.glob("*.bundle.md"))
+    else:
+        bundles = sorted(DIAGRAM_ROOT.glob("*-with-descriptions.md"))
     if not bundles:
         print("[ERROR] No bundles found")
         return 1

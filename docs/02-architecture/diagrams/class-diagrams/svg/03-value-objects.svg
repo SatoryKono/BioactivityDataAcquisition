@@ -1,0 +1,494 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="class" class="classDiagram" style="max-width:3614.65px;background-color:white" viewBox="0 0 3614.652 781"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}#my-svg .BronzeWriteResult&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .BronzeWriteResult span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .SilverWriteResult&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .SilverWriteResult span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .RunContext&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .RunContext span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .HealthCheckResult&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .HealthCheckResult span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .FencingToken&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .FencingToken span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .LockContext&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .LockContext span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .AuditEntry&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .AuditEntry span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .FilterLoadResult&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .FilterLoadResult span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .MemoryStats&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .MemoryStats span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .SourceMetadata&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .SourceMetadata span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .DQMetrics&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .DQMetrics span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .DQResult&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .DQResult span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .EnrichmentResult&gt;*{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}#my-svg .EnrichmentResult span{fill:#f0fdf4!important;stroke:#16a34a!important;stroke-width:2px!important;}/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px; 
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="edgePaths"><path id="id_LockContext_FencingToken_1" marker-end="url(#my-svg_class-dependencyEnd)" d="M1477.086 392v111" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_LockContext_FencingToken_1" data-points="W3sieCI6MTQ3Ny4wODU5Mzc1LCJ5IjozOTJ9LHsieCI6MTQ3Ny4wODU5Mzc1LCJ5Ijo0NjIuNX0seyJ4IjoxNDc3LjA4NTkzNzUsInkiOjUwOX1d"/><path id="id_DQResult_DQMetrics_2" marker-end="url(#my-svg_class-dependencyEnd)" d="M3151.266 344v159" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_DQResult_DQMetrics_2" data-points="W3sieCI6MzE1MS4yNjU2MjUsInkiOjM0NH0seyJ4IjozMTUxLjI2NTYyNSwieSI6NDYyLjV9LHsieCI6MzE1MS4yNjU2MjUsInkiOjUwOX1d"/><path id="id_AuditEntry_AuditLayer_3" marker-end="url(#my-svg_class-dependencyEnd)" d="m1820.547 380-6.159 13.75c-6.158 13.75-18.475 41.25-24.634 63.75s-6.158 40-6.158 48.75V515" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_AuditEntry_AuditLayer_3" data-points="W3sieCI6MTgyMC41NDY4MDEyOTcxNjk4LCJ5IjozODB9LHsieCI6MTc4My41OTU3MDMxMjUsInkiOjQ2Mi41fSx7IngiOjE3ODMuNTk1NzAzMTI1LCJ5Ijo1MjF9XQ=="/><path id="id_AuditEntry_AuditOperation_4" marker-end="url(#my-svg_class-dependencyEnd)" d="m2035.402 293.386 58.895 28.186c58.894 28.186 176.683 84.557 235.578 117.492s58.895 42.436 58.895 47.186V491" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_AuditEntry_AuditOperation_4" data-points="W3sieCI6MjAzNS40MDIzNDM3NSwieSI6MjkzLjM4NjMwNDg0ODc5ODR9LHsieCI6MjM4OC43Njk1MzEyNSwieSI6NDYyLjV9LHsieCI6MjM4OC43Njk1MzEyNSwieSI6NDk3fV0="/><path id="id_HealthCheckResult_HealthStatus_5" marker-end="url(#my-svg_class-dependencyEnd)" d="M1100.605 380v135" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_HealthCheckResult_HealthStatus_5" data-points="W3sieCI6MTEwMC42MDU0Njg3NSwieSI6MzgwfSx7IngiOjExMDAuNjA1NDY4NzUsInkiOjQ2Mi41fSx7IngiOjExMDAuNjA1NDY4NzUsInkiOjUyMX1d"/><path id="id_EnrichmentResult_EnrichmentStatus_6" marker-end="url(#my-svg_class-dependencyEnd)" d="M3458.969 440v39" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id_EnrichmentResult_EnrichmentStatus_6" data-points="W3sieCI6MzQ1OC45Njg3NSwieSI6NDQwfSx7IngiOjM0NTguOTY4NzUsInkiOjQ2Mi41fSx7IngiOjM0NTguOTY4NzUsInkiOjQ4NX1d"/></g><g class="nodes"><g id="classId-BronzeWriteResult-0" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-141.312-180h282.625v360h-282.625" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(149.313 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-141.312-180h282.625m-282.625 0h282.625m0 0v360m0-360v360m0 0h-282.625m282.625 0h-282.625m0 0v-360m0 360v-360" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(149.313 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(82.156 64)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="71.422" y="12" class="fo-fallback" text-anchor="middle" transform="translate(77.89 88)"><tspan x="71.422">BronzeWriteResult</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="67.82" y="12" class="fo-fallback" text-anchor="middle" transform="translate(24 144)"><tspan x="67.82">+batch_id: BatchID</tspan></text></g><g class="label"><text xml:space="preserve" x="63.812" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(24 168)"><tspan x="63.812">+relative_path:</tspan><tspan x="63.812" dy="16.8">str</tspan></text></g><g class="label"><text xml:space="preserve" x="68.273" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(24 192)"><tspan x="68.273">+absolute_path:</tspan><tspan x="68.273" dy="16.8">str</tspan></text></g><g class="label"><text xml:space="preserve" x="64.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(24 216)"><tspan x="64.266">+record_count: int</tspan></text></g><g class="label"><text xml:space="preserve" x="79.82" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(24 240)"><tspan x="79.82">+compressed_size:</tspan><tspan x="79.82" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="88.719" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(24 264)"><tspan x="88.719">+uncompressed_size:</tspan><tspan x="88.719" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="82.039" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(24 288)"><tspan x="82.039">+checksum_blake2:</tspan><tspan x="82.039" dy="16.8">str</tspan></text></g><g class="label"><text xml:space="preserve" x="89.602" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(24 312)"><tspan x="89.602">+compression_ratio:</tspan><tspan x="89.602" dy="16.8">float</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="56.688" y="12" class="fo-fallback" text-anchor="middle" transform="translate(24 368)"><tspan x="56.688">+exists() : : bool</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-141.312-100h282.625m-282.625 0h282.625M-141.312 124h282.625m-282.625 0h282.625" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(149.313 224)"/></g><g id="classId-SilverWriteResult-1" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-114.734-120h229.468v240h-229.468" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(455.36 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-114.734-120h229.468m-229.468 0h229.468m0 0v240m0-240v240m0 0h-229.468m229.468 0h-229.468m0 0v-240m0 240v-240" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(455.36 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(388.203 124)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="66.102" y="12" class="fo-fallback" text-anchor="middle" transform="translate(389.258 148)"><tspan x="66.102">SilverWriteResult</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="59.812" y="12" class="fo-fallback" text-anchor="middle" transform="translate(356.625 204)"><tspan x="59.812">+table_name: str</tspan></text></g><g class="label"><text xml:space="preserve" x="55.375" y="12" class="fo-fallback" text-anchor="middle" transform="translate(356.625 228)"><tspan x="55.375">+table_path: str</tspan></text></g><g class="label"><text xml:space="preserve" x="65.156" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(356.625 252)"><tspan x="65.156">+delta_version:</tspan><tspan x="65.156" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="64.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(356.625 276)"><tspan x="64.266">+record_count: int</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-114.734-40h229.468m-229.468 0h229.468M-114.734 88h229.468m-229.468 0h229.468" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(455.36 224)"/></g><g id="classId-RunContext-2" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-144-120h288v240h-288" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(764.094 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-144-120h288m-288 0h288m0 0v240m0-240v240m0 0h-288m288 0h-288m0 0v-240m0 240v-240" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(764.094 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="42.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(721.398 124)"><tspan x="42.695">«dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="45.328" y="12" class="fo-fallback" text-anchor="middle" transform="translate(718.766 148)"><tspan x="45.328">RunContext</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="54.031" y="12" class="fo-fallback" text-anchor="middle" transform="translate(636.094 204)"><tspan x="54.031">+run_id: RunID</tspan></text></g><g class="label"><text xml:space="preserve" x="72.273" y="12" class="fo-fallback" text-anchor="middle" transform="translate(636.094 228)"><tspan x="72.273">+run_type: RunType</tspan></text></g><g class="label"><text xml:space="preserve" x="75.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(636.094 252)"><tspan x="75.383">+started_at:</tspan><tspan x="75.383" dy="16.8">datetime</tspan></text></g><g class="label"><text xml:space="preserve" x="105.336" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(636.094 276)"><tspan x="105.336">+checkpoint_offset: int</tspan><tspan x="105.336" dy="16.8">| None</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-144-40h288m-288 0h288M-144 88h288m-288 0h288" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(764.094 224)"/></g><g id="classId-HealthCheckResult-3" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-142.512-156h285.024v312h-285.024" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1100.605 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-142.512-156h285.024m-285.024 0h285.024m0 0v312m0-312v312m0 0h-285.024m285.024 0h-285.024m0 0v-312m0 312v-312" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1100.605 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1033.45 88)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="72.914" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1027.691 112)"><tspan x="72.914">HealthCheckResult</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="76.266" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(974.094 168)"><tspan x="76.266">+status:</tspan><tspan x="76.266" dy="16.8">HealthStatus</tspan></text></g><g class="label"><text xml:space="preserve" x="64.703" y="12" class="fo-fallback" text-anchor="middle" transform="translate(974.094 192)"><tspan x="64.703">+latency_ms: float</tspan></text></g><g class="label"><text xml:space="preserve" x="46.906" y="12" class="fo-fallback" text-anchor="middle" transform="translate(974.094 216)"><tspan x="46.906">+provider: str</tspan></text></g><g class="label"><text xml:space="preserve" x="48.703" y="12" class="fo-fallback" text-anchor="middle" transform="translate(974.094 240)"><tspan x="48.703">+endpoint: str</tspan></text></g><g class="label"><text xml:space="preserve" x="77.445" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(974.094 264)"><tspan x="77.445">+last_error: str |</tspan><tspan x="77.445" dy="16.8">None</tspan></text></g><g class="label"><text xml:space="preserve" x="90.055" y="-4.8" class="fo-fallback" text-anchor="middle" transform="translate(974.094 288)"><tspan x="90.055">+consecutive_failure</tspan><tspan x="90.055" dy="16.8">s:</tspan><tspan x="90.055" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="80.719" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(974.094 312)"><tspan x="80.719">+checked_at:</tspan><tspan x="80.719" dy="16.8">datetime</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-142.512-76h285.024m-285.024 0h285.024M-142.512 124h285.024m-285.024 0h285.024" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1100.605 224)"/></g><g id="classId-FencingToken-4" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-113.836-120h227.672v240h-227.672" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1477.086 629)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-113.836-120h227.672m-227.672 0h227.672m0 0v240m0-240v240m0 0h-227.672m227.672 0h-227.672m0 0v-240m0 240v-240" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1477.086 629)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1409.93 529)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="53.633" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1423.453 553)"><tspan x="53.633">FencingToken</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="52.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1379.25 609)"><tspan x="52.266">+sequence: int</tspan></text></g><g class="label"><text xml:space="preserve" x="30.453" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1379.25 633)"><tspan x="30.453">+key: str</tspan></text></g><g class="label"><text xml:space="preserve" x="64.258" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1379.25 657)"><tspan x="64.258">+owner_id: RunID</tspan></text></g><g class="label"><text xml:space="preserve" x="58.484" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1379.25 681)"><tspan x="58.484">+issued_at: float</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-113.836-40h227.672m-227.672 0h227.672M-113.836 88h227.672m-227.672 0h227.672" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1477.086 629)"/></g><g id="classId-LockContext-5" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-183.969-168H183.97v336H-183.97" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1477.086 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-183.969-168H183.97m-367.938 0H183.97m0 0v336m0-336v336m0 0H-183.97m367.938 0H-183.97m0 0v-336m0 336v-336" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1477.086 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1409.93 76)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="48.453" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1428.633 100)"><tspan x="48.453">LockContext</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="30.453" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 156)"><tspan x="30.453">+key: str</tspan></text></g><g class="label"><text xml:space="preserve" x="64.258" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 180)"><tspan x="64.258">+owner_id: RunID</tspan></text></g><g class="label"><text xml:space="preserve" x="57.148" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 204)"><tspan x="57.148">+exclusive: bool</tspan></text></g><g class="label"><text xml:space="preserve" x="91.695" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 228)"><tspan x="91.695">+acquired_at: float</tspan><tspan x="91.695" dy="16.8">| None</tspan></text></g><g class="label"><text xml:space="preserve" x="134.391" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 252)"><tspan x="134.391">+fencing_token: FencingToken |</tspan><tspan x="134.391" dy="16.8">None</tspan></text></g></g><g class="methods-group text"><g class="label"><text xml:space="preserve" x="87.82" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 308)"><tspan x="87.82">+create() : : LockContext</tspan></text></g><g class="label"><text xml:space="preserve" x="62.922" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 332)"><tspan x="62.922">+is_valid() : : bool</tspan></text></g><g class="label"><text xml:space="preserve" x="105.617" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1309.117 356)"><tspan x="105.617">+matches_table(table) : : bool</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-183.969-88H183.97m-367.938 0H183.97M-183.969 64H183.97m-367.938 0H183.97" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1477.086 224)"/></g><g id="classId-AuditEntry-6" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-144.984-156h289.968v312h-289.968" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1890.418 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-144.984-156h289.968m-289.968 0h289.968m0 0v312m0-312v312m0 0h-289.968m289.968 0h-289.968m0 0v-312m0 312v-312" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1890.418 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1823.262 88)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="40.891" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1849.527 112)"><tspan x="40.891">AuditEntry</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="54.031" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1761.434 168)"><tspan x="54.031">+run_id: RunID</tspan></text></g><g class="label"><text xml:space="preserve" x="76.703" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1761.434 192)"><tspan x="76.703">+timestamp:</tspan><tspan x="76.703" dy="16.8">datetime</tspan></text></g><g class="label"><text xml:space="preserve" x="64.266" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1761.434 216)"><tspan x="64.266">+layer: AuditLayer</tspan></text></g><g class="label"><text xml:space="preserve" x="59.812" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1761.434 240)"><tspan x="59.812">+table_name: str</tspan></text></g><g class="label"><text xml:space="preserve" x="95.406" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1761.434 264)"><tspan x="95.406">+operation:</tspan><tspan x="95.406" dy="16.8">AuditOperation</tspan></text></g><g class="label"><text xml:space="preserve" x="68.266" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1761.434 288)"><tspan x="68.266">+records_count:</tspan><tspan x="68.266" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="54.922" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1761.434 312)"><tspan x="54.922">+metadata: dict</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-144.984-76h289.968m-289.968 0h289.968M-144.984 124h289.968m-289.968 0h289.968" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(1890.418 224)"/></g><g id="classId-FilterLoadResult-7" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-157.621-168H157.62v336H-157.62" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2243.023 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-157.621-168H157.62m-315.242 0H157.62m0 0v336m0-336v336m0 0H-157.62m315.242 0H-157.62m0 0v-336m0 336v-336" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2243.023 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="42.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2200.328 76)"><tspan x="42.695">«dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="63.117" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2179.906 100)"><tspan x="63.117">FilterLoadResult</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="54.922" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 156)"><tspan x="54.922">+ids: tuple&lt;str&gt;</tspan></text></g><g class="label"><text xml:space="preserve" x="56.711" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 180)"><tspan x="56.711">+total_count: int</tspan></text></g><g class="label"><text xml:space="preserve" x="65.609" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 204)"><tspan x="65.609">+unique_count: int</tspan></text></g><g class="label"><text xml:space="preserve" x="73.609" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 228)"><tspan x="73.609">+duplicate_count:</tspan><tspan x="73.609" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="77.617" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 252)"><tspan x="77.617">+has_duplicates:</tspan><tspan x="77.617" dy="16.8">bool</tspan></text></g><g class="label"><text xml:space="preserve" x="62.031" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 276)"><tspan x="62.031">+column_ids: dict</tspan></text></g><g class="label"><text xml:space="preserve" x="110.062" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 300)"><tspan x="110.062">+valid_combinations:</tspan><tspan x="110.062" dy="16.8">frozenset</tspan></text></g><g class="label"><text xml:space="preserve" x="75.367" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2101.402 324)"><tspan x="75.367">+filter_fields:</tspan><tspan x="75.367" dy="16.8">list&lt;str&gt;</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-157.621-88H157.62m-315.242 0H157.62M-157.621 136H157.62m-315.242 0H157.62" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2243.023 224)"/></g><g id="classId-MemoryStats-8" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-96.926-108H96.926v216H-96.926" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2547.57 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-96.926-108H96.926m-193.852 0H96.926m0 0v216m0-216v216m0 0H-96.926m193.852 0H-96.926m0 0v-216m0 216v-216" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2547.57 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="42.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2504.875 136)"><tspan x="42.695">«dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="50.242" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2497.328 160)"><tspan x="50.242">MemoryStats</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="51.805" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2466.645 216)"><tspan x="51.805">+rss_bytes: int</tspan></text></g><g class="label"><text xml:space="preserve" x="55.805" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2466.645 240)"><tspan x="55.805">+vms_bytes: int</tspan></text></g><g class="label"><text xml:space="preserve" x="50.922" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2466.645 264)"><tspan x="50.922">+percent: float</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-96.926-28H96.926m-193.852 0H96.926M-96.926 76H96.926m-193.852 0H96.926" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2547.57 224)"/></g><g id="classId-SourceMetadata-9" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-148.375-108h296.75v216h-296.75" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2842.871 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-148.375-108h296.75m-296.75 0h296.75m0 0v216m0-216v216m0 0h-296.75m296.75 0h-296.75m0 0v-216m0 216v-216" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2842.871 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="42.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2800.176 136)"><tspan x="42.695">«dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="61.797" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2781.074 160)"><tspan x="61.797">SourceMetadata</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="33.125" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2710.496 216)"><tspan x="33.125">+type: str</tspan></text></g><g class="label"><text xml:space="preserve" x="89.477" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2710.496 240)"><tspan x="89.477">+api_endpoint: str |</tspan><tspan x="89.477" dy="16.8">None</tspan></text></g><g class="label"><text xml:space="preserve" x="101.477" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(2710.496 264)"><tspan x="101.477">+request_details: dict</tspan><tspan x="101.477" dy="16.8">| None</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-148.375-28h296.75m-296.75 0h296.75M-148.375 76h296.75m-296.75 0h296.75" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(2842.871 224)"/></g><g id="classId-DQMetrics-10" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-120.73-120h241.46v240h-241.46" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3151.266 629)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-120.73-120h241.46m-241.46 0h241.46m0 0v240m0-240v240m0 0h-241.46m241.46 0h-241.46m0 0v-240m0 240v-240" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3151.266 629)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="42.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3108.57 529)"><tspan x="42.695">«dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="40.016" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3111.25 553)"><tspan x="40.016">DQMetrics</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="54.93" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3046.535 609)"><tspan x="54.93">+null_rate: float</tspan></text></g><g class="label"><text xml:space="preserve" x="74.5" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3046.535 633)"><tspan x="74.5">+duplicate_rate:</tspan><tspan x="74.5" dy="16.8">float</tspan></text></g><g class="label"><text xml:space="preserve" x="83.383" y="-4.8" class="fo-fallback" text-anchor="middle" transform="translate(3046.535 657)"><tspan x="83.383">+schema_violations</tspan><tspan x="83.383" dy="16.8">:</tspan><tspan x="83.383" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="77.578" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3046.535 681)"><tspan x="77.578">+custom_metrics:</tspan><tspan x="77.578" dy="16.8">dict</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-120.73-40h241.46m-241.46 0h241.46M-120.73 88h241.46m-241.46 0h241.46" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3151.266 629)"/></g><g id="classId-DQResult-11" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-110.02-120h220.04v240h-220.04" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3151.266 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-110.02-120h220.04m-220.04 0h220.04m0 0v240m0-240v240m0 0h-220.04m220.04 0h-220.04m0 0v-240m0 240v-240" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3151.266 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="42.695" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3108.57 124)"><tspan x="42.695">«dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="36.453" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3114.813 148)"><tspan x="36.453">DQResult</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="50.039" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3057.246 204)"><tspan x="50.039">+passed: bool</tspan></text></g><g class="label"><text xml:space="preserve" x="59.367" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3057.246 228)"><tspan x="59.367">+error_rate: float</tspan></text></g><g class="label"><text xml:space="preserve" x="72.672" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3057.246 252)"><tspan x="72.672">+metrics:</tspan><tspan x="72.672" dy="16.8">DQMetrics</tspan></text></g><g class="label"><text xml:space="preserve" x="55.359" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3057.246 276)"><tspan x="55.359">+anomalies: list</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-110.02-40h220.04m-220.04 0h220.04M-110.02 88h220.04m-220.04 0h220.04" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3151.266 224)"/></g><g id="classId-EnrichmentResult-12" class="node default"><g class="basic label-container"><path fill="#f0fdf4" stroke-width="0" d="M-147.684-216h295.368v432h-295.368" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3458.969 224)"/><path fill="none" stroke="#16a34a" stroke-dasharray="0 0" stroke-width="2" d="M-147.684-216h295.368m-295.368 0h295.368m0 0v432m0-432v432m0 0h-295.368m295.368 0h-295.368m0 0v-432m0 432v-432" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3458.969 224)"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="67.156" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3391.813 28)"><tspan x="67.156">«frozen dataclass»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="68.461" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3390.508 52)"><tspan x="68.461">EnrichmentResult</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="71.367" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 108)"><tspan x="71.367">+enricher_name:</tspan><tspan x="71.367" dy="16.8">str</tspan></text></g><g class="label"><text xml:space="preserve" x="93.602" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 132)"><tspan x="93.602">+status:</tspan><tspan x="93.602" dy="16.8">EnrichmentStatus</tspan></text></g><g class="label"><text xml:space="preserve" x="66.039" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 156)"><tspan x="66.039">+records_input:</tspan><tspan x="66.039" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="79.383" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 180)"><tspan x="79.383">+records_enriched:</tspan><tspan x="79.383" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="84.281" y="-4.8" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 204)"><tspan x="84.281">+records_not_found</tspan><tspan x="84.281" dy="16.8">:</tspan><tspan x="84.281" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="74.484" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 228)"><tspan x="74.484">+records_errored:</tspan><tspan x="74.484" dy="16.8">int</tspan></text></g><g class="label"><text xml:space="preserve" x="72.711" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 252)"><tspan x="72.711">+dq_error_rate:</tspan><tspan x="72.711" dy="16.8">float</tspan></text></g><g class="label"><text xml:space="preserve" x="87.398" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 276)"><tspan x="87.398">+duration_seconds:</tspan><tspan x="87.398" dy="16.8">float</tspan></text></g><g class="label"><text xml:space="preserve" x="97.453" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 300)"><tspan x="97.453">+error_message: str |</tspan><tspan x="97.453" dy="16.8">None</tspan></text></g><g class="label"><text xml:space="preserve" x="63.367" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 324)"><tspan x="63.367">+is_success: bool</tspan></text></g><g class="label"><text xml:space="preserve" x="82.047" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 348)"><tspan x="82.047">+enrichment_rate:</tspan><tspan x="82.047" dy="16.8">float</tspan></text></g><g class="label"><text xml:space="preserve" x="78.062" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(3327.285 372)"><tspan x="78.062">+not_found_rate:</tspan><tspan x="78.062" dy="16.8">float</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="2" d="M-147.684-136h295.368m-295.368 0h295.368M-147.684 184h295.368m-295.368 0h295.368" class="divider" style="fill:#f0fdf4;stroke:#16a34a;stroke-width:2px" transform="translate(3458.969 224)"/></g><g id="classId-AuditLayer-13" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M1713.365 521h140.461v216h-140.46"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M1713.365 521h140.461m-140.46 0h140.46m0 0v216m0-216v216m0 0h-140.46m140.46 0h-140.46m0 0V521m0 216V521"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="40.023" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1743.572 541)"><tspan x="40.023">«StrEnum»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="41.789" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1741.807 565)"><tspan x="41.789">AuditLayer</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="33.336" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1729.365 621)"><tspan x="33.336">BRONZE</tspan></text></g><g class="label"><text xml:space="preserve" x="27.867" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1729.365 645)"><tspan x="27.867">SILVER</tspan></text></g><g class="label"><text xml:space="preserve" x="22.672" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1729.365 669)"><tspan x="22.672">GOLD</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M1713.365 601h140.461m-140.46 0h140.46M1713.365 705h140.461m-140.46 0h140.46" class="divider"/></g><g id="classId-AuditOperation-14" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M2295.355 497h186.829v264h-186.829"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M2295.355 497h186.829m-186.829 0h186.829m0 0v264m0-264v264m0 0h-186.829m186.829 0h-186.829m0 0V497m0 264V497"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="40.023" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2348.746 517)"><tspan x="40.023">«StrEnum»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="58.219" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2330.55 541)"><tspan x="58.219">AuditOperation</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="25.773" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2311.355 597)"><tspan x="25.773">WRITE</tspan></text></g><g class="label"><text xml:space="preserve" x="29.336" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2311.355 621)"><tspan x="29.336">MERGE</tspan></text></g><g class="label"><text xml:space="preserve" x="32.898" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2311.355 645)"><tspan x="32.898">APPEND</tspan></text></g><g class="label"><text xml:space="preserve" x="31.125" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2311.355 669)"><tspan x="31.125">DELETE</tspan></text></g><g class="label"><text xml:space="preserve" x="48.305" y="12" class="fo-fallback" text-anchor="middle" transform="translate(2311.355 693)"><tspan x="48.305">OVERWRITE</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M2295.355 577h186.829m-186.829 0h186.829M2295.355 729h186.829m-186.829 0h186.829" class="divider"/></g><g id="classId-HealthStatus-15" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M1012.297 521h176.617v216h-176.617"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M1012.297 521h176.617m-176.617 0h176.617m0 0v216m0-216v216m0 0h-176.617m176.617 0h-176.617m0 0V521m0 216V521"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="40.023" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1060.582 541)"><tspan x="40.023">«StrEnum»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="48.898" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1051.707 565)"><tspan x="48.898">HealthStatus</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="36.305" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1028.297 621)"><tspan x="36.305">HEALTHY</tspan></text></g><g class="label"><text xml:space="preserve" x="45.344" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1028.297 645)"><tspan x="45.344">DEGRADED</tspan></text></g><g class="label"><text xml:space="preserve" x="47.859" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1028.297 669)"><tspan x="47.859">UNHEALTHY</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M1012.297 601h176.617m-176.617 0h176.617M1012.297 705h176.617m-176.617 0h176.617" class="divider"/></g><g id="classId-EnrichmentStatus-16" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M3370.059 485h177.82v288h-177.82"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M3370.059 485h177.82m-177.82 0h177.82m0 0v288m0-288v288m0 0h-177.82m177.82 0h-177.82m0 0V485m0 288V485"/></g><g class="annotation-group text"><g class="label"><text xml:space="preserve" x="40.023" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3418.945 505)"><tspan x="40.023">«StrEnum»</tspan></text></g></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="68.461" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3390.508 529)"><tspan x="68.461">EnrichmentStatus</tspan></text></g></g><g class="members-group text"><g class="label"><text xml:space="preserve" x="38.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3386.059 585)"><tspan x="38.68">SUCCESS</tspan></text></g><g class="label"><text xml:space="preserve" x="32.609" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3386.059 609)"><tspan x="32.609">PARTIAL</tspan></text></g><g class="label"><text xml:space="preserve" x="27.57" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3386.059 633)"><tspan x="27.57">FAILED</tspan></text></g><g class="label"><text xml:space="preserve" x="34.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3386.059 657)"><tspan x="34.68">SKIPPED</tspan></text></g><g class="label"><text xml:space="preserve" x="38.672" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3386.059 681)"><tspan x="38.672">NOT_RUN</tspan></text></g><g class="label"><text xml:space="preserve" x="36" y="12" class="fo-fallback" text-anchor="middle" transform="translate(3386.059 705)"><tspan x="36">TIMEOUT</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M3370.059 565h177.82m-177.82 0h177.82M3370.059 741h177.82m-177.82 0h177.82" class="divider"/></g></g></g></svg>

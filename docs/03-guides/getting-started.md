@@ -27,21 +27,34 @@ cd BioactivityDataAcquisition2
 
 ## 2. Environment Setup
 
-The recommended setup path is `scripts/dev/dev_setup.sh`. It checks required
-prerequisites, creates the virtual environment, installs dependencies, and
-runs the standard project bootstrap flow.
+The supported setup path is the maintained Make-based bootstrap:
 
 ```bash
-./scripts/dev/dev_setup.sh
+make install
+make test-deps
+make setup-plugins
 ```
 
-*Manual fallback: if you need a lower-level path, you can still use `make install`
-or create the virtual environment explicitly. On Windows without `make`:*
+If you use Codex or GitHub Copilot MCP, add the optional tooling setup after install:
+
+```bash
+python -m scripts.dev setup-mcp
+```
+
+`scripts/dev/dev_setup.sh` remains in the repository as a legacy placeholder and is not the supported onboarding path.
+
+Manual fallback without `make`:
+
+```bash
+uv sync --extra dev --extra tracing
+```
+
+On Windows without `make` or `uv`:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e .[dev,docs]
+pip install -e .[dev,tracing]
 ```
 
 ## 3. Configuration
@@ -126,7 +139,7 @@ data/
     ├── checkpoints/
     │   └── chembl_activity.json
     └── quarantine/
-        └── chembl/activity/
+        └── common.quarantine/
 ```
 
 ## Troubleshooting

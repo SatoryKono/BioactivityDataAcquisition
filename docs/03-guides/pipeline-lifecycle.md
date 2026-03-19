@@ -4,7 +4,7 @@
 
 ## Порядок выполнения PipelineRunner.run()
 
-> **Diagram:** See [`04-pipeline-execution-flow.mmd`](../02-architecture/mmd-diagrams/architecture/04-pipeline-execution-flow.mmd)
+> **Diagram:** See [`04-pipeline-execution-flow.mmd`](../02-architecture/diagrams/architecture/04-pipeline-execution-flow.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
 ## Очистка слоёв по типу запуска
@@ -88,7 +88,7 @@ metrics:
 Composite pipelines используют отдельный оркестратор (`CompositePipelineRunner`)
 вместо стандартного `PipelineRunner` + `Transformer`.
 
-> **Diagram:** See [`08-composite-pipeline.mmd`](../02-architecture/mmd-diagrams/architecture/08-composite-pipeline.mmd)
+> **Diagram:** See [`08-composite-pipeline.mmd`](../02-architecture/diagrams/architecture/08-composite-pipeline.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
 ### Ключевые отличия

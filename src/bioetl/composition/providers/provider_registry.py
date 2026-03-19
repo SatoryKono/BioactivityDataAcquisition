@@ -38,6 +38,7 @@ __all__ = [
 # Backward-compatible alias kept during the RF-008 terminology cleanup.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
+
 class ProviderRegistry:
     """Unified data provider registry (thread-safe, instance-scoped)."""
 
@@ -50,7 +51,10 @@ class ProviderRegistry:
         self._creator = creator if creator is not None else ProviderCreator()
         self._lock = threading.RLock()
 
-    _providers = ProvidersDescriptor()
+    if TYPE_CHECKING:
+        _providers: dict[str, ProviderConfig]
+    else:
+        _providers = ProvidersDescriptor()
 
     @classmethod
     def _get_default(cls) -> ProviderRegistry:
@@ -162,12 +166,28 @@ class ProviderRegistry:
         with self._lock:
             config = self._store.get(name)
         self._creator.require_data_source_creator(name=name, config=config)
+
+        def create_data_source_for_provider(
+            settings: Settings,
+            pipeline_config: PipelineYamlConfig,
+            logger: LoggerPort,
+            filter_config: InputFilterConfig | None = None,
+            metrics: MetricsPort | None = None,
+            pipeline_name: str = "unknown",
+        ) -> DataSourcePort:
+            return self.create_data_source(
+                name=name,
+                settings=settings,
+                pipeline_config=pipeline_config,
+                logger=logger,
+                filter_config=filter_config,
+                metrics=metrics,
+                pipeline_name=pipeline_name,
+            )
+
         return self._creator.build_bound_creator(
             name=name,
-            create_data_source_fn=lambda **kwargs: self.create_data_source(
-                name=name,
-                **kwargs,
-            ),
+            create_data_source_fn=create_data_source_for_provider,
         )
 
     @DefaultRegistryMethod

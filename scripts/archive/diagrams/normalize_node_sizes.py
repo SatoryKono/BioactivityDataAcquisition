@@ -35,7 +35,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DIRS = [
     REPO_ROOT / "docs/02-architecture/mmd-diagrams",
-    REPO_ROOT / "docs/02-architecture/mmd-diagrams/views",
+    REPO_ROOT / "docs/02-architecture/diagrams/views",
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 
@@ -620,7 +620,7 @@ def main() -> int:
         help=(
             "Optional files/directories. Defaults: "
             "docs/02-architecture/mmd-diagrams and "
-            "docs/02-architecture/mmd-diagrams/views"
+            "docs/02-architecture/diagrams/views"
         ),
     )
     args = parser.parse_args()

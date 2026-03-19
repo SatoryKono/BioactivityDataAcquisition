@@ -167,7 +167,7 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
 
 ##### 4.2. ADR-040 Compliance
 
-Для каждой .mmd диаграммы проверь (см. `docs/02-architecture/06-diagram-policy.md`):
+Для каждой .mmd диаграммы проверь (см. `docs/02-architecture/diagrams/governance/policy.md`):
 - Метаданные: `@version`, `@date`, `@type`, `@level`, `@nodes`
 - Density: ≤15 ideal, 16-20 soft limit, >20 нужен ELK renderer
 - Палитра: только канонические цвета ADR-040 (без ad-hoc hex)
@@ -316,7 +316,7 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
     # Фазы 2-4: параллельно
     Agent(subagent_type="py-doc-bot", prompt="task_id=DOCAUDIT-002, mode=code_sync, scope=docs/02-architecture/ docs/04-reference/")
     Agent(subagent_type="py-audit-bot", prompt="task_id=DOCAUDIT-003, mode=adr_audit, scope=docs/02-architecture/decisions/")
-    Agent(subagent_type="py-doc-bot", prompt="task_id=DOCAUDIT-004, mode=diagram_validation, scope=docs/02-architecture/mmd-diagrams/")
+    Agent(subagent_type="py-doc-bot", prompt="task_id=DOCAUDIT-004, mode=diagram_validation, scope=docs/02-architecture/diagrams/")
 
     # Фаза 5: после завершения 2-4
     Agent(subagent_type="py-doc-swarm", prompt="task_id=DOCAUDIT-005, mode=freshness, scope=docs/")

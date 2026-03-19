@@ -37,20 +37,28 @@ BioETL предоставляет комплексную систему observab
 
 | Переменная | Описание | По умолчанию |
 |------------|----------|--------------|
-| `BIOETL_METRICS_ENABLED` | Включить Prometheus метрики | `true` |
+| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Включить Prometheus метрики | `true` |
 | `BIOETL_METRICS_PORT` | Порт для Prometheus endpoint | `8000` |
+| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Включить OpenTelemetry tracing | `false` |
 | `BIOETL_LOG_LEVEL` | Уровень логирования | `INFO` |
 
 ### Включение/отключение
 
 ```bash
 # Включить метрики (по умолчанию)
-export BIOETL_METRICS_ENABLED=true
+export BIOETL_OBSERVABILITY__METRICS_ENABLED=true
 export BIOETL_METRICS_PORT=8000
 
+# Tracing остаётся opt-in
+export BIOETL_OBSERVABILITY__TRACING_ENABLED=true
+
 # Отключить метрики
-export BIOETL_METRICS_ENABLED=false
+export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 ```
+
+> **Note:** Prometheus metrics включены по settings default, но OpenTelemetry tracing
+> в текущем runtime выключен по умолчанию и активируется только явным
+> `BIOETL_OBSERVABILITY__TRACING_ENABLED=true`.
 
 ---
 
@@ -183,48 +191,48 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_adapter-request-duration-seconds` | Histogram | provider, endpoint | Длительность API-запросов |
-| `bioetl_adapter-requests-total` | Counter | provider, endpoint, status | Количество API-запросов |
-| `bioetl_adapter-batch-size` | Histogram | provider, endpoint | Размер ответов |
-| `bioetl_adapter-dropped-duplicates-total` | Counter | provider, entity-type | Дупликаты отброшенные |
-| `bioetl_http-request-duration-seconds` | Histogram | provider, method, status | Длительность HTTP-запросов |
-| `bioetl_http-retries-total` | Counter | provider, method | HTTP retry-попытки |
-| `bioetl_http-request-errors-total` | Counter | provider, method, error-type | Ошибки HTTP |
-| `bioetl_data-source-retries-total` | Counter | provider, operation | Retry data source |
-| `bioetl_data-source-retry-exhausted-total` | Counter | provider, operation | Retry исчерпан |
+| `bioetl_adapter_request_duration_seconds` | Histogram | provider, endpoint | Длительность API-запросов |
+| `bioetl_adapter_requests_total` | Counter | provider, endpoint, status | Количество API-запросов |
+| `bioetl_adapter_batch_size` | Histogram | provider, endpoint | Размер ответов |
+| `bioetl_adapter_dropped_duplicates_total` | Counter | provider, entity_type | Дупликаты отброшенные |
+| `bioetl_http_request_duration_seconds` | Histogram | provider, method, status | Длительность HTTP-запросов |
+| `bioetl_http_retries_total` | Counter | provider, method | HTTP retry-попытки |
+| `bioetl_http_request_errors_total` | Counter | provider, method, error_type | Ошибки HTTP |
+| `bioetl_data_source_retries_total` | Counter | provider, operation | Retry data source |
+| `bioetl_data_source_retry_exhausted_total` | Counter | provider, operation | Retry исчерпан |
 
 #### Rate Limiter Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_rate-limiter-tokens-available` | Gauge | provider | Доступные токены |
-| `bioetl_rate-limiter-wait-seconds` | Histogram | provider | Время ожидания |
+| `bioetl_rate_limiter_tokens_available` | Gauge | provider | Доступные токены |
+| `bioetl_rate_limiter_wait_seconds` | Histogram | provider | Время ожидания |
 
 #### Shutdown Metrics
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_shutdown-initiated` | Counter | reason | Инициация shutdown |
-| `bioetl_shutdown-completed` | Counter | reason | Завершение shutdown |
+| `bioetl_shutdown_initiated` | Counter | reason | Инициация shutdown |
+| `bioetl_shutdown_completed` | Counter | reason | Завершение shutdown |
 
 ### Примеры PromQL запросов
 
 ```promql
 # Rate обработки записей за 5 минут
-rate(bioetl_records-processed-total{pipeline="chembl_activity"}[5m])
+rate(bioetl_records_processed_total{pipeline="chembl_activity"}[5m])
 
 # 95-й перцентиль длительности пайплайна
-histogram-quantile(0.95, rate(bioetl_pipeline-duration-seconds-bucket[5m]))
+histogram_quantile(0.95, rate(bioetl_pipeline_duration_seconds_bucket[5m]))
 
 # Количество ошибок за час
-increase(bioetl_errors-total[1h])
+increase(bioetl_errors_total[1h])
 
 # Текущее состояние Circuit Breaker
-bioetl_circuit-breaker-state{adapter="chembl"}
+bioetl_circuit_breaker_state{adapter="chembl"}
 
 # Процент карантинных записей
-sum(rate(bioetl_dq-records-quarantined-total[5m])) /
-sum(rate(bioetl_records-processed-total[5m])) * 100
+sum(rate(bioetl_dq_records_quarantined_total[5m])) /
+sum(rate(bioetl_records_processed_total[5m])) * 100
 ```
 
 ---
@@ -286,7 +294,7 @@ bioetl run --pipeline chembl_activity --debug
 ### Включение
 
 ```bash
-export BIOETL_TRACING_ENABLED=true
+export BIOETL_OBSERVABILITY__TRACING_ENABLED=true
 ```
 
 ### Span Hierarchy
@@ -310,10 +318,10 @@ pipeline-execution
 
 | Span | Attributes |
 |------|------------|
-| `pipeline-execution` | pipeline, run-id, entity-type, run-type |
-| `batch-{n}` | batch-id, record-count, start-index |
-| `write-{layer}` | batch-id, record-count |
-| `transform` | silver-count, gold-count |
+| `pipeline-execution` | pipeline, run_id, entity_type, run_type |
+| `batch-{n}` | batch_id, record_count, start_index |
+| `write-{layer}` | batch_id, record_count |
+| `transform` | silver_count, gold_count |
 
 ### Экспорт трассировки
 
@@ -321,7 +329,7 @@ pipeline-execution
 
 ```bash
 # Production (OTLP)
-export OTEL-EXPORTER-OTLP-ENDPOINT=http://jaeger:4317
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
 
 # Development (Console)
 # Настраивается автоматически при отсутствии OTLP endpoint
@@ -384,11 +392,11 @@ bioetl health check --json
 
 | Метрика | Условие | Severity |
 |---------|---------|----------|
-| `bioetl_circuit-breaker-state == 2` | > 5 min | Critical |
-| `bioetl_errors-total` rate | > 10/min | Warning |
-| `bioetl_dq-records-quarantined-total` rate | > 5% of processed | Warning |
-| `bioetl_pipeline-duration-seconds` | > 95th percentile + 50% | Warning |
-| `bioetl_health_check-status == 0` | > 1 min | Critical |
+| `bioetl_circuit_breaker_state == 2` | > 5 min | Critical |
+| `bioetl_errors_total` rate | > 10/min | Warning |
+| `bioetl_dq_records_quarantined_total` rate | > 5% of processed | Warning |
+| `bioetl_pipeline_duration_seconds` | > 95th percentile + 50% | Warning |
+| `bioetl_health_check_status == 0` | > 1 min | Critical |
 
 ### Пример Alertmanager правил
 
@@ -397,7 +405,7 @@ groups:
   - name: bioetl
     rules:
       - alert: CircuitBreakerOpen
-        expr: bioetl_circuit-breaker-state == 2
+        expr: bioetl_circuit_breaker_state == 2
         for: 5m
         labels:
           severity: critical
@@ -405,7 +413,7 @@ groups:
           summary: "Circuit breaker open for {{ $labels.adapter }}"
 
       - alert: HighErrorRate
-        expr: rate(bioetl_errors-total[5m]) > 10
+        expr: rate(bioetl_errors_total[5m]) > 10
         for: 5m
         labels:
           severity: warning
@@ -414,8 +422,8 @@ groups:
 
       - alert: HighQuarantineRate
         expr: |
-          sum(rate(bioetl_dq-records-quarantined-total[5m])) by (pipeline) /
-          sum(rate(bioetl_records-processed-total[5m])) by (pipeline) > 0.05
+          sum(rate(bioetl_dq_records_quarantined_total[5m])) by (pipeline) /
+          sum(rate(bioetl_records_processed_total[5m])) by (pipeline) > 0.05
         for: 10m
         labels:
           severity: warning
@@ -475,7 +483,7 @@ groups:
 
 1. Проверить что метрики включены:
    ```bash
-   echo $BIOETL_METRICS_ENABLED  # should be "true"
+   echo $BIOETL_OBSERVABILITY__METRICS_ENABLED  # should be "true"
    ```
 
 2. Проверить endpoint:
@@ -504,12 +512,12 @@ groups:
 
 1. Проверить что tracing включён:
    ```bash
-   echo $BIOETL_TRACING_ENABLED  # should be "true"
+   echo $BIOETL_OBSERVABILITY__TRACING_ENABLED  # should be "true"
    ```
 
 2. Проверить OTLP endpoint:
    ```bash
-   echo $OTEL-EXPORTER-OTLP-ENDPOINT
+   echo $OTEL_EXPORTER_OTLP_ENDPOINT
    ```
 
 ---
