@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical health command module."""
+"""Public health CLI entrypoint backed by the canonical domain module."""
 
 from __future__ import annotations
 

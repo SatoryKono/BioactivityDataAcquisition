@@ -44,7 +44,7 @@ class PipelineConfigLoader:
     Loads pipeline configurations from YAML files and resolves DQ config
     through the hierarchical DQConfigLoader system. Filter configs are
     resolved via FilterConfigLoader during pipeline config loading
-    (see :func:`load_pipeline_config` in ``config_loader.py``).
+    (see :func:`load_pipeline_config` in ``bioetl.infrastructure.config``).
 
     Resolution order for DQ config:
     1. If dq_config_file present: load from DQ hierarchy

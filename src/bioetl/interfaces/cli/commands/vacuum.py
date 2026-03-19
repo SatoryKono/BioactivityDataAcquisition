@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical maintenance vacuum module."""
+"""Public maintenance vacuum CLI entrypoint backed by the canonical module."""
 
 from __future__ import annotations
 

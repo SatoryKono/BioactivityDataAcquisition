@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical run result-flow module."""
+"""Public run result-flow seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

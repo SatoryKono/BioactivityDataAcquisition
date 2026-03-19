@@ -15,9 +15,12 @@ INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
     "bioetl.composition._services",
 )
 CLI_REGISTRY_HELPER_MODULE = "bioetl.interfaces.cli.registry_helpers"
-CONFIG_LOADER_MODULE = "bioetl.infrastructure.config_loader"
 METADATA_BUILDER_COMPAT_MODULE = (
     "bioetl.infrastructure.storage.metadata_builder_composite_helpers"
+)
+CONFIG_LOADER_MODULE = "bioetl.infrastructure.config_loader"
+CONFIG_LOADER_MODULE_PATH = (
+    ROOT / "src" / "bioetl" / "infrastructure" / "config_loader.py"
 )
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
@@ -235,22 +238,8 @@ ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
 )
 ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset({})
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset({})
-ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "infrastructure" / "test_config_dynamic.py",
-    }
-)
 ALLOWED_CONFIG_LOADER_SRC_FILES: frozenset[Path] = frozenset()
-ALLOWED_CONFIG_LOADER_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "infrastructure" / "test_config_dynamic.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "infrastructure"
-        / "test_config_loader_schema_path.py",
-    }
-)
+ALLOWED_CONFIG_LOADER_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES = frozenset(
     {
         ROOT
@@ -603,40 +592,11 @@ def test_registry_module_imports_are_confined_to_dedicated_tests(
 
 
 @pytest.mark.architecture
-@pytest.mark.parametrize(
-    "symbol",
-    (
-        "read_pipeline_config_payload",
-        "normalize_pipeline_config_payload",
-        "_load_source_section",
-    ),
-)
-def test_config_loader_private_compat_helpers_are_confined(
-    symbol: str,
-    source_ast_cache: dict[Path, ast.Module],
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Private config-loader compatibility helpers should not become general APIs."""
-    src_violations = _iter_imported_symbol_violations(
-        source_ast_cache,
-        module_names=frozenset({CONFIG_LOADER_MODULE}),
-        symbol=symbol,
-        allowed_files=frozenset(),
-    )
-    assert not src_violations, (
-        f"{symbol} must stay out of first-party src imports:\n"
-        + "\n".join(src_violations)
-    )
-
-    test_violations = _iter_imported_symbol_violations(
-        test_ast_cache,
-        module_names=frozenset({CONFIG_LOADER_MODULE}),
-        symbol=symbol,
-        allowed_files=ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES,
-    )
-    assert not test_violations, (
-        f"{symbol} leaked beyond dedicated config compatibility coverage:\n"
-        + "\n".join(test_violations)
+def test_config_loader_compat_shim_file_has_been_removed() -> None:
+    """Historical config_loader shim should remain deleted."""
+    assert not CONFIG_LOADER_MODULE_PATH.exists(), (
+        "Legacy config_loader compatibility shim must stay removed: "
+        "src/bioetl/infrastructure/config_loader.py"
     )
 
 
@@ -660,14 +620,14 @@ def test_config_loader_module_is_absent_from_first_party_src_imports(
 def test_config_loader_module_is_confined_to_dedicated_tests(
     test_ast_cache: dict[Path, ast.Module],
 ) -> None:
-    """Ordinary tests must use canonical config seams, not config_loader."""
+    """Tests must not keep importing the removed config_loader shim."""
     violations = _iter_module_import_violations(
         test_ast_cache,
         module_name=CONFIG_LOADER_MODULE,
         allowed_files=ALLOWED_CONFIG_LOADER_TEST_FILES,
     )
     assert not violations, (
-        "config_loader compatibility module leaked beyond dedicated config tests:\n"
+        "config_loader compatibility shim must stay removed from tests:\n"
         + "\n".join(violations)
     )
 

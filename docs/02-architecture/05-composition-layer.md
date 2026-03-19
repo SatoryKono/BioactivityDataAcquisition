@@ -53,7 +53,7 @@ composition/bootstrap/
 | `pipeline.py`        | Сборка pipeline (main entry point)                        |
 | `runner.py`          | Сборка `PipelineRunner`                                   |
 | `runner_assembly.py` | Runner assembly helpers                                   |
-| `config_loader.py`   | Загрузка и валидация YAML-конфигураций                    |
+| `infrastructure.config` / `pipeline_config_api.py` | Загрузка и валидация YAML-конфигураций |
 | `runtime_basics.py`  | Базовые runtime утилиты                                   |
 
 **Composite pipeline bootstrap:**

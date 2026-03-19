@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical run-all command module."""
+"""Public run-all CLI entrypoint backed by the canonical domain module."""
 
 from __future__ import annotations
 

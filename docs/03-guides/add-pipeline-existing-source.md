@@ -109,7 +109,7 @@ python -m scripts.schema validate-configs --verbose
 Config load smoke:
 
 ```bash
-python -c "from bioetl.infrastructure.config_loader import load_pipeline_config; load_pipeline_config('chembl_mechanism'); print('ok')"
+python -c "from bioetl.infrastructure.config import load_pipeline_config; load_pipeline_config('chembl_mechanism'); print('ok')"
 ```
 
 Targeted tests:

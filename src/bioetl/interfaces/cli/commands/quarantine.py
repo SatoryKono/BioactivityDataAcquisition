@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical quarantine command module."""
+"""Public quarantine CLI entrypoint backed by the canonical domain module."""
 
 from __future__ import annotations
 

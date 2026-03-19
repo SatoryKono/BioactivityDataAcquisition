@@ -40,7 +40,7 @@ from bioetl.infrastructure.config.publication_type_classification_loader import 
 
 
 def __getattr__(name: str) -> type:
-    """Lazy imports to break circular dependency with config_loader."""
+    """Lazy imports to keep the public config package cycle-safe."""
     if name == "PipelineConfigLoader":
         from bioetl.infrastructure.config.pipeline_config_loader import (
             PipelineConfigLoader,

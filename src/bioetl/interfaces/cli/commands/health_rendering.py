@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical health rendering module."""
+"""Public health rendering seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

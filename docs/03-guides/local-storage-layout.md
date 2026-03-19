@@ -209,7 +209,7 @@ print(settings.data_dir)  # Path("data")
 
 ### Convention-Based Path Resolution
 
-Pipeline configurations can omit explicit paths. The config loader automatically
+Pipeline configurations can omit explicit paths. The canonical config pipeline automatically
 resolves paths using conventions:
 
 ```yaml
@@ -223,7 +223,7 @@ sink:
     # path defaults to: data/output/gold/chembl/activity
 ```
 
-**Resolution logic** (`src/bioetl/infrastructure/config_loader.py`):
+**Resolution logic** (`src/bioetl/infrastructure/config/pipeline_payload_normalization.py`):
 ```python
 layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
 ```

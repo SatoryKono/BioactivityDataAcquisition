@@ -1,5 +1,5 @@
 %% Title: YAML Configuration Resolution Chain
-%% Covers: unified config path plus still-active normalization compatibility
+%% Covers: unified config path plus canonical staged normalization flow
 %% Rank: 21 (Score 7.38) — Hierarchical config merge underpins every pipeline
 %% Updated: 2026-03-16
 
@@ -28,11 +28,11 @@ flowchart TD
 
     subgraph LOADERS["Infrastructure Config Loaders"]
         direction TB
-        CONFIG_LOADER["ConfigLoader<br/>load_pipeline_config()"]
+        CONFIG_LOADER["config package<br/>load_pipeline_config()"]
         BASE_CONFIG_LOADER["BaseConfigLoader<br/>shared merge helpers"]:::size-md
         DQ_CONFIG_LOADER["DQConfigLoader<br/>hierarchical DQ merge"]:::size-md
         FILTER_CONFIG_LOADER["FilterConfigLoader<br/>hierarchical filter merge"]:::size-md
-        YAML_LOADER["config_loader.py<br/>base + provider + entity + source merge"]:::size-md
+        YAML_LOADER["pipeline_config_api.py<br/>base + provider + entity + source merge"]:::size-md
         LEGACY_NORMALIZE["normalize_pipeline_config_payload()<br/>compat new + legacy shapes"]
     end
 

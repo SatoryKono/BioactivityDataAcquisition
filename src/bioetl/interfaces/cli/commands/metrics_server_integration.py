@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical metrics-server module."""
+"""Public metrics-server integration seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

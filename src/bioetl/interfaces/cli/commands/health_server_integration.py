@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical health-server module."""
+"""Public health-server integration seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical run-composite runtime module."""
+"""Public run-composite runtime seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

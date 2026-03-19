@@ -1,4 +1,4 @@
-"""Compatibility shim aliasing the canonical run result presenter module."""
+"""Public run result presenter seam backed by the canonical domain module."""
 
 from __future__ import annotations
 

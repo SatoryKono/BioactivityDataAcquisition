@@ -1,8 +1,8 @@
-"""Pipeline payload normalization helpers for config-loader orchestration.
+"""Pipeline payload normalization helpers for canonical config orchestration.
 
 Keeps convention defaults, source merging, and legacy/new-shape schema
-normalization behind one infrastructure boundary so ``config_loader`` can stay
-focused on read -> validate -> map orchestration.
+normalization behind one infrastructure boundary used by the staged
+pipeline-config flow.
 """
 
 from __future__ import annotations
