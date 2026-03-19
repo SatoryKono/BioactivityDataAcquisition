@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.services import ConfigService
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 

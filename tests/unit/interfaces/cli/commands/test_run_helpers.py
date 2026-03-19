@@ -11,7 +11,7 @@ import click
 import pytest
 
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,

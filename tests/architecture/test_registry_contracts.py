@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition import PipelineRegistry, create_registry
+from bioetl.composition.registry import get_default_registry
+from bioetl.domain.ports import PipelineFactoryPort
 
 
 class TestRegistryProtocol:
@@ -267,8 +269,6 @@ class TestRegistryFactoryProtocol:
 
     def test_pipeline_factory_protocol_is_runtime_checkable(self) -> None:
         """PipelineFactoryPort must be @runtime_checkable."""
-        from bioetl.composition.registry import PipelineFactoryPort
-
         # Test by attempting isinstance() - non-runtime_checkable raises TypeError
         class DummyImpl:
             """Dummy class for testing isinstance()."""
@@ -285,8 +285,6 @@ class TestRegistryFactoryProtocol:
 
     def test_pipeline_factory_protocol_has_required_attributes(self) -> None:
         """PipelineFactoryPort must define pipeline_name and silver_schema."""
-        from bioetl.composition.registry import PipelineFactoryPort
-
         # Use __annotations__ instead of get_type_hints() to avoid
         # resolving forward references (pa.Schema) at runtime.
         annotations = PipelineFactoryPort.__annotations__
@@ -300,8 +298,6 @@ class TestRegistryFactoryProtocol:
 
     def test_pipeline_factory_protocol_has_create_methods(self) -> None:
         """PipelineFactoryPort must have create_with_services and create_runner."""
-        from bioetl.composition.registry import PipelineFactoryPort
-
         assert hasattr(PipelineFactoryPort, "create_with_services"), (
             "PipelineFactoryPort MUST have create_with_services()"
         )
@@ -330,8 +326,6 @@ class TestDefaultRegistryHelper:
 
     def test_create_registry_returns_new_instance(self) -> None:
         """create_registry() must return a new instance each time."""
-        from bioetl.composition.registry import create_registry
-
         registry1 = create_registry()
         registry2 = create_registry()
         assert registry1 is not registry2, (

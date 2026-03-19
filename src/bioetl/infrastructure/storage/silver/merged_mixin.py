@@ -11,7 +11,7 @@ import pyarrow as pa
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
-from bioetl.infrastructure.storage.silver_writer_merged_operations import (
+from bioetl.infrastructure.storage.silver.merged_operations import (
     _export_silver_merged_csv,
     _MergedSilverWriteRequest,
     _prepare_merged_silver_write,

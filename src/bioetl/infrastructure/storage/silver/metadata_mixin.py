@@ -25,11 +25,11 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.storage.silver_writer_audit_operations import (
+from bioetl.infrastructure.storage.silver.audit_operations import (
     _build_silver_audit_entry,
     _SilverAuditWriteRequest,
 )
-from bioetl.infrastructure.storage.silver_writer_metadata_operations import (
+from bioetl.infrastructure.storage.silver.metadata_operations import (
     _build_silver_write_result,
     _execute_silver_metadata_write,
     _prepare_silver_merged_metadata_write,

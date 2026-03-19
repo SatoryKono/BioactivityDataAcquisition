@@ -8,7 +8,7 @@ import pytest
 
 from bioetl.domain.schemas.column_order import canonical_column_order
 from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
-from bioetl.infrastructure.storage.silver_writer_merged_mixin import (
+from bioetl.infrastructure.storage.silver.merged_mixin import (
     _MergedSilverWriteRequest,
     SilverWriterMergedMixin,
 )

@@ -45,7 +45,7 @@ class TestSilverWriterInit:
         from bioetl.domain.medallion import WriteModePolicy
         from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
         from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
-        from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+        from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
         )
         from bioetl.infrastructure.storage.write_resilience import (
@@ -82,7 +82,7 @@ class TestSilverWriterInit:
         """Runtime helper should preserve explicitly provided dependencies."""
         from bioetl.domain.medallion import WriteModePolicy
         from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
-        from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+        from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
         )
         from bioetl.infrastructure.storage.write_resilience import (
@@ -129,7 +129,7 @@ class TestSilverWriterValidation:
             SilverWriteMode,
             SilverWriter,
         )
-        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+        from bioetl.infrastructure.storage.silver.validation_mixin import (
             _SilverWritePreparationRequest,
         )
 
@@ -171,7 +171,7 @@ class TestSilverWriterValidation:
 
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+        from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteExecutionContext,
             _SilverWriteInvocation,
             execute_silver_write_with_tracing,
@@ -268,7 +268,7 @@ class TestSilverWriterValidation:
 
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+        from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteExecutionContext,
             _SilverWriteInvocation,
             execute_silver_write_with_tracing,
@@ -334,7 +334,7 @@ class TestSilverWriterValidation:
 
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+        from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteExecutionContext,
             _SilverWriteInvocation,
             execute_silver_write_with_tracing,
@@ -399,12 +399,12 @@ class TestSilverWriterValidation:
         import pyarrow as pa
 
         from bioetl.domain.medallion import SilverWriteMode
-        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+        from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteExecutionContext,
             _SilverWriteInvocation,
             execute_silver_write_pipeline,
         )
-        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+        from bioetl.infrastructure.storage.silver.validation_mixin import (
             _PreparedSilverWritePayload,
         )
 
@@ -494,13 +494,13 @@ class TestSilverWriterValidation:
             SilverWriter,
             _SilverWriteExecutionContext,
         )
-        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+        from bioetl.infrastructure.storage.silver.pipeline_helpers import (
             _SilverWriteInvocation,
         )
-        from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
+        from bioetl.infrastructure.storage.silver.delta_mixin import (
             _DeltaWriteRequest,
         )
-        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+        from bioetl.infrastructure.storage.silver.validation_mixin import (
             _PreparedSilverWritePayload,
         )
 

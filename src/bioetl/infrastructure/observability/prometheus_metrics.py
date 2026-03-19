@@ -6,193 +6,20 @@ Prometheus client library.
 
 from __future__ import annotations
 
-__all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
-
-
-from bioetl.domain.observability_contract import normalize_observability_metric_labels
 from bioetl.domain.ports import MetricLabels, MetricsPort, resolve_metric_labels
-from bioetl.infrastructure.observability.metrics import (
-    ADAPTER_BATCH_SIZE,
-    ADAPTER_DROPPED_DUPLICATES_TOTAL,
-    ADAPTER_ERROR_TAXONOMY_TOTAL,
-    ADAPTER_FALLBACK_ATTEMPTS_TOTAL,
-    ADAPTER_FALLBACK_HIT_RATE,
-    ADAPTER_FALLBACK_HITS_TOTAL,
-    ADAPTER_REQUEST_DURATION_SECONDS,
-    ADAPTER_REQUEST_P95_SECONDS,
-    ADAPTER_REQUESTS_TOTAL,
-    ARCHIVE_DURATION_SECONDS,
-    ARCHIVE_FILES_TOTAL,
-    BATCH_SIZE_RECORDS,
-    BRONZE_BYTES_WRITTEN_TOTAL,
-    BRONZE_RECORDS_WRITTEN_TOTAL,
-    BRONZE_WRITE_DURATION_SECONDS,
-    CIRCUIT_BREAKER_FAILURE_TOTAL,
-    CIRCUIT_BREAKER_STATE,
-    CIRCUIT_BREAKER_SUCCESS_TOTAL,
-    CIRCUIT_BREAKER_TRIPS_TOTAL,
-    DATA_FRESHNESS_SECONDS,
-    DATA_SOURCE_RETRIES_TOTAL,
-    DATA_SOURCE_RETRY_EXHAUSTED_TOTAL,
-    DQ_ANOMALY_DETECTED,
-    DQ_BASELINE_SAMPLES,
-    DQ_BASELINE_UPDATED,
-    DQ_CHECK_DURATION_MS,
-    DQ_RECORDS_QUARANTINED_TOTAL,
-    DQ_SOFT_THRESHOLD_EXCEEDED,
-    DQ_VALIDATION_FAILURES_TOTAL,
-    DQ_VALIDATION_SCORE,
-    ERRORS_TOTAL,
-    FILTER_COMBINATIONS_LOADED_TOTAL,
-    FILTER_IDS_DUPLICATES_TOTAL,
-    FILTER_IDS_LOADED_TOTAL,
-    HEALTH_CHECK_DURATION_SECONDS,
-    HEALTH_CHECK_FAILURES_TOTAL,
-    HEALTH_CHECK_LATENCY_MS,
-    HEALTH_CHECK_LATENCY_SECONDS,
-    HEALTH_CHECK_MODE_LATENCY_MS,
-    HEALTH_CHECK_MODE_STATUS,
-    HEALTH_CHECK_STATUS,
-    HEALTH_CHECK_SUCCESS_TOTAL,
-    HTTP_REQUEST_DURATION_SECONDS,
-    HTTP_REQUEST_ERRORS_TOTAL,
-    HTTP_RETRIES_TOTAL,
-    INFRASTRUCTURE_VALIDATED,
-    OBSERVABILITY_EVENTS_TOTAL,
-    PHASE_DURATION_SECONDS,
-    PIPELINE_DURATION_SECONDS,
-    PIPELINE_HEALTH_CHECK_PASSED,
-    PIPELINE_RUNS_TOTAL,
-    POLICY_VIOLATIONS_TOTAL,
-    PREFLIGHT_CONFIG_ERRORS_TOTAL,
-    PREFLIGHT_MEDALLION_POLICY_VALID,
-    PROBE_MODE_FALLBACK_TOTAL,
-    PROVIDER_HEALTH_STATUS,
-    QUARANTINE_RECORDS_TOTAL,
-    RATE_LIMITER_TOKENS_AVAILABLE,
-    RATE_LIMITER_WAIT_SECONDS,
-    RECORDS_PROCESSED_TOTAL,
-    SHUTDOWN_COMPLETED,
-    SHUTDOWN_INITIATED,
-    SILVER_VALIDATION_FAILURES_TOTAL,
-    STORAGE_OPTIMIZATION_TOTAL,
-    TRANSFORM_DURATION_SECONDS,
-    TRANSFORM_ERRORS_TOTAL,
-    VACUUM_DURATION_SECONDS,
-    VACUUM_FILES_REMOVED_TOTAL,
+from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+    normalize_dq_severity,
+    normalize_dq_stage,
+    normalize_metric_dispatch_labels,
+    normalize_quarantine_reason,
+)
+from bioetl.infrastructure.observability.prometheus_metric_registries import (
+    COUNTERS,
+    GAUGES,
+    HISTOGRAMS,
 )
 
-_ALLOWED_REASON_LABELS = frozenset(
-    {
-        "cross_validation",
-        "filtered_out_silver",
-        "data_quality",
-        "schema_validation",
-        "transform_error",
-        "validation_error",
-        "other",
-    }
-)
-_ALLOWED_STAGE_LABELS = frozenset(
-    {
-        "validation",
-        "threshold",
-        "transform",
-        "silver",
-        "gold",
-        "postrun",
-        "other",
-    }
-)
-_ALLOWED_SEVERITY_LABELS = frozenset(
-    {"soft_fail", "hard_fail", "warning", "error", "other"}
-)
-
-
-def _normalize_label(value: str, allowed_values: frozenset[str]) -> str:
-    normalized = value.strip().lower().replace("-", "_").replace(" ", "_")
-    return normalized if normalized in allowed_values else "other"
-
-
-# Registry of histogram metrics
-HISTOGRAMS = {
-    "pipeline_duration_seconds": PIPELINE_DURATION_SECONDS,
-    "batch_size_records": BATCH_SIZE_RECORDS,
-    "vacuum_duration_seconds": VACUUM_DURATION_SECONDS,
-    "archive_duration_seconds": ARCHIVE_DURATION_SECONDS,
-    "dq_check_duration_ms": DQ_CHECK_DURATION_MS,
-    "bioetl_phase_duration_seconds": PHASE_DURATION_SECONDS,
-    "health_check_duration_seconds": HEALTH_CHECK_DURATION_SECONDS,
-    "health_check_latency_ms": HEALTH_CHECK_LATENCY_MS,
-    "health_check_mode_latency_ms": HEALTH_CHECK_MODE_LATENCY_MS,
-    "health_check_latency_seconds": HEALTH_CHECK_LATENCY_SECONDS,
-    "transform_duration_seconds": TRANSFORM_DURATION_SECONDS,
-    "adapter_request_duration_seconds": ADAPTER_REQUEST_DURATION_SECONDS,
-    "adapter_batch_size": ADAPTER_BATCH_SIZE,
-    "http_request_duration_seconds": HTTP_REQUEST_DURATION_SECONDS,
-    "bioetl_rate_limiter_wait_seconds": RATE_LIMITER_WAIT_SECONDS,
-    "bronze_write_duration_seconds": BRONZE_WRITE_DURATION_SECONDS,
-}
-
-# Registry of counter metrics
-COUNTERS = {
-    "records_processed_total": RECORDS_PROCESSED_TOTAL,
-    "errors_total": ERRORS_TOTAL,
-    "filter_ids_loaded_total": FILTER_IDS_LOADED_TOTAL,
-    "filter_ids_duplicates_total": FILTER_IDS_DUPLICATES_TOTAL,
-    "dq_records_quarantined_total": DQ_RECORDS_QUARANTINED_TOTAL,
-    "circuit_breaker_trips_total": CIRCUIT_BREAKER_TRIPS_TOTAL,
-    "circuit_breaker_success_total": CIRCUIT_BREAKER_SUCCESS_TOTAL,
-    "circuit_breaker_failure_total": CIRCUIT_BREAKER_FAILURE_TOTAL,
-    "vacuum_files_removed_total": VACUUM_FILES_REMOVED_TOTAL,
-    "archive_files_total": ARCHIVE_FILES_TOTAL,
-    "dq_anomaly_detected": DQ_ANOMALY_DETECTED,
-    "dq_baseline_updated": DQ_BASELINE_UPDATED,
-    "bioetl_pipeline_runs_total": PIPELINE_RUNS_TOTAL,
-    "dq_soft_threshold_exceeded": DQ_SOFT_THRESHOLD_EXCEEDED,
-    "shutdown_initiated": SHUTDOWN_INITIATED,
-    "shutdown_completed": SHUTDOWN_COMPLETED,
-    "storage_optimization_total": STORAGE_OPTIMIZATION_TOTAL,
-    "filter_combinations_loaded_total": FILTER_COMBINATIONS_LOADED_TOTAL,
-    "transform_errors_total": TRANSFORM_ERRORS_TOTAL,
-    "adapter_requests_total": ADAPTER_REQUESTS_TOTAL,
-    "adapter_dropped_duplicates_total": ADAPTER_DROPPED_DUPLICATES_TOTAL,
-    "adapter_fallback_attempts_total": ADAPTER_FALLBACK_ATTEMPTS_TOTAL,
-    "adapter_fallback_hits_total": ADAPTER_FALLBACK_HITS_TOTAL,
-    "adapter_error_taxonomy_total": ADAPTER_ERROR_TAXONOMY_TOTAL,
-    "data_source_retries_total": DATA_SOURCE_RETRIES_TOTAL,
-    "data_source_retry_exhausted_total": DATA_SOURCE_RETRY_EXHAUSTED_TOTAL,
-    "health_check_success_total": HEALTH_CHECK_SUCCESS_TOTAL,
-    "health_check_failures_total": HEALTH_CHECK_FAILURES_TOTAL,
-    "probe_mode_fallback_total": PROBE_MODE_FALLBACK_TOTAL,
-    "http_retries_total": HTTP_RETRIES_TOTAL,
-    "http_request_errors_total": HTTP_REQUEST_ERRORS_TOTAL,
-    "bronze_records_written_total": BRONZE_RECORDS_WRITTEN_TOTAL,
-    "bronze_bytes_written_total": BRONZE_BYTES_WRITTEN_TOTAL,
-    "policy_violations_total": POLICY_VIOLATIONS_TOTAL,
-    "silver_validation_failures_total": SILVER_VALIDATION_FAILURES_TOTAL,
-    "quarantine_records_total": QUARANTINE_RECORDS_TOTAL,
-    "dq_validation_failures_total": DQ_VALIDATION_FAILURES_TOTAL,
-    "observability_events_total": OBSERVABILITY_EVENTS_TOTAL,
-}
-
-# Registry of gauge metrics
-GAUGES = {
-    "circuit_breaker_state": CIRCUIT_BREAKER_STATE,
-    "dq_baseline_samples": DQ_BASELINE_SAMPLES,
-    "dq_validation_score": DQ_VALIDATION_SCORE,
-    "data_freshness_seconds": DATA_FRESHNESS_SECONDS,
-    "pipeline_health_check_passed": PIPELINE_HEALTH_CHECK_PASSED,
-    "infrastructure_validated": INFRASTRUCTURE_VALIDATED,
-    "health_check_status": HEALTH_CHECK_STATUS,
-    "health_check_mode_status": HEALTH_CHECK_MODE_STATUS,
-    "preflight_medallion_policy_valid": PREFLIGHT_MEDALLION_POLICY_VALID,
-    "preflight_config_errors_total": PREFLIGHT_CONFIG_ERRORS_TOTAL,
-    "provider_health_status": PROVIDER_HEALTH_STATUS,
-    "adapter_request_p95_seconds": ADAPTER_REQUEST_P95_SECONDS,
-    "adapter_fallback_hit_rate": ADAPTER_FALLBACK_HIT_RATE,
-    "bioetl_rate_limiter_tokens_available": RATE_LIMITER_TOKENS_AVAILABLE,
-}
+__all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
 
 
 class PrometheusMetrics(MetricsPort):
@@ -259,13 +86,9 @@ class PrometheusMetrics(MetricsPort):
             tags=tags,
         )
         if name in COUNTERS:
-            if name == "observability_events_total":
-                normalized_labels = normalize_observability_metric_labels(
-                    resolved_labels
-                )
-                COUNTERS[name].labels(**normalized_labels).inc(value)
-                return
-            COUNTERS[name].labels(**resolved_labels).inc(value)
+            COUNTERS[name].labels(
+                **normalize_metric_dispatch_labels(name, resolved_labels)
+            ).inc(value)
 
     def set_gauge(
         self,
@@ -303,7 +126,7 @@ class PrometheusMetrics(MetricsPort):
             reason: Reason description.
             count: Count.
         """
-        bounded_reason = _normalize_label(reason, _ALLOWED_REASON_LABELS)
+        bounded_reason = normalize_quarantine_reason(reason)
         self.increment_counter(
             "quarantine_records_total",
             count,
@@ -325,8 +148,8 @@ class PrometheusMetrics(MetricsPort):
             severity: Severity.
             count: Count.
         """
-        bounded_stage = _normalize_label(stage, _ALLOWED_STAGE_LABELS)
-        bounded_severity = _normalize_label(severity, _ALLOWED_SEVERITY_LABELS)
+        bounded_stage = normalize_dq_stage(stage)
+        bounded_severity = normalize_dq_severity(severity)
         self.increment_counter(
             "dq_validation_failures_total",
             count,

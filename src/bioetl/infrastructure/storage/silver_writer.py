@@ -26,35 +26,35 @@ from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
 )
-from bioetl.infrastructure.storage.silver_writer_arrow_mixin import (
+from bioetl.infrastructure.storage.silver.arrow_mixin import (
     SilverWriterArrowMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
+from bioetl.infrastructure.storage.silver.delta_mixin import (
     SilverWriterDeltaMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_maintenance_mixin import (
+from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_merged_mixin import (
+from bioetl.infrastructure.storage.silver.merged_mixin import (
     SilverWriterMergedMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
+from bioetl.infrastructure.storage.silver.metadata_mixin import (
     SilverWriterMetadataMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
     execute_silver_write_pipeline,
     execute_silver_write_with_tracing,
 )
-from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
+from bioetl.infrastructure.storage.silver.postwrite_mixin import (
     SilverWriterPostwriteMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     build_silver_writer_runtime_services,
 )
-from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+from bioetl.infrastructure.storage.silver.validation_mixin import (
     SilverWriterValidationMixin,
 )
 from bioetl.infrastructure.storage.write_resilience import (

@@ -7,12 +7,12 @@ import re
 
 import pytest
 
+from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import (
     PIPELINE_CONFIGS,
     list_available_pipelines,
     register_all_pipelines,
 )
-from bioetl.composition.registry import PipelineRegistry, create_registry
 
 
 @pytest.fixture

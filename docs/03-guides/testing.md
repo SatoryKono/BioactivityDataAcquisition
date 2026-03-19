@@ -70,6 +70,15 @@ test для модуля.
 - `cluster_owner`: модуль intentionally owned через focused aggregate suite, и это
   должно быть явно перечислено в inventory.
 
+Для stable façade и arch-owned seams есть отдельный inventory:
+
+- `configs/quality/source_test_facade_inventory.yaml`
+- `tests/architecture/test_source_test_facade_ownership.py`
+
+Этот слой зарезервирован для package facades, retained canonical entrypoints и
+compatibility facades, где mirror-path `test_<module>.py` был бы ложным сигналом,
+а реальный owner живёт в contract или architecture suite.
+
 ### 2.2. Integration Tests (`tests/integration/`)
 
 Проверка взаимодействия компонентов с внешними API и хранилищем.

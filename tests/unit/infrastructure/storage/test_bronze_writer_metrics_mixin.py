@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.infrastructure.storage.bronze_writer_metrics_mixin import (
+from bioetl.infrastructure.storage.bronze.metrics_mixin import (
     BronzeWriterMetricsMixin,
 )
 

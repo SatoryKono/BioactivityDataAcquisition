@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 
 
 # =============================================================================

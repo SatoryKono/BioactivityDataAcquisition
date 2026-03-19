@@ -422,7 +422,7 @@ class TestSilverWriterErrorHandling:
                 side_effect=asyncio.TimeoutError,
             ),
             patch(
-                "bioetl.infrastructure.storage.silver_writer_merge_resilience_helpers.asyncio.sleep",
+                "bioetl.infrastructure.storage.silver.merge_resilience_helpers.asyncio.sleep",
                 new=AsyncMock(),
             ),
         ):

@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import pyarrow as pa
 
-from bioetl.infrastructure.storage.silver_writer_delta_helpers import _DeltaWriteRequest
-from bioetl.infrastructure.storage.silver_writer_validation_operations import (
+from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
 

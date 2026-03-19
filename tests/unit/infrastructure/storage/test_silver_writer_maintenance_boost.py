@@ -12,7 +12,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
-from bioetl.infrastructure.storage.silver_writer_maintenance_mixin import (
+from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
 )
 

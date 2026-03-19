@@ -586,19 +586,19 @@ def test_cross_layer_group_edges_total_budget() -> None:
 def test_silver_merge_resilience_instrumented() -> None:
     """Silver merge resilience must have retry policy and observability hooks."""
     resilience = Path("src/bioetl/infrastructure/storage/write_resilience.py")
-    delta_mixin = Path("src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py")
+    delta_mixin = Path("src/bioetl/infrastructure/storage/silver/delta_mixin.py")
     delta_helpers = Path(
-        "src/bioetl/infrastructure/storage/silver_writer_delta_helpers.py"
+        "src/bioetl/infrastructure/storage/silver/delta_helpers.py"
     )
     merge_resilience_helpers = Path(
-        "src/bioetl/infrastructure/storage/silver_writer_merge_resilience_helpers.py"
+        "src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py"
     )
 
     assert resilience.exists(), "write_resilience.py not found"
-    assert delta_mixin.exists(), "silver_writer_delta_mixin.py not found"
-    assert delta_helpers.exists(), "silver_writer_delta_helpers.py not found"
+    assert delta_mixin.exists(), "silver/delta_mixin.py not found"
+    assert delta_helpers.exists(), "silver/delta_helpers.py not found"
     assert merge_resilience_helpers.exists(), (
-        "silver_writer_merge_resilience_helpers.py not found"
+        "silver/merge_resilience_helpers.py not found"
     )
 
     res_content = resilience.read_text(encoding="utf-8")

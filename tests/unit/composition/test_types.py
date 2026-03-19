@@ -103,7 +103,7 @@ class TestTypesReExports:
 
     def test_pipeline_registry_is_same(self) -> None:
         """PipelineRegistry from types is same as from registry."""
-        from bioetl.composition.registry import PipelineRegistry as DirectRegistry
+        from bioetl.composition import PipelineRegistry as DirectRegistry
         from bioetl.composition.types import PipelineRegistry as ReExportedRegistry
 
         assert DirectRegistry is ReExportedRegistry
@@ -117,17 +117,17 @@ class TestTypesReExports:
 
     def test_create_registry_is_same(self) -> None:
         """create_registry from types is same as from registry."""
-        from bioetl.composition.registry import create_registry as direct_fn
+        from bioetl.composition import create_registry as direct_fn
         from bioetl.composition.types import create_registry as reexported_fn
 
         assert direct_fn is reexported_fn
 
     def test_get_default_registry_is_same(self) -> None:
-        """get_default_registry from types is same as from registry."""
+        """get_default_registry from types returns the same shared instance."""
         from bioetl.composition.registry import get_default_registry as direct_fn
         from bioetl.composition.types import get_default_registry as reexported_fn
 
-        assert direct_fn is reexported_fn
+        assert direct_fn() is reexported_fn()
 
 
 class TestTypesUsability:

@@ -10,7 +10,7 @@ from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import DeltaTransactionError
-from bioetl.infrastructure.storage.silver_writer_delta_helpers import (
+from bioetl.infrastructure.storage.silver.delta_helpers import (
     _DeltaWriteRequest,
     _load_delta_table,
     _MergeExecutionTimeoutError,

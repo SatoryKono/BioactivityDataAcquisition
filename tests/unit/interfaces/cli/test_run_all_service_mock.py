@@ -17,11 +17,11 @@ from click.testing import CliRunner
 
 from bioetl.application.services import (
     PipelineNotFoundError,
-    RunOptions,
     RunResult,
+    RunOptions,
     PipelineRunResult,
 )
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 from bioetl.interfaces.cli.commands.run_all import (
     _run_all_pipelines_async,
 )

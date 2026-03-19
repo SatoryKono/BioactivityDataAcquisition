@@ -17,7 +17,7 @@ def test_create_registry_delegates_to_composition_registry() -> None:
     registry = MagicMock()
 
     with patch(
-        "bioetl.composition.registry.create_registry",
+        "bioetl.composition.create_registry",
         return_value=registry,
     ) as mock_create_registry:
         result = registry_helpers.create_registry()

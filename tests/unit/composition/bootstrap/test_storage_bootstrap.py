@@ -18,7 +18,7 @@ from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_vacuum_service,
 )
 from bioetl.composition.factories.storage import StorageAdapter
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition import PipelineRegistry
 
 
 @pytest.mark.unit

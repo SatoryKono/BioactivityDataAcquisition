@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
 
-from bioetl.infrastructure.storage.silver_writer_delta_helpers import (
+from bioetl.infrastructure.storage.silver.delta_helpers import (
     _build_dispatch_policy,
     _DeltaWriteRequest,
     _dispatch_request_by_mode,
@@ -16,7 +16,7 @@ from bioetl.infrastructure.storage.silver_writer_delta_helpers import (
     _merge_records_with_timeout,
     _write_plain_delta_request,
 )
-from bioetl.infrastructure.storage.silver_writer_merge_resilience_helpers import (
+from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
     _emit_merge_final_event,
     _emit_merge_retry_event,
     _execute_merge_write_request,
