@@ -6,18 +6,14 @@ from typing import Any
 import pytest
 import yaml
 
-from bioetl.infrastructure.config import load_pipeline_config
-from bioetl.infrastructure.config_loader import (
-    load_pipeline_config as load_pipeline_config_cached,
-)
-from bioetl.infrastructure.config_loader import (
-    load_source_config,
-)
+from bioetl.infrastructure.config import load_pipeline_config, load_source_config
 from bioetl.infrastructure.config.source_normalizers.source import (
     normalize_source_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+load_pipeline_config_cached = load_pipeline_config
 
 
 def _minimal_unified_schema() -> dict[str, Any]:
@@ -692,7 +688,9 @@ def test_load_source_section_reuses_canonical_source_loader(
     tmp_path,
 ):
     """Source merge should reuse the canonical source loader output."""
-    from bioetl.infrastructure.config_loader import _load_source_section
+    from bioetl.infrastructure.config.pipeline_payload_normalization import (
+        load_source_section as _load_source_section,
+    )
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
     config = {
@@ -750,7 +748,9 @@ def test_load_source_section_rejects_pipeline_source_pagination_overrides(
     expected_fragment: str,
 ) -> None:
     """Pipeline source merges must reject direct pagination override seams."""
-    from bioetl.infrastructure.config_loader import _load_source_section
+    from bioetl.infrastructure.config.pipeline_payload_normalization import (
+        load_source_section as _load_source_section,
+    )
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
     config = {

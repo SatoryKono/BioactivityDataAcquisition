@@ -26,20 +26,25 @@ ALLOWED_STATUSES = frozenset(
 )
 INVENTORY_ROW_CELL_COUNT = 10
 
-REQUIRED_PATHS = frozenset(
+REQUIRED_TRANSITION_DEBT_PATHS = frozenset(
+    {
+        "src/bioetl/interfaces/cli/registry_helpers.py",
+        "src/bioetl/composition/registry.py",
+        "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py",
+    }
+)
+REQUIRED_RETAINED_ENTRYPOINT_PATHS = frozenset(
     {
         "src/bioetl/domain/composite/config.py",
         "src/bioetl/domain/value_objects/activity_values.py",
         "src/bioetl/domain/value_objects/publication_field_groups.py",
         "src/bioetl/composition/entrypoints.py",
-        "src/bioetl/interfaces/cli/registry_helpers.py",
-        "src/bioetl/composition/registry.py",
-        "src/bioetl/infrastructure/config_loader.py",
         "src/bioetl/application/composite/merger.py",
         "src/bioetl/infrastructure/adapters/pubmed/client.py",
         "src/bioetl/infrastructure/adapters/semanticscholar/client.py",
     }
 )
+REQUIRED_PATHS = REQUIRED_TRANSITION_DEBT_PATHS | REQUIRED_RETAINED_ENTRYPOINT_PATHS
 
 MEASURED_DOCSTRING_PREFIXES = (
     "Backward-compatible ",
@@ -103,6 +108,25 @@ def _extract_measured_registry_paths(text: str) -> set[str]:
     }
 
 
+def _extract_inventory_section(text: str, heading: str) -> str:
+    lines = text.splitlines()
+    collected: list[str] = []
+    in_section = False
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped == heading:
+            in_section = True
+            continue
+        if in_section and (stripped.startswith("### ") or stripped.startswith("## ")):
+            break
+        if in_section:
+            collected.append(line)
+
+    assert collected, f"Missing inventory section: {heading}"
+    return "\n".join(collected)
+
+
 def _iter_measured_registry_paths() -> set[str]:
     paths = set(REQUIRED_PATHS)
 
@@ -133,6 +157,8 @@ def test_inventory_doc_exists_with_required_sections() -> None:
         "## Governance Freeze",
         "## Mandatory Artifact Sync",
         "## Inventory",
+        "### Transition Debt Ledger",
+        "### Retained Public Entrypoints",
         "## Measured Registry",
     ):
         assert heading in text, f"Missing heading in inventory doc: {heading}"
@@ -183,6 +209,39 @@ def test_inventory_doc_covers_curated_facade_modules() -> None:
         assert (ROOT / path).exists(), (
             f"Inventory references a missing source file: {path}"
         )
+
+
+@pytest.mark.architecture
+def test_inventory_doc_splits_transition_debt_from_retained_entrypoints() -> None:
+    """Inventory doc must keep transition debt and retained entrypoints in separate ledgers."""
+    text = INVENTORY_DOC.read_text(encoding="utf-8")
+    transition_rows = dict(
+        _extract_inventory_rows(
+            _extract_inventory_section(text, "### Transition Debt Ledger")
+        )
+    )
+    retained_rows = dict(
+        _extract_inventory_rows(
+            _extract_inventory_section(text, "### Retained Public Entrypoints")
+        )
+    )
+
+    assert set(transition_rows) == REQUIRED_TRANSITION_DEBT_PATHS, (
+        "Transition debt ledger drifted from the expected compat-debt scope.\n"
+        + "\n".join(sorted(set(transition_rows) ^ REQUIRED_TRANSITION_DEBT_PATHS))
+    )
+    assert set(retained_rows) == REQUIRED_RETAINED_ENTRYPOINT_PATHS, (
+        "Retained public-entrypoint ledger drifted from the expected sanctioned scope.\n"
+        + "\n".join(sorted(set(retained_rows) ^ REQUIRED_RETAINED_ENTRYPOINT_PATHS))
+    )
+
+    assert all(
+        status in {"deprecated-warn", "compat-shim", "mixed-module"}
+        for status in transition_rows.values()
+    ), "Transition debt ledger must contain only true compatibility-debt statuses."
+    assert all(
+        status == "retained-entrypoint" for status in retained_rows.values()
+    ), "Retained public-entrypoint ledger must contain only retained-entrypoint rows."
 
 
 @pytest.mark.architecture
@@ -333,18 +392,6 @@ def test_registry_config_and_merge_transition_rows_capture_compatibility_policy(
                 "`bioetl.composition.registry` stay at zero in first-party `src`",
             ),
         },
-        "src/bioetl/infrastructure/config_loader.py": {
-            "status": "compat-shim",
-            "migration_snippets": (
-                "bioetl.infrastructure.config",
-                "bioetl.infrastructure.config.pipeline_config_api",
-            ),
-            "allowed_call_site_snippets": (
-                "tests/unit/infrastructure/test_config_dynamic.py",
-                "tests/unit/infrastructure/test_config_loader_schema_path.py",
-                "ordinary contract/architecture tests load configs through `bioetl.infrastructure.config`",
-            ),
-        },
         "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py": {
             "status": "compat-shim",
             "migration_snippets": (
@@ -415,6 +462,11 @@ def test_inventory_doc_tracks_measured_compatibility_registry() -> None:
 
     measured_only_count = len(expected_paths - inventory_paths)
     assert f"- Curated inventory rows: `{len(inventory_paths)}`" in text
+    assert f"- Transition debt rows: `{len(REQUIRED_TRANSITION_DEBT_PATHS)}`" in text
+    assert (
+        f"- Retained public entrypoints: `{len(REQUIRED_RETAINED_ENTRYPOINT_PATHS)}`"
+        in text
+    )
     assert f"- Measured tracked modules: `{len(expected_paths)}`" in text
     assert (
         f"- Measured-only modules outside curated inventory: `{measured_only_count}`"
