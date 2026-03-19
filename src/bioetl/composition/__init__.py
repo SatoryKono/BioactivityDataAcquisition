@@ -25,8 +25,8 @@ from bioetl.composition.registry import (
     PipelineDefinition,
     PipelineRegistry,
     create_registry,
-    get_default_registry,
 )
+from bioetl.composition.registry_default import get_default_registry
 
 __all__ = [
     "PipelineDefinition",

@@ -2,22 +2,16 @@
 
 MOVED to composition layer to fix dependency direction.
 
-This module provides an instance-level PipelineRegistry for:
+This module provides the canonical instance-level ``PipelineRegistry`` for:
 - Test isolation (each test can have its own registry)
 - Parallel test execution without clear()
 - Proper DI through composition root
-
-A shared default global instance is provided only as a compatibility seam.
 """
 
 from __future__ import annotations
 
 import threading
 from typing import TYPE_CHECKING, NamedTuple
-
-from bioetl.composition.registry_default import (
-    get_default_registry as _compat_get_default_registry,
-)
 from bioetl.domain.ports import PipelineFactoryPort
 
 if TYPE_CHECKING:
@@ -28,7 +22,6 @@ __all__ = [
     "PipelineFactoryPort",
     "PipelineRegistry",
     "create_registry",
-    "get_default_registry",
 ]
 
 
@@ -210,22 +203,6 @@ class PipelineRegistry:
         """
         with self._lock:
             self._registry.clear()
-
-
-def get_default_registry() -> PipelineRegistry:
-    """Get the compatibility-only shared default registry instance.
-
-    The shared singleton implementation lives in a dedicated compatibility
-    helper so this module stays focused on the canonical instance API.
-    For tests, prefer creating a new PipelineRegistry() instance via
-    :func:`create_registry`. New first-party runtime wiring should treat
-    this function as a transitional compatibility seam.
-
-    Returns:
-        The compatibility-only shared PipelineRegistry instance.
-    """
-    return _compat_get_default_registry()
-
 
 def create_registry() -> PipelineRegistry:
     """Create a new isolated registry instance.
