@@ -82,7 +82,7 @@ def _validate_tanimoto(value: float | None, field_name: str) -> None:
 
 
 @dataclass(frozen=True, kw_only=True)
-class DocumentSimilarity(BaseEntity):
+class ChemblPublicationSimilarity(BaseEntity):
     """Represents similarity between two ChEMBL documents."""
 
     sim_id: int
@@ -157,7 +157,7 @@ class ProteinClassification(BaseEntity):
 
 
 __all__ = [
-    "DocumentSimilarity",
+    "ChemblPublicationSimilarity",
     "Molecule",
     "ProteinClassification",
 ]

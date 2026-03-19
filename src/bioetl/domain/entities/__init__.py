@@ -43,8 +43,8 @@ from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
     ChemblPublication,
-    DocumentSimilarity,
-    DocumentTerm,
+    ChemblPublicationSimilarity,
+    ChemblPublicationTerm,
     Molecule,
     ProteinClassification,
     Target,
@@ -99,8 +99,8 @@ __all__ = [
     "ChemblPublicationTermRecord",
     "CompoundRecord",  # ChEMBL compound_record (molecule-document link)
     "CrossRefPublicationEntity",
-    "DocumentSimilarity",
-    "DocumentTerm",
+    "ChemblPublicationSimilarity",
+    "ChemblPublicationTerm",
     "Molecule",
     "MoleculeRecord",
     "OpenAlexPublicationEntity",

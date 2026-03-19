@@ -5,12 +5,12 @@ from __future__ import annotations
 from bioetl.domain.entities.chembl_structures_foundation import (
     CellLine,
     ChemblPublication,
-    DocumentTerm,
+    ChemblPublicationTerm,
     Target,
     TargetComponent,
 )
 from bioetl.domain.entities.chembl_structures_molecules import (
-    DocumentSimilarity,
+    ChemblPublicationSimilarity,
     Molecule,
     ProteinClassification,
 )
@@ -18,8 +18,8 @@ from bioetl.domain.entities.chembl_structures_molecules import (
 __all__ = [
     "CellLine",
     "ChemblPublication",
-    "DocumentSimilarity",
-    "DocumentTerm",
+    "ChemblPublicationSimilarity",
+    "ChemblPublicationTerm",
     "Molecule",
     "ProteinClassification",
     "Target",

@@ -1,4 +1,4 @@
-"""Unit tests for ChEMBL structural entities — Target, Molecule, DocumentTerm, etc."""
+"""Unit tests for ChEMBL structural entities — Target, Molecule, ChemblPublicationTerm, etc."""
 
 from __future__ import annotations
 
@@ -18,12 +18,12 @@ BASE_KWARGS = {
 
 @pytest.mark.unit
 class TestDocumentTerm:
-    """Tests for DocumentTerm entity."""
+    """Tests for ChemblPublicationTerm entity."""
 
     def test_valid_creation(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
-        dt = DocumentTerm(
+        dt = ChemblPublicationTerm(
             **BASE_KWARGS,
             publication_id="CHEMBL1125145",
             term="Aspirin",
@@ -34,9 +34,9 @@ class TestDocumentTerm:
         assert dt.mesh_id is None
 
     def test_valid_mesh_heading(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
-        dt = DocumentTerm(
+        dt = ChemblPublicationTerm(
             **BASE_KWARGS,
             publication_id="CHEMBL1",
             term="Kinases",
@@ -48,10 +48,10 @@ class TestDocumentTerm:
         assert dt.qualifier == "pharmacology"
 
     def test_empty_publication_id_raises(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
         with pytest.raises(ValueError, match="Document ChEMBL ID is required"):
-            DocumentTerm(
+            ChemblPublicationTerm(
                 **BASE_KWARGS,
                 publication_id="",
                 term="Test",
@@ -59,10 +59,10 @@ class TestDocumentTerm:
             )
 
     def test_empty_term_raises(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
         with pytest.raises(ValueError, match="Term text is required"):
-            DocumentTerm(
+            ChemblPublicationTerm(
                 **BASE_KWARGS,
                 publication_id="CHEMBL1",
                 term="",
@@ -70,10 +70,10 @@ class TestDocumentTerm:
             )
 
     def test_empty_term_type_raises(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
         with pytest.raises(ValueError, match="Term type is required"):
-            DocumentTerm(
+            ChemblPublicationTerm(
                 **BASE_KWARGS,
                 publication_id="CHEMBL1",
                 term="Test",
@@ -81,10 +81,10 @@ class TestDocumentTerm:
             )
 
     def test_invalid_term_type_raises(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
         with pytest.raises(ValueError, match="term_type must be one of"):
-            DocumentTerm(
+            ChemblPublicationTerm(
                 **BASE_KWARGS,
                 publication_id="CHEMBL1",
                 term="Test",
@@ -96,9 +96,9 @@ class TestDocumentTerm:
         ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"],
     )
     def test_valid_term_types(self, valid_type: str) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
-        dt = DocumentTerm(
+        dt = ChemblPublicationTerm(
             **BASE_KWARGS,
             publication_id="CHEMBL1",
             term="Test",
@@ -107,9 +107,9 @@ class TestDocumentTerm:
         assert dt.term_type == valid_type
 
     def test_immutable(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentTerm
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationTerm
 
-        dt = DocumentTerm(
+        dt = ChemblPublicationTerm(
             **BASE_KWARGS,
             publication_id="CHEMBL1",
             term="Test",
@@ -261,12 +261,12 @@ class TestCellLine:
 
 @pytest.mark.unit
 class TestDocumentSimilarity:
-    """Tests for DocumentSimilarity entity."""
+    """Tests for ChemblPublicationSimilarity entity."""
 
     def test_valid_creation(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentSimilarity
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationSimilarity
 
-        ds = DocumentSimilarity(
+        ds = ChemblPublicationSimilarity(
             **BASE_KWARGS,
             sim_id=1,
             doc_1=100,
@@ -276,9 +276,9 @@ class TestDocumentSimilarity:
         assert ds.doc_1 == 100
 
     def test_valid_with_tanimoto(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentSimilarity
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationSimilarity
 
-        ds = DocumentSimilarity(
+        ds = ChemblPublicationSimilarity(
             **BASE_KWARGS,
             sim_id=1,
             doc_1=100,
@@ -290,22 +290,22 @@ class TestDocumentSimilarity:
         assert ds.mol_tani == 0.80
 
     def test_zero_sim_id_raises(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentSimilarity
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationSimilarity
 
         with pytest.raises(ValueError, match="sim_id must be positive"):
-            DocumentSimilarity(**BASE_KWARGS, sim_id=0, doc_1=1, doc_2=2)
+            ChemblPublicationSimilarity(**BASE_KWARGS, sim_id=0, doc_1=1, doc_2=2)
 
     def test_same_document_raises(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentSimilarity
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationSimilarity
 
         with pytest.raises(ValueError, match="cannot be similar to itself"):
-            DocumentSimilarity(**BASE_KWARGS, sim_id=1, doc_1=100, doc_2=100)
+            ChemblPublicationSimilarity(**BASE_KWARGS, sim_id=1, doc_1=100, doc_2=100)
 
     def test_tanimoto_out_of_range_raises(self) -> None:
-        from bioetl.domain.entities.chembl_structures import DocumentSimilarity
+        from bioetl.domain.entities.chembl_structures import ChemblPublicationSimilarity
 
         with pytest.raises(ValueError, match="must be in"):
-            DocumentSimilarity(
+            ChemblPublicationSimilarity(
                 **BASE_KWARGS,
                 sim_id=1,
                 doc_1=100,
