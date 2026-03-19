@@ -37,6 +37,14 @@ def test_dependency_map_script_exists() -> None:
     assert script.exists(), "Missing dependency map generator script"
 
 
+def test_dependency_map_wrapper_is_compatibility_only() -> None:
+    wrapper = Path("scripts/generate_architecture_dependency_map.py").read_text(
+        encoding="utf-8"
+    )
+    assert "Compatibility wrapper" in wrapper
+    assert "scripts/qa/generate_architecture_dependency_map.py" in wrapper
+
+
 def test_mkdocs_nav_includes_dependency_map() -> None:
     mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
     assert "02-architecture/generated/module-dependency-map.md" in mkdocs
@@ -101,3 +109,12 @@ def test_dependency_map_drift_check_passes_current_repo() -> None:
         "Dependency-map JSON artifact drifted from generator output.\n"
         f"{_format_diff(str(json_path), actual_json, expected_json)}"
     )
+
+
+def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> None:
+    markdown = Path("docs/02-architecture/generated/module-dependency-map.md").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        "scripts/qa/generate_architecture_dependency_map.py" in markdown
+    ), "Generated dependency-map markdown should point to the canonical generator"

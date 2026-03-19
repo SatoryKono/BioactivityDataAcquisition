@@ -9,18 +9,22 @@
 
 ## Context
 
-BioETL содержит два каталога диаграмм с разными форматами и назначением:
+BioETL содержит два согласованных diagram subtrees с разными форматами и
+назначением. Текущий measured baseline ниже отражает состояние репозитория на
+`2026-03-19`:
 
 **Canonical sources** (`docs/02-architecture/diagrams/`):
-- `architecture/` — 32 `.mmd` файла (18 core + decomposed subdomain files)
-- `class-diagrams/` — 16 `.mmd` файлов (class diagram families)
-- `foundation/` — 54 `.mmd` файла (historical + TOP-25)
-- Итого: **103 `.mmd` файлов** (включая `_template.mmd`)
+- `architecture/` — 52 `.mmd` файла
+- `class-diagrams/` — 19 `.mmd` файлов
+- `foundation/` — 55 `.mmd` файлов
+- `_template.mmd` — 1 reusable template
+- Итого: **127 `.mmd` артефактов**
 
 **Decomposed views** (`docs/02-architecture/diagrams/views/`):
-- 31 parent diagram × 5 views (`-full`, `-overview`, `-domain`, `-infra`, `-dataflow`)
+- 31 foundation families × 5 views
+- 3 architecture-derived families × 2 views (`03-medallion-data-flow`, `13-port-protocol-contracts`, `16-transformer-hierarchy`)
 - + `00-legend.mermaid`
-- Итого: **156 `.mermaid` файлов**
+- Итого: **162 `.mermaid` файла**
 
 ### Проблемы до ADR-040
 
@@ -35,7 +39,9 @@ BioETL содержит два каталога диаграмм с разным
 | Interfaces | `#F1F5F9 / #64748B` | `#eff6ff / #2563eb` |
 
 Дополнительно: 286 emoji-префиксов в subgraph labels (`🟡 Domain Layer`) мешали CLI-рендерингу.
-Все 156 `.mermaid` view-файлов использовали uniform `linkStyle` без семантического разделения типов связей.
+Исторически large parts of the view corpus использовали uniform `linkStyle`
+без семантического разделения типов связей, а inventory/nav/policy описывали
+разные baselines.
 
 ### Существующая инфраструктура
 
@@ -127,7 +133,8 @@ Foundation views создаются как `.mermaid` в `diagrams/views/`.
 
 **`.mermaid` view-файлы** (decomposed):
 ```
-%% View: <Overview|Domain|Infrastructure|Dataflow|Full> | Parent: <file.mermaid>
+%% View: <Overview|Domain-Focus|Infrastructure-Mapping|Data-Flow|Full> | Parent: <family-full.mermaid|architecture-topic.mmd>
+%% Parent source: docs/02-architecture/diagrams/<foundation|architecture>/<file.mmd>   # required for `*-full.mermaid`
 flowchart TB
 ```
 
@@ -233,7 +240,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 ## Implementation
 
-Выполнено в рамках принятия ADR-040 (2026-02-25):
+Первичный rollout, выполненный в рамках принятия ADR-040 (2026-02-25):
 
 | Действие | Scope | Результат |
 |----------|-------|-----------|
@@ -242,6 +249,10 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 | linkStyle дифференциация | 16 flowchart файлов | 5 типов связей |
 | Создание `_template.mmd` | `diagrams/` | Единый шаблон для новых диаграмм |
 | `@nodes` в architecture/ | 29 файлов | Уже присутствовали |
+
+Текущий corpus с тех пор вырос; актуальные measured counts поддерживаются через
+`docs/02-architecture/diagrams/governance/diagrams-index.md` и
+`docs/02-architecture/diagrams/governance/diagram-views-inventory.md`.
 
 ---
 

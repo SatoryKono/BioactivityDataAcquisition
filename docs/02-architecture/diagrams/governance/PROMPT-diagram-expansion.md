@@ -325,15 +325,19 @@ src/bioetl/interfaces/http/health-server.py
 
 ### 0.5 Diagramming Policy (стандарты)
 
-Прочитай `docs/02-architecture/diagrams/00-diagramming-policy.md`. Ключевые правила:
+Прочитай `docs/02-architecture/diagrams/governance/policy.md`
+(канонический policy; historical context хранится в
+`docs/02-architecture/diagrams/governance/00-diagramming-policy.md`).
+Ключевые правила:
 
-- **Формат**: Mermaid (`.mermaid` расширение)
-- **Naming**: `NN-topic-name.mermaid` (kebab-case, NN-prefix для сортировки)
+- **Формат**: новые canonical diagrams создаются как Mermaid `.mmd`;
+  `.mermaid` используется для decomposed views в `docs/02-architecture/diagrams/views/`
+- **Naming**: `NN-topic-name.mmd` (kebab-case, NN-prefix для сортировки)
 - **Theme init**:
   ```
-  %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+  %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
   ```
-- **Цвета**: Bronze=#FFA500, Silver=#C0C0C0, Gold=#FFD700, Error=#e11d48, Success=#4CAF50, External=#2563eb
+- **Цвета**: Domain=#7c3aed, Application=#16a34a, Infrastructure=#dc2626, Composition=#f59e0b, Interfaces=#2563eb; Medallion palette см. policy
 - **Каждая диаграмма MUST** содержать: Title (как comment), Legend (если нужна), RULES.md reference
 
 ----------------------------------------------------------------------
