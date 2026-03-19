@@ -13,17 +13,17 @@ from typing import TYPE_CHECKING
 import click
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
-)
-from bioetl.interfaces.cli.commands.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
-)
-from bioetl.interfaces.cli.commands.health_rendering import (
+from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,
     build_health_result_lines,
     build_health_server_info_lines,
     render_health_results_json,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 

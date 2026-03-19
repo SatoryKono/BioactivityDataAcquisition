@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.interfaces.cli.commands.health_server_integration import (
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     echo_health_server_info,
 )
 from bioetl.interfaces.cli.formatters import echo_info, echo_warning

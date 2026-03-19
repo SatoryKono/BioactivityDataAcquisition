@@ -30,8 +30,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 __all__ = [
+    "CompositePipelineFinalizationContext",
     "CompositePipelineFinalizationRequest",
     "CompositePipelineFinalizationResult",
+    "CompositeResultBuildContext",
     "CompositeResultBuildRequest",
     "build_composite_result",
     "finalize_composite_result",
@@ -58,8 +60,8 @@ class _CompositePipelineFinalizationHostProtocol(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class CompositePipelineFinalizationRequest:
-    """Normalized request for terminal checkpoint finalization."""
+class CompositePipelineFinalizationContext:
+    """Normalized context for terminal checkpoint finalization."""
 
     state: CompositeCheckpointState
 
@@ -72,7 +74,7 @@ class CompositePipelineFinalizationResult:
 
 
 @dataclass(frozen=True, slots=True)
-class CompositeResultBuildRequest:
+class CompositeResultBuildContext:
     """Explicit data required to assemble the final CompositeResult."""
 
     artifacts: CompositeExecutionContext
@@ -86,7 +88,7 @@ class CompositeResultBuildRequest:
 
 def prepare_composite_result_context(
     *,
-    request: CompositeResultBuildRequest,
+    request: CompositeResultBuildContext,
     logger: LoggerPort,
 ) -> _PreparedCompositeResultContext:
     """Resolve completion metadata before final CompositeResult assembly."""
@@ -108,7 +110,7 @@ def prepare_composite_result_context(
 
 def log_composite_completion(
     *,
-    request: CompositeResultBuildRequest,
+    request: CompositeResultBuildContext,
     context: _PreparedCompositeResultContext,
     logger: LoggerPort,
 ) -> None:
@@ -126,7 +128,7 @@ def log_composite_completion(
 
 def finalize_composite_result(
     *,
-    request: CompositeResultBuildRequest,
+    request: CompositeResultBuildContext,
     context: _PreparedCompositeResultContext,
 ) -> CompositeResult:
     """Assemble the final CompositeResult from the prepared completion context."""
@@ -150,7 +152,7 @@ def finalize_composite_result(
 
 def build_composite_result(
     *,
-    request: CompositeResultBuildRequest,
+    request: CompositeResultBuildContext,
     logger: LoggerPort,
 ) -> CompositeResult:
     """Prepare, log, and assemble the final composite result in one seam."""
@@ -161,7 +163,7 @@ def build_composite_result(
 
 async def finalize_pipeline(
     host: _CompositePipelineFinalizationHostProtocol,
-    request: CompositePipelineFinalizationRequest,
+    request: CompositePipelineFinalizationContext,
 ) -> CompositePipelineFinalizationResult:
     """Finalize checkpoint state, cleanup resume state, and purge orphans."""
     completed_state = host._transition_to_completed_state(request.state)
@@ -172,3 +174,7 @@ async def finalize_pipeline(
     except (*CHECKPOINT_NON_FATAL_ERRORS, BioETLError):
         pass
     return CompositePipelineFinalizationResult(completed_state=completed_state)
+
+
+CompositePipelineFinalizationRequest = CompositePipelineFinalizationContext
+CompositeResultBuildRequest = CompositeResultBuildContext

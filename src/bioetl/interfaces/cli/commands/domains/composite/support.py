@@ -8,16 +8,16 @@ from collections.abc import Callable, Coroutine
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.execution_policy import (
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    echo_health_server_info,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
     map_success_flag_to_exit_code,
 )
-from bioetl.interfaces.cli.commands.execution_policy import (
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
-)
-from bioetl.interfaces.cli.commands.health_server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-    echo_health_server_info,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning

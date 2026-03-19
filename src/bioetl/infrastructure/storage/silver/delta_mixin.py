@@ -8,6 +8,10 @@ from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
 
+from bioetl.infrastructure.storage.delta.resilience import (
+    DEFAULT_SILVER_MERGE_POLICY,
+    SilverMergeResiliencePolicy,
+)
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _build_dispatch_policy,
     _DeltaWriteRequest,
@@ -20,10 +24,6 @@ from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
     _emit_merge_final_event,
     _emit_merge_retry_event,
     _execute_merge_write_request,
-)
-from bioetl.infrastructure.storage.delta.resilience import (
-    DEFAULT_SILVER_MERGE_POLICY,
-    SilverMergeResiliencePolicy,
 )
 
 if TYPE_CHECKING:

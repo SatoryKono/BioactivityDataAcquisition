@@ -1,17 +1,9 @@
-"""Thin wrapper re-exporting canonical CLI health-server helpers."""
+"""Compatibility shim aliasing the canonical health-server module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-    add_health_server_options,
-    echo_health_server_info,
-    health_server_context,
-)
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = [
-    "DEFAULT_HEALTH_SERVER_PORT",
-    "add_health_server_options",
-    "echo_health_server_info",
-    "health_server_context",
-]
+alias_module(
+    __name__, "bioetl.interfaces.cli.commands.domains.health.server_integration"
+)

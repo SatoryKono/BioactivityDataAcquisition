@@ -215,7 +215,7 @@ src/bioetl/application/core/filtered-data-source.py
 
 # Application Layer — Composite Pipeline
 src/bioetl/application/composite/coordinator.py
-src/bioetl/application/composite/runner.py
+src/bioetl/application/composite/runner_pkg/runner.py
 src/bioetl/application/composite/merger.py
 src/bioetl/application/composite/aggregator.py
 src/bioetl/application/composite/dependency-coordinator.py

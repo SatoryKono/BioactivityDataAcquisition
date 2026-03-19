@@ -116,4 +116,3 @@ def create_provider_assembly_support() -> ProviderAssemblySupport:
         create_http_client=_create_http_client_for_provider,
         create_adapter=_create_adapter_for_provider,
     )
-

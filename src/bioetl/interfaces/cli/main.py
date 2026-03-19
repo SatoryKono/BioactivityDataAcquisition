@@ -13,14 +13,14 @@ from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
 from bioetl.interfaces.cli.commands.debug import debug
+from bioetl.interfaces.cli.commands.domains.composite.command import run_composite
+from bioetl.interfaces.cli.commands.domains.health.command import health
+from bioetl.interfaces.cli.commands.domains.maintenance.command import maintenance
+from bioetl.interfaces.cli.commands.domains.quarantine.command import quarantine
+from bioetl.interfaces.cli.commands.domains.run.command import run
+from bioetl.interfaces.cli.commands.domains.run_all.command import run_all
 from bioetl.interfaces.cli.commands.export import export_command
-from bioetl.interfaces.cli.commands.health import health
 from bioetl.interfaces.cli.commands.lock import lock
-from bioetl.interfaces.cli.commands.maintenance import maintenance
-from bioetl.interfaces.cli.commands.quarantine import quarantine
-from bioetl.interfaces.cli.commands.run import run
-from bioetl.interfaces.cli.commands.run_all import run_all
-from bioetl.interfaces.cli.commands.run_composite import run_composite
 from bioetl.interfaces.cli.registry_helpers import (
     _build_registered_registry,
     build_cli_registry,

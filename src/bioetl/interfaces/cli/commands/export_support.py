@@ -14,10 +14,10 @@ from bioetl.application.services import (
     TablePreview,
 )
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.execution_policy import (
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
 )
-from bioetl.interfaces.cli.commands.execution_policy import (
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode

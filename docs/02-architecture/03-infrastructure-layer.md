@@ -185,7 +185,7 @@ PubMedAdapter                         (pubchempy)
 | `silver_writer_delta_helpers.py`         | Delta Lake helper functions                   |
 | `silver_writer_merge_resilience_helpers.py` | Merge retry и resilience logic             |
 | `silver_writer_pipeline_helpers.py`      | Pipeline-specific helpers                     |
-| `silver_writer_runtime_helpers.py`       | Runtime configuration helpers                 |
+| `silver/runtime_helpers.py`              | Runtime configuration helpers                 |
 
 #### 2.2.3. GoldWriter Mixin Decomposition
 

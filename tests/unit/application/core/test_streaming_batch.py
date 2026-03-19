@@ -15,7 +15,9 @@ from bioetl.application.core.batch_transformer import (
     StreamingBatchProcessor,
     TransformedRecord,
 )
-from bioetl.application.core.transformer_runtime import orchestration as batch_transformer_orchestration
+from bioetl.application.core.transformer_runtime import (
+    orchestration as batch_transformer_orchestration,
+)
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import MemoryConfig
 from bioetl.infrastructure.system.memory_monitor import MemoryMonitor

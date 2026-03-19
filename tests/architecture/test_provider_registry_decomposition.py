@@ -75,9 +75,7 @@ def test_provider_registry_uses_split_helper_modules() -> None:
         "provider_registry.py no longer imports required split helpers:\n"
         + "\n".join(sorted(missing_helpers))
     )
-    unexpected_runtime_imports = (
-        FORBIDDEN_REGISTRY_RUNTIME_IMPORTS & imported_modules
-    )
+    unexpected_runtime_imports = FORBIDDEN_REGISTRY_RUNTIME_IMPORTS & imported_modules
     assert not unexpected_runtime_imports, (
         "provider_registry.py must not reach back into public loader facades:\n"
         + "\n".join(sorted(unexpected_runtime_imports))

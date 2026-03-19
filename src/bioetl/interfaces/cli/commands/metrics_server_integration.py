@@ -1,13 +1,10 @@
-"""Thin wrapper re-exporting canonical CLI metrics-server helpers."""
+"""Compatibility shim aliasing the canonical metrics-server module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
-    ensure_metrics_server_started,
-    metrics_server_context,
-)
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = [
-    "ensure_metrics_server_started",
-    "metrics_server_context",
-]
+alias_module(
+    __name__,
+    "bioetl.interfaces.cli.commands.domains.health.metrics_server_integration",
+)

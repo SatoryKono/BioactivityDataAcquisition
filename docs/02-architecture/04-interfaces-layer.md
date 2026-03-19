@@ -22,7 +22,7 @@
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды (32 модуля в `commands/`, актуально на 2026-03-17):**
+**Доступные команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-03-19):**
 
 | Команда         | Модуль                       | Описание                                |
 | --------------- | ---------------------------- | --------------------------------------- |
@@ -47,13 +47,19 @@
 | Модуль                          | Назначение                              |
 | ------------------------------- | --------------------------------------- |
 | `execution_policy.py`           | Политики исполнения команд              |
+| `run_all_command_policy.py`     | Политики `run-all`                      |
 | `run_helpers.py`                | Вспомогательные функции для run-команд  |
 | `run_all_helpers.py`            | Вспомогательные функции для run-all     |
 | `run_command_policy.py`         | Политики run-команд                     |
+| `run_composite_helpers.py`      | Вспомогательные функции для composite   |
 | `run_composite_runtime.py`      | Runtime для composite                   |
 | `run_result_presenter.py`       | Форматирование результатов запуска      |
+| `health_rendering.py`           | Рендеринг health-результатов            |
 | `health_server_integration.py`  | Интеграция health-сервера               |
 | `metrics_server_integration.py` | Интеграция metrics-сервера              |
+| `quarantine_execution.py`       | Исполнение quarantine-операций          |
+| `quarantine_rendering.py`       | Рендеринг quarantine-результатов        |
+| `quarantine_support.py`         | Общие утилиты quarantine CLI            |
 
 **Примеры использования:**
 

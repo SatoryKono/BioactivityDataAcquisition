@@ -178,6 +178,24 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "main.py",
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_helpers.py",
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run"
+        / "support.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run_all"
+        / "command.py",
     }
 )
 ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES = frozenset(
@@ -215,12 +233,8 @@ ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
         ROOT / "src" / "bioetl" / "composition" / "registry_default.py",
     }
 )
-ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset(
-    {}
-)
-ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset(
-    {}
-)
+ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset({})
+ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset({})
 ALLOWED_CONFIG_LOADER_PRIVATE_HELPER_TEST_FILES = frozenset(
     {
         ROOT / "tests" / "unit" / "infrastructure" / "test_config_dynamic.py",
@@ -261,11 +275,17 @@ ALLOWED_MERGE_SERVICE_SRC_FILES = frozenset(
 )
 
 
+def _relative_to_root(path: Path) -> str:
+    """Return a stable project-relative POSIX path without eager filesystem resolution."""
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.resolve().relative_to(ROOT).as_posix()
+
+
 def _normalized_allowed_rel_paths(allowed_files: frozenset[Path]) -> frozenset[str]:
     """Normalize allowlist paths to project-relative POSIX strings."""
-    return frozenset(
-        path.resolve().relative_to(ROOT).as_posix() for path in allowed_files
-    )
+    return frozenset(_relative_to_root(path) for path in allowed_files)
 
 
 def _iter_module_import_violations(
@@ -277,7 +297,7 @@ def _iter_module_import_violations(
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file, tree in sorted(ast_cache.items()):
-        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        rel_path = _relative_to_root(py_file)
         if rel_path in allowed_rel_paths:
             continue
         for node in ast.walk(tree):
@@ -320,7 +340,7 @@ def _iter_symbol_mentions(
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file, content in sorted(content_cache.items()):
-        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        rel_path = _relative_to_root(py_file)
         if rel_path in allowed_rel_paths:
             continue
         for lineno, line in enumerate(content.splitlines(), 1):
@@ -338,7 +358,7 @@ def _iter_string_mentions(
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file, content in sorted(content_cache.items()):
-        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        rel_path = _relative_to_root(py_file)
         if rel_path in allowed_rel_paths:
             continue
         for lineno, line in enumerate(content.splitlines(), 1):
@@ -354,7 +374,7 @@ def _iter_text_symbol_mentions(
 ) -> list[str]:
     violations: list[str] = []
     for file_path in sorted(files):
-        rel_path = file_path.resolve().relative_to(ROOT).as_posix()
+        rel_path = _relative_to_root(file_path)
         for lineno, line in enumerate(
             file_path.read_text(encoding="utf-8").splitlines(), 1
         ):
@@ -373,7 +393,7 @@ def _iter_imported_symbol_violations(
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file, tree in sorted(ast_cache.items()):
-        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        rel_path = _relative_to_root(py_file)
         if rel_path in allowed_rel_paths:
             continue
         for node in ast.walk(tree):
@@ -400,7 +420,7 @@ def _iter_call_keyword_violations(
     violations: list[str] = []
     allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
     for py_file, tree in sorted(ast_cache.items()):
-        rel_path = py_file.resolve().relative_to(ROOT).as_posix()
+        rel_path = _relative_to_root(py_file)
         if rel_path in allowed_rel_paths:
             continue
         for node in ast.walk(tree):

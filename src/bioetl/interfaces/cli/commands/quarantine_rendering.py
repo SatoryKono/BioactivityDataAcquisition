@@ -1,15 +1,7 @@
-"""Thin wrapper re-exporting canonical quarantine rendering helpers."""
+"""Compatibility shim aliasing the canonical quarantine rendering module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.quarantine.rendering import (
-    build_purge_preview_lines,
-    build_quarantine_stats_lines,
-    build_replay_preview_lines,
-)
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = [
-    "build_purge_preview_lines",
-    "build_quarantine_stats_lines",
-    "build_replay_preview_lines",
-]
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.quarantine.rendering")

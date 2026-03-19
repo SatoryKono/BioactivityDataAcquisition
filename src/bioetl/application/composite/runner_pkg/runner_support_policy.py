@@ -71,10 +71,13 @@ def build_preflight_validation_context(
     field_priorities: Collection[str],
 ) -> _PreparedPreflightValidationContext | None:
     """Build validation context when preflight validation can run."""
-    if get_preflight_skip_reason(
-        validator=validator,
-        field_priorities=field_priorities,
-    ) is not None:
+    if (
+        get_preflight_skip_reason(
+            validator=validator,
+            field_priorities=field_priorities,
+        )
+        is not None
+    ):
         return None
 
     assert validator is not None
@@ -93,10 +96,7 @@ def can_run_enricher(
     force_enricher: str | None,
 ) -> bool:
     """Return whether an enricher should run under the current runtime policy."""
-    if (
-        enricher.pipeline in completed_enrichers
-        and force_enricher != enricher.pipeline
-    ):
+    if enricher.pipeline in completed_enrichers and force_enricher != enricher.pipeline:
         return False
 
     if required_only and not enricher.required:

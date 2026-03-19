@@ -1,15 +1,7 @@
-"""Thin wrapper re-exporting canonical quarantine execution helpers."""
+"""Compatibility shim aliasing the canonical quarantine execution module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands.domains.quarantine.execution import (
-    QuarantineExecutionPolicy,
-    run_quarantine_async,
-    run_quarantine_sync,
-)
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-__all__ = [
-    "QuarantineExecutionPolicy",
-    "run_quarantine_async",
-    "run_quarantine_sync",
-]
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.quarantine.execution")

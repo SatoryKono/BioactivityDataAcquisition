@@ -1,7 +1,7 @@
-"""Compatibility shim for run command-policy module."""
+"""Compatibility shim aliasing the canonical run command-policy module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands._compat import reexport_module
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-reexport_module(__name__, "bioetl.interfaces.cli.commands.domains.run.command_policy")
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.run.command_policy")

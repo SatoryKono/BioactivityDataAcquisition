@@ -40,7 +40,9 @@ def _load_yaml(path: Path) -> dict[str, object]:
 def _expected_same_path_test(source_rel: str) -> str:
     source_path = ROOT / source_rel
     relative_source = source_path.relative_to(SRC_ROOT)
-    expected = TEST_ROOT / "unit" / relative_source.parent / f"test_{source_path.stem}.py"
+    expected = (
+        TEST_ROOT / "unit" / relative_source.parent / f"test_{source_path.stem}.py"
+    )
     return expected.relative_to(ROOT).as_posix()
 
 
@@ -103,7 +105,9 @@ def test_source_test_facade_inventory_references_existing_files() -> None:
 
 
 @pytest.mark.architecture
-def test_source_test_facade_inventory_does_not_overlap_other_mapping_inventories() -> None:
+def test_source_test_facade_inventory_does_not_overlap_other_mapping_inventories() -> (
+    None
+):
     facade_payload = _load_yaml(INVENTORY_PATH)
     curated_payload = _load_yaml(CURATED_INVENTORY_PATH)
     thin_payload = _load_yaml(THIN_PACKAGE_INVENTORY_PATH)
@@ -116,11 +120,12 @@ def test_source_test_facade_inventory_does_not_overlap_other_mapping_inventories
         if isinstance(row, dict) and row.get("source")
     }
 
-    overlap = sorted((facade_sources & curated_sources) | (facade_sources & thin_sources))
+    overlap = sorted(
+        (facade_sources & curated_sources) | (facade_sources & thin_sources)
+    )
     assert not overlap, (
         "Facade ownership inventory must not duplicate sources already owned by "
-        "thin-package or curated behavior-heavy inventories:\n"
-        + "\n".join(overlap)
+        "thin-package or curated behavior-heavy inventories:\n" + "\n".join(overlap)
     )
 
 

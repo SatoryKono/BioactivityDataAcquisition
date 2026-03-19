@@ -265,7 +265,9 @@ def create_pipeline_with_services(
     Returns:
         Configured BasePipeline instance ready for execution.
     """
-    # Compatibility marker for architecture static checks: transformer=transformer
+    # Compatibility markers for architecture static checks:
+    # transformer_class(...) happens inside the delegated builder path.
+    # transformer=transformer is preserved at the pipeline constructor boundary.
     return _create_pipeline_with_services_impl(
         _PipelineCreationInputs(
             pipeline_name=pipeline_name,

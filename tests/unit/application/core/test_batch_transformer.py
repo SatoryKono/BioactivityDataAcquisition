@@ -15,7 +15,9 @@ from bioetl.application.core.transformer_runtime.finalization import (
     finalize_batch_transform_result,
     finalize_stream_transform_result,
 )
-from bioetl.application.core.transformer_runtime import orchestration as batch_transformer_orchestration
+from bioetl.application.core.transformer_runtime import (
+    orchestration as batch_transformer_orchestration,
+)
 from bioetl.application.core.transformer_runtime.state import (
     RecordTransformOutcome,
     TransformedRecord,

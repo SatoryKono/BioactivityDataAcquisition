@@ -587,9 +587,7 @@ def test_silver_merge_resilience_instrumented() -> None:
     """Silver merge resilience must have retry policy and observability hooks."""
     resilience = Path("src/bioetl/infrastructure/storage/delta/resilience.py")
     delta_mixin = Path("src/bioetl/infrastructure/storage/silver/delta_mixin.py")
-    delta_helpers = Path(
-        "src/bioetl/infrastructure/storage/silver/delta_helpers.py"
-    )
+    delta_helpers = Path("src/bioetl/infrastructure/storage/silver/delta_helpers.py")
     merge_resilience_helpers = Path(
         "src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py"
     )

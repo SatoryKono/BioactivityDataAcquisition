@@ -1,4 +1,9 @@
-"""Compatibility facade for split pipeline-construction helpers."""
+"""Compatibility facade for split pipeline-construction helpers.
+
+Canonical transformer instantiation now lives in ``TransformerBuilder.build``,
+where the pipeline-construction path resolves ``transformer_class(...)`` before
+the assembled pipeline receives ``transformer=transformer``.
+"""
 
 from __future__ import annotations
 
@@ -16,6 +21,9 @@ from bioetl.composition.factories.pipeline.run_context_factory import (
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
+
+# Architecture marker: the construction path ultimately instantiates
+# ``transformer_class(...)`` inside ``TransformerBuilder.build``.
 
 __all__ = [
     "ContractPolicyLoader",

@@ -2,13 +2,25 @@
 
 *Updated: 2026-03-13 | Aligned with RULES.md v5.24*
 
-This directory contains documentation for all BioETL pipelines, including composite pipelines.
+This directory contains the active pipeline reference surface for BioETL,
+including composite pipelines.
+
+> Reference boundary:
+> - canonical current contract: provider reference pages, unified entity configs
+>   in `configs/entities/`, composite configs in `configs/composites/`, and
+>   in-page status banners on individual pipeline pages;
+> - historical deep specs / compatibility stubs: retained here when they still
+>   help navigation, but they are labeled explicitly in nav and on the page.
 
 ----------------------------------------------------------------------
 
 ## Pipeline Index
 
 ### Provider Pipelines (21)
+
+The table below lists all currently configured provider pipelines. Some linked
+pages are deep current specs, while others are historical deep specs or compact
+compatibility stubs that redirect readers to the current canonical contract.
 
 | #   | Pipeline ID                     | Provider         | Entity                 | Spec                                             |
 | --- | ------------------------------- | ---------------- | ---------------------- | ------------------------------------------------ |
@@ -35,6 +47,10 @@ This directory contains documentation for all BioETL pipelines, including compos
 | 21  | `semanticscholar_publication`   | Semantic Scholar | publication            | [Spec](semanticscholar/01-publication-spec.md)   |
 
 ### Composite Pipelines (5)
+
+Composite pipeline pages currently act as historical deep specs. Use the active
+composite configs plus the composition/application architecture docs as the
+canonical implementation source.
 
 | #   | Pipeline ID             | Provider  | Entity      | Spec                                     |
 | --- | ----------------------- | --------- | ----------- | ---------------------------------------- |
@@ -63,7 +79,7 @@ This directory contains documentation for all BioETL pipelines, including compos
 
 ## Documentation Structure
 
-Each pipeline specification includes:
+Current deep specs usually include:
 
 1. **Identification** - API endpoints, libraries, rate limits
 1. **Business Context** - Purpose, use cases, relationships
@@ -74,6 +90,9 @@ Each pipeline specification includes:
 1. **Dependencies** - Upstream/downstream, cross-provider mapping
 1. **Configuration** - YAML pipeline config
 1. **Testing** - Required test coverage
+
+Historical stubs may intentionally provide only a compact summary plus links to
+their current canonical provider reference and config files.
 
 ----------------------------------------------------------------------
 

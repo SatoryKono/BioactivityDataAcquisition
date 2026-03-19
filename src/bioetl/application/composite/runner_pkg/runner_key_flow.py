@@ -12,15 +12,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 __all__ = [
-    "CompositeEnrichmentKeyRequest",
+    "CompositeEnrichmentKeyContext",
     "CompositeEnrichmentKeyResult",
     "extract_enrichment_keys",
 ]
 
 
 @dataclass(frozen=True, slots=True)
-class CompositeEnrichmentKeyRequest:
-    """Canonical request for extracting composite enrichment keys."""
+class CompositeEnrichmentKeyContext:
+    """Canonical context for extracting composite enrichment keys."""
 
     composite_name: str
     silver_table: str
@@ -39,7 +39,7 @@ async def extract_enrichment_keys(
     *,
     key_extractor: KeyExtractorService,
     logger: LoggerPort,
-    request: CompositeEnrichmentKeyRequest,
+    request: CompositeEnrichmentKeyContext,
 ) -> CompositeEnrichmentKeyResult:
     """Extract enrichment keys and emit the canonical observability payload."""
     keys_df = await key_extractor.extract(
@@ -56,3 +56,6 @@ async def extract_enrichment_keys(
         keys_count=result.keys_count,
     )
     return result
+
+
+CompositeEnrichmentKeyRequest = CompositeEnrichmentKeyContext

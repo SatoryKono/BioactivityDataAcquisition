@@ -175,7 +175,7 @@ modules:
     owner_tests:
       - tests/unit/infrastructure/storage/test_metadata_builder_composite_helpers.py
 
-  - source: src/bioetl/infrastructure/storage/silver_writer_runtime_helpers.py
+  - source: src/bioetl/infrastructure/storage/silver/runtime_helpers.py
     ownership: cluster_owner
     rationale: >
       Runtime helper defaults are intentionally covered by the focused SilverWriter
@@ -183,14 +183,18 @@ modules:
     owner_tests:
       - tests/unit/infrastructure/storage/silver_writer/test_silver_writer_core.py
 
-  - source: src/bioetl/infrastructure/storage/gold_writer_io_delta_mixins.py
-    ownership: direct_test
-    rationale: "Delta I/O mixins already have a dedicated same-path owner test."
+  - source: src/bioetl/infrastructure/storage/gold/io_delta_mixins.py
+    ownership: cluster_owner
+    rationale: >-
+      Gold Delta I/O mixins are owned by the focused GoldWriter I/O suite rather
+      than a strict same-path mirror file.
     owner_tests:
       - tests/unit/infrastructure/storage/test_gold_writer_io_delta_mixins.py
 
-  - source: src/bioetl/infrastructure/storage/bronze_writer_pipeline_helpers.py
-    ownership: direct_test
-    rationale: "Pipeline preparation helper is behavior-heavy enough to require a mirror owner test."
+  - source: src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py
+    ownership: cluster_owner
+    rationale: >-
+      Bronze pipeline helper behavior is owned by the focused BronzeWriter
+      pipeline-helper suite rather than a strict same-path mirror file.
     owner_tests:
       - tests/unit/infrastructure/storage/test_bronze_writer_pipeline_helpers.py

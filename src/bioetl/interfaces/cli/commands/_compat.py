@@ -1,9 +1,14 @@
-"""Helpers for compatibility re-export shims in the CLI commands layer."""
+"""Helpers for compatibility shims in the CLI commands layer."""
 
 from __future__ import annotations
 
-from importlib import import_module
 import sys
+from importlib import import_module
+
+
+def alias_module(module_name: str, target_module_name: str) -> None:
+    """Replace a compat shim module with the canonical target module object."""
+    sys.modules[module_name] = import_module(target_module_name)
 
 
 def reexport_module(module_name: str, target_module_name: str) -> None:

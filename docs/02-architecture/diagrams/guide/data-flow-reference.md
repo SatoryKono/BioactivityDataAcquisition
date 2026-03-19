@@ -90,7 +90,7 @@ See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
    - `molecule-synonyms`, `cross-references`, `atc-classifications`
 1. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
 
-**Code Reference**: `src/bioetl/application/core/base_transformer.py` → `BaseTransformer.transform_for_gold()`
+**Code Reference**: `src/bioetl/application/core/base_transformer/base.py` → `BaseTransformer.transform_for_gold()`
 
 ----------------------------------------------------------------------
 

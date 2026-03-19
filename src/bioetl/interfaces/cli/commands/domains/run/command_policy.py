@@ -19,15 +19,15 @@ from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
 )
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.execution_policy import (
+from bioetl.interfaces.cli.commands.domains.run.support import (
+    handle_destructive_run_confirmation,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
     map_run_status_to_exit_code,
 )
-from bioetl.interfaces.cli.commands.execution_policy import (
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
-)
-from bioetl.interfaces.cli.commands.run_helpers import (
-    handle_destructive_run_confirmation,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error

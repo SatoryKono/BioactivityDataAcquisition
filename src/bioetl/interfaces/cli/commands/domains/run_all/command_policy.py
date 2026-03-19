@@ -8,14 +8,14 @@ from typing import NoReturn, Protocol
 
 from bioetl.application.services import RunOptions
 from bioetl.composition import PipelineRegistry
-from bioetl.interfaces.cli.commands.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
-)
-from bioetl.interfaces.cli.commands.run_all_helpers import (
+from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     PipelineRegistryView,
     RunAllExecutionPlan,
     create_run_all_execution_plan,
+)
+from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error

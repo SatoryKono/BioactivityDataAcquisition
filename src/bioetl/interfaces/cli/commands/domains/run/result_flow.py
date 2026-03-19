@@ -8,7 +8,7 @@ from bioetl.application.services import RunResult
 from bioetl.application.services.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
-from bioetl.interfaces.cli.commands.health_server_integration import (
+from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     echo_health_server_info,
 )
 

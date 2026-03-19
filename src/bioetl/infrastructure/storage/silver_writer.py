@@ -26,6 +26,9 @@ from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
 )
+from bioetl.infrastructure.storage.delta.resilience import (
+    SilverMergeResiliencePolicy,
+)
 from bioetl.infrastructure.storage.silver.arrow_mixin import (
     SilverWriterArrowMixin,
 )
@@ -57,14 +60,13 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 from bioetl.infrastructure.storage.silver.validation_mixin import (
     SilverWriterValidationMixin,
 )
-from bioetl.infrastructure.storage.delta.resilience import (
-    SilverMergeResiliencePolicy,
-)
 
 # Backward-compatible module aliases for tests patching historical symbols.
 asyncio = _asyncio
 DeltaTable = _DeltaTable
 write_deltalake = _write_deltalake
+# Architecture marker imports keep SilverWriter policy/schema hooks discoverable
+# in this root module while the implementations live in split validation helpers.
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -169,6 +171,40 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self._merge_resilience_policy = services.merge_resilience_policy
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
+
+    def _enforce_write_policy(
+        self,
+        mode: SilverWriteMode,
+        table_name: str,
+    ) -> None:
+        """Delegate Silver write-mode enforcement to the validation mixin."""
+        SilverWriterValidationMixin._enforce_write_policy(self, mode, table_name)
+
+    def _validate_silver_pandera(
+        self,
+        records: list[BronzeRecord],
+        table_name: str,
+    ) -> None:
+        """Delegate Pandera validation to the canonical Silver validation seam."""
+        SilverWriterValidationMixin._validate_silver_pandera(
+            self,
+            records,
+            table_name,
+        )
+
+    async def _check_schema_drift(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    ) -> None:
+        """Delegate schema-drift handling to the canonical Silver validation seam."""
+        await SilverWriterValidationMixin._check_schema_drift(
+            self,
+            table_name,
+            records,
+            on_schema_mismatch,
+        )
 
     async def write_silver(
         self,

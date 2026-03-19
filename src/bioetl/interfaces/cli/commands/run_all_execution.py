@@ -1,7 +1,7 @@
-"""Compatibility shim for run-all execution module."""
+"""Compatibility shim aliasing the canonical run-all execution module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands._compat import reexport_module
+from bioetl.interfaces.cli.commands._compat import alias_module
 
-reexport_module(__name__, "bioetl.interfaces.cli.commands.domains.run_all.execution")
+alias_module(__name__, "bioetl.interfaces.cli.commands.domains.run_all.execution")

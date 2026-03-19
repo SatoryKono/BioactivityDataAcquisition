@@ -6,9 +6,9 @@ from collections.abc import Callable
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
-    Any,
     Generic,
     Protocol,
+    Self,
     TypeVar,
     overload,
 )
@@ -23,7 +23,9 @@ class _SupportsDefaultRegistry(Protocol):
     """Protocol for registries exposing a lazy default instance."""
 
     @classmethod
-    def _get_default(cls) -> Any:
+    def _get_default(
+        cls,
+    ) -> Self:
         """Return the lazy default registry instance."""
 
 

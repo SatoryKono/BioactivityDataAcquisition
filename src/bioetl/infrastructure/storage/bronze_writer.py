@@ -15,7 +15,6 @@ import zstandard as zstd
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze.metadata_mixin import (
     BronzeWriterMetadataMixin,
@@ -37,6 +36,7 @@ from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
 from bioetl.infrastructure.storage.bronze.validation_mixin import (
     BronzeWriterValidationMixin,
 )
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
