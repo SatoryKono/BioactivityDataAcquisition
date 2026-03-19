@@ -15,9 +15,14 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_TARGET = Path("docs/02-architecture/mmd-diagrams")
-DEFAULT_MANIFEST = Path("docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt")
+try:
+    from .diagram_paths import DIAGRAM_ROOT, QUALITY_GATE_MANIFEST, REPO_ROOT, source_dir
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import DIAGRAM_ROOT, QUALITY_GATE_MANIFEST, REPO_ROOT, source_dir
+
+
+DEFAULT_TARGET = DIAGRAM_ROOT
+DEFAULT_MANIFEST = QUALITY_GATE_MANIFEST
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 EXPECTED_CLASSDEFS = {"port", "adapter", "service", "process", "storage"}
 ALLOWED_EDGE_MARKERS = ("-->", "-.->", "==>")
@@ -217,7 +222,7 @@ def check_classdef_coverage(path: Path, lines: list[str]) -> list[Violation]:
 
 def sibling_views_for(path: Path) -> list[Path]:
     parent = path.stem
-    views_dir = REPO_ROOT / "docs/02-architecture/mmd-diagrams/views"
+    views_dir = source_dir("views")
     if not views_dir.exists():
         return []
 
@@ -249,7 +254,7 @@ def check_large_diagram_decomposition(path: Path, lines: list[str], threshold: i
                 severity="ERROR",
                 message=(
                     f"@nodes={nodes} requires decomposition; missing expected views in "
-                    "docs/02-architecture/mmd-diagrams/views"
+                    f"{views_dir.relative_to(REPO_ROOT)}"
                 ),
             )
         )

@@ -12,9 +12,11 @@ from bioetl.application.services import (
     PipelineRunResult,
     RunResult,
 )
+from bioetl.application.services.cli_run_orchestration_models import (
+    RunExecutionRequest,
+)
 from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
-    RunExecutionRequest,
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (

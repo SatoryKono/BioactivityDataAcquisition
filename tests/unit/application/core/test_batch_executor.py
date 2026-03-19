@@ -71,7 +71,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import MetricsPort, NoOpTracing
 from bioetl.domain.types import (
     BatchID,
     GoldSchemaType,
@@ -239,7 +239,7 @@ def _create_batch_executor(
         logger=services.logger,
     )
     tracing_manager = BatchTracingManagerService(
-        tracer=tracer,
+        tracer=tracer if tracer is not None else NoOpTracing(),
         context=context,
         config=config,
         initial_batch_size=initial_batch_size,

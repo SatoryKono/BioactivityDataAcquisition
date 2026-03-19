@@ -12,6 +12,8 @@ if REPO_ROOT_GIT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"
 else
   REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../../.." && pwd)"
 fi
+# shellcheck source=scripts/diagrams/diagram_paths.sh
+source "$REPO_ROOT/scripts/diagrams/diagram_paths.sh"
 PROFILE="pr"
 PUPPETEER_CFG="${PUPPETEER_CFG:-/tmp/puppeteer-config.json}"
 FORCE_WRITE_PUPPETEER=0
@@ -20,15 +22,15 @@ SKIP_RENDER=0
 ENFORCE_BUDGET=0
 DIAGRAM_PATH=""
 TEXT_LAYER="${TEXT_LAYER:-fallback-only}"
-SOURCE_MANIFEST="$REPO_ROOT/docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt"
-RENDER_MANIFEST="$REPO_ROOT/docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
+SOURCE_MANIFEST="$DIAGRAM_QUALITY_MANIFEST"
+RENDER_MANIFEST="$DIAGRAM_VISUAL_MANIFEST"
 TEMP_SOURCE_MANIFEST=""
 TEMP_RENDER_MANIFEST=""
 BUDGET_TMP_DIR=""
 BUDGET_QUALITY_JSON=""
 BUDGET_LINT_JSON=""
 BUDGET_NIGHTLY_JSON=""
-THEME_CONFIG="$REPO_ROOT/docs/02-architecture/mmd-diagrams/theme/mermaid-config.json"
+THEME_CONFIG="$DIAGRAM_THEME_DIR/mermaid-config.json"
 
 usage() {
   cat <<'EOF'
@@ -47,7 +49,7 @@ Options:
 
 Examples:
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr
-  docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr --diagram <repo-relative-diagram-path>
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr --text-layer fallback-only
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr --enforce-budget
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile nightly --strict-nightly
@@ -297,7 +299,7 @@ run_lint_check() {
   if [[ -n "$DIAGRAM_PATH" ]]; then
     python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" "$REPO_ROOT/$DIAGRAM_PATH"
   else
-    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" "$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" "$DIAGRAM_ROOT"
   fi
 }
 
@@ -307,7 +309,7 @@ run_operator_guard() {
       --check "$REPO_ROOT/$DIAGRAM_PATH"
   else
     python3 "$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py" \
-      --check "$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+      --check "$DIAGRAM_ROOT"
   fi
 }
 
@@ -317,25 +319,25 @@ run_render_step() {
     local diagram_stem
     diagram_dir="$(dirname "$DIAGRAM_PATH")"
     diagram_stem="$(basename "${DIAGRAM_PATH%.*}")"
-    bash "$REPO_ROOT/docs/02-architecture/mmd-diagrams/render.sh" \
+    bash "$DIAGRAM_RENDER_SCRIPT" \
       --dir "$REPO_ROOT/$diagram_dir" \
       --filter "$diagram_stem" \
       --text-layer "$TEXT_LAYER" \
       --puppeteer "$PUPPETEER_CFG"
   else
-    bash "$REPO_ROOT/docs/02-architecture/mmd-diagrams/render.sh" \
+    bash "$DIAGRAM_RENDER_SCRIPT" \
       --text-layer "$TEXT_LAYER" \
       --puppeteer "$PUPPETEER_CFG"
   fi
 }
 
 run_class_method_integrity_check() {
-  local class_source_dir="$REPO_ROOT/docs/02-architecture/mmd-diagrams/class-diagrams"
-  local class_svg_dir="$class_source_dir/svg"
+  local class_source_dir="$DIAGRAM_CLASS_SOURCE_DIR"
+  local class_svg_dir="$DIAGRAM_CLASS_SVG_DIR"
 
   if [[ -n "$DIAGRAM_PATH" ]]; then
     case "$DIAGRAM_PATH" in
-      docs/02-architecture/mmd-diagrams/class-diagrams/*.mmd)
+      "${DIAGRAM_ROOT_REL}/class-diagrams/"*.mmd)
         python3 "$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py" \
           --source-dir "$class_source_dir" \
           --svg-dir "$class_svg_dir" \
@@ -408,7 +410,7 @@ run_pr_profile() {
 
   log "DIAG-T018..T023: Quality gates"
   if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then
-    local lint_target="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+    local lint_target="$DIAGRAM_ROOT"
     if [[ -n "$DIAGRAM_PATH" ]]; then
       lint_target="$REPO_ROOT/$DIAGRAM_PATH"
     fi
@@ -480,7 +482,7 @@ run_quick_profile() {
 
   log "DIAG-T018..T023: Quality gates"
   if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then
-    local lint_target="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+    local lint_target="$DIAGRAM_ROOT"
     if [[ -n "$DIAGRAM_PATH" ]]; then
       lint_target="$REPO_ROOT/$DIAGRAM_PATH"
     fi

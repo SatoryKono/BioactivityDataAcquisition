@@ -80,6 +80,6 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 *   **`AGENT.md`**: Specialized instructions for AI agents.
 
 ## 8. Operational Policies (CRITICAL)
-*   **Loading Strategy**: `full-scan-only` is strictly for publications. All other high-volume entities MUST use `null` (default incremental) to enable checkpointing.
+*   **Loading Strategy**: `full_scan_only` is strictly for publications. All other high-volume entities MUST use `null` (default incremental) to enable checkpointing.
 *   **Transformer Mapping**: Use declarative `FieldGroup`/`FieldSpec`. Normalize empty collections to `None`. Compact JSON serialization for list/dict fields.
 *   **VCR Governance**: Organize cassettes in `tests/fixtures/vcr/{provider}/`. NEVER store in root. Use `once` mode locally, `none` in CI.

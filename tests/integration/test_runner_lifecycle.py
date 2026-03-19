@@ -30,7 +30,10 @@ from bioetl.application.services.medallion_lifecycle import (
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.ports import NoOpTracing
 from bioetl.domain.types import RunType
+
+_NOOP_TRACER = NoOpTracing()
 
 
 @dataclass
@@ -399,6 +402,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()
@@ -489,6 +493,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=lifecycle_service_no_clear,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()
@@ -564,6 +569,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         with pytest.raises(RuntimeError, match="Test error"):
@@ -645,6 +651,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()
@@ -722,6 +729,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         with pytest.raises(InfrastructureError) as exc_info:
@@ -809,6 +817,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()
@@ -948,6 +957,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()
@@ -1039,6 +1049,7 @@ class TestPipelineRunnerLifecycle:
             postrun=mock_postrun_service,
             lifecycle_service=mock_lifecycle_service,
             observer=mock_observer,
+            tracer=_NOOP_TRACER,
         )
 
         await runner.run()

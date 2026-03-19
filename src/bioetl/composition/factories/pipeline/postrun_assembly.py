@@ -23,6 +23,7 @@ from bioetl.application.core.postrun.service import (
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
+from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
@@ -103,6 +104,7 @@ def build_postrun_service(
     tracer: TracingPort | None = None,
 ) -> PostrunService:
     """Build the postrun service and its collaborators in the composition layer."""
+    resolved_tracer = resolve_tracer(tracer)
     dq_service = DataQualityService(
         dq_monitor=pipeline.services.dq_monitor,
         config=pipeline.config.dq,
@@ -121,21 +123,6 @@ def build_postrun_service(
         silver_dq_config=dq_configs.silver,
         gold_dq_config=dq_configs.gold,
     )
-    if tracer is None:
-        return PostrunService(
-            config=pipeline.config,
-            runtime=pipeline.runtime,
-            context=pipeline.context,
-            dq_service=dq_service,
-            lifecycle_service=lifecycle_service,
-            dependencies=dependencies,
-            storage=pipeline.services.storage,
-            metrics=pipeline.services.metrics,
-            logger=logger_port,
-            metadata_coordinator=pipeline.services.metadata_coordinator,
-            metadata_writer=pipeline.services.metadata_writer,
-        )
-
     return PostrunService(
         config=pipeline.config,
         runtime=pipeline.runtime,
@@ -143,7 +130,7 @@ def build_postrun_service(
         dq_service=dq_service,
         lifecycle_service=lifecycle_service,
         dependencies=dependencies,
-        tracer=tracer,
+        tracer=resolved_tracer,
         storage=pipeline.services.storage,
         metrics=pipeline.services.metrics,
         logger=logger_port,

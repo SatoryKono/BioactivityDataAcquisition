@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=scripts/diagrams/diagram_paths.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/diagram_paths.sh"
 DOCS_ROOT="$REPO_ROOT/docs"
-CANONICAL_ROOT="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+CANONICAL_ROOT="$DIAGRAM_ROOT"
 SCOPE="all"
-THEME_CONFIG="$REPO_ROOT/docs/02-architecture/mmd-diagrams/theme/mermaid-config.json"
-PUPPETEER_CFG="$REPO_ROOT/docs/02-architecture/mmd-diagrams/theme/puppeteer-config.json"
+THEME_CONFIG="$DIAGRAM_THEME_DIR/mermaid-config.json"
+PUPPETEER_CFG="$DIAGRAM_THEME_DIR/puppeteer-config.json"
 [[ -f "$PUPPETEER_CFG" ]] || PUPPETEER_CFG=""
 TEMP_PUPPETEER_CFG=""
 TMP_DIR=""

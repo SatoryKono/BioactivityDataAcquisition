@@ -1,23 +1,31 @@
 schema_version: 1
 policy:
-    default_gate_mode: block
-    owner_diversification_sync:
-        source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
-        starts_quarter: 2026-Q2
-        review_on: '2026-06-30'
-    required_fields:
-        - value
-        - owner
-        - reason
-        - classification
-        - linked_rf
-        - expires_on
-        - removal_step
+  default_gate_mode: block
+  owner_diversification_sync:
+    source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
+    starts_quarter: 2026-Q2
+    review_on: '2026-06-30'
+  required_fields:
+    - value
+    - owner
+    - reason
+    - classification
+    - linked_rf
+    - expires_on
+    - removal_step
 registries:
-    file_size_limits: { }
-    function_complexity: { }
-    function_length: { }
-    class_size: { }
-    class_method_count: { }
-    god_object: { }
-    domain_complexity: { }
+  file_size_limits: {}
+  function_complexity: {}
+  function_length: {}
+  class_size: {}
+  class_method_count: {}
+  god_object:
+    ProviderRegistry:
+      value: 1
+      owner: jules
+      reason: "Central registry for provider creation and metadata. Defined in src/bioetl/composition/providers/provider_registry.py."
+      classification: technical_debt
+      linked_rf: RF-001
+      expires_on: '2026-04-19'
+      removal_step: "Separate metadata store from creator logic."
+  domain_complexity: {}

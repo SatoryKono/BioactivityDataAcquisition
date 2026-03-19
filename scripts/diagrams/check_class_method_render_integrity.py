@@ -16,6 +16,11 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 
+try:
+    from .diagram_paths import source_dir
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import source_dir
+
 SVG_NS = "http://www.w3.org/2000/svg"
 NS = {"svg": SVG_NS}
 
@@ -208,7 +213,7 @@ def main() -> int:
     parser.add_argument(
         "--source-dir",
         type=Path,
-        default=Path("docs/02-architecture/mmd-diagrams/class-diagrams"),
+        default=source_dir("class-diagrams"),
         help="Directory containing class-diagram .mmd sources.",
     )
     parser.add_argument(

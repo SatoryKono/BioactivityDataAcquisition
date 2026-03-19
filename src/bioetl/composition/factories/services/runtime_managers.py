@@ -24,6 +24,7 @@ from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointManagerService,
 )
 from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
+from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
 from bioetl.domain.config import MemoryConfig
 from bioetl.domain.ports import (
     BatchIdGeneratorPort,
@@ -59,8 +60,9 @@ def build_runtime_managers(
         memory_config=memory_config,
         logger=pipeline.services.logger,
     )
+    resolved_tracer = resolve_tracer(tracer)
     tracing_manager = BatchTracingManagerService(
-        tracer=tracer,
+        tracer=resolved_tracer,
         context=pipeline.context,
         config=processor_config,
         initial_batch_size=initial_batch_size,

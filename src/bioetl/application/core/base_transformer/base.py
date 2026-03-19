@@ -6,9 +6,6 @@ import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
-from bioetl.application.core.base_transformer.contract_policy import (
-    _DefaultContractPolicy,
-)
 from bioetl.application.core.base_transformer.errors import (
     FilteredOutError,
     TransformationError,
@@ -23,8 +20,7 @@ from bioetl.application.core.base_transformer_dependency_helpers_mixin import (
 from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
-from bioetl.domain.ports import NoOpMetrics, NoOpPiiHasher, NoOpTracing
-from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
@@ -56,37 +52,20 @@ def _resolve_transformer_dependencies(
             )
         return dependencies
 
-    if not any(
+    if any(
         collaborator is not None
         for collaborator in (tracer, metrics, identity_service, pii_hasher)
     ):
         raise TypeError(
-            "BaseTransformer requires explicit collaborator injection via "
-            "'dependencies' (TransformerDependencyContext) or named collaborators. "
-            "Build defaults in composition when possible."
+            "BaseTransformer no longer assembles partial collaborator defaults "
+            "from named arguments. Build TransformerDependencyContext in "
+            "composition or test support and pass it via 'dependencies'."
         )
 
-    return TransformerDependencyContext(
-        tracer=(
-            tracer
-            if tracer is not None
-            else cast("TracingPort", NoOpTracing())
-        ),
-        metrics=(
-            metrics
-            if metrics is not None
-            else cast("MetricsPort", NoOpMetrics())
-        ),
-        identity_service=(
-            identity_service if identity_service is not None else IdentityService()
-        ),
-        pii_hasher=(
-            pii_hasher
-            if pii_hasher is not None
-            else cast("PiiHasherPort", NoOpPiiHasher())
-        ),
-        data_normalizer=DataNormalizationService(),
-        contract_policy=_DefaultContractPolicy(),
+    raise TypeError(
+        "BaseTransformer requires explicit collaborator injection via "
+        "'dependencies' (TransformerDependencyContext). Build runtime defaults "
+        "in composition when needed."
     )
 
 

@@ -7,25 +7,15 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-
-def _resolve_repo_root() -> Path:
-    current = Path(__file__).resolve()
-    for parent in current.parents:
-        if (parent / "pyproject.toml").exists() and (parent / "scripts").exists():
-            return parent
-    return current.parents[0]
+try:
+    from .diagram_paths import bundle_markdown_path, source_dir, source_ref
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import bundle_markdown_path, source_dir, source_ref
 
 
-REPO_ROOT = _resolve_repo_root()
-ARCH_DIR = REPO_ROOT / "docs" / "02-architecture" / "mmd-diagrams" / "architecture"
+ARCH_DIR = source_dir("architecture")
 PNG_DIR = ARCH_DIR / "png"
-OUTPUT_MD = (
-    REPO_ROOT
-    / "docs"
-    / "02-architecture"
-    / "mmd-diagrams"
-    / "architecture-diagrams-with-descriptions.md"
-)
+OUTPUT_MD = bundle_markdown_path("architecture")
 
 
 def extract_metadata(mmd_path: Path) -> dict[str, str]:
@@ -145,7 +135,7 @@ def main() -> int:
         else:
             lines.append(f"*PNG не найден: `architecture/png/{stem}.png`*\n")
 
-        lines.append(f"- Исходная диаграмма: `mmd-diagrams/architecture/{mf.name}`\n")
+        lines.append(f"- Исходная диаграмма: `{source_ref('architecture', mf.name)}`\n")
 
         lines.append("### Описание")
         lines.append(build_description(stem, meta))

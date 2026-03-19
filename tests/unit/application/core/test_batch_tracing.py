@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from typing import cast
 from unittest.mock import MagicMock
+from uuid import UUID
 
 import pytest
 
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.types import BatchID
 
 
 @pytest.fixture
@@ -54,26 +57,29 @@ def test_start_execution_span(service: BatchTracingManagerService) -> None:
     span = service.start_execution_span()
 
     assert span is not None
-    span.__enter__.assert_called_once()
+    cast(MagicMock, span).__enter__.assert_called_once()
 
 
 def test_start_batch_span(service: BatchTracingManagerService) -> None:
     """Batch span is created with batch_id and record_count."""
     span = service.start_batch_span(
-        batch_id="batch-001", record_count=50, start_index=0
+        batch_id=BatchID(UUID("12345678-1234-5678-1234-567812345678")),
+        record_count=50,
+        start_index=0,
     )
 
     assert span is not None
-    span.__enter__.assert_called_once()
+    cast(MagicMock, span).__enter__.assert_called_once()
 
 
 def test_start_layer_span(service: BatchTracingManagerService) -> None:
     """Layer span is created with correct count attribute key."""
-    span = service.start_layer_span("write_bronze", batch_id="batch-001", count=50)
+    batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+    span = service.start_layer_span("write_bronze", batch_id=batch_id, count=50)
     assert span is not None
 
     span2 = service.start_layer_span(
-        "transform", batch_id="batch-001", count=50, input_count=True
+        "transform", batch_id=batch_id, count=50, input_count=True
     )
     assert span2 is not None
 
@@ -135,9 +141,9 @@ def test_set_execution_stats_none_span(service: BatchTracingManagerService) -> N
 
 
 def test_noop_tracing(mock_context: MagicMock, mock_config: MagicMock) -> None:
-    """When tracer is None, uses NoOpTracing and spans are safe."""
+    """Explicit NoOpTracing keeps the service safe without hidden defaults."""
     svc = BatchTracingManagerService(
-        tracer=None,
+        tracer=NoOpTracing(),
         context=mock_context,
         config=mock_config,
         initial_batch_size=100,
@@ -145,6 +151,20 @@ def test_noop_tracing(mock_context: MagicMock, mock_config: MagicMock) -> None:
     )
 
     assert isinstance(svc._tracer, NoOpTracing)
+
+
+def test_none_tracer_is_rejected(
+    mock_context: MagicMock, mock_config: MagicMock
+) -> None:
+    """The application layer must not silently build tracing defaults."""
+    with pytest.raises(TypeError, match="requires explicit tracer injection"):
+        BatchTracingManagerService(
+            tracer=None,
+            context=mock_context,
+            config=mock_config,
+            initial_batch_size=100,
+            adaptive_sizing_enabled=False,
+        )
 
 
 def test_end_span_with_shutdown(service: BatchTracingManagerService) -> None:

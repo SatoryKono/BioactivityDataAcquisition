@@ -1,11 +1,11 @@
 %% BioETL — Bootstrap / DI Container (Composition Root)
-%% Shows the current composition-root seams used to assemble runtime and admin services.
+%% Shows the current narrow public APIs plus retained broad seam used to assemble runtime and admin services.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   17
+%% @nodes   20
 %% @reference  Decomposed into 12a, 12b sub-diagrams
 
 %%{init: {
@@ -24,7 +24,10 @@ graph TB
     CALLERS["Entry callers<br/>CLI + tests/scripts + future API"]:::size-md
 
     subgraph Public["Public composition seams"]
-        ENTRY["composition.entrypoints<br/>canonical retained facade"]:::size-md
+        EXEC["composition.execution_api<br/>preferred execution seam"]:::size-md
+        SVC["composition.services_api<br/>preferred services seam"]:::size-md
+        RES["composition.resources_api<br/>preferred resource seam"]:::size-md
+        ENTRY["composition.entrypoints<br/>retained broad facade"]:::size-md
         BOOT["composition.bootstrap<br/>runtime / cli / assembly"]:::size-md
     end
 
@@ -56,8 +59,15 @@ graph TB
         ADMINSVC["Admin services<br/>health / export / vacuum / checkpoint"]:::size-md
     end
 
-    CALLERS ==> ENTRY
-    ENTRY --> BOOT
+    CALLERS ==> EXEC
+    CALLERS ==> SVC
+    CALLERS ==> RES
+    CALLERS -.->|"broad / compat surface"| ENTRY
+
+    EXEC --> BOOT
+    SVC --> BOOT
+    RES --> BOOT
+    ENTRY -.->|"retained wide surface"| BOOT
 
     BOOT --> RUNTIME
     BOOT --> SUPPORT
@@ -94,7 +104,7 @@ graph TB
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class CALLERS entry
-    class ENTRY,BOOT public
+    class EXEC,SVC,RES,ENTRY,BOOT public
     class PR,PIPE,DSF,RF,RUNTIME,RH,SUPPORT comp
     class ADAPTER,STORAGE,OBS,LOCK infra
     class RUNNER,COMPOSITE,ADMINSVC app

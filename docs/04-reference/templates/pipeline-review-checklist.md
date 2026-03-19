@@ -19,7 +19,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Pipeline config exists at `configs/entities/{provider}/{entity}.yaml`
 - [ ] Unified config includes required sections: `pipeline`, `schema`, `quality`, `filters`, `contracts`
 - [ ] Provider config exists at `configs/providers/{provider}.yaml` (source, rate-limit, circuit-breaker)
-- [ ] `loading-strategy` specified (`full-scan-only` | `null`)
+- [ ] `loading_strategy` specified (`full_scan_only` | `null`)
 - [ ] `forensic-retention` flag set for Critical tables if needed
 
 ## 3. Data Flow - Medallion Architecture (RULES.md §2.1)

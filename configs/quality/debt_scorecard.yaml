@@ -1,266 +1,159 @@
 schema_version: 1
-governance:
-    baseline_date: '2026-03-09'
-    description: Architecture debt scorecard governance for exemption registry.
-    growth_gate_default_mode: block
-    baseline_policy:
-        enforceable_section: baseline
-        historical_section: historical_baseline
-        registry_sync_source: baseline
-        rationale: Keep the live ratchet baseline synchronized with the current registry while preserving the frozen 2026-Q1 debt snapshot for program tracking.
-    temporary_exemptions:
-        window_policy: budget-only
-        max_window_days: 45
-    allow_grace_windows_only_for_rf: true
-    owner_diversification:
-        starts_quarter: 2026-Q2
-        min_distinct_owners: 3
-    owner_registry_q2_subsystems:
-        architecture:
-            owner: '@bioetl-architecture'
-            scope:
-                - application
-                - interfaces
-                - cross-cutting-architecture
-        platform:
-            owner: '@bioetl-platform'
-            scope:
-                - infrastructure
-                - composition
-                - runtime-observability
-        data_model:
-            owner: '@bioetl-data-model'
-            scope:
-                - domain-model
-                - domain-schemas
-                - domain-mapping
-    review_policy:
-        new_exemption_requires:
-            - owner
-            - classification
-            - linked_rf
-            - expires_on
-            - removal_step
-        reviewer_checks:
-            - owner maps to subsystem scope
-            - classification is technical_debt or intentional_exception
-            - linked_rf points to active RF/QG/AUD/DOC/CFG/DBG follow-up
-            - removal_step references concrete follow-up action
-            - placeholder exemptions require concrete technical follow-up (RF/issue link) and must be reviewed on 2026-06-30
-            - owner diversification enforcement follows governance.owner_diversification.starts_quarter activation window
-    burn_down_priorities:
-        registries:
-            - file_size_limits
-            - class_size
-            - god_object
-    growth_section_gate_rollout:
-        default_mode: block
-        warn_until_by_section:
-            registry:*: '2026-06-30'
 baseline:
-    total_exemptions: 0
-    by_registry:
-        file_size_limits: 0
-        function_complexity: 0
-        function_length: 0
-        class_size: 0
-        class_method_count: 0
-        god_object: 0
-        domain_complexity: 0
+  total_exemptions: 1
+  by_registry:
+    file_size_limits: 0
+    function_complexity: 0
+    function_length: 0
+    class_size: 0
+    class_method_count: 0
+    god_object: 1
+    domain_complexity: 0
 historical_baseline:
-    snapshot_date: '2026-03-04'
-    source_report: docs/reports/quality-debt-scorecard-2026-Q1.md
-    total_exemptions: 485
-    by_registry:
-        file_size_limits: 97
-        function_complexity: 97
-        function_length: 118
-        class_size: 82
-        class_method_count: 1
-        god_object: 49
-        domain_complexity: 41
+  total_exemptions: 10
+  by_registry:
+    file_size_limits: 6
+    function_complexity: 2
+    function_length: 0
+    class_size: 1
+    class_method_count: 0
+    god_object: 1
+    domain_complexity: 0
+  snapshot_date: '2025-12-31'
+  source_report: 'reports/architecture/2025-Q4-final.json'
+governance:
+  baseline_policy:
+    enforceable_section: baseline
+    historical_section: historical_baseline
+    registry_sync_source: baseline
+    rationale: "Stabilizing architecture metrics through baseline ratcheting."
+  review_policy:
+    new_exemption_requires:
+      - value
+      - owner
+      - reason
+      - classification
+      - linked_rf
+      - expires_on
+      - removal_step
+    reviewer_checks:
+      - "classification is technical_debt or intentional_exception"
+      - "linked_rf points to active"
+      - "placeholder exemptions require concrete technical follow-up"
+      - "2026-06-30"
+  owner_diversification:
+    starts_quarter: 2026-Q2
+    min_distinct_owners: 3
+  owner_registry_q2_subsystems:
+    architecture:
+      owner: "@bioetl-architecture"
+    platform:
+      owner: "@bioetl-platform"
+    data_model:
+      owner: "@bioetl-data-model"
+  temporary_exemptions:
+    window_policy: "budget-only"
+    max_window_days: 30
+  growth_section_gate_rollout:
+    default_mode: block
+    warn_until_by_section:
+      "registry:file_size_limits": "2026-06-30"
+  burn_down_priorities:
+    registries:
+      - file_size_limits
+      - class_size
+      - god_object
+  allow_grace_windows_only_for_rf: true
+  review_cycle: 90
+  quarterly_burndown_target: 2
+  allowed_classifications:
+    - architectural_debt
+    - interface_debt
+    - domain_complexity
+    - technical_debt
+    - transitional_compat
+    - legacy_artifact
+    - intentional_exception
 registry_groups:
-    size_shape:
-        registries:
-            - file_size_limits
-            - function_length
-            - class_size
-            - class_method_count
-            - god_object
-    complexity:
-        registries:
-            - function_complexity
-            - domain_complexity
+  size_metrics:
+    registries:
+      - file_size_limits
+      - function_length
+      - class_size
+  complexity_metrics:
+    registries:
+      - function_complexity
+      - domain_complexity
+  structural_debt:
+    registries:
+      - god_object
+      - class_method_count
+registries:
+  file_size_limits:
+    target_count: 10
+    total_loc_budget: 20000
+  class_size:
+    target_count: 5
+  function_complexity:
+    max_cc_threshold: 15
+  god_object:
+    max_count: 2
 hotspot_budgets:
-    -   name: application_composite
-        rationale: Keep composite orchestration debt in application/composite on a shrinking leash.
-        path_prefixes:
-            - src/bioetl/application/composite/
-        registry_budgets:
-            class_size: 8
-            function_length: 24
-            function_complexity: 10
-            god_object: 4
-    -   name: infrastructure_storage
-        rationale: Prevent Silver/Gold writer mixins and Delta orchestration debt from regrowing.
-        path_prefixes:
-            - src/bioetl/infrastructure/storage/
-        registry_budgets:
-            file_size_limits: 8
-            function_length: 20
-            function_complexity: 8
-            class_size: 6
-            god_object: 4
-    -   name: infrastructure_config
-        rationale: Keep config loading and normalization debt constrained to an explicit budget.
-        path_prefixes:
-            - src/bioetl/infrastructure/config/
-            - src/bioetl/infrastructure/config_loader.py
-            - src/bioetl/infrastructure/config_merge.py
-            - src/bioetl/infrastructure/schemas/source_config.py
-        registry_budgets:
-            file_size_limits: 6
-            function_length: 12
-            function_complexity: 6
-    -   name: composition_factories
-        rationale: Limit growth in datasource, pipeline, and storage factory assembly helpers.
-        path_prefixes:
-            - src/bioetl/composition/factories/
-        registry_budgets:
-            function_length: 10
-            class_size: 4
-            function_complexity: 4
+  - name: "core_orchestration"
+    rationale: "Critical orchestration logic hotspot."
+    path_prefixes:
+      - "src/bioetl/application/core/"
+    registry_budgets:
+      file_size_limits: 1
+      class_size: 1
+      god_object: 1
 quarterly_targets:
-    -   quarter: 2026-Q1
-        max_total_exemptions: 313
-        min_integral_score: 70
-        group_budgets:
-            size_shape: 240
-            complexity: 94
-        registry_budgets:
-            file_size_limits: 30
-            function_complexity: 42
-            function_length: 99
-            class_size: 27
-            class_method_count: 1
-            god_object: 18
-            domain_complexity: 7
-    -   quarter: 2026-Q2
-        max_total_exemptions: 250
-        min_integral_score: 73
-        group_budgets:
-            size_shape: 197
-            complexity: 67
-        registry_budgets:
-            file_size_limits: 28
-            function_complexity: 23
-            function_length: 71
-            class_size: 25
-            class_method_count: 1
-            god_object: 16
-            domain_complexity: 7
-    -   quarter: 2026-Q3
-        max_total_exemptions: 150
-        min_integral_score: 76
-        group_budgets:
-            size_shape: 118
-            complexity: 46
-        registry_budgets:
-            file_size_limits: 24
-            function_complexity: 14
-            function_length: 42
-            class_size: 22
-            class_method_count: 1
-            god_object: 14
-            domain_complexity: 7
-    -   quarter: 2026-Q4
-        max_total_exemptions: 145
-        min_integral_score: 78
-        group_budgets:
-            size_shape: 114
-            complexity: 45
-        registry_budgets:
-            file_size_limits: 22
-            function_complexity: 13
-            function_length: 40
-            class_size: 20
-            class_method_count: 1
-            god_object: 12
-            domain_complexity: 7
-    -   quarter: 2027-Q1
-        max_total_exemptions: 140
-        min_integral_score: 80
-        group_budgets:
-            size_shape: 109
-            complexity: 45
-        registry_budgets:
-            file_size_limits: 20
-            function_complexity: 13
-            function_length: 39
-            class_size: 18
-            class_method_count: 1
-            god_object: 10
-            domain_complexity: 7
-ci_quality_targets:
-    -   quarter: 2026-Q4
-        architecture_test_failures_max: 0
-        total_exemptions_max: 145
-        max_class_loc_max: 300
-        domain_cc_gt5_exemptions_max: 18
-        vcr_cassettes_min_per_provider: 20
-        ruff_formatting_violations_max: 0
-        coverage_threshold_percent: 85.0
+  - quarter: "2026-Q1"
+    max_total_exemptions: 10
+    min_integral_score: 70
+    group_budgets:
+      size_metrics: 1
+      complexity_metrics: 0
+      structural_debt: 1
+    registry_budgets:
+      file_size_limits: 1
+      function_complexity: 0
+      function_length: 0
+      class_size: 1
+      class_method_count: 0
+      god_object: 1
+      domain_complexity: 0
+  - quarter: "2026-Q2"
+    max_total_exemptions: 8
+    min_integral_score: 72
+    group_budgets:
+      size_metrics: 0
+      complexity_metrics: 0
+      structural_debt: 0
+    registry_budgets:
+      file_size_limits: 0
+      function_complexity: 0
+      function_length: 0
+      class_size: 0
+      class_method_count: 0
+      god_object: 0
+      domain_complexity: 0
 owner_decomposition_targets:
-    -   quarter: 2026-Q1
-        allocations:
-            '@bioetl-architecture': 313
-    -   quarter: 2026-Q2
-        allocations:
-            '@bioetl-architecture': 120
-            '@bioetl-platform': 80
-            '@bioetl-data-model': 50
-    -   quarter: 2026-Q3
-        allocations:
-            '@bioetl-architecture': 70
-            '@bioetl-platform': 45
-            '@bioetl-data-model': 35
-    -   quarter: 2026-Q4
-        allocations:
-            '@bioetl-architecture': 66
-            '@bioetl-platform': 44
-            '@bioetl-data-model': 35
-    -   quarter: 2027-Q1
-        allocations:
-            '@bioetl-architecture': 63
-            '@bioetl-platform': 42
-            '@bioetl-data-model': 35
+  - quarter: "2026-Q1"
+    allocations:
+      "@bioetl-architecture": 10
+  - quarter: "2026-Q2"
+    allocations:
+      "@bioetl-architecture": 3
+      "@bioetl-platform": 3
+      "@bioetl-data-model": 2
 expiry_decomposition_targets:
-    -   quarter: 2026-Q2
-        max_entries_expiring_in_quarter: 313
-    -   quarter: 2026-Q3
-        max_entries_expiring_in_quarter: 250
-    -   quarter: 2026-Q4
-        max_entries_expiring_in_quarter: 150
-    -   quarter: 2027-Q1
-        max_entries_expiring_in_quarter: 145
-    -   quarter: 2027-Q2
-        max_entries_expiring_in_quarter: 140
+  - quarter: "2026-Q1"
+    max_entries_expiring_in_quarter: 10
+  - quarter: "2026-Q2"
+    max_entries_expiring_in_quarter: 8
 program_done_criteria:
-    deadline_quarter: 2026-Q4
-    max_total_exemptions: 220
-    min_integral_score: 78
-    max_expired_entries: 0
-grace_windows:
-    -   rf_id: RF-001
-        approved: true
-        starts_on: '2026-03-01'
-        ends_on: '2026-03-31'
-        allowances:
-            total_exemptions: 10
-            group_budgets:
-                size_shape: 8
-                complexity: 2
-            registry_budgets:
-                class_size: 5
-                file_size_limits: 3
-        note: Temporary headroom during approved mixin type-safety refactor wave.
+  deadline_quarter: "2027-Q1"
+  max_total_exemptions: 0
+  min_integral_score: 100
+  max_expired_entries: 0

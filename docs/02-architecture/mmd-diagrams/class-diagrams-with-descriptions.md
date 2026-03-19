@@ -1,6 +1,6 @@
 # BioETL Class Diagrams With Descriptions
 
-- Generated: 2026-03-16T10:12:25
+- Generated: 2026-03-19T10:51:26
 - Diagram count: 19
 
 ## Table of Contents
@@ -22,7 +22,7 @@
 - [13-domain-services — Class Diagram: Domain Services](#13-domain-services)
 - [14-observability — Class Diagram: Observability Components](#14-observability)
 - [14a-observability-method-catalog — Class Diagram: Observability Method Catalog (L2)](#14a-observability-method-catalog)
-- [15-extractors — Class Diagram: Field Extractors](#15-extractors)
+- [15-extractors — Class Diagram: Field Extractors and Publication Blocks](#15-extractors)
 - [16-factories-bootstrap — Class Diagram: Factories & Bootstrap](#16-factories-bootstrap)
 
 \newpage
@@ -209,7 +209,7 @@
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
-- Дата: `2026-02-26`
+- Дата: `2026-03-19`
 - Узлы (metadata): `20`
 
 \newpage
@@ -238,13 +238,13 @@
 ![11-storage](class-diagrams/png/11-storage.png)
 
 ### Описание
-Диаграмма «Class Diagram: Storage Components» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Bronze/Silver/Gold writers and supporting classes.. На схеме отражено примерно 16 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: BaseDeltaWriter, BronzeWriter, SilverWriter, GoldWriter, DeltaReader, ArrowDataConverter.
+Диаграмма «Class Diagram: Storage Components» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Bronze/Silver/Gold writers and supporting classes.. На схеме отражено примерно 19 узлов и 21 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: BaseDeltaWriter, BronzeWriter, SilverWriter, GoldWriter, DeltaReader, ArrowDataConverter.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
-- Дата: `2026-03-01`
-- Узлы (metadata): `16`
+- Дата: `2026-03-19`
+- Узлы (metadata): `19`
 
 \newpage
 
@@ -318,18 +318,18 @@
 
 <div style="page-break-before: always;"></div>
 
-## 15-extractors — Class Diagram: Field Extractors
+## 15-extractors — Class Diagram: Field Extractors and Publication Blocks
 
 ![15-extractors](class-diagrams/png/15-extractors.png)
 
 ### Описание
-Диаграмма «Class Diagram: Field Extractors» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Extractor pattern used in transformers.. На схеме отражено примерно 12 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PubMedExtractors, UniProtExtractors. Показательные узлы для быстрого чтения: BaseFieldExtractor, AbstractExtractor, AuthorExtractor, DateExtractor, ClassificationExtractor, IdentifierExtractor.
+Диаграмма «Class Diagram: Field Extractors and Publication Blocks» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Helper extractor classes plus declarative block contract used in publication transformers.. На схеме отражено примерно 14 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PubMedExtractors, UniProtExtractors. Показательные узлы для быстрого чтения: BaseFieldExtractor, ExtractionBlock, AbstractExtractor, AuthorExtractor, DateExtractor, ClassificationExtractor.
 
 ### Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
-- Дата: `2026-02-24`
-- Узлы (metadata): `12`
+- Дата: `2026-03-19`
+- Узлы (metadata): `14`
 
 \newpage
 
@@ -340,7 +340,7 @@
 ![16-factories-bootstrap](class-diagrams/png/16-factories-bootstrap.png)
 
 ### Описание
-Диаграмма «Class Diagram: Factories & Bootstrap» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Current composition-layer factories, provider registry, and runtime assembly.. На схеме отражено примерно 9 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilderService, CompositeSupportServicesFactory.
+Диаграмма «Class Diagram: Factories & Bootstrap» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: Current composition-layer factories, provider registry, and runtime assembly.. На схеме отражено примерно 9 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilderService, CompositeFilterExtractionService.
 
 ### Метаданные
 - Тип: `classDiagram`

@@ -16,7 +16,7 @@
 2. Исторический policy (контекст): `docs/02-architecture/mmd-diagrams/docs/00-diagramming-policy.md`.
 3. Канонические исходники диаграмм: `docs/02-architecture/mmd-diagrams/**/*.mmd`.
 4. Decomposed views: `docs/02-architecture/mmd-diagrams/views/*.mermaid`.
-5. Рендеры: gitignored, регенерируются через `render.sh`.
+5. Рендер-артефакты: `svg/png` под sibling-каталогами `mmd-diagrams/**/svg` и `mmd-diagrams/**/png` считаются поддерживаемыми documentation outputs и регенерируются через `render.sh` после изменения источников.
 
 ## 3. Форматы и именование
 
@@ -100,7 +100,7 @@
 
 Диаграмма считается готовой, если одновременно выполнено:
 1. Есть исходник в каноническом каталоге (`.mmd`).
-2. Есть соответствующий рендер (`svg/png`) в ожидаемом каталоге.
+2. Есть соответствующий обновлённый рендер (`svg/png`) в ожидаемом каталоге.
 3. Есть запись в индексной странице/разделе документации.
 4. Ссылка на диаграмму не битая.
 5. `scripts/diagrams/lint_diagrams.py` не даёт ошибок.
@@ -110,6 +110,7 @@
 ```bash
 python3 scripts/diagrams/lint_diagrams.py docs
 python3 scripts/docs/check_doc_links.py --links
+python3 scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
 python3 scripts/diagrams/check_diagram_visual_smoke.py
 bash scripts/diagrams/validate_mermaid_syntax.sh
 ```

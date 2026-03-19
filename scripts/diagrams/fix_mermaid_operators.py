@@ -22,9 +22,14 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+try:
+    from .diagram_paths import DIAGRAM_ROOT
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import DIAGRAM_ROOT
+
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 TARGET_DIAGRAM_TYPES = {"classdiagram", "sequencediagram"}
-DEFAULT_SCOPE = Path("docs/02-architecture/mmd-diagrams")
+DEFAULT_SCOPE = DIAGRAM_ROOT
 
 
 @dataclass(frozen=True)

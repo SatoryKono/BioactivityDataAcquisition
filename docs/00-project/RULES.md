@@ -387,7 +387,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 ### 2.7. Стратегия Загрузки (Load Strategy)
 
-| Критерий                                  | `loading-strategy: full-scan-only` |
+| Критерий                                  | `loading_strategy: full_scan_only` |
 | ----------------------------------------- | ---------------------------------- |
 | Источник с нестабильной offset-пагинацией | ✅ Обязательно                     |
 | Checkpoint resume                         | ❌ Запрещён                        |
@@ -395,9 +395,9 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 | Типичные сущности                         | Publication family, derived sets   |
 
 - **Watermark**: Механизм удалён согласно [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md).
-- **Конфигурация**: `loading-strategy: full-scan-only` задаётся в `configs/entities/{provider}/{entity}.yaml` секция `pipeline:` (см. [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)).
-- **Default behavior**: При `loading-strategy: null` разрешён checkpoint-based resume (стандартный incremental-поток).
-- **Checkpoint policy**: Для `full-scan-only` возобновление через checkpoint **MUST NOT** использоваться.
+- **Конфигурация**: `loading_strategy: full_scan_only` задаётся в `configs/entities/{provider}/{entity}.yaml` секция `pipeline:` (см. [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)).
+- **Default behavior**: При `loading_strategy: null` разрешён checkpoint-based resume (стандартный incremental-поток).
+- **Checkpoint policy**: Для `full_scan_only` возобновление через checkpoint **MUST NOT** использоваться.
 
 ### 2.8. Генерация ID Сущности (Entity ID)
 
@@ -445,8 +445,9 @@ Dependencies — пайплайны, которые запускаются **п�
 ```yaml
 dependencies:
   - pipeline: chembl_target_component
-    join-keys: [component-id]       # Ключ из seed
-    silver_table: silver/chembl/target-component
+    join_keys: [primary_component_id]  # Ключ из seed
+    filter_field: component_id
+    silver_table: silver/chembl/target_component
 ```
 
 **Chained Dependencies (цепочечные зависимости):**
@@ -457,15 +458,16 @@ dependencies:
 dependencies:
   # 1. Стандартный: ключи из seed
   - pipeline: chembl_target_component
-    join-keys: [component-id]
-    silver_table: silver/chembl/target-component
+    join_keys: [primary_component_id]
+    filter_field: component_id
+    silver_table: silver/chembl/target_component
 
   # 2. Цепочечный: ключи из предыдущего dependency
   - pipeline: chembl_protein_class
-    join-keys: [protein-classification-id]  # Колонка в source таблице
-    filter_field: protein-class-id          # Поле API (если отличается)
-    key-source: chembl_target_component     # Читать ключи отсюда
-    silver_table: silver/chembl/protein-class
+    join_keys: [protein_classification_id]  # Колонка в source таблице
+    filter_field: protein_class_id          # Поле API (если отличается)
+    key_source: chembl_target_component     # Читать ключи отсюда
+    silver_table: silver/chembl/protein_class
 ```
 
 **Поля DependencyConfig:**
@@ -473,31 +475,31 @@ dependencies:
 | Поле              | Тип     | Описание                                     |
 | ----------------- | ------- | -------------------------------------------- |
 | `pipeline`        | string  | Имя пайплайна                                |
-| `join-keys`       | list    | Колонки для извлечения ключей                |
-| `key-source`      | string? | `null`/`"seed"` = seed, иначе имя dependency |
-| `filter-field`    | string? | Поле API для фильтрации (если ≠ join-key)    |
+| `join_keys`       | list    | Колонки для извлечения ключей                |
+| `key_source`      | string? | `null`/`"seed"` = seed, иначе имя dependency |
+| `filter_field`    | string? | Поле API для фильтрации (если ≠ join key)    |
 | `required`        | bool    | При `true` — ошибка останавливает composite  |
-| `timeout-seconds` | int     | Таймаут выполнения                           |
-| `silver-table`    | string? | Путь к Silver-таблице                        |
+| `timeout_seconds` | int     | Таймаут выполнения                           |
+| `silver_table`    | string? | Путь к Silver-таблице                        |
 
 #### 2.9.2. Merge Configuration
 
 | Параметр               | Описание                            | Значения                                                           |
 | ---------------------- | ----------------------------------- | ------------------------------------------------------------------ |
-| `strategy`             | Стратегия объединения               | `left-outer`, `inner`, `union`                                     |
-| `conflict-resolution`  | Разрешение конфликтов полей         | `seed-priority`, `enricher-priority`, `coalesce`, `explicit-rules` |
-| `preserve-all-sources` | Сохранение всех колонок провайдеров | `true` / `false` (default)                                         |
+| `strategy`             | Стратегия объединения               | `left_outer`, `inner`, `union`                                     |
+| `conflict_resolution`  | Разрешение конфликтов полей         | `seed_priority`, `enricher_priority`, `coalesce`, `explicit_rules` |
+| `preserve_all_sources` | Сохранение всех колонок провайдеров | `true` / `false` (default)                                         |
 
-#### 2.9.3. preserve-all-sources Feature
+#### 2.9.3. preserve_all_sources Feature
 
-Опция `preserve-all-sources` в `MergeConfig` контролирует обработку колонок при слиянии:
+Опция `preserve_all_sources` в `MergeConfig` контролирует обработку колонок при слиянии:
 
 | Режим                                   | Поведение                                                                            | Используется когда                          |
 | --------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------- |
-| `preserve-all-sources: false` (default) | Колонки из разных источников **сливаются** (coalesce) в единую колонку по приоритету | Нужна единая "лучшая" версия поля           |
-| `preserve-all-sources: true`            | **Все** квалифицированные колонки сохраняются                                        | Нужны данные из всех источников для анализа |
+| `preserve_all_sources: false` (default) | Колонки из разных источников **сливаются** (coalesce) в единую колонку по приоритету | Нужна единая "лучшая" версия поля           |
+| `preserve_all_sources: true`            | **Все** квалифицированные колонки сохраняются                                        | Нужны данные из всех источников для анализа |
 
-**Формат колонок при `preserve-all-sources: true`:**
+**Формат колонок при `preserve_all_sources: true`:**
 
 ```
 {provider}.{entity}.{field}
@@ -508,18 +510,18 @@ dependencies:
 ```yaml
 # configs/composites/publication.yaml
 merge:
-  strategy: left-outer
-  conflict-resolution: seed-priority
-  preserve-all-sources: true  # Сохранить все колонки провайдеров
+  strategy: left_outer
+  conflict_resolution: seed_priority
+  preserve_all_sources: true  # Сохранить все колонки провайдеров
 ```
 
 **Результирующие колонки:**
 
 ```
-# При preserve-all-sources: false (coalesce)
+# При preserve_all_sources: false (coalesce)
 title                           # Единственная колонка title
 
-# При preserve-all-sources: true (все источники)
+# При preserve_all_sources: true (все источники)
 chembl.publication.title        # Значение из ChEMBL
 crossref.publication.title      # Значение из CrossRef
 openalex.publication.title      # Значение из OpenAlex
@@ -528,22 +530,22 @@ pubmed.publication.title        # Значение из PubMed
 
 **Когда использовать:**
 
-- **`preserve-all-sources: true`**: Анализ качества данных, сравнение источников, ML-фичи из нескольких провайдеров
-- **`preserve-all-sources: false`**: Продакшн-витрины с единственной "лучшей" версией каждого поля
+- **`preserve_all_sources: true`**: Анализ качества данных, сравнение источников, ML-фичи из нескольких провайдеров
+- **`preserve_all_sources: false`**: Продакшн-витрины с единственной "лучшей" версией каждого поля
 
 #### 2.9.4. Column Groups
 
-Для контроля порядка колонок в output используется конфигурация `column-groups`:
+Для контроля порядка колонок в output используется конфигурация `column_groups`:
 
 ```yaml
 merge:
-  column-groups:
+  column_groups:
     - name: identifiers
-      fields: [document-chembl-id, doi, pmid]
-      provider-order: [chembl, crossref, openalex, pubmed]
+      fields: [publication_id, doi, pmid]
+      provider_order: [chembl, crossref, openalex, pubmed]
     - name: title
       fields: [title]
-      provider-order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 ```
 
 #### 2.9.5. Field Group Registry

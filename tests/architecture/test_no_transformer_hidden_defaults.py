@@ -32,25 +32,26 @@ def _iter_constructor_calls(function_node: ast.FunctionDef) -> list[str]:
     return names
 
 
-def test_base_transformer_init_does_not_construct_default_collaborators() -> None:
-    """BaseTransformer must consume injected collaborators, not create them."""
+def test_base_transformer_dependency_resolution_does_not_construct_defaults() -> None:
+    """Transformer core must consume injected collaborators, not create them."""
     content = BASE_TRANSFORMER_PATH.read_text(encoding="utf-8")
     tree = ast.parse(content)
 
+    checked = False
     for node in ast.walk(tree):
-        if not isinstance(node, ast.ClassDef) or node.name != "BaseTransformer":
-            continue
-        for item in node.body:
-            if isinstance(item, ast.FunctionDef) and item.name == "__init__":
-                calls = set(_iter_constructor_calls(item))
-                forbidden = sorted(FORBIDDEN_CONSTRUCTORS & calls)
-                assert not forbidden, (
-                    "BaseTransformer.__init__ must not create concrete defaults; "
-                    f"found: {', '.join(forbidden)}"
-                )
-                return
+        if isinstance(node, ast.FunctionDef) and node.name in {
+            "__init__",
+            "_resolve_transformer_dependencies",
+        }:
+            calls = set(_iter_constructor_calls(node))
+            forbidden = sorted(FORBIDDEN_CONSTRUCTORS & calls)
+            assert not forbidden, (
+                "BaseTransformer core must not create concrete defaults; "
+                f"{node.name} found: {', '.join(forbidden)}"
+            )
+            checked = True
 
-    raise AssertionError("BaseTransformer.__init__ not found")
+    assert checked, "Expected BaseTransformer DI functions were not found"
 
 
 def test_transformer_dependency_module_does_not_construct_default_collaborators() -> (

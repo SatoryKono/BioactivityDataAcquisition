@@ -247,7 +247,7 @@ def validate_thresholds(self) -> BaseDQThresholds:
     return self
 ```
 
-> **Примечание:** [base_schemas.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/schemas/base_schemas.py)
+> **Примечание:** [base_schemas.py](../../../src/bioetl/infrastructure/schemas/base_schemas.py)
 > сейчас является facade-модулем над provider-split реализациями. Стабильные
 > импорты остаются на facade path, а не на внутренних split modules.
 

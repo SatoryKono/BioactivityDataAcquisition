@@ -7,10 +7,15 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
+try:
+    from .diagram_paths import DIAGRAM_ROOT
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import DIAGRAM_ROOT
+
 
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 DEFAULT_ROOTS = [
-    Path("docs/02-architecture/mmd-diagrams"),
+    DIAGRAM_ROOT,
     Path("docs/02-architecture/diagrams/mermaid"),
 ]
 

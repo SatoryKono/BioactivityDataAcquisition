@@ -17,9 +17,13 @@ from pathlib import Path
 SVG_NS = "http://www.w3.org/2000/svg"
 NS = {"svg": SVG_NS}
 
-DEFAULT_MANIFEST = Path(
-    "docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
-)
+try:
+    from .diagram_paths import VISUAL_SMOKE_MANIFEST
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import VISUAL_SMOKE_MANIFEST
+
+
+DEFAULT_MANIFEST = VISUAL_SMOKE_MANIFEST
 
 
 @dataclass(frozen=True)

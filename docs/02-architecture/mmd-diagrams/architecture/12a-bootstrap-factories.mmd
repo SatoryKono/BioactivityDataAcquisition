@@ -1,13 +1,13 @@
-%% BioETL — Bootstrap: Registries and Factory Seams
-%% Focuses on current registries, provider wiring, and canonical factory seams.
+%% BioETL — Bootstrap: Registries, Public APIs, and Factory Seams
+%% Focuses on current public composition APIs, registries, provider wiring, and canonical factory seams.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
 %% @view    bootstrap-factories
 %% @parent  12-bootstrap-di-container.mmd
-%% @nodes   8
+%% @nodes   11
 %% @uniform width=296 height=56 max_title_len=30 max_desc_lines=2
 
 %%{init: {
@@ -22,7 +22,10 @@
   }
 }}%%
 graph TB
-    ENTRY["composition.entrypoints"]:::size-sm
+    EXEC["composition.execution_api"]:::size-sm
+    SVC["composition.services_api"]:::size-sm
+    RES["composition.resources_api"]:::size-sm
+    ENTRY["composition.entrypoints<br/>retained broad seam"]:::size-sm
     BOOT["composition.bootstrap"]:::size-sm
 
     subgraph Registries["Registries + factories"]
@@ -34,7 +37,10 @@ graph TB
         CSS["CompositeSupportServicesFactory"]:::size-sm
     end
 
-    ENTRY --> BOOT
+    EXEC --> BOOT
+    SVC --> BOOT
+    RES --> BOOT
+    ENTRY -.->|"broad public access"| BOOT
     BOOT --> PR
     BOOT --> PIPE
     BOOT --> DSF
@@ -46,5 +52,5 @@ graph TB
     classDef public fill:#f8fafc,stroke:#475569,stroke-width:2px
     classDef comp fill:#fff7ed,stroke:#f59e0b
 
-    class ENTRY,BOOT public
+    class EXEC,SVC,RES,ENTRY,BOOT public
     class PR,PIPE,DSF,RF,RFB,CSS comp

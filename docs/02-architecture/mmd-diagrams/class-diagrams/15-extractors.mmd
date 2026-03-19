@@ -1,11 +1,11 @@
-%% BioETL — Class Diagram: Field Extractors
-%% Extractor pattern used in transformers.
+%% BioETL — Class Diagram: Field Extractors and Publication Blocks
+%% Helper extractor classes plus declarative block contract used in publication transformers.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-19
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @nodes   12
+%% @nodes   14
 %% @uniform class width=224 height=72 max_title_len=23 max_desc_lines=2
 
 classDiagram
@@ -16,6 +16,13 @@ classDiagram
     }
 
     note for BaseFieldExtractor "Extractor strategy for API fields"
+
+    class ExtractionBlock {
+        <<Protocol>>
+        +extract(record: BronzeRecord): JsonDict
+    }
+
+    note for ExtractionBlock "Declarative publication block contract"
 
     class AbstractExtractor {
         PubMed abstract text
@@ -72,6 +79,11 @@ classDiagram
         +parse(date_str): date | None
     }
 
+    class PubMedBlockSet {
+        Identifier / Core / Author / Journal
+        Date / Classification / Metrics
+    }
+
     BaseFieldExtractor <|-- AbstractExtractor
     BaseFieldExtractor <|-- AuthorExtractor
     BaseFieldExtractor <|-- DateExtractor
@@ -84,6 +96,12 @@ classDiagram
     BaseFieldExtractor <|-- CommentExtractor
 
     DateExtractor --> MedlineDateParser : uses
+    PubMedBlockSet ..|> ExtractionBlock : conforms to
+    PubMedBlockSet ..> AbstractExtractor : uses
+    PubMedBlockSet ..> AuthorExtractor : uses
+    PubMedBlockSet ..> DateExtractor : uses
+    PubMedBlockSet ..> ClassificationExtractor : uses
+    PubMedBlockSet ..> IdentifierExtractor : uses
 
     namespace PubMedExtractors {
         class AbstractExtractor
@@ -91,6 +109,8 @@ classDiagram
         class DateExtractor
         class ClassificationExtractor
         class IdentifierExtractor
+        class PubMedBlockSet
+        class ExtractionBlock
     }
 
     namespace UniProtExtractors {

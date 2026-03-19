@@ -12,7 +12,11 @@ from bioetl.application.services.dq_report_service import (
     DQReportContext,
     DQReportService,
 )
-from bioetl.domain.ports import GoldDQConfigPort, SilverDQConfigPort
+from bioetl.domain.ports import (
+    BronzeDQConfigPort,
+    GoldDQConfigPort,
+    SilverDQConfigPort,
+)
 
 
 def _make_report(status_value: str = "PASS") -> MagicMock:
@@ -59,12 +63,181 @@ def silver_config() -> MagicMock:
 
 
 @pytest.fixture
+def bronze_config() -> MagicMock:
+    config = MagicMock(spec=BronzeDQConfigPort)
+    config.enabled = True
+    config.output_path = None
+    config.get_format_enum.return_value = MagicMock(value="json")
+    return config
+
+
+@pytest.fixture
 def gold_config() -> MagicMock:
     config = MagicMock(spec=GoldDQConfigPort)
     config.enabled = True
     config.output_path = None
     config.get_format_enum.return_value = MagicMock(value="json")
     return config
+
+
+@pytest.mark.unit
+def test_path_to_str_returns_string_or_none(service: DQReportService) -> None:
+    report_path = Path("bronze/report.json")
+    assert service._path_to_str(report_path) == str(report_path)
+    assert service._path_to_str(None) is None
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_try_generate_bronze_requires_enabled_and_config(
+    service: DQReportService,
+    bronze_config: MagicMock,
+) -> None:
+    service._generate_bronze_report = AsyncMock(return_value=Path("bronze.json"))  # type: ignore[method-assign]
+    context = _make_context()
+
+    disabled = await service._try_generate_bronze(context, bronze_config, enabled=False)
+    assert disabled is None
+    service._generate_bronze_report.assert_not_awaited()  # type: ignore[attr-defined]
+
+    missing_config = await service._try_generate_bronze(context, None, enabled=True)
+    assert missing_config is None
+    service._generate_bronze_report.assert_not_awaited()  # type: ignore[attr-defined]
+
+    generated = await service._try_generate_bronze(context, bronze_config, enabled=True)
+    assert generated == Path("bronze.json")
+    service._generate_bronze_report.assert_awaited_once_with(context, bronze_config)  # type: ignore[attr-defined]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_bronze_report_skips_when_analyzer_or_writer_missing(
+    service: DQReportService,
+    bronze_config: MagicMock,
+) -> None:
+    context = _make_context()
+
+    result = await service._generate_bronze_report(context, bronze_config)
+
+    assert result is None
+    service._logger.warning.assert_called_with(
+        "bronze_dq_report_skipped",
+        reason="analyzer or writer not available",
+        run_id=context.run_id,
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_bronze_report_skips_when_data_missing(
+    service: DQReportService,
+    bronze_config: MagicMock,
+) -> None:
+    service._bronze_analyzer = MagicMock()
+    service._report_writer = AsyncMock()
+    context = _make_context(bronze_records=None, bronze_batch_id=None)
+
+    result = await service._generate_bronze_report(context, bronze_config)
+
+    assert result is None
+    service._logger.warning.assert_called_with(
+        "bronze_dq_report_skipped",
+        reason="no bronze data available",
+        run_id=context.run_id,
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_bronze_report_uses_context_output_path_precedence(
+    service: DQReportService,
+    bronze_config: MagicMock,
+    tmp_path: Path,
+) -> None:
+    service._bronze_analyzer = MagicMock()
+    service._bronze_analyzer.analyze.return_value = _make_report("WARNING")
+    service._report_writer = AsyncMock()
+    expected_path = tmp_path / "bronze-report.json"
+    service._report_writer.write_bronze_report.return_value = expected_path
+    bronze_config.output_path = str(tmp_path / "bronze-config-path.json")
+    context_output = str(tmp_path / "bronze-context-path.json")
+    context = _make_context(bronze_output_path=context_output)
+
+    result = await service._generate_bronze_report(context, bronze_config)
+
+    assert result == expected_path
+    service._report_writer.write_bronze_report.assert_awaited_once()
+    assert service._report_writer.write_bronze_report.await_args.kwargs[
+        "output_path"
+    ] == Path(context_output)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_bronze_report_uses_config_output_path_fallback(
+    service: DQReportService,
+    bronze_config: MagicMock,
+    tmp_path: Path,
+) -> None:
+    service._bronze_analyzer = MagicMock()
+    service._bronze_analyzer.analyze.return_value = _make_report()
+    service._report_writer = AsyncMock()
+    expected_path = tmp_path / "bronze-report.json"
+    service._report_writer.write_bronze_report.return_value = expected_path
+    bronze_config.output_path = str(tmp_path / "bronze-config-only-path.json")
+    context = _make_context(bronze_output_path=None)
+
+    result = await service._generate_bronze_report(context, bronze_config)
+
+    assert result == expected_path
+    assert service._report_writer.write_bronze_report.await_args.kwargs[
+        "output_path"
+    ] == Path(bronze_config.output_path)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_bronze_report_returns_none_when_analyzer_fails(
+    service: DQReportService,
+    bronze_config: MagicMock,
+) -> None:
+    service._bronze_analyzer = MagicMock()
+    service._bronze_analyzer.analyze.side_effect = RuntimeError("bronze analyze failed")
+    service._report_writer = AsyncMock()
+    context = _make_context()
+
+    result = await service._generate_bronze_report(context, bronze_config)
+
+    assert result is None
+    service._logger.error.assert_called_with(
+        "bronze_dq_report_failed",
+        run_id=context.run_id,
+        error="bronze analyze failed",
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_generate_bronze_report_returns_none_when_writer_fails(
+    service: DQReportService,
+    bronze_config: MagicMock,
+) -> None:
+    service._bronze_analyzer = MagicMock()
+    service._bronze_analyzer.analyze.return_value = _make_report()
+    service._report_writer = AsyncMock()
+    service._report_writer.write_bronze_report.side_effect = ValueError(
+        "bronze write failed"
+    )
+    context = _make_context()
+
+    result = await service._generate_bronze_report(context, bronze_config)
+
+    assert result is None
+    service._logger.error.assert_called_with(
+        "bronze_dq_report_failed",
+        run_id=context.run_id,
+        error="bronze write failed",
+    )
 
 
 @pytest.mark.unit

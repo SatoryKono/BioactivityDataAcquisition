@@ -1,8 +1,8 @@
 %% BioETL — Port Contracts: Storage
-%% Covers StoragePort, DeltaReaderPort, and MetadataWriterPort implementations.
+%% Covers StoragePort, DeltaReaderPort, and layer-specific MetadataWriterPort implementations.
 
-%% @version 1.0.0
-%% @date    2026-02-25
+%% @version 1.1.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
 %% @view    storage
@@ -25,13 +25,13 @@ graph LR
     subgraph Domain["Domain Layer"]
         STP["StoragePort"]:::size-sm
         DRP["DeltaReaderPort"]:::size-sm
-        MWP["MetadataWriterPort"]:::size-sm
+        MWP["MetadataWriterPort<br/>write_bronze / write_silver / write_gold"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         BW["BronzeWriter"]:::size-sm
         DR_I["DeltaReader"]:::size-sm
-        MW_I["MetadataWriter"]:::size-sm
+        MW_I["MetadataWriter<br/>atomic metadata sidecars"]:::size-sm
     end
 
     STP --- BW & SW & GW

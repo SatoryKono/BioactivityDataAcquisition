@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import pytest
 
@@ -115,6 +115,7 @@ class TestBuildPostrunService:
             metrics=pipeline.services.metrics,
             logger=logger,
             dependencies=dependencies,
+            tracer=ANY,
             metadata_coordinator=pipeline.services.metadata_coordinator,
             metadata_writer=pipeline.services.metadata_writer,
         )

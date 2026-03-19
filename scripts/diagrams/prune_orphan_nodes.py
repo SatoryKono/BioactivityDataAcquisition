@@ -43,12 +43,17 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8")
 
+try:
+    from .diagram_paths import DIAGRAM_ROOT, source_dir
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import DIAGRAM_ROOT, source_dir
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DIRS = [
-    REPO_ROOT / "docs/02-architecture/mmd-diagrams",
-    REPO_ROOT / "docs/02-architecture/mmd-diagrams/views",
+    DIAGRAM_ROOT,
+    source_dir("views"),
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 

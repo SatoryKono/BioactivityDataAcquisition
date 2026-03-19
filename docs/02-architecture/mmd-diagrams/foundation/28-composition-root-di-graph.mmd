@@ -1,136 +1,88 @@
-%% Title: Composition Root Wiring — Full DI Graph
-%% Covers: RULES.md §1.1 (Composition Layer), ADR-005
-%% Rank: 3 (Score 9.00) — Complete dependency injection assembly
-%% Updated: 2026-02-17
+%% Title: Composition Root Wiring — Public APIs and Assembly
+%% Covers: RULES.md §1.1 (Composition Layer), ADR-005, RF-011
+%% Rank: 3 (Score 9.00) — Current composition seams and retained facade policy
+%% Updated: 2026-03-19
 
-%% @version 1.1.0
-%% @date    2026-02-24
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    flowchart
-%% @level   Mixed (System / Component / Class)
-%% @nodes   28
-%% @uniform-group entry     nodes=CLI,BOOT
-%% @uniform-group factories nodes=BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF
-%% @uniform-group registry  nodes=PR,OB
-%% @uniform-group created   nodes=UHC,ADP,BW,SLL,PS,RUN
+%% @level   Mixed (System / Component / Module)
+%% @nodes   17
+%% keep-orphan: ENTRY
+%% @uniform-group interfaces nodes=CLI
+%% @uniform-group public     nodes=EXEC,SERV,RES,ENTRY
+%% @uniform-group assembly   nodes=BPR,BSRV,SB,RF,DSF,STF,REG
+%% @uniform-group runtime    nodes=PRS,PRUN,PS,ADP,STOR
 %% @uniform-width group
-
-%% @uniform width=296 groups=4 width_strategy=group
-%% @uniform-stats entry        width=296 height=144 max_desc_lines=6
-%% @uniform-stats factories    width=224 height=144 max_desc_lines=6
-%% @uniform-stats registry     width=200 height=144 max_desc_lines=6
-%% @uniform-stats created      width=176 height=144 max_desc_lines=6
-%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
-%% keep-orphan: OB
-    subgraph Entry["Entry Point"]
-        CLI["CLI run command"]
-        BOOT["bootstrap/runtime/assembly.py"]
+    subgraph Interfaces["Interfaces"]
+        CLI["CLI / interfaces layer"]
     end
 
-    subgraph Factories["Composition Factories"]
-        direction LR
-
-        subgraph LoggerFactories["Logger & Observability"]
-            BL["BootstrapLogger<br/>• configure structlog"]
-            DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor"]
-        end
-
-        subgraph ClientFactories["Client & Data Source"]
-            HCF["HttpClientFactory<br/>• create(provider)<br/>→ UnifiedHTTPClient"]
-            DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl"]
-        end
-
-        subgraph StorageFactories["Storage & Services"]
-            STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter"]
-            STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()"]
-            SB["ServicesBuilder<br/>with_storage + with_lock<br/>with_logger + metrics<br/>build() -> PipelineServices"]
-        end
-
-        subgraph PipelineFactories["Pipeline Construction"]
-            RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner"]
-            GPF["GenericPipelineFactory<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema"]
-        end
+    subgraph PublicAPIs["Public composition APIs"]
+        EXEC["execution_api<br/>runner creation + metrics flush"]
+        SERV["services_api<br/>service accessors"]
+        RES["resources_api<br/>cleanup / checkpoint / archive helpers"]
+        ENTRY["entrypoints.py<br/>retained broad facade"]
     end
 
-    subgraph Registry["Registration"]
-        PR["ProviderRegistry<br/>• 8 providers registered"]
-        OB["ObservabilityBundle<br/>• logger + metrics + tracing"]
+    subgraph Assembly["Composition assembly"]
+        BPR["bootstrap_pipeline_runner()"]
+        BSRV["bootstrap_pipeline_runner_service()"]
+        SB["ServicesBuilder"]
+        RF["RunnerFactory"]
+        DSF["DataSourceFactory"]
+        STF["StorageFactory"]
+        REG["ProviderRegistry"]
     end
 
-    subgraph Created["Created Instances"]
-        direction TB
-        subgraph RuntimeInfra["Infra Instances"]
-            direction TB
-            UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker"]
-            ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)"]
-            BW["BronzeWriter"]
-            SLL["StructlogLogger"]
-        end
-        subgraph RuntimeCore["Application Instances"]
-            direction TB
-            PS["PipelineServices<br/>(frozen bundle)"]
-            RUN["PipelineRunner<br/>(fully assembled)"]
-        end
+    subgraph Runtime["Created runtime objects"]
+        PRS["PipelineRunnerService"]
+        PRUN["PipelineRunner"]
+        PS["PipelineServices"]
+        ADP["Provider adapter"]
+        STOR["Bronze / Silver / Gold writers"]
     end
 
-    %% Bootstrap flow
-    CLI ==> BOOT
-    BOOT -.-> BL
-    BL --> SLL
-    BOOT -.-> HCF
-    HCF -.-> UHC
-    BOOT -.-> DSF
-    DSF -.->|"uses"| PR
-    DSF -.->|"uses"| UHC
+    CLI --> SERV
+    CLI --> EXEC
+    CLI -. cleanup and lifecycle commands .-> RES
+
+    ENTRY -. retained public re-export .-> EXEC
+    ENTRY -. retained public re-export .-> SERV
+    ENTRY -. retained public re-export .-> RES
+
+    EXEC ==> BPR
+    SERV ==> BSRV
+    RES --> STF
+
+    BPR --> SB
+    BPR --> RF
+    BSRV --> SB
+    BSRV --> RF
+    SB --> DSF
+    SB --> STF
+    DSF --> REG
     DSF --> ADP
-    BOOT -.-> STF
-    STF -.-> STA
-    STA ==> BW & SW & GW
-    BOOT -.-> DQF
-    BOOT ==> SB
-    SB -.->|"injects"| BW & SW & GW
-    SB -.->|"injects"| ML
-    SB -.->|"injects"| LC
-    SB -.->|"injects"| UQ
-    SB -.->|"injects"| SLL
-    SB -.->|"injects"| PMM
-    SB -.->|"injects"| NOT
-    SB ==> PS
-    BOOT ==> RF
-    RF -.->|"uses"| PS
-    RF -.->|"uses"| ADP
-    RF ==> RUN
+    STF --> STOR
+    SB --> PS
+    RF --> PRUN
+    BSRV --> PRS
+    PRS --> PS
+    PRUN --> PS
+    PRUN --> ADP
 
-    %% Registry connections
-    GPF -.->|"registers"| PLREG
-    PR -.->|"maps"| DSR
+    style Interfaces fill:#eff6ff,stroke:#2563eb
+    style PublicAPIs fill:#fff7ed,stroke:#f59e0b
+    style Assembly fill:#ffe4e6,stroke:#dc2626
+    style Runtime fill:#f0fdf4,stroke:#16a34a
 
-    %% Layout constraints
-    CLI ~~~ BOOT
-    PR ~~~ OB
-    UHC ~~~ ADP ~~~ BW ~~~ SLL ~~~ PS ~~~ RUN
-
-    %% Styling
-    style Entry fill:#f5f3ff,stroke:#7c3aed
-    style Factories fill:#ffe4e6,stroke:#dc2626
-    style Registry fill:#fff7ed,stroke:#f59e0b
-    style Created fill:#f0fdf4,stroke:#16a34a
-
-    style LoggerFactories fill:#fefce8,stroke:#ca8a04,stroke-dasharray: 5 5
-    style ClientFactories fill:#eff6ff,stroke:#2563eb,stroke-dasharray: 5 5
-    style StorageFactories fill:#f5f3ff,stroke:#7c3aed,stroke-dasharray: 5 5
-    style PipelineFactories fill:#fff7ed,stroke:#f59e0b,stroke-dasharray: 5 5
-
-    %% Layer palette (semantic)
-    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
     classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
     classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
-    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
-    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
 
     class CLI layer_interfaces;
-    class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
-    class PS,RUN layer_application;
-    class UHC,ADP,BW,SLL layer_infrastructure;
-
-    %% Click tooltips    click SB ../../02-architecture/decisions/ADR-005-composition-layer-separation.md "Injects storage, lock, checkpoint, obs"    click DSF ../../00-project/RULES.md "Resolves adapter via registry"    click RF ../../00-project/RULES.md "Builds PipelineRunner from services"
+    class EXEC,SERV,RES,ENTRY,BPR,BSRV,SB,RF,DSF,STF,REG layer_composition;
+    class PRS,PRUN,PS layer_application;
+    class ADP,STOR layer_infrastructure;

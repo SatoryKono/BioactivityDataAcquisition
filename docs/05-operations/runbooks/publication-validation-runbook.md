@@ -277,56 +277,58 @@ cat logs/bioetl.log | \
   jq -r 'select(.event == "structural-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
-# 2. Примеры записей с нарушением page-ordering
+# 2. Примеры записей с нарушением page_ordering
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+from deltalake import DeltaTable
+df = DeltaTable('data/output/silver/pubmed/publication').to_pandas()
 invalid-pages = df[
-    df['page-first'].notna() &
-    df['page-last'].notna() &
-    (df['page-first'].astype(str).str.isnumeric()) &
-    (df['page-last'].astype(str).str.isnumeric()) &
-    (df['page-first'].astype(int) > df['page-last'].astype(int))
+    df['page_first'].notna() &
+    df['page_last'].notna() &
+    (df['page_first'].astype(str).str.isnumeric()) &
+    (df['page_last'].astype(str).str.isnumeric()) &
+    (df['page_first'].astype(int) > df['page_last'].astype(int))
 ]
-print(f'Records with page-first > page-last: {len(invalid-pages)}')
-print(invalid-pages[['pmid', 'page-first', 'page-last', '-dq-warn']].head(10))
+print(f'Records with page_first > page_last: {len(invalid-pages)}')
+print(invalid-pages[['pmid', 'page_first', 'page_last', '_dq_warn']].head(10))
 "
 ```
 
 #### Типичные проблемы
 
-**Проблема: Year mismatch между `publication-year` и `publication-date`**
+**Проблема: Year mismatch между `publication_year` и `publication_date`**
 
 ```bash
 # Найти несоответствия
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/silver/crossref/publication.parquet')
-df['publication-date-year'] = pd.to-datetime(df['publication-date'], errors='coerce').dt.year
+from deltalake import DeltaTable
+df = DeltaTable('data/output/silver/crossref/publication').to_pandas()
+df['publication_date_year'] = pd.to_datetime(df['publication_date'], errors='coerce').dt.year
 mismatches = df[
-    df['publication-year'].notna() &
-    df['publication-date'].notna() &
-    (df['publication-year'] != df['publication-date-year'])
+    df['publication_year'].notna() &
+    df['publication_date'].notna() &
+    (df['publication_year'] != df['publication_date_year'])
 ]
 print(f'Year mismatches: {len(mismatches)}')
-print(mismatches[['doi', 'publication-year', 'publication-date']].head(10))
+print(mismatches[['doi', 'publication_year', 'publication_date']].head(10))
 "
 ```
 
 **Решение:**
-- Использовать `publication-date` как source of truth:
+- Использовать `publication_date` как source of truth:
   ```python
   def transform(self, raw: RawRecord) -> TransformedRecord:
-      pub-date = raw.get("publication-date")
-      pub-year = raw.get("publication-year")
+      pub_date = raw.get("publication_date")
+      pub_year = raw.get("publication_year")
 
       # If date exists, extract year from it
-      if pub-date:
-          pub-year = datetime.strptime(pub-date, "%Y-%m-%d").year
+      if pub_date:
+          pub_year = datetime.strptime(pub_date, "%Y-%m-%d").year
 
       return TransformedRecord(
-          publication-date=pub-date,
-          publication-year=pub-year,
+          publication_date=pub_date,
+          publication_year=pub_year,
       )
   ```
 
@@ -334,7 +336,7 @@ print(mismatches[['doi', 'publication-year', 'publication-date']].head(10))
 
 ### Level 3: External Verification Failures
 
-**Симптом:** HTTP 404/timeout от upstream API, `-dq-warn=True`
+**Симптом:** HTTP 404/timeout от upstream API, `_dq_warn=True`
 
 #### Диагностика
 

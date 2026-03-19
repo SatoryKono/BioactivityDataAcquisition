@@ -41,8 +41,14 @@ from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import MemoryConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.ports import MemoryMonitorPort, MetricsPort
-from bioetl.domain.types import BatchID, GoldSchemaType, RunID, RunType, ValidationResult
+from bioetl.domain.ports import MemoryMonitorPort, MetricsPort, NoOpTracing
+from bioetl.domain.types import (
+    BatchID,
+    GoldSchemaType,
+    RunID,
+    RunType,
+    ValidationResult,
+)
 
 
 @pytest.fixture
@@ -176,7 +182,7 @@ def _create_batch_executor(
         logger=services.logger,
     )
     tracing_manager = BatchTracingManagerService(
-        tracer=None,
+        tracer=NoOpTracing(),
         context=context,
         config=config,
         initial_batch_size=initial_batch_size,

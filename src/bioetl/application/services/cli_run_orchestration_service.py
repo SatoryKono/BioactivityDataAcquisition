@@ -13,75 +13,17 @@ __all__ = [
 ]
 
 
-from collections.abc import Coroutine
-from dataclasses import dataclass
-from typing import Any, Protocol
-
+from bioetl.application.services.cli_run_orchestration_contracts import (
+    MetricsFlushCallable,
+    RunCoroutineCallable,
+    RunPreparedPipelineCallable,
+)
+from bioetl.application.services.cli_run_orchestration_models import (
+    RunExecutionRequest,
+    RunPreparationResult,
+    StartOffsetValidationResult,
+)
 from bioetl.application.services.pipeline_runner_service import RunOptions, RunResult
-
-
-class RunPreparedPipelineCallable(Protocol):
-    """Callable contract for async execution of a prepared run request."""
-
-    def __call__(
-        self,
-        request: RunExecutionRequest,
-    ) -> Coroutine[Any, Any, RunResult]: ...  # Any: standard Coroutine type params
-
-
-class RunCoroutineCallable(Protocol):
-    """Callable contract to execute awaitables in sync context."""
-
-    def __call__(
-        self,
-        main: Coroutine[Any, Any, RunResult],  # Any: standard Coroutine type params
-        *,
-        debug: bool | None = None,
-    ) -> RunResult: ...
-
-
-class MetricsFlushCallable(Protocol):
-    """Callable contract for metrics flush at command boundary."""
-
-    def __call__(
-        self,
-        run_label: str = "bioetl",
-        pipeline_name: str | None = None,
-    ) -> bool: ...
-
-
-@dataclass(frozen=True, slots=True)
-class StartOffsetValidationResult:
-    """Validation result for start-offset related CLI options."""
-
-    is_valid: bool
-    error_message: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class RunExecutionContext:
-    """Prepared run context passed across CLI orchestration boundaries."""
-
-    pipeline: str
-    options: RunOptions
-    health_server: bool
-    health_port: int
-
-
-RunExecutionRequest = RunExecutionContext
-
-
-@dataclass(frozen=True, slots=True)
-class RunPreparationResult:
-    """Result of translating raw CLI inputs into a prepared run request."""
-
-    request: RunExecutionRequest | None = None
-    error_message: str | None = None
-
-    @property
-    def is_valid(self) -> bool:
-        """Whether CLI inputs were valid enough to build a run request."""
-        return self.request is not None
 
 
 class CliRunOrchestrationService:

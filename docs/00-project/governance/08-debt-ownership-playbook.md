@@ -40,6 +40,7 @@ Current ownership metadata is governed by:
 - `configs/quality/debt_scorecard.yaml`
 - `configs/quality/architecture_metric_exemptions.yaml`
 
-Latest historical snapshot/evidence:
+Use the two config registries above as the canonical current state.
+Historical report snapshots remain evidence only:
 
 - `docs/reports/debt-ownership-dashboard-2026-03-06.md`

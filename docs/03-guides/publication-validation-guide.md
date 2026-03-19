@@ -148,35 +148,35 @@ class PublicationSilverSchema(DataFrameModel):
 **Когда:** После успешной Base Validation
 
 **Проверки:**
-- ✅ Page ordering: `page-first <= page-last`
+- ✅ Page ordering: `page_first <= page_last`
 - ✅ Year consistency: `YEAR(publication_date) == publication_year`
 - ✅ Field dependencies: `IF doi THEN title IS NOT NULL`
-- ✅ Content hash integrity: `SHA256(title + abstract + ...) == content-hash`
+- ✅ Content hash integrity: `SHA256(title + abstract + ...) == content_hash`
 
 **Результат:**
 - `PASS` → следующий уровень
-- `WARN` → `-dq-warn=True`, продолжить валидацию
+- `WARN` → `_dq_warn=True`, продолжить валидацию
 
 **Пример:**
 ```python
 class StructuralValidator:
     def validate_page_ordering(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Check page-first <= page-last when both numeric."""
+        """Check page_first <= page_last when both numeric."""
         mask = (
-            df["page-first"].notna() &
-            df["page-last"].notna() &
-            df["page-first"].str.isnumeric() &
-            df["page-last"].str.isnumeric()
+            df["page_first"].notna() &
+            df["page_last"].notna() &
+            df["page_first"].str.isnumeric() &
+            df["page_last"].str.isnumeric()
         )
 
-        invalid = df[mask & (df["page-first"].astype(int) > df["page-last"].astype(int))]
+        invalid = df[mask & (df["page_first"].astype(int) > df["page_last"].astype(int))]
 
         if not invalid.empty:
-            df.loc[invalid.index, "-dq-warn"] = True
+            df.loc[invalid.index, "_dq_warn"] = True
             self._logger.warning(
-                "page-ordering-violation",
+                "page_ordering_violation",
                 count=len(invalid),
-                record-ids=invalid.index.tolist()
+                record_ids=invalid.index.tolist()
             )
 
         return df
@@ -196,10 +196,10 @@ class StructuralValidator:
 |---------------|-----------|----------|-------------|
 | `doi` | CrossRef | `https://api.crossref.org/works/{doi}` | GET |
 | `pmid` | PubMed | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}` | GET |
-| `pmc-id` | PMC | `https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc-id}` | GET |
+| `pmc_id` | PMC | `https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc_id}` | GET |
 | `openalex_id` | OpenAlex | `https://api.openalex.org/works/{id}` | GET |
-| `paper-id` | Semantic Scholar | `https://api.semanticscholar.org/graph/v1/paper/{id}` | GET |
-| `document-chembl-id` | ChEMBL | `https://www.ebi.ac.uk/chembl/api/data/document/{id}` | GET |
+| `paper_id` | Semantic Scholar | `https://api.semanticscholar.org/graph/v1/paper/{id}` | GET |
+| `publication_id` | ChEMBL | `https://www.ebi.ac.uk/chembl/api/data/document/{id}` | GET |
 
 **Результат:**
 - `HTTP 200` → PASS

@@ -1,39 +1,14 @@
-# ChEMBL Publication Term Pipeline
+# ChEMBL Publication Term Pipeline Deep Spec
 
-*Updated: 2026-02-03*
+Status: Historical deep spec.
 
-## Overview
+This page is preserved for historical analysis only. It describes an older contract shape and legacy loading-strategy wording.
 
-Derived pipeline that extracts and flattens publication terms (MeSH, keywords) from ChEMBL publication records.
+Canonical sources:
+- [ChEMBL publication provider reference](../../providers/chembl/publication.md)
+- [`configs/entities/chembl/publication_term.yaml`](../../../../configs/entities/chembl/publication_term.yaml)
 
-## Identity
-
-| Field            | Value                                                   |
-| ---------------- | ------------------------------------------------------- |
-| Pipeline ID      | `chembl_publication_term`                               |
-| Provider         | `chembl`                                                |
-| Entity           | `publication-term` (derived from `/document`)           |
-| Version          | `2.1.0`                                                 |
-| Loading Strategy | `full-scan-only` (force full scan)                      |
-| Primary Keys     | `entity-id` (hash of publication-id + term-type + term) |
-| Config           | `configs/entities/chembl/publication_term.yaml`        |
-
-## Outputs
-
-| Layer  | Path                                         |
-| ------ | -------------------------------------------- |
-| Bronze | `data/output/bronze/chembl/publication-term` |
-| Silver | `data/output/silver/chembl/publication-term` |
-| Gold   | `data/output/gold/chembl/publication-term`   |
-
-## Related Configs
-
-- DQ: `configs/entities/chembl/publication_term.yaml#quality`
-- Filters: `configs/entities/chembl/publication_term.yaml#filters`
-- Column groups: `configs/entities/chembl/publication_term.yaml#schema`
-
-## Related ADRs
-
-- [ADR-024](../../../02-architecture/decisions/ADR-024-entity-naming-unification.md)
-- [ADR-030](../../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
-- [ADR-031](../../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
+Current canonical summary:
+- The active config surface uses snake_case keys such as `loading_strategy`.
+- Publication identifiers and alias mappings are defined in the entity config and current provider pipeline implementation.
+- Use the entity config and provider reference for current behavior; do not copy field names or loading examples from this legacy page.

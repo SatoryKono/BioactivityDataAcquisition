@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1100,
-    "total_internal_imports": 4218,
+    "scanned_modules": 1104,
+    "total_internal_imports": 4232,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 249,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 508,
+      "imports": 516,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 669,
+      "imports": 671,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 276,
+      "imports": 279,
       "allowed": true
     },
     {
@@ -65,7 +65,7 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 37,
+      "imports": 38,
       "allowed": true
     },
     {
@@ -121,7 +121,7 @@
     {
       "source": "application.core",
       "target": "domain.ports",
-      "imports": 49
+      "imports": 48
     },
     {
       "source": "composition.bootstrap",
@@ -154,13 +154,13 @@
       "imports": 35
     },
     {
-      "source": "application.services",
-      "target": "domain.ports",
-      "imports": 30
-    },
-    {
       "source": "interfaces.cli",
       "target": "application.services",
+      "imports": 31
+    },
+    {
+      "source": "application.services",
+      "target": "domain.ports",
       "imports": 30
     },
     {
@@ -209,14 +209,14 @@
       "imports": 22
     },
     {
+      "source": "application.core",
+      "target": "domain.context",
+      "imports": 21
+    },
+    {
       "source": "infrastructure.storage",
       "target": "domain.medallion",
       "imports": 20
-    },
-    {
-      "source": "application.core",
-      "target": "domain.context",
-      "imports": 19
     },
     {
       "source": "composition.factories",
@@ -299,14 +299,14 @@
       "imports": 14
     },
     {
-      "source": "infrastructure.quality",
-      "target": "domain.types",
+      "source": "application.core",
+      "target": "domain.config",
       "imports": 13
     },
     {
-      "source": "application.core",
-      "target": "domain.config",
-      "imports": 12
+      "source": "infrastructure.quality",
+      "target": "domain.types",
+      "imports": 13
     },
     {
       "source": "composition.bootstrap",

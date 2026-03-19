@@ -9,14 +9,66 @@ Intended usage:
 from __future__ import annotations
 
 import argparse
+import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+try:
+    from .diagram_paths import VISUAL_SMOKE_MANIFEST
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import VISUAL_SMOKE_MANIFEST
 
-DEFAULT_MANIFEST = Path(
-    "docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
-)
+
+DEFAULT_MANIFEST = VISUAL_SMOKE_MANIFEST
+
+
+def iter_git_candidates() -> list[str]:
+    """Return preferred git executable candidates for the current platform."""
+    candidates: list[str] = []
+    seen: set[str] = set()
+
+    def _add(path: str | None) -> None:
+        if not path:
+            return
+        normalized = os.path.normcase(path)
+        if normalized in seen:
+            return
+        seen.add(normalized)
+        candidates.append(path)
+
+    _add(shutil.which("git"))
+
+    if os.name == "nt":
+        _add(r"C:\Program Files\Git\cmd\git.exe")
+        _add(r"C:\Program Files\Git\bin\git.exe")
+
+    _add("git")
+    return candidates
+
+
+def run_git_command(args: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run git with platform-aware fallback executable resolution."""
+    last_completed: subprocess.CompletedProcess[str] | None = None
+
+    for git_executable in iter_git_candidates():
+        completed = subprocess.run(
+            [git_executable, *args],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode == 0:
+            return completed
+        last_completed = completed
+
+    err = (
+        last_completed.stderr.strip()
+        if last_completed is not None and last_completed.stderr
+        else "unknown error"
+    )
+    raise RuntimeError(f"git {' '.join(args)} failed: {err}")
 
 
 def load_manifest(manifest_path: Path) -> list[str]:
@@ -46,16 +98,7 @@ def ensure_paths_exist(repo_root: Path, rel_paths: list[str]) -> None:
 
 def changed_paths(rel_paths: list[str]) -> list[str]:
     """Return list of changed paths among provided manifest entries."""
-    cmd = ["git", "diff", "--name-only", "--", *rel_paths]
-    completed = subprocess.run(
-        cmd,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if completed.returncode != 0:
-        err = completed.stderr.strip()
-        raise RuntimeError(f"git diff failed: {err or 'unknown error'}")
+    completed = run_git_command(["diff", "--name-only", "--", *rel_paths])
     return [line.strip() for line in completed.stdout.splitlines() if line.strip()]
 
 

@@ -1,13 +1,13 @@
 %% BioETL — Bootstrap: Runtime and Admin Wiring
-%% Covers the current runtime/admin assembly outputs created from composition bootstrap.
+%% Covers how narrow public composition APIs and the retained broad seam expose runtime/admin assembly outputs.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
 %% @view    bootstrap-wiring
 %% @parent  12-bootstrap-di-container.mmd
-%% @nodes   15
+%% @nodes   19
 %% @uniform width=400 height=56 max_title_len=34 max_desc_lines=2
 
 %%{init: {
@@ -22,6 +22,13 @@
   }
 }}%%
 graph TB
+    subgraph Public["Public composition APIs"]
+        EXEC["execution_api"]:::size-sm
+        SVC["services_api"]:::size-sm
+        RES["resources_api"]:::size-sm
+        ENTRY["entrypoints<br/>retained broad seam"]:::size-sm
+    end
+
     subgraph Composition["Composition bootstrap"]
         BOOTR["bootstrap.runtime"]:::size-sm
         BOOTC["bootstrap.cli"]:::size-sm
@@ -43,6 +50,16 @@ graph TB
         ADM["Health / export / checkpoint<br/>vacuum / quarantine services"]:::size-sm
     end
 
+    EXEC --> BOOTR
+    EXEC --> PRUN
+    EXEC --> CRUN
+    SVC --> BOOTR
+    SVC --> BOOTC
+    RES --> ASSEMBLY
+    ENTRY -.->|"wide facade"| BOOTR
+    ENTRY -.->|"wide facade"| BOOTC
+    ENTRY -.->|"wide facade"| ASSEMBLY
+
     BOOTR --> RFB
     BOOTR --> CSS
     BOOTR --> ADAPTER
@@ -63,6 +80,7 @@ graph TB
     classDef infra fill:#fff1f2,stroke:#dc2626
     classDef app fill:#f0fdf4,stroke:#16a34a
 
+    class EXEC,SVC,RES,ENTRY comp
     class BOOTR,BOOTC,ASSEMBLY,RFB,CSS comp
     class ADAPTER,STORAGE,OBS,LOCK infra
     class PRUN,CRUN,ADM app

@@ -24,6 +24,7 @@ from bioetl.composition.factories.dq.context_resolver import (
 from bioetl.composition.factories.pipeline.postrun_assembly import (
     build_postrun_service,
 )
+from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
 from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy, WriteModePolicy
@@ -181,6 +182,7 @@ def _create_pipeline_runner(
     lifecycle_service: MedallionLifecycleService,
     observer: PipelineObserver,
 ) -> PipelineRunner:
+    resolved_tracer = resolve_tracer(observability.tracer)
     dependencies = PipelineRunnerDependencies(
         executor=executor,
         checkpoint_manager=checkpoint_manager,
@@ -198,7 +200,7 @@ def _create_pipeline_runner(
         context=pipeline.context,
         dependencies=dependencies,
         pipeline=pipeline,
-        tracer=observability.tracer,
+        tracer=resolved_tracer,
     )
 
 

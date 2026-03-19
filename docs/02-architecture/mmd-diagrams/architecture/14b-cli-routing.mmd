@@ -1,13 +1,13 @@
 %% BioETL — CLI: Routing to Composition Boundary
-%% Shows how command families route through registry helpers, composition.entrypoints, and bootstrap services.
+%% Shows how command families route through registry helpers and narrow composition APIs, while entrypoints remains a retained broad seam.
 
-%% @version 1.1.0
-%% @date    2026-03-16
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    flowchart
 %% @level   System / Component
 %% @view    cli-routing
 %% @parent  14-cli-interface-layer.mmd
-%% @nodes   13
+%% @nodes   14
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -29,9 +29,10 @@ graph TB
     end
 
     subgraph Composition["composition boundary"]
-        ENTRY["composition.entrypoints"]:::size-sm
-        BOOTR["bootstrap.runtime"]:::size-sm
-        BOOTC["bootstrap.cli"]:::size-sm
+        EXEC["execution_api"]:::size-sm
+        SVC["services_api"]:::size-sm
+        RES["resources_api"]:::size-sm
+        ENTRY["entrypoints<br/>retained broad seam"]:::size-sm
         PIPE["PipelineRegistry"]:::size-sm
     end
 
@@ -43,17 +44,19 @@ graph TB
     end
 
     RUN --> REG --> PIPE
-    RUN --> ENTRY --> BOOTR --> PRUN
-    RC --> ENTRY
-    ENTRY --> BOOTR --> CRUN
-    ADM --> ENTRY --> BOOTC --> ASVC
+    RUN --> EXEC --> PRUN
+    RUN --> SVC --> PRUN
+    RC --> EXEC --> CRUN
+    ADM --> SVC --> ASVC
+    ADM --> RES --> ASVC
     ADM -.->|"server mode"| HSRV
-    ENTRY -.->|"health deps"| HSRV
+    SVC -.->|"health deps"| HSRV
+    ENTRY -.->|"broad public seam / compat"| NOTE["Retained for broad callers;<br/>not the primary internal CLI route"]:::size-sm
 
     classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     classDef comp fill:#fff7ed,stroke:#f59e0b
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class RUN,RC,ADM,REG cli
-    class ENTRY,BOOTR,BOOTC,PIPE comp
-    class PRUN,CRUN,ASVC,HSRV app
+    class EXEC,SVC,RES,ENTRY,PIPE comp
+    class PRUN,CRUN,ASVC,HSRV,NOTE app

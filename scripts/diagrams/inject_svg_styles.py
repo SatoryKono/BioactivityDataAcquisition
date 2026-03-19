@@ -33,12 +33,17 @@ import re
 import sys
 from pathlib import Path
 
+try:
+    from .diagram_paths import render_dir
+except ImportError:  # pragma: no cover - direct script execution
+    from diagram_paths import render_dir
+
 # ── Defaults ────────────────────────────────────────────────────────────────
 
 SVG_DIRS = [
-    Path("docs/02-architecture/mmd-diagrams/architecture/svg"),
-    Path("docs/02-architecture/mmd-diagrams/class-diagrams/svg"),
-    Path("docs/02-architecture/mmd-diagrams/foundation/svg"),
+    render_dir("architecture", "svg"),
+    render_dir("class-diagrams", "svg"),
+    render_dir("foundation", "svg"),
 ]
 
 # ── ANSI colours ────────────────────────────────────────────────────────────

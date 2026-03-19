@@ -1,8 +1,8 @@
 %% BioETL — Class Diagram: Transformers
 %% BaseTransformer hierarchy and provider-specific implementations.
 
-%% @version 1.1.0
-%% @date    2026-02-26
+%% @version 1.2.0
+%% @date    2026-03-19
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   20
@@ -53,8 +53,10 @@ classDiagram
 
         class BasePublicationTransformer {
             <<ABC>>
-            #_extract_fields(record): dict
-            #_build_entity(fields): PublicationBase
+            +extraction_blocks: list~ExtractionBlock~
+            #_extract_business_data(record): JsonDict
+            #_get_primary_id_field(): str
+            #_get_entity_class(): type
         }
     }
 
@@ -105,6 +107,8 @@ classDiagram
         class PubMedPublicationTransformer {
             provider = "pubmed"
             entity_type = "publication"
+            -_cached_xml_root: Element | None
+            +extraction_blocks: list~ExtractionBlock~
         }
         class CrossRefPublicationTransformer {
             provider = "crossref"
