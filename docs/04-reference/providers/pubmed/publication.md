@@ -64,7 +64,9 @@
 
 ### Парсинг XML
 
-PubMed API возвращает данные в XML формате. Трансформер использует `xml_utils.py` для парсинга.
+PubMed API возвращает данные в XML формате. Трансформер использует
+`xml_parser.py` и extractor-модули из `extractors/` для парсинга и
+нормализации полей.
 
 ### Entity ID
 
@@ -111,7 +113,8 @@ bioetl run --pipeline pubmed_publication --run-type rebuild
 |-----------|------|
 | Конфигурация | `configs/entities/pubmed/publication.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/pubmed/transformer.py` |
-| XML Utils | `src/bioetl/application/pipelines/pubmed/xml_utils.py` |
+| XML Parser | `src/bioetl/application/pipelines/pubmed/xml_parser.py` |
+| Extractors | `src/bioetl/application/pipelines/pubmed/extractors/` |
 
 ---
 
