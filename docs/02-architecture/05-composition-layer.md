@@ -11,7 +11,7 @@
 **Ключевые характеристики:**
 
 - **Глобальная осведомленность:** Единственный слой (наряду с `Interfaces`), который "знает" обо всех остальных слоях. Ему разрешено импортировать из `infrastructure`, `application` и `domain`.
-- **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Центральный класс — `GenericPipelineFactory`, обеспечивающий декларативное создание пайплайнов.
+- **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические public seams проходят через `entrypoints.py`, `execution_api.py`, `services_api.py`, `resources_api.py`, а специализированные factory/bootstrap модули собирают runtime-компоненты.
 - **Конфигурация:** Преобразует сырые настройки из YAML или переменных окружения в доменные объекты конфигурации.
 
 ## 2. Ключевые Компоненты
@@ -36,14 +36,14 @@ composition/bootstrap/
 │   ├── storage.py       # Storage CLI bootstrap
 │   ├── checkpoint.py    # Checkpoint CLI bootstrap
 │   └── adr.py           # ADR-related CLI bootstrap
-└── runtime/             # Runtime assembly (23 модуля)
+└── runtime/             # Runtime assembly
 ```
 
 - `bootstrap_pipeline_runner()`: Каноническая точка входа для создания `PipelineRunner` в runtime-сценариях.
 - `bootstrap_composite_runner()`: Каноническая точка входа для сборки `CompositePipelineRunner`.
 - `bootstrap/runtime/composite.py`: Bootstrap для Composite Pipeline (ADR-026).
 
-#### 2.1.1. `runtime/` — Runtime Assembly (23 модуля)
+#### 2.1.1. `runtime/` — Runtime Assembly
 
 **Core assembly:**
 
@@ -91,19 +91,19 @@ composition/bootstrap/
 
 В v6.0+ логика создания компонентов централизована в специализированных фабриках, организованных в подпакеты:
 
-**Расположение:** `src/bioetl/composition/factories/` (56 .py файлов в 5 подпакетах)
+**Расположение:** `src/bioetl/composition/factories/`
 
 | Подпакет / Файл             | Ключевые компоненты                          | Назначение                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline/assembler.py`     | `GenericPipelineFactory`                     | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline/pipeline_assembler.py` | Public entrypoint                        | Публичный entrypoint для pipeline assembly                     |
+| `pipeline/creation_api.py`  | `create_pipeline_factory()`, `assemble_runner()` | Узкий public surface для pipeline factory/runner assembly  |
 | `pipeline/registry.py`      | Реестр фабрик                                | Все зарегистрированные pipeline factories                      |
 | `pipeline/runner.py`        | `RunnerFactory`                              | Создание `PipelineRunner` с DI                                 |
-| `datasource/factory.py`     | `DataSourceFactory`                          | Создает `DataSourcePort` для провайдера                        |
+| `datasource/data_source_factory.py` | `DataSourceFactory`                 | Создает `DataSourcePort` для провайдера                        |
 | `datasource/http_client.py` | `HttpClientFactory`                          | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
 | `storage/factory.py`        | `StorageFactory`                             | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
 | `storage/adapter.py`        | `StorageAdapter`                             | Создание отдельных storage адаптеров                           |
-| `services/factory.py`       | `ServicesFactory`                            | Создание core сервисов                                         |
+| `services/factory.py`       | `BaseServicesFactory`                        | Создание core сервисов                                         |
 | `services/builder.py`       | `ServicesBuilder`                            | Создание `PipelineServices` bundle                             |
 | `services/port_factories.py`| Port factory functions                       | Boundary-validated port creation                               |
 | `dq/factory.py`             | `DQServicesFactory`                          | Создание Data Quality компонентов                              |
@@ -123,14 +123,17 @@ composition/bootstrap/
 
 Также в корне `composition/` находятся:
 `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`,
-`execution_api.py`, `services_api.py`, `resources_api.py`, `observability.py`,
-`registry.py`, `types.py`, `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
+`execution_api.py`, `services_api.py`, `resources_api.py`, `composite_api.py`,
+`observability_api.py`, `observability.py`, `registry.py`, `types.py`,
+`_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
 
 Политика использования root-level composition seams:
 
 - `entrypoints.py` — `retained-entrypoint` и стабильный публичный composition seam.
 - `execution_api.py`, `services_api.py`, `resources_api.py` — узкие sanctioned public APIs
   для новых internal call sites в `interfaces`.
+- `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime
+  и observability-related call sites.
 - `_pipeline_execution.py`, `_resource_management.py`, `_services.py` — internal implementation
   modules; прямые импорты вне `composition/` запрещены policy-тестами.
 
@@ -141,8 +144,8 @@ composition/bootstrap/
 
 | Пакет              | Ключевые модули                                         | Назначение                                           |
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------- |
-| `providers/`       | `provider_registry.py`, `loader.py`, `registration.py`, internal provider config builders | Реестр провайдеров, canonical loader lifecycle и internal registration helpers |
-| `services/`        | `__init__.py`, `versioning.py` | Composition-level re-exports для metadata coordination и versioning utilities |
+| `providers/`       | `provider_registry.py`, `loader.py`, `registration.py`, `_default_registry.py`, `factory_loader.py` | Реестр провайдеров, canonical loader lifecycle и compat/singleton helpers |
+| `services/`        | `__init__.py`, `versioning.py` | Тонкий re-export layer для `MetadataCoordinator` и versioning utilities |
 | `runtime_builders/`| `runner_builder.py`, `observability_builder.py`, `inputs_resolver.py` | Builders для runtime assembly                        |
 
 ### 2.3. ProviderRegistry и канонический data-source creator path
@@ -191,7 +194,7 @@ data_source = DataSourceFactory.create("chembl", settings=settings, logger=logge
 
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
 - **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
-- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `factories/pipeline/registry.py` без написания шаблонного кода сборки.
+- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода.
 
 ### 3.1. Composite Pipeline Bootstrap (ADR-026)
 
@@ -225,10 +228,10 @@ runner = bootstrap_composite_runner(
 
 | Диаграмма               | Файл                                                                                               | Описание                           |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Composition Root        | [28-composition-root-di-graph.mermaid](diagrams/foundation/28-composition-root-di-graph.mmd)     | DI container, factories, bootstrap |
-| Factory Pattern         | [38-runtime-assembly-sequence.mermaid](diagrams/foundation/38-runtime-assembly-sequence.mmd)            | Использование Factory паттерна     |
-| Five Layer Architecture | [01-high-level.mermaid](diagrams/foundation/01-high-level.mmd)                                   | Composition слой в архитектуре     |
-| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/foundation/05-layers-interaction.mmd)                    | Bootstrap → Factories → Runner     |
+| Composition Root        | [28-composition-root-di-graph.mmd](diagrams/foundation/28-composition-root-di-graph.mmd)         | DI container, factories, bootstrap |
+| Factory Pattern         | [38-runtime-assembly-sequence.mmd](diagrams/foundation/38-runtime-assembly-sequence.mmd)         | Использование Factory паттерна     |
+| Five Layer Architecture | [01-high-level.mmd](diagrams/foundation/01-high-level.mmd)                                       | Composition слой в архитектуре     |
+| Layers Interaction      | [05-layers-interaction.mmd](diagrams/foundation/05-layers-interaction.mmd)                        | Bootstrap → Factories → Runner     |
 
 ### Связанные ADR
 

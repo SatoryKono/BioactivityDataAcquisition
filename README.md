@@ -449,9 +449,18 @@ Access the docs at `http://localhost:8000`.
 │       │   ├── core/         # PipelineRunner, Executor, BaseTransformer
 │       │   ├── pipelines/    # ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, Semantic Scholar (+ common utilities)
 │       │   └── services/     # Application services (lifecycle, vacuum, cleanup)
-│       ├── composition/      # Composition Root (DI, bootstrap)
-│       │   ├── factories/    # Pipeline, storage, data source factories
-│       │   └── providers/    # Provider registry
+│       ├── composition/      # Composition Root (public seams, bootstrap, factories)
+│       │   ├── bootstrap/    # Runtime and CLI bootstrap assembly
+│       │   ├── factories/    # Pipeline, storage, data source, service factories
+│       │   ├── providers/    # Provider registry and loading lifecycle
+│       │   ├── runtime_builders/ # Leaf builders for runner inputs and observability
+│       │   ├── services/     # Thin re-exports for metadata/versioning helpers
+│       │   ├── entrypoints.py # Stable broad public seam
+│       │   ├── execution_api.py # Narrow execution API
+│       │   ├── services_api.py # Narrow services API
+│       │   ├── resources_api.py # Narrow checkpoint/quarantine API
+│       │   ├── composite_api.py # Composite runtime facade
+│       │   └── observability_api.py # Observability facade
 │       ├── infrastructure/   # Adapters (API clients, Delta Lake, Storage)
 │       │   ├── adapters/     # HTTP clients with unified resilience
 │       │   ├── storage/      # Bronze/Silver/Gold writers
