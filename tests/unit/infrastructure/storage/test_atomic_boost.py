@@ -1,4 +1,4 @@
-"""Coverage boost tests for _atomic.py.
+"""Coverage boost tests for support/atomic_ops.py.
 
 Targets uncovered lines: 96, 146-147, 150, 255-259, 298, 310.
 """
@@ -11,13 +11,13 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.infrastructure.storage._atomic import (
+from bioetl.infrastructure.storage.support.atomic_ops import (
     AtomicWriteError,
     AtomicWriteGroup,
     _replace_with_retry,
     atomic_write,
 )
-from bioetl.infrastructure.storage.write_resilience import AdaptiveRetryPolicy
+from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 
 
 @pytest.mark.unit
@@ -54,7 +54,7 @@ class TestReplaceWithRetryLine96:
             retry_events.append((attempt, delay))
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
+            with patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"):
                 _replace_with_retry(
                     temp, target, retry_policy=policy, on_retry=on_retry
                 )
@@ -86,7 +86,7 @@ class TestReplaceWithRetryLine96:
         )
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
+            with patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"):
                 _replace_with_retry(temp, target, retry_policy=policy, on_retry=None)
 
         assert target.exists()

@@ -325,10 +325,12 @@ def test_registry_config_and_merge_transition_rows_capture_compatibility_policy(
                 "get_default_registry()",
             ),
             "allowed_call_site_snippets": (
-                "tests/architecture/test_registry_contracts.py",
-                "tests/unit/composition/test_types.py",
-                "tests/unit/composition/factories/pipeline/test_registry.py",
-                "direct instance imports now use `bioetl.composition`",
+                "direct `bioetl.composition.registry` imports stay confined to "
+                "`src/bioetl/composition/__init__.py` and "
+                "`src/bioetl/composition/registry_default.py`",
+                "ordinary tests/runtime code use `bioetl.composition` for instance APIs",
+                "direct imports of `get_default_registry()` from "
+                "`bioetl.composition.registry` stay at zero in first-party `src`",
             ),
         },
         "src/bioetl/infrastructure/config_loader.py": {

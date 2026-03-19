@@ -21,7 +21,7 @@ from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
     _emit_merge_retry_event,
     _execute_merge_write_request,
 )
-from bioetl.infrastructure.storage.write_resilience import (
+from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
     SilverMergeResiliencePolicy,
 )

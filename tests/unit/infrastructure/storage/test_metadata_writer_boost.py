@@ -34,13 +34,13 @@ from bioetl.domain.models.metadata import (
     SourceMetadata,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.storage._atomic import AtomicWriteError
+from bioetl.infrastructure.storage.support.atomic_ops import AtomicWriteError
 from bioetl.infrastructure.storage.metadata_writer import (
     METADATA_FILENAME,
     MetadataWriter,
     _get_metadata_filename,
 )
-from bioetl.infrastructure.storage.write_resilience import AdaptiveRetryPolicy
+from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 
 
 def _make_runtime() -> RuntimeMetadata:
@@ -203,7 +203,7 @@ class TestEmitRetryTelemetry:
 
         with (
             patch.object(Path, "replace", flaky_replace),
-            patch("bioetl.infrastructure.storage._atomic.time.sleep"),
+            patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"),
         ):
             await writer.write_bronze_metadata(
                 base_path, _make_bronze_metadata(), provider="chembl", entity="activity"
@@ -219,7 +219,7 @@ class TestEmitFinalTelemetry:
 
     def test_build_final_telemetry_outcome_keeps_status_mapping(self) -> None:
         """Outcome builder should keep canonical status->event/severity mapping."""
-        from bioetl.infrastructure.storage.metadata_writer_operations import (
+        from bioetl.infrastructure.storage.metadata.writer_operations import (
             _build_metadata_write_final_telemetry,
         )
 
@@ -241,7 +241,7 @@ class TestEmitFinalTelemetry:
 
     def test_final_telemetry_outcome_encodes_event_name_and_severity(self) -> None:
         """Final telemetry outcome should keep canonical event/severity pairing."""
-        from bioetl.infrastructure.storage.metadata_writer_operations import (
+        from bioetl.infrastructure.storage.metadata.writer_operations import (
             _MetadataWriteFinalTelemetry,
         )
 
@@ -516,7 +516,7 @@ class TestWriteMetadataPathLogic:
 
         with (
             patch.object(Path, "replace", flaky_replace),
-            patch("bioetl.infrastructure.storage._atomic.time.sleep"),
+            patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"),
         ):
             await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
 
@@ -551,7 +551,7 @@ class TestWriteMetadataPathLogic:
         self, tmp_path: Path
     ) -> None:
         """_write_metadata should pass one prepared operation into the execution helper."""
-        from bioetl.infrastructure.storage.metadata_writer_operations import (
+        from bioetl.infrastructure.storage.metadata.writer_operations import (
             _MetadataWriteRequest,
         )
 

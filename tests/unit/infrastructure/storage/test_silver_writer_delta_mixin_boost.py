@@ -27,7 +27,7 @@ from bioetl.infrastructure.storage.silver.delta_helpers import (
     _raise_domain_write_error,
     _select_dispatch_handler,
 )
-from bioetl.infrastructure.storage.write_resilience import (
+from bioetl.infrastructure.storage.delta.resilience import (
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
 )

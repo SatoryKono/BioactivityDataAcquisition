@@ -24,10 +24,9 @@ from bioetl.application.services import (
     VacuumService,
 )
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
-from bioetl.composition import create_registry
+from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -42,13 +41,6 @@ __all__ = [
 
 if TYPE_CHECKING:
     from bioetl.composition import PipelineRegistry
-
-
-def get_default_registry() -> PipelineRegistry:
-    """Compatibility helper returning an explicit registered registry."""
-    registry = create_registry()
-    register_all_pipelines(registry=registry)
-    return registry
 
 
 def bootstrap_cleanup_service() -> CleanupService:

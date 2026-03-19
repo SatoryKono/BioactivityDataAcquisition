@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pyarrow as pa
 import pytest
 
-from bioetl.infrastructure.storage.gold_writer_io_delta_mixins import (
+from bioetl.infrastructure.storage.gold.io_delta_mixins import (
     _SimpleGoldWriteRequest,
     _build_simple_gold_write,
     _gold_write_retry_delay,

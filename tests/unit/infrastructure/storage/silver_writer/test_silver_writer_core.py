@@ -48,7 +48,7 @@ class TestSilverWriterInit:
         from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
         )
-        from bioetl.infrastructure.storage.write_resilience import (
+        from bioetl.infrastructure.storage.delta.resilience import (
             DEFAULT_SILVER_MERGE_POLICY,
         )
         from bioetl.infrastructure.validation.pandera_validator import (
@@ -85,7 +85,7 @@ class TestSilverWriterInit:
         from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
         )
-        from bioetl.infrastructure.storage.write_resilience import (
+        from bioetl.infrastructure.storage.delta.resilience import (
             build_default_silver_merge_policy,
         )
 

@@ -6,6 +6,7 @@ Extracted from registration.py for LOC compliance.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
@@ -18,18 +19,14 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.composition.providers._config_helpers import (
     _get_adapter_config,
     _get_circuit_breaker_from_config,
-    _get_factories,
     _get_rate_limit_from_config,
     _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
 )
-from bioetl.composition.providers._models import (
-    HttpConfig,
-    ProviderConfig,
-)
-from bioetl.composition.providers.factory_loader import (
-    get_data_source_factory,
-    get_http_client_factory,
+from bioetl.composition.providers._models import HttpConfig, ProviderConfig
+from bioetl.composition.providers._registration_contracts import (
+    ProviderAssemblySupport,
+    create_provider_assembly_support,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
@@ -58,6 +55,8 @@ def _create_chembl_data_source(
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering.
 
@@ -67,12 +66,8 @@ def _create_chembl_data_source(
     For document_term entity type, wraps the adapter with PublicationTermDataSource
     to extract terms from publication records (derived entity pattern).
     """
-    DataSourceFactory, HttpClientFactory = _get_factories(
-        get_data_source_factory, get_http_client_factory
-    )
-    http_client = HttpClientFactory.create_for_provider(
-        "chembl", settings, metrics=metrics
-    )
+    support = assembly_support or create_provider_assembly_support()
+    http_client = support.create_http_client("chembl", settings, metrics=metrics)
 
     # Load adapter configuration from YAML (single source of truth)
     adapter_config = _get_adapter_config("chembl", default_page_size=1000)
@@ -86,10 +81,11 @@ def _create_chembl_data_source(
             extraction_params, filter_config, logger
         )
 
-    base_adapter = DataSourceFactory.create(
+    base_adapter = support.create_adapter(
         "chembl",
         http_client=http_client,
         logger=logger,
+        settings=settings,
         adapter_config=adapter_config,
         metrics=metrics,
         extraction_params=extraction_params,
@@ -175,6 +171,8 @@ def _create_uniprot_data_source(
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create UniProt data source with optional CSV filtering.
 
@@ -183,21 +181,18 @@ def _create_uniprot_data_source(
     via ``pipeline_config.source.api.base_url`` for testing or alternative
     deployments.
     """
-    DataSourceFactory, HttpClientFactory = _get_factories(
-        get_data_source_factory, get_http_client_factory
-    )
-    http_client = HttpClientFactory.create_for_provider(
-        "uniprot", settings, metrics=metrics
-    )
+    support = assembly_support or create_provider_assembly_support()
+    http_client = support.create_http_client("uniprot", settings, metrics=metrics)
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider="uniprot",
         logger=logger,
         metrics=metrics,
     )
-    data_source = DataSourceFactory.create(
+    data_source = support.create_adapter(
         "uniprot",
         http_client=http_client,
         logger=logger,
+        settings=settings,
         base_url=pipeline_config.source.api.base_url or UNIPROT_API_BASE,
         strict_error_handling=settings.strict_error_handling,
         metrics=metrics,
@@ -213,6 +208,8 @@ def _create_uniprot_idmapping_data_source(
     filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create UniProt ID Mapping data source.
 
@@ -221,10 +218,8 @@ def _create_uniprot_idmapping_data_source(
     2. Calls UniProt ID Mapping API to map to UniProt accessions
     3. Yields records with mapping results
     """
-    _, http_client_factory = _get_factories(
-        get_data_source_factory, get_http_client_factory
-    )
-    http_client = http_client_factory.create_for_provider("uniprot", settings)
+    support = assembly_support or create_provider_assembly_support()
+    http_client = support.create_http_client("uniprot", settings, metrics=metrics)
     from_db, to_db = _resolve_uniprot_mapping_databases(pipeline_config)
     return IDMappingDataSource(
         idmapping_client=UniProtIDMappingClient(
@@ -276,8 +271,12 @@ def _extract_uniprot_mapping_seed_ids(
     return None
 
 
-def _get_bio_provider_configs() -> dict[str, ProviderConfig]:
+def _get_bio_provider_configs(
+    *,
+    assembly_support: ProviderAssemblySupport | None = None,
+) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bio providers."""
+    support = assembly_support or create_provider_assembly_support()
     chembl = _get_rate_limit_from_config("chembl")
     pubchem = _get_rate_limit_from_config("pubchem")
     uniprot = _get_rate_limit_from_config("uniprot")
@@ -288,7 +287,10 @@ def _get_bio_provider_configs() -> dict[str, ProviderConfig]:
             http_config=HttpConfig(rate=chembl.rate, capacity=chembl.capacity),
             requires_http_client=True,
             requires_logger=True,
-            data_source_creator=_create_chembl_data_source,
+            data_source_creator=partial(
+                _create_chembl_data_source,
+                assembly_support=support,
+            ),
         ),
         "pubchem": ProviderConfig(
             adapter_class=PubChemAdapter,
@@ -307,13 +309,19 @@ def _get_bio_provider_configs() -> dict[str, ProviderConfig]:
             ),
             requires_http_client=True,
             requires_logger=True,
-            data_source_creator=_create_uniprot_data_source,
+            data_source_creator=partial(
+                _create_uniprot_data_source,
+                assembly_support=support,
+            ),
         ),
         "uniprot_idmapping": ProviderConfig(
             adapter_class=IDMappingDataSource,
             http_config=HttpConfig(rate=uniprot.rate, capacity=uniprot.capacity),
             requires_http_client=True,
             requires_logger=True,
-            data_source_creator=_create_uniprot_idmapping_data_source,
+            data_source_creator=partial(
+                _create_uniprot_idmapping_data_source,
+                assembly_support=support,
+            ),
         ),
     }

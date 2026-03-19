@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.storage._atomic import (
+from bioetl.infrastructure.storage.support.atomic_ops import (
     AtomicWriteError,
     atomic_write,
     atomic_write_bytes,

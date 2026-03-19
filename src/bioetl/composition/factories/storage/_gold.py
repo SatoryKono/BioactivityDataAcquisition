@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
-from bioetl.infrastructure.storage.gold_writer_runtime_helpers import (
+from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
 )
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter

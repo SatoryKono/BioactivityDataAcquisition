@@ -8,7 +8,7 @@ import pyarrow as pa
 import pytest
 from deltalake import write_deltalake
 
-from bioetl.infrastructure.storage.retention_manager import RetentionPolicy
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 
 @pytest.fixture

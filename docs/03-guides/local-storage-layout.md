@@ -159,7 +159,7 @@ All file writes use atomic patterns to prevent data corruption:
 2. Fsync to ensure durability
 3. Atomic rename to final path
 
-See `src/bioetl/infrastructure/storage/_atomic.py` for implementation.
+See `src/bioetl/infrastructure/storage/support/atomic_ops.py` for implementation.
 
 ## Maintenance Operations
 

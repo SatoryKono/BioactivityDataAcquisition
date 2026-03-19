@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pyarrow as pa
 import pytest
 
-from bioetl.infrastructure.storage.arrow_converter import (
+from bioetl.infrastructure.storage.delta.arrow_converter import (
     ArrowDataConverter,
     build_arrow_schema_preparation_context,
     filter_record_for_schema,

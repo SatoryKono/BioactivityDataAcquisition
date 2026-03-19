@@ -192,14 +192,17 @@ PubMedAdapter                         (pubchempy)
 | Файл                              | Назначение                                    |
 | --------------------------------- | --------------------------------------------- |
 | `gold_writer.py`                  | Главный `GoldWriter`                          |
-| `gold_writer_io_mixin.py`         | I/O operations (Delta write)                  |
-| `gold_writer_io_delta_mixins.py`  | Delta-specific I/O (merge, overwrite)         |
-| `gold_writer_metadata_mixin.py`   | Gold metadata sidecar generation              |
-| `gold_writer_validation_mixin.py` | Pandera schema validation                     |
-| `gold_writer_read_cleanup_mixin.py`| Read и cleanup operations                    |
-| `gold_writer_io_helpers.py`       | I/O helper functions                          |
-| `gold_writer_metadata_audit.py`   | Metadata audit trail                          |
-| `gold_writer_pipeline_helpers.py` | Pipeline-specific helpers                     |
+| `gold/io_mixin.py`                | I/O operations (Delta write)                  |
+| `gold/io_delta_mixins.py`         | Delta-specific I/O (merge, overwrite)         |
+| `gold/metadata_mixin.py`          | Gold metadata sidecar generation              |
+| `gold/validation_mixin.py`        | Pandera schema validation                     |
+| `gold/read_cleanup_mixin.py`      | Read и cleanup operations                     |
+| `gold/io_helpers.py`              | I/O helper functions                          |
+| `gold/metadata_audit.py`          | Metadata audit trail                          |
+| `gold/pipeline_helpers.py`        | Pipeline-specific helpers                     |
+| `gold/runtime_helpers.py`         | Runtime configuration helpers                 |
+| `gold/metadata_operations.py`     | Metadata sidecar write operations             |
+| `gold/metadata_payloads.py`       | Metadata payload normalization helpers        |
 
 #### 2.2.4. Storage Support
 
@@ -210,25 +213,27 @@ PubMedAdapter                         (pubchempy)
 | `base_delta_writer.py`   | `BaseDeltaWriter`    | Базовый класс для Silver/Gold writers         |
 | `silver_writer.py`       | `SilverWriter`       | Канонический Delta Lake writer для Silver layer |
 | `delta_reader.py`        | `DeltaReader`        | Чтение Delta Lake таблиц                      |
-| `arrow_converter.py`     | `ArrowDataConverter` | PyArrow conversion utilities                  |
-| `_atomic.py`             | `atomic_write_text`  | Atomic file write (temp + rename)             |
+| `delta/arrow_converter.py` | `ArrowDataConverter` | PyArrow conversion utilities                |
+| `delta/resilience.py`    | `AdaptiveRetryPolicy` | Retry/backoff policy objects for storage writes |
+| `atomic.py`              | `atomic_write_text`  | Public atomic-write facade                    |
+| `support/atomic_ops.py`  | `AtomicWriteGroup`   | Internal atomic file write and replace-retry  |
 
 **Metadata infrastructure:**
 
 | Файл                                  | Компонент          | Назначение                                    |
 | -------------------------------------- | ------------------ | --------------------------------------------- |
 | `metadata_writer.py`                  | `MetadataWriter`   | Запись metadata sidecar YAML                  |
-| `metadata_writer_operations.py`       | Internal operations| Подготовка, telemetry, retry для metadata     |
+| `metadata/writer_operations.py`       | Internal operations| Подготовка, telemetry, retry для metadata     |
 | `metadata_builder.py`                 | `MetadataBuilder`  | Сборка metadata моделей                       |
-| `metadata_builder_base.py`            | Base builder       | Базовые функции сборки metadata               |
+| `metadata/builder_base.py`            | Base builder       | Базовые функции сборки metadata               |
 | `metadata_builder_composite_helpers.py`| Compatibility wrapper | Transitional wrapper over canonical `bioetl.domain.services.composite_metadata_helpers` |
 
 **Other storage:**
 
 | Файл                           | Компонент                  | Назначение                              |
 | ------------------------------ | -------------------------- | --------------------------------------- |
-| `retention_manager.py`         | `RetentionPolicy`          | VACUUM retention и Delta maintenance    |
-| `composite_checkpoint_writer.py`| `FileCompositeCheckpointWriter`| Запись composite checkpoint             |
+| `support/retention.py`         | `RetentionPolicy`          | VACUUM retention и Delta maintenance    |
+| `support/checkpoint_writer.py` | `FileCompositeCheckpointWriter` | Запись composite checkpoint         |
 
 #### 2.1.3. Adapter Support Infrastructure
 

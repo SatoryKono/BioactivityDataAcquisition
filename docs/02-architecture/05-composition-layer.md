@@ -144,7 +144,7 @@ composition/bootstrap/
 
 | Пакет              | Ключевые модули                                         | Назначение                                           |
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------- |
-| `providers/`       | `provider_registry.py`, `loader.py`, `registration.py`, `_default_registry.py`, `factory_loader.py` | Реестр провайдеров, canonical loader lifecycle и compat/singleton helpers |
+| `providers/`       | `provider_registry.py`, `loader.py`, `registration.py`, `_default_registry.py`, `_loading.py`, `_registration_contracts.py` | Реестр провайдеров, canonical loader lifecycle и leaf registration/loading contracts |
 | `services/`        | `__init__.py`, `versioning.py` | Тонкий re-export layer для `MetadataCoordinator` и versioning utilities |
 | `runtime_builders/`| `runner_builder.py`, `observability_builder.py`, `inputs_resolver.py` | Builders для runtime assembly                        |
 

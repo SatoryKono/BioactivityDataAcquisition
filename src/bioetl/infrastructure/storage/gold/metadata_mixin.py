@@ -9,11 +9,11 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.storage.gold_writer_metadata_audit import (
+from bioetl.infrastructure.storage.gold.metadata_audit import (
     _build_gold_audit_entry,
     _GoldAuditWriteRequest,
 )
-from bioetl.infrastructure.storage.gold_writer_metadata_operations import (
+from bioetl.infrastructure.storage.gold.metadata_operations import (
     _extract_delta_table_version,
     _GoldMergedMetadataWriteRequest,
     _GoldMetadataWriteRequest,

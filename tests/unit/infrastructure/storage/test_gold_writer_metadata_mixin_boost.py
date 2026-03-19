@@ -1,4 +1,4 @@
-"""Coverage boost tests for gold_writer_metadata_mixin.py.
+"""Coverage boost tests for gold/metadata_mixin.py.
 
 Targets uncovered lines: 48-50, 71-78, 117, 154-181, 287-301, 317, 369, 380-388.
 """
@@ -16,7 +16,7 @@ import pytest
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.storage.gold_writer_metadata_mixin import (
+from bioetl.infrastructure.storage.gold.metadata_mixin import (
     GoldWriterMetadataMixin,
 )
 
@@ -287,7 +287,7 @@ class TestWriteGoldMetadata:
         mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_metadata_operations.build_gold_metadata_payload",
+            "bioetl.infrastructure.storage.gold.metadata_operations.build_gold_metadata_payload",
             return_value=metadata,
         ) as mock_build:
             await mixin._write_gold_metadata(
@@ -370,7 +370,7 @@ class TestWriteGoldMergedMetadata:
         mixin._write_gold_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         with patch(
-            "bioetl.infrastructure.storage.gold_writer_metadata_operations.build_gold_merged_metadata_input",
+            "bioetl.infrastructure.storage.gold.metadata_operations.build_gold_merged_metadata_input",
             return_value=MagicMock(),
         ) as mock_build:
             await mixin._write_gold_merged_metadata(

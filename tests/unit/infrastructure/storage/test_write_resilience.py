@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.infrastructure.storage.write_resilience import (
+from bioetl.infrastructure.storage.delta.resilience import (
     build_default_silver_merge_policy,
 )
 

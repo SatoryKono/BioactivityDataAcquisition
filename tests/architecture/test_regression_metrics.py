@@ -585,7 +585,7 @@ def test_cross_layer_group_edges_total_budget() -> None:
 
 def test_silver_merge_resilience_instrumented() -> None:
     """Silver merge resilience must have retry policy and observability hooks."""
-    resilience = Path("src/bioetl/infrastructure/storage/write_resilience.py")
+    resilience = Path("src/bioetl/infrastructure/storage/delta/resilience.py")
     delta_mixin = Path("src/bioetl/infrastructure/storage/silver/delta_mixin.py")
     delta_helpers = Path(
         "src/bioetl/infrastructure/storage/silver/delta_helpers.py"
@@ -594,7 +594,7 @@ def test_silver_merge_resilience_instrumented() -> None:
         "src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py"
     )
 
-    assert resilience.exists(), "write_resilience.py not found"
+    assert resilience.exists(), "delta/resilience.py not found"
     assert delta_mixin.exists(), "silver/delta_mixin.py not found"
     assert delta_helpers.exists(), "silver/delta_helpers.py not found"
     assert merge_resilience_helpers.exists(), (
@@ -603,7 +603,7 @@ def test_silver_merge_resilience_instrumented() -> None:
 
     res_content = resilience.read_text(encoding="utf-8")
     assert "SilverMergeResiliencePolicy" in res_content, (
-        "SilverMergeResiliencePolicy not defined in write_resilience.py"
+        "SilverMergeResiliencePolicy not defined in delta/resilience.py"
     )
     assert "max_retries" in res_content, (
         "Retry configuration missing in SilverMergeResiliencePolicy"

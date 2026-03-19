@@ -224,4 +224,4 @@ VACUUM операции логируются с structlog pattern:
 - [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [RULES.md §3.1: Medallion Architecture](../00-project/RULES.md)
 - [VacuumService](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/application/services/vacuum_service.py)
-- [RetentionPolicy](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/storage/retention_manager.py)
+- [RetentionPolicy](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/storage/support/retention.py)

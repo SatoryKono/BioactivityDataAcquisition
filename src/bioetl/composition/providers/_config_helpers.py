@@ -20,38 +20,14 @@ from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterRead
 from bioetl.infrastructure.config_load_api import load_source_config
 
 if TYPE_CHECKING:
-    from typing import Any
-
+    from bioetl.composition.providers._registration_contracts import (
+        ProviderAssemblySupport,
+    )
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.models.filter import ExtractionParams
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
-
-
-def _get_factories(
-    data_source_factory_getter: Callable[
-        [], Any  # Any: factory wiring; concrete types resolved at runtime
-    ],  # Any: factory type varies per provider
-    http_client_factory_getter: Callable[
-        [], Any  # Any: factory wiring; concrete types resolved at runtime
-    ],  # Any: factory type varies per provider
-) -> tuple[Any, Any]:  # Any: resolved factory instances
-    """Resolve factory classes via injected getters.
-
-    Keeps this helper module decoupled from factory modules to avoid
-    cross-import dependency chains.
-
-    Args:
-        data_source_factory_getter: Zero-argument callable returning the data
-            source factory class.
-        http_client_factory_getter: Zero-argument callable returning the HTTP
-            client factory class.
-
-    Returns:
-        Tuple of (data_source_factory, http_client_factory).
-    """
-    return data_source_factory_getter(), http_client_factory_getter()
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
@@ -245,6 +221,7 @@ def _create_http_data_source(
     *,
     adapter_factory: Callable[..., DataSourcePort],
     extra_kwargs: dict[str, object] | None = None,
+    assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Generic HTTP data source: http_client + helpers + adapter + filter wrap.
 
@@ -267,12 +244,12 @@ def _create_http_data_source(
     from bioetl.composition.factories.datasource.adapter_helpers import (
         AdapterHelpersFactory,
     )
-    from bioetl.composition.providers.factory_loader import get_http_client_factory
-
-    HttpClientFactory = get_http_client_factory()
-    http_client = HttpClientFactory.create_for_provider(
-        provider, settings, metrics=metrics
+    from bioetl.composition.providers._registration_contracts import (
+        create_provider_assembly_support,
     )
+
+    support = assembly_support or create_provider_assembly_support()
+    http_client = support.create_http_client(provider, settings, metrics=metrics)
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider=provider,
         logger=logger,

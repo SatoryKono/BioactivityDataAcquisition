@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import pyarrow as pa
 
-from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

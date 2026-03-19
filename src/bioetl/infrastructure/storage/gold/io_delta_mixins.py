@@ -10,13 +10,13 @@ from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 import pyarrow as pa
 
-from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+from bioetl.infrastructure.storage.gold.io_helpers import (
     initialize_scd2_records as _initialize_scd2_records,
 )
-from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
-from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+from bioetl.infrastructure.storage.gold.io_helpers import (
     write_scd2_once as _write_scd2_once,
 )
 
@@ -261,7 +261,7 @@ class _GoldWriterExecutorArrowMixin:
         self, records: list[GoldRecord], column_order: list[str] | None = None
     ) -> pa.Table:
         """Convert records to PyArrow table with Delta-safe null handling."""
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter(logger=self.logger)
         return converter.convert_records_to_arrow(

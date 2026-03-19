@@ -181,15 +181,11 @@ class TestExtractionParamsPassedToAdapter:
     """Test that extraction_params reaches ChemblAdapter via DataSourceFactory."""
 
     @patch(
-        "bioetl.composition.providers.registration_bio._get_factories",
-    )
-    @patch(
         "bioetl.composition.providers.registration_bio._get_adapter_config",
     )
     def test_extraction_params_passed_to_adapter(
         self,
         mock_get_adapter_config: MagicMock,
-        mock_get_factories: MagicMock,
     ) -> None:
         """ExtractionParams from pipeline_config reaches DataSourceFactory.create."""
         from bioetl.composition.providers.registration_bio import (
@@ -197,9 +193,7 @@ class TestExtractionParamsPassedToAdapter:
         )
 
         # Setup mocks
-        mock_factory = MagicMock()
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (mock_factory, mock_http_factory)
+        support = MagicMock()
         mock_get_adapter_config.return_value = MagicMock()
 
         mock_settings = MagicMock()
@@ -215,14 +209,13 @@ class TestExtractionParamsPassedToAdapter:
             settings=mock_settings,
             pipeline_config=mock_pipeline_config,
             logger=mock_logger,
+            assembly_support=support,
         )
 
-        # Verify DataSourceFactory.create was called with extraction_params
-        mock_factory.create.assert_called_once()
-        call_kwargs = mock_factory.create.call_args
-        extraction_params = call_kwargs[1].get("extraction_params") or call_kwargs[
-            1
-        ].get("extraction_params")
+        # Verify injected adapter factory was called with extraction_params
+        support.create_adapter.assert_called_once()
+        call_kwargs = support.create_adapter.call_args
+        extraction_params = call_kwargs[1].get("extraction_params")
 
         assert extraction_params is not None
         assert isinstance(extraction_params, ExtractionParams)
@@ -230,24 +223,18 @@ class TestExtractionParamsPassedToAdapter:
         assert extraction_params.params["standard_units"] == "nM"
 
     @patch(
-        "bioetl.composition.providers.registration_bio._get_factories",
-    )
-    @patch(
         "bioetl.composition.providers.registration_bio._get_adapter_config",
     )
     def test_empty_extraction_params_when_not_configured(
         self,
         mock_get_adapter_config: MagicMock,
-        mock_get_factories: MagicMock,
     ) -> None:
         """Empty ExtractionParams when pipeline has no extraction_params."""
         from bioetl.composition.providers.registration_bio import (
             _create_chembl_data_source,
         )
 
-        mock_factory = MagicMock()
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (mock_factory, mock_http_factory)
+        support = MagicMock()
         mock_get_adapter_config.return_value = MagicMock()
 
         mock_settings = MagicMock()
@@ -260,9 +247,10 @@ class TestExtractionParamsPassedToAdapter:
             settings=mock_settings,
             pipeline_config=mock_pipeline_config,
             logger=mock_logger,
+            assembly_support=support,
         )
 
-        call_kwargs = mock_factory.create.call_args[1]
+        call_kwargs = support.create_adapter.call_args[1]
         extraction_params = call_kwargs["extraction_params"]
         assert extraction_params.is_empty
 

@@ -25,36 +25,36 @@ from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,  # noqa: F401
 )
-from bioetl.infrastructure.storage.gold_writer_io_mixin import GoldWriterIOMixin
-from bioetl.infrastructure.storage.gold_writer_metadata_mixin import (
+from bioetl.infrastructure.storage.gold.io_mixin import GoldWriterIOMixin
+from bioetl.infrastructure.storage.gold.metadata_mixin import (
     GoldWriterMetadataMixin,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext as _GoldWriteDispatchContext,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWritePostwriteContext as _GoldWritePostwriteContext,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteRequest as _GoldWriteRequest,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     PreparedGoldWriteContext as _PreparedGoldWriteContext,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     post_write_gold as _post_write_gold_impl,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     prepare_gold_write as _prepare_write_gold_impl,
 )
-from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     set_gold_write_span_attributes as _set_write_span_attributes_impl,
 )
-from bioetl.infrastructure.storage.gold_writer_runtime_helpers import (
+from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
     build_gold_writer_runtime_services,
 )
-from bioetl.infrastructure.storage.gold_writer_validation_mixin import (
+from bioetl.infrastructure.storage.gold.validation_mixin import (
     GoldWriterValidationMixin,
 )
 
@@ -81,7 +81,7 @@ def _normalize_scd_config(
     primary_keys: list[str] | None,
 ) -> ScdConfig:
     """Compatibility wrapper preserving canonical monkeypatch/import path."""
-    from bioetl.infrastructure.storage.gold_writer_pipeline_helpers import (
+    from bioetl.infrastructure.storage.gold.pipeline_helpers import (
         normalize_scd_config,
     )
 

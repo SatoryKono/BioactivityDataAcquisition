@@ -1,7 +1,8 @@
 """CLI commands package for BioETL.
 
-Each module contains a single command group or standalone command.
-All commands are thin wrappers that delegate to Application services.
+The compatibility surface remains at ``bioetl.interfaces.cli.commands.*``,
+while canonical implementations are partitioned by operational domain under
+``bioetl.interfaces.cli.commands.domains``.
 """
 
 from __future__ import annotations

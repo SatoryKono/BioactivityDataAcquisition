@@ -20,7 +20,7 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
-from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
 from bioetl.application.composite.runner_pkg import (

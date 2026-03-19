@@ -6,6 +6,7 @@ and biblio configs, and integration with ProviderRegistry.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,6 +14,7 @@ import pytest
 from bioetl.composition.providers.provider_registry import (
     ProviderConfig,
     ProviderRegistry,
+    create_provider_registry,
 )
 from bioetl.composition.providers.registration import (
     _build_provider_configs,
@@ -42,15 +44,16 @@ class TestRegisterAllProviders:
         mock_bio: MagicMock,
     ) -> None:
         """Should register providers returned by _get_bio_provider_configs."""
+        registry = create_provider_registry()
         mock_adapter = MagicMock()
         mock_bio.return_value = {
             "chembl": ProviderConfig(adapter_class=mock_adapter),
         }
         mock_biblio.return_value = {}
 
-        register_all_providers()
+        register_all_providers(registry=registry)
 
-        assert ProviderRegistry.is_registered("chembl")
+        assert registry.is_registered("chembl")
 
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
@@ -60,15 +63,16 @@ class TestRegisterAllProviders:
         mock_bio: MagicMock,
     ) -> None:
         """Should register providers returned by _get_biblio_provider_configs."""
+        registry = create_provider_registry()
         mock_adapter = MagicMock()
         mock_bio.return_value = {}
         mock_biblio.return_value = {
             "pubmed": ProviderConfig(adapter_class=mock_adapter),
         }
 
-        register_all_providers()
+        register_all_providers(registry=registry)
 
-        assert ProviderRegistry.is_registered("pubmed")
+        assert registry.is_registered("pubmed")
 
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
@@ -78,6 +82,7 @@ class TestRegisterAllProviders:
         mock_bio: MagicMock,
     ) -> None:
         """Second call should skip already-registered providers (idempotent)."""
+        registry = create_provider_registry()
         mock_adapter_v1 = MagicMock(name="v1")
         mock_adapter_v2 = MagicMock(name="v2")
 
@@ -86,17 +91,17 @@ class TestRegisterAllProviders:
         }
         mock_biblio.return_value = {}
 
-        register_all_providers()
+        register_all_providers(registry=registry)
 
         # Change config for second call
         mock_bio.return_value = {
             "chembl": ProviderConfig(adapter_class=mock_adapter_v2),
         }
 
-        register_all_providers()
+        register_all_providers(registry=registry)
 
         # Original config should still be in place
-        config = ProviderRegistry.get("chembl")
+        config = registry.get("chembl")
         assert config.adapter_class is mock_adapter_v1
 
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
@@ -107,6 +112,7 @@ class TestRegisterAllProviders:
         mock_bio: MagicMock,
     ) -> None:
         """Should merge bio and biblio configs and register all."""
+        registry = create_provider_registry()
         mock_adapter = MagicMock()
         mock_bio.return_value = {
             "chembl": ProviderConfig(adapter_class=mock_adapter),
@@ -117,10 +123,10 @@ class TestRegisterAllProviders:
             "crossref": ProviderConfig(adapter_class=mock_adapter),
         }
 
-        register_all_providers()
+        register_all_providers(registry=registry)
 
         for name in ("chembl", "pubchem", "pubmed", "crossref"):
-            assert ProviderRegistry.is_registered(name), f"Missing: {name}"
+            assert registry.is_registered(name), f"Missing: {name}"
 
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
@@ -130,6 +136,7 @@ class TestRegisterAllProviders:
         mock_bio: MagicMock,
     ) -> None:
         """register_all_providers should not raise when called multiple times."""
+        registry = create_provider_registry()
         mock_adapter = MagicMock()
         mock_bio.return_value = {
             "chembl": ProviderConfig(adapter_class=mock_adapter),
@@ -137,9 +144,29 @@ class TestRegisterAllProviders:
         mock_biblio.return_value = {}
 
         # Should not raise
-        register_all_providers()
-        register_all_providers()
-        register_all_providers()
+        register_all_providers(registry=registry)
+        register_all_providers(registry=registry)
+        register_all_providers(registry=registry)
+
+    @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
+    @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
+    def test_injected_registry_isolated_from_default_singleton(
+        self,
+        mock_biblio: MagicMock,
+        mock_bio: MagicMock,
+    ) -> None:
+        """Explicit registry injection should not mutate the default singleton."""
+        registry = create_provider_registry()
+        mock_adapter = MagicMock()
+        mock_bio.return_value = {
+            "chembl": ProviderConfig(adapter_class=mock_adapter),
+        }
+        mock_biblio.return_value = {}
+
+        register_all_providers(registry=registry)
+
+        assert registry.is_registered("chembl")
+        assert not ProviderRegistry.is_registered("chembl")
 
 
 @pytest.mark.unit
@@ -186,3 +213,25 @@ class TestBuildProviderConfigs:
         result = _build_provider_configs()
 
         assert result["shared"].adapter_class is mock_adapter_biblio
+
+    @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
+    @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
+    def test_passes_shared_assembly_support_to_group_builders(
+        self,
+        mock_biblio: MagicMock,
+        mock_bio: MagicMock,
+    ) -> None:
+        """Bio and biblio builders should receive the same support bundle."""
+
+        @dataclass(frozen=True)
+        class StubSupport:
+            marker: str = "support"
+
+        support = StubSupport()
+        mock_bio.return_value = {}
+        mock_biblio.return_value = {}
+
+        _build_provider_configs(assembly_support=support)
+
+        mock_bio.assert_called_once_with(assembly_support=support)
+        mock_biblio.assert_called_once_with(assembly_support=support)

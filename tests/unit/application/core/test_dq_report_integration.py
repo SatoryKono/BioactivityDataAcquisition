@@ -15,16 +15,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.batch_execution_lifecycle import (
+from bioetl.application.core.batch_execution import (
     BatchExecutionLifecycleService,
-)
-from bioetl.application.core.batch_execution_run_service import (
     BatchExecutionRunService,
-)
-from bioetl.application.core.batch_execution_state_service import (
     BatchExecutionStateService,
 )
+from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )

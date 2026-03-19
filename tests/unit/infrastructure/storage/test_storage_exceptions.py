@@ -168,7 +168,7 @@ class TestSilverWriterExceptions:
     async def test_vacuum_raises_table_not_found(self, noop_logger):
         """Test that vacuum raises CustomTableNotFoundError."""
         with patch(
-            "bioetl.infrastructure.storage.retention_manager.DeltaTable",
+            "bioetl.infrastructure.storage.support.retention.DeltaTable",
             side_effect=TableNotFoundError,
         ):
             writer = SilverWriter(base_path="/fake/path", logger=noop_logger)

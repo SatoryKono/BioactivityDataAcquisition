@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.infrastructure.storage.gold_writer_metadata_payloads import (
+from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_input,
     build_gold_metadata_payload,

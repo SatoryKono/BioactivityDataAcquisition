@@ -12,7 +12,7 @@ from deltalake import write_deltalake
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 
 __all__ = [
     "_MergedSilverWriteRequest",

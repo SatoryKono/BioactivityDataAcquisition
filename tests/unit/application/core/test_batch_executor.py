@@ -14,6 +14,11 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from bioetl.application.core.batch_execution import (
+    BatchExecutionLifecycleService,
+    BatchExecutionRunService,
+    BatchExecutionStateService,
+)
 from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.application.core.batch_executor import (
@@ -40,15 +45,6 @@ from bioetl.application.core.batch_executor_loop_helpers import (
 )
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
-)
-from bioetl.application.core.batch_execution_lifecycle import (
-    BatchExecutionLifecycleService,
-)
-from bioetl.application.core.batch_execution_run_service import (
-    BatchExecutionRunService,
-)
-from bioetl.application.core.batch_execution_state_service import (
-    BatchExecutionStateService,
 )
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,

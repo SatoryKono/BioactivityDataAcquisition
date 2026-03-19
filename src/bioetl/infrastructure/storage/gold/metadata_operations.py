@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.storage.gold_writer_metadata_payloads import (
+from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
     build_gold_metadata_payload,
 )

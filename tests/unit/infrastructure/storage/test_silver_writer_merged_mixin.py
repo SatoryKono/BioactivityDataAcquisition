@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.schemas.column_order import canonical_column_order
-from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.silver.merged_mixin import (
     _MergedSilverWriteRequest,
     SilverWriterMergedMixin,

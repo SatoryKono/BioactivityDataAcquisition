@@ -6,14 +6,12 @@ Extracted from pipeline_builder.py to keep it within LOC limits.
 from __future__ import annotations
 
 from bioetl.application.core.base import BasePipeline
+from bioetl.application.core.batch_execution import (
+    BatchExecutionLifecycleService,
+    BatchExecutionRunService,
+)
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
-)
-from bioetl.application.core.batch_execution_lifecycle import (
-    BatchExecutionLifecycleService,
-)
-from bioetl.application.core.batch_execution_run_service import (
-    BatchExecutionRunService,
 )
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService

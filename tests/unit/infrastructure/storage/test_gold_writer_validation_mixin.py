@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.infrastructure.storage.gold_writer_validation_mixin import (
+from bioetl.infrastructure.storage.gold.validation_mixin import (
     GoldWriterValidationMixin,
 )
 

@@ -27,6 +27,14 @@ from bioetl.application.composite.runner_pkg.runner_models import (
     CompositeExecutionContext,
     CompositeRuntimeConfig,
 )
+from bioetl.application.composite.runner_pkg.runner_support_policy import (
+    build_enrichers_to_run,
+    build_preflight_validation_context,
+    build_result_build_request,
+    can_run_enricher,
+    get_preflight_skip_reason,
+    get_required_enricher_failure,
+)
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
     _PreparedCompositeResultContext,
@@ -101,14 +109,14 @@ class CompositeRunnerSupportMixin:
         artifacts: CompositeExecutionContext,
     ) -> CompositeResultBuildRequest:
         """Build an explicit result-assembly request for completion helpers."""
-        return CompositeResultBuildRequest(
+        return build_result_build_request(
             artifacts=artifacts,
             composite_name=self._config.name,
             run_id=self._run_id_str,
             started_at=self._started_at,
             original_run_id=self._original_run_id,
-            required_enrichers=frozenset(self._config.required_enrichers),
-            required_dependencies=frozenset(self._config.required_dependencies),
+            required_enrichers=self._config.required_enrichers,
+            required_dependencies=self._config.required_dependencies,
         )
 
     def _validate_config_consistency(
@@ -177,25 +185,21 @@ class CompositeRunnerSupportMixin:
         self: _CompositeRunnerSupportHostProtocol,
     ) -> _PreparedPreflightValidationContext | None:
         """Build the canonical preflight validation context when validation can run."""
-        if self._get_preflight_skip_reason() is not None:
-            return None
-
-        validator = self._preflight_validator
-        assert validator is not None
-        return _PreparedPreflightValidationContext(
-            validator=validator,
-            field_count=len(self._config.merge.field_priorities),
+        field_priorities = getattr(self._config.merge, "field_priorities", ())
+        return build_preflight_validation_context(
+            validator=self._preflight_validator,
+            field_priorities=field_priorities,
         )
 
     def _get_preflight_skip_reason(
         self: _CompositeRunnerSupportHostProtocol,
     ) -> str | None:
         """Return skip reason for preflight validation when it should not run."""
-        if self._preflight_validator is None:
-            return "preflight_validator not configured"
-        if not self._config.merge.field_priorities:
-            return "no field_priorities configured"
-        return None
+        field_priorities = getattr(self._config.merge, "field_priorities", ())
+        return get_preflight_skip_reason(
+            validator=self._preflight_validator,
+            field_priorities=field_priorities,
+        )
 
     async def _save_checkpoint_safe(
         self: _CompositeRunnerSupportHostProtocol,
@@ -272,11 +276,13 @@ class CompositeRunnerSupportMixin:
             List of EnricherConfig entries that have not been completed and match
             the current runtime filters (required_only, enrich_only, force_enricher).
         """
-        return [
-            enricher
-            for enricher in self._config.enrichers
-            if self._should_run_enricher(enricher, state)
-        ]
+        return build_enrichers_to_run(
+            self._config.enrichers,
+            completed_enrichers=state.completed_enrichers,
+            required_only=self._runtime.required_only,
+            enrich_only=self._runtime.enrich_only,
+            force_enricher=self._runtime.force_enricher,
+        )
 
     def _should_run_enricher(
         self: _CompositeRunnerSupportHostProtocol,
@@ -284,18 +290,12 @@ class CompositeRunnerSupportMixin:
         state: CompositeCheckpointState,
     ) -> bool:
         """Return whether an enricher should execute under current runtime policy."""
-        if (
-            enricher.pipeline in state.completed_enrichers
-            and self._runtime.force_enricher != enricher.pipeline
-        ):
-            return False
-
-        if self._runtime.required_only and not enricher.required:
-            return False
-
-        return not (
-            self._runtime.enrich_only
-            and enricher.pipeline not in self._runtime.enrich_only
+        return can_run_enricher(
+            enricher,
+            completed_enrichers=state.completed_enrichers,
+            required_only=self._runtime.required_only,
+            enrich_only=self._runtime.enrich_only,
+            force_enricher=self._runtime.force_enricher,
         )
 
     def _check_required_enrichers(
@@ -312,13 +312,7 @@ class CompositeRunnerSupportMixin:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> str | None:
         """Return failure reason for required enricher validation, if any."""
-        for enricher_name in self._config.required_enrichers:
-            result = enrichment_results.get(enricher_name)
-            if result is None:
-                return f"Required enricher '{enricher_name}' did not run"
-            if not result.is_success:
-                return (
-                    f"Required enricher '{enricher_name}' failed: "
-                    f"{result.error_message or result.status.value}"
-                )
-        return None
+        return get_required_enricher_failure(
+            required_enrichers=self._config.required_enrichers,
+            enrichment_results=enrichment_results,
+        )

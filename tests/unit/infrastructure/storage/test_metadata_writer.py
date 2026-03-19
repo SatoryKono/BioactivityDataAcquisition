@@ -37,7 +37,7 @@ from bioetl.infrastructure.storage.metadata_writer import (
     METADATA_FILENAME,
     MetadataWriter,
 )
-from bioetl.infrastructure.storage.write_resilience import AdaptiveRetryPolicy
+from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 
 
 @pytest.fixture
@@ -392,7 +392,7 @@ class TestMetadataWriter:
 
         with (
             patch.object(Path, "replace", flaky_replace),
-            patch("bioetl.infrastructure.storage._atomic.time.sleep"),
+            patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"),
         ):
             await writer.write_bronze_metadata(base_path, bronze_metadata)
 
@@ -468,7 +468,7 @@ class TestMetadataWriterOperationPreparation:
         bronze_metadata: BronzeMetadata,
     ) -> None:
         """Prepared operation should preserve runtime run_id and telemetry pipeline."""
-        from bioetl.infrastructure.storage.metadata_writer_operations import (
+        from bioetl.infrastructure.storage.metadata.writer_operations import (
             _MetadataWriteRequest,
             _prepare_metadata_write_operation,
         )
