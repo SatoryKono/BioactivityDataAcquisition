@@ -126,6 +126,14 @@ hotspot_budgets:
       file_size_limits: 1
       class_size: 1
       god_object: 1
+  - name: "composite_orchestration"
+    rationale: "Composite runtime orchestration hotspot spanning join, checkpoint, and runner support seams."
+    path_prefixes:
+      - "src/bioetl/application/composite/"
+    registry_budgets:
+      file_size_limits: 1
+      class_size: 1
+      god_object: 1
 quarterly_targets:
   - quarter: "2026-Q1"
     max_total_exemptions: 10

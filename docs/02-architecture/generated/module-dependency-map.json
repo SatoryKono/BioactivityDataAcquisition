@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1195,
-    "total_internal_imports": 4439,
+    "scanned_modules": 1199,
+    "total_internal_imports": 4452,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 248,
@@ -11,7 +11,7 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 578,
+      "imports": 579,
       "allowed": true
     },
     {
@@ -29,19 +29,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 308,
+      "imports": 312,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 233,
+      "imports": 234,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 216,
+      "imports": 222,
       "allowed": true
     },
     {
@@ -65,7 +65,7 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 44,
+      "imports": 45,
       "allowed": true
     },
     {
@@ -156,7 +156,7 @@
     {
       "source": "interfaces.cli",
       "target": "application.services",
-      "imports": 32
+      "imports": 33
     },
     {
       "source": "application.services",
@@ -239,6 +239,11 @@
       "imports": 19
     },
     {
+      "source": "composition.providers",
+      "target": "infrastructure.adapters",
+      "imports": 19
+    },
+    {
       "source": "application.services",
       "target": "domain.value_objects",
       "imports": 18
@@ -257,11 +262,6 @@
       "source": "application.core",
       "target": "domain.exceptions",
       "imports": 17
-    },
-    {
-      "source": "composition.providers",
-      "target": "infrastructure.adapters",
-      "imports": 16
     },
     {
       "source": "application.pipelines",
@@ -364,6 +364,16 @@
       "imports": 9
     },
     {
+      "source": "composition.providers",
+      "target": "domain.ports",
+      "imports": 9
+    },
+    {
+      "source": "composition.providers",
+      "target": "infrastructure.config",
+      "imports": 9
+    },
+    {
       "source": "infrastructure.observability",
       "target": "domain.ports",
       "imports": 9
@@ -377,16 +387,6 @@
       "source": "interfaces.cli",
       "target": "composition._root",
       "imports": 9
-    },
-    {
-      "source": "application.pipelines",
-      "target": "domain.mapping",
-      "imports": 8
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.storage",
-      "imports": 8
     }
   ],
   "violations": []

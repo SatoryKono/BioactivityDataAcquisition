@@ -36,9 +36,15 @@ SNAPSHOT_FILE = SNAPSHOT_DIR / "pipeline_configs.json"
 # List of all pipeline config names to test
 PIPELINES = [
     "chembl_activity",
+    "chembl_molecule",
+    "chembl_publication_term",
+    "crossref_publication",
+    "openalex_publication",
     "pubchem_compound",
     "pubmed_publication",
+    "semanticscholar_publication",
     "uniprot_protein",
+    "uniprot_idmapping",
 ]
 
 
@@ -82,6 +88,20 @@ def golden_snapshots() -> dict[str, Any]:
     return load_snapshots()
 
 
+def _active_entity_pipelines() -> dict[str, str]:
+    """Collect one active representative pipeline name per provider."""
+    providers: dict[str, str] = {}
+    for config_path in sorted(Path("configs/entities").glob("*/*.yaml")):
+        lines = config_path.read_text(encoding="utf-8").splitlines()
+        pipeline_name = next(
+            line.split(":", 1)[1].strip()
+            for line in lines
+            if "pipeline_name:" in line
+        )
+        providers.setdefault(config_path.parent.name, pipeline_name)
+    return providers
+
+
 @pytest.mark.parametrize("pipeline_name", PIPELINES)
 def test_pipeline_config_golden_master(
     pipeline_name: str, golden_snapshots: dict[str, Any]
@@ -112,3 +132,29 @@ def test_pipeline_config_golden_master(
         )
 
     assert serialized_config == golden_snapshots[pipeline_name]
+
+
+def test_golden_master_pipeline_set_references_existing_configs() -> None:
+    """Representative golden-master pipelines must remain loadable."""
+    for pipeline_name in PIPELINES:
+        yaml_config = load_pipeline_config(pipeline_name)
+        assert yaml_config is not None
+
+
+def test_golden_master_pipeline_set_covers_each_non_chembl_provider() -> None:
+    """Golden-master set must cover every non-ChEMBL provider at least once."""
+    represented = {
+        yaml_config_to_domain(load_pipeline_config(pipeline_name)).provider
+        for pipeline_name in PIPELINES
+    }
+    expected = {
+        provider for provider in _active_entity_pipelines()
+        if provider != "chembl"
+    }
+
+    assert expected <= represented
+
+
+def test_golden_master_pipeline_set_includes_special_case_pipeline() -> None:
+    """Representative set should keep a non-trivial pipeline shape in scope."""
+    assert "chembl_publication_term" in PIPELINES

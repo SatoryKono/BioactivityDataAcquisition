@@ -14,28 +14,46 @@ import pytest
 from bioetl.application.core.base import BasePipeline
 
 # (module_path, class_name)
-# ChEMBL pipelines consolidated in _pipelines.py per audit-package-structure-2026-02-07
+# ChEMBL marker classes are canonically owned by pipeline_types.py.
 _PIPELINE_MODULES: list[tuple[str, str]] = [
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLActivityPipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLAssayPipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLAssayParametersPipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLCellLinePipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLCompoundRecordPipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLMoleculePipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLProteinClassPipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLPublicationPipeline"),
+    ("bioetl.application.pipelines.chembl.pipeline_types", "ChEMBLActivityPipeline"),
+    ("bioetl.application.pipelines.chembl.pipeline_types", "ChEMBLAssayPipeline"),
     (
-        "bioetl.application.pipelines.chembl._pipelines",
+        "bioetl.application.pipelines.chembl.pipeline_types",
+        "ChEMBLAssayParametersPipeline",
+    ),
+    ("bioetl.application.pipelines.chembl.pipeline_types", "ChEMBLCellLinePipeline"),
+    (
+        "bioetl.application.pipelines.chembl.pipeline_types",
+        "ChEMBLCompoundRecordPipeline",
+    ),
+    ("bioetl.application.pipelines.chembl.pipeline_types", "ChEMBLMoleculePipeline"),
+    (
+        "bioetl.application.pipelines.chembl.pipeline_types",
+        "ChEMBLProteinClassPipeline",
+    ),
+    (
+        "bioetl.application.pipelines.chembl.pipeline_types",
+        "ChEMBLPublicationPipeline",
+    ),
+    (
+        "bioetl.application.pipelines.chembl.pipeline_types",
         "ChEMBLPublicationSimilarityPipeline",
     ),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLPublicationTermPipeline"),
     (
-        "bioetl.application.pipelines.chembl._pipelines",
+        "bioetl.application.pipelines.chembl.pipeline_types",
+        "ChEMBLPublicationTermPipeline",
+    ),
+    (
+        "bioetl.application.pipelines.chembl.pipeline_types",
         "ChEMBLSubcellularFractionPipeline",
     ),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTargetPipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTargetComponentPipeline"),
-    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTissuePipeline"),
+    ("bioetl.application.pipelines.chembl.pipeline_types", "ChEMBLTargetPipeline"),
+    (
+        "bioetl.application.pipelines.chembl.pipeline_types",
+        "ChEMBLTargetComponentPipeline",
+    ),
+    ("bioetl.application.pipelines.chembl.pipeline_types", "ChEMBLTissuePipeline"),
     ("bioetl.application.pipelines.pubchem", "PubChemCompoundPipeline"),
     ("bioetl.application.pipelines.pubmed", "PubMedPublicationPipeline"),
     ("bioetl.application.pipelines.uniprot", "UniProtProteinPipeline"),
@@ -73,3 +91,35 @@ class TestPipelineRegistrations:
         assert "__init__" not in cls.__dict__, (
             f"{class_name} should not define __init__; it inherits from BasePipeline"
         )
+
+    @pytest.mark.parametrize(
+        "class_name",
+        [
+            "ChEMBLActivityPipeline",
+            "ChEMBLAssayPipeline",
+            "ChEMBLAssayParametersPipeline",
+            "ChEMBLCellLinePipeline",
+            "ChEMBLCompoundRecordPipeline",
+            "ChEMBLMoleculePipeline",
+            "ChEMBLProteinClassPipeline",
+            "ChEMBLPublicationPipeline",
+            "ChEMBLPublicationSimilarityPipeline",
+            "ChEMBLPublicationTermPipeline",
+            "ChEMBLSubcellularFractionPipeline",
+            "ChEMBLTargetPipeline",
+            "ChEMBLTargetComponentPipeline",
+            "ChEMBLTissuePipeline",
+        ],
+    )
+    def test_chembl_compat_module_re_exports_canonical_pipeline_types(
+        self, class_name: str
+    ) -> None:
+        """Legacy _pipelines imports should resolve to canonical pipeline_types classes."""
+        canonical_module = importlib.import_module(
+            "bioetl.application.pipelines.chembl.pipeline_types"
+        )
+        compat_module = importlib.import_module(
+            "bioetl.application.pipelines.chembl._pipelines"
+        )
+
+        assert getattr(compat_module, class_name) is getattr(canonical_module, class_name)

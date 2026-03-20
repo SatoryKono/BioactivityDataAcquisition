@@ -82,6 +82,7 @@ class TestCreateCheckpointManager:
 class TestCreateBatchProcessingComponents:
     """Tests for create_batch_processing_components."""
 
+    @patch("bioetl.composition.factories.services.pipeline_builder.ColumnOrderer")
     @patch("bioetl.composition.factories.services.pipeline_builder.BatchWriter")
     @patch("bioetl.composition.factories.services.pipeline_builder.BatchTransformer")
     @patch(
@@ -96,6 +97,7 @@ class TestCreateBatchProcessingComponents:
         mock_batch_metrics: MagicMock,
         mock_batch_transformer: MagicMock,
         mock_batch_writer: MagicMock,
+        mock_column_orderer: MagicMock,
     ) -> None:
         """Returns BatchProcessingComponents with wired metrics, transformer, writer."""
         bm = MagicMock()
@@ -132,6 +134,109 @@ class TestCreateBatchProcessingComponents:
         assert result.batch_metrics is bm
         assert result.transformer is tf
         assert result.writer is wr
+        mock_column_orderer.assert_not_called()
+
+    @patch("bioetl.composition.factories.services.pipeline_builder.ColumnOrderer")
+    @patch("bioetl.composition.factories.services.pipeline_builder.BatchWriter")
+    @patch("bioetl.composition.factories.services.pipeline_builder.BatchTransformer")
+    @patch(
+        "bioetl.composition.factories.services.pipeline_builder.BatchMetricsRecorderService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_builder.QuarantineManagerService"
+    )
+    def test_creates_column_orderer_when_column_groups_present(
+        self,
+        mock_quarantine: MagicMock,
+        mock_batch_metrics: MagicMock,
+        mock_batch_transformer: MagicMock,
+        mock_batch_writer: MagicMock,
+        mock_column_orderer: MagicMock,
+    ) -> None:
+        mock_quarantine.return_value = MagicMock()
+        mock_batch_metrics.return_value = MagicMock()
+        mock_batch_transformer.return_value = MagicMock()
+        mock_batch_writer.return_value = MagicMock()
+        ordered = MagicMock(name="column_orderer")
+        mock_column_orderer.return_value = ordered
+
+        context = MagicMock()
+        context.run_type.value = "incremental"
+        context.logger = MagicMock()
+
+        config = MagicMock()
+        config.provider = "chembl"
+        config.entity_type = "activity"
+        config.pipeline_name = "chembl_activity"
+        config.column_groups = ("system", "business")
+
+        create_batch_processing_components(
+            services=MagicMock(),
+            context=context,
+            config=config,
+            error_classifier=MagicMock(),
+            transform_callback=MagicMock(),
+            gold_filter_callback=MagicMock(),
+            gold_transform_callback=MagicMock(),
+            gold_validator=MagicMock(),
+        )
+
+        mock_column_orderer.assert_called_once_with(
+            context.logger,
+            column_groups=config.column_groups,
+        )
+        options = mock_batch_writer.call_args.kwargs["options"]
+        assert options.column_orderer is ordered
+
+    @patch("bioetl.composition.factories.services.pipeline_builder.BatchWriter")
+    @patch("bioetl.composition.factories.services.pipeline_builder.BatchTransformer")
+    @patch(
+        "bioetl.composition.factories.services.pipeline_builder.BatchMetricsRecorderService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_builder.QuarantineManagerService"
+    )
+    def test_forwards_tracer_and_lock_validator_into_writer_options(
+        self,
+        mock_quarantine: MagicMock,
+        mock_batch_metrics: MagicMock,
+        mock_batch_transformer: MagicMock,
+        mock_batch_writer: MagicMock,
+    ) -> None:
+        mock_quarantine.return_value = MagicMock()
+        mock_batch_metrics.return_value = MagicMock()
+        mock_batch_transformer.return_value = MagicMock()
+        mock_batch_writer.return_value = MagicMock()
+
+        context = MagicMock()
+        context.run_type.value = "incremental"
+        context.logger = MagicMock()
+
+        config = MagicMock()
+        config.provider = "chembl"
+        config.entity_type = "activity"
+        config.pipeline_name = "chembl_activity"
+        config.column_groups = ()
+
+        tracer = MagicMock(name="tracer")
+        lock_validator = MagicMock(name="lock_validator")
+
+        create_batch_processing_components(
+            services=MagicMock(),
+            context=context,
+            config=config,
+            error_classifier=MagicMock(),
+            transform_callback=MagicMock(),
+            gold_filter_callback=MagicMock(),
+            gold_transform_callback=MagicMock(),
+            gold_validator=MagicMock(),
+            tracer=tracer,
+            lock_validator=lock_validator,
+        )
+
+        options = mock_batch_writer.call_args.kwargs["options"]
+        assert options.tracer is tracer
+        assert options.lock_validator is lock_validator
 
 
 @pytest.mark.unit
@@ -173,3 +278,46 @@ class TestCreateRecordProcessorFromPipeline:
 
         assert result is expected
         create_fn.assert_called_once()
+
+    def test_forwards_lock_validator_tracer_column_groups_and_scd(self) -> None:
+        """Delegates lock/tracing/column-group config through to processor builder."""
+        expected = MagicMock()
+        create_fn = MagicMock(return_value=expected)
+        tracer = MagicMock(name="tracer")
+        lock_validator = MagicMock(name="lock_validator")
+
+        pipeline = MagicMock()
+        pipeline.config.pipeline_name = "test"
+        pipeline.config.provider = "chembl"
+        pipeline.config.entity_type = "activity"
+        pipeline.config.dq = None
+        pipeline.config.table.primary_keys = ["pk"]
+        pipeline.config.effective_silver_table = "silver_table"
+        pipeline.config.effective_gold_table = "gold_table"
+        pipeline.config.table.silver_write_mode = "merge"
+        pipeline.config.table.gold_write_mode = "overwrite"
+        pipeline.config.table.on_schema_mismatch = "error"
+        pipeline.config.column_groups = ["system", "business"]
+        pipeline.config.scd_config = {"type": 2}
+
+        callbacks = SimpleNamespace(
+            transform=MagicMock(),
+            gold_filter=MagicMock(),
+            gold_transform=MagicMock(),
+        )
+
+        create_record_processor_from_pipeline(
+            pipeline=pipeline,
+            silver_schema=None,
+            gold_schema=MagicMock(),
+            callbacks=callbacks,
+            create_record_processor_fn=create_fn,
+            lock_validator=lock_validator,
+            tracer=tracer,
+        )
+
+        call_kwargs = create_fn.call_args.kwargs
+        assert call_kwargs["lock_validator"] is lock_validator
+        assert call_kwargs["tracer"] is tracer
+        assert call_kwargs["column_groups"] == tuple(pipeline.config.column_groups)
+        assert call_kwargs["scd_config"] == pipeline.config.scd_config

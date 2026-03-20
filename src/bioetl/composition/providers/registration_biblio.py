@@ -11,11 +11,15 @@ from bioetl.composition.providers._config_helpers import (
     _create_http_data_source,
     _get_batch_size_from_config,
     _get_rate_limit_from_config,
-    _normalize_optional_override,
 )
 from bioetl.composition.providers._registration_biblio_adapters import (
     _build_openalex_adapter_from_settings,
     _build_pubmed_adapter_from_settings,
+)
+from bioetl.composition.providers._registration_biblio_profiles import (
+    _resolve_mailto_batch_profile,
+    _resolve_pubmed_request_profile,
+    _resolve_semanticscholar_request_profile,
 )
 from bioetl.composition.providers._models import HttpConfig, ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
@@ -91,14 +95,7 @@ def _create_pubmed_data_source(
     Email follows a similar resolution: ``pipeline_config.source.email`` takes
     precedence over ``settings.default_email``.
     """
-    configured_api_key = _normalize_optional_override(pipeline_config.source.api_key)
-    settings_api_key = (
-        settings.pubmed_api_key.get_secret_value() if settings.pubmed_api_key else None
-    )
-    api_key = configured_api_key or settings_api_key
-
-    configured_email = _normalize_optional_override(pipeline_config.source.email)
-    email = configured_email or settings.default_email
+    profile = _resolve_pubmed_request_profile(settings, pipeline_config)
 
     return _create_http_data_source(
         provider="pubmed",
@@ -108,7 +105,7 @@ def _create_pubmed_data_source(
         metrics=metrics,
         pipeline_name=pipeline_name,
         adapter_factory=PubMedAdapter,
-        extra_kwargs={"email": email, "api_key": api_key},
+        extra_kwargs={"email": profile.email, "api_key": profile.api_key},
         assembly_support=assembly_support,
     )
 
@@ -128,9 +125,11 @@ def _create_crossref_data_source(
     CrossRef requires mailto for polite pool access (50 req/sec vs 1 req/sec).
     Email is obtained from pipeline config or settings.default_email.
     """
-    configured_email = _normalize_optional_override(pipeline_config.source.email)
-    mailto = configured_email or settings.default_email
-    batch_size = _get_batch_size_from_config("crossref", default=50)
+    profile = _resolve_mailto_batch_profile(
+        settings,
+        pipeline_config,
+        batch_size=_get_batch_size_from_config("crossref", default=50),
+    )
 
     return _create_http_data_source(
         provider="crossref",
@@ -140,7 +139,11 @@ def _create_crossref_data_source(
         metrics=metrics,
         pipeline_name=pipeline_name,
         adapter_factory=create_crossref_adapter,
-        extra_kwargs={"settings": settings, "mailto": mailto, "batch_size": batch_size},
+        extra_kwargs={
+            "settings": settings,
+            "mailto": profile.mailto,
+            "batch_size": profile.batch_size,
+        },
         assembly_support=assembly_support,
     )
 
@@ -160,9 +163,11 @@ def _create_openalex_data_source(
     OpenAlex requires mailto for polite pool access (10 req/sec).
     Email is obtained from pipeline config or settings.default_email.
     """
-    configured_email = _normalize_optional_override(pipeline_config.source.email)
-    mailto = configured_email or settings.default_email
-    batch_size = _get_batch_size_from_config("openalex", default=50)
+    profile = _resolve_mailto_batch_profile(
+        settings,
+        pipeline_config,
+        batch_size=_get_batch_size_from_config("openalex", default=50),
+    )
 
     return _create_http_data_source(
         provider="openalex",
@@ -172,7 +177,7 @@ def _create_openalex_data_source(
         metrics=metrics,
         pipeline_name=pipeline_name,
         adapter_factory=OpenAlexAdapter,
-        extra_kwargs={"mailto": mailto, "batch_size": batch_size},
+        extra_kwargs={"mailto": profile.mailto, "batch_size": profile.batch_size},
         assembly_support=assembly_support,
     )
 
@@ -188,18 +193,16 @@ def _create_semanticscholar_data_source(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create Semantic Scholar adapter and optionally wrap it with input filtering."""
-    api_key = (
-        settings.semanticscholar_api_key.get_secret_value()
-        if settings.semanticscholar_api_key
-        else ""
+    profile = _resolve_semanticscholar_request_profile(
+        settings,
+        batch_size=_get_batch_size_from_config("semanticscholar", default=100),
     )
+    api_key = profile.api_key
     if not api_key:
         logger.warning(
             "semanticscholar_no_api_key",
             message="No API key provided. Rate limits will be shared with other users.",
         )
-
-    batch_size = _get_batch_size_from_config("semanticscholar", default=100)
 
     return _create_http_data_source(
         provider="semanticscholar",
@@ -209,7 +212,7 @@ def _create_semanticscholar_data_source(
         metrics=metrics,
         pipeline_name=pipeline_name,
         adapter_factory=SemanticScholarAdapter,
-        extra_kwargs={"api_key": api_key, "batch_size": batch_size},
+        extra_kwargs={"api_key": api_key, "batch_size": profile.batch_size},
         assembly_support=assembly_support,
     )
 

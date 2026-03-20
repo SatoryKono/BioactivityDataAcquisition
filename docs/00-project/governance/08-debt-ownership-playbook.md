@@ -42,3 +42,29 @@ Current ownership metadata is governed by:
 
 Use the two config registries above as the canonical current state.
 If dashboard snapshots are regenerated, publish them under `docs/reports/` and treat them as evidence-only artifacts rather than source of truth.
+
+## Metric Semantics
+
+Use the following terms consistently in governance reviews:
+
+- **Exemption debt**: counts of entries in `configs/quality/architecture_metric_exemptions.yaml`.
+  This is the debt state enforced by the scorecard and quarter targets.
+- **Hotspot inventory**: raw structural measurements such as large-file counts
+  (for example `>10 KB` or `>350 LOC`) collected from the current working tree.
+  This is analysis and prioritization input unless explicitly promoted into a named hotspot budget or another blocking policy.
+
+These two signals are related but not interchangeable:
+
+- A green `file_size_limits` ratchet means the exemption registry is within budget.
+- It does **not** automatically mean the repo has no large-file tail.
+
+## Review Workflow For Size Signals
+
+When a review discusses file-size debt:
+
+1. Check exemption debt first in:
+   - `configs/quality/debt_scorecard.yaml`
+   - `configs/quality/architecture_metric_exemptions.yaml`
+2. If structural context is needed, generate or refresh a raw hotspot inventory snapshot using the canonical command in [`scripts/README.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/README.md).
+3. Treat that raw snapshot as evidence for prioritization, not as a blocking gate by itself.
+4. Only convert hotspot inventory into enforceable debt through an explicit scorecard or named-hotspot decision.

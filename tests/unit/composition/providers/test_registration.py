@@ -168,6 +168,26 @@ class TestRegisterAllProviders:
         assert registry.is_registered("chembl")
         assert not ProviderRegistry.is_registered("chembl")
 
+    @patch("bioetl.composition.providers.registration.create_provider_assembly_support")
+    @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
+    @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
+    def test_builds_default_assembly_support_bound_to_explicit_registry(
+        self,
+        mock_biblio: MagicMock,
+        mock_bio: MagicMock,
+        mock_create_support: MagicMock,
+    ) -> None:
+        """Explicit registry registration should bind default support to that registry."""
+        registry = create_provider_registry()
+        support = MagicMock(name="support")
+        mock_create_support.return_value = support
+        mock_bio.return_value = {}
+        mock_biblio.return_value = {}
+
+        register_all_providers(registry=registry)
+
+        mock_create_support.assert_called_once_with(provider_registry=registry)
+
 
 @pytest.mark.unit
 class TestBuildProviderConfigs:

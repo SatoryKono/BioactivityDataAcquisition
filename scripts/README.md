@@ -126,9 +126,51 @@ check-naming-pkg   Package naming consistency check
 check-exemptions   Quality exemptions audit
 check-terminology  Terminology linting
 report-dep-map     Generate/check architecture dependency map
-report-hotspots    Generate hotspot degradation report
+report-hotspots    Generate performance hotspot degradation report
+report-duplication-baseline Generate report-only duplication baseline
 calibrate-hotspots Calibrate hotspot budgets
 ```
+
+Notes:
+
+- `check-c901` is a blocking complexity baseline gate for new structural debt.
+- `report-hotspots` and `calibrate-hotspots` are **performance** tools backed by benchmark observations. They do **not** describe the repo-wide source-tree size tail.
+- `report-duplication-baseline` is a **report-only structural** tool for duplication visibility in `composition` and `application`. It is intended to create a baseline artifact before any blocking ratchet is considered.
+- `scripts/qa/report_duplication_baseline.py` is the canonical direct script path behind `python -m scripts.qa report-duplication-baseline`.
+- In governance discussions, distinguish:
+  - `exemption debt`: counts from `configs/quality/architecture_metric_exemptions.yaml` that are enforced by the debt scorecard
+  - `hotspot inventory`: raw source-tree size/LOC measurements used for analysis and prioritization
+
+### Source-tree hotspot inventory
+
+When you need a reproducible raw snapshot of large Python modules under `src/bioetl`, use a local command like this:
+
+```bash
+./.venv/Scripts/python.exe - <<'PY'
+from pathlib import Path
+
+root = Path("src/bioetl")
+files = [p for p in root.rglob("*.py") if "__pycache__" not in p.parts]
+rows: list[tuple[str, int, int, str]] = []
+for path in files:
+    text = path.read_text(encoding="utf-8")
+    loc = len(text.splitlines())
+    size = path.stat().st_size
+    layer = path.relative_to(root).parts[0]
+    rows.append((path.as_posix(), size, loc, layer))
+
+size_hotspots = [r for r in rows if r[1] > 10240]
+loc_hotspots = [r for r in rows if r[2] > 350]
+overlap = [r for r in rows if r[1] > 10240 and r[2] > 350]
+
+print(f"total_files={len(rows)}")
+print(f"size_hotspots_gt_10kb={len(size_hotspots)}")
+print(f"loc_hotspots_gt_350={len(loc_hotspots)}")
+print(f"overlap={len(overlap)}")
+PY
+```
+
+Use this output as an evidence/inventory snapshot. Do not interpret it as equivalent to scorecard exemption debt unless a governance policy explicitly says so.
 
 High-frequency sync commands:
 

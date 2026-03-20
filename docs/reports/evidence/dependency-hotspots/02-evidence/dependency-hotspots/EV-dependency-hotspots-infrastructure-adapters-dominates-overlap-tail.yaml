@@ -1,0 +1,19 @@
+id: EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail
+pillar: dependency-hotspots
+source:
+  type: dataset
+  ref: "docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md"
+  retrieved_at: 2026-03-20
+claim: "The densest hotspot package is `src/bioetl/infrastructure/adapters`, which contains 7 of the 17 files exceeding both 10 KB and 350 LOC."
+quote: "| `src/bioetl/infrastructure/adapters` | 7 |"
+confidence: 0.92
+assumptions:
+  - "Package-prefix grouping at `src/bioetl/<layer>/<subpackage>` is granular enough to expose structural concentration."
+  - "Overlap hotspots are the best proxy for the most maintenance-heavy modules in this snapshot."
+notes: "The overlap set includes `crossref/batch.py`, `http/client_retry_mixin.py`, `health_check_mixin.py`, `chembl/fetch_resilience_mixin.py`, `error_handling.py`, `http/health_monitor.py`, and `openalex/filter_fetch_adapter_mixin.py`."
+tags:
+  - hotspot
+  - infrastructure
+  - adapters
+  - package-concentration
+  - overlap

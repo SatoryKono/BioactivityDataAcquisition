@@ -29,6 +29,8 @@ Plans in this folder must not override normative documents.
 ## Active Plan Links
 
 - [mkdocs-material-migration-track-2026-03-03.md](mkdocs-material-migration-track-2026-03-03.md)
+- [rf-04-composition-hotspots-execution-plan-2026-03-20.md](rf-04-composition-hotspots-execution-plan-2026-03-20.md)
+- [rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md](rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md)
 - Historical plans moved to [docs/99-archive/plans/README.md](../99-archive/plans/README.md) *(archived reference only)*
 
 ## Related Prompt

@@ -26,14 +26,14 @@ def read_delta_records(
         scanner = dataset.scanner(columns=columns)
         to_reader = getattr(scanner, "to_reader", None)
         if callable(to_reader):
-            result: list[BronzeRecord] = []
+            records: list[BronzeRecord] = []
             for batch in to_reader():
-                result.extend(batch.to_pylist())
-            return result
+                records.extend(batch.to_pylist())
+            return records
 
     arrow_table = table.to_pyarrow_table(columns=columns)
-    result: list[BronzeRecord] = arrow_table.to_pylist()
-    return result
+    rows: list[BronzeRecord] = arrow_table.to_pylist()
+    return rows
 
 
 def load_delta_table(table_path: str) -> DeltaTable:

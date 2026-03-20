@@ -17,12 +17,29 @@ ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = ROOT / "tests"
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
+ENTITY_CONFIGS_DIR = ROOT / "configs" / "entities"
 
 
 def _load_matrix() -> dict:
     """Load the test matrix configuration."""
     with MATRIX_PATH.open() as f:
         return yaml.safe_load(f)
+
+
+def _iter_entity_configs() -> list[tuple[str, str, Path]]:
+    """Return active entity config tuples as (provider, entity, path)."""
+    configs: list[tuple[str, str, Path]] = []
+    for config_path in sorted(ENTITY_CONFIGS_DIR.glob("*/*.yaml")):
+        configs.append((config_path.parent.name, config_path.stem, config_path))
+    return configs
+
+
+def _ownership_paths(matrix: dict, entity_key: str) -> list[Path]:
+    """Resolve owned test paths for a provider.entity key."""
+    raw_paths = matrix.get("entity_test_ownership", {}).get(entity_key, [])
+    if isinstance(raw_paths, str):
+        raw_paths = [raw_paths]
+    return [ROOT / path for path in raw_paths]
 
 
 @pytest.mark.architecture
@@ -104,6 +121,92 @@ class TestLayerTestCoverage:
                         f"Layer '{layer}' requires unit tests but none found in "
                         f"{layer_test_dir.relative_to(ROOT)}"
                     )
+
+
+@pytest.mark.architecture
+class TestEntityOwnershipCoverage:
+    """Validate provider/entity test ownership ratchets."""
+
+    def test_each_active_provider_entity_has_test_ownership_entry(self) -> None:
+        matrix = _load_matrix()
+        ownership = matrix.get("entity_test_ownership", {})
+
+        for provider, entity, _config_path in _iter_entity_configs():
+            entity_key = f"{provider}.{entity}"
+            assert entity_key in ownership, (
+                f"Missing entity_test_ownership entry for '{entity_key}' in "
+                f"{MATRIX_PATH.relative_to(ROOT)}"
+            )
+
+    def test_owned_test_paths_exist_for_declared_entities(self) -> None:
+        matrix = _load_matrix()
+
+        for provider, entity, _config_path in _iter_entity_configs():
+            entity_key = f"{provider}.{entity}"
+            owned_paths = _ownership_paths(matrix, entity_key)
+
+            assert owned_paths, f"entity '{entity_key}' must declare at least one test path"
+            for owned_path in owned_paths:
+                assert owned_path.exists(), (
+                    f"Declared ownership path for '{entity_key}' is missing: "
+                    f"{owned_path.relative_to(ROOT)}"
+                )
+
+    def test_must_contract_providers_have_owned_contract_or_provider_regression_suite(
+        self,
+    ) -> None:
+        matrix = _load_matrix()
+        provider_suites = matrix.get("provider_regression_suites", {})
+        contract_dir = TESTS_DIR / "contract"
+
+        suite_index: dict[str, set[str]] = {}
+        for suite_name, suite_config in provider_suites.items():
+            for provider in suite_config.get("providers", {}):
+                suite_index.setdefault(provider, set()).add(suite_name)
+
+        for provider, config in matrix["providers"].items():
+            if config.get("contract_tests") != "MUST":
+                continue
+
+            contract_path = contract_dir / f"test_{provider}_contract.py"
+            assert contract_path.exists() or provider in suite_index, (
+                f"provider '{provider}' requires contract coverage but has neither "
+                f"{contract_path.relative_to(ROOT)} nor a canonical provider regression suite"
+            )
+
+    def test_golden_master_representative_set_matches_matrix_policy(self) -> None:
+        matrix = _load_matrix()
+        from tests.architecture.test_config_golden_master import PIPELINES
+
+        represented: dict[str, set[str]] = {}
+        for provider, entity, config_path in _iter_entity_configs():
+            lines = config_path.read_text(encoding="utf-8").splitlines()
+            pipeline_name = next(
+                line.split(":", 1)[1].strip()
+                for line in lines
+                if "pipeline_name:" in line
+            )
+            if pipeline_name in PIPELINES:
+                represented.setdefault(provider, set()).add(entity)
+
+        for provider, config in matrix["providers"].items():
+            if provider == "chembl":
+                continue
+            if config.get("golden_masters") in {"SHOULD", "MAY"}:
+                assert provider in represented, (
+                    f"provider '{provider}' is eligible for golden-master coverage but "
+                    "is missing from the representative pipeline set"
+                )
+
+    def test_provider_matrix_only_references_existing_entity_configs(self) -> None:
+        matrix = _load_matrix()
+        existing = {(provider, entity) for provider, entity, _ in _iter_entity_configs()}
+
+        for provider, config in matrix["providers"].items():
+            for entity in config.get("entities", []):
+                assert (provider, entity) in existing, (
+                    f"matrix references missing entity config '{provider}.{entity}'"
+                )
 
 
 @pytest.mark.architecture

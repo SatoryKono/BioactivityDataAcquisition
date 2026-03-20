@@ -87,6 +87,52 @@ providers:
     contract_tests: SHOULD
     golden_masters: MAY
 
+# ── Entity-level test ownership ──────────────────────────────
+
+entity_test_ownership:
+  chembl.activity:
+    - tests/integration/pipelines/test_chembl_activity.py
+  chembl.assay:
+    - tests/e2e/test_chembl_assay_e2e.py
+  chembl.assay_parameters:
+    - tests/unit/application/pipelines/test_chembl_assay_parameters.py
+  chembl.cell_line:
+    - tests/integration/pipelines/test_chembl_cell_line.py
+  chembl.compound_record:
+    - tests/integration/pipelines/test_chembl_compound_record.py
+  chembl.molecule:
+    - tests/e2e/test_chembl_molecule_e2e.py
+  chembl.protein_class:
+    - tests/unit/application/pipelines/test_chembl_pipelines.py
+  chembl.publication:
+    - tests/e2e/test_chembl_publication_e2e.py
+  chembl.publication_similarity:
+    - tests/unit/application/pipelines/test_chembl_pipelines.py
+  chembl.publication_term:
+    - tests/e2e/test_chembl_publication_term_e2e.py
+  chembl.subcellular_fraction:
+    - tests/unit/application/pipelines/chembl/test_subcellular_fraction_transformer.py
+  chembl.target:
+    - tests/e2e/test_chembl_target_e2e.py
+  chembl.target_component:
+    - tests/integration/pipelines/test_chembl_target_component.py
+  chembl.tissue:
+    - tests/unit/application/pipelines/chembl/test_tissue_transformer.py
+  crossref.publication:
+    - tests/e2e/test_crossref_publication_e2e.py
+  openalex.publication:
+    - tests/e2e/test_openalex_publication_e2e.py
+  pubchem.compound:
+    - tests/e2e/test_pubchem_compound_e2e.py
+  pubmed.publication:
+    - tests/e2e/test_pubmed_publication_e2e.py
+  semanticscholar.publication:
+    - tests/e2e/test_semanticscholar_publication_e2e.py
+  uniprot.idmapping:
+    - tests/integration/adapters/test_uniprot_idmapping.py
+  uniprot.protein:
+    - tests/e2e/test_uniprot_protein_e2e.py
+
 # ── Canonical regression suites for shared provider capabilities ─────────────
 
 provider_regression_suites:

@@ -9,7 +9,7 @@ ProviderConfig building delegated to sibling modules (Wave 3 simplification).
 from __future__ import annotations
 
 from importlib import import_module
-from typing import cast
+from typing import Any, cast
 
 from bioetl.composition.providers._models import ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
@@ -46,8 +46,11 @@ def register_all_providers(
     Each provider includes a data_source_creator for unified registry access.
     """
     target_registry = _resolve_registration_registry(registry)
+    support = assembly_support or create_provider_assembly_support(
+        provider_registry=cast("Any", target_registry)
+    )
     for provider_name, config in _build_provider_configs(
-        assembly_support=assembly_support
+        assembly_support=support
     ).items():
         if target_registry.is_registered(provider_name):
             continue

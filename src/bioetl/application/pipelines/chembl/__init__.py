@@ -19,8 +19,8 @@ Usage:
 
 from __future__ import annotations
 
-# Pipeline classes (consolidated in _pipelines.py)
-from bioetl.application.pipelines.chembl._pipelines import (
+# Pipeline marker classes (canonical owner: pipeline_types.py)
+from bioetl.application.pipelines.chembl.pipeline_types import (
     ChEMBLActivityPipeline,
     ChEMBLAssayParametersPipeline,
     ChEMBLAssayPipeline,

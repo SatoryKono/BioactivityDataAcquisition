@@ -1,0 +1,19 @@
+id: EV-layers-interfaces-are-driving-adapters
+pillar: layers-and-boundaries
+source:
+  type: internal-doc
+  ref: "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md:24-25; docs/02-architecture/decisions/ADR-005-composition-layer-separation.md:35-38; README.md:472-474; tests/architecture/test_interfaces_no_infrastructure.py:43-109"
+  retrieved_at: 2026-03-20
+claim: "The `interfaces` layer is treated as the driving-adapter/user-interaction edge of the system: it owns CLI-facing entrypoints and is expected to route through application services or composition entrypoints instead of directly binding itself to infrastructure modules."
+quote: "`interfaces/` | Handle incoming requests (CLI commands, HTTP, events)"
+confidence: 0.93
+assumptions:
+  - "The `interfaces` package still reflects the intended external interaction boundary even though some reserved or compatibility subpackages may exist."
+  - "The `test_interfaces_no_infrastructure.py` suite captures the preferred direction for interface code rather than a temporary style preference."
+notes: "ADR-005 documents that `interfaces -> infrastructure` is technically allowed in the matrix, but the current guardrails still encode a preference for going through application/composition."
+tags:
+  - layers
+  - interfaces
+  - driving-adapters
+  - cli
+  - boundaries

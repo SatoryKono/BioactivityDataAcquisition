@@ -225,7 +225,18 @@ _DOC_EXCLUDED_DIRS = {
 # Sub-paths excluded from doc naming audit (relative to docs root)
 _DOC_EXCLUDED_SUBPATHS = {
     "00-project/ai",
+    "reports",
+    "docs/reports",
+    "reports/evidence",
 }
+
+
+def _normalize_doc_excluded_subpath(subpath: str) -> str:
+    """Normalize configured docs exclusion prefixes to docs-root-relative paths."""
+    normalized = subpath.replace("\\", "/").strip("/")
+    if normalized.startswith("docs/"):
+        normalized = normalized.removeprefix("docs/")
+    return normalized
 
 
 def is_pascal_case(name: str) -> bool:
@@ -345,7 +356,9 @@ def check_documentation(docs_path: Path) -> Iterator[Violation]:
         if rel_parts and rel_parts[0] in _DOC_EXCLUDED_DIRS:
             continue
         if rel is not None and any(
-            str(rel).replace("\\", "/").startswith(sp)
+            str(rel).replace("\\", "/").startswith(
+                _normalize_doc_excluded_subpath(sp)
+            )
             for sp in _DOC_EXCLUDED_SUBPATHS
         ):
             continue

@@ -1,0 +1,19 @@
+id: EV-dependency-hotspots-95-files-exceed-10kb
+pillar: dependency-hotspots
+source:
+  type: dataset
+  ref: "docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md"
+  retrieved_at: 2026-03-20
+claim: "The current `src/bioetl` tree contains 95 Python files above 10 KB, with the hotspot inventory concentrated in `infrastructure` (42 files) and `application` (31 files)."
+quote: "| Files `>10 KB` | 95 |"
+confidence: 0.93
+assumptions:
+  - "Filesystem byte size is a reasonable proxy for module sprawl at this coarse-grained hotspot level."
+  - "The working tree snapshot is representative and not distorted by generated files inside `src/bioetl`."
+notes: "The 10 KB threshold surfaces a broad maintainability tail that is much larger than the extreme LOC-only set."
+tags:
+  - hotspot
+  - file-size
+  - application
+  - infrastructure
+  - source-tree

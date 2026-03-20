@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import partial
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.composition.providers._models import ProviderConfig
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
+    from bioetl.composition.providers.provider_registry import ProviderRegistry
 
 
 class ProviderRegistrarProtocol(Protocol):
@@ -94,6 +96,8 @@ def _create_adapter_for_provider(
     http_client: UnifiedHTTPClient | None = None,
     logger: LoggerPort | None = None,
     settings: Settings | None = None,
+    *,
+    provider_registry: ProviderRegistry | None = None,
     **kwargs: object,
 ) -> DataSourcePort:
     """Resolve the canonical adapter factory lazily at the composition edge."""
@@ -106,13 +110,20 @@ def _create_adapter_for_provider(
         http_client=http_client,
         logger=logger,
         settings=settings,
+        provider_registry=provider_registry,
         **kwargs,
     )
 
 
-def create_provider_assembly_support() -> ProviderAssemblySupport:
+def create_provider_assembly_support(
+    *,
+    provider_registry: ProviderRegistry | None = None,
+) -> ProviderAssemblySupport:
     """Build the default injected support bundle for provider registration."""
     return ProviderAssemblySupport(
         create_http_client=_create_http_client_for_provider,
-        create_adapter=_create_adapter_for_provider,
+        create_adapter=partial(
+            _create_adapter_for_provider,
+            provider_registry=provider_registry,
+        ),
     )

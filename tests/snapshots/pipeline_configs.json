@@ -332,8 +332,119 @@
   "chembl_molecule": {
     "batch_size": 100,
     "checkpoint_interval": 1000,
+    "column_groups": [
+      {
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
+        ],
+        "name": "system",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "molecule_id",
+          "pref_name",
+          "max_phase",
+          "structure_type",
+          "molecule_type",
+          "first_approval",
+          "therapeutic_flag",
+          "oral",
+          "parenteral",
+          "topical",
+          "black_box_warning",
+          "natural_product",
+          "first_in_class",
+          "prodrug",
+          "inorganic_flag",
+          "polymer_flag",
+          "withdrawn_flag",
+          "chirality",
+          "dosed_ingredient",
+          "availability_type",
+          "usan_year",
+          "usan_stem",
+          "usan_substem",
+          "usan_stem_definition",
+          "helm_notation",
+          "molecule_species",
+          "hierarchy_parent_chembl_id",
+          "hierarchy_active_chembl_id",
+          "hierarchy_child_chembl_id",
+          "logp",
+          "logp_method",
+          "mw_freebase",
+          "molecular_weight",
+          "hba_count",
+          "hbd_count",
+          "polar_surface_area",
+          "rotatable_bond_count",
+          "ro5_violation_count",
+          "heavy_atom_count",
+          "aromatic_ring_count",
+          "qed_score",
+          "molecular_formula",
+          "ro3_pass",
+          "canonical_smiles",
+          "standard_inchi",
+          "inchi_key",
+          "molecule_hierarchy",
+          "molecule_properties",
+          "molecule_structures",
+          "molecule_synonyms",
+          "cross_references",
+          "atc_classifications"
+        ],
+        "name": "business",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [],
+        "name": "dq",
+        "pattern": "^_dq_",
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      }
+    ],
     "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [],
+      "field_validations": [],
       "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "key_nullability_rules": [],
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
@@ -343,26 +454,220 @@
       "column_filters": [
         {
           "column": "molecule_type",
+          "operator": "in",
           "values": [
             "Small molecule"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            "0"
           ]
         }
       ],
       "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
       "required_fields": [
-        "pref_name"
+        "molecule_id"
       ]
     },
-    "gold_table": null,
-    "gold_write_mode": "overwrite",
-    "partition_cols": [],
+    "gold_schema": null,
+    "loading_strategy": null,
     "pipeline_name": "chembl_molecule",
-    "primary_keys": [
-      "molecule_id"
-    ],
     "provider": "chembl",
-    "silver_table": "chembl_molecule",
-    "write_mode": "merge"
+    "scd_config": {
+      "business_key": "molecule_id",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
+    },
+    "silver_filters": {
+      "column_filters": [
+        {
+          "column": "molecule_type",
+          "operator": "in",
+          "values": [
+            "Small molecule"
+          ]
+        },
+        {
+          "column": "structure_type",
+          "operator": "in",
+          "values": [
+            "MOL"
+          ]
+        },
+        {
+          "column": "inorganic_flag",
+          "operator": "in",
+          "values": [
+            "0"
+          ]
+        }
+      ],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": [
+        "molecule_id"
+      ]
+    },
+    "table": {
+      "gold_table": "chembl_molecule",
+      "gold_write_mode": "scd2",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "molecule_id"
+      ],
+      "silver_table": "chembl_molecule",
+      "silver_write_mode": "merge"
+    },
+    "transform_steps": [],
+    "transform_version": null
+  },
+  "chembl_publication_term": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "column_groups": [
+      {
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
+        ],
+        "name": "system",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_id",
+          "term",
+          "term_type",
+          "mesh_id",
+          "qualifier"
+        ],
+        "name": "business",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [],
+        "name": "dq",
+        "pattern": "^_dq_",
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      }
+    ],
+    "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [],
+      "field_validations": [],
+      "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "key_nullability_rules": [],
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "entity_type": "publication_term",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [
+        {
+          "column": "term_type",
+          "operator": "in",
+          "values": [
+            "KEYWORD",
+            "MESH_HEADING"
+          ]
+        }
+      ],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": [
+        "publication_id",
+        "term",
+        "term_type"
+      ]
+    },
+    "gold_schema": null,
+    "loading_strategy": "full_scan_only",
+    "pipeline_name": "chembl_publication_term",
+    "provider": "chembl",
+    "scd_config": {
+      "business_key": "entity_id",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
+    },
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
+    "table": {
+      "gold_table": "chembl_publication_term",
+      "gold_write_mode": "overwrite",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "entity_id"
+      ],
+      "silver_table": "chembl_publication_term",
+      "silver_write_mode": "merge"
+    },
+    "transform_steps": [],
+    "transform_version": null
   },
   "chembl_target": {
     "batch_size": 100,
@@ -399,6 +704,728 @@
     "provider": "chembl",
     "silver_table": "chembl_target",
     "write_mode": "merge"
+  },
+  "crossref_publication": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "column_groups": [
+      {
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_source",
+          "_ingestion_ts",
+          "_index",
+          "_lookup_method",
+          "_original_id"
+        ],
+        "name": "system",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_doi",
+          "alternative_id"
+        ],
+        "name": "identifiers",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "title"
+        ],
+        "name": "title",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "authors"
+        ],
+        "name": "authors",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "journal",
+          "journal_name_short"
+        ],
+        "name": "journal",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "issn",
+          "issn_list",
+          "issn_print",
+          "issn_electronic"
+        ],
+        "name": "issn",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_year"
+        ],
+        "name": "year",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_date",
+          "published",
+          "published_online",
+          "published_print"
+        ],
+        "name": "dates",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "volume",
+          "issue",
+          "page_first",
+          "page_last"
+        ],
+        "name": "pagination",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "citations_received",
+          "citations_made"
+        ],
+        "name": "citations",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "subject_keywords"
+        ],
+        "name": "subjects",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "language"
+        ],
+        "name": "language",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publisher"
+        ],
+        "name": "publisher",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_type",
+          "publication_type_unified",
+          "publication_subclass",
+          "publication_class"
+        ],
+        "name": "doc_type",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "content_domain_domains",
+          "content_domain_crossmark_restriction"
+        ],
+        "name": "content_domain",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "license_url"
+        ],
+        "name": "license",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [],
+        "name": "dq",
+        "pattern": "^_dq_",
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      }
+    ],
+    "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [],
+      "field_validations": [],
+      "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "key_nullability_rules": [],
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "entity_type": "publication",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        }
+      ],
+      "required_fields": [
+        "doi",
+        "title"
+      ]
+    },
+    "gold_schema": null,
+    "loading_strategy": "full_scan_only",
+    "pipeline_name": "crossref_publication",
+    "provider": "crossref",
+    "scd_config": {
+      "business_key": "doi",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
+    },
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
+    "table": {
+      "gold_table": "crossref_publication",
+      "gold_write_mode": "scd2",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "doi"
+      ],
+      "silver_table": "crossref_publication",
+      "silver_write_mode": "merge"
+    },
+    "transform_steps": [],
+    "transform_version": null
+  },
+  "openalex_publication": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "column_groups": [
+      {
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_source",
+          "_ingestion_ts",
+          "_index",
+          "_lookup_method",
+          "_original_id"
+        ],
+        "name": "system",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "openalex_id",
+          "publication_doi",
+          "publication_pmid",
+          "mag_id"
+        ],
+        "name": "identifiers",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "title"
+        ],
+        "name": "title",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "abstract"
+        ],
+        "name": "abstract",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "authors",
+          "author_openalex_ids",
+          "author_orcids"
+        ],
+        "name": "authors",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "affiliation_list"
+        ],
+        "name": "affiliations",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "institution_ids",
+          "institution_country_codes",
+          "ror_ids"
+        ],
+        "name": "institutions",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "journal",
+          "issn"
+        ],
+        "name": "journal",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_year"
+        ],
+        "name": "year",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_date"
+        ],
+        "name": "dates",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "volume",
+          "issue",
+          "page_first",
+          "page_last"
+        ],
+        "name": "pagination",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "citations_received",
+          "citations_made",
+          "fwci"
+        ],
+        "name": "citations",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "is_oa",
+          "oa_status"
+        ],
+        "name": "open_access",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "subject_topics",
+          "primary_topic",
+          "subject_keywords",
+          "subject_mesh"
+        ],
+        "name": "subjects",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publisher"
+        ],
+        "name": "publisher",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "grants"
+        ],
+        "name": "funding",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_type",
+          "publication_type_unified",
+          "publication_subclass",
+          "publication_class"
+        ],
+        "name": "doc_type",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "is_retracted"
+        ],
+        "name": "quality",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "language"
+        ],
+        "name": "language",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [],
+        "name": "dq",
+        "pattern": "^_dq_",
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      }
+    ],
+    "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [],
+      "field_validations": [],
+      "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "key_nullability_rules": [],
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "entity_type": "publication",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        }
+      ],
+      "required_fields": [
+        "openalex_id",
+        "title"
+      ]
+    },
+    "gold_schema": null,
+    "loading_strategy": "full_scan_only",
+    "pipeline_name": "openalex_publication",
+    "provider": "openalex",
+    "scd_config": {
+      "business_key": "openalex_id",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
+    },
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
+    "table": {
+      "gold_table": "openalex_publication",
+      "gold_write_mode": "scd2",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "openalex_id"
+      ],
+      "silver_table": "openalex_publication",
+      "silver_write_mode": "merge"
+    },
+    "transform_steps": [],
+    "transform_version": null
   },
   "pubchem_compound": {
     "batch_size": 100,
@@ -917,6 +1944,448 @@
         "pmid"
       ],
       "silver_table": "pubmed_publication",
+      "silver_write_mode": "merge"
+    },
+    "transform_steps": [],
+    "transform_version": null
+  },
+  "semanticscholar_publication": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "column_groups": [
+      {
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_source",
+          "_ingestion_ts",
+          "_index",
+          "_lookup_method",
+          "_original_id"
+        ],
+        "name": "system",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "paper_id",
+          "publication_doi",
+          "publication_pmid",
+          "corpus_id",
+          "dblp_id"
+        ],
+        "name": "identifiers",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "title"
+        ],
+        "name": "title",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "abstract",
+          "tldr"
+        ],
+        "name": "abstract",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "author_s2_ids",
+          "author_orcids",
+          "author_h_indices"
+        ],
+        "name": "authors",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "affiliation_list"
+        ],
+        "name": "affiliations",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "journal"
+        ],
+        "name": "journal",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_year"
+        ],
+        "name": "year",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_date"
+        ],
+        "name": "dates",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "volume",
+          "issue",
+          "page_first",
+          "page_last",
+          "page_range"
+        ],
+        "name": "pagination",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "citations_received",
+          "citations_made",
+          "influential_citation_count",
+          "citation_contexts"
+        ],
+        "name": "citations",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "subject_fields",
+          "publication_types"
+        ],
+        "name": "subjects",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "publication_type",
+          "publication_type_unified",
+          "publication_subclass",
+          "publication_class"
+        ],
+        "name": "doc_type",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "is_oa",
+          "oa_status",
+          "open_access_url"
+        ],
+        "name": "open_access",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [],
+        "name": "dq",
+        "pattern": "^_dq_",
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      }
+    ],
+    "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [],
+      "field_validations": [],
+      "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "key_nullability_rules": [],
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "entity_type": "publication",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        }
+      ],
+      "required_fields": [
+        "paper_id",
+        "title"
+      ]
+    },
+    "gold_schema": null,
+    "loading_strategy": "full_scan_only",
+    "pipeline_name": "semanticscholar_publication",
+    "provider": "semanticscholar",
+    "scd_config": {
+      "business_key": "paper_id",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
+    },
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
+    "table": {
+      "gold_table": "semanticscholar_publication",
+      "gold_write_mode": "scd2",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "paper_id"
+      ],
+      "silver_table": "semanticscholar_publication",
+      "silver_write_mode": "merge"
+    },
+    "transform_steps": [],
+    "transform_version": null
+  },
+  "uniprot_idmapping": {
+    "batch_size": 100,
+    "checkpoint_interval": 1000,
+    "column_groups": [
+      {
+        "fields": [
+          "entity_id",
+          "content_hash",
+          "_run_id",
+          "_run_type",
+          "_source_batch_id",
+          "_ingestion_ts",
+          "_index"
+        ],
+        "name": "system",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
+          "target_id",
+          "uniprot_accession",
+          "mapping_status",
+          "uniprot_entry_name",
+          "organism_scientific",
+          "organism_common",
+          "taxonomy_id",
+          "protein_name",
+          "gene_primary",
+          "sequence_length",
+          "sequence_mass",
+          "reviewed",
+          "annotation_score",
+          "all_mappings"
+        ],
+        "name": "business",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [],
+        "name": "dq",
+        "pattern": "^_dq_",
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      }
+    ],
+    "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [],
+      "field_validations": [],
+      "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "key_nullability_rules": [],
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
+      "soft_fail_threshold": 0.05,
+      "strict_validation": false
+    },
+    "entity_type": "idmapping",
+    "fields": [],
+    "gold_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": [
+        "target_id",
+        "mapping_status"
+      ]
+    },
+    "gold_schema": null,
+    "loading_strategy": null,
+    "pipeline_name": "uniprot_idmapping",
+    "provider": "uniprot",
+    "scd_config": {
+      "business_key": "target_id",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
+    },
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
+    "table": {
+      "gold_table": "uniprot_idmapping",
+      "gold_write_mode": "scd2",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "target_id"
+      ],
+      "silver_table": "uniprot_idmapping",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],

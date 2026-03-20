@@ -13,9 +13,11 @@ from bioetl.application.services import (
     RunOptions,
     RunResult,
 )
+from bioetl.application.services.cli_run_orchestration_models import (
+    RunExecutionRequest,
+)
 from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
-    RunExecutionRequest,
 )
 from bioetl.composition import PipelineRegistry
 from bioetl.composition.execution_api import push_metrics_to_gateway

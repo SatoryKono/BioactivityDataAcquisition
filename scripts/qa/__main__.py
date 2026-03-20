@@ -13,6 +13,7 @@ Commands:
     check-terminology    Terminology linting
     report-dep-map       Generate/check architecture dependency map
     report-hotspots      Generate hotspot degradation report
+    report-duplication-baseline  Generate report-only duplication baseline
     calibrate-hotspots   Calibrate hotspot budgets
 """
 from __future__ import annotations
@@ -29,6 +30,7 @@ COMMANDS: dict[str, str] = {
     "check-terminology": "lint_terminology.py",
     "report-dep-map": "generate_architecture_dependency_map.py",
     "report-hotspots": "generate_hotspot_degradation_report.py",
+    "report-duplication-baseline": "report_duplication_baseline.py",
     "calibrate-hotspots": "calibrate_hotspot_budgets.py",
 }
 

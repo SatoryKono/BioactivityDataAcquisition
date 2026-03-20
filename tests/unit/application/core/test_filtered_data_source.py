@@ -25,8 +25,10 @@ class MockDataSource:
         self.__aexit__ = AsyncMock(return_value=None)
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
         self.aclose = AsyncMock()
+        self.fetch_calls: list[dict[str, object]] = []
 
     async def fetch(self, *args, **kwargs):
+        self.fetch_calls.append({"args": args, "kwargs": kwargs})
         for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
             yield record
 
@@ -44,8 +46,13 @@ class MockFilterableDataSource:
         self.__aexit__ = AsyncMock(return_value=None)
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
         self.aclose = AsyncMock()
+        self.fetch_calls: list[dict[str, object]] = []
+        self.fetch_filtered_calls: list[dict[str, object]] = []
+        self.fetch_multi_filtered_calls: list[dict[str, object]] = []
+        self.fetch_filtered_with_fallback_calls: list[dict[str, object]] = []
 
     async def fetch(self, *args, **kwargs):
+        self.fetch_calls.append({"args": args, "kwargs": kwargs})
         for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
             yield record
 
@@ -56,6 +63,14 @@ class MockFilterableDataSource:
         filter_field: str,
         limit: int | None = None,
     ):
+        self.fetch_filtered_calls.append(
+            {
+                "entity_type": entity_type,
+                "filter_ids": list(filter_ids),
+                "filter_field": filter_field,
+                "limit": limit,
+            }
+        )
         for record in [{"id": "filtered_1"}, {"id": "filtered_2"}]:
             yield record
 
@@ -65,6 +80,13 @@ class MockFilterableDataSource:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ):
+        self.fetch_multi_filtered_calls.append(
+            {
+                "entity_type": entity_type,
+                "filters": dict(filters),
+                "limit": limit,
+            }
+        )
         for record in [{"id": "multi_1"}, {"id": "multi_2"}]:
             yield record
 
@@ -76,6 +98,15 @@ class MockFilterableDataSource:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ):
+        self.fetch_filtered_with_fallback_calls.append(
+            {
+                "entity_type": entity_type,
+                "filter_ids": list(filter_ids),
+                "filter_field": filter_field,
+                "fallback_mapping": dict(fallback_mapping),
+                "limit": limit,
+            }
+        )
         for record in [{"id": "fallback_1"}, {"id": "fallback_2"}]:
             yield record
 
@@ -287,6 +318,34 @@ class TestFilteredDataSourceFetch:
         assert records == [{"id": "1"}, {"id": "2"}, {"id": "3"}]
 
     @pytest.mark.asyncio
+    async def test_fetch_without_filtering_forwards_query_and_offset(
+        self, mock_data_source, disabled_filter_config
+    ):
+        """Test unfiltered fetch keeps query and offset passthrough intact."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+
+        records = []
+        async for record in filtered.fetch(
+            "activity",
+            limit=10,
+            query="kinase",
+            offset=25,
+        ):
+            records.append(record)
+
+        assert len(records) == 3
+        assert mock_data_source.fetch_calls[-1]["kwargs"] == {
+            "entity_type": "activity",
+            "limit": 10,
+            "query": "kinase",
+            "offset": 25,
+        }
+
+    @pytest.mark.asyncio
     async def test_fetch_with_filtering_enabled(
         self,
         mock_data_source_with_filtered,
@@ -466,6 +525,38 @@ class TestFilteredDataSourceFallback:
         assert len(records) == 2
         assert records == [{"id": "filtered_1"}, {"id": "filtered_2"}]
 
+    @pytest.mark.asyncio
+    async def test_single_column_fetch_with_fallback_forwards_limit(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """Test fallback filtering preserves the requested limit."""
+        config = InputFilterConfig(
+            enabled=True,
+            filter_field="doi",
+            direct_filter_ids=("10.1038/test1", "10.1038/test2"),
+            direct_fallback_mapping={"10.1038/test1": "Test Title"},
+        )
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=None,
+            filter_config=config,
+        )
+
+        await filtered.__aenter__()
+
+        records = []
+        async for record in filtered.fetch("publication", limit=1):
+            records.append(record)
+
+        assert len(records) == 2
+        assert (
+            mock_data_source_with_filtered.fetch_filtered_with_fallback_calls[-1][
+                "limit"
+            ]
+            == 1
+        )
+
 
 @pytest.mark.unit
 class TestFilteredDataSourceMultiColumn:
@@ -548,6 +639,92 @@ class TestFilteredDataSourceMultiColumn:
         # _matches_valid_combination filters them based on valid_combinations
         assert isinstance(records, list)
 
+    @pytest.mark.asyncio
+    async def test_multi_column_fetch_respects_limit_after_valid_combination_filtering(
+        self,
+        multi_column_filter_config,
+    ):
+        """Test limit is applied after valid-combination filtering, not before."""
+
+        class MultiColumnTrackingDataSource(MockFilterableDataSource):
+            async def fetch_multi_filtered(
+                self,
+                entity_type: str,
+                filters: dict[str, list[str]],
+                limit: int | None = None,
+            ):
+                self.fetch_multi_filtered_calls.append(
+                    {
+                        "entity_type": entity_type,
+                        "filters": dict(filters),
+                        "limit": limit,
+                    }
+                )
+                for record in [
+                    {"molecule_id": "CHEMBL1", "assay_id": "CHEMBL_ASSAY_1"},
+                    {"molecule_id": "CHEMBL1", "assay_id": "WRONG"},
+                    {"molecule_id": "CHEMBL2", "assay_id": "CHEMBL_ASSAY_1"},
+                ]:
+                    yield record
+
+        reader = AsyncMock()
+        reader.load_multi_column_filter = AsyncMock(
+            return_value=FilterLoadResult(
+                ids=("CHEMBL1", "CHEMBL2"),
+                total_count=3,
+                unique_count=2,
+                duplicate_count=1,
+                duplicates=frozenset({"CHEMBL1"}),
+                column_ids={
+                    "molecule_id": frozenset({"CHEMBL1", "CHEMBL2"}),
+                    "assay_id": frozenset({"CHEMBL_ASSAY_1"}),
+                },
+                valid_combinations=frozenset(
+                    {
+                        ("CHEMBL1", "CHEMBL_ASSAY_1"),
+                        ("CHEMBL2", "CHEMBL_ASSAY_1"),
+                    }
+                ),
+                filter_fields=("molecule_id", "assay_id"),
+            )
+        )
+        data_source = MultiColumnTrackingDataSource()
+        filtered = FilteredDataSource(
+            data_source=data_source,
+            filter_reader=reader,
+            filter_config=multi_column_filter_config,
+        )
+        await filtered.__aenter__()
+
+        records = []
+        async for record in filtered.fetch("activity", limit=1):
+            records.append(record)
+
+        assert records == [{"molecule_id": "CHEMBL1", "assay_id": "CHEMBL_ASSAY_1"}]
+        assert data_source.fetch_multi_filtered_calls[-1]["limit"] is None
+
+    @pytest.mark.asyncio
+    async def test_multi_column_fetch_raises_when_adapter_missing_fetch_multi_filtered(
+        self,
+        mock_data_source,
+        mock_multi_filter_reader,
+        multi_column_filter_config,
+    ):
+        """Test multi-column filtering requires a filterable adapter implementation."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=mock_multi_filter_reader,
+            filter_config=multi_column_filter_config,
+        )
+
+        await filtered.__aenter__()
+
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
+            async for _ in filtered.fetch("activity"):
+                pass
+
 
 @pytest.mark.unit
 class TestFilteredDataSourceMetrics:
@@ -629,6 +806,54 @@ class TestFilteredDataSourceMetrics:
         # Should not raise even without metrics
         await filtered.__aenter__()
         assert filtered._filter_ids is not None
+
+    @pytest.mark.asyncio
+    async def test_multi_column_metrics_record_combination_and_per_field_counts(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """Test multi-column load emits combination and per-field counters."""
+        from bioetl.domain.filtering.input_config import FilterColumn
+
+        mock_metrics = MagicMock()
+        reader = AsyncMock()
+        reader.load_multi_column_filter = AsyncMock(
+            return_value=FilterLoadResult(
+                ids=("CHEMBL1", "CHEMBL2"),
+                total_count=2,
+                unique_count=2,
+                duplicate_count=0,
+                duplicates=frozenset(),
+                column_ids={
+                    "molecule_id": frozenset({"CHEMBL1", "CHEMBL2"}),
+                    "assay_id": frozenset({"CHEMBL_ASSAY_1"}),
+                },
+                valid_combinations=frozenset({("CHEMBL1", "CHEMBL_ASSAY_1")}),
+                filter_fields=("molecule_id", "assay_id"),
+            )
+        )
+        config = InputFilterConfig(
+            enabled=True,
+            source_path="data/multi.csv",
+            columns=(
+                FilterColumn("molecule_id", "molecule_id"),
+                FilterColumn("assay_id", "assay_id"),
+            ),
+        )
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=reader,
+            filter_config=config,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+        )
+
+        await filtered.__aenter__()
+
+        calls = mock_metrics.increment_counter.call_args_list
+        counter_names = [call.args[0] for call in calls]
+        assert "filter_combinations_loaded_total" in counter_names
+        assert counter_names.count("filter_ids_loaded_total") == 2
 
 
 @pytest.mark.unit

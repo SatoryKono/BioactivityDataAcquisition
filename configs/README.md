@@ -37,6 +37,10 @@ DQ config uses its own 4-layer hierarchy:
 `base/quality.yaml → providers/{p}.yaml → entities/{p}/{e}.yaml → inline overrides`
 
 Loaded by `DQConfigLoader`, which merges `entity_field_validations` lists by field name.
+The active DQ key-space follows the hierarchical naming used by
+`configs/base/quality.yaml`, `configs/providers/{provider}.yaml`, and
+`configs/entities/{provider}/{entity}.yaml`: `common_*`,
+`provider_field_validations`, and `entity_*`.
 
 ### Filter Config (separate path)
 
@@ -51,12 +55,13 @@ merged into entity-level `silver_filters` / `gold_filters` by
 | `pipeline` | pipeline_name, provider, entity_type, batch_size, business_primary_keys, sink modes |
 | `schema` | column_groups, content_hash include/exclude, silver/gold include_groups/alias_policy |
 | `contracts` | primary_key, merge_keys, hash_include/hash_exclude, rename_map (via defaults) |
-| `quality` | entity_field_validations, entity_cross_field_validations, entity_conditional_validations, key_nullability |
+| `quality` | common/provider/entity validation lists, entity_conditional_validations, key_nullability |
 | `filters` | extraction_params, silver_filters, gold_filters |
 | `hash_policy` | canonical hash policy for bronze→silver/gold promotion |
 | `source` | API-specific params merged from provider-level defaults (no legacy source_file) |
 
 Legacy file-reference keys follow explicit status rules:
+- Normative CI/source-of-truth constants for active, retired, and transitional config keys live in `src/bioetl/infrastructure/config/config_ci_contract.py`. Pre-commit `scripts/schema/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) both import that shared contract.
 - Retired now: pipeline `schema_file`, `data_schema_file`, `column_groups_file`, `source_file`, source `batch_size`, source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`, and composite `merge.column_groups_file` are not part of the active runtime contract.
 - Required canonical composite contract: composite `composite.version` must be present; YAML files that omit it are no longer accepted by runtime validation.
 - Transitional migration-only: pipeline `filter_batch_size` remains a compatibility alias and is deprecated in schema/models.
