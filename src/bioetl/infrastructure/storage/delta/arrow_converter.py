@@ -68,11 +68,17 @@ def filter_record_for_schema(
     context: ArrowSchemaPreparationContext,
 ) -> JsonDict:
     """Filter one record to schema fields and serialize string-backed complex values."""
-    return {
-        key: serialize_value_for_arrow_schema(value, key in context.string_fields)
-        for key, value in record.items()
-        if key in context.schema_fields
-    }
+    filtered: JsonDict = {}
+    string_fields = context.string_fields
+    for key in context.schema_names:
+        if key not in record:
+            continue
+        value = record[key]
+        filtered[key] = serialize_value_for_arrow_schema(
+            value,
+            key in string_fields,
+        )
+    return filtered
 
 
 def sort_arrow_table_by_primary_keys(
@@ -83,7 +89,7 @@ def sort_arrow_table_by_primary_keys(
     logger: LoggerPort | None = None,
 ) -> pa.Table:
     """Sort an Arrow table by available primary keys for deterministic writes."""
-    if not primary_keys:
+    if not primary_keys or arrow_data.num_rows < 2:
         return arrow_data
 
     available_schema_names = tuple(schema_names or arrow_data.schema.names)
@@ -216,6 +222,9 @@ class ArrowDataConverter:
         Returns:
             PyArrow Table ready for Delta Lake write.
         """
+        if not records:
+            return pa.table({})
+
         arrow_data = pa.Table.from_pylist(records)
         if column_order is not None or apply_column_order:
             arrow_data = self._apply_column_order(arrow_data, column_order)
@@ -235,11 +244,17 @@ class ArrowDataConverter:
         apply_column_order: bool = False,
     ) -> pa.Table:
         """Convert records to Arrow using schema filtering, serialization, and sorting."""
-        context = build_arrow_schema_preparation_context(schema)
-        filtered_records = [
-            filter_record_for_schema(record, context) for record in records
-        ]
-        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+        if not records:
+            return pa.Table.from_pylist([], schema=schema)
+
+        try:
+            arrow_data = pa.Table.from_pylist(records, schema=schema)
+        except (pa.ArrowInvalid, pa.ArrowTypeError, TypeError, ValueError):
+            context = build_arrow_schema_preparation_context(schema)
+            filtered_records = [
+                filter_record_for_schema(record, context) for record in records
+            ]
+            arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
         if column_order is not None or apply_column_order:
             arrow_data = self._apply_column_order(arrow_data, column_order)
         return sort_arrow_table_by_primary_keys(

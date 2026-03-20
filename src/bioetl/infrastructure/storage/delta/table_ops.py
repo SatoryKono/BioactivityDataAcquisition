@@ -15,7 +15,22 @@ def read_delta_records(
     table: DeltaTable,
     columns: list[str] | None = None,
 ) -> list[BronzeRecord]:
-    """Read Delta rows into generic record dictionaries."""
+    """Read Delta rows into generic record dictionaries.
+
+    Prefer RecordBatchReader iteration to reduce peak memory compared to
+    materializing a full Arrow table before conversion.
+    """
+    to_dataset = getattr(table, "to_pyarrow_dataset", None)
+    if callable(to_dataset):
+        dataset = to_dataset()
+        scanner = dataset.scanner(columns=columns)
+        to_reader = getattr(scanner, "to_reader", None)
+        if callable(to_reader):
+            result: list[BronzeRecord] = []
+            for batch in to_reader():
+                result.extend(batch.to_pylist())
+            return result
+
     arrow_table = table.to_pyarrow_table(columns=columns)
     result: list[BronzeRecord] = arrow_table.to_pylist()
     return result

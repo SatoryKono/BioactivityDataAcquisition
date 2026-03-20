@@ -13,12 +13,16 @@ from httpx import Response
 import pytest
 import respx
 
+from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_API_BASE
 from bioetl.infrastructure.adapters.crossref.client import (
     CROSSREF_API_BASE,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -52,9 +56,10 @@ def mock_logger() -> MagicMock:
 
 @pytest.fixture
 def crossref_adapter(mock_logger: MagicMock) -> CrossRefAdapter:
-    return CrossRefAdapter(
+    return create_crossref_adapter(
         http_client=_build_http_client("crossref_external_verification"),
         logger=mock_logger,
+        settings=None,
         mailto="bioetl-test@example.com",
         batch_size=10,
     )
@@ -68,6 +73,9 @@ def pubmed_adapter(mock_logger: MagicMock) -> PubMedAdapter:
         email="bioetl-test@example.com",
         api_key=None,
         batch_size=100,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 
@@ -78,6 +86,9 @@ def openalex_adapter(mock_logger: MagicMock) -> OpenAlexAdapter:
         logger=mock_logger,
         mailto="bioetl-test@example.com",
         batch_size=10,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 
@@ -87,6 +98,9 @@ def semanticscholar_adapter(mock_logger: MagicMock) -> SemanticScholarAdapter:
         http_client=_build_http_client("semanticscholar_external_verification"),
         logger=mock_logger,
         batch_size=10,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 

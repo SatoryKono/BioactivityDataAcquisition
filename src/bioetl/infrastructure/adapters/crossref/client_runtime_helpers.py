@@ -1,10 +1,9 @@
-"""Runtime assembly helpers for the CrossRef adapter."""
+"""Runtime validation helpers for the CrossRef adapter."""
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
 from bioetl.infrastructure.adapters.crossref.batch import (
@@ -12,12 +11,7 @@ from bioetl.infrastructure.adapters.crossref.batch import (
     SearchPaginator,
 )
 from bioetl.infrastructure.adapters.crossref.client_builders import (
-    _create_default_crossref_batch_fetcher,
     _create_default_crossref_fetch_flow,
-    _create_default_crossref_query_builder,
-    _create_default_crossref_response_mapper,
-    _create_default_crossref_search_paginator,
-    _create_default_crossref_title_fallback_handler,
 )
 from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
@@ -30,12 +24,8 @@ from bioetl.infrastructure.adapters.crossref.response_mapper import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-    from bioetl.infrastructure.adapters.common.api_request_collector import (
-        APIRequestCollector,
-    )
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
+_RuntimeService = TypeVar("_RuntimeService")
 
 __all__ = [
     "CrossRefRuntimeServices",
@@ -46,13 +36,24 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class CrossRefRuntimeServices:
-    """Resolved CrossRef runtime collaborators after default/injected wiring."""
+    """Resolved CrossRef runtime collaborators after composition wiring."""
 
     query_builder: CrossRefQueryBuilder
     response_mapper: CrossRefResponseMapper
     batch_fetcher: DoiBatchProcessor
     search_paginator: SearchPaginator
     fallback_handler: CrossRefTitleFallbackHandler
+
+
+def _require_runtime_service(
+    value: _RuntimeService | None,
+    *,
+    name: str,
+) -> _RuntimeService:
+    """Fail fast when a mandatory runtime collaborator was not injected."""
+    if value is None:
+        raise ValueError(f"CrossRef adapter requires injected {name}")
+    return value
 
 
 def build_crossref_runtime_services(
@@ -62,68 +63,29 @@ def build_crossref_runtime_services(
     batch_fetcher: DoiBatchProcessor | None,
     search_paginator: SearchPaginator | None,
     title_fallback_handler: CrossRefTitleFallbackHandler | None,
-    http_client: UnifiedHTTPClient,
-    logger: LoggerPort,
-    adapter_metrics: AdapterMetricsRecorder,
-    request_collector: APIRequestCollector,
-    mailto: str,
-    api_base: str,
-    headers_fn: Callable[[], dict[str, str]],
 ) -> CrossRefRuntimeServices:
-    """Resolve CrossRef runtime collaborators using injected overrides or defaults."""
-    resolved_query_builder = (
-        query_builder
-        if query_builder is not None
-        else _create_default_crossref_query_builder(
-            api_base=api_base,
-            mailto=mailto,
-        )
-    )
-    resolved_response_mapper = (
-        response_mapper
-        if response_mapper is not None
-        else _create_default_crossref_response_mapper()
-    )
-    resolved_batch_fetcher = (
-        batch_fetcher
-        if batch_fetcher is not None
-        else _create_default_crossref_batch_fetcher(
-            http=http_client,
-            logger=logger,
-            metrics=adapter_metrics,
-            mailto=mailto,
-            api_base=api_base,
-            headers_fn=headers_fn,
-            request_collector=request_collector,
-        )
-    )
-    resolved_search_paginator = (
-        search_paginator
-        if search_paginator is not None
-        else _create_default_crossref_search_paginator(
-            http=http_client,
-            logger=logger,
-            metrics=adapter_metrics,
-            mailto=mailto,
-            api_base=api_base,
-            headers_fn=headers_fn,
-            request_collector=request_collector,
-        )
-    )
-    resolved_fallback_handler = (
-        title_fallback_handler
-        if title_fallback_handler is not None
-        else _create_default_crossref_title_fallback_handler(
-            logger=logger,
-            search_fn=resolved_search_paginator.search,
-        )
-    )
+    """Validate that composition injected the full CrossRef runtime graph."""
     return CrossRefRuntimeServices(
-        query_builder=resolved_query_builder,
-        response_mapper=resolved_response_mapper,
-        batch_fetcher=resolved_batch_fetcher,
-        search_paginator=resolved_search_paginator,
-        fallback_handler=resolved_fallback_handler,
+        query_builder=_require_runtime_service(
+            query_builder,
+            name="query_builder",
+        ),
+        response_mapper=_require_runtime_service(
+            response_mapper,
+            name="response_mapper",
+        ),
+        batch_fetcher=_require_runtime_service(
+            batch_fetcher,
+            name="batch_fetcher",
+        ),
+        search_paginator=_require_runtime_service(
+            search_paginator,
+            name="search_paginator",
+        ),
+        fallback_handler=_require_runtime_service(
+            title_fallback_handler,
+            name="title_fallback_handler",
+        ),
     )
 
 

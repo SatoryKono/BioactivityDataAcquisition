@@ -20,6 +20,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -32,6 +35,11 @@ if TYPE_CHECKING:
 CASSETTE_DIR = (
     Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "semanticscholar"
 )
+
+
+def _fallback_service() -> object:
+    """Create explicit fallback service for direct adapter constructors."""
+    return create_default_fallback_service(adapter_metrics=MagicMock())
 
 
 @pytest.fixture(scope="module")
@@ -73,6 +81,7 @@ def semanticscholar_adapter(
         http_client=http_client,
         logger=mock_logger,
         batch_size=100,
+        fallback_fetch_service=_fallback_service(),
     )
 
 
@@ -105,6 +114,7 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
             status = await adapter.health_check()
 
@@ -130,6 +140,7 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             records: list[dict[str, Any]] = []
@@ -160,6 +171,7 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             records: list[dict[str, Any]] = []
@@ -192,6 +204,7 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             records: list[dict[str, Any]] = []
@@ -230,6 +243,7 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             fallback_mapping = {
@@ -276,6 +290,7 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             # Title must match what VCR cassette returns for title validation
@@ -312,6 +327,7 @@ class TestSemanticScholarAdapterEdgeCases:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             with pytest.raises(ValueError, match=r"publication.*paper"):
@@ -341,6 +357,7 @@ class TestSemanticScholarAdapterEdgeCases:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             with respx.mock:
@@ -370,6 +387,7 @@ class TestSemanticScholarAdapterEdgeCases:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
+                fallback_fetch_service=_fallback_service(),
             )
 
             records: list[dict[str, Any]] = []
@@ -406,6 +424,7 @@ class TestSemanticScholarAdapterRateLimiting:
             http_client=http_client,
             logger=mock_logger,
             batch_size=10,
+            fallback_fetch_service=_fallback_service(),
         )
 
         # Verify adapter is configured

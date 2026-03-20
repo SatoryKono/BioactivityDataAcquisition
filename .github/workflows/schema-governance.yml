@@ -143,7 +143,7 @@ jobs:
             exit 1
           fi
           if [[ "${{ needs.schema-parity.result }}" == "failure" ]]; then
-            echo "::warning::Schema parity check reported mismatches (non-blocking)"
+            echo "::error::Schema parity check reported blocking mismatches"
+            exit 1
           fi
           echo "::notice::Schema governance checks completed"
-

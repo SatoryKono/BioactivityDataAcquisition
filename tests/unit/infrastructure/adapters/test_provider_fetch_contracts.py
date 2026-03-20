@@ -6,7 +6,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.domain.ports import FallbackPolicyPort
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
@@ -34,14 +38,18 @@ def openalex_adapter(mock_http_client: MagicMock) -> OpenAlexAdapter:
         logger=NoOpLogger(),
         mailto="test@example.com",
         batch_size=10,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 
 @pytest.fixture
 def crossref_adapter(mock_http_client: MagicMock) -> CrossRefAdapter:
-    return CrossRefAdapter(
+    return create_crossref_adapter(
         http_client=mock_http_client,
         logger=NoOpLogger(),
+        settings=None,
         mailto="test@example.com",
         batch_size=10,
     )
@@ -53,6 +61,9 @@ def pubmed_adapter(mock_http_client: MagicMock) -> PubMedAdapter:
         http_client=mock_http_client,
         logger=NoOpLogger(),
         email="test@example.com",
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 
@@ -65,12 +76,21 @@ def semanticscholar_adapter(
         logger=NoOpLogger(),
         api_key="",
         batch_size=10,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 
 @pytest.fixture
 def uniprot_adapter(mock_http_client: MagicMock) -> UniProtAdapter:
-    return UniProtAdapter(http_client=mock_http_client, logger=NoOpLogger())
+    return UniProtAdapter(
+        http_client=mock_http_client,
+        logger=NoOpLogger(),
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
+    )
 
 
 @pytest.mark.asyncio

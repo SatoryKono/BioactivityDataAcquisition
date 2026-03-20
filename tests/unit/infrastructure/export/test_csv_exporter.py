@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import json
 import os
 import tempfile
@@ -12,6 +13,7 @@ import pyarrow as pa
 import pyarrow.csv as pv
 import pytest
 
+import bioetl.infrastructure.export.csv_exporter_table_ops as csv_exporter_table_ops
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -54,6 +56,20 @@ class TestCsvExporterInit:
 @pytest.mark.unit
 class TestCsvExporterFlatten:
     """Tests for _flatten_for_csv method."""
+
+    def test_flatten_simple_types_returns_same_table(self) -> None:
+        """Simple tables should bypass expensive flattening work."""
+        table = pa.Table.from_pydict(
+            {
+                "id": [1, 2],
+                "name": ["a", "b"],
+                "value": [1.5, 2.5],
+            }
+        )
+
+        result = CsvExporter._flatten_for_csv(table)
+
+        assert result is table
 
     def test_flatten_simple_types(self) -> None:
         """Test that simple types are preserved."""
@@ -374,24 +390,51 @@ class TestCsvExporterInternals:
         mock_logger.debug.assert_called_once()
 
     def test_deduplicate_handles_import_error(
-        self, tmp_path: Path, mock_logger: MagicMock
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
-        table = MagicMock()
-        table.column_names = ["id"]
-        table.to_pandas.side_effect = ImportError("no pandas")
+        table = pa.Table.from_pydict({"id": [1, 1], "name": ["a", "b"]})
+        original_import = builtins.__import__
+
+        def _patched_import(
+            name: str,
+            globals: object = None,
+            locals: object = None,
+            fromlist: tuple[str, ...] = (),
+            level: int = 0,
+        ) -> object:
+            if name == "polars":
+                raise ImportError("no polars")
+            return original_import(name, globals, locals, fromlist, level)
+
+        monkeypatch.setattr(csv_exporter_table_ops, "_builtin_import", _patched_import)
         result = exporter._deduplicate(table, ["id"])
 
         assert result is table
         mock_logger.warning.assert_called()
 
     def test_deduplicate_handles_generic_error(
-        self, tmp_path: Path, mock_logger: MagicMock
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
-        table = MagicMock()
-        table.column_names = ["id"]
-        table.to_pandas.side_effect = RuntimeError("boom")
+        table = pa.Table.from_pydict({"id": [1, 1], "name": ["a", "b"]})
+
+        class _BrokenPolarsModule:
+            @staticmethod
+            def from_arrow(_table: pa.Table) -> object:
+                raise RuntimeError("boom")
+
+        monkeypatch.setattr(
+            csv_exporter_table_ops,
+            "_builtin_import",
+            lambda name: _BrokenPolarsModule() if name == "polars" else builtins.__import__(name),
+        )
         result = exporter._deduplicate(table, ["id"])
 
         assert result is table

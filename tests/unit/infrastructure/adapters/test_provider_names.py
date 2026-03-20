@@ -7,9 +7,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+    create_default_error_handler,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 
@@ -38,6 +46,13 @@ class TestAdapterProviderNames:
             rate_limiter=rate_limiter,
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
+            error_handler=create_default_error_handler(
+                logger=mock_logger,
+                metrics=None,
+            ),
+            request_collector=APIRequestCollector(),
+            entity_mapper=PubChemEntityMapper(),
+            fetch_strategies=MagicMock(name="fetch_strategies"),
         )
         assert adapter.provider_name == "pubchem"
         assert PubChemAdapter.provider_name == "pubchem"
@@ -45,6 +60,12 @@ class TestAdapterProviderNames:
     def test_uniprot_provider_name(self, mock_logger):
         """Test UniProtAdapter provider name."""
         mock_http_client = MagicMock()
-        adapter = UniProtAdapter(http_client=mock_http_client, logger=mock_logger)
+        adapter = UniProtAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            fallback_fetch_service=create_default_fallback_service(
+                adapter_metrics=MagicMock()
+            ),
+        )
         assert adapter.provider_name == "uniprot"
         assert UniProtAdapter.provider_name == "uniprot"

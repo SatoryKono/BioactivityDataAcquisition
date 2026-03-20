@@ -18,9 +18,6 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
 )
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service as _create_default_uniprot_fallback_service,
-)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -96,6 +93,8 @@ class UniProtAdapter(
         self,
         http_client: UnifiedHTTPClient,
         logger: LoggerPort,
+        *,
+        fallback_fetch_service: FallbackFetchOrchestratorService,
         api_key: str | None = None,
         base_url: str = UNIPROT_API_BASE,
         strict_error_handling: bool = False,
@@ -103,7 +102,6 @@ class UniProtAdapter(
         error_handler: ErrorHandlerPort | None = None,
         adapter_metrics: AdapterMetricsRecorder | None = None,
         request_collector: APIRequestCollector | None = None,
-        fallback_fetch_service: FallbackFetchOrchestratorService | None = None,
     ) -> None:
         """Initialize UniProt adapter dependencies.
 
@@ -117,7 +115,7 @@ class UniProtAdapter(
             error_handler: Optional error handler for mapping exceptions to domain errors.
             adapter_metrics: Optional pre-built adapter metrics instance.
             request_collector: Optional pre-built request collector instance.
-            fallback_fetch_service: Optional pre-built fallback fetch orchestrator.
+            fallback_fetch_service: Pre-built fallback fetch orchestrator.
         """
         super().__init__(
             http_client,
@@ -135,13 +133,7 @@ class UniProtAdapter(
             "feature": self._fetch_features,
             "sequence": self._fetch_sequences,
         }
-        self._fallback_fetch_service = (
-            fallback_fetch_service
-            if fallback_fetch_service is not None
-            else _create_default_uniprot_fallback_service(
-                adapter_metrics=self._adapter_metrics,
-            )
-        )
+        self._fallback_fetch_service = fallback_fetch_service
         self.configure_fallback_policy(None)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
@@ -262,6 +254,8 @@ def _create_uniprot_adapter(
         raise ValueError("UniProt adapter requires http_client")
     if logger is None:
         raise ValueError("UniProt adapter requires logger")
+    if "fallback_fetch_service" not in kwargs:
+        raise ValueError("UniProt adapter requires fallback_fetch_service")
 
     return UniProtAdapter(
         http_client=http_client,
@@ -273,5 +267,5 @@ def _create_uniprot_adapter(
         error_handler=kwargs.get("error_handler"),
         adapter_metrics=kwargs.get("adapter_metrics"),
         request_collector=kwargs.get("request_collector"),
-        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
+        fallback_fetch_service=kwargs["fallback_fetch_service"],
     )

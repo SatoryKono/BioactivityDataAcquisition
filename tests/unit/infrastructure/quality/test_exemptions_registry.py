@@ -486,3 +486,99 @@ class TestValidateExemptionTargetReferences:
             errors = validate_exemption_target_references(path)
 
         assert any("MissingService" in error for error in errors)
+
+    def test_ambiguous_bare_function_symbol_reports_error(self, tmp_path: Path) -> None:
+        """Bare function keys should be rejected when they match multiple modules."""
+        app_dir = tmp_path / "src" / "bioetl" / "application"
+        infra_dir = tmp_path / "src" / "bioetl" / "infrastructure"
+        app_dir.mkdir(parents=True)
+        infra_dir.mkdir(parents=True)
+        (app_dir / "module_a.py").write_text(
+            "def repeated_name():\n    return 1\n",
+            encoding="utf-8",
+        )
+        (infra_dir / "module_b.py").write_text(
+            "def repeated_name():\n    return 2\n",
+            encoding="utf-8",
+        )
+
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "value",
+                    "owner",
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
+            },
+            "registries": {name: {} for name in REQUIRED_EXEMPTION_REGISTRIES},
+        }
+        registries = raw["registries"]
+        assert isinstance(registries, dict)
+        registries["function_complexity"] = {
+            "repeated_name": {
+                "value": 15,
+                "owner": "alice",
+                "reason": "temporary hotspot",
+                "classification": "technical_debt",
+                "linked_rf": "RF-001",
+                "expires_on": "2026-06-30",
+                "removal_step": "split function",
+            }
+        }
+
+        path = _write_registry(tmp_path, raw)
+        with patch(
+            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            return_value=tmp_path,
+        ):
+            errors = validate_exemption_target_references(path)
+
+        assert any("bare symbol key is ambiguous" in error for error in errors)
+
+    def test_path_qualified_symbol_requires_non_empty_name(self, tmp_path: Path) -> None:
+        """Path-qualified keys with an empty symbol suffix should fail clearly."""
+        src_dir = tmp_path / "src" / "bioetl" / "application"
+        src_dir.mkdir(parents=True)
+        module_file = src_dir / "module.py"
+        module_file.write_text("def some_fn():\n    return 1\n", encoding="utf-8")
+
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "value",
+                    "owner",
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
+            },
+            "registries": {name: {} for name in REQUIRED_EXEMPTION_REGISTRIES},
+        }
+        registries = raw["registries"]
+        assert isinstance(registries, dict)
+        registries["function_complexity"] = {
+            "src/bioetl/application/module.py::": {
+                "value": 15,
+                "owner": "alice",
+                "reason": "temporary hotspot",
+                "classification": "technical_debt",
+                "linked_rf": "RF-001",
+                "expires_on": "2026-06-30",
+                "removal_step": "split function",
+            }
+        }
+
+        path = _write_registry(tmp_path, raw)
+        with patch(
+            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            return_value=tmp_path,
+        ):
+            errors = validate_exemption_target_references(path)
+
+        assert any("must be non-empty" in error for error in errors)

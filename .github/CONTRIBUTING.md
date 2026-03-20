@@ -4,8 +4,10 @@
 
 ```bash
 # 1. Clone and install (automated setup)
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
+# Clone the canonical repository or your fork, then verify origin:
+git clone <repo-url>
 cd BioactivityDataAcquisition2
+git remote -v
 ./scripts/dev/dev_setup.sh          # Full setup with all checks
 # ./scripts/dev/dev_setup.sh --quick  # Fast: skip tests and linters
 # ./scripts/dev/dev_setup.sh --ci     # CI mode: no colors, non-interactive
@@ -31,11 +33,16 @@ Before contributing, read these documents:
 ## Workflow
 
 1. **Create branch** from `main`
+1. **Prefer an isolated worktree** for non-trivial tasks
 1. **Read** relevant sections of RULES.md
 1. **Implement** following architecture constraints
 1. **Test** (`make test` before AND after changes)
 1. **Lint** (`make lint`)
 1. **Commit** using Conventional Commits format
+
+For the full local GitHub workflow, including worktrees, sync/rebase, PR creation, and cleanup, see:
+
+- [docs/03-guides/github-local-workflow.md](../docs/03-guides/github-local-workflow.md)
 
 ## Commit Format
 

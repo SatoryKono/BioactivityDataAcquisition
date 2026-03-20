@@ -524,6 +524,13 @@ def _build_runtime_init_kwargs(
     adapter_cls: type,
 ) -> tuple[dict[str, object], ThreadPoolExecutor | None]:
     """Create minimal constructor kwargs for runtime Protocol checks."""
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.pubchem.entity_mapper import (
+        PubChemEntityMapper,
+    )
+
     signature = inspect.signature(adapter_cls)
     kwargs: dict[str, object] = {}
     thread_pool: ThreadPoolExecutor | None = None
@@ -533,6 +540,7 @@ def _build_runtime_init_kwargs(
     circuit_breaker = MagicMock()
     circuit_breaker.get_state.return_value = "closed"
     circuit_breaker.get_failure_count.return_value = 0
+    error_handler = MagicMock()
 
     value_by_name: dict[str, object] = {
         "http_client": http_client,
@@ -541,6 +549,16 @@ def _build_runtime_init_kwargs(
         "email": "bioetl-tests@example.org",
         "rate_limiter": rate_limiter,
         "circuit_breaker": circuit_breaker,
+        "error_handler": error_handler,
+        "request_collector": APIRequestCollector(),
+        "entity_mapper": PubChemEntityMapper(),
+        "fetch_strategies": MagicMock(),
+        "fallback_fetch_service": MagicMock(),
+        "query_builder": MagicMock(),
+        "response_mapper": MagicMock(),
+        "batch_fetcher": MagicMock(),
+        "search_paginator": MagicMock(),
+        "title_fallback_handler": MagicMock(),
     }
 
     for parameter in signature.parameters.values():
@@ -561,6 +579,19 @@ def _build_runtime_init_kwargs(
                 f"{adapter_cls.__module__}.{adapter_cls.__name__}.{parameter.name}"
             )
         kwargs[parameter.name] = value
+
+    if (
+        adapter_cls.__module__ == "bioetl.infrastructure.adapters.crossref.client"
+        and adapter_cls.__name__ == "CrossRefAdapter"
+    ):
+        for name in (
+            "query_builder",
+            "response_mapper",
+            "batch_fetcher",
+            "search_paginator",
+            "title_fallback_handler",
+        ):
+            kwargs.setdefault(name, value_by_name[name])
 
     return kwargs, thread_pool
 

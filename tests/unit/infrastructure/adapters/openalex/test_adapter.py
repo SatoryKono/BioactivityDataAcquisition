@@ -11,6 +11,9 @@ import pytest
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -37,13 +40,23 @@ def logger() -> NoOpLogger:
 
 
 @pytest.fixture
-def adapter(mock_http_client: MagicMock, logger: NoOpLogger) -> OpenAlexAdapter:
+def fallback_fetch_service():
+    return create_default_fallback_service(adapter_metrics=MagicMock())
+
+
+@pytest.fixture
+def adapter(
+    mock_http_client: MagicMock,
+    logger: NoOpLogger,
+    fallback_fetch_service,
+) -> OpenAlexAdapter:
     """Create an adapter instance for testing."""
     return OpenAlexAdapter(
         http_client=mock_http_client,
         logger=logger,
         mailto="test@example.com",
         batch_size=10,
+        fallback_fetch_service=fallback_fetch_service,
     )
 
 
@@ -51,13 +64,17 @@ class TestOpenAlexAdapter:
     """Tests for OpenAlexAdapter."""
 
     def test_adapter_initialization(
-        self, mock_http_client: MagicMock, logger: NoOpLogger
+        self,
+        mock_http_client: MagicMock,
+        logger: NoOpLogger,
+        fallback_fetch_service,
     ) -> None:
         """Should initialize adapter with required parameters."""
         adapter = OpenAlexAdapter(
             http_client=mock_http_client,
             logger=logger,
             mailto="test@example.com",
+            fallback_fetch_service=fallback_fetch_service,
         )
         assert adapter.provider_name == "openalex"
         assert adapter.mailto == "test@example.com"
@@ -80,6 +97,9 @@ class TestOpenAlexAdapter:
             error_handler=error_handler,
             adapter_metrics=adapter_metrics,
             request_collector=request_collector,
+            fallback_fetch_service=create_default_fallback_service(
+                adapter_metrics=adapter_metrics
+            ),
         )
 
         assert adapter._http_client is mock_http_client
@@ -100,11 +120,15 @@ class TestOpenAlexAdapter:
         cursor_flow = MagicMock()
         fallback_handler = MagicMock()
         fallback_orchestrator = MagicMock()
+        fallback_fetch_service = create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        )
 
         adapter = OpenAlexAdapter(
             http_client=mock_http_client,
             logger=logger,
             mailto="test@example.com",
+            fallback_fetch_service=fallback_fetch_service,
             openalex_query_executor=query_executor,
             openalex_response_mapper=response_mapper,
             openalex_cursor_flow=cursor_flow,
@@ -626,6 +650,9 @@ class TestCreateOpenAlexAdapter:
             settings=None,
             mailto="test@example.com",
             batch_size=25,
+            fallback_fetch_service=create_default_fallback_service(
+                adapter_metrics=MagicMock()
+            ),
         )
 
         assert adapter.mailto == "test@example.com"
@@ -640,6 +667,9 @@ class TestCreateOpenAlexAdapter:
                 http_client=mock_http_client,
                 logger=logger,
                 settings=None,
+                fallback_fetch_service=create_default_fallback_service(
+                    adapter_metrics=MagicMock()
+                ),
             )
 
     def test_create_adapter_requires_http_client(self, logger: NoOpLogger) -> None:
@@ -650,6 +680,9 @@ class TestCreateOpenAlexAdapter:
                 logger=logger,
                 settings=None,
                 mailto="test@example.com",
+                fallback_fetch_service=create_default_fallback_service(
+                    adapter_metrics=MagicMock()
+                ),
             )
 
     def test_create_adapter_requires_logger(self, mock_http_client: MagicMock) -> None:
@@ -660,4 +693,7 @@ class TestCreateOpenAlexAdapter:
                 logger=None,
                 settings=None,
                 mailto="test@example.com",
+                fallback_fetch_service=create_default_fallback_service(
+                    adapter_metrics=MagicMock()
+                ),
             )

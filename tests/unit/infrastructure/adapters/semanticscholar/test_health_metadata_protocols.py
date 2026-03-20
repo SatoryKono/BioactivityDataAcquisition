@@ -9,6 +9,9 @@ import pytest
 
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -74,5 +77,11 @@ def test_adapter_satisfies_health_metadata_dependency_protocol() -> None:
     logger = MagicMock()
     logger.warning = MagicMock()
 
-    adapter = SemanticScholarAdapter(http_client=http_client, logger=logger)
+    adapter = SemanticScholarAdapter(
+        http_client=http_client,
+        logger=logger,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
+    )
     assert isinstance(adapter, SemanticScholarHealthMetadataDependencies)

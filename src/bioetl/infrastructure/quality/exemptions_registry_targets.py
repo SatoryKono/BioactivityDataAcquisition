@@ -24,6 +24,11 @@ _FUNCTION_SYMBOL_REGISTRIES = frozenset(
     {"domain_complexity", "function_complexity", "function_length"}
 )
 
+_SYMBOL_REGISTRY_CONTEXT = {
+    **{name: "class" for name in _CLASS_SYMBOL_REGISTRIES},
+    **{name: "function" for name in _FUNCTION_SYMBOL_REGISTRIES},
+}
+
 
 def _iter_source_modules(src_root: Path) -> list[Path]:
     """Return all source modules that participate in exemption lookups."""
@@ -115,6 +120,61 @@ def _validate_symbol_key_reference(
         )
 
 
+def _get_symbol_registry_context(
+    registry_name: str,
+    *,
+    classes_by_module: dict[str, set[str]],
+    functions_by_module: dict[str, set[str]],
+    class_counts: Counter[str],
+    function_counts: Counter[str],
+) -> tuple[str, dict[str, set[str]], Counter[str]] | None:
+    """Return symbol validation context for class/function registries."""
+    symbol_kind = _SYMBOL_REGISTRY_CONTEXT.get(registry_name)
+    if symbol_kind == "class":
+        return symbol_kind, classes_by_module, class_counts
+    if symbol_kind == "function":
+        return symbol_kind, functions_by_module, function_counts
+    return None
+
+
+def _validate_registry_entries(
+    *,
+    registry_name: str,
+    entries: object,
+    classes_by_module: dict[str, set[str]],
+    functions_by_module: dict[str, set[str]],
+    class_counts: Counter[str],
+    function_counts: Counter[str],
+    errors: list[str],
+) -> None:
+    """Validate target references for one registry when it tracks live symbols."""
+    if not isinstance(entries, dict):
+        return
+
+    context = _get_symbol_registry_context(
+        registry_name,
+        classes_by_module=classes_by_module,
+        functions_by_module=functions_by_module,
+        class_counts=class_counts,
+        function_counts=function_counts,
+    )
+    if context is None:
+        return
+
+    symbol_kind, symbols_by_module, global_counts = context
+    for key in sorted(entries):
+        if not isinstance(key, str):
+            continue
+        _validate_symbol_key_reference(
+            registry_name=registry_name,
+            key=key,
+            symbol_kind=symbol_kind,
+            symbols_by_module=symbols_by_module,
+            global_counts=global_counts,
+            errors=errors,
+        )
+
+
 def validate_exemption_target_references(
     path: Path | str | None = None,
 ) -> list[str]:
@@ -134,30 +194,15 @@ def validate_exemption_target_references(
     errors: list[str] = []
 
     for registry_name, entries in sorted(registries.items()):
-        if not isinstance(entries, dict):
-            continue
-        if registry_name in _CLASS_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="class",
-                        symbols_by_module=classes_by_module,
-                        global_counts=class_counts,
-                        errors=errors,
-                    )
-        elif registry_name in _FUNCTION_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="function",
-                        symbols_by_module=functions_by_module,
-                        global_counts=function_counts,
-                        errors=errors,
-                    )
+        _validate_registry_entries(
+            registry_name=registry_name,
+            entries=entries,
+            classes_by_module=classes_by_module,
+            functions_by_module=functions_by_module,
+            class_counts=class_counts,
+            function_counts=function_counts,
+            errors=errors,
+        )
 
     return errors
 

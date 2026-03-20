@@ -9,6 +9,9 @@ import respx
 from httpx import Response
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -30,9 +33,18 @@ def unified_http_client():
 
 
 @pytest.fixture
-def uniprot_adapter(unified_http_client, mock_logger):
+def fallback_fetch_service():
+    return create_default_fallback_service(adapter_metrics=MagicMock())
+
+
+@pytest.fixture
+def uniprot_adapter(unified_http_client, mock_logger, fallback_fetch_service):
     """Fixture for UniProtAdapter."""
-    return UniProtAdapter(http_client=unified_http_client, logger=mock_logger)
+    return UniProtAdapter(
+        http_client=unified_http_client,
+        logger=mock_logger,
+        fallback_fetch_service=fallback_fetch_service,
+    )
 
 
 @pytest.fixture

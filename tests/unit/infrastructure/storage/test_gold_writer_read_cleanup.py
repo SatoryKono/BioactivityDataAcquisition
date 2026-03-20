@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.infrastructure.storage.gold.read_cleanup_mixin import (
     GoldWriterReadCleanupMixin,
+    _build_read_projection,
     _load_gold_writer_module,
 )
 
@@ -35,6 +36,28 @@ class TestLoadGoldWriterModule:
         module = _load_gold_writer_module()
         assert isinstance(module, ModuleType)
         assert module.__name__ == "bioetl.infrastructure.storage.gold_writer"
+
+
+class TestBuildReadProjection:
+    """Tests for read projection helper."""
+
+    def test_returns_none_without_requested_columns(self) -> None:
+        """No projection should be applied when caller wants full records."""
+        assert _build_read_projection(columns=None, current_only=True) is None
+
+    def test_appends_is_current_when_needed(self) -> None:
+        """Current-only reads keep filtering support in projected reads."""
+        assert _build_read_projection(
+            columns=["entity_id"],
+            current_only=True,
+        ) == ["entity_id", "is_current"]
+
+    def test_keeps_existing_is_current_once(self) -> None:
+        """Projection should not duplicate filter columns."""
+        assert _build_read_projection(
+            columns=["entity_id", "is_current"],
+            current_only=True,
+        ) == ["entity_id", "is_current"]
 
 
 class TestPreviewCleanup:
@@ -135,6 +158,7 @@ class TestReadGold:
         assert len(result) == 1
         assert "entity_id" in result[0]
         assert "extra" not in result[0]
+        mock_dt.to_pyarrow_table.assert_called_once_with(["entity_id", "is_current"])
 
     @pytest.mark.asyncio
     async def test_read_gold_filters_is_current(self, tmp_path: Path) -> None:
@@ -165,6 +189,7 @@ class TestReadGold:
         assert len(result) == 1
         assert result[0]["entity_id"] == "E1"
         assert result[0]["is_current"] is True
+        mock_dt.to_pyarrow_table.assert_called_once_with()
 
 
 class TestGetHistory:

@@ -12,6 +12,9 @@ from pydantic import SecretStr
 from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -39,6 +42,9 @@ def pubmed_adapter(mock_logger) -> PubMedAdapter:
         http_client=http_client,
         logger=mock_logger,
         email="test@example.com",
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 
@@ -193,6 +199,9 @@ async def test_adapter_factory(mock_logger):
         logger=mock_logger,
         settings=settings,
         batch_size=100,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
     assert adapter.email == "factory@example.com"

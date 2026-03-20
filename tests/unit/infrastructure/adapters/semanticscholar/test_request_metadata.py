@@ -6,6 +6,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
@@ -45,6 +48,9 @@ def adapter(
         logger=mock_logger,
         api_key="test-api-key",
         batch_size=10,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 

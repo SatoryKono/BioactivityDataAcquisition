@@ -2,15 +2,26 @@
 
 from __future__ import annotations
 
+import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
+from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
+from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
+    PubChemFetchStrategies,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -19,11 +30,33 @@ pytestmark = pytest.mark.unit
 def adapter() -> PubChemAdapter:
     """Create a lightweight adapter instance for request-metadata tests."""
     pool = ThreadPoolExecutor(max_workers=1)
+    logger = MagicMock()
+    rate_limiter = TokenBucketRateLimiter(rate=5.0, capacity=10)
+    circuit_breaker = CircuitBreakerGuard(provider="pubchem_test")
+    request_collector = APIRequestCollector()
+    entity_mapper = PubChemEntityMapper()
+
+    async def run_in_executor(func, *args):
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(pool, func, *args)
+
     adapter = PubChemAdapter(
-        logger=MagicMock(),
-        rate_limiter=TokenBucketRateLimiter(rate=5.0, capacity=10),
-        circuit_breaker=CircuitBreakerGuard(provider="pubchem_test"),
+        logger=logger,
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
         thread_pool=pool,
+        error_handler=create_default_error_handler(logger=logger, metrics=None),
+        request_collector=request_collector,
+        entity_mapper=entity_mapper,
+        fetch_strategies=PubChemFetchStrategies(
+            logger=logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            mapper=entity_mapper,
+            run_in_executor=run_in_executor,
+            provider_name=PubChemAdapter.provider_name,
+            request_collector=request_collector,
+        ),
     )
     try:
         yield adapter

@@ -142,6 +142,7 @@ class TestArrowDataConverterConvertRecords:
         result = converter.convert_records_to_arrow(records)
         assert isinstance(result, pa.Table)
         assert len(result) == 0
+        assert result.column_names == []
 
     def test_convert_records_with_invalid_primary_key_ignored(self) -> None:
         """Should ignore primary keys that don't exist in schema."""
@@ -279,6 +280,21 @@ class TestArrowDataConverterConvertRecords:
         assert result.column("id").to_pylist() == [2, 1]
         logger.warning.assert_called_once()
 
+    def test_convert_records_with_schema_handles_empty_records(self) -> None:
+        """Schema-aware conversion should return an empty table with the requested schema."""
+        converter = ArrowDataConverter()
+        schema = pa.schema(
+            [
+                pa.field("id", pa.int64()),
+                pa.field("payload", pa.string()),
+            ]
+        )
+
+        result = converter.convert_records_to_arrow_with_schema([], schema)
+
+        assert result.schema == schema
+        assert result.num_rows == 0
+
 
 class TestArrowSchemaPreparationHelpers:
     """Tests for reusable schema-aware Arrow preparation helpers."""
@@ -351,6 +367,14 @@ class TestArrowSchemaPreparationHelpers:
         result = sort_arrow_table_by_primary_keys(table, ["id"])
 
         assert result.column("id").to_pylist() == ["a", "b", "c"]
+
+    def test_sort_arrow_table_by_primary_keys_skips_single_row(self) -> None:
+        """Single-row tables should bypass sort work."""
+        table = pa.table({"id": ["a"], "value": [1]})
+
+        result = sort_arrow_table_by_primary_keys(table, ["id"])
+
+        assert result is table
 
 
 class TestArrowDataConverterNullColumnSanitization:

@@ -13,10 +13,14 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import inspect
+import json
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from types import ModuleType
 
 import yaml
 
@@ -155,6 +159,14 @@ def _write_if_changed(path: Path, content: str, check: bool) -> bool:
 
 
 def _run_gold_contract_generation(check: bool) -> bool:
+    if check:
+        current = _snapshot_generated_contracts()
+        expected = _expected_generated_contracts_snapshot()
+        stale = current != expected
+        if stale:
+            _emit(f"STALE {GENERATED_GLOB}", err=True)
+        return stale
+
     before = _snapshot_generated_contracts()
     subprocess.run(
         [sys.executable, "scripts/schema/generate_contracts.py"],
@@ -174,6 +186,44 @@ def _snapshot_generated_contracts() -> dict[str, str]:
     for path in sorted(GENERATED_CONTRACTS_DIR.glob("*.json")):
         rel = path.relative_to(PROJECT_ROOT).as_posix()
         snapshot[rel] = path.read_text(encoding="utf-8")
+    return snapshot
+
+
+def _load_generate_contracts_module() -> ModuleType:
+    """Load the contract generator script as a module for side-effect-free checks."""
+    script_path = PROJECT_ROOT / "scripts" / "schema" / "generate_contracts.py"
+    spec = importlib.util.spec_from_file_location(
+        "bioetl_generate_contracts_script",
+        script_path,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load contract generator: {script_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _expected_generated_contracts_snapshot() -> dict[str, str]:
+    """Build the expected Gold contract snapshot without mutating the workspace."""
+    module = _load_generate_contracts_module()
+    schema_classes: list[type[object]] = []
+    for export_name in module.gold_contracts.__all__:
+        export_obj = getattr(module.gold_contracts, export_name)
+        if inspect.isclass(export_obj) and export_name.endswith("GoldSchema"):
+            schema_classes.append(export_obj)
+
+    schema_classes.sort(key=lambda cls: cls.__name__)
+    snapshot: dict[str, str] = {}
+
+    for schema_cls in schema_classes:
+        entity = module._class_to_entity(schema_cls.__name__)
+        filename = module._filename_from_version(entity, module.CONTRACT_VERSION)
+        output_path = GENERATED_CONTRACTS_DIR / filename
+        contract = module._build_contract(schema_cls, entity)
+        snapshot[output_path.relative_to(PROJECT_ROOT).as_posix()] = (
+            json.dumps(contract, indent=2, ensure_ascii=False) + "\n"
+        )
+
     return snapshot
 
 

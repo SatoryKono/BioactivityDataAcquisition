@@ -186,6 +186,7 @@ class TestCrossRefAndOpenAlexCreators:
         call_kwargs = mock_adapter_cls.call_args.kwargs
         assert call_kwargs["mailto"] == "default@example.org"
         assert call_kwargs["batch_size"] == 55
+        assert call_kwargs["fallback_fetch_service"] is not None
         assert result is mock_adapter
 
     @patch("bioetl.composition.providers.registration_biblio.PubMedAdapter")
