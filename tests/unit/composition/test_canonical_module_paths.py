@@ -38,3 +38,18 @@ def test_pipeline_runner_service_bootstrap_reexports_legacy_entrypoint() -> None
     )
 
     assert canonical_bootstrap is bootstrap_pipeline_runner_service
+
+
+def test_services_creation_api_reexports_pipeline_creation_symbols() -> None:
+    """Services creation API should stay as a compatibility shim."""
+    from bioetl.composition.factories.pipeline.creation_api import (
+        _PipelineCreationInputs as CanonicalPipelineCreationInputs,
+        _create_pipeline_with_services_impl as canonical_create_pipeline,
+    )
+    from bioetl.composition.factories.services.creation_api import (
+        _PipelineCreationInputs,
+        _create_pipeline_with_services_impl,
+    )
+
+    assert _PipelineCreationInputs is CanonicalPipelineCreationInputs
+    assert _create_pipeline_with_services_impl is canonical_create_pipeline

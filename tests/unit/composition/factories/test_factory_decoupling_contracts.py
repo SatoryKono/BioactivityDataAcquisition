@@ -8,6 +8,14 @@ from pathlib import Path
 import pytest
 
 from bioetl.composition.factories.pipeline import build_pipeline_services
+from bioetl.composition.factories.pipeline.creation_api import (
+    _PipelineCreationInputs as CanonicalPipelineCreationInputs,
+    _create_pipeline_with_services_impl as canonical_create_pipeline,
+)
+from bioetl.composition.factories.services import (
+    _PipelineCreationInputs,
+    _create_pipeline_with_services_impl,
+)
 
 
 @pytest.mark.unit
@@ -36,3 +44,10 @@ def test_pipeline_package_root_reexports_canonical_service_bundle_entrypoint() -
     assert build_pipeline_services.__module__ == (
         "bioetl.composition.factories.services.bundle"
     )
+
+
+@pytest.mark.unit
+def test_services_package_root_reexports_canonical_pipeline_creation_symbols() -> None:
+    """Services package root should expose pipeline-owned creation contracts."""
+    assert _PipelineCreationInputs is CanonicalPipelineCreationInputs
+    assert _create_pipeline_with_services_impl is canonical_create_pipeline

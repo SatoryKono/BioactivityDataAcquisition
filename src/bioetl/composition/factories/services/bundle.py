@@ -10,7 +10,7 @@ from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.services.creation_api import (
+from bioetl.composition.factories.pipeline.creation_api import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,

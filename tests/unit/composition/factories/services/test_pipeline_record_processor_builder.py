@@ -1,0 +1,85 @@
+"""Unit tests for record-processor helper seams extracted from pipeline_builder."""
+
+from __future__ import annotations
+
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+from bioetl.composition.factories.services.pipeline_record_processor_builder import (
+    build_record_processor_config_and_validator,
+    create_record_processor_from_pipeline,
+)
+
+
+def _make_pipeline() -> MagicMock:
+    pipeline = MagicMock()
+    pipeline.services = MagicMock(name="services")
+    pipeline.context = MagicMock(name="context")
+    pipeline.config.pipeline_name = "chembl_activity"
+    pipeline.config.provider = "chembl"
+    pipeline.config.entity_type = "activity"
+    pipeline.config.dq = None
+    pipeline.config.table = MagicMock()
+    pipeline.config.table.primary_keys = ["pk"]
+    pipeline.config.effective_silver_table = "silver_table"
+    pipeline.config.effective_gold_table = "gold_table"
+    pipeline.config.table.silver_write_mode = "merge"
+    pipeline.config.table.gold_write_mode = "overwrite"
+    pipeline.config.table.on_schema_mismatch = "error"
+    pipeline.config.column_groups = ["system", "business"]
+    pipeline.config.scd_config = {"type": 2}
+    return pipeline
+
+
+def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> None:
+    pipeline = _make_pipeline()
+    callbacks = SimpleNamespace(
+        transform=MagicMock(name="transform"),
+        gold_filter=MagicMock(name="gold_filter"),
+        gold_transform=MagicMock(name="gold_transform"),
+    )
+    create_fn = MagicMock(return_value=MagicMock(name="record_processor"))
+
+    create_record_processor_from_pipeline(
+        pipeline=pipeline,
+        silver_schema=None,
+        gold_schema=MagicMock(name="gold_schema"),
+        callbacks=callbacks,
+        create_record_processor_fn=create_fn,
+        lock_validator=MagicMock(name="lock_validator"),
+        tracer=MagicMock(name="tracer"),
+    )
+
+    call_kwargs = create_fn.call_args.kwargs
+    assert call_kwargs["services"] is pipeline.services
+    assert call_kwargs["context"] is pipeline.context
+    assert call_kwargs["pipeline_name"] == "chembl_activity"
+    assert call_kwargs["provider"] == "chembl"
+    assert call_kwargs["entity_type"] == "activity"
+    assert call_kwargs["column_groups"] == ("system", "business")
+    assert call_kwargs["scd_config"] == {"type": 2}
+
+
+def test_build_record_processor_config_and_validator_forwards_paths_and_strict() -> None:
+    pipeline = _make_pipeline()
+    gold_validator_factory = MagicMock(return_value=MagicMock(name="validator"))
+
+    config, validator = build_record_processor_config_and_validator(
+        pipeline=pipeline,
+        silver_schema=None,
+        gold_schema=MagicMock(name="gold_schema"),
+        strict_gold_validation=False,
+        bronze_output_path="/tmp/bronze",
+        silver_output_path="/tmp/silver",
+        gold_output_path="/tmp/gold",
+        flat_structure=True,
+        gold_validator_factory=gold_validator_factory,
+    )
+
+    assert config.pipeline_name == "chembl_activity"
+    assert config.bronze_output_path == "/tmp/bronze"
+    assert config.silver_output_path == "/tmp/silver"
+    assert config.gold_output_path == "/tmp/gold"
+    assert config.flat_structure is True
+    assert validator is gold_validator_factory.return_value
+    assert gold_validator_factory.call_args.kwargs["strict"] is False

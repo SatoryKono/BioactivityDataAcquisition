@@ -1,7 +1,7 @@
 # RF-04A Composition Seam Map
 
 **Date:** 2026-03-20
-**Status:** Completed analysis
+**Status:** Completed analysis, decisions executed for RF-04B/RF-04C
 **Parent plan:** [`rf-04-composition-hotspots-execution-plan-2026-03-20.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/plans/rf-04-composition-hotspots-execution-plan-2026-03-20.md)
 
 ## Purpose
@@ -212,10 +212,10 @@ It is “not yet justified to touch”.
 
 The current code already has explicit bundle boundaries and targeted tests. Without stronger evidence of duplicated wiring elsewhere or multiple independent change axes inside one builder, decomposing it now would be churn-heavy and likely worsen discoverability.
 
-## Recommended Next Step
+## Outcome
 
-Proceed with:
+The recommended next step from this memo has now been executed:
 
-1. RF-04B as a low-risk `registration_biblio` closeout slice.
-2. RF-04C as the main `pipeline_builder` decomposition wave.
-3. Leave `composite_support_service_builders.py` out of implementation scope unless a later wave discovers duplicated merge/runtime wiring that needs extraction.
+1. RF-04B completed as a low-risk `registration_biblio` closeout slice.
+2. RF-04C completed as the main `pipeline_builder` decomposition wave.
+3. [`composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) remains intentionally outside implementation scope until stronger evidence appears.
