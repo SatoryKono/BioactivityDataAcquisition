@@ -2,9 +2,9 @@
 """Validate rendered diagram artifacts for smoke baseline set.
 
 Checks:
-- DIAG-T010: SVG artifacts exist
-- DIAG-T011: PNG artifacts exist
-- DIAG-T012: SVG/PNG artifacts are non-empty
+- DIAG-T010: required SVG artifacts exist
+- DIAG-T011: PNG compatibility artifacts exist when explicitly required
+- DIAG-T012: required artifacts are non-empty
 """
 
 from __future__ import annotations
@@ -68,14 +68,17 @@ def to_png_path(svg_path: Path) -> Path:
     try:
         svg_idx = parts.index("svg")
     except ValueError:
-        raise ValueError(f"Cannot derive PNG path (missing '/svg/' segment): {svg_path}") from None
+        raise ValueError(
+            f"Cannot derive PNG path (missing '/svg/' segment): {svg_path}"
+        ) from None
 
     parts[svg_idx] = "png"
-    png = Path(*parts).with_suffix(".png")
-    return png
+    return Path(*parts).with_suffix(".png")
 
 
-def validate_artifacts(repo_root: Path, svg_rel_paths: list[Path]) -> list[ArtifactIssue]:
+def validate_artifacts(
+    repo_root: Path, svg_rel_paths: list[Path], *, require_png: bool = False
+) -> list[ArtifactIssue]:
     issues: list[ArtifactIssue] = []
 
     for svg_rel in svg_rel_paths:
@@ -100,28 +103,31 @@ def validate_artifacts(repo_root: Path, svg_rel_paths: list[Path]) -> list[Artif
                 )
             )
 
-        if not png_abs.exists():
-            issues.append(
-                ArtifactIssue(
-                    file=str(png_rel),
-                    kind="DIAG-T011",
-                    message="PNG artifact is missing",
+        if require_png:
+            if not png_abs.exists():
+                issues.append(
+                    ArtifactIssue(
+                        file=str(png_rel),
+                        kind="DIAG-T011",
+                        message="PNG compatibility artifact is missing",
+                    )
                 )
-            )
-        elif png_abs.stat().st_size <= 0:
-            issues.append(
-                ArtifactIssue(
-                    file=str(png_rel),
-                    kind="DIAG-T012",
-                    message="PNG artifact is empty",
+            elif png_abs.stat().st_size <= 0:
+                issues.append(
+                    ArtifactIssue(
+                        file=str(png_rel),
+                        kind="DIAG-T012",
+                        message="PNG compatibility artifact is empty",
+                    )
                 )
-            )
 
     return issues
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Validate diagram SVG/PNG artifact existence")
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Validate diagram render artifacts (SVG required, PNG optional)"
+    )
     parser.add_argument(
         "--manifest",
         type=Path,
@@ -129,17 +135,24 @@ def parse_args() -> argparse.Namespace:
         help=f"Path to SVG manifest (default: {DEFAULT_MANIFEST})",
     )
     parser.add_argument(
+        "--require-png",
+        action="store_true",
+        help="Also require derived PNG compatibility artifacts for manifest entries",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Emit JSON report",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     repo_root = Path.cwd()
-    manifest = args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    manifest = (
+        args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    )
 
     try:
         svg_paths = load_manifest(manifest)
@@ -147,7 +160,7 @@ def main() -> int:
         _err(f"[ERROR] {exc}")
         return 2
 
-    issues = validate_artifacts(repo_root, svg_paths)
+    issues = validate_artifacts(repo_root, svg_paths, require_png=args.require_png)
 
     if args.json:
         _out(
@@ -155,6 +168,7 @@ def main() -> int:
                 {
                     "ok": not issues,
                     "checked": len(svg_paths),
+                    "require_png": args.require_png,
                     "issues": [asdict(issue) for issue in issues],
                 },
                 ensure_ascii=True,
@@ -162,7 +176,8 @@ def main() -> int:
             )
         )
     else:
-        _out(f"[INFO] Checked artifact pairs: {len(svg_paths)}")
+        mode = "SVG+PNG compatibility" if args.require_png else "SVG primary"
+        _out(f"[INFO] Checked artifact entries: {len(svg_paths)} ({mode})")
 
     if issues:
         _err("[ERROR] Diagram artifact validation failed:")

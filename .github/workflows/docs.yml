@@ -137,7 +137,7 @@ jobs:
           bash docs/02-architecture/mmd-diagrams/render.sh \
             --puppeteer /tmp/puppeteer-config.json
 
-      - name: Validate rendered artifact existence (SVG/PNG)
+      - name: Validate required rendered artifacts (SVG primary)
         run: |
           python3 scripts/diagrams/check_diagram_artifacts.py \
             --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
@@ -236,4 +236,3 @@ jobs:
           else
             echo "Rendered outputs also updated — OK."
           fi
-

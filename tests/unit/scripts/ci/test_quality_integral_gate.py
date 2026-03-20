@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from scripts.ci.quality_integral_gate import ArchitectureTestStats
-from scripts.ci.quality_integral_gate import TestHealthClassification as HealthClassification
+from scripts.ci.quality_integral_gate import (
+    TestHealthClassification as HealthClassification,
+)
 from scripts.ci.quality_integral_gate import _build_test_health_payload
 from scripts.ci.quality_integral_gate import _classify_test_health
 
@@ -23,7 +25,8 @@ def test_classify_test_health_environment_limited_green() -> None:
             "live_api_gate_mode": "scheduled",
             "live_api_minimum_baseline": {
                 "enforced_providers": ["chembl", "pubchem"],
-                "vcr_only_providers": ["crossref"],
+                "pilot_providers": ["crossref"],
+                "vcr_only_providers": ["openalex"],
             },
         },
         "fixture_governance": {"rollout": {"cassette_metadata": "planned"}},
@@ -37,7 +40,9 @@ def test_classify_test_health_environment_limited_green() -> None:
 
     assert result.status == "environment_limited_green"
     assert "network opt-in gated" in " | ".join(result.reasons)
+    assert "pilot provider" in " | ".join(result.reasons)
     assert result.architecture_skip_count == 12
+    assert result.live_contract_pilot_provider_count == 1
     assert result.live_contract_vcr_only_provider_count == 1
 
 
@@ -56,6 +61,7 @@ def test_classify_test_health_staged_green() -> None:
             "live_api_gate_mode": "always",
             "live_api_minimum_baseline": {
                 "enforced_providers": ["chembl", "pubchem"],
+                "pilot_providers": [],
                 "vcr_only_providers": [],
             },
         },
@@ -100,6 +106,7 @@ def test_classify_test_health_fully_exercised_green() -> None:
             "live_api_gate_mode": "always",
             "live_api_minimum_baseline": {
                 "enforced_providers": ["chembl", "pubchem", "uniprot"],
+                "pilot_providers": [],
                 "vcr_only_providers": [],
             },
         },
@@ -138,6 +145,7 @@ def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
         architecture_skip_count=0,
         architecture_skip_ratio=0.0,
         live_contract_enforced_provider_count=4,
+        live_contract_pilot_provider_count=1,
         live_contract_vcr_only_provider_count=3,
         staged_rollout_flags=("fixture_governance.cassette_metadata=partial",),
     )

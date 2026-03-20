@@ -23,7 +23,7 @@ python -m scripts.diagrams <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `check-artifacts` | `check_diagram_artifacts.py` | Check diagram artifact manifest |
+| `check-artifacts` | `check_diagram_artifacts.py` | Check required SVG artifacts and optional PNG compatibility artifacts |
 | `check-quality-gates` | `check_diagram_quality_gates.py` | Check diagram quality gates |
 | `check-visual-smoke` | `check_diagram_visual_smoke.py` | Visual smoke test for diagrams |
 | `check-svg-text` | `check_svg_text_visibility.py` | Check SVG text visibility |
@@ -51,6 +51,7 @@ python -m scripts.diagrams <command> [args...]
 | `render-pdf-desc` | `generate_with_descriptions_pdf.py` | Generate PDF with descriptions |
 | `render-docx` | `generate_with_descriptions_docx.py` | Generate DOCX with descriptions |
 | `render-views` | `generate_views_bundle.py` | Refresh views Markdown bundle |
+| `render-desc-indexes` | `generate_description_indexes.py` | Refresh family-oriented description indexes |
 
 ### Suite
 
@@ -65,7 +66,7 @@ python -m scripts.diagrams <command> [args...]
 | `lint` | After editing `.mmd`/`.mermaid` files; validates metadata, naming, staleness, palettes | Pre-commit hook + nightly CI |
 | `lint-summarize` | After `lint` produces a report; generates human-readable summary | Manual, post-lint |
 | `lint-budget` | After lint run; enforces quality budget thresholds | CI gate (nightly) |
-| `check-artifacts` | After rendering diagrams; validates SVG/PNG artifacts exist and are non-empty | Nightly CI (post-render) |
+| `check-artifacts` | After rendering diagrams; validates required SVG artifacts and, when requested, PNG compatibility artifacts | Nightly CI (post-render) |
 | `check-quality-gates` | Before merge; implements DIAG-T018..T023 regression gates (edge markers, classdefs, node counts) | CI gate (`architecture.yml` + nightly) |
 | `check-visual-smoke` | After rendering; visual baseline comparison (DIAG-T026) | Nightly CI |
 | `check-svg-text` | After rendering SVGs; validates text readability (DIAG-T014..T015) | Nightly CI |
@@ -83,6 +84,7 @@ python -m scripts.diagrams <command> [args...]
 | `render-pdf-desc` | When PDF with full descriptions is needed | Manual, on-demand |
 | `render-docx` | When DOCX export is needed for external review | Manual, on-demand |
 | `render-views` | When the views Markdown bundle needs refresh | Manual, on-demand |
+| `render-desc-indexes` | When description indexes drift or card counts change | Manual, on-demand |
 | `nightly` | Full Phase 2 diagram validation (DIAG-T024..T029) | Scheduled nightly (2:20 UTC) |
 
 ## Other Files
@@ -90,6 +92,7 @@ python -m scripts.diagrams <command> [args...]
 | File | Description |
 |------|-------------|
 | `generate_all_bundles.py` | Canonical Markdown bundle generator; supports `--collection` for targeted publication refresh |
+| `generate_description_indexes.py` | Canonical generator for family-oriented description indexes |
 | `run_diagram_checks.sh` | Shell wrapper for diagram checks |
 | `run_diagram_docs_agent.sh` | Shell wrapper for diagram docs agent |
 | `validate_mermaid_syntax.sh` | Validate Mermaid syntax |
@@ -99,5 +102,7 @@ python -m scripts.diagrams <command> [args...]
 ## Bundle Generation Contract
 
 - `generate_all_bundles.py` is the canonical Markdown bundle generator for `architecture`, `class-diagrams`, `foundation`, and `views`.
+- Markdown bundles prefer `svg/` renders as the primary publication artifact and fall back to `png/` only when an SVG is missing.
+- `generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`.
 - `generate_architecture_bundle.py` and `generate_views_bundle.py` are maintained compatibility wrappers for collection-specific entrypoints.
 - When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact.

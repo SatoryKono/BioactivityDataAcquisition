@@ -33,6 +33,7 @@ Render:
     render-pdf-desc      Generate PDF with descriptions
     render-docx          Generate DOCX with descriptions
     render-views         Refresh views Markdown bundle
+    render-desc-indexes  Refresh description indexes
 
 Suite:
     nightly              Run full diagram nightly suite
@@ -70,6 +71,7 @@ COMMANDS: dict[str, str] = {
     "render-pdf-desc": "generate_with_descriptions_pdf.py",
     "render-docx": "generate_with_descriptions_docx.py",
     "render-views": "generate_views_bundle.py",
+    "render-desc-indexes": "generate_description_indexes.py",
     # Suite
     "nightly": "run_diagram_nightly_suite.py",
 }

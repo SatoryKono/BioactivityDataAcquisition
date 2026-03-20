@@ -82,6 +82,15 @@ These are fundamentally incompatible at the adapter level. Clear boundary needed
 - Live provider contract verification remains active today via the scheduled
   `contract-tests.yml` workflow and must opt into outbound network access explicitly
 
+### Live Provider Tiering
+
+- `enforced`: provider is part of the minimum live contract baseline and must
+  keep a dedicated `tests/contract/test_<provider>_contract.py` suite
+- `pilot`: provider has an explicitly tracked live contract pilot suite, but is
+  not yet part of the enforced minimum baseline
+- `vcr_only`: provider confidence is currently carried through VCR-backed tests
+  and must not silently grow a live contract suite without matrix promotion
+
 ---
 
 ## Consequences

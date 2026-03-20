@@ -21,6 +21,7 @@ bash scripts/check_skills_mirror.sh --sync
 | Skill | Path | Purpose |
 |------|------|---------|
 | `agent-orchestration` | `.codex/skills/agent-orchestration` | Multi-agent coordination map |
+| `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Hierarchical evidence collection and synthesis orchestration |
 | `py-review-orchestrator` | `.codex/skills/py-review-orchestrator` | Hierarchical review campaign |
 | `py-test-swarm` | `.codex/skills/py-test-swarm` | Hierarchical test swarm (L1/L2/L3) |
 
@@ -89,6 +90,7 @@ bash scripts/check_skills_mirror.sh --sync
 - [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
 - [generating-constrained-specs](generating-constrained-specs/SKILL.md)
+- [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [initializing-ledger](initializing-ledger/SKILL.md)
 - [making-decisions](making-decisions/SKILL.md)
 - [nci-analysis](nci-analysis/SKILL.md)

@@ -23,6 +23,7 @@ from bioetl.composition.providers._config_helpers import (
 from bioetl.composition.providers._models import HttpConfig, ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
+    build_data_source_provider_config,
     build_http_provider_config,
     resolve_provider_assembly_support,
 )
@@ -255,7 +256,7 @@ def _get_bio_provider_configs(
             data_source_creator=_create_chembl_data_source,
             assembly_support=support,
         ),
-        "pubchem": ProviderConfig(
+        "pubchem": build_data_source_provider_config(
             adapter_class=PubChemAdapter,
             http_config=HttpConfig(rate=pubchem.rate, capacity=pubchem.capacity),
             requires_http_client=False,

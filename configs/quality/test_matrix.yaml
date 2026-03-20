@@ -43,10 +43,23 @@ layers:
 
 providers:
   chembl:
-    entities: [activity, assay, assay_parameters, cell_line, compound_record,
-               publication, publication_similarity, publication_term, molecule,
-               protein_class, subcellular_fraction, target, target_component,
-               tissue]
+    entities:
+      [
+        activity,
+        assay,
+        assay_parameters,
+        cell_line,
+        compound_record,
+        publication,
+        publication_similarity,
+        publication_term,
+        molecule,
+        protein_class,
+        subcellular_fraction,
+        target,
+        target_component,
+        tissue,
+      ]
     vcr_cassettes: MUST
     contract_tests: MUST
     golden_masters: SHOULD
@@ -72,13 +85,13 @@ providers:
   crossref:
     entities: [publication]
     vcr_cassettes: MUST
-    contract_tests: SHOULD
+    contract_tests: MUST
     golden_masters: MAY
 
   openalex:
     entities: [publication]
     vcr_cassettes: MUST
-    contract_tests: SHOULD
+    contract_tests: MUST
     golden_masters: MAY
 
   semanticscholar:
@@ -166,8 +179,8 @@ property_test_boundaries:
     - application/core/normalization*
     - domain/services/schema*
   forbidden:
-    - infrastructure/storage   # Use fixtures instead
-    - interfaces/cli           # Use e2e instead
+    - infrastructure/storage  # Use fixtures instead
+    - interfaces/cli  # Use e2e instead
   # Note: infrastructure/adapters/common is exempt — retry/fallback
   # policies are pure logic tested with property-based approaches.
 
@@ -187,8 +200,8 @@ mutation_testing:
       enforced: false
   excluded:
     - infrastructure  # I/O-heavy, low mutation value
-    - composition     # Wiring code, tested via e2e
-    - interfaces      # CLI tested via e2e
+    - composition  # Wiring code, tested via e2e
+    - interfaces  # CLI tested via e2e
 
 # ── Fixture governance ───────────────────────────────────────
 
@@ -220,13 +233,14 @@ contract_testing:
   live_api_gate_mode: scheduled
   network_opt_in_required: true
   live_api_minimum_baseline:
-    enforced_providers: [chembl, pubchem, uniprot, pubmed]
-    vcr_only_providers: [crossref, openalex, semanticscholar]
+    enforced_providers: [chembl, pubchem, uniprot, pubmed, crossref, openalex]
+    pilot_providers: []
+    vcr_only_providers: [semanticscholar]
   provider_live_api:
     chembl: enforced
     pubchem: enforced
     uniprot: enforced
     pubmed: enforced
-    crossref: vcr_only
-    openalex: vcr_only
+    crossref: enforced
+    openalex: enforced
     semanticscholar: vcr_only

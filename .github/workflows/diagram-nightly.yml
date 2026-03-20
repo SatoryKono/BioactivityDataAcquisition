@@ -34,7 +34,8 @@ jobs:
       - name: Validate rendered artifacts (DIAG-T010..T012)
         run: |
           python3 scripts/diagrams/check_diagram_artifacts.py \
-            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt \
+            --require-png
 
       - name: Validate SVG text visibility (DIAG-T014..T015)
         run: |
@@ -185,4 +186,3 @@ jobs:
             echo "- Workflow status: ${{ job.status }}"
             echo "- `mmdc --version`: $(mmdc --version || echo 'unavailable')"
           } >> "$GITHUB_STEP_SUMMARY"
-

@@ -29,7 +29,7 @@ RF-04 has now completed the intended core path:
 - RF-04A completed as an explicit seam-analysis memo in [`rf-04a-composition-seam-map-2026-03-20.md`](rf-04a-composition-seam-map-2026-03-20.md)
 - RF-04B completed for [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py)
 - RF-04C completed for [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py)
-- RF-04D remains intentionally deferred for [`composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py)
+- RF-04D now closes as a guarded facade-only seam for [`composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py)
 
 Delivered structural changes:
 
@@ -37,6 +37,8 @@ Delivered structural changes:
 - [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py) now stays focused on provider registration and data-source facade wiring
 - record-processor projection/config assembly moved into [`pipeline_record_processor_builder.py`](../../src/bioetl/composition/factories/services/pipeline_record_processor_builder.py)
 - [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py) remains the public facade while delegating the extracted seam
+- [`composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) now remains a thin facade over split execution/runtime-management/merge builders and is protected against regrowth by architecture tests
+- [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py) is now treated as a guarded service-factory facade over the split batch-processing, record-processor, and batch-executor builders, with a dedicated contract ratchet holding that shape
 
 Verification completed successfully for implemented slices:
 
@@ -156,7 +158,7 @@ Current implication:
 
 ### RF-04C. Main Decomposition Wave For Pipeline Builder
 
-- **Status:** completed
+- **Status:** completed and ratcheted as facade seam
 - **Type:** refactor
 - **Layer:** composition/factories/services
 - **Risk:** medium
@@ -173,6 +175,14 @@ Current implication:
 - 2-3 adjacent helper modules carry themed responsibilities;
 - helper names are descriptive and navigable, not just `_helpers2.py`-style fragments.
 
+**Current closeout interpretation**
+- the intended split is already in place via:
+  - `pipeline_processing_components_builder.py`
+  - `pipeline_record_processor_builder.py`
+  - `pipeline_batch_executor_builder.py`
+- the remaining responsibility of `pipeline_builder.py` is now to stay a thin
+  service-factory facade and not re-accumulate low-level orchestration code
+
 **Not allowed**
 - changing runtime semantics;
 - moving half the file into generic “utils”;
@@ -180,19 +190,30 @@ Current implication:
 
 ### RF-04D. Evidence Gate For Composite Support Builders
 
-- **Status:** deferred by explicit seam analysis
-- **Type:** analysis-first
+- **Status:** closed as facade-only seam with guardrails
+- **Type:** closeout / architecture ratchet
 - **Layer:** composition/bootstrap/runtime
-- **Risk:** medium if executed blindly, low if deferred
-- **Goal:** decide whether this file is truly a hotspot or merely a large cohesive bundle-builder.
+- **Risk:** low
+- **Goal:** keep the module as a stable facade and prevent it from regrowing into a mixed runtime builder.
 
-**Promote to implementation only if one of these is proven**
-- one builder contains multiple independent change axes;
-- repeated merge/runtime wiring is duplicated outside the file;
-- a planned seam can be protected with targeted tests, not only architecture smoke checks.
+**Current interpretation**
+- the file is already a thin facade over:
+  - `composite_execution_support_builder.py`
+  - `composite_runtime_management_builder.py`
+  - `composite_merge_dependency_builder.py`
+- the hotspot has therefore collapsed from a decomposition candidate into a
+  preservation candidate
 
-**Default outcome**
-- if the evidence is weak, explicitly defer this file out of RF-04 implementation scope.
+**Required guard shape**
+- keep the file facade-only
+- prevent new local builder functions/classes from accumulating there
+- keep runtime-config import policy aligned with the stable facade
+
+**Reopen only if one of these becomes true**
+- new mixed builder logic starts accumulating in the facade again
+- one of the split builder modules develops a stronger internal seam that needs
+  another decomposition pass
+- repeated runtime/merge wiring pressure reappears outside the split builder set
 
 ## 4. Execution Order
 

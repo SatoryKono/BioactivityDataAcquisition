@@ -30,11 +30,11 @@
 
 - **Domain Layer** - Чистая бизнес-логика без I/O:
 
-  - 3 DDD Aggregates (PipelineRun, Batch, QuarantineEntry)
-  - 26 Ports (Protocol interfaces)
-  - 9 Entities (ChemblActivity, UniProtProtein и др.)
-  - 11 Value Objects
-  - 6 Domain Services
+  - representative DDD aggregates (PipelineRun, Batch, QuarantineEntry)
+  - port families and protocol interfaces
+  - canonical domain entity families (ChemblActivity, UniProtProtein и др.)
+  - value-object families
+  - pure domain service families
 
 - **Application Layer** - Use Cases и оркестрация:
 
@@ -64,7 +64,7 @@
 - ✅ Infrastructure реализует Domain Ports
 - ✅ Composition собирает зависимости
 
-**Файл:** [`docs/02-architecture/diagrams/foundation/01-high-level.mermaid`](../foundation/01-high-level.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/01-high-level.mmd`](../foundation/01-high-level.mmd)
 
 ----------------------------------------------------------------------
 
@@ -96,14 +96,14 @@ Ports & Adapters паттерн - ключевой архитектурный п
 - Value Objects
 - Domain Services
 
-**26 Ports (Protocols):**
+**Port families and protocol surfaces:**
 
 - DataSourcePort, StoragePort
 - LockPort, CheckpointPort, QuarantinePort
 - TracingPort, MetricsPort, LoggerPort
 - И другие...
 
-**Файл:** [`docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mermaid`](../foundation/26-hexagonal-ports-adapters.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mmd`](../foundation/26-hexagonal-ports-adapters.mmd)
 
 ----------------------------------------------------------------------
 
@@ -137,13 +137,13 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Нарушение = Блокер PR**
 
-**Файл:** [`docs/02-architecture/diagrams/foundation/27-import-matrix-enforcement.mermaid`](../foundation/27-import-matrix-enforcement.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/27-import-matrix-enforcement.mmd`](../foundation/27-import-matrix-enforcement.mmd)
 
 ----------------------------------------------------------------------
 
 ### 1.4 Medallion Architecture Overview
 
-> **Diagram:** See [`03-medallion-data-flow.mermaid`](../architecture/03-medallion-data-flow.mmd)
+> **Diagram:** See [`03-medallion-data-flow.mmd`](../architecture/03-medallion-data-flow.mmd)
 
 **Приоритет:** 9.38 | **Тип:** Flowchart
 
@@ -184,7 +184,7 @@ Bronze → Silver → Gold уровни хранения данных.
 - Delta Time Travel (7-day history)
 - VACUUM cleanup (weekly)
 
-**Файл:** [`docs/02-architecture/diagrams/architecture/03-medallion-data-flow.mermaid`](../architecture/03-medallion-data-flow.mmd)
+**Файл:** [`docs/02-architecture/diagrams/architecture/03-medallion-data-flow.mmd`](../architecture/03-medallion-data-flow.mmd)
 
 ----------------------------------------------------------------------
 
@@ -277,7 +277,7 @@ End-to-end поток данных от API провайдера до Gold layer
 
 - SIGTERM → Finish current batch → Save checkpoint → Exit(0)
 
-**Файл:** [`docs/02-architecture/diagrams/foundation/08-complete-etl-workflow.mermaid`](../foundation/08-complete-etl-workflow.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/08-complete-etl-workflow.mmd`](../foundation/08-complete-etl-workflow.mmd)
 
 ----------------------------------------------------------------------
 
@@ -348,7 +348,7 @@ Delta merge by content-hash — критическая операция для i
 
 **Описание:**
 
-Полная доменная модель с DDD Aggregates, Entities, Value Objects.
+Representative карта доменной модели с DDD aggregates, entity families и value-object families.
 
 **DDD Aggregates (Root Entities):**
 
@@ -371,7 +371,7 @@ Delta merge by content-hash — критическая операция для i
 - DataNormalizationService, IdentityService
 - UnitConverter, ActivityAggregator, ValueValidator
 
-**Файл:** [`docs/02-architecture/diagrams/foundation/13-domain-models-relationship.mermaid`](../foundation/13-domain-models-relationship.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/13-domain-models-relationship.mmd`](../foundation/13-domain-models-relationship.mmd)
 
 ----------------------------------------------------------------------
 
@@ -383,7 +383,7 @@ Delta merge by content-hash — критическая операция для i
 
 **Описание:**
 
-26 Protocol interfaces — контракты между Domain и Infrastructure.
+Port protocol families — контракты между Domain и Infrastructure.
 
 **Категории портов:**
 
@@ -407,7 +407,7 @@ Delta merge by content-hash — критическая операция для i
 - StructlogLogger → LoggerPort
 - NoOpTracing/NoOpMetrics → Null Object Pattern
 
-**Файл:** [`docs/02-architecture/diagrams/foundation/30-port-adapter-mapping.mermaid`](../foundation/26-hexagonal-ports-adapters.mmd)
+**Файл:** [`docs/02-architecture/diagrams/foundation/26-hexagonal-ports-adapters.mmd`](../foundation/26-hexagonal-ports-adapters.mmd)
 
 ----------------------------------------------------------------------
 

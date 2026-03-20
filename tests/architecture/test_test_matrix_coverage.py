@@ -453,15 +453,23 @@ class TestContractTestingGovernance:
         assert contract_testing.get("live_api_gate_mode") == "scheduled"
         assert contract_testing.get("network_opt_in_required") is True
         assert live_api_baseline == {
-            "enforced_providers": ["chembl", "pubchem", "uniprot", "pubmed"],
-            "vcr_only_providers": ["crossref", "openalex", "semanticscholar"],
+            "enforced_providers": [
+                "chembl",
+                "pubchem",
+                "uniprot",
+                "pubmed",
+                "crossref",
+                "openalex",
+            ],
+            "pilot_providers": [],
+            "vcr_only_providers": ["semanticscholar"],
         }
         assert contract_testing["provider_live_api"]["chembl"] == "enforced"
         assert contract_testing["provider_live_api"]["pubchem"] == "enforced"
         assert contract_testing["provider_live_api"]["uniprot"] == "enforced"
         assert contract_testing["provider_live_api"]["pubmed"] == "enforced"
-        assert contract_testing["provider_live_api"]["crossref"] == "vcr_only"
-        assert contract_testing["provider_live_api"]["openalex"] == "vcr_only"
+        assert contract_testing["provider_live_api"]["crossref"] == "enforced"
+        assert contract_testing["provider_live_api"]["openalex"] == "enforced"
         assert contract_testing["provider_live_api"]["semanticscholar"] == "vcr_only"
 
         assert 'BIOETL_LIVE_API_TESTS: "true"' in workflow
@@ -474,7 +482,9 @@ class TestContractTestingGovernance:
         self,
     ) -> None:
         matrix = _load_matrix()
-        provider_live_api = matrix["contract_testing"]["provider_live_api"]
+        contract_testing = matrix["contract_testing"]
+        provider_live_api = contract_testing["provider_live_api"]
+        live_api_baseline = contract_testing["live_api_minimum_baseline"]
         providers = matrix["providers"]
         contract_dir = TESTS_DIR / "contract"
         conftest = (contract_dir / "conftest.py").read_text(encoding="utf-8")
@@ -484,13 +494,17 @@ class TestContractTestingGovernance:
             contract_test = contract_dir / f"test_{provider}_contract.py"
             marker_registration = f'"markers", "{provider}:'
 
-            if status == "enforced":
+            if status in {"enforced", "pilot"}:
                 assert contract_test.exists(), (
-                    f"provider '{provider}' is live-enforced but {contract_test.relative_to(ROOT)} is missing"
+                    f"provider '{provider}' is {status} but {contract_test.relative_to(ROOT)} is missing"
                 )
                 assert marker_registration in conftest, (
-                    f"provider '{provider}' is live-enforced but pytest marker is not registered"
+                    f"provider '{provider}' is {status} but pytest marker is not registered"
                 )
+                if status == "pilot":
+                    assert provider in live_api_baseline.get("pilot_providers", []), (
+                        f"provider '{provider}' is marked pilot but not tracked in pilot_providers baseline"
+                    )
             elif status == "vcr_only":
                 assert not contract_test.exists(), (
                     f"provider '{provider}' is VCR-only in the live baseline but already has a live contract suite; "
