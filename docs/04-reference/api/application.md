@@ -7,17 +7,22 @@ pipeline definitions, transformers, batch processing logic, data quality service
 composite pipeline coordination. It depends on the Domain layer and is consumed by
 Composition and Interfaces layers.
 
+Package-root note: `bioetl.application` itself is intentionally narrow and does not
+act as a broad public re-export facade. In practice, sanctioned imports come from
+subpackage facades such as `application.services`, `application.composite`,
+`application.observability`, and provider-specific pipeline packages.
+
 ---
 
 ## Package Structure
 
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
-| `application.core` | Pipeline runner, batch processing, transformer base | `PipelineRunner`, `BasePipeline`, `BaseTransformer`, `BatchExecutor` |
-| `application.services` | Application services (DQ, export, health, config) | `DataQualityService`, `ExportService`, `HealthService` |
-| `application.composite` | Composite pipeline orchestration (ADR-026) | `CompositePipelineRunner`, `MergeService`, `EnrichmentCoordinatorService` |
-| `application.observability` | Pipeline lifecycle observation | `PipelineObserver` |
-| `application.pipelines` | Provider-specific pipeline and transformer definitions | per-provider transformers and pipeline classes |
+| `application.core` | Pipeline runner, batch processing, transformer/runtime internals | No active package-root facade; import defining submodules directly |
+| `application.services` | Application services (runner, config, export, health, admin) | `PipelineRunnerService`, `ConfigService`, `ExportService`, `HealthService`, `VacuumService` |
+| `application.composite` | Composite pipeline orchestration (ADR-026) | `CompositePipelineRunner`, `CompositePipelineRunnerService`, `MergeService`, `EnrichmentCoordinatorService` |
+| `application.observability` | Pipeline lifecycle observation | `PipelineObserver`, `LifecyclePhase`, `traced_operation`, `traced_async_operation` |
+| `application.pipelines` | Provider-specific pipeline and transformer definitions | `GenericPipeline` at package root; provider packages export their own pipeline classes |
 
 ---
 

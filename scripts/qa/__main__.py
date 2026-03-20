@@ -12,6 +12,7 @@ Commands:
     check-exemptions     Quality exemptions audit
     check-terminology    Terminology linting
     report-dep-map       Generate/check architecture dependency map
+    report-vcr-metadata  Generate/check canonical VCR metadata catalog
     report-hotspots      Generate hotspot degradation report
     report-duplication-baseline  Generate report-only duplication baseline
     calibrate-hotspots   Calibrate hotspot budgets
@@ -29,6 +30,7 @@ COMMANDS: dict[str, str] = {
     "check-exemptions": "check_quality_exemptions.py",
     "check-terminology": "lint_terminology.py",
     "report-dep-map": "generate_architecture_dependency_map.py",
+    "report-vcr-metadata": "report_vcr_metadata_catalog.py",
     "report-hotspots": "generate_hotspot_degradation_report.py",
     "report-duplication-baseline": "report_duplication_baseline.py",
     "calibrate-hotspots": "calibrate_hotspot_budgets.py",

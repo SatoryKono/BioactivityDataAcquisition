@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from functools import partial
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
@@ -24,7 +23,8 @@ from bioetl.composition.providers._config_helpers import (
 from bioetl.composition.providers._models import HttpConfig, ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
-    create_provider_assembly_support,
+    build_http_provider_config,
+    resolve_provider_assembly_support,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
@@ -62,7 +62,7 @@ def _create_chembl_data_source(
     For document_term entity type, wraps the adapter with PublicationTermDataSource
     to extract terms from publication records (derived entity pattern).
     """
-    support = assembly_support or create_provider_assembly_support()
+    support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("chembl", settings, metrics=metrics)
 
     # Load adapter configuration from YAML (single source of truth)
@@ -147,7 +147,7 @@ def _create_uniprot_data_source(
     via ``pipeline_config.source.api.base_url`` for testing or alternative
     deployments.
     """
-    support = assembly_support or create_provider_assembly_support()
+    support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("uniprot", settings, metrics=metrics)
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider="uniprot",
@@ -184,7 +184,7 @@ def _create_uniprot_idmapping_data_source(
     2. Calls UniProt ID Mapping API to map to UniProt accessions
     3. Yields records with mapping results
     """
-    support = assembly_support or create_provider_assembly_support()
+    support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("uniprot", settings, metrics=metrics)
     from_db, to_db = _resolve_uniprot_mapping_databases(pipeline_config)
     return IDMappingDataSource(
@@ -242,21 +242,18 @@ def _get_bio_provider_configs(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bio providers."""
-    support = assembly_support or create_provider_assembly_support()
+    support = resolve_provider_assembly_support(assembly_support)
     chembl = _get_rate_limit_from_config("chembl")
     pubchem = _get_rate_limit_from_config("pubchem")
     uniprot = _get_rate_limit_from_config("uniprot")
 
     return {
-        "chembl": ProviderConfig(
+        "chembl": build_http_provider_config(
             adapter_class=ChemblAdapter,
-            http_config=HttpConfig(rate=chembl.rate, capacity=chembl.capacity),
-            requires_http_client=True,
-            requires_logger=True,
-            data_source_creator=partial(
-                _create_chembl_data_source,
-                assembly_support=support,
-            ),
+            rate=chembl.rate,
+            capacity=chembl.capacity,
+            data_source_creator=_create_chembl_data_source,
+            assembly_support=support,
         ),
         "pubchem": ProviderConfig(
             adapter_class=PubChemAdapter,
@@ -266,28 +263,19 @@ def _get_bio_provider_configs(
             custom_creator=_create_pubchem_adapter,
             data_source_creator=_create_pubchem_data_source,
         ),
-        "uniprot": ProviderConfig(
+        "uniprot": build_http_provider_config(
             adapter_class=UniProtAdapter,
-            http_config=HttpConfig(
-                rate=uniprot.rate,
-                capacity=uniprot.capacity,
-                rate_overrides={"uniprot_api_key": 100.0},
-            ),
-            requires_http_client=True,
-            requires_logger=True,
-            data_source_creator=partial(
-                _create_uniprot_data_source,
-                assembly_support=support,
-            ),
+            rate=uniprot.rate,
+            capacity=uniprot.capacity,
+            rate_overrides={"uniprot_api_key": 100.0},
+            data_source_creator=_create_uniprot_data_source,
+            assembly_support=support,
         ),
-        "uniprot_idmapping": ProviderConfig(
+        "uniprot_idmapping": build_http_provider_config(
             adapter_class=IDMappingDataSource,
-            http_config=HttpConfig(rate=uniprot.rate, capacity=uniprot.capacity),
-            requires_http_client=True,
-            requires_logger=True,
-            data_source_creator=partial(
-                _create_uniprot_idmapping_data_source,
-                assembly_support=support,
-            ),
+            rate=uniprot.rate,
+            capacity=uniprot.capacity,
+            data_source_creator=_create_uniprot_idmapping_data_source,
+            assembly_support=support,
         ),
     }

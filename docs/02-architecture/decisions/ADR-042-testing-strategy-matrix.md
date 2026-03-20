@@ -49,17 +49,18 @@ These are fundamentally incompatible at the adapter level. Clear boundary needed
 ### Fixture Governance
 
 1. VCR cassettes MUST live in `tests/fixtures/vcr/{provider}/`
-2. Cassette metadata rollout is staged: `_meta.yaml` sidecars are the target shape, but
-   CI enforcement remains disabled until the existing cassette inventory is backfilled
-3. Stale cassettes (>90 days) remain a configured target threshold, but CI enforcement is
-   still planned until `_meta.yaml` cassette backfill exists repo-wide
-4. A canonical cassette-metadata catalog is reserved at
-   `reports/quality/vcr-metadata-catalog.json`, but both catalog generation and metadata
-   backfill workflow remain planned until the initial repo-wide inventory exists
-5. Future canonical tooling paths are reserved at
+2. Cassette metadata rollout is staged in `partial` mode: `_meta.yaml` sidecars are
+   now present for a seeded inventory, but CI enforcement is not yet repo-wide
+3. Stale cassettes (>90 days) remain a configured target threshold, and rollout is now
+   `partial`: metadata inventory exists, but stale-age enforcement is not yet a full
+   blocking CI gate for the entire cassette estate
+4. A canonical cassette-metadata catalog now lives at
+   `reports/quality/vcr-metadata-catalog.json`; generation exists, but coverage and
+   workflow automation are still partial
+5. Canonical tooling paths are active for partial rollout at
    `scripts/qa/report_vcr_metadata_catalog.py` and
-   `scripts/migrations/active/backfill_vcr_metadata_sidecars.py`; until rollout begins,
-   CI must not reference these paths as active checks
+   `scripts/migrations/active/backfill_vcr_metadata_sidecars.py`; workflow-level
+   automation can remain staged even after the tooling exists
 6. Golden master snapshots for transformers live in `tests/fixtures/golden/{provider}/`
    with partial rollout allowed while provider coverage is still being expanded
 7. Root-level / legacy cassette placement is already enforced in CI

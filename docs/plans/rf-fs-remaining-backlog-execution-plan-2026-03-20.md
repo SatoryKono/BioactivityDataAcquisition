@@ -1,7 +1,31 @@
 # RF-FS Remaining Backlog Execution Plan
 
-Status: active  
+Status: reconciled context after Wave 0  
 Date: 2026-03-20
+
+## Wave 0 Reconciliation Update
+
+This document remains useful as a structural input, but it is no longer the
+primary execution queue for refactor work.
+
+After the Wave 0 reconciliation pass:
+
+- the authoritative cross-plan execution order now lives in
+  `docs/plans/consolidated-master-refactor-plan-2026-03-20.md`
+- this file should be read as a supporting structural backlog snapshot and
+  detail source for `RF-FS-*` interpretation
+- `RF-FS-004` should no longer be read as a broad unresolved baseline item;
+  it now acts mainly as implemented-local context plus remaining config-seam
+  constraints
+- `RF-FS-006a` and `RF-FS-006b` should be interpreted through evidence-led
+  candidate review and conservative cleanup rules, not as a blind delete queue
+- runtime `ProviderRegistry` ownership questions should remain aligned with the
+  deferred/watchpoint framing captured outside this document rather than being
+  pulled forward as an implicit structural prerequisite
+
+Do not use the historical ordering below as a competing master program. Use it
+only to understand what unresolved `RF-FS-*` themes were absorbed into the
+consolidated plan.
 
 ## Purpose
 
@@ -34,7 +58,7 @@ Important current-state corrections versus the older baselines:
 - `infrastructure/storage` is no longer fully flat; it already has `bronze/`, `silver/`, `gold/`, `metadata/`, `delta/`, and `support/` subdomains.
 - several `RF-FS-006` candidates are not orphaned in practice and must be audited by status, not deleted by filename intuition.
 
-## Recommended Remaining Order
+## Historical Remaining Order At Consolidation Time
 
 1. `RF-FS-004`
 2. `RF-FS-006a`
@@ -45,6 +69,18 @@ Important current-state corrections versus the older baselines:
 7. `RF-FS-002d`
 8. `RF-FS-003`
 9. `RF-FS-007`
+
+## Current Interpretation After Reconciliation
+
+- `RF-FS-004`: substantially implemented locally; remaining relevant pieces are
+  now ownership constraints and context for broader composition/config work.
+- `RF-FS-006a` / `RF-FS-006b`: remain valid only as evidence-led review and
+  conservative cleanup subtracks.
+- `RF-FS-007`: no longer a near-term structural prerequisite; deferred runtime
+  ownership watchpoint rules take precedence.
+- `RF-FS-002a` through `RF-FS-002d` and `RF-FS-003`: still useful as thematic
+  decomposition ideas, but they should be scheduled through the consolidated
+  master plan rather than revived as a separate queue.
 
 ## RF-FS-004
 

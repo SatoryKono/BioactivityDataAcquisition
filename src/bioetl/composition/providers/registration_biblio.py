@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from functools import partial
 from typing import TYPE_CHECKING, Any
 
 from bioetl.composition.factories.datasource.crossref import (
@@ -13,7 +12,7 @@ from bioetl.composition.providers._config_helpers import (
     _get_batch_size_from_config,
     _get_rate_limit_from_config,
 )
-from bioetl.composition.providers._models import HttpConfig, ProviderConfig
+from bioetl.composition.providers._models import ProviderConfig
 from bioetl.composition.providers._registration_biblio_adapters import (
     _build_openalex_adapter_from_settings,
     _build_pubmed_adapter_from_settings,
@@ -25,7 +24,8 @@ from bioetl.composition.providers._registration_biblio_profiles import (
 )
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
-    create_provider_assembly_support,
+    build_http_provider_config,
+    resolve_provider_assembly_support,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
@@ -223,61 +223,43 @@ def _get_biblio_provider_configs(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bibliographic providers."""
-    support = assembly_support or create_provider_assembly_support()
+    support = resolve_provider_assembly_support(assembly_support)
     pubmed = _get_rate_limit_from_config("pubmed")
     crossref = _get_rate_limit_from_config("crossref")
     openalex = _get_rate_limit_from_config("openalex")
     semanticscholar = _get_rate_limit_from_config("semanticscholar")
 
     return {
-        "pubmed": ProviderConfig(
+        "pubmed": build_http_provider_config(
             adapter_class=PubMedAdapter,
-            http_config=HttpConfig(
-                rate=pubmed.rate,
-                capacity=pubmed.capacity,
-                rate_overrides={"pubmed_api_key": 10.0},
-            ),
-            requires_http_client=True,
-            requires_logger=True,
+            rate=pubmed.rate,
+            capacity=pubmed.capacity,
+            rate_overrides={"pubmed_api_key": 10.0},
             custom_creator=_create_pubmed_adapter_from_settings,
-            data_source_creator=partial(
-                _create_pubmed_data_source,
-                assembly_support=support,
-            ),
+            data_source_creator=_create_pubmed_data_source,
+            assembly_support=support,
         ),
-        "crossref": ProviderConfig(
+        "crossref": build_http_provider_config(
             adapter_class=CrossRefAdapter,
-            http_config=HttpConfig(rate=crossref.rate, capacity=crossref.capacity),
-            requires_http_client=True,
-            requires_logger=True,
+            rate=crossref.rate,
+            capacity=crossref.capacity,
             custom_creator=create_crossref_adapter,
-            data_source_creator=partial(
-                _create_crossref_data_source,
-                assembly_support=support,
-            ),
+            data_source_creator=_create_crossref_data_source,
+            assembly_support=support,
         ),
-        "openalex": ProviderConfig(
+        "openalex": build_http_provider_config(
             adapter_class=OpenAlexAdapter,
-            http_config=HttpConfig(rate=openalex.rate, capacity=openalex.capacity),
-            requires_http_client=True,
-            requires_logger=True,
+            rate=openalex.rate,
+            capacity=openalex.capacity,
             custom_creator=_create_openalex_adapter_from_settings,
-            data_source_creator=partial(
-                _create_openalex_data_source,
-                assembly_support=support,
-            ),
+            data_source_creator=_create_openalex_data_source,
+            assembly_support=support,
         ),
-        "semanticscholar": ProviderConfig(
+        "semanticscholar": build_http_provider_config(
             adapter_class=SemanticScholarAdapter,
-            http_config=HttpConfig(
-                rate=semanticscholar.rate,
-                capacity=semanticscholar.capacity,
-            ),
-            requires_http_client=True,
-            requires_logger=True,
-            data_source_creator=partial(
-                _create_semanticscholar_data_source,
-                assembly_support=support,
-            ),
+            rate=semanticscholar.rate,
+            capacity=semanticscholar.capacity,
+            data_source_creator=_create_semanticscholar_data_source,
+            assembly_support=support,
         ),
     }

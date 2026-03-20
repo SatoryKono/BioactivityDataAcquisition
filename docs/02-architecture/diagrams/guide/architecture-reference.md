@@ -1,6 +1,6 @@
 # Architecture Diagrams - BioETL
 
-*Версия: 1.0 | Дата: 2026-01-20 | Статус: Активная*
+*Версия: 1.1 | Дата: 2026-03-20 | Статус: Активная*
 
 Комплексная система архитектурных диаграмм для понимания структуры, потоков данных и компонентов проекта BioETL.
 
@@ -38,25 +38,25 @@
 
 - **Application Layer** - Use Cases и оркестрация:
 
-  - PipelineRunner, BatchExecutor, RecordProcessor
-  - 30+ Pipeline implementations
-  - 14 Application Services
+  - runner, batch-execution, lifecycle, preflight и postrun families в `application/core`
+  - provider-specific pipelines + `GenericPipeline` facades в `application/pipelines`
+  - application services, observability helpers и composite orchestration
 
 - **Composition Layer** - Dependency Injection:
 
-  - bootstrap_pipeline_runner() / bootstrap_composite_runner() - Composition Root runtime entrypoints
-  - 8 Factories
-  - PipelineRegistry
+  - runtime/bootstrap entrypoints (`bootstrap_pipeline_runner()`, `bootstrap_composite_runner()`, CLI bootstrap helpers)
+  - provider loading lifecycle, registry helpers и factory families
+  - public composition seams (`entrypoints`, `execution_api`, `services_api`, `resources_api`)
 
 - **Infrastructure Layer** - Адаптеры:
 
-  - 3 Storage Writers (Bronze/Silver/Gold)
-  - 7 Provider Adapters
-  - HTTP Infrastructure
+  - storage writers/readers, metadata/storage support packages
+  - provider adapters and HTTP infrastructure
+  - config loading, normalization and persistence support packages
 
 - **Interfaces Layer** - Entry Points:
 
-  - CLI (11+ commands)
+  - CLI command families for run, run-all, inspect, admin and maintenance flows
 
 **Ключевые правила:**
 

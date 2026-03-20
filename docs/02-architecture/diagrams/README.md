@@ -11,6 +11,16 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 
 ---
 
+## Source Of Truth And Publication Boundary
+
+- Canonical architecture/class/foundation sources live in the `.mmd` trees under this directory.
+- `png/`, `svg/`, `bundles/`, `descriptions/` and supplemental `INDEX.md` files are published or derived artifacts.
+- `views/*.mermaid` are focused review views and should be treated as presentation-oriented slices, not as replacements for the canonical `.mmd` families.
+
+When diagram drift is detected, the first remediation target should usually be the publication layer: stale descriptions, bundles, indexes, and rendered artifacts. Broad redraw of canonical `.mmd` sources should be the exception, not the default response.
+
+---
+
 ## Supplementary Non-Nav Indexes
 
 These artifacts are intentionally outside primary nav but linked here for discoverability.

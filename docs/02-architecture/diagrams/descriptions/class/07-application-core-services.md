@@ -3,9 +3,9 @@
 - Исходная диаграмма: `class-diagrams/07-application-core-services.mmd`
 
 ## Описание
-Диаграмма Application Core Services показывает архитектурную модель модуля `07-application-core-services` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: PipelineRunner, BatchExecutor, and their composition. На схеме отражено примерно 16 классов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: PipelineRunner, PipelineService, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManagerService.
+Диаграмма Application Core Services показывает архитектурную модель application-core orchestration и фиксирует контракты, роли и отношения между runner, batch-execution, lifecycle, preflight и postrun service families. Это representative view, а не полный перечень всех runtime helpers внутри `application/core`: схема выделяет основные execution seams вокруг `PipelineRunner`, `BatchExecutor`, `RecordProcessor`, `BatchWriter`, `CheckpointManagerService`, `BatchMemoryManagerService`, `BatchMetricsRecorderService`, `BatchTracingManagerService`, `PreflightService`, `PostrunService` и `CleanupService`. Диаграмму удобно использовать для оценки влияния изменений в runtime orchestration и для проверки, что новые decomposition waves не размывают границы между execution loop, lifecycle coordination и support services.
 
 ## Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
-- Дата метаданных: `2026-02-26`
+- Дата метаданных: `2026-03-20`

@@ -19,6 +19,7 @@ python -m scripts.qa <command> [args...]
 | `check-exemptions` | `check_quality_exemptions.py` | Quality exemptions audit |
 | `check-terminology` | `lint_terminology.py` | Terminology linting against glossary |
 | `report-dep-map` | `generate_architecture_dependency_map.py` | Generate/check architecture dependency map |
+| `report-vcr-metadata` | `report_vcr_metadata_catalog.py` | Generate/check canonical VCR metadata catalog |
 | `report-hotspots` | `generate_hotspot_degradation_report.py` | Generate performance hotspot degradation report |
 | `report-duplication-baseline` | `report_duplication_baseline.py` | Generate report-only duplication baseline for `composition`/`application` |
 | `calibrate-hotspots` | `calibrate_hotspot_budgets.py` | Calibrate hotspot budgets |
@@ -33,6 +34,7 @@ python -m scripts.qa <command> [args...]
 | `check-exemptions` | After modifying quality exemption registry | CI gate (`architecture.yml`) |
 | `check-terminology` | After adding domain terms; validates code uses canonical terminology per `glossary.md` | CI gate (`architecture.yml`) |
 | `report-dep-map` | After changing imports in `src/bioetl/`; use `--check` for drift detection, `--update` to regenerate | Pre-commit hook + CI gate |
+| `report-vcr-metadata` | When updating VCR fixture governance rollout or sidecar inventory; use `--check` for drift detection, `--update` to regenerate | Architecture / test-governance maintenance |
 | `report-hotspots` | After performance benchmark runs; generates degradation report from JSONL observations | Manual, on-demand |
 | `report-duplication-baseline` | When reviewing duplication pressure in `composition` or `application`; generates report-only baseline artifacts without creating a blocking gate | Manual, on-demand |
 | `calibrate-hotspots` | After collecting new performance observations; recalculates budget thresholds | Manual, on-demand |
@@ -53,6 +55,8 @@ Direct script path:
 ```bash
 python scripts/qa/generate_architecture_dependency_map.py --check
 python scripts/qa/generate_architecture_dependency_map.py --update
+python scripts/qa/report_vcr_metadata_catalog.py --check
+python scripts/qa/report_vcr_metadata_catalog.py --update
 python scripts/qa/report_duplication_baseline.py
 ```
 

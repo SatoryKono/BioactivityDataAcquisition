@@ -17,7 +17,7 @@ from bioetl.composition.providers._models import ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
     ProviderRegistrarProtocol,
-    create_provider_assembly_support,
+    resolve_provider_assembly_support,
 )
 from bioetl.composition.providers.registration_biblio import (
     _get_biblio_provider_configs,
@@ -48,8 +48,9 @@ def register_all_providers(
     Each provider includes a data_source_creator for unified registry access.
     """
     target_registry = _resolve_registration_registry(registry)
-    support = assembly_support or create_provider_assembly_support(
-        provider_registry=cast("Any", target_registry)
+    support = resolve_provider_assembly_support(
+        assembly_support,
+        provider_registry=cast("Any", target_registry),
     )
     for provider_name, config in _build_provider_configs(
         assembly_support=support
@@ -64,7 +65,7 @@ def _build_provider_configs(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> dict[str, ProviderConfig]:
     """Build provider registry configs from YAML-backed rate limits."""
-    support = assembly_support or create_provider_assembly_support()
+    support = resolve_provider_assembly_support(assembly_support)
     return {
         **_get_bio_provider_configs(assembly_support=support),
         **_get_biblio_provider_configs(assembly_support=support),

@@ -19,6 +19,8 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+import yaml
+
 if __package__ in {None, ""}:
     from _compatibility_telemetry import (  # type: ignore[import-not-found]
         collect_compatibility_surface_snapshot,
@@ -47,6 +49,37 @@ class ArchitectureTestStats:
     errors: int
     skipped: int
     returncode: int
+
+
+@dataclass(frozen=True)
+class TestHealthClassification:
+    """Descriptive test-health classification derived from policy + execution."""
+
+    status: str
+    summary: str
+    reasons: tuple[str, ...]
+    architecture_skip_count: int
+    architecture_skip_ratio: float | None
+    live_contract_enforced_provider_count: int
+    live_contract_vcr_only_provider_count: int
+    staged_rollout_flags: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, object]:
+        """Return a stable JSON-serializable view."""
+        return {
+            "status": self.status,
+            "summary": self.summary,
+            "reasons": list(self.reasons),
+            "architecture_skip_count": self.architecture_skip_count,
+            "architecture_skip_ratio": self.architecture_skip_ratio,
+            "live_contract_enforced_provider_count": (
+                self.live_contract_enforced_provider_count
+            ),
+            "live_contract_vcr_only_provider_count": (
+                self.live_contract_vcr_only_provider_count
+            ),
+            "staged_rollout_flags": list(self.staged_rollout_flags),
+        }
 
 
 def _parse_args() -> argparse.Namespace:
@@ -85,6 +118,16 @@ def _parse_args() -> argparse.Namespace:
         "--coverage-xml",
         default="coverage.xml",
         help="Coverage XML file path (optional).",
+    )
+    parser.add_argument(
+        "--test-matrix",
+        default="configs/quality/test_matrix.yaml",
+        help="Path to the test matrix policy YAML used for descriptive health classification.",
+    )
+    parser.add_argument(
+        "--test-health-taxonomy",
+        default="configs/quality/test_health_reporting.yaml",
+        help="Path to the canonical test-health reporting taxonomy config.",
     )
     parser.add_argument(
         "--output",
@@ -281,6 +324,193 @@ def _coverage_percent(coverage_xml_path: Path) -> float | None:
         return None
 
 
+def _load_yaml_mapping(path: Path) -> dict[str, object]:
+    if not path.exists():
+        return {}
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if isinstance(raw, dict):
+        return raw
+    return {}
+
+
+def _build_test_health_payload(
+    classification: TestHealthClassification,
+    taxonomy: dict[str, object],
+) -> dict[str, object]:
+    """Attach canonical taxonomy metadata to the computed classification."""
+    statuses = taxonomy.get("statuses", {})
+    status_entry: dict[str, object] = {}
+    if isinstance(statuses, dict):
+        raw_entry = statuses.get(classification.status, {})
+        if isinstance(raw_entry, dict):
+            status_entry = raw_entry
+
+    short_label = status_entry.get("short_label")
+    definition = status_entry.get("definition")
+    merge_semantics = status_entry.get("merge_semantics")
+
+    return {
+        **classification.as_dict(),
+        "classification_mode": taxonomy.get("classification_mode", "informational"),
+        "merge_blocking_source": taxonomy.get(
+            "merge_blocking_source", "ci_pass_fail_and_quality_gate"
+        ),
+        "merge_blocking_note": taxonomy.get("merge_blocking_note", ""),
+        "short_label": short_label
+        if isinstance(short_label, str)
+        else classification.status,
+        "definition": definition
+        if isinstance(definition, str)
+        else classification.summary,
+        "merge_semantics": (
+            merge_semantics if isinstance(merge_semantics, str) else "informational"
+        ),
+    }
+
+
+def _string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, str)]
+
+
+def _staged_rollout_flags(test_matrix: dict[str, object]) -> tuple[str, ...]:
+    flags: list[str] = []
+
+    fixture_governance = test_matrix.get("fixture_governance", {})
+    if isinstance(fixture_governance, dict):
+        rollout = fixture_governance.get("rollout", {})
+        if isinstance(rollout, dict):
+            for key, value in sorted(rollout.items()):
+                if isinstance(value, str) and value != "enforced":
+                    flags.append(f"fixture_governance.{key}={value}")
+
+    mutation_testing = test_matrix.get("mutation_testing", {})
+    if isinstance(mutation_testing, dict):
+        ci_gate_mode = mutation_testing.get("ci_gate_mode")
+        if isinstance(ci_gate_mode, str) and ci_gate_mode != "full":
+            flags.append(f"mutation_testing.ci_gate_mode={ci_gate_mode}")
+        targets = mutation_testing.get("targets", {})
+        if isinstance(targets, dict):
+            for target_name, target_payload in sorted(targets.items()):
+                if not isinstance(target_payload, dict):
+                    continue
+                enforced = target_payload.get("enforced")
+                if enforced is False:
+                    flags.append(f"mutation_testing.targets.{target_name}=staged")
+
+    return tuple(flags)
+
+
+def _classify_test_health(
+    architecture_stats: ArchitectureTestStats,
+    test_matrix: dict[str, object],
+    *,
+    suite_green: bool,
+) -> TestHealthClassification:
+    total_executed = architecture_stats.tests
+    skip_ratio: float | None = None
+    if total_executed > 0:
+        skip_ratio = round(architecture_stats.skipped / total_executed, 4)
+
+    contract_testing = test_matrix.get("contract_testing", {})
+    enforced_providers: list[str] = []
+    vcr_only_providers: list[str] = []
+    network_opt_in_required = False
+    live_api_gate_mode = ""
+
+    if isinstance(contract_testing, dict):
+        network_opt_in_required = bool(
+            contract_testing.get("network_opt_in_required", False)
+        )
+        gate_mode = contract_testing.get("live_api_gate_mode")
+        if isinstance(gate_mode, str):
+            live_api_gate_mode = gate_mode
+
+        baseline = contract_testing.get("live_api_minimum_baseline", {})
+        if isinstance(baseline, dict):
+            enforced_providers = _string_list(baseline.get("enforced_providers"))
+            vcr_only_providers = _string_list(baseline.get("vcr_only_providers"))
+
+    staged_flags = _staged_rollout_flags(test_matrix)
+
+    reasons: list[str] = []
+    if not suite_green:
+        reasons.append("merge-blocking failures remain present")
+        return TestHealthClassification(
+            status="non_green",
+            summary=(
+                "Suite is not green, so descriptive confidence classes remain "
+                "secondary to active failures."
+            ),
+            reasons=tuple(reasons),
+            architecture_skip_count=architecture_stats.skipped,
+            architecture_skip_ratio=skip_ratio,
+            live_contract_enforced_provider_count=len(enforced_providers),
+            live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            staged_rollout_flags=staged_flags,
+        )
+
+    environment_reasons: list[str] = []
+    if architecture_stats.skipped > 0:
+        environment_reasons.append(
+            f"architecture suite still carries {architecture_stats.skipped} skips"
+        )
+    if network_opt_in_required:
+        environment_reasons.append("live contract execution is network opt-in gated")
+    if live_api_gate_mode and live_api_gate_mode != "always":
+        environment_reasons.append(f"live API gate mode is {live_api_gate_mode}")
+    if vcr_only_providers:
+        environment_reasons.append(
+            "live minimum baseline excludes "
+            f"{len(vcr_only_providers)} VCR-only provider(s)"
+        )
+
+    if environment_reasons:
+        return TestHealthClassification(
+            status="environment_limited_green",
+            summary=(
+                "Green status is environment-limited because parts of the "
+                "confidence surface remain skip- or environment-gated."
+            ),
+            reasons=tuple(environment_reasons),
+            architecture_skip_count=architecture_stats.skipped,
+            architecture_skip_ratio=skip_ratio,
+            live_contract_enforced_provider_count=len(enforced_providers),
+            live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            staged_rollout_flags=staged_flags,
+        )
+
+    if staged_flags:
+        return TestHealthClassification(
+            status="staged_green",
+            summary=(
+                "Green status is staged because at least one shared confidence "
+                "surface is not yet fully enforced."
+            ),
+            reasons=staged_flags,
+            architecture_skip_count=architecture_stats.skipped,
+            architecture_skip_ratio=skip_ratio,
+            live_contract_enforced_provider_count=len(enforced_providers),
+            live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            staged_rollout_flags=staged_flags,
+        )
+
+    return TestHealthClassification(
+        status="fully_exercised_green",
+        summary=(
+            "Green status reflects a fully exercised confidence surface with no "
+            "detected staged or environment-gated limitations."
+        ),
+        reasons=(),
+        architecture_skip_count=architecture_stats.skipped,
+        architecture_skip_ratio=skip_ratio,
+        live_contract_enforced_provider_count=len(enforced_providers),
+        live_contract_vcr_only_provider_count=len(vcr_only_providers),
+        staged_rollout_flags=staged_flags,
+    )
+
+
 def _quarter_target(
     scorecard: dict[str, object], quarter: str
 ) -> dict[str, object] | None:
@@ -353,6 +583,8 @@ def main() -> int:
     src_root = Path(args.src_root)
     vcr_root = Path(args.vcr_root)
     coverage_xml = Path(args.coverage_xml)
+    test_matrix_path = Path(args.test_matrix)
+    test_health_taxonomy_path = Path(args.test_health_taxonomy)
 
     architecture_stats = _run_architecture_tests(args.architecture_tests)
     arch_failures = architecture_stats.failures + architecture_stats.errors
@@ -394,6 +626,8 @@ def main() -> int:
     )
     coverage_threshold = _require_float(ci_target, "coverage_threshold_percent")
     compatibility_surface = collect_compatibility_surface_snapshot()
+    test_matrix = _load_yaml_mapping(test_matrix_path)
+    test_health_taxonomy = _load_yaml_mapping(test_health_taxonomy_path)
 
     bonus = 0.0
     if arch_failures == 0:
@@ -407,6 +641,12 @@ def main() -> int:
 
     adjusted_integral_score = round(min(100.0, summary.integral_score + bonus), 2)
     gate_pass = adjusted_integral_score >= min_integral_score
+    test_health = _classify_test_health(
+        architecture_stats,
+        test_matrix,
+        suite_green=gate_pass and arch_failures == 0,
+    )
+    test_health_payload = _build_test_health_payload(test_health, test_health_taxonomy)
 
     output = {
         "generated_at_utc": datetime.now(UTC).isoformat(),
@@ -429,6 +669,7 @@ def main() -> int:
             "coverage_verified": coverage_percent is not None,
         },
         "compatibility_surface": compatibility_surface.as_dict(),
+        "test_health": test_health_payload,
         "integral_score": {
             "base": summary.integral_score,
             "bonus": bonus,
@@ -476,6 +717,26 @@ def main() -> int:
             f"- adjusted_integral_score: `{adjusted_integral_score}`",
             f"- min_required: `{min_integral_score}`",
             f"- architecture_test_failures: `{arch_failures}`",
+            f"- test_health_status: `{test_health.status}`",
+            f"- test_health_label: `{test_health_payload['short_label']}`",
+            f"- test_health_summary: {test_health.summary}",
+            f"- test_health_definition: {test_health_payload['definition']}",
+            f"- test_health_merge_semantics: `{test_health_payload['merge_semantics']}`",
+            (
+                "- test_health_merge_blocking_source: `"
+                + str(test_health_payload["merge_blocking_source"])
+                + "`"
+            ),
+            f"- architecture_skipped: `{test_health.architecture_skip_count}`",
+            (
+                "- staged_rollout_flags: `"
+                + (
+                    ", ".join(test_health.staged_rollout_flags)
+                    if test_health.staged_rollout_flags
+                    else "none"
+                )
+                + "`"
+            ),
             f"- total_exemptions: `{total_exemptions}`",
             render_compatibility_surface_section(
                 compatibility_surface, heading="## Compatibility Surface Snapshot"
@@ -500,6 +761,15 @@ def main() -> int:
         f"compat_shims={compatibility_surface.compat_shim_modules}; "
         f"mixed={compatibility_surface.mixed_modules}; "
         f"retained={compatibility_surface.retained_entrypoints}"
+    )
+    print(
+        "[quality-integral-gate] "
+        f"test_health={test_health.status}; "
+        f"test_health_semantics={test_health_payload['merge_semantics']}; "
+        f"arch_skipped={test_health.architecture_skip_count}; "
+        f"live_enforced={test_health.live_contract_enforced_provider_count}; "
+        f"live_vcr_only={test_health.live_contract_vcr_only_provider_count}; "
+        f"staged_flags={len(test_health.staged_rollout_flags)}"
     )
     print(f"[quality-integral-gate] wrote metrics: {output_path}")
 

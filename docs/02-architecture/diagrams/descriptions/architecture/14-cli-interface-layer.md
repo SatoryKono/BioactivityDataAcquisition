@@ -3,9 +3,13 @@
 - Исходная диаграмма: `architecture/14-cli-interface-layer.mmd`
 
 ## Описание
-Диаграмма CLI / Interface Layer показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 14-cli-interface-layer. В исходном файле прямо зафиксирован контекст: Shows CLI commands, their routing, and interaction with composition.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: User, CLI Interface (Click), Run Commands, Health Commands, Data Commands. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: User, Terminal, CLI Interface (Click), bioetl (main group), Run Commands, bioetl run ━━━━━━━━━━━━━━━━━ --provider --entity --run-type --limit --resume --dry-run. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=24), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
+Диаграмма CLI / Interface Layer показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. В исходном файле прямо зафиксирован контекст: Shows CLI commands, their routing, and interaction with composition. Диаграмму следует читать как обзорный routing view: она показывает, как семейства CLI-команд и entrypoints передают управление в composition/bootstrap слой, но не служит исчерпывающим каталогом всех support-модулей внутри `interfaces.cli`.
+
+Ключевые контейнеры и семейства на схеме: `CLI Interface (Click)`, `Run Commands`, `Health Commands`, `Data Commands`, а также основной маршрут от пользователя и терминала к конкретным command handlers и bootstrap entrypoints. В текущей кодовой базе этот срез полезен прежде всего для проверки границ между `interfaces`, `composition` и runtime assembly, а также для контроля того, что рост CLI surface не размывает routing contracts.
+
+Оценка плотности `@nodes=24` полезна для контроля читаемости и стабильного рендеринга, но не должна интерпретироваться как точный инвентарь текущей command/support surface.
 
 ## Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
+- Дата метаданных: `2026-03-20`

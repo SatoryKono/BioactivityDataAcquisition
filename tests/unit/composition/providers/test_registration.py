@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from unittest.mock import MagicMock, patch
+from unittest.mock import call
 
 import pytest
 
@@ -21,7 +22,10 @@ from bioetl.composition.providers.registration import (
     register_all_providers,
 )
 from bioetl.composition.providers._registration_contracts import (
+    bind_provider_data_source_creator,
+    build_http_provider_config,
     create_provider_assembly_support,
+    resolve_provider_assembly_support,
 )
 
 
@@ -171,25 +175,28 @@ class TestRegisterAllProviders:
         assert registry.is_registered("chembl")
         assert not ProviderRegistry.is_registered("chembl")
 
-    @patch("bioetl.composition.providers.registration.create_provider_assembly_support")
+    @patch("bioetl.composition.providers.registration.resolve_provider_assembly_support")
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
     def test_builds_default_assembly_support_bound_to_explicit_registry(
         self,
         mock_biblio: MagicMock,
         mock_bio: MagicMock,
-        mock_create_support: MagicMock,
+        mock_resolve_support: MagicMock,
     ) -> None:
         """Explicit registry registration should bind default support to that registry."""
         registry = create_provider_registry()
         support = MagicMock(name="support")
-        mock_create_support.return_value = support
+        mock_resolve_support.return_value = support
         mock_bio.return_value = {}
         mock_biblio.return_value = {}
 
         register_all_providers(registry=registry)
 
-        mock_create_support.assert_called_once_with(provider_registry=registry)
+        assert mock_resolve_support.call_args_list == [
+            call(None, provider_registry=registry),
+            call(support),
+        ]
 
     @patch("bioetl.composition.providers.registration.get_default_provider_registrar")
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
@@ -305,3 +312,83 @@ def test_default_provider_assembly_support_binds_explicit_registry_for_http_clie
     assert result == "client"
     assert captured["provider"] == "chembl"
     assert captured["provider_registry"] is registry
+
+
+@pytest.mark.unit
+def test_resolve_provider_assembly_support_returns_injected_support_unchanged() -> None:
+    """Injected assembly support should remain the canonical owner when present."""
+    support = MagicMock(name="support")
+
+    assert resolve_provider_assembly_support(support) is support
+
+
+@pytest.mark.unit
+def test_resolve_provider_assembly_support_binds_explicit_registry_when_building_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Default support creation should thread the explicit registry once."""
+    registry = create_provider_registry()
+    sentinel_support = MagicMock(name="support")
+    captured: dict[str, object] = {}
+
+    def _fake_create_provider_assembly_support(*, provider_registry=None):
+        captured["provider_registry"] = provider_registry
+        return sentinel_support
+
+    monkeypatch.setattr(
+        "bioetl.composition.providers._registration_contracts.create_provider_assembly_support",
+        _fake_create_provider_assembly_support,
+    )
+
+    result = resolve_provider_assembly_support(None, provider_registry=registry)
+
+    assert result is sentinel_support
+    assert captured["provider_registry"] is registry
+
+
+@pytest.mark.unit
+def test_bind_provider_data_source_creator_captures_shared_support_instance() -> None:
+    """Support-aware creators should be bound through one canonical helper path."""
+    support = MagicMock(name="support")
+
+    def _creator(settings, pipeline_config, logger, **kwargs):
+        return kwargs["assembly_support"]
+
+    bound = bind_provider_data_source_creator(
+        _creator,
+        assembly_support=support,
+    )
+
+    result = bound(MagicMock(), MagicMock(), MagicMock())
+
+    assert result is support
+
+
+@pytest.mark.unit
+def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None:
+    """HTTP-oriented provider configs should be assembled through one shared path."""
+    support = MagicMock(name="support")
+    custom_creator = MagicMock(name="custom_creator")
+
+    def _creator(settings, pipeline_config, logger, **kwargs):
+        return kwargs["assembly_support"]
+
+    config = build_http_provider_config(
+        adapter_class=MagicMock(name="adapter_class"),
+        rate=7.5,
+        capacity=15,
+        rate_overrides={"api_key": 30.0},
+        custom_creator=custom_creator,
+        data_source_creator=_creator,
+        assembly_support=support,
+    )
+
+    assert config.http_config is not None
+    assert config.http_config.rate == 7.5
+    assert config.http_config.capacity == 15
+    assert config.http_config.rate_overrides == {"api_key": 30.0}
+    assert config.requires_http_client is True
+    assert config.requires_logger is True
+    assert config.custom_creator is custom_creator
+    assert config.data_source_creator is not None
+    assert config.data_source_creator(MagicMock(), MagicMock(), MagicMock()) is support

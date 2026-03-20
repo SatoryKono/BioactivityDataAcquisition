@@ -7,6 +7,7 @@ date: 2026-03-20
 
 _Generated: 2026-03-20_
 _Status: Generated export artifact (non-normative). Canonical project guidance remains in `docs/02-architecture/**`, `docs/03-guides/**`, and `docs/04-reference/**`._
+_Warning: this merged export may lag behind active source docs after remediation waves. Use it for broad offline reading only, not for current workflow, API-surface, or inventory decisions._
 
 \newpage
 

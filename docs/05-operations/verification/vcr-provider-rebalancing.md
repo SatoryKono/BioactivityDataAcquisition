@@ -1,5 +1,8 @@
 # VCR Provider Rebalancing (RF-013)
 
+> **Status:** Historical verification and operations artifact (non-normative).
+> Use this note as dated workflow evidence only; current policy source of truth remains `docs/00-project/RULES.md`, active ADRs, and current test architecture/docs.
+
 ## Goal
 
 Maintain balanced VCR cassette coverage across bibliography providers.

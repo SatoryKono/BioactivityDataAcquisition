@@ -1,0 +1,7 @@
+schema_version: 1
+provider: openalex
+cassette_rel_path: tests/fixtures/vcr/openalex/rf013_openalex_health_case_01.yaml
+metadata_status: seeded_partial_backfill
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: a2fd8870cfc1b0687d2b4ba2dac821a1ae3032c1ddd94a77592a4530ae44de5d
+staleness_ready: false

@@ -2,8 +2,8 @@
 
 Руководство по настройке конфигурации ETL-пайплайнов в BioETL.
 
-**Версия:** 6.0.0
-**Дата обновления:** 2026-02-03
+**Версия:** 6.0.1
+**Дата обновления:** 2026-03-20
 
 ----------------------------------------------------------------------
 
@@ -66,22 +66,32 @@ configs/
 │   ├── publication.yaml
 │   ├── target.yaml
 │   └── field_groups/publication.yaml
+├── quality/                      # Quality policy, debt, source-test governance
+│   ├── architecture_metric_exemptions.yaml
+│   ├── debt_scorecard.yaml
+│   ├── source_test_facade_inventory.yaml
+│   ├── source_test_mapping_exceptions.yaml
+│   ├── source_test_owner_inventory.yaml
+│   └── test_matrix.yaml
 ├── enums/
-│   └── chembl.yaml
+│   ├── chembl.yaml
+│   └── publication_type_classification.meta.yaml
 └── naming_exceptions.yaml
 ```
 
 ### Статистика конфигураций
 
-| Категория                     | Количество | Описание                                   |
-| ----------------------------- | ---------- | ------------------------------------------ |
+| Категория                     | Количество | Описание |
+| ----------------------------- | ---------- | -------- |
 | Entity configs (unified)      | 21         | Standard ETL pipelines (`configs/entities`) |
-| Composite pipeline configs    | 5          | Multi-provider pipelines (`configs/composites`) |
+| Composite pipeline configs    | 5          | Multi-provider pipelines (`configs/composites/*.yaml`) |
 | Composite field-group configs | 1          | Shared field groups (`configs/composites/field_groups`) |
 | Provider configs              | 7          | Source + provider quality/filters (`configs/providers`) |
-| Base configs                  | 3          | Global defaults (`configs/base`)           |
-| Misc configs                  | 2          | Enums + naming exceptions                  |
-| **Итого файлов конфигурации** | **39**     | Все YAML-конфиги в `configs/`              |
+| Base configs                  | 3          | Global defaults (`configs/base`) |
+| Quality/governance configs    | 11         | Quality policy, debt, source-test, and composite quality files (`configs/quality`) |
+| Enum configs                  | 2          | Enum and publication-classification assets (`configs/enums`) |
+| Misc standalone configs       | 1          | Naming exceptions (`configs/naming_exceptions.yaml`) |
+| **Итого файлов конфигурации** | **51**     | Все YAML-конфиги в `configs/` |
 
 ----------------------------------------------------------------------
 

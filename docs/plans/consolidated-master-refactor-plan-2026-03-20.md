@@ -1,7 +1,7 @@
 # Consolidated Master Refactor Plan
 
 Дата: 2026-03-20
-Статус: master draft
+Статус: active master plan, Wave 0 reconciled
 Язык: русский
 
 ## Назначение
@@ -13,6 +13,37 @@
 Цель документа — заменить набор пересекающихся execution plans, roadmap-ов,
 backlog-ов и evidence-derived proposals одной общей программой работ, пригодной
 для дальнейшего исполнения волнами.
+
+## Результат Wave 0
+
+Wave 0 в рамках этого master plan теперь считается выполненной как
+reconciliation pass. Это означает не то, что все исторические refactor-темы
+одновременно закрыты кодом, а то, что их статусная модель и иерархия больше не
+конфликтуют между собой.
+
+После reconciliation действуют следующие правила:
+
+- этот документ является главным execution/backlog документом для общей
+  программы рефакторинга;
+- [consolidated-master-refactor-plan-expanded-waves-2026-03-20.md](consolidated-master-refactor-plan-expanded-waves-2026-03-20.md)
+  является его развёрнутым companion-документом по волнам;
+- `rf-fs-*`, `rf-04`, `rf-06`, `rf-07` и evidence roadmaps больше не
+  трактуются как конкурирующие master programs;
+- документы типа `ledger`, `seam map`, `decision summary` и calibration
+  summaries считаются supporting context или constraints, а не самостоятельными
+  очередями исполнения.
+
+Wave 0 также снимает несколько старых противоречий:
+
+- `RF-FS-004` больше не нужно трактовать как исходный широкий structural
+  backlog item; его уже выполненные локальные slices и ownership decisions
+  должны читаться как implemented context и remaining config-seam constraints;
+- `RF-06` больше не читается как активная кодовая migration wave, а как
+  docs/governance watchpoint;
+- `RF-07D` остаётся deferred runtime watchpoint и не должен неявно
+  перетаскиваться в следующую активную implementation wave;
+- provider-assembly simplification остаётся допустимым следующим execution
+  направлением, но только вне explicit runtime instance-threading campaign.
 
 ## Что было включено
 
@@ -60,6 +91,8 @@ technical-debt roadmap, не потеряв важные предложения.
 
 Приоритет: `P0`
 
+Статус после reconciliation: `completed`
+
 Сюда входят работы, которые уже запущены и не должны оставаться в подвешенном
 состоянии:
 - добивание `RF-FS-004` до полного wave-level closeout
@@ -72,6 +105,8 @@ technical-debt roadmap, не потеряв важные предложения.
 
 Основной результат:
 - один актуальный structural backlog без “полузакрытых” пунктов.
+- один главный master plan и один развёрнутый companion document;
+- явное отделение active execution plans от context-only inputs.
 
 ### Wave 1. ProviderRegistry и provider-assembly cluster
 
@@ -256,14 +291,35 @@ execution документ, а старые планы — как:
   восприниматься как конкурирующие программы;
 - они становятся вложенными источниками для единой последовательности работ.
 
+Практическая иерархия после Wave 0 выглядит так:
+
+1. master execution:
+   - `consolidated-master-refactor-plan-2026-03-20.md`
+   - `consolidated-master-refactor-plan-expanded-waves-2026-03-20.md`
+2. active targeted plans:
+   - `rf-04-composition-hotspots-execution-plan-2026-03-20.md`
+   - `rf-07-provider-registry-migration-plan-2026-03-20.md`
+   - `rf-06-domain-facade-hygiene-plan-2026-03-20.md`
+3. reconciled context / closeout inputs:
+   - `rf-fs-remaining-backlog-execution-plan-2026-03-20.md`
+   - `rf-fs-004-execution-plan-2026-03-20.md`
+   - `refactor-proposals-consolidation-input-2026-03-20.md`
+4. evidence constraints:
+   - decision summaries and calibration/synthesis artifacts under
+     `docs/reports/evidence/`
+
 ## Рекомендуемый immediate next step
 
-Если переходить от master plan к исполнению прямо сейчас, лучший старт такой:
+После закрытия Wave 0 дальнейшие действия нужно читать в двух разных режимах,
+чтобы не смешивать structural closeout и next debt program:
 
-1. официально принять Wave 1 как текущую активную волну;
-2. собрать provider-registry resolution ledger по:
-   - `registration.py`
-   - `registration_bio.py`
-   - `registration_biblio.py`
-3. выделить Slice 1A как первый implementation batch;
-4. прогнать targeted provider-registry verify before moving дальше.
+1. для legacy structural closeout:
+   - держать `RF-06` как docs/governance watchpoint;
+   - держать `RF-07D` как deferred runtime watchpoint;
+   - использовать remaining `rf-fs-*` документы только как subordinate inputs,
+     а не как самостоятельный execution queue.
+2. для следующей активной debt-oriented волны:
+   - открыть Wave 1 как provider-assembly simplification;
+   - ограничить её composition/provider assembly scope;
+   - не расширять её до explicit runtime `ProviderRegistry` threading без новых
+     reopen criteria.

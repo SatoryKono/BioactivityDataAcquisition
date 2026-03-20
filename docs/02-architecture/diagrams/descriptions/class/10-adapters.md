@@ -3,7 +3,7 @@
 - Исходная диаграмма: `class-diagrams/10-adapters.mmd`
 
 ## Описание
-Диаграмма Infrastructure Adapters показывает архитектурную модель модуля `10-adapters` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: HTTP adapter class hierarchy with mixins. На схеме отражено примерно 18 классов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма Infrastructure Adapters показывает архитектурный срез семейства `bioetl.infrastructure.adapters` и фиксирует ключевые контракты, роли и отношения внутри HTTP adapter hierarchy. Её следует читать как representative view: схема покрывает базовые адаптеры, mixin-композицию, `UnifiedHTTPClient`, decorator layer и набор показательных provider adapters, но не претендует на роль исчерпывающего инвентаря всех инфраструктурных реализаций.
 
 **Ключевые элементы:**
 - **Mixins**: HealthCheckMixin, HealthCheckProviderMixin — переиспользуемые поведения
@@ -15,5 +15,5 @@
 ## Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
-- Дата метаданных: `2026-03-08` (обновлено: добавлены детали RetryingDataSourceDecorator с delegation pattern)
+- Дата метаданных: `2026-03-20` (обновлено: описание переведено в режим representative architectural slice)
 - Версия диаграммы: `1.2.0`
