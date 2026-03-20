@@ -1,7 +1,7 @@
 # Publication Validation Documentation Index
 
-**Версия:** 1.0.0
-**Дата:** 2026-02-06
+**Версия:** 1.0.1
+**Дата:** 2026-03-20
 **Статус:** Production Ready ✅
 
 ---
@@ -10,10 +10,10 @@
 
 Комплексная система валидации публикационных данных BioETL, охватывающая **191 поле** из **5 провайдеров** (ChEMBL, PubMed, CrossRef, OpenAlex, Semantic Scholar) с **5-уровневой стратегией валидации**.
 
-**Ключевые метрики:**
+**Ключевые метрики и артефакты:**
 - 📊 **191 поле** × 5 провайдеров
 - ✅ **5 уровней валидации** (Base → Structural → External → Logical → Semantic)
-- 🧪 **471 тест** (64% от целевых 735)
+- 🧪 **471 тест** (64% от целевых 735) по состоянию на 2026-02-06; актуальное покрытие проверяй по `tests/` и CI
 - 📈 **Target DQ Pass Rate:** ≥ 95%
 
 ---
@@ -56,14 +56,14 @@
 
 | Документ | Описание | Покрытие |
 |----------|----------|----------|
-| **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver-schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
+| **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver_schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
 | **[Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)** | Тесты валидации схем публикаций | Contract tests |
 
 **Test Organization:**
 ```
 tests/
 ├── contract/
-│   ├── silver-schemas/README.md    # Contract test docs
+│   ├── silver_schemas/README.md    # Contract test docs
 │   └── test_publication_schema_contracts.py
 ├── unit/domain/schemas/            # Base validation tests
 ├── unit/application/services/dq/   # Structural/logical/semantic tests

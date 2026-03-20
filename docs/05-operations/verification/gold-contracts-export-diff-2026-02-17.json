@@ -52,6 +52,26 @@
         "required_changed": false
       }
     },
+    "chembl_molecule": {
+      "file": "docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_protein_class": {
+      "file": "docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
     "chembl_publication": {
       "file": "docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
       "status": "updated",
@@ -74,26 +94,6 @@
     },
     "chembl_publication_term": {
       "file": "docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json",
-      "status": "updated",
-      "diff": {
-        "added_properties": [],
-        "removed_properties": [],
-        "changed_properties": [],
-        "required_changed": false
-      }
-    },
-    "chembl_molecule": {
-      "file": "docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
-      "status": "updated",
-      "diff": {
-        "added_properties": [],
-        "removed_properties": [],
-        "changed_properties": [],
-        "required_changed": false
-      }
-    },
-    "chembl_protein_class": {
-      "file": "docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],

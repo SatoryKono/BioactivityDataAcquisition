@@ -118,6 +118,7 @@ make setup-plugins
 Notes:
 
 - `make install` uses `uv sync --extra dev --extra tracing` when `uv` is available; otherwise it creates `.venv` and installs the editable package with dev extras.
+- Documentation site commands such as `make docs-build` require the separate `docs` extra: `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"`.
 - `make setup-plugins` configures local pytest/pre-commit tooling.
 - If you use Codex or GitHub Copilot MCP, run `python -m scripts.dev setup-mcp` after install.
 - `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
@@ -133,11 +134,13 @@ Notes:
 
    # Preferred manual path
    uv sync --extra dev --extra tracing
+   # Add --extra docs if you need MkDocs/site builds
+   uv sync --extra dev --extra tracing --extra docs
 
    # Fallback without uv
    python3 -m venv .venv
    . .venv/bin/activate
-   pip install -e ".[dev,tracing]"
+   pip install -e ".[dev,tracing,docs]"
    ```
 
 1. **Configure Environment** *(optional)*:
