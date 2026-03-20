@@ -9,6 +9,8 @@
 - этот файл нужен как **операционная шпаргалка**
 - сюда включены как BioETL-skills, так и полезные global/system/knowledge skills, которые реально могут использоваться в работе
 
+Текущее правило orchestration: production-код в обычном Codex workflow пишет orchestrator напрямую. Если встречается `py-code-bot`, считай это legacy/compatibility reference, а не preferred active step.
+
 ## 15 Skills, Которые Стоит Использовать Чаще Всего Именно В BioETL
 
 Ниже не “самые мощные вообще”, а **самые практичные для повседневного workflow BioETL**: код, архитектура, конфиги, тесты, docs и безопасная работа с ветками.
@@ -18,24 +20,24 @@
 | 1 | `capability-discovery` | Быстро показывает, какие project-specific команды, skills и quality gates уже есть в репозитории. Сильно снижает лишнюю ручную работу. | В начале новой задачи, в незнакомой зоне проекта, перед запуском сложного workflow |
 | 2 | `py-plan-bot` | Хорошо раскладывает большие изменения на шаги по слоям BioETL: код, конфиги, тесты, docs, architecture checks. | Когда задача не умещается в “исправь один файл” |
 | 3 | `using-git-worktrees` | Даёт безопасную изоляцию для реализации, если дерево уже грязное или работа рискованная. Для BioETL это особенно полезно из-за длинных рефакторингов и параллельных веток. | Перед крупным feature/fix/refactor или branch consolidation |
-| 4 | `py-code-bot` | Основной исполнительский режим для production Python-кода. Помогает делать изменения так, чтобы они вписывались в архитектуру проекта. | Когда план уже понятен и пора менять код |
-| 5 | `py-debug-bot` | Хорош для root-cause analysis в многослойных поломках, где symptom и причина живут в разных местах. | Когда failure не локализуется одной быстрой правкой |
-| 6 | `py-test-bot` | Самый частый спутник кодовой работы: написать, адаптировать, стабилизировать или починить тесты. | После изменений в логике, при локальных падениях suite |
-| 7 | `verify-unit-tests` | Проверяет, что unit tests остались unit tests: детерминированные, изолированные, без лишнего I/O. | После добавления или переписывания тестов |
-| 8 | `verify-architecture` | Быстрый operational guardrail после структурных изменений. Позволяет подтвердить, что import matrix и layer boundaries не поехали. | Перед commit/PR после рефакторинга или DI/wiring changes |
-| 9 | `architecture-guardian` | Более строгий архитектурный взгляд: ADR, anti-patterns, naming, ответственность модулей. | Когда изменение затрагивает `domain/application/infrastructure/composition` |
-| 10 | `py-config-bot` | Для BioETL это must-have: конфиги здесь управляют значительной частью поведения pipelines. | При работе с `configs/**`, schema rules, provider/entity YAML |
-| 11 | `data-engineer` | Помогает смотреть не только на код, но и на shape/lineage/quality самих данных. | При pipeline logic, transforms, schema evolution, medallion flow |
-| 12 | `documentation-audit` | Документация в BioETL легко дрейфует после рефакторинга. Этот skill помогает быстро поймать рассинхрон. | После заметных изменений в архитектуре, tooling, workflow, onboarding |
-| 13 | `py-doc-bot` | Исполнительский docs-skill для точечных и массовых обновлений документации. | Когда уже известно, какие docs нужно синхронизировать |
-| 14 | `vcr-record` | Практически обязательный skill для HTTP/VCR интеграций с провайдерами. Держит кассеты и secret-safety в порядке. | При записи, обновлении и проверке cassette-based tests |
-| 15 | `git-workflow-manager` | Очень полезен для cleanup веток, cherry-pick, consolidation и аккуратного PR flow. | Когда задача упирается уже не в код, а в движение изменений по Git |
+| 4 | `py-debug-bot` | Хорош для root-cause analysis в многослойных поломках, где symptom и причина живут в разных местах. | Когда failure не локализуется одной быстрой правкой |
+| 5 | `py-test-bot` | Самый частый спутник кодовой работы: написать, адаптировать, стабилизировать или починить тесты. | После изменений в логике, при локальных падениях suite |
+| 6 | `verify-unit-tests` | Проверяет, что unit tests остались unit tests: детерминированные, изолированные, без лишнего I/O. | После добавления или переписывания тестов |
+| 7 | `verify-architecture` | Быстрый operational guardrail после структурных изменений. Позволяет подтвердить, что import matrix и layer boundaries не поехали. | Перед commit/PR после рефакторинга или DI/wiring changes |
+| 8 | `architecture-guardian` | Более строгий архитектурный взгляд: ADR, anti-patterns, naming, ответственность модулей. | Когда изменение затрагивает `domain/application/infrastructure/composition` |
+| 9 | `py-config-bot` | Для BioETL это must-have: конфиги здесь управляют значительной частью поведения pipelines. | При работе с `configs/**`, schema rules, provider/entity YAML |
+| 10 | `documentation-audit` | Документация в BioETL легко дрейфует после рефакторинга. Этот skill помогает быстро поймать рассинхрон. | После заметных изменений в архитектуре, tooling, workflow, onboarding |
+| 11 | `py-doc-bot` | Исполнительский docs-skill для точечных и массовых обновлений документации. | Когда уже известно, какие docs нужно синхронизировать |
+| 12 | `vcr-record` | Практически обязательный skill для HTTP/VCR интеграций с провайдерами. Держит кассеты и secret-safety в порядке. | При записи, обновлении и проверке cassette-based tests |
+| 13 | `collecting-evidence` | Полезен, когда нужно не спорить об архитектуре на интуиции, а собирать traceable evidence pack. | Перед repo-wide выводами, redesign и roadmap-калибровкой |
+| 14 | `synthesizing-pillars` | Превращает собранный evidence в patterns, tensions и actionable conclusions. | После research-wave, до roadmap или решения |
+| 15 | `making-decisions` | Закрепляет явные решения с рисками и trade-offs вместо плавающих выводов в чате. | Когда evidence уже собран и нужен decision layer |
 
 ## Быстрая Карта По Сценариям
 
 | Сценарий | Лучший стартовый набор |
 |---|---|
-| Новый feature/fix | `capability-discovery` → `py-plan-bot` → `using-git-worktrees` → `py-code-bot` |
+| Новый feature/fix | `capability-discovery` → `py-plan-bot` → `using-git-worktrees` → orchestrator (direct implementation) |
 | Непонятное падение | `py-debug-bot` → `py-test-bot` → `verify-unit-tests` |
 | Архитектурный рефакторинг | `py-plan-bot` → `architecture-guardian` → `verify-architecture` |
 | Pipeline/config работа | `py-config-bot` → `data-engineer` → `schema-parity` |
@@ -69,8 +71,8 @@
 | `py-config-bot` | Профиль для YAML/schema/topology/config consistency. Относится к конфигам как к коду, а не как к второстепенным файлам. | При изменении `configs/**`, schema rules, provider/entity settings. | `schema-parity`, `new-pipeline` |
 | `py-debug-bot` | Методичный root-cause analysis для сложных поломок. Держит reasoning чистым и не даёт застрять в поверхностном patching. | Когда symptom и причина разбросаны по нескольким слоям. | `debugger`, `py-test-bot` |
 | `py-test-bot` | Локальная работа с тестами: писать, обновлять, стабилизировать, чинить. Помогает держать tests как инженерный актив. | При конкретной test-задаче или падении suite. | `verify-unit-tests`, `vcr-record` |
-| `py-plan-bot` | Декомпозирует сложную работу на безопасные и логичные шаги. Делает многослойные задачи обозримыми. | Когда задача затрагивает код, тесты, docs и конфиги сразу. | `using-git-worktrees`, `py-code-bot` |
-| `py-code-bot` | Основной исполнительский профиль для production Python-кода. Помогает аккуратно доводить реализацию до рабочего состояния. | Когда план уже понятен и пора менять код. | `py-plan-bot`, `verify-implementation` |
+| `py-plan-bot` | Декомпозирует сложную работу на безопасные и логичные шаги. Делает многослойные задачи обозримыми. | Когда задача затрагивает код, тесты, docs и конфиги сразу. | `using-git-worktrees`, orchestrator |
+| `py-code-bot` | Deprecated compatibility profile. Может встречаться в старых notes и mirrors, но не считается preferred active execution path в текущем Codex orchestration. | Только при разборе legacy references или совместимости старых workflow notes. | `py-plan-bot`, `docs/00-project/ai/agents/agents/ORCHESTRATION.md` |
 | `refactoring-specialist` | Специализируется на структурном улучшении кода без потери управляемости. Убирает дублирование, legacy seams и смешанные ответственности. | Когда система работает, но её форма мешает развитию. | `architecture-guardian`, `verify-architecture` |
 | `test-automator` | Автоматизирует тестовые workflows и harness, уменьшая ручную рутину. Хорош для повторяемых QA-процессов. | Когда тестовая работа стала слишком процедурной или хрупкой. | `py-test-bot`, `verify-unit-tests` |
 | `data-engineer` | Смотрит на data flow, schema, lineage и transforms как на first-class concern. Помогает видеть поведение данных, а не только код вокруг них. | При pipeline logic, schema evolution, normalization, medallion transitions. | `schema-parity`, `provider-health` |

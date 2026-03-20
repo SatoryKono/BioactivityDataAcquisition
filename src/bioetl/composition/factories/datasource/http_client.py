@@ -19,10 +19,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.composition.factories.datasource.provider_registry_resolution import (
+    resolve_datasource_provider_registry as _resolve_provider_registry,
+)
 from bioetl.composition.providers.provider_registry import (
     ProviderRegistry,
-    ensure_provider_registry_ready,
-    get_default_provider_registry,
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
@@ -39,17 +40,6 @@ __all__ = [
     "HttpClientFactory",
     "ResolvedHttpConfig",
 ]
-
-
-def _resolve_provider_registry(
-    provider_registry: ProviderRegistry | None = None,
-) -> ProviderRegistry:
-    """Resolve the provider registry used for HTTP config lookup."""
-    return ensure_provider_registry_ready(
-        provider_registry
-        if provider_registry is not None
-        else get_default_provider_registry()
-    )
 
 
 @dataclass(frozen=True)

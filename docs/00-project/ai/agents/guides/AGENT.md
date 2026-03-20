@@ -30,6 +30,22 @@ make lint && make test && git add . && git commit
 
 **Главное правило:** Читай `docs/00-project/RULES.md` → Планируй → Делай → Проверяй → Документируй
 
+### Evidence Calibration
+
+Если задача затрагивает файловую структуру, package topology, hotspot selection или repo-wide refactor claims, сначала сверяйся с:
+
+- [../../../../reports/evidence/project-file-structure/SUMMARY.md](../../../../reports/evidence/project-file-structure/SUMMARY.md)
+- [../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [../../../../reports/evidence/project-package-topology/SUMMARY.md](../../../../reports/evidence/project-package-topology/SUMMARY.md)
+- [../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
+- [../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+
+Operational rule:
+- breadth сама по себе не равна debt;
+- package family важнее whole layer как единица calibration;
+- governance signals важнее интуитивных structural claims.
+
 ----------------------------------------------------------------------
 
 ## 1. Твоя Персона

@@ -3,13 +3,14 @@
 *Статус: internal-published (Internal / Extended)*
 *Обновлено: 2026-03-12 (Wave 6 consolidation)*
 
-This directory stores documentation mirrors for Claude Code skills.
+This directory stores published documentation for BioETL AI skills across supported runtimes.
 
 ## Canonical Source
 
-- Canonical local skill source: `.claude/skills/`
-- Canonical local mirror: `docs/00-project/ai/skills/local/`
-- Rule: edit skills only in `.claude/skills/`; never edit `docs/00-project/ai/skills/local/` manually.
+- Canonical Codex runtime skill source: `.codex/skills/`
+- `docs/00-project/ai/skills/local/` is a published mirror layer and may retain compatibility entries for navigation
+- Edit runtime skill behavior in the runtime source first; do not treat `local/` as the primary authoring surface
+- When active docs and mirrors diverge, prefer current runtime orchestration guidance from `.codex/agents/ORCHESTRATION.md`
 
 ## Layout
 
@@ -22,7 +23,7 @@ This directory stores documentation mirrors for Claude Code skills.
 ## Wave 6 Consolidation (2026-03-12)
 
 Removed 6 skills (Ledger framework + nci-analysis) and 2 OpenAI metadata files.
-Runtime `.claude/skills/` now contains 6 active skills.
+Current active orchestration no longer uses `py-code-bot` as a first-line production-code step; production code is written directly by the orchestrator.
 See `SKILLS-CATALOG.md` for full details.
 
 ## Global Snapshot

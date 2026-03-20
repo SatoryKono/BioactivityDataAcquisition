@@ -44,6 +44,26 @@
 | Configs (unified) | `configs/entities/{provider}/{entity}.yaml` |
 | Configs (composite) | `configs/composites/{entity}.yaml` |
 
+### Evidence anchors
+
+При структурных выводах и roadmap-решениях сначала сверяйся с актуальными evidence packs:
+
+| Topic | File |
+|-------|------|
+| File structure baseline | [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md) |
+| File structure decisions | [../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md) |
+| Package topology baseline | [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md) |
+| Package topology synthesis | [../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md](../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md) |
+| Topology vs governance cross-synthesis | [../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md) |
+| Package topology decisions | [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md) |
+| Governance signals baseline | [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md) |
+| Governance signals decisions | [../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md) |
+
+Короткая operational rule:
+- package count сам по себе не запускает structural wave;
+- hotspot calibration по умолчанию идёт на уровне package family, а не whole layer;
+- topology подсказывает, где смотреть; governance signals подсказывают, где действовать.
+
 ### Быстрые команды
 
 ```bash

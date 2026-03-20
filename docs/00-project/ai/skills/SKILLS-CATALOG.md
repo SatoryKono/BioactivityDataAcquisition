@@ -7,8 +7,9 @@
 
 ## Канонические Правила
 
-- `.claude/skills/` — канонический источник runtime skills для Claude Code.
-- `docs/00-project/ai/skills/local/` — сгенерированное зеркало, его нельзя редактировать вручную.
+- `.codex/skills/` — канонический источник runtime skills для текущего Codex workflow.
+- `.claude/skills/` — legacy/parallel runtime surface для Claude-specific flows, если такой workflow отдельно поддерживается.
+- `docs/00-project/ai/skills/local/` — опубликованное docs-mirror/compatibility layer; его нельзя считать основным authoring source.
 - `docs/00-project/ai/skills/global/` — курируемый snapshot выбранных глобальных skills.
 - `docs/00-project/ai/skills/_references/` — канонический источник reference-бандлов для overlay в `local/`.
 - Frontmatter (`name`, `description`) в каждом `SKILL.md` считается контрактом триггера.
@@ -114,4 +115,5 @@
 
 ## Примечания
 
-- `py-code-bot` исключён из active published catalog: начиная с `ORCHESTRATION.md v4.0` production-код пишет orchestrator.
+- `py-code-bot` не является частью preferred active orchestration: начиная с `ORCHESTRATION.md v4.0` production-код по умолчанию пишет orchestrator.
+- Если `py-code-bot` встречается в compatibility mirrors или старых workflow notes, трактуй его как deprecated compatibility profile, а не как рекомендуемый основной шаг.

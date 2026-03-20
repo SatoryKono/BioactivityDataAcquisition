@@ -30,6 +30,7 @@ Plans in this folder must not override normative documents.
 
 - [mkdocs-material-migration-track-2026-03-03.md](mkdocs-material-migration-track-2026-03-03.md)
 - [branch-consolidation-plan-2026-03-19.md](branch-consolidation-plan-2026-03-19.md)
+- [documentation-drift-remediation-plan-2026-03-20.md](documentation-drift-remediation-plan-2026-03-20.md)
 - [dia-019-diagram-directory-consolidation-plan-2026-03-19.md](dia-019-diagram-directory-consolidation-plan-2026-03-19.md)
 - [onboarding-checklist-day-1-2026-03-20.md](onboarding-checklist-day-1-2026-03-20.md)
 - [project-briefing-capability-discovery-2026-03-20.md](project-briefing-capability-discovery-2026-03-20.md)

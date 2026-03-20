@@ -96,6 +96,7 @@ GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
 # These sections are mostly historical/internal and can be audited with
 # `--legacy-paths-all`.
 DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
+NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES = ("reports/",)
 
 # Optional inline marker to allow historical legacy examples in a specific line.
 ALLOW_LEGACY_MARKER = "doc-lint: allow-legacy"
@@ -337,6 +338,15 @@ def get_not_in_nav_docs(root: Path = DOCS_DIR) -> list[str]:
     return sorted(all_docs - nav_docs)
 
 
+def _filter_not_in_nav_growth_scope(paths: set[str]) -> set[str]:
+    """Exclude internal report bulk from nav-growth accounting."""
+    return {
+        path
+        for path in paths
+        if not path.startswith(NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES)
+    }
+
+
 def _load_not_in_nav_baseline(
     baseline_file: Path = NOT_IN_NAV_BASELINE_FILE,
 ) -> tuple[set[str], bool]:
@@ -366,8 +376,9 @@ def check_not_in_nav_growth(
         removed: Docs present in baseline but absent now.
         baseline_exists: Whether baseline file exists.
     """
-    current = set(get_not_in_nav_docs(root))
+    current = _filter_not_in_nav_growth_scope(set(get_not_in_nav_docs(root)))
     baseline, baseline_exists = _load_not_in_nav_baseline(baseline_file)
+    baseline = _filter_not_in_nav_growth_scope(baseline)
     added = sorted(current - baseline)
     removed = sorted(baseline - current)
     return len(current), len(baseline), added, removed, baseline_exists

@@ -7,11 +7,12 @@ from typing import TYPE_CHECKING, ClassVar, cast
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
+from bioetl.composition.factories.datasource.provider_registry_resolution import (
+    resolve_datasource_provider_registry as _resolve_provider_registry,
+)
 from bioetl.composition.providers.provider_registry import (
     DataSourceCreatorProtocol,
     ProviderRegistry,
-    ensure_provider_registry_ready,
-    get_default_provider_registry,
 )
 from bioetl.domain.ports import DataSourcePort
 
@@ -21,17 +22,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 DataSourceCreatorPort = DataSourceCreatorProtocol
-
-
-def _resolve_provider_registry(
-    provider_registry: ProviderRegistry | None = None,
-) -> ProviderRegistry:
-    """Resolve and initialize the registry used for provider-bound creators."""
-    return ensure_provider_registry_ready(
-        provider_registry
-        if provider_registry is not None
-        else get_default_provider_registry()
-    )
 
 
 def get_data_source_creator(

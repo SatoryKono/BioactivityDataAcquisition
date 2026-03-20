@@ -16,6 +16,16 @@
 - **ID system**: `CFG-001`, `CFG-002`, ...
 - **Model**: sonnet
 
+## Evidence Anchors
+
+For claims about config-tree layout or repo organization, consult:
+
+- [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md)
+- [../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md)
+
+Do not propose repo/package restructuring from config sprawl alone without evidence beyond file count or directory breadth.
+
 ---
 
 ## 2. Config Hierarchy
