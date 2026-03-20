@@ -12,7 +12,7 @@ from __future__ import annotations
 
 __all__ = ["DEFAULT_FIELDS", "SEMANTICSCHOLAR_HEALTH_ERRORS", "SemanticScholarAdapter"]
 
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING
 
 from httpx import HTTPStatusError, RequestError
@@ -25,9 +25,6 @@ from bioetl.infrastructure.adapters.common import (
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
-)
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service as _create_default_semanticscholar_fallback_service,
 )
 from bioetl.infrastructure.adapters.semanticscholar.batch_request_mixin import (
     SemanticScholarBatchRequestMixin,
@@ -132,7 +129,8 @@ class SemanticScholarAdapter(
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
-    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
+    _: KW_ONLY
+    fallback_fetch_service: FallbackFetchOrchestratorService
     title_fallback_handler: SemanticScholarTitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="semanticscholar")
@@ -152,13 +150,7 @@ class SemanticScholarAdapter(
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,
         )
-        self._fallback_fetch_service = (
-            self.fallback_fetch_service
-            if self.fallback_fetch_service is not None
-            else _create_default_semanticscholar_fallback_service(
-                adapter_metrics=self._adapter_metrics,
-            )
-        )
+        self._fallback_fetch_service = self.fallback_fetch_service
         self._fallback_handler = (
             self.title_fallback_handler
             if self.title_fallback_handler is not None

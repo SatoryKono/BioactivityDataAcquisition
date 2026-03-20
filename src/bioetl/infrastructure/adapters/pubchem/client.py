@@ -36,11 +36,6 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
-from bioetl.infrastructure.adapters.pubchem.client_builders import (
-    _create_default_pubchem_entity_mapper,
-    _create_default_pubchem_fetch_strategies,
-    _create_default_pubchem_request_collector,
-)
 from bioetl.infrastructure.adapters.pubchem.client_model_mixin import (
     PubChemAdapterModelMixin,
 )
@@ -90,6 +85,10 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
         ...     rate_limiter=rate_limiter,
         ...     circuit_breaker=circuit_breaker,
         ...     thread_pool=thread_pool,
+        ...     error_handler=error_handler,
+        ...     request_collector=request_collector,
+        ...     entity_mapper=entity_mapper,
+        ...     fetch_strategies=fetch_strategies,
         ... )
         >>> compounds = [c async for c in adapter.fetch("compound", query="aspirin", limit=10)]
         >>> # Each compound dict contains a 'cid' key with the PubChem compound ID
@@ -108,11 +107,11 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
         thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
         *,
-        error_handler: ErrorHandlerPort | None = None,
+        error_handler: ErrorHandlerPort,
         owns_thread_pool: bool = False,
-        request_collector: APIRequestCollector | None = None,
-        entity_mapper: PubChemEntityMapper | None = None,
-        fetch_strategies: PubChemFetchStrategies | None = None,
+        request_collector: APIRequestCollector,
+        entity_mapper: PubChemEntityMapper,
+        fetch_strategies: PubChemFetchStrategies,
     ) -> None:
         """Initialize PubChem client.
 
@@ -124,14 +123,16 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
             circuit_breaker: Pre-configured circuit breaker.
             thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
-            error_handler: Pre-built error handler (optional, injected by
-                    AdapterHelpersFactory). Falls back to inline ErrorService.
+            error_handler: Pre-built error handler assembled by the composition
+                root.
             owns_thread_pool: Whether this adapter owns the injected thread pool
                 and should shut it down on close.
-            request_collector: Pre-built request collector (optional, injected by
-                    AdapterHelpersFactory). Falls back to inline APIRequestCollector.
-            entity_mapper: Pre-built entity mapper (optional).
-            fetch_strategies: Pre-built fetch strategies (optional).
+            request_collector: Pre-built request collector assembled by the
+                composition root.
+            entity_mapper: Pre-built entity mapper assembled by the composition
+                root.
+            fetch_strategies: Pre-built fetch strategies assembled by the
+                composition root.
 
         """
         super().__init__(
@@ -143,29 +144,9 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
             error_handler=error_handler,
             owns_thread_pool=owns_thread_pool,
         )
-        self._mapper = (
-            entity_mapper
-            if entity_mapper is not None
-            else _create_default_pubchem_entity_mapper()
-        )
-        self._request_collector = (
-            request_collector
-            if request_collector is not None
-            else _create_default_pubchem_request_collector()
-        )
-        self._strategies = (
-            fetch_strategies
-            if fetch_strategies is not None
-            else _create_default_pubchem_fetch_strategies(
-                logger=logger,
-                rate_limiter=rate_limiter,
-                circuit_breaker=circuit_breaker,
-                mapper=self._mapper,
-                run_in_executor=self._run_in_executor,
-                provider_name=self.provider_name,
-                request_collector=self._request_collector,
-            )
-        )
+        self._mapper = entity_mapper
+        self._request_collector = request_collector
+        self._strategies = fetch_strategies
 
     async def _fetch_compound(
         self, query: str | None, limit: int | None

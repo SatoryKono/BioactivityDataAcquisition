@@ -10,6 +10,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 
 
@@ -38,6 +41,9 @@ def adapter(mock_http_client, mock_logger):
         logger=mock_logger,
         email="test@example.com",
         api_key=None,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 

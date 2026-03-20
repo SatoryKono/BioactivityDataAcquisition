@@ -9,6 +9,9 @@ import pytest
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -46,6 +49,9 @@ def adapter(
         logger=mock_logger,
         api_key="test-api-key",
         batch_size=10,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 
@@ -70,6 +76,9 @@ class TestSemanticScholarAdapter:
             error_handler=error_handler,
             adapter_metrics=adapter_metrics,
             request_collector=request_collector,
+            fallback_fetch_service=create_default_fallback_service(
+                adapter_metrics=adapter_metrics
+            ),
         )
 
         assert adapter._http_client is mock_http_client
@@ -100,6 +109,9 @@ class TestSemanticScholarAdapter:
         adapter = SemanticScholarAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
+            fallback_fetch_service=create_default_fallback_service(
+                adapter_metrics=MagicMock()
+            ),
         )
 
         headers = adapter._build_headers()

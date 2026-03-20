@@ -6,6 +6,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 
@@ -30,7 +33,13 @@ def mock_logger() -> MagicMock:
 @pytest.fixture
 def adapter(mock_http_client: AsyncMock, mock_logger: MagicMock) -> UniProtAdapter:
     """Create UniProt adapter instance."""
-    return UniProtAdapter(http_client=mock_http_client, logger=mock_logger)
+    return UniProtAdapter(
+        http_client=mock_http_client,
+        logger=mock_logger,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
+    )
 
 
 def test_request_count_starts_at_zero(adapter: UniProtAdapter) -> None:

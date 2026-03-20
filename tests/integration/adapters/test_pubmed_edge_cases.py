@@ -13,6 +13,9 @@ import respx
 from httpx import Response
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -41,6 +44,9 @@ def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
         logger=mock_logger,
         email="test@example.com",
         api_key=None,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 

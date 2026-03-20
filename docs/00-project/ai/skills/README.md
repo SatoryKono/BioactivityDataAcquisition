@@ -17,6 +17,7 @@ This directory stores documentation mirrors for Claude Code skills.
 - `global/` — snapshot of selected global skills
 - `_references/` — reference bundles overlaid into local mirror
 - `SKILLS-CATALOG.md` — consolidated skill registry
+- `SKILLS-PRACTICAL-INDEX.md` — operational index with practical usage guidance and a recommended top-15 for BioETL
 
 ## Wave 6 Consolidation (2026-03-12)
 

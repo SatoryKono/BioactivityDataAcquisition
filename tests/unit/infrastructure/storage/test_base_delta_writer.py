@@ -366,10 +366,42 @@ class TestBaseDeltaWriterAsync:
     ) -> None:
         """Test read_table returns record dictionaries from the shared loader path."""
         expected_records = [{"id": "1", "name": "test"}]
-        mock_arrow_table = MagicMock()
-        mock_arrow_table.to_pylist.return_value = expected_records
+        mock_batch = MagicMock()
+        mock_batch.to_pylist.return_value = expected_records
+        mock_reader = [mock_batch]
+        mock_scanner = MagicMock()
+        mock_scanner.to_reader.return_value = mock_reader
+        mock_dataset = MagicMock()
+        mock_dataset.scanner.return_value = mock_scanner
 
         mock_delta_table = MagicMock()
+        mock_delta_table.to_pyarrow_dataset.return_value = mock_dataset
+
+        with patch(
+            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+            return_value=mock_delta_table,
+        ):
+            result = await writer.read_table("existing_table", columns=["id", "name"])
+
+        assert result == expected_records
+        mock_dataset.scanner.assert_called_once_with(
+            columns=["id", "name"]
+        )
+
+    async def test_read_table_falls_back_to_arrow_table_when_dataset_reader_missing(
+        self,
+        writer: BaseDeltaWriter,
+    ) -> None:
+        """Fallback to legacy full-table conversion when scanner reader is unavailable."""
+        expected_records = [{"id": "1", "name": "test"}]
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = expected_records
+        mock_scanner = MagicMock()
+        del mock_scanner.to_reader
+        mock_dataset = MagicMock()
+        mock_dataset.scanner.return_value = mock_scanner
+        mock_delta_table = MagicMock()
+        mock_delta_table.to_pyarrow_dataset.return_value = mock_dataset
         mock_delta_table.to_pyarrow_table.return_value = mock_arrow_table
 
         with patch(

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 __all__ = ["OPENALEX_API_BASE", "OPENALEX_RUNTIME_ERRORS", "OpenAlexAdapter"]
 
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from httpx import HTTPStatusError, RequestError
@@ -29,9 +29,6 @@ from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
-)
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service as _create_default_openalex_fallback_service,
 )
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
     OpenAlexAdapterHelpersMixin,
@@ -122,7 +119,8 @@ class OpenAlexAdapter(
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
-    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
+    _: KW_ONLY
+    fallback_fetch_service: FallbackFetchOrchestratorService
     openalex_query_executor: OpenAlexQueryExecutor | None = None
     openalex_response_mapper: OpenAlexResponseMapper | None = None
     openalex_cursor_flow: OpenAlexCursorFlowService | None = None
@@ -150,13 +148,7 @@ class OpenAlexAdapter(
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,
         )
-        self._fallback_fetch_service = (
-            self.fallback_fetch_service
-            if self.fallback_fetch_service is not None
-            else _create_default_openalex_fallback_service(
-                adapter_metrics=self._adapter_metrics,
-            )
-        )
+        self._fallback_fetch_service = self.fallback_fetch_service
         runtime_services = build_openalex_runtime_services(
             fallback_fetch_service=self._fallback_fetch_service,
             openalex_query_executor=self.openalex_query_executor,
@@ -232,6 +224,8 @@ def _create_openalex_adapter(
         raise ValueError("OpenAlex adapter requires http_client")
     if logger is None:
         raise ValueError("OpenAlex adapter requires logger")
+    if "fallback_fetch_service" not in kwargs:
+        raise ValueError("OpenAlex adapter requires fallback_fetch_service")
 
     return OpenAlexAdapter(
         http_client=http_client,
@@ -242,5 +236,5 @@ def _create_openalex_adapter(
         error_handler=kwargs.get("error_handler"),
         adapter_metrics=kwargs.get("adapter_metrics"),
         request_collector=kwargs.get("request_collector"),
-        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
+        fallback_fetch_service=kwargs["fallback_fetch_service"],
     )

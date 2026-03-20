@@ -29,6 +29,7 @@ class StubSyncAdapter(BaseSyncAdapter):
         rate_limiter: TokenBucketRateLimiter,
         circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
+        error_handler: Any | None = None,
         metrics: Any = None,
         fail_probe: bool = False,
         probe_error: Exception | None = None,
@@ -40,6 +41,7 @@ class StubSyncAdapter(BaseSyncAdapter):
             rate_limiter=rate_limiter,
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
+            error_handler=error_handler or MagicMock(),
             metrics=metrics,
             owns_thread_pool=owns_thread_pool,
         )
@@ -105,7 +107,7 @@ def thread_pool():
 class TestHealthCheckLogging:
     """Tests for health_check logging behavior via HealthCheckMixin."""
 
-    def test_init_uses_default_error_handler_factory(
+    def test_init_uses_injected_error_handler(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
@@ -113,23 +115,18 @@ class TestHealthCheckLogging:
         circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
     ) -> None:
-        """Test that constructor delegates default error handler creation."""
+        """Test that constructor preserves the injected error handler."""
         error_handler = MagicMock()
-
-        with patch(
-            "bioetl.infrastructure.adapters.sync_base.create_default_error_handler",
-            return_value=error_handler,
-        ) as factory:
-            adapter = StubSyncAdapter(
-                logger=mock_logger,
-                rate_limiter=rate_limiter,
-                circuit_breaker=circuit_breaker,
-                thread_pool=thread_pool,
-                metrics=mock_metrics,
-            )
+        adapter = StubSyncAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+            error_handler=error_handler,
+            metrics=mock_metrics,
+        )
 
         assert adapter._error_handler is error_handler
-        factory.assert_called_once_with(logger=mock_logger, metrics=mock_metrics)
 
     async def test_health_check_logs_warning_on_exception(
         self,

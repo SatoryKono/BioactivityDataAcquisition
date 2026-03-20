@@ -5,7 +5,7 @@
 ## Summary
 
 - Scanned modules: `1195`
-- Internal import edges (raw): `4446`
+- Internal import edges (raw): `4439`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `248`
@@ -23,12 +23,12 @@ flowchart LR
     application -->|578 OK| application
     application -->|697 OK| domain
     composition -->|213 OK| application
-    composition -->|306 OK| composition
+    composition -->|308 OK| composition
     composition -->|233 OK| domain
-    composition -->|215 OK| infrastructure
+    composition -->|216 OK| infrastructure
     domain -->|696 OK| domain
     infrastructure -->|536 OK| domain
-    infrastructure -->|675 OK| infrastructure
+    infrastructure -->|665 OK| infrastructure
     interfaces -->|44 OK| application
     interfaces -->|38 OK| composition
     interfaces -->|35 OK| domain
@@ -42,12 +42,12 @@ flowchart LR
 | `application` | `application` | 578 | allowed |
 | `application` | `domain` | 697 | allowed |
 | `composition` | `application` | 213 | allowed |
-| `composition` | `composition` | 306 | allowed |
+| `composition` | `composition` | 308 | allowed |
 | `composition` | `domain` | 233 | allowed |
-| `composition` | `infrastructure` | 215 | allowed |
+| `composition` | `infrastructure` | 216 | allowed |
 | `domain` | `domain` | 696 | allowed |
 | `infrastructure` | `domain` | 536 | allowed |
-| `infrastructure` | `infrastructure` | 675 | allowed |
+| `infrastructure` | `infrastructure` | 665 | allowed |
 | `interfaces` | `application` | 44 | allowed |
 | `interfaces` | `composition` | 38 | allowed |
 | `interfaces` | `domain` | 35 | allowed |
@@ -89,8 +89,8 @@ flowchart LR
 | `composition.factories` | `domain.types` | 19 |
 | `application.services` | `domain.value_objects` | 18 |
 | `composition.bootstrap` | `application.services` | 18 |
+| `composition.factories` | `infrastructure.adapters` | 18 |
 | `application.core` | `domain.exceptions` | 17 |
-| `composition.factories` | `infrastructure.adapters` | 17 |
 | `composition.providers` | `infrastructure.adapters` | 16 |
 | `application.pipelines` | `domain.context` | 15 |
 | `composition.bootstrap` | `domain.composite` | 15 |

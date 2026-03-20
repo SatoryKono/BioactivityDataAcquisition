@@ -24,6 +24,26 @@ def _load_gold_writer_module() -> ModuleType:
     return import_module("bioetl.infrastructure.storage.gold_writer")
 
 
+def _build_read_projection(
+    *,
+    columns: list[str] | None,
+    current_only: bool,
+) -> list[str] | None:
+    """Build a minimal projection for Gold reads when callers request columns.
+
+    When a caller requests specific columns we can avoid materializing the full
+    table by projecting only the requested fields plus ``is_current`` when it is
+    needed for post-read filtering.
+    """
+    if columns is None:
+        return None
+
+    projection = list(columns)
+    if current_only and "is_current" not in projection:
+        projection.append("is_current")
+    return projection
+
+
 class GoldWriterReadCleanupMixin:
     """Reusable read/history and cleanup-preview helpers."""
 
@@ -49,10 +69,20 @@ class GoldWriterReadCleanupMixin:
             Any,  # Any: DeltaTable runtime type has no complete type stubs
             await self._run_in_executor(lambda: module.DeltaTable(table_path)),
         )
-        arrow_table = cast(
-            Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
-            await self._run_in_executor(dt.to_pyarrow_table),
+        projection = _build_read_projection(
+            columns=columns,
+            current_only=current_only,
         )
+        if projection is None:
+            arrow_table = cast(
+                Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
+                await self._run_in_executor(dt.to_pyarrow_table),
+            )
+        else:
+            arrow_table = cast(
+                Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
+                await self._run_in_executor(dt.to_pyarrow_table, projection),
+            )
         if current_only and "is_current" in arrow_table.column_names:
             import pyarrow.compute as pc
 

@@ -36,9 +36,6 @@ from bioetl.domain.ports import (
     MetricsPort,
     NoOpMetrics,
 )
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_error_handler,
-)
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
 if TYPE_CHECKING:
@@ -93,7 +90,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
         *,
-        error_handler: ErrorHandlerPort | None = None,
+        error_handler: ErrorHandlerPort,
         owns_thread_pool: bool = False,
     ) -> None:
         """Initialize Sync Adapter resources.
@@ -107,8 +104,8 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
             metrics: MetricsPort instance for metrics collection.
-            error_handler: Pre-built error handler (optional, injected by
-                    AdapterHelpersFactory). Falls back to inline ErrorService.
+            error_handler: Pre-built error handler injected by the
+                composition root.
             owns_thread_pool: Whether this adapter owns the injected executor and
                 should shut it down on ``close()``/GC finalization. Defaults to
                 ``False`` so externally managed executors are not closed implicitly.
@@ -122,11 +119,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         self.thread_pool = thread_pool
         self._owns_thread_pool = owns_thread_pool
         self.strict_error_handling = strict_error_handling
-        self._error_handler = (
-            error_handler
-            if error_handler is not None
-            else create_default_error_handler(logger=logger, metrics=self.metrics)
-        )
+        self._error_handler = error_handler
 
         # Safety: owned executors are finalized if explicit close is missed.
         self._finalizer = (

@@ -14,6 +14,7 @@ Rate Limits:
 
 from __future__ import annotations
 
+import asyncio
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -23,9 +24,19 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
+from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
+    PubChemFetchStrategies,
+)
 
 # VCR cassette directory for PubChem adapter tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "pubchem"
@@ -78,11 +89,30 @@ def pubchem_adapter(
     thread_pool: ThreadPoolExecutor,
 ) -> PubChemAdapter:
     """Create PubChemAdapter instance for testing."""
+    request_collector = APIRequestCollector()
+    entity_mapper = PubChemEntityMapper()
+
+    async def run_in_executor(func, *args):
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(thread_pool, func, *args)
+
     return PubChemAdapter(
         logger=mock_logger,
         rate_limiter=rate_limiter,
         circuit_breaker=circuit_breaker,
         thread_pool=thread_pool,
+        error_handler=create_default_error_handler(logger=mock_logger, metrics=None),
+        request_collector=request_collector,
+        entity_mapper=entity_mapper,
+        fetch_strategies=PubChemFetchStrategies(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            mapper=entity_mapper,
+            run_in_executor=run_in_executor,
+            provider_name=PubChemAdapter.provider_name,
+            request_collector=request_collector,
+        ),
     )
 
 

@@ -9,11 +9,15 @@ import os
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -66,6 +70,9 @@ async def adapter(http_client: UnifiedHTTPClient) -> PubMedAdapter:
         logger=NoOpLogger(),
         email="bioetl-test@example.com",
         api_key=None,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
 
 

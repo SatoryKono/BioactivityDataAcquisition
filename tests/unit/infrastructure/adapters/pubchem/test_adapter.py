@@ -2,18 +2,29 @@
 
 from __future__ import annotations
 
+import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.http.circuit_breaker import (
     CircuitBreakerGuard,
     CircuitBreakerOpenError,
 )
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
+from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
+    PubChemFetchStrategies,
+)
 
 
 @pytest.fixture
@@ -45,13 +56,65 @@ def thread_pool():
 
 
 @pytest.fixture
-def pubchem_adapter(mock_logger, rate_limiter, circuit_breaker, thread_pool):
+def request_collector() -> APIRequestCollector:
+    return APIRequestCollector()
+
+
+@pytest.fixture
+def entity_mapper() -> PubChemEntityMapper:
+    return PubChemEntityMapper()
+
+
+@pytest.fixture
+def error_handler(mock_logger):
+    return create_default_error_handler(logger=mock_logger, metrics=None)
+
+
+@pytest.fixture
+def fetch_strategies(
+    mock_logger,
+    rate_limiter,
+    circuit_breaker,
+    thread_pool,
+    request_collector,
+    entity_mapper,
+) -> PubChemFetchStrategies:
+    async def run_in_executor(func, *args):
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(thread_pool, func, *args)
+
+    return PubChemFetchStrategies(
+        logger=mock_logger,
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
+        mapper=entity_mapper,
+        run_in_executor=run_in_executor,
+        provider_name=PubChemAdapter.provider_name,
+        request_collector=request_collector,
+    )
+
+
+@pytest.fixture
+def pubchem_adapter(
+    mock_logger,
+    rate_limiter,
+    circuit_breaker,
+    thread_pool,
+    error_handler,
+    request_collector,
+    entity_mapper,
+    fetch_strategies,
+):
     """Create PubChemAdapter with injected dependencies."""
     adapter = PubChemAdapter(
         logger=mock_logger,
         rate_limiter=rate_limiter,
         circuit_breaker=circuit_breaker,
         thread_pool=thread_pool,
+        error_handler=error_handler,
+        request_collector=request_collector,
+        entity_mapper=entity_mapper,
+        fetch_strategies=fetch_strategies,
     )
     yield adapter
     # Thread pool cleanup is handled by thread_pool fixture

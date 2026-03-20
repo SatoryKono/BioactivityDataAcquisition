@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from builtins import __import__ as _builtin_import
 from typing import TYPE_CHECKING
 
 import pyarrow as pa
@@ -24,17 +25,22 @@ def is_complex_type(field_type: pa.DataType) -> bool:
 def serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
     """Serialize a column of complex values to JSON strings."""
     vals = [
-        serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
+        serialize_to_json(value) if value is not None else None
+        for value in col.to_pylist()
     ]
     return pa.array(vals, type=pa.string())
 
 
 def flatten_table_for_csv(table: pa.Table) -> pa.Table:
     """Convert complex types (list, struct) to JSON strings for CSV export."""
+    complex_flags = tuple(is_complex_type(field.type) for field in table.schema)
+    if not any(complex_flags):
+        return table
+
     new_columns = []
     for i, field in enumerate(table.schema):
         col = table.column(i)
-        if is_complex_type(field.type):
+        if complex_flags[i]:
             new_columns.append(serialize_column_to_json(col))
         else:
             new_columns.append(col)
@@ -43,10 +49,10 @@ def flatten_table_for_csv(table: pa.Table) -> pa.Table:
         [
             pa.field(
                 field.name,
-                pa.string() if is_complex_type(field.type) else field.type,
+                pa.string() if complex_flags[i] else field.type,
                 field.nullable,
             )
-            for field in table.schema
+            for i, field in enumerate(table.schema)
         ]
     )
     return pa.Table.from_arrays(new_columns, schema=new_schema)
@@ -80,6 +86,8 @@ def deduplicate_table(
     """Deduplicate table based on primary keys."""
     if not primary_keys:
         return table
+    if table.num_rows < 2:
+        return table
 
     missing_keys = [key for key in primary_keys if key not in table.column_names]
     if missing_keys:
@@ -90,10 +98,15 @@ def deduplicate_table(
         return table
 
     try:
-        df = table.to_pandas()
-        original_count = len(df)
-        df = df.drop_duplicates(subset=primary_keys, keep="last")
-        dedup_count = len(df)
+        pl = _builtin_import("polars")
+        df = pl.from_arrow(table)
+        original_count = df.height
+        df = df.unique(
+            subset=primary_keys,
+            keep="last",
+            maintain_order=True,
+        )
+        dedup_count = df.height
 
         if dedup_count < original_count:
             logger.debug(
@@ -101,9 +114,9 @@ def deduplicate_table(
                 removed_rows=original_count - dedup_count,
             )
 
-        return pa.Table.from_pandas(df, schema=table.schema)
+        return df.to_arrow()
     except ImportError:
-        logger.warning("Pandas not available for CSV deduplication")
+        logger.warning("Polars not available for CSV deduplication")
         return table
     except (
         pa.ArrowException,

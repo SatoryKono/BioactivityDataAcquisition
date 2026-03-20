@@ -15,6 +15,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
+
 # VCR cassette directory for UniProt adapter tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "uniprot"
 
@@ -59,7 +63,13 @@ class TestUniProtAdapterIntegration:
         """Create UniProtAdapter instance."""
         from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
-        return UniProtAdapter(http_client=uniprot_http_client, logger=mock_logger)
+        return UniProtAdapter(
+            http_client=uniprot_http_client,
+            logger=mock_logger,
+            fallback_fetch_service=create_default_fallback_service(
+                adapter_metrics=MagicMock()
+            ),
+        )
 
     def test_provider_name(self, uniprot_adapter: Any) -> None:
         """Adapter should have correct provider name."""
@@ -79,7 +89,11 @@ class TestUniProtAdapterIntegration:
 
         async with uniprot_http_client:
             adapter = UniProtAdapter(
-                http_client=uniprot_http_client, logger=mock_logger
+                http_client=uniprot_http_client,
+                logger=mock_logger,
+                fallback_fetch_service=create_default_fallback_service(
+                    adapter_metrics=MagicMock()
+                ),
             )
             status = await adapter.health_check()
 
@@ -103,7 +117,11 @@ class TestUniProtAdapterIntegration:
 
         async with uniprot_http_client:
             adapter = UniProtAdapter(
-                http_client=uniprot_http_client, logger=mock_logger
+                http_client=uniprot_http_client,
+                logger=mock_logger,
+                fallback_fetch_service=create_default_fallback_service(
+                    adapter_metrics=MagicMock()
+                ),
             )
 
             records = []

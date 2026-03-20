@@ -11,7 +11,7 @@ from __future__ import annotations
 
 __all__ = ["ENTREZ_API_BASE", "PubMedAdapter"]
 
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
@@ -24,9 +24,6 @@ from bioetl.infrastructure.adapters.common import (
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
-)
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service as _create_default_pubmed_fallback_service,
 )
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
@@ -111,7 +108,8 @@ class PubMedAdapter(
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
-    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
+    _: KW_ONLY
+    fallback_fetch_service: FallbackFetchOrchestratorService
     title_fallback_handler: PubMedTitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="pubmed")
@@ -131,13 +129,7 @@ class PubMedAdapter(
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,
         )
-        self._fallback_fetch_service = (
-            self.fallback_fetch_service
-            if self.fallback_fetch_service is not None
-            else _create_default_pubmed_fallback_service(
-                adapter_metrics=self._adapter_metrics,
-            )
-        )
+        self._fallback_fetch_service = self.fallback_fetch_service
 
         self._fallback_handler = (
             self.title_fallback_handler
@@ -258,6 +250,8 @@ def _create_pubmed_adapter(
         raise ValueError("PubMed adapter requires http_client")
     if logger is None:
         raise ValueError("PubMed adapter requires logger")
+    if "fallback_fetch_service" not in kwargs:
+        raise ValueError("PubMed adapter requires fallback_fetch_service")
 
     return PubMedAdapter(
         http_client=http_client,
@@ -269,5 +263,5 @@ def _create_pubmed_adapter(
         error_handler=kwargs.get("error_handler"),
         adapter_metrics=kwargs.get("adapter_metrics"),
         request_collector=kwargs.get("request_collector"),
-        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
+        fallback_fetch_service=kwargs["fallback_fetch_service"],
     )

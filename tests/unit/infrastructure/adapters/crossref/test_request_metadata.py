@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.infrastructure.adapters.crossref import CROSSREF_API_BASE, CrossRefAdapter
 
 pytestmark = pytest.mark.unit
@@ -26,9 +27,10 @@ def mock_logger() -> MagicMock:
 @pytest.fixture
 def adapter(mock_http_client: AsyncMock, mock_logger: MagicMock) -> CrossRefAdapter:
     """Create CrossRef adapter instance."""
-    return CrossRefAdapter(
+    return create_crossref_adapter(
         http_client=mock_http_client,
         logger=mock_logger,
+        settings=None,
         mailto="test@example.com",
     )
 

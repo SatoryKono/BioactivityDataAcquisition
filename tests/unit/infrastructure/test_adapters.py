@@ -11,11 +11,19 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.resilience import AdapterConfig
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+    create_default_error_handler,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 
@@ -100,8 +108,36 @@ class TestPubChemAdapter:
         yield pool
         pool.shutdown(wait=False)
 
+    @pytest.fixture
+    def request_collector(self):
+        """Create request collector for testing."""
+        return APIRequestCollector()
+
+    @pytest.fixture
+    def entity_mapper(self):
+        """Create entity mapper for testing."""
+        return PubChemEntityMapper()
+
+    @pytest.fixture
+    def error_handler(self, mock_logger):
+        """Create error handler for testing."""
+        return create_default_error_handler(logger=mock_logger, metrics=None)
+
+    @pytest.fixture
+    def fetch_strategies(self):
+        """Use an explicit strategy collaborator in direct adapter construction."""
+        return MagicMock(name="fetch_strategies")
+
     def test_adapter_creation(
-        self, mock_logger, rate_limiter, circuit_breaker, thread_pool
+        self,
+        mock_logger,
+        rate_limiter,
+        circuit_breaker,
+        thread_pool,
+        error_handler,
+        request_collector,
+        entity_mapper,
+        fetch_strategies,
     ):
         """Test PubChem adapter can be created with DI."""
         adapter = PubChemAdapter(
@@ -109,12 +145,25 @@ class TestPubChemAdapter:
             rate_limiter=rate_limiter,
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
+            error_handler=error_handler,
+            request_collector=request_collector,
+            entity_mapper=entity_mapper,
+            fetch_strategies=fetch_strategies,
         )
 
         assert adapter.provider_name == "pubchem"
         assert adapter.rate_limiter.rate == 5.0  # 5 req/sec per RULES.md
 
-    def test_adapter_with_custom_rate(self, mock_logger, circuit_breaker, thread_pool):
+    def test_adapter_with_custom_rate(
+        self,
+        mock_logger,
+        circuit_breaker,
+        thread_pool,
+        error_handler,
+        request_collector,
+        entity_mapper,
+        fetch_strategies,
+    ):
         """Test PubChem adapter with custom rate limit via injected rate limiter."""
         custom_rate_limiter = TokenBucketRateLimiter(
             rate=10.0, capacity=20, provider="pubchem"
@@ -124,11 +173,24 @@ class TestPubChemAdapter:
             rate_limiter=custom_rate_limiter,
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
+            error_handler=error_handler,
+            request_collector=request_collector,
+            entity_mapper=entity_mapper,
+            fetch_strategies=fetch_strategies,
         )
 
         assert adapter.rate_limiter.rate == 10.0
 
-    def test_thread_pool_injected(self, mock_logger, rate_limiter, circuit_breaker):
+    def test_thread_pool_injected(
+        self,
+        mock_logger,
+        rate_limiter,
+        circuit_breaker,
+        error_handler,
+        request_collector,
+        entity_mapper,
+        fetch_strategies,
+    ):
         """Test thread pool is properly injected for sync operations."""
         from concurrent.futures import ThreadPoolExecutor
 
@@ -139,6 +201,10 @@ class TestPubChemAdapter:
                 rate_limiter=rate_limiter,
                 circuit_breaker=circuit_breaker,
                 thread_pool=custom_pool,
+                error_handler=error_handler,
+                request_collector=request_collector,
+                entity_mapper=entity_mapper,
+                fetch_strategies=fetch_strategies,
             )
 
             assert adapter.thread_pool is not None
@@ -147,7 +213,15 @@ class TestPubChemAdapter:
             custom_pool.shutdown(wait=False)
 
     async def test_compound_to_dict(
-        self, mock_logger, rate_limiter, circuit_breaker, thread_pool
+        self,
+        mock_logger,
+        rate_limiter,
+        circuit_breaker,
+        thread_pool,
+        error_handler,
+        request_collector,
+        entity_mapper,
+        fetch_strategies,
     ):
         """Test compound conversion to dictionary."""
         adapter = PubChemAdapter(
@@ -155,6 +229,10 @@ class TestPubChemAdapter:
             rate_limiter=rate_limiter,
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
+            error_handler=error_handler,
+            request_collector=request_collector,
+            entity_mapper=entity_mapper,
+            fetch_strategies=fetch_strategies,
         )
 
         # Mock compound object
@@ -202,27 +280,48 @@ class TestUniProtAdapter:
         """Create a mock logger."""
         return MagicMock()
 
-    def test_adapter_creation_without_api_key(self, http_client, mock_logger):
+    @pytest.fixture
+    def fallback_fetch_service(self):
+        """Create fallback fetch service for testing."""
+        return create_default_fallback_service(adapter_metrics=MagicMock())
+
+    def test_adapter_creation_without_api_key(
+        self, http_client, mock_logger, fallback_fetch_service
+    ):
         """Test UniProt adapter without API key."""
-        adapter = UniProtAdapter(http_client=http_client, logger=mock_logger)
+        adapter = UniProtAdapter(
+            http_client=http_client,
+            logger=mock_logger,
+            fallback_fetch_service=fallback_fetch_service,
+        )
 
         assert adapter.provider_name == "uniprot"
         assert adapter.api_key is None
 
-    def test_adapter_creation_with_api_key(self, http_client, mock_logger):
+    def test_adapter_creation_with_api_key(
+        self, http_client, mock_logger, fallback_fetch_service
+    ):
         """Test UniProt adapter with API key."""
         adapter = UniProtAdapter(
-            http_client=http_client, logger=mock_logger, api_key="test_key"
+            http_client=http_client,
+            logger=mock_logger,
+            api_key="test_key",
+            fallback_fetch_service=fallback_fetch_service,
         )
 
         assert adapter.api_key == "test_key"
 
-    def test_adapter_with_custom_base_url(self, http_client, mock_logger):
+    def test_adapter_with_custom_base_url(
+        self, http_client, mock_logger, fallback_fetch_service
+    ):
         """Test UniProt adapter with custom base URL."""
         mock_http = MagicMock()
         custom_url = "https://custom.uniprot.org"
         adapter = UniProtAdapter(
-            http_client=mock_http, logger=mock_logger, base_url=custom_url
+            http_client=mock_http,
+            logger=mock_logger,
+            base_url=custom_url,
+            fallback_fetch_service=fallback_fetch_service,
         )
 
         assert adapter.base_url == custom_url

@@ -9,10 +9,12 @@ import os
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
 
+from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
@@ -61,9 +63,10 @@ async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
 @pytest_asyncio.fixture
 async def adapter(http_client: UnifiedHTTPClient) -> CrossRefAdapter:
     """Create CrossRef adapter used by rebalance tests."""
-    return CrossRefAdapter(
+    return create_crossref_adapter(
         http_client=http_client,
         logger=NoOpLogger(),
+        settings=None,
         mailto="bioetl-test@example.com",
         batch_size=50,
     )

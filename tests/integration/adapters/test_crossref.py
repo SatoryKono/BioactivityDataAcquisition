@@ -12,6 +12,7 @@ import pytest
 import respx
 from httpx import Response
 
+from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
@@ -34,9 +35,10 @@ def crossref_adapter(mock_logger: MagicMock) -> CrossRefAdapter:
         TokenBucketRateLimiter(rate=50.0, capacity=100.0),
         CircuitBreakerGuard(provider="crossref_test"),
     )
-    return CrossRefAdapter(
+    return create_crossref_adapter(
         http_client=http_client,
         logger=mock_logger,
+        settings=None,
         mailto="test@example.com",
         batch_size=50,
     )

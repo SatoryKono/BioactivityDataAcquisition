@@ -7,6 +7,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 
@@ -27,8 +30,17 @@ def mock_logger():
 
 
 @pytest.fixture
-def adapter(mock_http_client, mock_logger):
-    return UniProtAdapter(http_client=mock_http_client, logger=mock_logger)
+def fallback_fetch_service():
+    return create_default_fallback_service(adapter_metrics=MagicMock())
+
+
+@pytest.fixture
+def adapter(mock_http_client, mock_logger, fallback_fetch_service):
+    return UniProtAdapter(
+        http_client=mock_http_client,
+        logger=mock_logger,
+        fallback_fetch_service=fallback_fetch_service,
+    )
 
 
 @pytest.mark.asyncio
@@ -369,6 +381,9 @@ def test_build_params_parse_response_and_repr(adapter):
         http_client=adapter._http_client,
         logger=adapter.logger,
         api_key="secret",
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
     assert "with API key" in repr(with_key)
 
@@ -381,6 +396,9 @@ def test_handle_fetch_error_paths(adapter):
         http_client=adapter._http_client,
         logger=MagicMock(),
         strict_error_handling=True,
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
     )
     wrapped = RuntimeError("wrapped")
     strict._error_handler.wrap_error = MagicMock(return_value=wrapped)  # type: ignore[attr-defined]

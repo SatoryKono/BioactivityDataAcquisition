@@ -7,8 +7,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import RequestError
 
+from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service,
+)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -30,9 +34,10 @@ def mock_logger():
 @pytest.fixture
 def adapter(mock_http_client, mock_logger):
     """Fixture for CrossRefAdapter instance."""
-    return CrossRefAdapter(
+    return create_crossref_adapter(
         http_client=mock_http_client,
         logger=mock_logger,
+        settings=None,
         mailto="test@example.com",
     )
 
@@ -52,6 +57,9 @@ def test_post_init_preserves_injected_crossref_runtime_collaborators(
         http_client=mock_http_client,
         logger=mock_logger,
         mailto="test@example.com",
+        fallback_fetch_service=create_default_fallback_service(
+            adapter_metrics=MagicMock()
+        ),
         query_builder=query_builder,
         response_mapper=response_mapper,
         batch_fetcher=batch_fetcher,
@@ -77,9 +85,10 @@ def test_post_init_preserves_injected_base_collaborators(
     adapter_metrics = AdapterMetricsRecorder(metrics, "crossref")
     request_collector = APIRequestCollector()
 
-    adapter = CrossRefAdapter(
+    adapter = create_crossref_adapter(
         http_client=mock_http_client,
         logger=mock_logger,
+        settings=None,
         mailto="test@example.com",
         metrics=metrics,
         error_handler=error_handler,
