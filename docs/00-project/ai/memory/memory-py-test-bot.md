@@ -16,6 +16,16 @@
 - **ID system**: `FAIL-001`, `FAIL-002`, ...
 - **Model**: sonnet
 
+## Evidence Anchors
+
+For test recommendations that imply structural conclusions, consult:
+
+- [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md)
+- [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md)
+
+Do not infer that a broad layer needs reorganization from test spread alone. Prefer family-level calibration plus failing evidence.
+
 ---
 
 ## 2. Test Directory Structure

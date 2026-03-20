@@ -13,6 +13,7 @@
 | Docs mirror | `docs/00-project/ai/agents/` | Публикуемый документационный слой, включая Codex mirror pages |
 
 При расхождении между runtime-реестрами (`.claude/agents/`, `.codex/agents/`) и docs приоритет у runtime-реестра.
+Для текущего Codex workflow статус `py-code-bot` определяется по `.codex/agents/ORCHESTRATION.md`: production-код пишет orchestrator, а `py-code-bot` трактуется как deprecated compatibility reference.
 
 ## Structure
 
@@ -35,6 +36,19 @@
 | Diagram Docs Orchestrator | [runtime/py-diagram-docs-orchestrator.md](runtime/py-diagram-docs-orchestrator.md) | Оркестратор обновления/rerender диаграммных docx/pdf |
 | Agent Memory (quick) | [runtime/agent-memory.md](runtime/agent-memory.md) | Краткая оперативная память по проекту |
 | Team Orchestration | [agents/ORCHESTRATION.md](agents/ORCHESTRATION.md) | Публикуемое Codex docs mirror для `.codex/agents/ORCHESTRATION.md` |
+
+## Evidence Anchors
+
+Для структурных утверждений про repo layout, package topology и hotspot calibration сначала опирайся на актуальные evidence packs:
+
+- [Project File Structure Summary](../../../reports/evidence/project-file-structure/SUMMARY.md)
+- [Project File Structure Decisions](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [Project Package Topology Summary](../../../reports/evidence/project-package-topology/SUMMARY.md)
+- [Topology Synthesis](../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
+- [Topology vs Governance Cross-Synthesis](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
+- [Package Topology Decisions](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [Governance Signals Summary](../../../reports/evidence/governance-signals/SUMMARY.md)
+- [Governance Signals Decisions](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 
 ## Policy & Audit Reports
 

@@ -184,6 +184,42 @@ ALLOWED_LEGACY_DATASOURCE_FACTORY_SRC_FILES: frozenset[Path] = frozenset()
 LEGACY_DATASOURCE_FACTORY_MODULE_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "factories" / "datasource" / "factory.py"
 )
+LEGACY_BATCH_TRANSFORMER_ORCHESTRATION_MODULE_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "batch_transformer_orchestration.py"
+)
+SANCTIONED_DEAD_CODE_EXCLUSION_MODULE_PATHS = frozenset(
+    {
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "composite"
+        / "dependency_join_support.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "core"
+        / "batch_execution_lifecycle.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "core"
+        / "batch_execution_run_service.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "core"
+        / "batch_execution_state_service.py",
+    }
+)
 ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_SERVICES_CREATION_API_TEST_FILES = frozenset(
     {
@@ -1023,6 +1059,30 @@ def test_legacy_datasource_factory_module_file_has_been_removed() -> None:
     assert not LEGACY_DATASOURCE_FACTORY_MODULE_PATH.exists(), (
         "Legacy datasource factory shim must stay removed: "
         "src/bioetl/composition/factories/datasource/factory.py"
+    )
+
+
+@pytest.mark.architecture
+def test_legacy_batch_transformer_orchestration_module_file_has_been_removed() -> None:
+    """Legacy batch-transformer orchestration duplicate should stay removed."""
+    assert not LEGACY_BATCH_TRANSFORMER_ORCHESTRATION_MODULE_PATH.exists(), (
+        "Legacy batch_transformer_orchestration duplicate must stay removed: "
+        "src/bioetl/application/core/batch_transformer_orchestration.py"
+    )
+
+
+@pytest.mark.architecture
+def test_sanctioned_dead_code_exclusion_modules_remain_present() -> None:
+    """Sanctioned aggregate/wrapper seams must not be dropped by generic cleanup."""
+    missing = [
+        str(path.relative_to(ROOT))
+        for path in sorted(SANCTIONED_DEAD_CODE_EXCLUSION_MODULE_PATHS)
+        if not path.exists()
+    ]
+    assert not missing, (
+        "Sanctioned compatibility/aggregate seams must stay present unless a "
+        "dedicated migration removes their public obligations:\n"
+        + "\n".join(f"  - {item}" for item in missing)
     )
 
 

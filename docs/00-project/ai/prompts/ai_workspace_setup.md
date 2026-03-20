@@ -227,9 +227,10 @@ SSOT локальных skills: `.codex/skills/`.
 - `documentation-cascade-audit` (каскадный аудит документации)
 - `technical-designer-mermaid` (Mermaid-диаграммы с ADR-040)
 
-`py-code-bot` не включается в active docs mirror: с `ORCHESTRATION.md v4.0`
-production-код пишет orchestrator, а legacy runtime-артефакт не используется как
-published profile.
+`py-code-bot` не является частью preferred active orchestration: с
+`ORCHESTRATION.md v4.0` production-код пишет orchestrator. При этом
+compatibility/runtime entry может сохраняться в docs mirror и runtime catalog
+для навигации по legacy references.
 
 Проверка:
 
@@ -238,7 +239,7 @@ published profile.
     # Ожидание: пустой вывод (все обновлены)
 
     # Проверить синхронизацию SSOT ↔ docs mirror для локальных skills
-    diff <(ls docs/00-project/ai/skills/local/ | grep "^py-" | grep -v "^py-code-bot$") <(ls .codex/skills/ | grep "^py-" | grep -v "^py-code-bot$")
+    diff <(ls docs/00-project/ai/skills/local/ | grep "^py-") <(ls .codex/skills/ | grep "^py-")
 
 #### 7. Проверка корневых файлов
 

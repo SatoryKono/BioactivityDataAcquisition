@@ -70,6 +70,24 @@ tests/
   fixtures/vcr/  — VCR cassettes per provider
 ```
 
+## Evidence Anchors
+
+Before proposing repo-wide refactors, package moves, or topology claims, consult the current evidence baseline:
+
+- File structure baseline: [docs/reports/evidence/project-file-structure/SUMMARY.md](docs/reports/evidence/project-file-structure/SUMMARY.md)
+- File structure decision summary: [docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md](docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- Package topology baseline: [docs/reports/evidence/project-package-topology/SUMMARY.md](docs/reports/evidence/project-package-topology/SUMMARY.md)
+- Package topology synthesis: [docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md](docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
+- Topology vs governance cross-synthesis: [docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
+- Package topology decisions: [docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md](docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- Governance signals baseline: [docs/reports/evidence/governance-signals/SUMMARY.md](docs/reports/evidence/governance-signals/SUMMARY.md)
+- Governance signals decisions: [docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md](docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+
+Use these evidence packs as the default calibration layer:
+- Package count alone is not a refactor trigger.
+- Family-level topology is a better hotspot unit than whole-layer breadth.
+- Governance signals decide where to act; topology mostly decides where to look.
+
 ## Common Commands
 
 ```bash

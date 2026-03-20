@@ -16,6 +16,22 @@
 - **ID system**: `DOC-001`, `DOC-002`, ...
 - **Model**: sonnet
 
+## Evidence Anchors
+
+When updating architecture, governance, or agent docs, sync against:
+
+- [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md)
+- [../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md)
+- [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md)
+- [../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+
+Prefer evidence-backed wording:
+- package count is descriptive, not a standalone defect signal;
+- family-level topology is the preferred hotspot narrative;
+- governance signals should be cited when docs imply prioritization.
+
 ---
 
 ## 2. Documentation Structure

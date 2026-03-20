@@ -181,6 +181,42 @@ def test_not_in_nav_growth_guard_passes_for_current_repo() -> None:
     )
 
 
+def test_not_in_nav_growth_excludes_reports_prefixes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _load_module()
+    baseline_file = tmp_path / "not_in_nav_baseline.txt"
+    baseline_file.write_text(
+        "\n".join(
+            [
+                "reports/evidence/example/SUMMARY.md",
+                "plans/example-plan.md",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        module,
+        "get_not_in_nav_docs",
+        lambda root=module.DOCS_DIR: [
+            "reports/evidence/example/SUMMARY.md",
+            "plans/example-plan.md",
+        ],
+    )
+
+    current_count, baseline_count, added, removed, baseline_exists = (
+        module.check_not_in_nav_growth(baseline_file=baseline_file)
+    )
+
+    assert baseline_exists is True
+    assert current_count == 1
+    assert baseline_count == 1
+    assert added == []
+    assert removed == []
+
+
 def test_not_in_nav_growth_detects_increase_against_reduced_baseline(
     tmp_path: Path,
 ) -> None:
