@@ -1,4 +1,4 @@
-"""Compatibility wrapper for the canonical batch-execution state sublayer."""
+"""Public batch-execution state exports."""
 
 from __future__ import annotations
 

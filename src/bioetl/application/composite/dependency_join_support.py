@@ -1,7 +1,7 @@
-"""Compatibility facade for dependency join helpers.
+"""Public dependency-join helper exports.
 
-Canonical consumers should import the narrower builders/models/execution modules.
-This module remains as a stable seam during the RF-003 transition.
+Canonical consumers may still import the narrower builders/models/execution
+modules directly, but this module is the sanctioned aggregate seam.
 """
 
 from __future__ import annotations

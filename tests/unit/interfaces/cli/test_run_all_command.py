@@ -49,11 +49,11 @@ def mock_registry():
     ]
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+            "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
             return_value=mock,
         ),
         patch(
-            "bioetl.interfaces.cli.main.get_default_registry",
+            "bioetl.interfaces.cli.main.build_cli_registry",
             return_value=mock,
         ),
     ):
@@ -74,11 +74,11 @@ def mock_registry_main():
     ]
     with (
         patch(
-            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
             return_value=mock,
         ),
         patch(
-            "bioetl.interfaces.cli.main.get_default_registry",
+            "bioetl.interfaces.cli.main.build_cli_registry",
             return_value=mock,
         ),
     ):

@@ -1,4 +1,4 @@
-"""Compatibility wrapper for the canonical batch-execution run-policy sublayer."""
+"""Public batch-execution run-policy exports."""
 
 from __future__ import annotations
 

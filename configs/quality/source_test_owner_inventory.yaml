@@ -169,11 +169,11 @@ modules:
     owner_tests:
       - tests/unit/infrastructure/adapters/pubchem/test_query_builder.py
 
-  - source: src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py
+  - source: src/bioetl/infrastructure/storage/metadata_builder.py
     ownership: direct_test
-    rationale: "Compatibility helper stays on a direct owner test for freeze-guard clarity."
+    rationale: "Canonical metadata builder behavior stays on the direct same-path owner suite."
     owner_tests:
-      - tests/unit/infrastructure/storage/test_metadata_builder_composite_helpers.py
+      - tests/unit/infrastructure/storage/test_metadata_builder.py
 
   - source: src/bioetl/infrastructure/storage/silver/runtime_helpers.py
     ownership: cluster_owner

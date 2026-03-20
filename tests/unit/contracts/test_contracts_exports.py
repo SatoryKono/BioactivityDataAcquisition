@@ -21,9 +21,9 @@ class TestContractsPackageExports:
             ChEMBLAssayParametersGoldSchema,
             ChEMBLCellLineGoldSchema,
             ChEMBLCompoundRecordGoldSchema,
-            ChEMBLDocumentGoldSchema,
-            ChEMBLDocumentSimilarityGoldSchema,
-            ChEMBLDocumentTermGoldSchema,
+            ChEMBLPublicationGoldSchema,
+            ChEMBLPublicationSimilarityGoldSchema,
+            ChEMBLPublicationTermGoldSchema,
             ChEMBLMoleculeGoldSchema,
             ChEMBLProteinClassGoldSchema,
             ChEMBLSubcellularFractionGoldSchema,
@@ -38,9 +38,9 @@ class TestContractsPackageExports:
         assert hasattr(ChEMBLAssayParametersGoldSchema, "validate")
         assert hasattr(ChEMBLCellLineGoldSchema, "validate")
         assert hasattr(ChEMBLCompoundRecordGoldSchema, "validate")
-        assert hasattr(ChEMBLDocumentGoldSchema, "validate")
-        assert hasattr(ChEMBLDocumentSimilarityGoldSchema, "validate")
-        assert hasattr(ChEMBLDocumentTermGoldSchema, "validate")
+        assert hasattr(ChEMBLPublicationGoldSchema, "validate")
+        assert hasattr(ChEMBLPublicationSimilarityGoldSchema, "validate")
+        assert hasattr(ChEMBLPublicationTermGoldSchema, "validate")
         assert hasattr(ChEMBLMoleculeGoldSchema, "validate")
         assert hasattr(ChEMBLProteinClassGoldSchema, "validate")
         assert hasattr(ChEMBLSubcellularFractionGoldSchema, "validate")

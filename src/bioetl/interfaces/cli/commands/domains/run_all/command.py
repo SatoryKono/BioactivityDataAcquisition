@@ -60,18 +60,13 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
     validate_provider as _validate_provider,
 )
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
-from bioetl.interfaces.cli.registry_helpers import (
-    build_cli_registry as _build_cli_registry,
-)
+from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 
 if TYPE_CHECKING:
     from bioetl.application.services.pipeline_runner_service import (
         PipelineRunnerService,
     )
     from bioetl.composition import PipelineRegistry
-
-# Compatibility patch point retained for tests and legacy callers.
-get_default_registry = _build_cli_registry
 
 
 def get_pipeline_runner_service(
@@ -291,5 +286,6 @@ __all__ = [
     "_filter_pipelines_by_provider",
     "_get_available_providers",
     "_validate_provider",
+    "build_cli_registry",
     "run_all",
 ]

@@ -32,11 +32,11 @@ class TestCliExitCodeMatrix:
         with (
             patch("bioetl.interfaces.cli.main.register_all_pipelines"),
             patch(
-                "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
                 return_value=registry,
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=registry,
             ),
         ):

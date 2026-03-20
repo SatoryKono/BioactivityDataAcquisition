@@ -33,9 +33,6 @@ __all__ = [
     "main",
 ]
 
-# Compatibility patch point retained for tests and legacy callers.
-get_default_registry = build_cli_registry
-
 
 def _build_main_registry() -> object:
     """Build an explicit registry for the canonical process entrypoint.
@@ -56,7 +53,7 @@ def _build_main_registry() -> object:
 def cli(ctx: click.Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
     if ctx.obj is None:
-        ctx.obj = get_default_registry()
+        ctx.obj = build_cli_registry()
 
 
 # Register commands

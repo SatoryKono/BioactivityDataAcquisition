@@ -1,4 +1,4 @@
-"""Compatibility facade for architecture metric exemptions registry helpers."""
+"""Public API for architecture metric exemptions registry helpers."""
 
 from __future__ import annotations
 

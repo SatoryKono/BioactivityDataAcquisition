@@ -37,7 +37,7 @@ def mock_registry():
         "uniprot_protein",
     ]
     with patch(
-        "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+        "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
         return_value=mock,
     ):
         yield mock

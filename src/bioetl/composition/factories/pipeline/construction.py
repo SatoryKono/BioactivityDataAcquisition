@@ -1,8 +1,7 @@
-"""Compatibility facade for split pipeline-construction helpers.
+"""Public pipeline-construction helper exports.
 
-Canonical transformer instantiation now lives in ``TransformerBuilder.build``,
-where the pipeline-construction path resolves ``transformer_class(...)`` before
-the assembled pipeline receives ``transformer=transformer``.
+Transformer instantiation lives in ``TransformerBuilder.build``, while this
+module remains the sanctioned aggregate seam for construction helpers.
 """
 
 from __future__ import annotations

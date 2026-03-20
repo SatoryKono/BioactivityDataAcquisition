@@ -96,11 +96,11 @@ __all__ = [
     "CellLineRecord",
     "ChemblPublication",
     "ChemblPublicationRecord",
+    "ChemblPublicationSimilarity",
+    "ChemblPublicationTerm",
     "ChemblPublicationTermRecord",
     "CompoundRecord",  # ChEMBL compound_record (molecule-document link)
     "CrossRefPublicationEntity",
-    "ChemblPublicationSimilarity",
-    "ChemblPublicationTerm",
     "Molecule",
     "MoleculeRecord",
     "OpenAlexPublicationEntity",

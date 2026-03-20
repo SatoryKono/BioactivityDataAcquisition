@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import threading
 from typing import TYPE_CHECKING, NamedTuple
+
 from bioetl.domain.ports import PipelineFactoryPort
 
 if TYPE_CHECKING:
@@ -203,6 +204,7 @@ class PipelineRegistry:
         """
         with self._lock:
             self._registry.clear()
+
 
 def create_registry() -> PipelineRegistry:
     """Create a new isolated registry instance.

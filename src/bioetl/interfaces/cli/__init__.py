@@ -22,14 +22,10 @@ from typing import TYPE_CHECKING
 
 from bioetl.interfaces.cli.commands.domains.run.support import validate_pipeline_name
 from bioetl.interfaces.cli.main import cli, main
-from bioetl.interfaces.cli.registry_helpers import build_cli_registry
 
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
-
-# Backward-compatible package export kept while canonical helper is build_cli_registry().
-get_default_registry = build_cli_registry
 
 
 def create_pipeline_runner(
@@ -49,7 +45,6 @@ def create_pipeline_runner(
 __all__ = [
     "cli",
     "create_pipeline_runner",
-    "get_default_registry",
     "main",
     "validate_pipeline_name",
 ]

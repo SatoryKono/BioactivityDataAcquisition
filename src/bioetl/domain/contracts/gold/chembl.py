@@ -18,9 +18,9 @@ from bioetl.domain.contracts.gold._chembl_molecule_target_schemas import (
 from bioetl.domain.contracts.gold._chembl_reference_publication_schemas import (
     ChEMBLCellLineGoldSchema,
     ChEMBLCompoundRecordGoldSchema,
-    ChEMBLDocumentGoldSchema,
-    ChEMBLDocumentSimilarityGoldSchema,
-    ChEMBLDocumentTermGoldSchema,
+    ChEMBLPublicationGoldSchema,
+    ChEMBLPublicationSimilarityGoldSchema,
+    ChEMBLPublicationTermGoldSchema,
 )
 
 __all__ = [
@@ -29,11 +29,11 @@ __all__ = [
     "ChEMBLAssayParametersGoldSchema",
     "ChEMBLCellLineGoldSchema",
     "ChEMBLCompoundRecordGoldSchema",
-    "ChEMBLDocumentGoldSchema",
-    "ChEMBLDocumentSimilarityGoldSchema",
-    "ChEMBLDocumentTermGoldSchema",
     "ChEMBLMoleculeGoldSchema",
     "ChEMBLProteinClassGoldSchema",
+    "ChEMBLPublicationGoldSchema",
+    "ChEMBLPublicationSimilarityGoldSchema",
+    "ChEMBLPublicationTermGoldSchema",
     "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",

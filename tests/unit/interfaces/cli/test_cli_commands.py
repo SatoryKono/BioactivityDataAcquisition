@@ -1661,10 +1661,10 @@ class TestRunCommandExceptionHandlers:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_helpers.get_default_registry"
+                "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry"
             ) as mock_registry,
             patch(
-                "bioetl.interfaces.cli.main.get_default_registry"
+                "bioetl.interfaces.cli.main.build_cli_registry"
             ) as mock_registry_main,
             patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
@@ -1689,10 +1689,10 @@ class TestRunCommandExceptionHandlers:
 
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_helpers.get_default_registry"
+                "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry"
             ) as mock_registry,
             patch(
-                "bioetl.interfaces.cli.main.get_default_registry"
+                "bioetl.interfaces.cli.main.build_cli_registry"
             ) as mock_registry_main,
             patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
