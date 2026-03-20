@@ -56,5 +56,11 @@ else
   DIAGRAM_VISUAL_MANIFEST="$DIAGRAM_ROOT/manifests/visual-smoke.txt"
 fi
 
+if [[ -f "$DIAGRAM_MANIFESTS_DIR/png-compatibility.txt" ]]; then
+  DIAGRAM_PNG_COMPAT_MANIFEST="$DIAGRAM_MANIFESTS_DIR/png-compatibility.txt"
+else
+  DIAGRAM_PNG_COMPAT_MANIFEST="$DIAGRAM_ROOT/manifests/png-compatibility.txt"
+fi
+
 DIAGRAM_CLASS_SOURCE_DIR="$DIAGRAM_ROOT/class-diagrams"
 DIAGRAM_CLASS_SVG_DIR="$DIAGRAM_CLASS_SOURCE_DIR/svg"

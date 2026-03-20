@@ -34,7 +34,7 @@ jobs:
       - name: Validate rendered artifacts (DIAG-T010..T012)
         run: |
           python3 scripts/diagrams/check_diagram_artifacts.py \
-            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt \
+            --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt \
             --require-png
 
       - name: Validate SVG text visibility (DIAG-T014..T015)

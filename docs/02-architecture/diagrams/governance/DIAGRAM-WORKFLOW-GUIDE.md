@@ -394,7 +394,7 @@ bash docs/02-architecture/diagrams/tooling/render.sh
 8. **Отрендерить:** `bash docs/02-architecture/diagrams/tooling/render.sh`
    Для усиленного рендера больших схем можно задать: `--large-threshold`, `--large-scale`, `--large-png-dpi`.
 9. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
-   Для дополнительной compatibility-проверки PNG: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --require-png`
+   Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt --require-png`
 10. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
 11. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`
 12. **Добавить в индекс:** обновить `README.md` каталога

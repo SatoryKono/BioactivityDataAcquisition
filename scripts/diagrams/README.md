@@ -105,4 +105,5 @@ python -m scripts.diagrams <command> [args...]
 - Markdown bundles prefer `svg/` renders as the primary publication artifact and fall back to `png/` only when an SVG is missing.
 - `generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`.
 - `generate_architecture_bundle.py` and `generate_views_bundle.py` are maintained compatibility wrappers for collection-specific entrypoints.
+- `visual-smoke.txt` remains the canonical SVG smoke manifest; `png-compatibility.txt` is a smaller curated manifest for PNG compatibility checks.
 - When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact.

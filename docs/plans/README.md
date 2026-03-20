@@ -57,6 +57,8 @@ Plans in this folder must not override normative documents.
 
 - The consolidated master plan is the primary execution/backlog surface for the
   current refactor program.
+- `wave-3-crossref-batch-cluster-plan-2026-03-20.md` is the active bounded
+  implementation plan for the current `Wave 3` adapter hotspot reduction start.
 - `rf-fs-remaining-backlog-execution-plan-2026-03-20.md` is now a reconciled
   context document, not a competing master queue.
 - `refactor-proposals-consolidation-input-2026-03-20.md` is an absorbed input

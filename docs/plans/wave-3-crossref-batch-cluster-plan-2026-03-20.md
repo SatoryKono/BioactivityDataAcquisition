@@ -1,7 +1,7 @@
 # Wave 3 CrossRef Batch Cluster Plan
 
 Date: 2026-03-20  
-Status: active bounded-cluster plan  
+Status: active bounded-cluster plan, preflight completed  
 Parent program: [consolidated-master-refactor-plan-2026-03-20.md](./consolidated-master-refactor-plan-2026-03-20.md)
 
 ## Purpose
@@ -63,6 +63,31 @@ Supporting guards:
 - [`tests/architecture/test_no_inline_construction_in_adapters.py`](../../tests/architecture/test_no_inline_construction_in_adapters.py)
 - [`tests/architecture/test_architecture_dependency_docs_drift.py`](../../tests/architecture/test_architecture_dependency_docs_drift.py)
 
+## Current Preflight Snapshot
+
+Cluster-start inventory confirms a narrow compatibility surface before any code
+movement:
+
+- current direct `src/` imports of `bioetl.infrastructure.adapters.crossref.batch`:
+  none at the current snapshot
+- direct import anchored in tests:
+  [`tests/performance/test_hotspot_budgets.py`](../../tests/performance/test_hotspot_budgets.py)
+  imports `DoiBatchProcessor` from `crossref.batch`
+- architecture touchpoints:
+  [`tests/architecture/test_no_inline_construction_in_adapters.py`](../../tests/architecture/test_no_inline_construction_in_adapters.py)
+  names `DoiBatchProcessor` and `SearchPaginator` as adapter collaborators that
+  must remain constructor-injected and not inlined
+
+Public collaborator symbols that must remain stable through the first internal
+split:
+
+- `DoiBatchProcessor`
+- `SearchPaginator`
+- `HttpTransport`
+- `BaseMetrics`
+- `CROSSREF_RUNTIME_ERRORS`
+- `CROSSREF_FALLBACK_ERRORS`
+
 ## Target Shape
 
 The intended first slice follows the accepted complexity backlog:
@@ -81,6 +106,8 @@ adapter family.
 
 Slice `3A-1`: cluster ledger and workflow split preflight.
 
+Status: `completed`
+
 Deliverables:
 
 - confirm current direct imports of `crossref.batch`
@@ -88,9 +115,27 @@ Deliverables:
 - freeze first write scope around `batch.py` plus new internal modules only
 - keep docs/evidence language aligned with a temporary compatibility seam
 
-If preflight remains clean, the next code slice is:
+Preflight result:
+
+- direct `src/` importer count is currently zero
+- visible external touchpoints are bounded to tests and architecture guards
+- the first refactor can therefore stay inside the `crossref/` package with a
+  temporary compatibility seam in `batch.py`
+
+Next code slice:
 
 Slice `3A-2`: internal workflow split with compatibility re-export.
+
+Planned write scope for `3A-2`:
+
+- keep [`batch.py`](../../src/bioetl/infrastructure/adapters/crossref/batch.py)
+  as the temporary import-stable facade
+- add
+  `src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py`
+- add
+  `src/bioetl/infrastructure/adapters/crossref/_search_paginator.py`
+- avoid broader edits outside `crossref/` unless a test failure proves a real
+  caller contract needs adjustment
 
 ## Verification
 
