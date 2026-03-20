@@ -42,7 +42,15 @@ from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import (
+        DataSourcePort,
+        ErrorHandlerPort,
+        LoggerPort,
+        MetricsPort,
+    )
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -107,10 +115,11 @@ def _create_pubchem_adapter(
     settings: Settings | None = None,
     **kwargs: object,
 ) -> DataSourcePort:
-    """Create PubChem adapter with all dependencies injected from Composition Root."""
+    """Create PubChem adapter with composition-owned helper injection."""
     if logger is None:
         raise ValueError("PubChem adapter requires logger")
 
+    del http_client, settings
     rate_limit = _get_rate_limit_from_config("pubchem")
     cb_config = _get_circuit_breaker_from_config("pubchem")
     rate = cast(float, kwargs.pop("rate", rate_limit.rate))
@@ -124,6 +133,25 @@ def _create_pubchem_adapter(
     max_workers = cast(int, kwargs.pop("max_workers", 4))
     strict_error_handling = cast(bool, kwargs.pop("strict_error_handling", False))
     metrics = cast("MetricsPort | None", kwargs.pop("metrics", None))
+    error_handler = cast(
+        "ErrorHandlerPort | None",
+        kwargs.pop("error_handler", None),
+    )
+    request_collector = cast(
+        "APIRequestCollector | None",
+        kwargs.pop("request_collector", None),
+    )
+
+    if error_handler is None or request_collector is None:
+        helper_services = AdapterHelpersFactory.create_sync_helpers(
+            provider="pubchem",
+            logger=logger,
+            metrics=metrics,
+        )
+        if error_handler is None:
+            error_handler = helper_services.error_handler
+        if request_collector is None:
+            request_collector = helper_services.request_collector
 
     return PubChemAdapter(
         logger=logger,
@@ -139,6 +167,8 @@ def _create_pubchem_adapter(
         thread_pool=ThreadPoolExecutor(max_workers=max_workers),
         owns_thread_pool=True,
         strict_error_handling=strict_error_handling,
+        error_handler=error_handler,
+        request_collector=request_collector,
     )
 
 

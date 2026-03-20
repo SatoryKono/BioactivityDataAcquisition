@@ -15,6 +15,7 @@ from bioetl.infrastructure.adapters.error_handling import ErrorService
 __all__ = [
     "AdapterHelperServices",
     "AdapterHelpersFactory",
+    "SyncAdapterHelperServices",
 ]
 
 
@@ -38,6 +39,21 @@ class AdapterHelperServices:
             "adapter_metrics": self.adapter_metrics,
             "request_collector": self.request_collector,
             "fallback_fetch_service": self.fallback_fetch_service,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class SyncAdapterHelperServices:
+    """Container with helper dependencies shared by sync-backed adapters."""
+
+    error_handler: ErrorHandlerPort
+    request_collector: APIRequestCollector
+
+    def as_injection_kwargs(self) -> dict[str, object]:
+        """Return kwargs payload for sync adapter constructor injection."""
+        return {
+            "error_handler": self.error_handler,
+            "request_collector": self.request_collector,
         }
 
 
@@ -89,4 +105,32 @@ class AdapterHelpersFactory:
             adapter_metrics=adapter_metrics,
             request_collector=request_collector,
             fallback_fetch_service=fallback_fetch_service,
+        )
+
+    @classmethod
+    def create_sync_helpers(
+        cls,
+        *,
+        provider: str,
+        logger: LoggerPort,
+        metrics: MetricsPort | None = None,
+    ) -> SyncAdapterHelperServices:
+        """Create helper services for one sync-backed provider adapter.
+
+        Args:
+            provider: Provider name kept for a symmetric factory signature.
+            logger: LoggerPort for structured error and request logging.
+            metrics: Optional MetricsPort; uses NoOpMetrics if None.
+
+        Returns:
+            SyncAdapterHelperServices bundle with error handler and request
+            collector for sync-backed adapters.
+        """
+        del provider
+        metrics_port = metrics if metrics is not None else NoOpMetrics()
+        request_collector = APIRequestCollector()
+        error_handler = ErrorService(logger=logger, metrics=metrics_port)
+        return SyncAdapterHelperServices(
+            error_handler=error_handler,
+            request_collector=request_collector,
         )
