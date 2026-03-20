@@ -1,12 +1,13 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.24 | Last updated: 2026-03-19*
+*Synced with RULES.md v5.24 | Last updated: 2026-03-20*
 
 > **Documentation Update:** 2026-03-19
 > - Compatibility inventory synced with the current measured CLI shim registry
 > - Source-code map updated for the storage subpackage decomposition (`bronze/`, `silver/`, `gold/`, `metadata/`, `delta/`, `support/`)
 > - Snapshot-style file/test counts removed from active navigation blocks to reduce drift
 > - Active entry points clarified: `RULES.md`, `TOOLS.md`, and canonical layer docs in `docs/02-architecture/`
+> - 2026-03-20: stale config-loader entry updated to current composition/runtime and infrastructure config seams
 
 ## Quick Links
 
@@ -462,7 +463,8 @@ graph TD
 | `configs/entities/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
 | `src/bioetl/composition/bootstrap_contexts.py`     | Composition root          |
-| `src/bioetl/infrastructure/config_loader.py`       | Config loading (unified + legacy) |
+| `src/bioetl/composition/bootstrap/runtime/config_loader.py` | Runtime bootstrap config loading |
+| `src/bioetl/infrastructure/config/`               | Infrastructure config loaders and normalization package |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
 | `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json` | Gold data contracts |
 

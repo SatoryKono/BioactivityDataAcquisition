@@ -126,6 +126,7 @@ check-naming-pkg   Package naming consistency check
 check-exemptions   Quality exemptions audit
 check-terminology  Terminology linting
 report-dep-map     Generate/check architecture dependency map
+report-vcr-metadata Generate/check canonical VCR metadata catalog
 report-hotspots    Generate performance hotspot degradation report
 report-duplication-baseline Generate report-only duplication baseline
 calibrate-hotspots Calibrate hotspot budgets
@@ -177,6 +178,8 @@ High-frequency sync commands:
 ```bash
 python scripts/qa/generate_architecture_dependency_map.py --check
 python scripts/qa/generate_architecture_dependency_map.py --update
+python scripts/qa/report_vcr_metadata_catalog.py --check
+python scripts/qa/report_vcr_metadata_catalog.py --update
 python scripts/docs/check_doc_links.py --configs
 ```
 

@@ -245,10 +245,10 @@ def _create_http_data_source(
         AdapterHelpersFactory,
     )
     from bioetl.composition.providers._registration_contracts import (
-        create_provider_assembly_support,
+        resolve_provider_assembly_support,
     )
 
-    support = assembly_support or create_provider_assembly_support()
+    support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client(provider, settings, metrics=metrics)
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider=provider,

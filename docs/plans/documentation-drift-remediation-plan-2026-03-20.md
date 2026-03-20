@@ -1,6 +1,6 @@
 # Documentation Drift Remediation Plan
 
-*Status: active execution plan (non-normative)*
+*Status: completed execution plan (non-normative)*
 *Date: 2026-03-20*
 
 ## Basis
@@ -31,6 +31,7 @@ Reduce active documentation errors without opening a repo-wide docs rewrite. The
 ### DD-01. Reconcile `py-code-bot` Status Across Active AI Docs
 
 - **Priority**: P0
+- **Status**: completed
 - **Objective**: make the current orchestration model readable from one pass through active AI docs
 - **Authoritative source**: `.codex/agents/ORCHESTRATION.md`
 - **Target files**:
@@ -49,6 +50,7 @@ Reduce active documentation errors without opening a repo-wide docs rewrite. The
 ### DD-02. Repair Project Navigation Drift
 
 - **Priority**: P1
+- **Status**: completed
 - **Objective**: remove stale or misleading entry-point links from project navigation docs
 - **Target file**: `docs/00-project/00-map.md`
 - **Expected result**:
@@ -58,6 +60,7 @@ Reduce active documentation errors without opening a repo-wide docs rewrite. The
 ### DD-03. Correct Reference and Guide Surface Claims
 
 - **Priority**: P1
+- **Status**: completed
 - **Objective**: bring API and reference wording back in line with actual exported and recommended surfaces
 - **Target files**:
   - `docs/04-reference/api/application.md`
@@ -70,6 +73,7 @@ Reduce active documentation errors without opening a repo-wide docs rewrite. The
 ### DD-04. Refresh Architecture Snapshot Docs
 
 - **Priority**: P2
+- **Status**: completed
 - **Objective**: correct “snapshot shrinkage” where architecture docs understate current breadth
 - **Target files**:
   - `docs/02-architecture/diagrams/descriptions/class/07-application-core-services.md`
@@ -81,6 +85,7 @@ Reduce active documentation errors without opening a repo-wide docs rewrite. The
 ### DD-05. Label or Regenerate Derivative Surfaces
 
 - **Priority**: P3
+- **Status**: completed
 - **Objective**: reduce confusion from generated and historical artifacts that lag behind active source docs
 - **Target files**:
   - `docs/exports/full-documentation-no-plans-reports-skills.merged.md`
@@ -101,6 +106,22 @@ After each wave:
 Additional verification when diagrams or bundles change:
 
 1. `./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py`
+
+## Implementation Closeout
+
+Delivered in this wave:
+
+- `DD-01`: active AI/project docs now consistently treat orchestrator as the production-code owner in the current Codex workflow, with `py-code-bot` framed as deprecated compatibility drift where it still appears
+- `DD-02`: `docs/00-project/00-map.md` no longer points to the removed `src/bioetl/infrastructure/config_loader.py` path and instead references live config-loading entry points
+- `DD-03`: API/reference docs now distinguish layer breadth from canonical package-root exports, and the pipeline-config guide reflects the current `configs/` YAML inventory (`51` files)
+- `DD-04`: architecture snapshot prose now describes current application-core and related layer families without relying on narrow stale snapshots
+- `DD-05`: generated/historical derivative artifacts now carry stronger non-normative and historical labeling to reduce source-of-truth confusion
+
+Wave-level verification completed:
+
+1. `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --configs`
+2. `./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_documentation_sync.py`
+3. targeted `git diff --check` on touched files
 
 ## Definition Of Done
 

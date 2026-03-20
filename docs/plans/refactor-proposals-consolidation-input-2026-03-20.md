@@ -1,7 +1,7 @@
 # Refactor Proposals Consolidation Input
 
 Date: 2026-03-20
-Status: prepared
+Status: absorbed context after Wave 0
 
 ## Purpose
 
@@ -14,6 +14,13 @@ set for a later consolidation task. Only proposals that still influence future
 execution are included. Documents that are implemented, purely analytical,
 already decision-closed, or only serve as ledgers/constraints are explicitly
 filtered out or downgraded to “context only.”
+
+Wave 0 note:
+- this document has now served its purpose;
+- the consolidated execution result lives in
+  `docs/plans/consolidated-master-refactor-plan-2026-03-20.md`;
+- this file should be treated as historical consolidation input, not as an
+  active planning surface.
 
 Important note:
 - `docs/reports/plans` does not exist in the current repository.

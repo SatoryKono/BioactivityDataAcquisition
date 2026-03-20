@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-20T14:30:07.059067+00:00",
+  "generated_at": "2026-03-20T19:16:40.878697+00:00",
   "summary": {
-    "total_scripts": 189,
+    "total_scripts": 193,
     "status_counts": {
-      "active": 89,
+      "active": 90,
       "legacy": 6,
-      "orphan": 80,
+      "orphan": 83,
       "unknown": 14
     },
     "reference_group_coverage": {
       "build": 28,
       "ci": 39,
-      "docs": 56,
-      "scripts": 39,
+      "docs": 58,
+      "scripts": 40,
       "skills": 3,
-      "tests": 32
+      "tests": 33
     }
   },
   "scripts": [
@@ -331,13 +331,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 434,
+          "line": 442,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/ci/quality_integral_gate.py \\"
         },
         {
           "path": "makefile",
-          "line": 434,
+          "line": 442,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/ci/quality_integral_gate.py \\"
         }
@@ -348,13 +348,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
           "line": 30,
           "source_group": "ci",
           "text": "uv run python scripts/ci/report_quality_debt_weekly.py \\"
+        },
+        {
+          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/EV-technical-debt-complexity-hotspots-policy-implies-further-burndown-to-zero.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"configs/quality/debt_scorecard.yaml:80-85; configs/quality/debt_scorecard.yaml:153-167; configs/quality/debt_scorecard.yaml:182-186; scripts/ci/report_quality_debt_weekly.py:91-125; scripts/ci/r"
+        },
+        {
+          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/RAW-complexity-hotspots-2026-03-20.md",
+          "line": 11,
+          "source_group": "docs",
+          "text": "- `scripts/ci/report_quality_debt_weekly.py`"
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
@@ -369,7 +381,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -379,21 +391,45 @@
         },
         {
           "path": "Makefile",
-          "line": 86,
+          "line": 94,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/ci/run_pytest_resilient.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/06-backlog/BACKLOG-project-test-health-implementation-2026-03-20.md",
+          "line": 57,
+          "source_group": "docs",
+          "text": "- [`run_pytest_resilient.py`](../../../../../scripts/ci/run_pytest_resilient.py)"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/ORCHESTRATION.md",
+          "line": 25,
+          "source_group": "docs",
+          "text": "- `scripts/ci/run_pytest_resilient.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/failure-stability/02-evidence/failure-stability/EV-project-test-health-failure-stability-ci-uses-resilient-runner-for-worker-crash-fallback.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \".github/workflows/tests.yml:310-356; scripts/ci/run_pytest_resilient.py:1-24; scripts/ci/run_pytest_resilient.py:70-79\""
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/failure-stability/02-evidence/failure-stability/RAW-failure-stability-2026-03-20.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/ci/run_pytest_resilient.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/failure-stability/02-evidence/failure-stability/RAW-failure-stability-2026-03-20.md",
+          "line": 24,
+          "source_group": "docs",
+          "text": "- it uses `scripts/ci/run_pytest_resilient.py`"
         },
         {
           "path": "makefile",
-          "line": 86,
+          "line": 94,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/ci/run_pytest_resilient.py"
-        },
-        {
-          "path": "tests/architecture/test_ci_test_strategy.py",
-          "line": 16,
-          "source_group": "tests",
-          "text": "assert \"scripts/ci/run_pytest_resilient.py\" in workflow, ("
         }
       ]
     },
@@ -443,19 +479,19 @@
         },
         {
           "path": "Makefile",
-          "line": 330,
+          "line": 338,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
         },
         {
           "path": "makefile",
-          "line": 330,
+          "line": 338,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 285,
+          "line": 289,
           "source_group": "tests",
           "text": "assert \"python scripts/data/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -476,19 +512,19 @@
         },
         {
           "path": "Makefile",
-          "line": 331,
+          "line": 339,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
         },
         {
           "path": "makefile",
-          "line": 331,
+          "line": 339,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 286,
+          "line": 290,
           "source_group": "tests",
           "text": "assert \"python scripts/data/check_vcr_filename_policy.py\" in workflow"
         }
@@ -697,6 +733,22 @@
     {
       "path": "scripts/dev/metrics_mock_server.py",
       "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/dev/run_mypy.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/dev/run_mypy.sh",
+      "type": "sh",
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
@@ -996,17 +1048,36 @@
     {
       "path": "scripts/diagrams/__main__.py",
       "type": "py",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-tooling-and-validator-scope.yaml",
+          "line": 7,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/__main__.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 6,
+          "source_group": "docs",
+          "text": "- `scripts/diagrams/__main__.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": "- `scripts/diagrams/__main__.py` exposes lint, check, fix, render, and nightly commands for the diagram estate."
+        }
+      ]
     },
     {
       "path": "scripts/diagrams/add_svg_text_fallback.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-modernization-program.md",
@@ -1039,12 +1110,6 @@
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
         {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 169,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/add_svg_text_fallback.py`"
-        },
-        {
           "path": "tests/architecture/test_add_svg_text_fallback.py",
           "line": 1,
           "source_group": "tests",
@@ -1057,7 +1122,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
@@ -1094,12 +1159,6 @@
           "line": 62,
           "source_group": "docs",
           "text": "| DIAG-T033 | Class method render integrity | Целостность сигнатур методов в classDiagram | `scripts/diagrams/check_class_method_render_integrity.py` | Auto | PR | Hard |"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 159,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/check_class_method_render_integrity.py`"
         }
       ]
     },
@@ -1108,7 +1167,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1141,22 +1200,10 @@
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 155,
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 9,
           "source_group": "docs",
           "text": "- `scripts/diagrams/check_diagram_artifacts.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 256,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/check_diagram_artifacts.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 277,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         }
       ]
     },
@@ -1165,7 +1212,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1205,7 +1252,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 344,
+          "line": 354,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -1224,7 +1271,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 12,
+      "reference_count": 8,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -1285,13 +1332,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 236,
+          "line": 244,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/class.bundle.pdf"
         },
         {
           "path": "Makefile",
-          "line": 237,
+          "line": 245,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/foundation.bundle.pdf"
         },
@@ -1303,19 +1350,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 256,
+          "line": 266,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
         },
         {
           "path": "makefile",
-          "line": 236,
+          "line": 244,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/class.bundle.pdf"
         },
         {
           "path": "makefile",
-          "line": 237,
+          "line": 245,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/foundation.bundle.pdf"
         }
@@ -1326,7 +1373,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1348,7 +1395,7 @@
         },
         {
           "path": "Makefile",
-          "line": 241,
+          "line": 249,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
@@ -1381,10 +1428,23 @@
     {
       "path": "scripts/diagrams/diagram_paths.py",
       "type": "py",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-tooling-and-validator-scope.yaml",
+          "line": 9,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/diagram_paths.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 8,
+          "source_group": "docs",
+          "text": "- `scripts/diagrams/diagram_paths.py`"
+        }
+      ]
     },
     {
       "path": "scripts/diagrams/diagram_paths.sh",
@@ -1434,13 +1494,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 328,
+          "line": 338,
           "source_group": "docs",
           "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 349,
+          "line": 359,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
         }
@@ -1451,7 +1511,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
@@ -1466,12 +1526,6 @@
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
         },
         {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 171,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/fix_mermaid_operators.py`"
-        },
-        {
           "path": "tests/architecture/test_fix_mermaid_operators.py",
           "line": 1,
           "source_group": "tests",
@@ -1482,151 +1536,70 @@
     {
       "path": "scripts/diagrams/fix_pagebreaks_in_bundles.py",
       "type": "py",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 161,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/fix_pagebreaks_in_bundles.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 265,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/fix_pagebreaks_in_bundles.py`"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/diagrams/generate_all_bundles.py",
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 2,
       "references": [
         {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 144,
+          "path": "docs/plans/documentation-drift-remediation-plan-2026-03-20.md",
+          "line": 108,
+          "source_group": "docs",
+          "text": "1. `./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 10,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_all_bundles.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 260,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_all_bundles.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 275,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 391,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 423,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 459,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py"
         }
       ]
     },
     {
       "path": "scripts/diagrams/generate_architecture_bundle.py",
       "type": "py",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 145,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_architecture_bundle.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 261,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_architecture_bundle.py`"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/diagrams/generate_views_bundle.py",
       "type": "py",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 146,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_views_bundle.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 262,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_views_bundle.py`"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/diagrams/generate_with_descriptions_docx.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
-          "line": 228,
+          "line": 236,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_docx.py"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 253,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 147,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
           "line": 263,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
         },
         {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 424,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/diagrams/generate_with_descriptions_docx.py --input-md docs/02-architecture/diagrams/bundles/architecture.bundle.md --input-md docs/02-architecture/diagrams/bundles/"
-        },
-        {
           "path": "makefile",
-          "line": 228,
+          "line": 236,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_docx.py"
         }
@@ -1637,41 +1610,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
-          "line": 224,
+          "line": 232,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 252,
+          "line": 262,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 148,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 264,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 425,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/diagrams/generate_with_descriptions_pdf.py --skip-bounds-check --input-md docs/02-architecture/diagrams/bundles/architecture.bundle.md --input-md docs/02-architectur"
         },
         {
           "path": "makefile",
-          "line": 224,
+          "line": 232,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py"
         }
@@ -1682,7 +1637,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
@@ -1695,12 +1650,6 @@
           "line": 554,
           "source_group": "docs",
           "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 167,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/inject_svg_styles.py`"
         }
       ]
     },
@@ -1711,7 +1660,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 33,
+      "reference_count": 31,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -1733,13 +1682,13 @@
         },
         {
           "path": "Makefile",
-          "line": 197,
+          "line": 205,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/lint_diagrams.py docs"
         },
         {
           "path": "Makefile",
-          "line": 201,
+          "line": 209,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true"
         },
@@ -1768,7 +1717,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -1796,25 +1745,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 413,
+          "line": 423,
           "source_group": "docs",
           "text": "`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 421,
+          "line": 431,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 424,
+          "line": 434,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 427,
+          "line": 437,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --fix"
         }
@@ -1825,23 +1774,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "Makefile",
-          "line": 248,
+          "line": 256,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/report_diagram_padding.py --top 30"
         },
         {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 172,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/report_diagram_padding.py`"
-        },
-        {
           "path": "makefile",
-          "line": 248,
+          "line": 256,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/report_diagram_padding.py --top 30"
         }
@@ -1852,17 +1795,17 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 362,
+          "line": 372,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 363,
+          "line": 373,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget"
         },
@@ -1913,19 +1856,19 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 232,
+          "line": 240,
           "source_group": "build",
           "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 254,
+          "line": 264,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
         {
           "path": "makefile",
-          "line": 232,
+          "line": 240,
           "source_group": "build",
           "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         }
@@ -1936,7 +1879,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1955,18 +1898,6 @@
           "line": 508,
           "source_group": "docs",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py\" \\"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 160,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/run_diagram_nightly_suite.py`"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 259,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/run_diagram_nightly_suite.py`"
         }
       ]
     },
@@ -1975,7 +1906,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
@@ -1988,12 +1919,6 @@
           "line": 541,
           "source_group": "docs",
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
-        },
-        {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 168,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/strip_svg_foreign_object.py`"
         },
         {
           "path": "tests/architecture/test_strip_svg_foreign_object.py",
@@ -2018,7 +1943,7 @@
         },
         {
           "path": "Makefile",
-          "line": 202,
+          "line": 210,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -2030,7 +1955,7 @@
         },
         {
           "path": "makefile",
-          "line": 202,
+          "line": 210,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         }
@@ -2059,27 +1984,27 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 370,
+          "line": 380,
           "source_group": "docs",
           "text": "Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 374,
+          "line": 384,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 377,
+          "line": 387,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
         {
-          "path": "docs/reports/dia-019-diagram-directory-consolidation-plan-2026-03-19.md",
-          "line": 166,
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-uniform-sizing-supports-class-diagram-maintenance.yaml",
+          "line": 6,
           "source_group": "docs",
-          "text": "- `scripts/diagrams/uniform_diagram_sizes.py`"
+          "text": "- scripts/diagrams/uniform_diagram_sizes.py"
         },
         {
           "path": "tests/architecture/test_uniform_diagram_group_width.py",
@@ -2096,7 +2021,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 19,
+      "reference_count": 18,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -2118,7 +2043,7 @@
         },
         {
           "path": "Makefile",
-          "line": 206,
+          "line": 214,
           "source_group": "build",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh"
         },
@@ -2169,7 +2094,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -2179,7 +2104,7 @@
         },
         {
           "path": "Makefile",
-          "line": 518,
+          "line": 526,
           "source_group": "build",
           "text": "$(RUN) bash scripts/docs/build_docs_site.sh"
         },
@@ -2226,17 +2151,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
-          "line": 532,
+          "line": 540,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
         },
         {
+          "path": "docs/reports/evidence/project-test-health/06-backlog/BACKLOG-project-test-health-implementation-2026-03-20.md",
+          "line": 234,
+          "source_group": "docs",
+          "text": "- `uv run python scripts/docs/check_doc_drift.py --runtime-mirrors --freshness`"
+        },
+        {
           "path": "makefile",
-          "line": 532,
+          "line": 540,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
         },
@@ -2253,7 +2184,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 46,
+      "reference_count": 42,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -2263,19 +2194,19 @@
         },
         {
           "path": "Makefile",
-          "line": 521,
+          "line": 529,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_links.py --links"
         },
         {
           "path": "Makefile",
-          "line": 522,
+          "line": 530,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_links.py --configs"
         },
         {
           "path": "Makefile",
-          "line": 523,
+          "line": 531,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_links.py --legacy-paths"
         },
@@ -2314,13 +2245,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 527,
+          "line": 535,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
         },
         {
           "path": "makefile",
-          "line": 527,
+          "line": 535,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
         }
@@ -2421,7 +2352,7 @@
       "references": [
         {
           "path": "scripts/qa/README.md",
-          "line": 59,
+          "line": 63,
           "source_group": "scripts",
           "text": "`scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only."
         },
@@ -2430,6 +2361,27 @@
           "line": 41,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/generate_architecture_dependency_map.py\").read_text("
+        }
+      ]
+    },
+    {
+      "path": "scripts/migrations/active/backfill_vcr_metadata_sidecars.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
+          "line": 62,
+          "source_group": "docs",
+          "text": "`scripts/migrations/active/backfill_vcr_metadata_sidecars.py`; workflow-level"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": "- canonical tooling paths активированы для partial rollout: `scripts/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` сл"
         }
       ]
     },
@@ -2678,13 +2630,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 75,
+          "line": 83,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_plugins.sh"
         },
         {
           "path": "makefile",
-          "line": 75,
+          "line": 83,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_plugins.sh"
         },
@@ -2711,13 +2663,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 78,
+          "line": 86,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_skills.sh"
         },
         {
           "path": "makefile",
-          "line": 78,
+          "line": 86,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_skills.sh"
         }
@@ -2899,7 +2851,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 38,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -2927,7 +2879,7 @@
         },
         {
           "path": "Makefile",
-          "line": 414,
+          "line": 422,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/qa/generate_architecture_dependency_map.py --check"
         },
@@ -3020,7 +2972,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 74,
+          "line": 94,
           "source_group": "docs",
           "text": "Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/qa/naming_audit.py`."
         },
@@ -3053,21 +3005,72 @@
       "references": [
         {
           "path": "scripts/README.md",
-          "line": 139,
+          "line": 140,
           "source_group": "scripts",
           "text": "- `scripts/qa/report_duplication_baseline.py` is the canonical direct script path behind `python -m scripts.qa report-duplication-baseline`."
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "- `scripts/qa/report_duplication_baseline.py` (`python -m scripts.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review."
         },
         {
           "path": "scripts/qa/README.md",
-          "line": 56,
+          "line": 60,
           "source_group": "scripts",
           "text": "python scripts/qa/report_duplication_baseline.py"
+        }
+      ]
+    },
+    {
+      "path": "scripts/qa/report_vcr_metadata_catalog.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
+          "line": 61,
+          "source_group": "docs",
+          "text": "`scripts/qa/report_vcr_metadata_catalog.py` and"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": "- canonical tooling paths активированы для partial rollout: `scripts/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` сл"
+        },
+        {
+          "path": "scripts/README.md",
+          "line": 181,
+          "source_group": "scripts",
+          "text": "python scripts/qa/report_vcr_metadata_catalog.py --check"
+        },
+        {
+          "path": "scripts/README.md",
+          "line": 182,
+          "source_group": "scripts",
+          "text": "python scripts/qa/report_vcr_metadata_catalog.py --update"
+        },
+        {
+          "path": "scripts/qa/README.md",
+          "line": 58,
+          "source_group": "scripts",
+          "text": "python scripts/qa/report_vcr_metadata_catalog.py --check"
+        },
+        {
+          "path": "scripts/qa/README.md",
+          "line": 59,
+          "source_group": "scripts",
+          "text": "python scripts/qa/report_vcr_metadata_catalog.py --update"
+        },
+        {
+          "path": "tests/architecture/test_vcr_metadata_catalog_drift.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "script = Path(\"scripts/qa/report_vcr_metadata_catalog.py\")"
         }
       ]
     },
@@ -3108,7 +3111,7 @@
         },
         {
           "path": "Makefile",
-          "line": 332,
+          "line": 340,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked"
         },
@@ -3138,7 +3141,7 @@
         },
         {
           "path": "makefile",
-          "line": 332,
+          "line": 340,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked"
         }
@@ -3159,13 +3162,13 @@
         },
         {
           "path": "Makefile",
-          "line": 557,
+          "line": 565,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
         },
         {
           "path": "makefile",
-          "line": 557,
+          "line": 565,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
         },
@@ -3188,7 +3191,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 18,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -3198,45 +3201,45 @@
         },
         {
           "path": "Makefile",
-          "line": 537,
+          "line": 545,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
           "path": "Makefile",
-          "line": 542,
+          "line": 550,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
           "path": "Makefile",
-          "line": 547,
+          "line": 555,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md"
         },
         {
           "path": "Makefile",
-          "line": 552,
+          "line": 560,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json"
         },
         {
-          "path": "docs/reports/branch-consolidation-plan-2026-03-19.md",
-          "line": 46,
-          "source_group": "docs",
-          "text": "git checkout origin/bolt-optimize-as-py-8836708768404040860 -- scripts/repo/check_scripts_inventory.py"
-        },
-        {
-          "path": "docs/reports/branch-consolidation-plan-2026-03-19.md",
-          "line": 49,
-          "source_group": "docs",
-          "text": "git add scripts/repo/check_scripts_inventory.py tests/architecture/test_scripts_inventory_discovery.py tests/architecture/test_codex_skill_agent_links.py"
+          "path": "makefile",
+          "line": 545,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
           "path": "makefile",
-          "line": 537,
+          "line": 550,
           "source_group": "build",
-          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json"
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json"
+        },
+        {
+          "path": "makefile",
+          "line": 555,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md"
         }
       ]
     },
@@ -3276,13 +3279,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 338,
+          "line": 346,
           "source_group": "build",
           "text": "bash scripts/repo/preflight_cleanup.sh --dry-run; \\"
         },
         {
           "path": "Makefile",
-          "line": 340,
+          "line": 348,
           "source_group": "build",
           "text": "bash scripts/repo/preflight_cleanup.sh; \\"
         },
@@ -3294,13 +3297,13 @@
         },
         {
           "path": "makefile",
-          "line": 338,
+          "line": 346,
           "source_group": "build",
           "text": "bash scripts/repo/preflight_cleanup.sh --dry-run; \\"
         },
         {
           "path": "makefile",
-          "line": 340,
+          "line": 348,
           "source_group": "build",
           "text": "bash scripts/repo/preflight_cleanup.sh; \\"
         }
@@ -3407,13 +3410,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-config-bot.md",
-          "line": 46,
+          "line": 56,
           "source_group": "docs",
           "text": "| ADR-025 | Pipeline Config Unification (required fields) | `python scripts/schema/config_gap_analysis.py -v` |"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 201,
+          "line": 211,
           "source_group": "docs",
           "text": "| Config gap analysis | `scripts/schema/config_gap_analysis.py` |"
         }
@@ -3440,13 +3443,13 @@
         },
         {
           "path": "Makefile",
-          "line": 571,
+          "line": 579,
           "source_group": "build",
           "text": "uv run python scripts/schema/generate_contracts.py"
         },
         {
           "path": "Makefile",
-          "line": 573,
+          "line": 581,
           "source_group": "build",
           "text": "$(VENV_PYTHON) scripts/schema/generate_contracts.py"
         },
@@ -3464,13 +3467,13 @@
         },
         {
           "path": "makefile",
-          "line": 571,
+          "line": 579,
           "source_group": "build",
           "text": "uv run python scripts/schema/generate_contracts.py"
         },
         {
           "path": "makefile",
-          "line": 573,
+          "line": 581,
           "source_group": "build",
           "text": "$(VENV_PYTHON) scripts/schema/generate_contracts.py"
         }
@@ -3533,13 +3536,13 @@
         },
         {
           "path": "Makefile",
-          "line": 565,
+          "line": 573,
           "source_group": "build",
           "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py"
         },
         {
           "path": "Makefile",
-          "line": 606,
+          "line": 614,
           "source_group": "build",
           "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py --check"
         },
@@ -3857,13 +3860,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 421,
+          "line": 429,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_application_deps.py"
         },
         {
           "path": "makefile",
-          "line": 421,
+          "line": 429,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_application_deps.py"
         }
@@ -3878,25 +3881,25 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 413,
+          "line": 421,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_architecture.py"
         },
         {
           "path": "Makefile",
-          "line": 422,
+          "line": 430,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_architecture.py"
         },
         {
           "path": "makefile",
-          "line": 413,
+          "line": 421,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_architecture.py"
         },
         {
           "path": "makefile",
-          "line": 422,
+          "line": 430,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_architecture.py"
         }

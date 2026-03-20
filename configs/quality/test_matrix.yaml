@@ -207,10 +207,10 @@ fixture_governance:
   cassette_metadata_backfill_workflow_present: false
   cassette_metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
   rollout:
-    cassette_metadata: planned
-    cassette_staleness_age: metadata_gated
-    cassette_metadata_catalog: planned
-    cassette_metadata_backfill: planned
+    cassette_metadata: partial
+    cassette_staleness_age: partial
+    cassette_metadata_catalog: partial
+    cassette_metadata_backfill: partial
     contract_snapshots: planned
     golden_masters: partial
     extensionless_filenames: partial

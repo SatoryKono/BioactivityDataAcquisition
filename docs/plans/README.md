@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-03-03*
+*Last updated: 2026-03-20*
 
 This directory contains implementation plans, corrective roadmaps, and migration plans.
 
@@ -28,6 +28,13 @@ Plans in this folder must not override normative documents.
 
 ## Active Plan Links
 
+### Authoritative Refactor Program
+
+- [consolidated-master-refactor-plan-2026-03-20.md](consolidated-master-refactor-plan-2026-03-20.md)
+- [consolidated-master-refactor-plan-expanded-waves-2026-03-20.md](consolidated-master-refactor-plan-expanded-waves-2026-03-20.md)
+
+### Active Targeted Plans
+
 - [mkdocs-material-migration-track-2026-03-03.md](mkdocs-material-migration-track-2026-03-03.md)
 - [branch-consolidation-plan-2026-03-19.md](branch-consolidation-plan-2026-03-19.md)
 - [documentation-drift-remediation-plan-2026-03-20.md](documentation-drift-remediation-plan-2026-03-20.md)
@@ -42,7 +49,17 @@ Plans in this folder must not override normative documents.
 - [rf-fs-004-execution-plan-2026-03-20.md](rf-fs-004-execution-plan-2026-03-20.md)
 - [rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md](rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md)
 - [rf-fs-remaining-backlog-execution-plan-2026-03-20.md](rf-fs-remaining-backlog-execution-plan-2026-03-20.md)
+- [refactor-proposals-consolidation-input-2026-03-20.md](refactor-proposals-consolidation-input-2026-03-20.md)
 - Historical plans and superseded baseline series moved to [docs/99-archive/plans/README.md](../99-archive/plans/README.md) *(archived reference only)*
+
+### Status Guidance
+
+- The consolidated master plan is the primary execution/backlog surface for the
+  current refactor program.
+- `rf-fs-remaining-backlog-execution-plan-2026-03-20.md` is now a reconciled
+  context document, not a competing master queue.
+- `refactor-proposals-consolidation-input-2026-03-20.md` is an absorbed input
+  artifact retained for traceability.
 
 ## Related Prompt
 

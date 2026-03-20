@@ -9,18 +9,23 @@ This is the only layer allowed to import from both Application and Infrastructur
 
 See also: [ADR-005: Composition Layer Separation](../../02-architecture/decisions/ADR-005-composition-layer-separation.md)
 
+Package-root note: `bioetl.composition` is narrower than the layer as a whole.
+Its package root currently exports registry helpers, while execution/services/resource
+seams are exposed through dedicated submodules such as `entrypoints`,
+`execution_api`, `services_api`, and `resources_api`.
+
 ---
 
 ## Package Structure
 
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
-| `composition.factories` | Factory classes for creating wired components | `GenericPipelineFactory`, `DataSourceFactory`, `StorageFactory`, `DQServicesFactory` |
-| `composition.bootstrap` | Application bootstrapping and initialization | assembly, runtime, CLI bootstrapping |
-| `composition.providers` | Provider registration and discovery | `ProviderRegistry`, provider decorators |
-| `composition.runtime_builders` | Leaf runtime assembly helpers | `build_pipeline_runner`, `RunnerInputs`, `ResolvedVacuumSettings` |
-| `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, versioning helpers |
-| `composition` (top-level) | Public composition seams, registry, observability bundle | `entrypoints`, `execution_api`, `services_api`, `resources_api`, `composite_api`, `observability_api`, `PipelineRegistry`, `ObservabilityBundle` |
+| `composition.factories` | Factory classes for creating wired components | `GenericPipelineFactory`, `DataSourceFactory`, `StorageFactory`, `DQServicesFactory`, `build_pipeline_services` |
+| `composition.bootstrap` | Application bootstrapping and initialization | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, CLI bootstrap helpers, `load_pipeline_config` |
+| `composition.providers` | Provider registration and discovery | `ProviderRegistry`, `create_provider_registry`, `ensure_providers_loaded`, `register_all_providers` |
+| `composition.runtime_builders` | Leaf runtime assembly helpers | `build_pipeline_runner` |
+| `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, `compute_config_hash`, `get_git_commit`, `get_pipeline_version` |
+| `composition` (top-level) | Narrow package-root facade | `PipelineDefinition`, `PipelineRegistry`, `create_registry`, `get_default_registry`; broader APIs live in submodules |
 
 ---
 

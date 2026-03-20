@@ -29,14 +29,15 @@ Fix:
     fix-pagebreaks       Fix pagebreaks in bundles
 
 Render:
-    render-pdf           Generate architecture PDF bundle
+    render-pdf           Refresh architecture Markdown bundle (legacy entrypoint)
     render-pdf-desc      Generate PDF with descriptions
     render-docx          Generate DOCX with descriptions
-    render-views         Generate views bundle
+    render-views         Refresh views Markdown bundle
 
 Suite:
     nightly              Run full diagram nightly suite
 """
+
 from __future__ import annotations
 
 import subprocess

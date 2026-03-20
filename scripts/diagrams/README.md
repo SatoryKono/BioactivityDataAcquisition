@@ -47,10 +47,10 @@ python -m scripts.diagrams <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `render-pdf` | `generate_architecture_bundle.py` | Generate architecture PDF bundle |
+| `render-pdf` | `generate_architecture_bundle.py` | Refresh architecture Markdown bundle via legacy entrypoint |
 | `render-pdf-desc` | `generate_with_descriptions_pdf.py` | Generate PDF with descriptions |
 | `render-docx` | `generate_with_descriptions_docx.py` | Generate DOCX with descriptions |
-| `render-views` | `generate_views_bundle.py` | Generate views bundle |
+| `render-views` | `generate_views_bundle.py` | Refresh views Markdown bundle |
 
 ### Suite
 
@@ -79,19 +79,25 @@ python -m scripts.diagrams <command> [args...]
 | `fix-orphans` | After diagram edits leave disconnected nodes; use `--check` to detect, `--fix` to remove | Pre-commit hook or manual |
 | `fix-sizes` | When diagrams have inconsistent dimensions; normalizes sizes | Manual codemod |
 | `fix-pagebreaks` | When PDF bundles have pagebreak issues | Manual, post-render |
-| `render-pdf` | Before release or documentation delivery; generates architecture PDF bundle | Manual, pre-release |
+| `render-pdf` | When the architecture Markdown bundle needs refresh; legacy collection-specific entrypoint | Manual, on-demand |
 | `render-pdf-desc` | When PDF with full descriptions is needed | Manual, on-demand |
 | `render-docx` | When DOCX export is needed for external review | Manual, on-demand |
-| `render-views` | When views-focused bundle is needed | Manual, on-demand |
+| `render-views` | When the views Markdown bundle needs refresh | Manual, on-demand |
 | `nightly` | Full Phase 2 diagram validation (DIAG-T024..T029) | Scheduled nightly (2:20 UTC) |
 
 ## Other Files
 
 | File | Description |
 |------|-------------|
-| `generate_all_bundles.py` | Generate all diagram bundles at once |
+| `generate_all_bundles.py` | Canonical Markdown bundle generator; supports `--collection` for targeted publication refresh |
 | `run_diagram_checks.sh` | Shell wrapper for diagram checks |
 | `run_diagram_docs_agent.sh` | Shell wrapper for diagram docs agent |
 | `validate_mermaid_syntax.sh` | Validate Mermaid syntax |
 | `svg2png.mjs` | Node.js SVG-to-PNG converter |
 | `pagebreak.lua` | Pandoc Lua filter for pagebreaks |
+
+## Bundle Generation Contract
+
+- `generate_all_bundles.py` is the canonical Markdown bundle generator for `architecture`, `class-diagrams`, `foundation`, and `views`.
+- `generate_architecture_bundle.py` and `generate_views_bundle.py` are maintained compatibility wrappers for collection-specific entrypoints.
+- When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact.
