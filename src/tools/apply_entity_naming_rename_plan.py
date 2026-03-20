@@ -25,10 +25,12 @@ from pathlib import Path
 
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MATRIX_PATH = (
-    REPO_ROOT / "reports" / "architecture" / "entity-naming-rename-matrix-2026-03-19.csv"
+    REPO_ROOT
+    / "reports"
+    / "architecture"
+    / "entity-naming-rename-matrix-2026-03-19.csv"
 )
 DEFAULT_PLAN_PATH = (
     REPO_ROOT / "reports" / "architecture" / "entity-naming-rename-plan-2026-03-19.yaml"
@@ -197,8 +199,12 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
                 f"- {row.wave} :: {row.action} :: {row.old_name} -> {row.new_name} :: {row.file_path}"
             )
 
+    mode = "apply" if apply else "dry-run"
     print(
-        f"\nSummary: modified_files={modified_files} total_matches={total_matches} mode={'apply' if apply else 'dry-run'}"
+        "\nSummary: "
+        f"modified_files={modified_files} "
+        f"total_matches={total_matches} "
+        f"mode={mode}"
     )
     return 0
 

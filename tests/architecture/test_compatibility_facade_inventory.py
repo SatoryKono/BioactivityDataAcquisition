@@ -26,11 +26,7 @@ ALLOWED_STATUSES = frozenset(
 )
 INVENTORY_ROW_CELL_COUNT = 10
 
-REQUIRED_TRANSITION_DEBT_PATHS = frozenset(
-    {
-        "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py",
-    }
-)
+REQUIRED_TRANSITION_DEBT_PATHS: frozenset[str] = frozenset()
 REQUIRED_RETAINED_ENTRYPOINT_PATHS = frozenset(
     {
         "src/bioetl/domain/composite/config.py",
@@ -237,9 +233,9 @@ def test_inventory_doc_splits_transition_debt_from_retained_entrypoints() -> Non
         status in {"deprecated-warn", "compat-shim", "mixed-module"}
         for status in transition_rows.values()
     ), "Transition debt ledger must contain only true compatibility-debt statuses."
-    assert all(
-        status == "retained-entrypoint" for status in retained_rows.values()
-    ), "Retained public-entrypoint ledger must contain only retained-entrypoint rows."
+    assert all(status == "retained-entrypoint" for status in retained_rows.values()), (
+        "Retained public-entrypoint ledger must contain only retained-entrypoint rows."
+    )
 
 
 @pytest.mark.architecture
@@ -352,25 +348,13 @@ def test_retained_composition_and_domain_rows_document_dedicated_test_allowlists
 
 
 @pytest.mark.architecture
-def test_registry_config_and_merge_transition_rows_capture_compatibility_policy() -> (
-    None
-):
-    """Active compatibility rows must document current transition surfaces precisely."""
+def test_retained_merge_row_captures_current_entrypoint_policy() -> None:
+    """Retained merge entrypoint row must document the current sanctioned seam."""
     rows = {
         row["path"]: row
         for row in _iter_inventory_cells(INVENTORY_DOC.read_text(encoding="utf-8"))
     }
     expected = {
-        "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py": {
-            "status": "compat-shim",
-            "migration_snippets": (
-                "bioetl.domain.services.composite_metadata_helpers",
-                "transitional re-export only",
-            ),
-            "allowed_call_site_snippets": (
-                "tests/unit/infrastructure/storage/test_metadata_builder_composite_helpers.py",
-            ),
-        },
         "src/bioetl/application/composite/merger.py": {
             "status": "retained-entrypoint",
             "migration_snippets": (

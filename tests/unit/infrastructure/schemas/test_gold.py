@@ -11,7 +11,7 @@ import pytest
 
 # Import from contracts package (canonical location in domain layer)
 from bioetl.domain.contracts import (
-    ChEMBLDocumentGoldSchema,
+    ChEMBLPublicationGoldSchema,
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
     PubMedPublicationGoldSchema,
@@ -42,7 +42,7 @@ class TestGoldPublicationSchemaDQFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -66,7 +66,7 @@ class TestGoldPublicationSchemaUnifiedFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -81,7 +81,7 @@ class TestGoldPublicationSchemaUnifiedFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             # OpenAlex doesn't have page fields - they were removed as unused
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -102,7 +102,7 @@ class TestGoldPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -117,7 +117,7 @@ class TestGoldPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             # CrossRef excluded: pmid explicitly excluded from transformer output
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -132,7 +132,7 @@ class TestGoldPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -152,7 +152,7 @@ class TestGoldPublicationSchemaCoreFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             # CrossRef excluded: abstract not collected per user request
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -168,7 +168,7 @@ class TestGoldPublicationSchemaCoreFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -197,7 +197,7 @@ class TestGoldPublicationSchemaCoreFields:
 
     def test_chembl_schema_has_publication_year_field(self):
         """ChEMBL Gold schema uses publication_year (unified naming)."""
-        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
+        fields = get_schema_fields(ChEMBLPublicationGoldSchema)
         assert "publication_year" in fields, (
             "ChEMBL Document missing publication_year field"
         )
@@ -210,7 +210,7 @@ class TestGoldPublicationSchemaPrimaryKeys:
     @pytest.mark.parametrize(
         "schema_class,name,primary_key",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document", "publication_id"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document", "publication_id"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication", "doi"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication", "openalex_id"),
             (PubMedPublicationGoldSchema, "PubMed Publication", "pmid"),
@@ -239,7 +239,7 @@ class TestGoldPublicationSchemaLookupTrackingFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -255,7 +255,7 @@ class TestGoldPublicationSchemaLookupTrackingFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -276,7 +276,7 @@ class TestGoldPublicationSchemaMetadataFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -291,7 +291,7 @@ class TestGoldPublicationSchemaMetadataFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -306,7 +306,7 @@ class TestGoldPublicationSchemaMetadataFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (ChEMBLPublicationGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -414,7 +414,7 @@ class TestGoldSchemaValidation:
         assert validated["pmid"].iloc[0] == "12345678"
 
     def test_chembl_document_validates_correct_data(self) -> None:
-        """ChEMBLDocumentGoldSchema should validate correct data."""
+        """ChEMBLPublicationGoldSchema should validate correct data."""
         valid_record = {
             "entity_id": "chembl_CHEMBL12345",
             "content_hash": "xyz789",
@@ -465,7 +465,7 @@ class TestGoldSchemaValidation:
         }
 
         df = pd.DataFrame([valid_record])
-        validated = ChEMBLDocumentGoldSchema.validate(df)
+        validated = ChEMBLPublicationGoldSchema.validate(df)
 
         assert len(validated) == 1
         assert validated["publication_id"].iloc[0] == "CHEMBL12345"

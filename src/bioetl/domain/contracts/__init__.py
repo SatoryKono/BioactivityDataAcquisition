@@ -40,11 +40,11 @@ from bioetl.domain.contracts.gold import (
     ChEMBLAssayParametersGoldSchema,
     ChEMBLCellLineGoldSchema,
     ChEMBLCompoundRecordGoldSchema,
-    ChEMBLDocumentGoldSchema,
-    ChEMBLDocumentSimilarityGoldSchema,
-    ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLProteinClassGoldSchema,
+    ChEMBLPublicationGoldSchema,
+    ChEMBLPublicationSimilarityGoldSchema,
+    ChEMBLPublicationTermGoldSchema,
     ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
@@ -64,40 +64,31 @@ from bioetl.domain.contracts.gold import (
 )
 
 __all__ = [
-    # Utilities
     "DATE_REGEX",
-    # ChEMBL
     "ChEMBLActivityGoldSchema",
     "ChEMBLAssayGoldSchema",
     "ChEMBLAssayParametersGoldSchema",
     "ChEMBLCellLineGoldSchema",
     "ChEMBLCompoundRecordGoldSchema",
-    "ChEMBLDocumentGoldSchema",
-    "ChEMBLDocumentSimilarityGoldSchema",
-    "ChEMBLDocumentTermGoldSchema",
     "ChEMBLMoleculeGoldSchema",
     "ChEMBLProteinClassGoldSchema",
+    "ChEMBLPublicationGoldSchema",
+    "ChEMBLPublicationSimilarityGoldSchema",
+    "ChEMBLPublicationTermGoldSchema",
     "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
     "ChEMBLTissueGoldSchema",
-    # Composite
     "CompositeActivityGoldSchema",
     "CompositeAssayGoldSchema",
     "CompositeMoleculeGoldSchema",
     "CompositePublicationGoldSchema",
     "CompositeTargetGoldSchema",
-    # CrossRef
     "CrossRefPublicationGoldSchema",
-    # OpenAlex
     "OpenAlexPublicationGoldSchema",
-    # PubChem
     "PubChemCompoundGoldSchema",
-    # PubMed
     "PubMedPublicationGoldSchema",
-    # SemanticScholar
     "SemanticScholarPublicationGoldSchema",
-    # UniProt
     "UniProtIDMappingGoldSchema",
     "UniProtProteinGoldSchema",
 ]

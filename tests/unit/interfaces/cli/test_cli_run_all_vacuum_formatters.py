@@ -65,7 +65,7 @@ def mock_registry():
         "uniprot_protein",
     ]
     with patch(
-        "bioetl.interfaces.cli.main.get_default_registry",
+        "bioetl.interfaces.cli.main.build_cli_registry",
         return_value=mock,
     ):
         yield mock
@@ -348,7 +348,7 @@ class TestRunAllCommand:
     def test_run_all_invalid_provider(self, cli_runner, mock_registry):
         """Test error for invalid provider."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+            "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
             return_value=mock_registry,
         ):
             result = cli_runner.invoke(cli, ["run-all", "--source", "invalid"])
@@ -359,7 +359,7 @@ class TestRunAllCommand:
     def test_run_all_list_only(self, cli_runner, mock_registry):
         """Test --list-only shows pipelines without running."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+            "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
             return_value=mock_registry,
         ):
             result = cli_runner.invoke(
@@ -379,7 +379,7 @@ class TestRunAllCommand:
                 return_value=BatchRunResult(total=2, succeeded=0, failed=0, skipped=2),
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=mock_registry,
             ),
         ):
@@ -398,7 +398,7 @@ class TestRunAllCommand:
                 return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=mock_registry,
             ),
         ):
@@ -415,7 +415,7 @@ class TestRunAllCommand:
                 return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=mock_registry,
             ),
         ):
@@ -440,7 +440,7 @@ class TestRunAllCommand:
                 ),
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=mock_registry,
             ),
         ):
@@ -457,7 +457,7 @@ class TestRunAllCommand:
                 side_effect=KeyboardInterrupt(),
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=mock_registry,
             ),
         ):
@@ -1254,7 +1254,7 @@ class TestRunAllCommandExceptions:
                 side_effect=RuntimeError("Unexpected batch error"),
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=mock_registry,
             ),
         ):
@@ -1271,7 +1271,7 @@ class TestRunAllCommandExceptions:
                 return_value=BatchRunResult(total=2, succeeded=2, failed=0, skipped=0),
             ) as mock_asyncio_run,
             patch(
-                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                "bioetl.interfaces.cli.commands.run_all.build_cli_registry",
                 return_value=mock_registry,
             ),
         ):

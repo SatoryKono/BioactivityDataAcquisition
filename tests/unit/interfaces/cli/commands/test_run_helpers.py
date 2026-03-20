@@ -62,7 +62,7 @@ class TestValidatePipelineName:
     def test_valid_pipeline_returns_value(self, mock_registry: MagicMock) -> None:
         """Test that a valid pipeline name is returned unchanged."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
             return_value=mock_registry,
         ):
             result = validate_pipeline_name(None, None, "chembl_activity")
@@ -74,7 +74,7 @@ class TestValidatePipelineName:
     ) -> None:
         """Test that unknown pipeline raises click.BadParameter."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
             return_value=mock_registry,
         ):
             with pytest.raises(click.BadParameter) as exc_info:
@@ -87,7 +87,7 @@ class TestValidatePipelineName:
     ) -> None:
         """Test that error includes list of available pipelines."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            "bioetl.interfaces.cli.commands.run_helpers.build_cli_registry",
             return_value=mock_registry,
         ):
             with pytest.raises(click.BadParameter) as exc_info:

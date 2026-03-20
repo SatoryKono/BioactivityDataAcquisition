@@ -42,9 +42,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.ports import LoggerPort
 
-# Compatibility patch point retained for tests and legacy callers.
-get_default_registry = build_cli_registry
-
 
 def resolve_context_registry(
     ctx: click.Context | None = None,
@@ -74,7 +71,7 @@ def validate_pipeline_name(
     Raises:
         click.BadParameter: If pipeline name is not in registry.
     """
-    registry = resolve_context_registry(ctx) or get_default_registry()
+    registry = resolve_context_registry(ctx) or build_cli_registry()
     available = registry.list_pipelines()
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")

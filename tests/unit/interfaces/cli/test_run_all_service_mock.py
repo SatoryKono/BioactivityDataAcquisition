@@ -45,7 +45,7 @@ def mock_registry():
         "pubchem_compound",
     ]
     with patch(
-        "bioetl.interfaces.cli.main.get_default_registry",
+        "bioetl.interfaces.cli.main.build_cli_registry",
         return_value=mock,
     ):
         yield mock
@@ -110,7 +110,7 @@ class TestRunAllWithMockedService:
             yield
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_run_all_calls_service_for_each_pipeline(
         self,
@@ -139,7 +139,7 @@ class TestRunAllWithMockedService:
         assert mock_pipeline_runner_service.run.call_count == 2
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_run_all_passes_correct_options(
         self,
@@ -183,7 +183,7 @@ class TestRunAllWithMockedService:
         assert options.limit == 50
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_run_all_handles_service_failure(
         self,
@@ -209,7 +209,7 @@ class TestRunAllWithMockedService:
         assert "unexpected error" in result.output.lower()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_run_all_handles_pipeline_not_found(
         self,
@@ -247,7 +247,7 @@ class TestRunAllDryRunMode:
     """Tests for run-all dry-run mode with PipelineRunnerService."""
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_dry_run_passes_flag_to_service(
         self,
@@ -277,7 +277,7 @@ class TestRunAllDryRunMode:
         assert options.dry_run is True
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_dry_run_shows_dry_run_prefix_in_output(
         self,
@@ -305,7 +305,7 @@ class TestRunAllDryRunMode:
         assert "[DRY-RUN]" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_dry_run_reports_skipped_count(
         self,
@@ -347,7 +347,7 @@ class TestRunAllFormatterOutput:
     """Tests for run-all CLI output formatting."""
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_success_output_contains_ok_marker(
         self,
@@ -375,7 +375,7 @@ class TestRunAllFormatterOutput:
         assert "completed successfully" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_failure_output_contains_fail_marker(
         self,
@@ -405,7 +405,7 @@ class TestRunAllFormatterOutput:
         assert "failed" in result.output.lower()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_summary_shows_succeeded_count(
         self,
@@ -436,7 +436,7 @@ class TestRunAllFormatterOutput:
         assert "Succeeded: 2" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_summary_shows_failed_count(
         self,
@@ -467,7 +467,7 @@ class TestRunAllFormatterOutput:
         assert "Failed: 1" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_summary_shows_failed_pipeline_names(
         self,
@@ -508,7 +508,7 @@ class TestRunAllShutdownScenarios:
     """Tests for run-all shutdown handling."""
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_shutdown_stops_remaining_pipelines(
         self,
@@ -544,7 +544,7 @@ class TestRunAllShutdownScenarios:
         assert "gracefully shut down" in result.output.lower()
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_shutdown_shows_stop_marker(
         self,
@@ -572,7 +572,7 @@ class TestRunAllShutdownScenarios:
         assert "WARNING:" in result.output
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
-    @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
+    @patch("bioetl.interfaces.cli.commands.run_all.build_cli_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")
     def test_shutdown_exit_code_with_no_failures(
         self,

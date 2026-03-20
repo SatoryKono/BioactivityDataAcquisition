@@ -186,14 +186,14 @@ Span атрибуты становятся информативными:
 | AssayTransformer | Assay | `"assay"` |
 | MoleculeTransformer | Molecule | `"molecule"` |
 | TargetTransformer | Target | `"target"` |
-| DocumentTransformer | Document | `"document"` |
+| PublicationTransformer | ChemblPublication | `"chemblpublication"` |
 | TargetComponentTransformer | TargetComponent | `"targetcomponent"` |
 | CellLineTransformer | CellLine | `"cellline"` |
 | CompoundRecordTransformer | CompoundRecord | `"compoundrecord"` |
 | ProteinClassTransformer | ProteinClassification | `"proteinclassification"` |
 | AssayParametersTransformer | AssayParameters | `"assayparameters"` |
-| DocumentSimilarityTransformer | DocumentSimilarity | `"documentsimilarity"` |
-| DocumentTermTransformer | DocumentTerm | `"documentterm"` |
+| PublicationSimilarityTransformer | ChemblPublicationSimilarity | `"chemblpublicationsimilarity"` |
+| PublicationTermTransformer | ChemblPublicationTerm | `"chemblpublicationterm"` |
 | PubMedPublicationTransformer | — | `"publication"` |
 
 ## Alternatives Considered

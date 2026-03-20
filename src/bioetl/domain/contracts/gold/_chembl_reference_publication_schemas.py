@@ -88,7 +88,7 @@ class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
         strict = True
 
 
-class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
+class ChEMBLPublicationGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Document in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
@@ -156,7 +156,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
         strict = True
 
 
-class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
+class ChEMBLPublicationSimilarityGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Document Similarity in Gold layer.
 
     Represents similarity between two ChEMBL documents based on Tanimoto coefficients.
@@ -202,7 +202,7 @@ class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
         strict = True
 
 
-class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
+class ChEMBLPublicationTermGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Document Term in Gold layer.
 
     Derived entity extracted from Document records by flattening
@@ -242,7 +242,7 @@ class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
 __all__ = [
     "ChEMBLCellLineGoldSchema",
     "ChEMBLCompoundRecordGoldSchema",
-    "ChEMBLDocumentGoldSchema",
-    "ChEMBLDocumentSimilarityGoldSchema",
-    "ChEMBLDocumentTermGoldSchema",
+    "ChEMBLPublicationGoldSchema",
+    "ChEMBLPublicationSimilarityGoldSchema",
+    "ChEMBLPublicationTermGoldSchema",
 ]

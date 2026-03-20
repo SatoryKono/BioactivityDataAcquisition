@@ -15,6 +15,25 @@ Utility scripts for BioETL project maintenance and development.
 
 ## Available Tools
 
+### generate_docs_export.py
+
+Manifest-driven generator for `docs/exports/*.merged.md` artifacts with legacy path
+resolution for moved documentation trees.
+
+**Location:** `src/tools/generate_docs_export.py`
+
+**Typical usage:**
+
+```bash
+python src/tools/generate_docs_export.py --rewrite-manifest
+```
+
+**What it does:**
+- Resolves legacy `docs/**` paths after folder migrations
+- Rewrites the export manifest with normalized current paths
+- Regenerates `docs/exports/full-documentation-no-plans-reports-skills.merged.md`
+- Reports removed historical entries that are intentionally skipped
+
 ### file_merger.py
 
 A versatile file merging and project analysis tool with multiple operation modes.

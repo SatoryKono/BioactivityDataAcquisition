@@ -1,4 +1,4 @@
-"""Compatibility facade for debt scorecard decomposition policy validators."""
+"""Public debt-scorecard decomposition validation exports."""
 
 from __future__ import annotations
 

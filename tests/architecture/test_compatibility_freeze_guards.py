@@ -18,6 +18,14 @@ CLI_REGISTRY_HELPER_MODULE = "bioetl.interfaces.cli.registry_helpers"
 METADATA_BUILDER_COMPAT_MODULE = (
     "bioetl.infrastructure.storage.metadata_builder_composite_helpers"
 )
+METADATA_BUILDER_COMPAT_MODULE_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "storage"
+    / "metadata_builder_composite_helpers.py"
+)
 CONFIG_LOADER_MODULE = "bioetl.infrastructure.config_loader"
 CONFIG_LOADER_MODULE_PATH = (
     ROOT / "src" / "bioetl" / "infrastructure" / "config_loader.py"
@@ -201,30 +209,7 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
         / "command.py",
     }
 )
-ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES = frozenset(
-    {
-        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_cli_commands.py",
-        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_cli_helpers.py",
-        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_run_all_command.py",
-        ROOT / "tests" / "unit" / "interfaces" / "cli" / "test_run_all_service_mock.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "interfaces"
-        / "cli"
-        / "test_cli_run_all_vacuum_formatters.py",
-        ROOT
-        / "tests"
-        / "unit"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "test_run_helpers.py",
-        ROOT / "tests" / "unit" / "interfaces" / "cli" / "commands" / "test_debug.py",
-        ROOT / "tests" / "e2e" / "test_cli_safety.py",
-        ROOT / "tests" / "integration" / "interfaces" / "test_cli_exit_code_matrix.py",
-    }
-)
+ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "__init__.py",
@@ -240,16 +225,7 @@ ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset({})
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset({})
 ALLOWED_CONFIG_LOADER_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_CONFIG_LOADER_TEST_FILES: frozenset[Path] = frozenset()
-ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES = frozenset(
-    {
-        ROOT
-        / "tests"
-        / "unit"
-        / "infrastructure"
-        / "storage"
-        / "test_metadata_builder_composite_helpers.py",
-    }
-)
+ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_MERGE_SERVICE_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "application" / "composite" / "merger.py",
@@ -633,6 +609,15 @@ def test_config_loader_module_is_confined_to_dedicated_tests(
 
 
 @pytest.mark.architecture
+def test_metadata_builder_compat_module_file_has_been_removed() -> None:
+    """Historical storage metadata compat wrapper should remain deleted."""
+    assert not METADATA_BUILDER_COMPAT_MODULE_PATH.exists(), (
+        "Legacy storage metadata compat wrapper must stay removed: "
+        "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py"
+    )
+
+
+@pytest.mark.architecture
 def test_metadata_builder_compat_module_is_not_used_in_src(
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
@@ -652,7 +637,7 @@ def test_metadata_builder_compat_module_is_not_used_in_src(
 def test_metadata_builder_compat_module_is_confined_to_dedicated_tests(
     test_ast_cache: dict[Path, ast.Module],
 ) -> None:
-    """Tests must not treat the storage metadata compat wrapper as a normal API."""
+    """Tests must not keep importing the removed storage metadata compat wrapper."""
     violations = _iter_module_import_violations(
         test_ast_cache,
         module_name=METADATA_BUILDER_COMPAT_MODULE,
@@ -902,11 +887,11 @@ def test_internal_composition_entrypoint_module_strings_are_not_used_in_unit_tes
         "bioetl.interfaces.cli.commands.run_all.get_default_registry",
     ),
 )
-def test_cli_local_get_default_registry_patch_points_are_confined_to_dedicated_tests(
+def test_cli_local_get_default_registry_patch_points_remain_removed_from_tests(
     needle: str,
     test_content_cache: dict[Path, str],
 ) -> None:
-    """CLI compat patch-point aliases must stay confined to dedicated test coverage."""
+    """Tests must not reintroduce removed CLI get_default_registry patch aliases."""
     violations = _iter_string_mentions(
         test_content_cache,
         needle=needle,
@@ -914,6 +899,6 @@ def test_cli_local_get_default_registry_patch_points_are_confined_to_dedicated_t
         | frozenset({Path(__file__).resolve()}),
     )
     assert not violations, (
-        "CLI get_default_registry compat patch points leaked into new test files:\n"
+        "Removed CLI get_default_registry patch points reappeared in tests:\n"
         + "\n".join(violations)
     )

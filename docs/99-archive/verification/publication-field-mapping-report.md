@@ -152,7 +152,7 @@ original-id: Series[str] = pa.Field(nullable=True, alias="-original-id")
 
 ### Recommended Fix
 
-Add fields to `ChEMBLDocumentGoldSchema`:
+Add fields to `ChEMBLPublicationGoldSchema`:
 
 ```python
 # After src-id field (line 428)
@@ -207,17 +207,17 @@ All providers use `normalize-pmc-id()`:
 ### 1. chembl_publication_similarity ✅
 
 - **Transformer**: `publication-similarity-transformer.py`
-- **Entity**: `DocumentSimilarity`
+- **Entity**: `ChemblPublicationSimilarity`
 - **Silver**: `CHEMBL-DOCUMENT-SIMILARITY-SCHEMA`
-- **Gold**: `ChEMBLDocumentSimilarityGoldSchema`
+- **Gold**: `ChEMBLPublicationSimilarityGoldSchema`
 - **Status**: All fields correctly mapped, types consistent
 
 ### 2. chembl_publication_term ✅
 
 - **Transformer**: `publication-term-transformer.py`
-- **Entity**: `DocumentTerm`
+- **Entity**: `ChemblPublicationTerm`
 - **Silver**: `CHEMBL-DOCUMENT-TERM-SCHEMA`
-- **Gold**: `ChEMBLDocumentTermGoldSchema`
+- **Gold**: `ChEMBLPublicationTermGoldSchema`
 - **Status**: All fields correctly mapped, types consistent
 
 ### 3. semanticscholar_publication ✅

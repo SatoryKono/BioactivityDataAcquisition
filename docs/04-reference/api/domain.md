@@ -193,9 +193,9 @@ class DataSourcePort(Protocol):
 | `Tissue` | Tissue entity |
 | `SubcellularFraction` | Subcellular fraction entity |
 | `CompoundRecord` | Molecule-document link |
-| `ChemblPublication` | ChEMBL document entity |
-| `DocumentSimilarity` | Document similarity score |
-| `DocumentTerm` | Document term frequency |
+| `ChemblPublication` | ChEMBL publication entity |
+| `ChemblPublicationSimilarity` | Publication similarity score |
+| `ChemblPublicationTerm` | Publication term frequency |
 | `ProteinClassification` | Protein class hierarchy |
 
 ### ChEMBL DTOs (Pydantic, frozen, extra='forbid')
@@ -359,8 +359,8 @@ class DataSourcePort(Protocol):
 
 `ChEMBLActivityGoldSchema`, `ChEMBLAssayGoldSchema`, `ChEMBLMoleculeGoldSchema`,
 `ChEMBLTargetGoldSchema`, `ChEMBLTargetComponentGoldSchema`, `ChEMBLCellLineGoldSchema`,
-`ChEMBLTissueGoldSchema`, `ChEMBLDocumentGoldSchema`, `ChEMBLDocumentSimilarityGoldSchema`,
-`ChEMBLDocumentTermGoldSchema`, `ChEMBLProteinClassGoldSchema`,
+`ChEMBLTissueGoldSchema`, `ChEMBLPublicationGoldSchema`, `ChEMBLPublicationSimilarityGoldSchema`,
+`ChEMBLPublicationTermGoldSchema`, `ChEMBLProteinClassGoldSchema`,
 `ChEMBLAssayParametersGoldSchema`, `ChEMBLCompoundRecordGoldSchema`,
 `ChEMBLSubcellularFractionGoldSchema`
 
