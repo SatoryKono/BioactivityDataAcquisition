@@ -268,7 +268,9 @@ def test_default_provider_assembly_support_binds_explicit_registry_for_http_clie
     registry = create_provider_registry()
     captured: dict[str, object] = {}
 
-    def _fake_create_for_provider(provider: str, settings=None, **kwargs: object) -> str:
+    def _fake_create_for_provider(
+        provider: str, settings=None, **kwargs: object
+    ) -> str:
         captured["provider"] = provider
         captured["provider_registry"] = kwargs.get("provider_registry")
         return "client"

@@ -19,7 +19,7 @@
 
 ### REQ-ARCH-001
 - **Уровень**: MUST
-- **Описание**: Интерфейсы (Ports) определяются в пакете `domain/ports/` через `typing.Protocol`. Импорт **MUST** быть из фасада (`from bioetl.domain.ports import ...`).
+- **Описание**: Интерфейсы (Ports) определяются в пакете `domain/ports/` через `typing.Protocol`. Импорт **MUST** быть из фасада (`from bioetl.domain.ports import ...`). Это правило относится и к runtime-oriented cross-layer contracts (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они остаются санкционированной частью `bioetl.domain.ports`, потому что выражают чистые абстракции, а не concrete infrastructure behavior.
 - **Проверка**: Статический анализ — проверить наличие пакета и использование Protocol. Архитектурный тест `test-ports-imported-only-from-facade`.
 
 ### REQ-ARCH-002
@@ -730,7 +730,7 @@
 
 #### REQ-CLEANUP-004
 - **Уровень**: MUST
-- **Описание**: PipelineServices реализует async context manager (`--aenter--`/`--aexit--`)
+- **Описание**: `PipelineService` реализует async context manager (`__aenter__`/`__aexit__`)
 - **Проверка**: Проверить использование `async with services:` в runner
 
 ### 5.5 Security

@@ -60,7 +60,9 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     assert call_kwargs["scd_config"] == {"type": 2}
 
 
-def test_build_record_processor_config_and_validator_forwards_paths_and_strict() -> None:
+def test_build_record_processor_config_and_validator_forwards_paths_and_strict() -> (
+    None
+):
     pipeline = _make_pipeline()
     gold_validator_factory = MagicMock(return_value=MagicMock(name="validator"))
 

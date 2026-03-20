@@ -433,7 +433,9 @@ class TestCsvExporterInternals:
         monkeypatch.setattr(
             csv_exporter_table_ops,
             "_builtin_import",
-            lambda name: _BrokenPolarsModule() if name == "polars" else builtins.__import__(name),
+            lambda name: (
+                _BrokenPolarsModule() if name == "polars" else builtins.__import__(name)
+            ),
         )
         result = exporter._deduplicate(table, ["id"])
 

@@ -145,7 +145,9 @@ class TestEntityOwnershipCoverage:
             entity_key = f"{provider}.{entity}"
             owned_paths = _ownership_paths(matrix, entity_key)
 
-            assert owned_paths, f"entity '{entity_key}' must declare at least one test path"
+            assert owned_paths, (
+                f"entity '{entity_key}' must declare at least one test path"
+            )
             for owned_path in owned_paths:
                 assert owned_path.exists(), (
                     f"Declared ownership path for '{entity_key}' is missing: "
@@ -200,7 +202,9 @@ class TestEntityOwnershipCoverage:
 
     def test_provider_matrix_only_references_existing_entity_configs(self) -> None:
         matrix = _load_matrix()
-        existing = {(provider, entity) for provider, entity, _ in _iter_entity_configs()}
+        existing = {
+            (provider, entity) for provider, entity, _ in _iter_entity_configs()
+        }
 
         for provider, config in matrix["providers"].items():
             for entity in config.get("entities", []):

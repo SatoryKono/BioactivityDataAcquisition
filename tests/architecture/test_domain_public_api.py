@@ -8,6 +8,7 @@ exposes only subpackages and events; consumers import from sub-facades.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import get_type_hints
 
 
 def test_domain_all_is_complete(src_dir: Path) -> None:
@@ -149,6 +150,40 @@ def test_domain_ports_facade_explicitly_exports_runtime_contracts() -> None:
     assert not missing, (
         "Runtime-oriented cross-layer contracts must remain available from "
         f"bioetl.domain.ports facade: missing {sorted(missing)}"
+    )
+
+
+def test_pipeline_context_remains_normative_domain_execution_context() -> None:
+    """Verify PipelineContext stays typed as a domain-level execution context.
+
+    RF-06 keeps PipelineContext in the domain layer on purpose: it carries
+    deterministic run metadata and a LoggerPort abstraction, not a concrete
+    infrastructure logger/runtime object.
+    """
+    from datetime import datetime
+
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.ports import LoggerPort
+
+    context_hints = get_type_hints(PipelineContext)
+    bind_logger_hints = get_type_hints(PipelineContext.bind_logger)
+    create_hints = get_type_hints(PipelineContext.create)
+
+    assert context_hints["logger"] is LoggerPort, (
+        "PipelineContext.logger must remain typed as LoggerPort so the domain "
+        "context carries only a pure logging abstraction"
+    )
+    assert context_hints["started_at"] is datetime, (
+        "PipelineContext.started_at must remain the explicit deterministic "
+        "timestamp carried through pipeline execution"
+    )
+    assert bind_logger_hints["return"] is PipelineContext, (
+        "PipelineContext.bind_logger() must preserve the same domain execution "
+        "context type instead of switching to an infrastructure object"
+    )
+    assert create_hints["return"] is PipelineContext, (
+        "PipelineContext.create() must remain the sanctioned constructor for "
+        "domain-level execution context instances"
     )
 
 

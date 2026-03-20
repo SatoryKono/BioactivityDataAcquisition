@@ -384,9 +384,7 @@ class TestBaseDeltaWriterAsync:
             result = await writer.read_table("existing_table", columns=["id", "name"])
 
         assert result == expected_records
-        mock_dataset.scanner.assert_called_once_with(
-            columns=["id", "name"]
-        )
+        mock_dataset.scanner.assert_called_once_with(columns=["id", "name"])
 
     async def test_read_table_falls_back_to_arrow_table_when_dataset_reader_missing(
         self,

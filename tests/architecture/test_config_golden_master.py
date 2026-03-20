@@ -94,9 +94,7 @@ def _active_entity_pipelines() -> dict[str, str]:
     for config_path in sorted(Path("configs/entities").glob("*/*.yaml")):
         lines = config_path.read_text(encoding="utf-8").splitlines()
         pipeline_name = next(
-            line.split(":", 1)[1].strip()
-            for line in lines
-            if "pipeline_name:" in line
+            line.split(":", 1)[1].strip() for line in lines if "pipeline_name:" in line
         )
         providers.setdefault(config_path.parent.name, pipeline_name)
     return providers
@@ -148,8 +146,7 @@ def test_golden_master_pipeline_set_covers_each_non_chembl_provider() -> None:
         for pipeline_name in PIPELINES
     }
     expected = {
-        provider for provider in _active_entity_pipelines()
-        if provider != "chembl"
+        provider for provider in _active_entity_pipelines() if provider != "chembl"
     }
 
     assert expected <= represented

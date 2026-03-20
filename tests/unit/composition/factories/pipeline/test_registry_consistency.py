@@ -74,7 +74,7 @@ class TestChemblPipelinesRegistered:
         missing = expected_registry_names - registered_set
         assert not missing, (
             f"ChEMBL pipeline classes not registered: {missing}. "
-            f"Add them to PIPELINE_CONFIGS in pipeline_factories.py"
+            "Add them to PIPELINE_CONFIGS in registry_manifest.py"
         )
 
     def test_all_providers_have_pipelines_registered(
@@ -97,7 +97,7 @@ class TestChemblPipelinesRegistered:
 
         assert not missing_pipelines, (
             f"Pipelines not registered: {missing_pipelines}. "
-            f"Add them to the registry in pipeline_factories.py"
+            "Add them to the registry manifest and registry wiring."
         )
 
 

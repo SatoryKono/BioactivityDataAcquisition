@@ -73,7 +73,7 @@ sequenceDiagram
     Asm->>SB: .with_logger(StructlogLogger)
     Asm->>SB: .with_metrics(PrometheusMetrics)
     Asm->>SB: .build()
-    SB-->>Asm: PipelineServices (frozen)
+    SB-->>Asm: PipelineService (frozen)
 
     Note over Asm,RF: Phase 8: Runner
     Asm->>RF: create_runner(services, adapter, config)

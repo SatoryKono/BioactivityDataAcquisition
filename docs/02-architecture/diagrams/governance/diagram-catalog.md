@@ -44,7 +44,7 @@
 22. **Pipeline Lifecycle** - State - Состояния выполнения пайплайна
 23. **Services Architecture** - Component - 14 application services
 24. **Transformer Hierarchy** - Class - BaseTransformer и конкретные реализации
-25. **Pipeline Services Bundle** - Component - PipelineServices и его компоненты
+25. **Pipeline Services Bundle** - Component - PipelineService и его компоненты
 26. **Batch Processing Flow** - Activity - Полный цикл обработки батча
 27. **Preflight Checklist** - Activity - PreflightService проверки
 28. **Postrun Operations** - Activity - PostrunService cleanup
@@ -60,7 +60,7 @@
 36. **Provider Registration** - Component - 7 провайдеров
 37. **Configuration Builders** - Class - FilterConfigBuilder и др.
 38. **Entrypoints Mapping** - Flowchart - CLI → Composition → Application
-39. **Services Factory** - Sequence - Создание PipelineServices bundle
+39. **Services Factory** - Sequence - Создание PipelineService bundle
 40. **Storage Factory** - Sequence - Создание storage adapters
 
 ### 1.5 Infrastructure Layer (10)
@@ -280,7 +280,7 @@
 218. **BasePipeline** - Class - Abstract pipeline
 219. **LockCoordinator** - Class - Lock orchestration
 220. **CheckpointManager** - Class - Checkpoint handling
-221. **PipelineServices** - Class - Services bundle
+221. **PipelineService** - Class - Services bundle
 222. **QuarantineManager** - Class - Quarantine management
 223. **PreflightService** - Class - Pre-run checks
 224. **PostrunService** - Class - Post-run operations

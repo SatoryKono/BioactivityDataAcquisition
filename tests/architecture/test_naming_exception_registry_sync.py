@@ -12,9 +12,13 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = REPO_ROOT / "configs" / "naming_exceptions.yaml"
-NAMING_POLICY_PATH = REPO_ROOT / "docs" / "00-project" / "governance" / "02-naming-policy.md"
+NAMING_POLICY_PATH = (
+    REPO_ROOT / "docs" / "00-project" / "governance" / "02-naming-policy.md"
+)
 GLOSSARY_PATH = REPO_ROOT / "docs" / "00-project" / "glossary.md"
-DOMAIN_ENTITIES_INIT = REPO_ROOT / "src" / "bioetl" / "domain" / "entities" / "__init__.py"
+DOMAIN_ENTITIES_INIT = (
+    REPO_ROOT / "src" / "bioetl" / "domain" / "entities" / "__init__.py"
+)
 
 
 def _load_registry_payload() -> dict[str, object]:
@@ -68,7 +72,9 @@ def test_stable_pipeline_id_exceptions_match_active_entity_configs() -> None:
     assert isinstance(stable_public_surface, dict), "stable_public_surface must exist"
 
     pipeline_ids = stable_public_surface.get("pipeline_ids")
-    assert isinstance(pipeline_ids, list) and pipeline_ids, "pipeline_ids must be non-empty"
+    assert isinstance(pipeline_ids, list) and pipeline_ids, (
+        "pipeline_ids must be non-empty"
+    )
 
     by_name = {
         entry["name"]: entry
@@ -77,10 +83,14 @@ def test_stable_pipeline_id_exceptions_match_active_entity_configs() -> None:
     }
 
     for pipeline_name in ("pubchem_compound", "uniprot_protein"):
-        assert pipeline_name in by_name, f"{pipeline_name} missing from stable pipeline IDs"
+        assert pipeline_name in by_name, (
+            f"{pipeline_name} missing from stable pipeline IDs"
+        )
         entry = by_name[pipeline_name]
         location = entry.get("location")
-        assert isinstance(location, str) and location, f"{pipeline_name} must declare location"
+        assert isinstance(location, str) and location, (
+            f"{pipeline_name} must declare location"
+        )
         config_path = REPO_ROOT / location
         assert config_path.exists(), f"{pipeline_name} location missing: {config_path}"
         raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
@@ -94,16 +104,24 @@ def test_stable_public_surface_symbols_exist_in_code() -> None:
 
     for section_name in ("pipeline_classes", "transformers", "gold_schemas"):
         section = stable_public_surface.get(section_name)
-        assert isinstance(section, list) and section, f"{section_name} must be non-empty"
+        assert isinstance(section, list) and section, (
+            f"{section_name} must be non-empty"
+        )
         for entry in section:
             assert isinstance(entry, dict), f"{section_name} entries must be mappings"
             name = entry.get("name")
             location = entry.get("location")
             reason = entry.get("reason")
-            assert isinstance(name, str) and name, f"{section_name} entry must have name"
-            assert isinstance(location, str) and location, f"{name} must declare location"
+            assert isinstance(name, str) and name, (
+                f"{section_name} entry must have name"
+            )
+            assert isinstance(location, str) and location, (
+                f"{name} must declare location"
+            )
             assert isinstance(reason, str) and reason, f"{name} must declare reason"
-            assert (REPO_ROOT / location).exists(), f"{name} location missing: {location}"
+            assert (REPO_ROOT / location).exists(), (
+                f"{name} location missing: {location}"
+            )
             assert name in class_names, f"{name} not found in codebase"
 
 
@@ -125,7 +143,9 @@ def test_forbidden_domain_aliases_are_not_exported_from_domain_entities() -> Non
         assert isinstance(legacy_name, str) and legacy_name
         assert isinstance(canonical_name, str) and canonical_name
         assert isinstance(export_surface, str) and export_surface
-        assert canonical_name in exports, f"{canonical_name} should be exported canonically"
+        assert canonical_name in exports, (
+            f"{canonical_name} should be exported canonically"
+        )
         assert legacy_name not in exports, f"{legacy_name} must not be re-exported"
 
 
@@ -162,7 +182,9 @@ def test_naming_audit_uses_registry_for_doc_exceptions(tmp_path: Path) -> None:
     )
 
 
-def test_naming_policy_and_glossary_distinguish_canonical_and_stable_public_names() -> None:
+def test_naming_policy_and_glossary_distinguish_canonical_and_stable_public_names() -> (
+    None
+):
     naming_policy = NAMING_POLICY_PATH.read_text(encoding="utf-8")
     glossary = GLOSSARY_PATH.read_text(encoding="utf-8")
 

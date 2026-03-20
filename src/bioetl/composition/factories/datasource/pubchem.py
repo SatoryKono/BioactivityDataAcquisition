@@ -147,7 +147,9 @@ def create_pubchem_adapter(
         "APIRequestCollector | None",
         kwargs.pop("request_collector", None),
     )
-    entity_mapper = cast("PubChemEntityMapper | None", kwargs.pop("entity_mapper", None))
+    entity_mapper = cast(
+        "PubChemEntityMapper | None", kwargs.pop("entity_mapper", None)
+    )
     fetch_strategies = cast(
         "PubChemFetchStrategies | None",
         kwargs.pop("fetch_strategies", None),

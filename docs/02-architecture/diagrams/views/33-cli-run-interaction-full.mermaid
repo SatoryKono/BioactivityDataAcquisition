@@ -49,7 +49,7 @@ sequenceDiagram
     Boot->>Boot: create HttpClientFactory → client
     Boot->>Boot: create DataSourceFactory → adapter
     Boot->>SB: ServicesBuilder.build()
-    SB-->>Boot: PipelineServices (frozen)
+    SB-->>Boot: PipelineService (frozen)
     Boot->>RF: RunnerFactory.create_runner()
     RF-->>Boot: PipelineRunner (assembled)
     Boot-->>PRS: runner

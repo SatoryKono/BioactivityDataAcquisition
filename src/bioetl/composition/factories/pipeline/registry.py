@@ -3,7 +3,7 @@
 This module creates all pipeline factories using the GenericPipelineFactory
 pattern with GenericPipeline as the unified pipeline class.
 
-Pipeline configurations are defined in configs.py.
+Pipeline registry inventory is defined in registry_manifest.py.
 Contract validation logic is in contract_validator.py.
 
 Thread-safety: Registration uses a module-level lock to prevent TOCTOU race conditions.

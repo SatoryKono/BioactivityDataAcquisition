@@ -122,4 +122,6 @@ class TestPipelineRegistrations:
             "bioetl.application.pipelines.chembl._pipelines"
         )
 
-        assert getattr(compat_module, class_name) is getattr(canonical_module, class_name)
+        assert getattr(compat_module, class_name) is getattr(
+            canonical_module, class_name
+        )

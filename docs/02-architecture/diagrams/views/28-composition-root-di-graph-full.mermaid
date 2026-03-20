@@ -57,7 +57,7 @@ flowchart TB
         subgraph StorageFactories["Storage & Services"]
             STF["StorageFactory<br/>• create(config)<br/>→ Bronze/Silver/Gold writers<br/>"]
             STA["StorageAdapter<br/>• create_bronze/silver/gold<br/>"]
-            SB["ServicesBuilder<br/>• wire storage/lock/obs<br/>• build() → PipelineServices"]
+            SB["ServicesBuilder<br/>• wire storage/lock/obs<br/>• build() → PipelineService"]
         end
 
         subgraph PipelineFactories["Pipeline Construction"]
@@ -82,7 +82,7 @@ flowchart TB
         end
         subgraph RuntimeCore["Application Instances"]
             direction TB
-            PS["PipelineServices<br/>(frozen bundle)<br/><br/>"]
+            PS["PipelineService<br/>(frozen bundle)<br/><br/>"]
             RUN["PipelineRunner<br/>(fully assembled)<br/><br/>"]
         end
     end

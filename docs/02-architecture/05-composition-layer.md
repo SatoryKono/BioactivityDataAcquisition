@@ -106,7 +106,7 @@ composition/bootstrap/
 | `storage/factory.py`        | `StorageFactory`                             | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
 | `storage/adapter.py`        | `StorageAdapter`                             | Создание отдельных storage адаптеров                           |
 | `services/factory.py`       | `BaseServicesFactory`                        | Создание core сервисов                                         |
-| `services/builder.py`       | `ServicesBuilder`                            | Создание `PipelineServices` bundle                             |
+| `services/builder.py`       | `ServicesBuilder`                            | Создание `PipelineService` bundle                              |
 | `services/port_factories.py`| Port factory functions                       | Boundary-validated port creation                               |
 | `dq/factory.py`             | `DQServicesFactory`                          | Создание Data Quality компонентов                              |
 | `transformer_factory.py`    | `register_transformer() / create_transformer()` | Создание трансформеров по провайдеру                        |
@@ -156,9 +156,10 @@ composition/bootstrap/
 
 Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
 
-- **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
+- **`ProviderRegistry`**: Thread-safe instance-scoped реестр provider metadata и creation callbacks. Class-level методы сохраняются как compatibility facade над shared default registry.
+- **`ensure_providers_loaded()`**: Канонический lifecycle boundary для shared runtime/bootstrap registration state.
 - **`get_data_source_creator()`**: Каноническая точка получения provider-bound creator callback для data source assembly.
-- **`DataSourceFactory`**: Канонический façade для создания `DataSourcePort` через `ProviderRegistry`.
+- **`DataSourceFactory`**: Канонический façade для создания `DataSourcePort` через `ProviderRegistry`; local factory seams при необходимости принимают explicit `provider_registry`.
 
 Legacy registry façade сохраняется только для explicit compatibility coverage.
 Полная deprecation/inventory картина по этому compatibility surface и соседним compat-модулям описана в
@@ -171,7 +172,7 @@ Legacy registry façade сохраняется только для explicit comp
 creator = get_data_source_creator("chembl")
 data_source = creator(settings, config, logger)
 
-# Или напрямую через DataSourceFactory / ProviderRegistry
+# Или напрямую через DataSourceFactory
 data_source = DataSourceFactory.create("chembl", settings=settings, logger=logger)
 ```
 

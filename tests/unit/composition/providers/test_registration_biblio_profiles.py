@@ -31,8 +31,9 @@ def test_resolve_pubmed_request_profile_prefers_pipeline_overrides() -> None:
     assert result.api_key == "pipeline-key"
 
 
-def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch(
-) -> None:
+def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch() -> (
+    None
+):
     settings = MagicMock()
     settings.default_email = "default@example.org"
 
@@ -45,8 +46,10 @@ def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch(
     assert result.mailto == "default@example.org"
     assert result.batch_size == 55
 
-def test_resolve_semanticscholar_request_profile_uses_empty_key_when_unconfigured(
-) -> None:
+
+def test_resolve_semanticscholar_request_profile_uses_empty_key_when_unconfigured() -> (
+    None
+):
     settings = MagicMock()
     settings.semanticscholar_api_key = None
 

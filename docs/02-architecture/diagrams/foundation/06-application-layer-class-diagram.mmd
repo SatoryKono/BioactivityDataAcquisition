@@ -18,7 +18,7 @@ classDiagram
             <<abstract>>
             #config: PipelineConfig
             #runtime: RuntimeConfig
-            #services: PipelineServices
+            #services: PipelineService
             +create(config, runtime, services)$ BasePipeline
             +pipeline_name() str
             +provider() str
@@ -94,7 +94,7 @@ classDiagram
             
         }
 
-        class PipelineServices {
+        class PipelineService {
             <<frozen dataclass>>
             +data_source: DataSourcePort
             +storage: StoragePort
@@ -388,7 +388,7 @@ classDiagram
     RecordProcessor --> BatchMetricsRecorder
     BatchTransformer --> BaseTransformer
 
-    BasePipeline --> PipelineServices
+    BasePipeline --> PipelineService
     RunnerServices --> LockCoordinator
     RunnerServices --> PreflightService
     RunnerServices --> PostrunService

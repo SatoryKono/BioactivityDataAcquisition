@@ -17,11 +17,11 @@ classDiagram
         <<abstract>>
         #_config: PipelineConfig
         #_runtime: RuntimeConfig
-        #_services: PipelineServices
+        #_services: PipelineService
         +create(config, runtime, services)$ BasePipeline
         +config() PipelineConfig
         +runtime() RuntimeConfig
-        +services() PipelineServices
+        +services() PipelineService
         +pipeline_name() str
         +provider() str
         +entity() str

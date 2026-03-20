@@ -1,6 +1,6 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-03-19T11:31:48
+- Generated: 2026-03-20T17:51:44
 - Diagram count: 162
 
 ## Table of Contents
@@ -715,7 +715,7 @@
 ![06-application-layer-class-diagram-full](../views/png/06-application-layer-class-diagram-full.png)
 
 ### Описание
-Диаграмма «Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineServices.
+Диаграмма «Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineService.
 
 ### Метаданные
 - Тип: `classDiagram`

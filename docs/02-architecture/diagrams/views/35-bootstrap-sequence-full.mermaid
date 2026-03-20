@@ -78,7 +78,7 @@ flowchart TB
         S8E[".with_quarantine(unified_quarantine)<br/>"]
         S8F[".with_logger(structlog_logger)<br/>"]
         S8G[".with_metrics(prometheus_metrics)<br/>"]
-        S8H[".build() → PipelineServices (frozen)<br/>"]
+        S8H[".build() → PipelineService (frozen)<br/>"]
     end
 
     subgraph Step9["Step 9: Runner Assembly"]

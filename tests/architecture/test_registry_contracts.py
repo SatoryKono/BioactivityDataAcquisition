@@ -80,7 +80,9 @@ class TestRegistryProtocol:
         factories, new class-level ``ProviderRegistry`` method calls in this
         subtree should not grow back unnoticed.
         """
-        datasource_path = src_dir / "bioetl" / "composition" / "factories" / "datasource"
+        datasource_path = (
+            src_dir / "bioetl" / "composition" / "factories" / "datasource"
+        )
         forbidden_patterns = [
             "ProviderRegistry.ensure_loaded(",
             "ProviderRegistry.is_registered(",
@@ -115,9 +117,18 @@ class TestRegistryProtocol:
         """
         runtime_files = [
             src_dir / "bioetl" / "composition" / "_pipeline_execution.py",
-            src_dir / "bioetl" / "composition" / "bootstrap" / "runtime" / "pipeline.py",
+            src_dir
+            / "bioetl"
+            / "composition"
+            / "bootstrap"
+            / "runtime"
+            / "pipeline.py",
             src_dir / "bioetl" / "composition" / "factories" / "pipeline" / "runner.py",
-            src_dir / "bioetl" / "composition" / "runtime_builders" / "runner_builder.py",
+            src_dir
+            / "bioetl"
+            / "composition"
+            / "runtime_builders"
+            / "runner_builder.py",
         ]
         forbidden_pattern = "ProviderRegistry.ensure_loaded("
         violations: list[str] = []
@@ -125,7 +136,9 @@ class TestRegistryProtocol:
         for py_file in runtime_files:
             content = py_file.read_text(encoding="utf-8")
             if forbidden_pattern in content:
-                violations.append(f"{py_file.relative_to(src_dir)}: {forbidden_pattern}")
+                violations.append(
+                    f"{py_file.relative_to(src_dir)}: {forbidden_pattern}"
+                )
 
         assert not violations, (
             "Deferred runtime paths should use the named runtime bootstrap seam "

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-20T11:17:59.952926+00:00",
+  "generated_at": "2026-03-20T14:30:07.059067+00:00",
   "summary": {
     "total_scripts": 189,
     "status_counts": {
@@ -12,10 +12,10 @@
     "reference_group_coverage": {
       "build": 28,
       "ci": 39,
-      "docs": 57,
-      "scripts": 37,
+      "docs": 56,
+      "scripts": 39,
       "skills": 3,
-      "tests": 31
+      "tests": 32
     }
   },
   "scripts": [
@@ -455,7 +455,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 182,
+          "line": 285,
           "source_group": "tests",
           "text": "assert \"python scripts/data/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -488,7 +488,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 183,
+          "line": 286,
           "source_group": "tests",
           "text": "assert \"python scripts/data/check_vcr_filename_policy.py\" in workflow"
         }
@@ -2226,7 +2226,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
@@ -2239,6 +2239,12 @@
           "line": 532,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
+        },
+        {
+          "path": "tests/architecture/test_runtime_agent_docs_drift.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "script = Path(\"scripts/docs/check_doc_drift.py\").resolve()"
         }
       ]
     },
@@ -2247,7 +2253,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 46,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -2981,13 +2987,13 @@
       "references": [
         {
           "path": "docs/00-project/glossary.md",
-          "line": 483,
+          "line": 490,
           "source_group": "docs",
           "text": "A terminology linter is available at `scripts/qa/lint_terminology.py`:"
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 487,
+          "line": 494,
           "source_group": "docs",
           "text": "python scripts/qa/lint_terminology.py src/bioetl/"
         },
@@ -3379,10 +3385,10 @@
           "text": "run: uv run python scripts/schema/check_config_invariants.py"
         },
         {
-          "path": "docs/reports/RF-FS-001-baseline-2026-03-19.md",
-          "line": 5,
-          "source_group": "docs",
-          "text": "keys и invariants расходится между scripts/schema/check_config_invariants.py, tests/architecture/test_config_ci_invariants.py и docs. Исправленная задача должна привести к одному нормативному описанию"
+          "path": "scripts/schema/README.md",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "- `scripts/schema/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the sam"
         }
       ]
     },
@@ -3585,10 +3591,10 @@
           "text": "python scripts/schema/validate_pipeline_configs.py"
         },
         {
-          "path": "docs/reports/RF-FS-001-baseline-2026-03-19.md",
-          "line": 8,
-          "source_group": "docs",
-          "text": "смогут использовать pre-commit invariant check, architecture tests и, при необходимости, документационные генераторы. При этом scripts/schema/validate_pipeline_configs.py может остаться wrapper-скрипт"
+          "path": "scripts/schema/README.md",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "- `scripts/schema/validate_pipeline_configs.py` is an officially supported compatibility wrapper around the canonical validator in `docs/00-project/ai/agents/scripts/py-config-bot-2.py`."
         }
       ]
     },
