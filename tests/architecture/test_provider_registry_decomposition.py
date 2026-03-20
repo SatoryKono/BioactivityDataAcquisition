@@ -20,6 +20,9 @@ REGISTRATION_BIO_PATH = (
 CONFIG_HELPERS_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "providers" / "_config_helpers.py"
 )
+REGISTRATION_BIBLIO_PATH = (
+    ROOT / "src" / "bioetl" / "composition" / "providers" / "registration_biblio.py"
+)
 FACTORY_LOADER_PATH = (
     ROOT / "src" / "bioetl" / "composition" / "providers" / "factory_loader.py"
 )
@@ -44,6 +47,10 @@ FORBIDDEN_REVERSE_REGISTRATION_IMPORTS = {
 FORBIDDEN_FACTORY_LOADER_IMPORTS = {
     "bioetl.composition.providers.factory_loader",
 }
+CANONICAL_PROVIDER_CONFIG_BUILDERS = {
+    "build_data_source_provider_config",
+    "build_http_provider_config",
+}
 
 
 def _import_from_modules(path: Path) -> set[str]:
@@ -53,6 +60,20 @@ def _import_from_modules(path: Path) -> set[str]:
         for node in ast.walk(tree)
         if isinstance(node, ast.ImportFrom) and node.module is not None
     }
+
+
+def _called_names(path: Path) -> set[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    called_names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if isinstance(func, ast.Name):
+            called_names.add(func.id)
+        elif isinstance(func, ast.Attribute):
+            called_names.add(func.attr)
+    return called_names
 
 
 @pytest.mark.architecture
@@ -112,6 +133,29 @@ def test_registration_helpers_use_injected_assembly_callbacks(path: Path) -> Non
     assert not unexpected_factory_loader_imports, (
         f"{path.name} must not import factory_loader after RF-FS-001:\n"
         + "\n".join(sorted(unexpected_factory_loader_imports))
+    )
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize("path", [REGISTRATION_BIO_PATH, REGISTRATION_BIBLIO_PATH])
+def test_registration_family_uses_canonical_provider_config_builders(path: Path) -> None:
+    """Bio/biblio registration families should not grow manual ProviderConfig skeletons."""
+    called_names = _called_names(path)
+    assert "ProviderConfig" not in called_names, (
+        f"{path.name} must not manually construct ProviderConfig entries again. "
+        "Use canonical builder helpers from _registration_contracts instead."
+    )
+
+    imported_modules = _import_from_modules(path)
+    assert "bioetl.composition.providers._registration_contracts" in imported_modules, (
+        f"{path.name} must import canonical provider-config builders from "
+        "_registration_contracts."
+    )
+
+    missing_builders = CANONICAL_PROVIDER_CONFIG_BUILDERS & called_names
+    assert missing_builders, (
+        f"{path.name} must call at least one canonical provider-config builder "
+        "from _registration_contracts."
     )
 
 

@@ -51,6 +51,32 @@ views (`03-medallion-data-flow`, `13-port-protocol-contracts`,
 | `erDiagram` | Связи между сущностями | full-er-diagram |
 | `mindmap` | Иерархическое мышление | architecture-principles-mindmap |
 
+### 1.3. Граница между canonical sources и publication artifacts
+
+Canonical source of truth для диаграмм остаётся в `.mmd`-деревьях
+`architecture/`, `class-diagrams/` и `foundation/`, а также в derived source
+tree `views/*.mermaid`. Файлы в `svg/`, `png/`, `bundles/`, `descriptions/` и
+дополнительные `INDEX.md` следует трактовать как publication artifacts.
+
+Для Markdown bundle publication первичным render artifact теперь считается
+`svg/`. Деревья `png/` сохраняются как compatibility/export layer и не должны
+снова трактоваться как единственный обязательный surface для чтения bundle-файлов.
+
+Для Markdown bundle generation каноническим entrypoint теперь считается:
+
+```bash
+python -m scripts.diagrams.generate_all_bundles --collection <name>
+```
+
+где `<name>` — одна из коллекций `architecture`, `class-diagrams`,
+`foundation`, `views`.
+
+Legacy entrypoints `generate_architecture_bundle.py` и
+`generate_views_bundle.py` поддерживаются как compatibility wrappers и не
+должны снова расходиться по поведению с canonical generator. Когда нужно
+исправить drift, предпочтительно регенерировать только затронутую коллекцию,
+а не выполнять широкое обновление всех derived artifacts сразу.
+
 ---
 
 ## 2. Метаданные и шаблон
@@ -367,7 +393,8 @@ bash docs/02-architecture/diagrams/tooling/render.sh
 7. **Проверить orphan-ноды:** `python scripts/diagrams/prune_orphan_nodes.py --check`
 8. **Отрендерить:** `bash docs/02-architecture/diagrams/tooling/render.sh`
    Для усиленного рендера больших схем можно задать: `--large-threshold`, `--large-scale`, `--large-png-dpi`.
-9. **Проверить артефакты SVG/PNG:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
+9. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
+   Для дополнительной compatibility-проверки PNG: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --require-png`
 10. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`
 11. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`
 12. **Добавить в индекс:** обновить `README.md` каталога
@@ -382,7 +409,7 @@ bash docs/02-architecture/diagrams/tooling/render.sh
 4. L1-диаграмма содержит только ключевые методы, вторичные операции вынесены в companion L2 (`01a/08a/14a` и т.д.).
 5. Выполнен `python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams/class-diagrams`.
 6. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`.
-7. Перерендерены изменённые диаграммы через `render.sh`, а `svg/png` артефакты обновлены.
+7. Перерендерены изменённые диаграммы через `render.sh`, обязательные `svg`-артефакты обновлены, а `png` обновлены там, где они остаются compatibility/export surface.
 8. Нет drift между `.mmd` и рендер-артефактами в PR.
 
 ---
@@ -396,7 +423,7 @@ bash docs/02-architecture/diagrams/tooling/render.sh
 | differentiate_linkstyle.py | `src/tools/` | Семантическая стилизация рёбер |
 | lint_diagrams.py | `scripts/diagrams/` | Lint-проверка по 14 правилам |
 | prune_orphan_nodes.py | `scripts/diagrams/` | Детекция и удаление orphan-нод |
-| check_diagram_artifacts.py | `scripts/diagrams/` | DIAG-T010..T012 (наличие/непустота SVG+PNG) |
+| check_diagram_artifacts.py | `scripts/diagrams/` | DIAG-T010/T012 для обязательных SVG и DIAG-T011/T012 для optional PNG compatibility |
 | check_svg_text_visibility.py | `scripts/diagrams/` | Smoke-проверка видимости текста в SVG |
 | check_diagram_quality_gates.py | `scripts/diagrams/` | DIAG-T018..T023 (style/classDef/decomposition/legend/labels) |
 | run_diagram_nightly_suite.py | `scripts/diagrams/` | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme) |

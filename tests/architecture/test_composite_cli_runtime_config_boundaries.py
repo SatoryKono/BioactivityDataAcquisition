@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -49,3 +50,64 @@ def test_composite_runtime_modules_import_runtime_config_from_stable_facade(
         "from bioetl.application.composite.runner_pkg.runner_models import "
         "CompositeRuntimeConfig" not in content
     ), f"{relative_path} must not import CompositeRuntimeConfig from runner_models."
+
+
+def _parse_tree(path: Path) -> ast.AST:
+    return ast.parse(path.read_text(encoding="utf-8"))
+
+
+@pytest.mark.architecture
+def test_composite_support_service_builders_stays_facade_only(src_dir: Path) -> None:
+    """The composite support builders module should remain a thin re-export facade."""
+    file_path = (
+        src_dir
+        / "bioetl"
+        / "composition"
+        / "bootstrap"
+        / "runtime"
+        / "composite_support_service_builders.py"
+    )
+    content = file_path.read_text(encoding="utf-8")
+    tree = _parse_tree(file_path)
+
+    function_defs = [
+        node.name
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+    class_defs = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+
+    assert not function_defs, (
+        "composite_support_service_builders.py must stay a facade-only module. "
+        f"Found local function definitions: {function_defs}"
+    )
+    assert not class_defs, (
+        "composite_support_service_builders.py must stay a facade-only module. "
+        f"Found local class definitions: {class_defs}"
+    )
+
+    allowed_import_modules = {
+        "bioetl.application.composite.runtime_models",
+        "bioetl.composition.bootstrap.runtime.composite_execution_support_builder",
+        "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder",
+        "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder",
+        "bioetl.composition.bootstrap.runtime.composite_support_service_bundles",
+        "__future__",
+        "typing",
+    }
+    import_modules = {
+        node.module
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    unexpected_imports = import_modules - allowed_import_modules
+    assert not unexpected_imports, (
+        "composite_support_service_builders.py imported unexpected modules:\n"
+        + "\n".join(sorted(unexpected_imports))
+    )
+
+    line_count = len(content.splitlines())
+    assert line_count <= 40, (
+        "composite_support_service_builders.py must remain a thin facade "
+        f"(current lines: {line_count}, max: 40)."
+    )

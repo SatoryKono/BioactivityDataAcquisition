@@ -21,6 +21,7 @@
 | Skill | Назначение |
 |-------|---------|
 | `agent-orchestration` | Карта координации multi-agent workflow |
+| `hierarchical-evidence-orchestration` | Иерархическая evidence-wave orchestration: shard collection через `collecting-evidence` + shard synthesis через `synthesizing-pillars` |
 | `py-review-orchestrator` | Иерархическая кампания code review |
 | `py-test-swarm` | Иерархический test swarm (L1/L2/L3) |
 
@@ -91,6 +92,7 @@
 - [documentation-audit](local/documentation-audit/SKILL.md)
 - [documentation-cascade-audit](local/documentation-cascade-audit/SKILL.md)
 - [new-pipeline](local/new-pipeline/SKILL.md)
+- [hierarchical-evidence-orchestration](local/hierarchical-evidence-orchestration/SKILL.md)
 - [py-audit-bot](local/py-audit-bot/SKILL.md)
 - [py-config-bot](local/py-config-bot/SKILL.md)
 - [py-debug-bot](local/py-debug-bot/SKILL.md)

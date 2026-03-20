@@ -72,5 +72,5 @@ python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-archi
 
 - New canonical diagrams must be added as `.mmd` under `diagrams/**`.
 - Decomposed views are maintained in `diagrams/views/*.mermaid`.
-- Rendered `svg/png` artifacts under sibling `svg/` and `png/` directories are maintained outputs and must be refreshed when source diagrams change.
+- Rendered `svg/` artifacts are the primary maintained publication output; sibling `png/` trees remain compatibility/export outputs and should be refreshed where those surfaces are still used.
 - Legacy snapshots may still exist in `docs/02-architecture/diagrams/mermaid/`, but they are not canonical for new work.

@@ -1,0 +1,31 @@
+schema_version: "1.0"
+classification_mode: informational
+merge_blocking_source: ci_pass_fail_and_quality_gate
+merge_blocking_note: >
+  Descriptive test-health classes inform confidence posture and prioritization.
+  Merge blocking remains governed by ordinary CI pass/fail and the quality gate.
+statuses:
+  fully_exercised_green:
+    short_label: Fully Exercised Green
+    definition: >
+      Green result with no detected staged rollout or environment-gated limitation
+      in the classified surface.
+    merge_semantics: informational
+  staged_green:
+    short_label: Staged Green
+    definition: >
+      Green result where at least one confidence surface is still staged,
+      partial, or not fully enforced.
+    merge_semantics: informational
+  environment_limited_green:
+    short_label: Environment-Limited Green
+    definition: >
+      Green result whose confidence is reduced by skips, network opt-in gates,
+      scheduled live checks, or VCR-only provider tiers.
+    merge_semantics: informational
+  non_green:
+    short_label: Non-Green
+    definition: >
+      Failing or non-passing result where active regressions take precedence over
+      descriptive confidence classification.
+    merge_semantics: derived_from_blocking_ci

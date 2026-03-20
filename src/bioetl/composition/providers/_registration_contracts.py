@@ -7,6 +7,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.providers._models import (
+    AdapterCreator,
     DataSourceCreatorProtocol,
     HttpConfig,
     ProviderConfig,
@@ -182,6 +183,26 @@ def bind_provider_data_source_creator(
     )
 
 
+def build_data_source_provider_config(
+    *,
+    adapter_class: type[DataSourcePort],
+    http_config: HttpConfig | None,
+    requires_http_client: bool,
+    requires_logger: bool = True,
+    custom_creator: AdapterCreator | None = None,
+    data_source_creator: DataSourceCreatorProtocol | None = None,
+) -> ProviderConfig:
+    """Build the canonical ProviderConfig shape for registry data-source entries."""
+    return ProviderConfig(
+        adapter_class=adapter_class,
+        http_config=http_config,
+        requires_http_client=requires_http_client,
+        requires_logger=requires_logger,
+        custom_creator=custom_creator,
+        data_source_creator=data_source_creator,
+    )
+
+
 def build_http_provider_config(
     *,
     adapter_class: type[DataSourcePort],
@@ -190,10 +211,10 @@ def build_http_provider_config(
     data_source_creator: SupportAwareDataSourceCreatorProtocol,
     assembly_support: ProviderAssemblySupport,
     rate_overrides: dict[str, float] | None = None,
-    custom_creator: ProviderAdapterFactoryProtocol | None = None,
+    custom_creator: AdapterCreator | None = None,
 ) -> ProviderConfig:
     """Build the common HTTP-oriented ProviderConfig shape for registration."""
-    return ProviderConfig(
+    return build_data_source_provider_config(
         adapter_class=adapter_class,
         http_config=HttpConfig(
             rate=rate,

@@ -9,7 +9,7 @@ _Связанные документы: diagram-modernization-program.md, diagra
 ## 2. Область тестирования
 
 1. Синтаксис Mermaid (`.mmd`, `.mermaid`).
-2. Консистентность рендера SVG/PNG.
+2. Консистентность рендера, где SVG остаётся primary artifact, а PNG используется как compatibility/export surface.
 3. Читаемость текста в узлах и метках.
 4. Семантика связей и типизация узлов.
 5. Декомпозиция крупных диаграмм и наличие legend.
@@ -36,9 +36,9 @@ _Связанные документы: diagram-modernization-program.md, diagra
 | DIAG-T007 | ELK required for large flowcharts | Стабильность layout | `lint_diagrams.py` | Auto | PR | Hard |
 | DIAG-T008 | Orphan nodes controlled | Чистота графа | `scripts/diagrams/prune_orphan_nodes.py --check` | Auto | PR | Soft |
 | DIAG-T009 | Render completes | Рендер без падений | `render.sh` | Auto | PR | Hard |
-| DIAG-T010 | SVG artifacts exist | Проверка обязательных артефактов | CI shell check | Auto | PR | Hard |
-| DIAG-T011 | PNG artifacts exist | Проверка обязательных артефактов | CI shell check | Auto | PR | Hard |
-| DIAG-T012 | Artifacts non-empty | Отсев пустых файлов | CI shell check | Auto | PR | Hard |
+| DIAG-T010 | SVG artifacts exist | Проверка обязательных SVG-артефактов | CI shell check | Auto | PR | Hard |
+| DIAG-T011 | PNG compatibility artifacts exist | Проверка PNG там, где они остаются compatibility surface | CI shell check | Auto | Nightly | Soft |
+| DIAG-T012 | Required artifacts non-empty | Отсев пустых обязательных артефактов | CI shell check | Auto | PR | Hard |
 | DIAG-T013 | Visual smoke manifest pass | Базовая читаемость эталонного пула | `check_diagram_visual_smoke.py` | Auto | PR | Hard |
 | DIAG-T014 | SVG text nodes present | Не потерян текст в SVG | `scripts/diagrams/check_svg_text_visibility.py` | Auto | PR | Hard |
 | DIAG-T015 | Edge labels present | Не потеряны подписи связей | `scripts/diagrams/check_svg_text_visibility.py` | Auto | PR | Hard |
@@ -73,8 +73,8 @@ _Связанные документы: diagram-modernization-program.md, diagra
 8. `DIAG-T008`: проверяет orphan-ноды (узлы без связей).
 9. `DIAG-T009`: проверяет, что рендер-пайплайн выполняется без ошибок.
 10. `DIAG-T010`: проверяет наличие обязательных SVG артефактов.
-11. `DIAG-T011`: проверяет наличие обязательных PNG артефактов.
-12. `DIAG-T012`: проверяет, что SVG/PNG артефакты не пустые.
+11. `DIAG-T011`: проверяет наличие PNG-артефактов там, где они ещё нужны как compatibility/export surface.
+12. `DIAG-T012`: проверяет, что обязательные артефакты не пустые.
 13. `DIAG-T013`: проверяет smoke-бейзлайн эталонного SVG-пула.
 14. `DIAG-T014`: проверяет наличие читаемых text-node в SVG.
 15. `DIAG-T015`: проверяет сохранность edge-label в SVG.
@@ -99,9 +99,9 @@ _Связанные документы: diagram-modernization-program.md, diagra
 
 ## 5. Минимальный стартовый набор (обязательный до rollout)
 
-1. DIAG-T001, T002, T007, T009, T010, T011, T012, T013, T017.
+1. DIAG-T001, T002, T007, T009, T010, T012, T013, T017.
 2. Эталонный пул: минимум 5 диаграмм из `manifests/visual-smoke.txt`.
-3. Авто-отчет в PR: статус всех обязательных тестов + ссылки на SVG/PNG artifacts.
+3. Авто-отчет в PR: статус обязательных тестов + ссылки на primary SVG artifacts.
 
 ## 6. Кандидаты в эталонный пул
 
@@ -131,7 +131,7 @@ _Связанные документы: diagram-modernization-program.md, diagra
 ## 8. DoD для тестового workflow
 
 1. Все hard-gate тесты в PR обязательны и блокируют merge при fail.
-2. Артефакты SVG/PNG доступны в CI для review.
+2. Primary SVG artifacts доступны в CI для review; PNG публикуются там, где нужен compatibility/export surface.
 3. Есть автоматический отчет с метриками читаемости.
 4. Есть documented playbook для быстрого восстановления при регрессии.
 

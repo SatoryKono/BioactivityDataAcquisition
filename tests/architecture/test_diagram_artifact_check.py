@@ -30,7 +30,7 @@ def test_to_png_path_converts_svg_segment() -> None:
     assert png.parts[-3:] == ("foundation", "png", "01-sample.png")
 
 
-def test_validate_artifacts_reports_missing_png(tmp_path: Path) -> None:
+def test_validate_artifacts_skips_missing_png_by_default(tmp_path: Path) -> None:
     module = _load_module()
     repo = tmp_path
     svg_rel = Path("docs/a/svg/sample.svg")
@@ -39,6 +39,19 @@ def test_validate_artifacts_reports_missing_png(tmp_path: Path) -> None:
     svg_abs.write_text("<svg></svg>", encoding="utf-8")
 
     issues = module.validate_artifacts(repo, [svg_rel])
+
+    assert not any(issue.kind == "DIAG-T011" for issue in issues)
+
+
+def test_validate_artifacts_reports_missing_png_when_required(tmp_path: Path) -> None:
+    module = _load_module()
+    repo = tmp_path
+    svg_rel = Path("docs/a/svg/sample.svg")
+    svg_abs = repo / svg_rel
+    svg_abs.parent.mkdir(parents=True, exist_ok=True)
+    svg_abs.write_text("<svg></svg>", encoding="utf-8")
+
+    issues = module.validate_artifacts(repo, [svg_rel], require_png=True)
 
     assert any(issue.kind == "DIAG-T011" for issue in issues)
 
@@ -56,7 +69,7 @@ def test_validate_artifacts_reports_empty_svg_and_png(tmp_path: Path) -> None:
     svg_abs.write_text("", encoding="utf-8")
     png_abs.write_bytes(b"")
 
-    issues = module.validate_artifacts(repo, [svg_rel])
+    issues = module.validate_artifacts(repo, [svg_rel], require_png=True)
 
     assert any(
         issue.kind == "DIAG-T012" and issue.file.endswith("sample.svg")
@@ -66,3 +79,11 @@ def test_validate_artifacts_reports_empty_svg_and_png(tmp_path: Path) -> None:
         issue.kind == "DIAG-T012" and issue.file.endswith("sample.png")
         for issue in issues
     )
+
+
+def test_parse_args_supports_optional_png_requirement() -> None:
+    module = _load_module()
+
+    args = module.parse_args([])
+
+    assert args.require_png is False

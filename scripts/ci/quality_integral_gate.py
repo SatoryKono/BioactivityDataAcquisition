@@ -61,6 +61,7 @@ class TestHealthClassification:
     architecture_skip_count: int
     architecture_skip_ratio: float | None
     live_contract_enforced_provider_count: int
+    live_contract_pilot_provider_count: int
     live_contract_vcr_only_provider_count: int
     staged_rollout_flags: tuple[str, ...]
 
@@ -74,6 +75,9 @@ class TestHealthClassification:
             "architecture_skip_ratio": self.architecture_skip_ratio,
             "live_contract_enforced_provider_count": (
                 self.live_contract_enforced_provider_count
+            ),
+            "live_contract_pilot_provider_count": (
+                self.live_contract_pilot_provider_count
             ),
             "live_contract_vcr_only_provider_count": (
                 self.live_contract_vcr_only_provider_count
@@ -415,6 +419,7 @@ def _classify_test_health(
 
     contract_testing = test_matrix.get("contract_testing", {})
     enforced_providers: list[str] = []
+    pilot_providers: list[str] = []
     vcr_only_providers: list[str] = []
     network_opt_in_required = False
     live_api_gate_mode = ""
@@ -430,6 +435,7 @@ def _classify_test_health(
         baseline = contract_testing.get("live_api_minimum_baseline", {})
         if isinstance(baseline, dict):
             enforced_providers = _string_list(baseline.get("enforced_providers"))
+            pilot_providers = _string_list(baseline.get("pilot_providers"))
             vcr_only_providers = _string_list(baseline.get("vcr_only_providers"))
 
     staged_flags = _staged_rollout_flags(test_matrix)
@@ -447,6 +453,7 @@ def _classify_test_health(
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
             live_contract_enforced_provider_count=len(enforced_providers),
+            live_contract_pilot_provider_count=len(pilot_providers),
             live_contract_vcr_only_provider_count=len(vcr_only_providers),
             staged_rollout_flags=staged_flags,
         )
@@ -465,6 +472,10 @@ def _classify_test_health(
             "live minimum baseline excludes "
             f"{len(vcr_only_providers)} VCR-only provider(s)"
         )
+    if pilot_providers:
+        environment_reasons.append(
+            f"live minimum baseline includes {len(pilot_providers)} pilot provider(s)"
+        )
 
     if environment_reasons:
         return TestHealthClassification(
@@ -477,6 +488,7 @@ def _classify_test_health(
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
             live_contract_enforced_provider_count=len(enforced_providers),
+            live_contract_pilot_provider_count=len(pilot_providers),
             live_contract_vcr_only_provider_count=len(vcr_only_providers),
             staged_rollout_flags=staged_flags,
         )
@@ -492,6 +504,7 @@ def _classify_test_health(
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
             live_contract_enforced_provider_count=len(enforced_providers),
+            live_contract_pilot_provider_count=len(pilot_providers),
             live_contract_vcr_only_provider_count=len(vcr_only_providers),
             staged_rollout_flags=staged_flags,
         )
@@ -506,6 +519,7 @@ def _classify_test_health(
         architecture_skip_count=architecture_stats.skipped,
         architecture_skip_ratio=skip_ratio,
         live_contract_enforced_provider_count=len(enforced_providers),
+        live_contract_pilot_provider_count=len(pilot_providers),
         live_contract_vcr_only_provider_count=len(vcr_only_providers),
         staged_rollout_flags=staged_flags,
     )
@@ -768,6 +782,7 @@ def main() -> int:
         f"test_health_semantics={test_health_payload['merge_semantics']}; "
         f"arch_skipped={test_health.architecture_skip_count}; "
         f"live_enforced={test_health.live_contract_enforced_provider_count}; "
+        f"live_pilot={test_health.live_contract_pilot_provider_count}; "
         f"live_vcr_only={test_health.live_contract_vcr_only_provider_count}; "
         f"staged_flags={len(test_health.staged_rollout_flags)}"
     )

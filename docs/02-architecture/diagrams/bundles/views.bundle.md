@@ -1,6 +1,6 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-03-20T22:19:41
+- Generated: 2026-03-20T22:49:13
 - Diagram count: 162
 
 ## Table of Contents
@@ -47,7 +47,7 @@
 
 ## 00-legend — 00 Legend
 
-![00-legend](../views/png/00-legend.png)
+![00-legend](../views/svg/00-legend.svg)
 
 ### Описание
 Диаграмма «00 Legend» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Legend. Родительская диаграмма: `(root)`. Схема имеет плотность порядка 43 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: 📋 Legend, Link Types. Показательные узлы для быстрого чтения: Main data flow: solid, 4px, Dependency/DI: dashed, 2px, Observability: gray, 1px, Error/Quarantine: red dashed, 2px, Codes used in diagrams, K01 = Transform & normalize.
@@ -62,7 +62,7 @@
 
 ## 01-full-system-component-dataflow — 01 Full System Component
 
-![01-full-system-component-dataflow](../views/png/01-full-system-component-dataflow.png)
+![01-full-system-component-dataflow](../views/svg/01-full-system-component-dataflow.svg)
 
 ### Описание
 Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 12 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, PipelineRunner, BatchTransformer, PipelineExecutor, RecordProcessor, ActivityTransformer.
@@ -77,7 +77,7 @@
 
 ## 01-full-system-component-domain — 01 Full System Component
 
-![01-full-system-component-domain](../views/png/01-full-system-component-domain.png)
+![01-full-system-component-domain](../views/svg/01-full-system-component-domain.svg)
 
 ### Описание
 Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer. Показательные узлы для быстрого чтения: DataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort, MetricsPort.
@@ -92,7 +92,7 @@
 
 ## 01-full-system-component-full — Full System Component Diagram
 
-![01-full-system-component-full](../views/png/01-full-system-component-full.png)
+![01-full-system-component-full](../views/svg/01-full-system-component-full.svg)
 
 ### Описание
 Диаграмма «Full System Component Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters). Схема имеет плотность порядка 64 узлов и 78 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Bioactivity Sources, Publication Sources, Interfaces Layer, Composition Layer, Application Layer. Показательные узлы для быстрого чтения: ChEMBL API, PubChem API, UniProt API, PubMed API, CrossRef API, OpenAlex API. Связанный ADR: ADR-040.
@@ -110,7 +110,7 @@
 
 ## 01-full-system-component-infra — 01 Full System Component
 
-![01-full-system-component-infra](../views/png/01-full-system-component-infra.png)
+![01-full-system-component-infra](../views/svg/01-full-system-component-infra.svg)
 
 ### Описание
 Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 20 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: StoragePort, LockPort, CheckpointPort, QuarantinePort, MetricsPort, TracingPort.
@@ -125,7 +125,7 @@
 
 ## 01-full-system-component-overview — 01 Full System Component
 
-![01-full-system-component-overview](../views/png/01-full-system-component-overview.png)
+![01-full-system-component-overview](../views/svg/01-full-system-component-overview.svg)
 
 ### Описание
 Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 12 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces, Composition, Application, Domain Ports, Infrastructure. Показательные узлы для быстрого чтения: Provider APIs, CLI, Bootstrap, Factories, PipelineRunner, PipelineExecutor.
@@ -140,7 +140,7 @@
 
 ## 01-high-level-dataflow — 01 High Level
 
-![01-high-level-dataflow](../views/png/01-high-level-dataflow.png)
+![01-high-level-dataflow](../views/svg/01-high-level-dataflow.svg)
 
 ### Описание
 Диаграмма «01 High Level» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `01-high-level-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer, Composition Layer. Показательные узлы для быстрого чтения: Executor, Runner, Bronze, Silver, Gold, Sources.
@@ -155,7 +155,7 @@
 
 ## 01-high-level-domain — 01 High Level
 
-![01-high-level-domain](../views/png/01-high-level-domain.png)
+![01-high-level-domain](../views/svg/01-high-level-domain.svg)
 
 ### Описание
 Диаграмма «01 High Level» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `01-high-level-full.mermaid`. Схема имеет плотность порядка 20 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Boot, Trans, Sources, Runner, Executor, Adapters.
@@ -170,7 +170,7 @@
 
 ## 01-high-level-full — High-Level System Architecture
 
-![01-high-level-full](../views/png/01-high-level-full.png)
+![01-high-level-full](../views/svg/01-high-level-full.svg)
 
 ### Описание
 Диаграмма «High-Level System Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture). Схема имеет плотность порядка 19 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Data Sources, Interfaces Layer, Composition Layer, Application Layer, Infrastructure Layer, Data Lake — Local Storage. Показательные узлы для быстрого чтения: ChEMBL API, PubChem API, UniProt API, PubMed API, CrossRef API, OpenAlex API.
@@ -187,7 +187,7 @@
 
 ## 01-high-level-infra — 01 High Level
 
-![01-high-level-infra](../views/png/01-high-level-infra.png)
+![01-high-level-infra](../views/svg/01-high-level-infra.svg)
 
 ### Описание
 Диаграмма «01 High Level» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `01-high-level-full.mermaid`. Схема имеет плотность порядка 20 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Executor, Runner, Storage, Adapters, Quarantine, Boot.
@@ -202,7 +202,7 @@
 
 ## 01-high-level-overview — 01 High Level
 
-![01-high-level-overview](../views/png/01-high-level-overview.png)
+![01-high-level-overview](../views/svg/01-high-level-overview.svg)
 
 ### Описание
 Диаграмма «01 High Level» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `01-high-level-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Executor, Runner, Trans, Boot, Sources, Adapters.
@@ -217,7 +217,7 @@
 
 ## 02-medallion-dataflow — 02 Medallion
 
-![02-medallion-dataflow](../views/png/02-medallion-dataflow.png)
+![02-medallion-dataflow](../views/svg/02-medallion-dataflow.svg)
 
 ### Описание
 Диаграмма «02 Medallion» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `02-medallion-full.mermaid`. Схема имеет плотность порядка 12 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Bronze, Silver, normalize, flatten, B1, B2.
@@ -232,7 +232,7 @@
 
 ## 02-medallion-domain — 02 Medallion
 
-![02-medallion-domain](../views/png/02-medallion-domain.png)
+![02-medallion-domain](../views/svg/02-medallion-domain.svg)
 
 ### Описание
 Диаграмма «02 Medallion» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `02-medallion-full.mermaid`. Схема имеет плотность порядка 20 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: normalize, flatten, B1, B2, B3, B4.
@@ -247,7 +247,7 @@
 
 ## 02-medallion-full — Medallion Architecture Layers
 
-![02-medallion-full](../views/png/02-medallion-full.png)
+![02-medallion-full](../views/svg/02-medallion-full.svg)
 
 ### Описание
 Диаграмма «Medallion Architecture Layers» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Bronze/Silver/Gold), §2.3 (Quarantine). Схема имеет плотность порядка 15 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Bronze Layer, Silver Layer, Gold Layer, Quarantine. Показательные узлы для быстрого чтения: Raw Data JSONL + zstd, Append-Only writes, Retention: 90 days, content_hash tracking, Normalized Data Delta Lake (ACID), Merge by content_hash.
@@ -264,7 +264,7 @@
 
 ## 02-medallion-infra — 02 Medallion
 
-![02-medallion-infra](../views/png/02-medallion-infra.png)
+![02-medallion-infra](../views/svg/02-medallion-infra.svg)
 
 ### Описание
 Диаграмма «02 Medallion» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `02-medallion-full.mermaid`. Схема имеет плотность порядка 20 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Quarantine, Bronze, normalize, Silver, flatten, B1.
@@ -279,7 +279,7 @@
 
 ## 02-medallion-overview — 02 Medallion
 
-![02-medallion-overview](../views/png/02-medallion-overview.png)
+![02-medallion-overview](../views/svg/02-medallion-overview.svg)
 
 ### Описание
 Диаграмма «02 Medallion» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `02-medallion-full.mermaid`. Схема имеет плотность порядка 15 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: normalize, flatten, B1, B2, B3, B4.
@@ -294,7 +294,7 @@
 
 ## 03-medallion-data-flow-full — 03 Medallion Data Flow
 
-![03-medallion-data-flow-full](../views/png/03-medallion-data-flow-full.png)
+![03-medallion-data-flow-full](../views/svg/03-medallion-data-flow-full.svg)
 
 ### Описание
 Диаграмма «03 Medallion Data Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Full. Родительская диаграмма: `03-medallion-data-flow.mmd`. Схема имеет плотность порядка 8 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: External APIs, Ingestion rate-limit + retry, Bronze JSONL + metadata, Transform normalize + identity, Silver Delta + validator, Gold Delta + business schema.
@@ -309,7 +309,7 @@
 
 ## 03-medallion-data-flow-overview — 03 Medallion Data Flow
 
-![03-medallion-data-flow-overview](../views/png/03-medallion-data-flow-overview.png)
+![03-medallion-data-flow-overview](../views/svg/03-medallion-data-flow-overview.svg)
 
 ### Описание
 Диаграмма «03 Medallion Data Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `03-medallion-data-flow.mmd`. Схема имеет плотность порядка 4 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Bronze, Silver, Gold, DQ + Quarantine.
@@ -324,7 +324,7 @@
 
 ## 04-domain-layer-class-diagram-dataflow — 04 Domain Layer Class Diagram
 
-![04-domain-layer-class-diagram-dataflow](../views/png/04-domain-layer-class-diagram-dataflow.png)
+![04-domain-layer-class-diagram-dataflow](../views/svg/04-domain-layer-class-diagram-dataflow.svg)
 
 ### Описание
 Диаграмма «04 Domain Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `04-domain-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: PipelineConfig, DataSourcePort, FilterableDataSourcePort, QuarantinePort, TableConfig, DQConfig.
@@ -339,7 +339,7 @@
 
 ## 04-domain-layer-class-diagram-domain — 04 Domain Layer Class Diagram
 
-![04-domain-layer-class-diagram-domain](../views/png/04-domain-layer-class-diagram-domain.png)
+![04-domain-layer-class-diagram-domain](../views/svg/04-domain-layer-class-diagram-domain.svg)
 
 ### Описание
 Диаграмма «04 Domain Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `04-domain-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: BaseEntity, TableConfig, PublicationEntityBase, PipelineConfig, DataSourcePort, FilterableDataSourcePort.
@@ -354,7 +354,7 @@
 
 ## 04-domain-layer-class-diagram-full — Domain Layer Class Diagram
 
-![04-domain-layer-class-diagram-full](../views/png/04-domain-layer-class-diagram-full.png)
+![04-domain-layer-class-diagram-full](../views/svg/04-domain-layer-class-diagram-full.svg)
 
 ### Описание
 Диаграмма «Domain Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Domain Layer), §1.2 (Ports), §1.3 (Entities). Схема имеет плотность порядка 26 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Ports, Entities, Config, Types. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
@@ -371,7 +371,7 @@
 
 ## 04-domain-layer-class-diagram-infra — 04 Domain Layer Class Diagram
 
-![04-domain-layer-class-diagram-infra](../views/png/04-domain-layer-class-diagram-infra.png)
+![04-domain-layer-class-diagram-infra](../views/svg/04-domain-layer-class-diagram-infra.svg)
 
 ### Описание
 Диаграмма «04 Domain Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `04-domain-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: StoragePort, LockPort, CheckpointPort, QuarantinePort, MetricsPort, TracingPort.
@@ -386,7 +386,7 @@
 
 ## 04-domain-layer-class-diagram-overview — 04 Domain Layer Class Diagram
 
-![04-domain-layer-class-diagram-overview](../views/png/04-domain-layer-class-diagram-overview.png)
+![04-domain-layer-class-diagram-overview](../views/svg/04-domain-layer-class-diagram-overview.svg)
 
 ### Описание
 Диаграмма «04 Domain Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `04-domain-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: BaseEntity, PublicationEntityBase, PipelineConfig, TableConfig, DQConfig, FilterableDataSourcePort.
@@ -401,7 +401,7 @@
 
 ## 05-layers-interaction-dataflow — 05 Layers Interaction
 
-![05-layers-interaction-dataflow](../views/png/05-layers-interaction-dataflow.png)
+![05-layers-interaction-dataflow](../views/svg/05-layers-interaction-dataflow.svg)
 
 ### Описание
 Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 12 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Runner, BatchExec, Transformer, Merger, CompositeRunner.
@@ -416,7 +416,7 @@
 
 ## 05-layers-interaction-domain — 05 Layers Interaction
 
-![05-layers-interaction-domain](../views/png/05-layers-interaction-domain.png)
+![05-layers-interaction-domain](../views/svg/05-layers-interaction-domain.svg)
 
 ### Описание
 Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Exceptions, Domain, Factories, Coordinator, Application.
@@ -431,7 +431,7 @@
 
 ## 05-layers-interaction-full — Layer Interaction — Hexagonal Architecture
 
-![05-layers-interaction-full](../views/png/05-layers-interaction-full.png)
+![05-layers-interaction-full](../views/svg/05-layers-interaction-full.svg)
 
 ### Описание
 Диаграмма «Layer Interaction — Hexagonal Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Layers), §1.2 (Ports & Adapters). Схема имеет плотность порядка 19 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces Layer, Composition Layer, Application Layer, Composite Pipeline (ADR-026), Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CLI Entry Point, bootstrap_pipeline, PipelineRegistry, Factories, PipelineRunner, BatchExecutor.
@@ -448,7 +448,7 @@
 
 ## 05-layers-interaction-infra — 05 Layers Interaction
 
-![05-layers-interaction-infra](../views/png/05-layers-interaction-infra.png)
+![05-layers-interaction-infra](../views/svg/05-layers-interaction-infra.svg)
 
 ### Описание
 Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Types, Exceptions, Runner, BatchExec, Transformer.
@@ -463,7 +463,7 @@
 
 ## 05-layers-interaction-overview — 05 Layers Interaction
 
-![05-layers-interaction-overview](../views/png/05-layers-interaction-overview.png)
+![05-layers-interaction-overview](../views/svg/05-layers-interaction-overview.svg)
 
 ### Описание
 Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 15 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Types, Factories, Runner, BatchExec, Services.
@@ -478,7 +478,7 @@
 
 ## 05-pipeline-lifecycle-states-dataflow — 05 Pipeline Lifecycle States
 
-![05-pipeline-lifecycle-states-dataflow](../views/png/05-pipeline-lifecycle-states-dataflow.png)
+![05-pipeline-lifecycle-states-dataflow](../views/svg/05-pipeline-lifecycle-states-dataflow.svg)
 
 ### Описание
 Диаграмма «05 Pipeline Lifecycle States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `05-pipeline-lifecycle-states-full.mermaid`. Схема имеет плотность порядка 12 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: ValidateLock, TRANSFORMING, FetchBatch, FailBatch, EXTRACTING, WriteBronze.
@@ -493,7 +493,7 @@
 
 ## 05-pipeline-lifecycle-states-domain — 05 Pipeline Lifecycle States
 
-![05-pipeline-lifecycle-states-domain](../views/png/05-pipeline-lifecycle-states-domain.png)
+![05-pipeline-lifecycle-states-domain](../views/svg/05-pipeline-lifecycle-states-domain.svg)
 
 ### Описание
 Диаграмма «05 Pipeline Lifecycle States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `05-pipeline-lifecycle-states-full.mermaid`. Схема имеет плотность порядка 20 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer. Показательные узлы для быстрого чтения: ERROR, LoadingConfig, HealthChecks, PassRecords, WarnRecords, LogError.
@@ -508,7 +508,7 @@
 
 ## 05-pipeline-lifecycle-states-full — Pipeline Lifecycle State Machine
 
-![05-pipeline-lifecycle-states-full](../views/png/05-pipeline-lifecycle-states-full.png)
+![05-pipeline-lifecycle-states-full](../views/svg/05-pipeline-lifecycle-states-full.svg)
 
 ### Описание
 Диаграмма «Pipeline Lifecycle State Machine» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3 (Pipeline Execution), §3.5 (Graceful Shutdown).
@@ -525,7 +525,7 @@
 
 ## 05-pipeline-lifecycle-states-infra — 05 Pipeline Lifecycle States
 
-![05-pipeline-lifecycle-states-infra](../views/png/05-pipeline-lifecycle-states-infra.png)
+![05-pipeline-lifecycle-states-infra](../views/svg/05-pipeline-lifecycle-states-infra.svg)
 
 ### Описание
 Диаграмма «05 Pipeline Lifecycle States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `05-pipeline-lifecycle-states-full.mermaid`. Схема имеет плотность порядка 20 узлов и 23 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: ERROR, ValidateLock, VALIDATING, PREFLIGHT, TRANSFORMING, LOCK_ACQUIRING.
@@ -540,7 +540,7 @@
 
 ## 05-pipeline-lifecycle-states-overview — 05 Pipeline Lifecycle States
 
-![05-pipeline-lifecycle-states-overview](../views/png/05-pipeline-lifecycle-states-overview.png)
+![05-pipeline-lifecycle-states-overview](../views/svg/05-pipeline-lifecycle-states-overview.svg)
 
 ### Описание
 Диаграмма «05 Pipeline Lifecycle States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `05-pipeline-lifecycle-states-full.mermaid`. Схема имеет плотность порядка 15 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: LoadingConfig, ValidateLock, LogError, *, FetchBatch, FAILED.
@@ -555,7 +555,7 @@
 
 ## 06-application-layer-class-diagram-dataflow — 06 Application Layer Class Diagram
 
-![06-application-layer-class-diagram-dataflow](../views/png/06-application-layer-class-diagram-dataflow.png)
+![06-application-layer-class-diagram-dataflow](../views/svg/06-application-layer-class-diagram-dataflow.svg)
 
 ### Описание
 Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: BaseChemblTransformer, RecordProcessor, BasePipeline, PipelineRunner, PipelineExecutor, BatchTransformer.
@@ -570,7 +570,7 @@
 
 ## 06-application-layer-class-diagram-domain — 06 Application Layer Class Diagram
 
-![06-application-layer-class-diagram-domain](../views/png/06-application-layer-class-diagram-domain.png)
+![06-application-layer-class-diagram-domain](../views/svg/06-application-layer-class-diagram-domain.svg)
 
 ### Описание
 Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: RunnerServices, BaseChemblTransformer, RecordProcessor, BasePipeline, PipelineRunner, PipelineExecutor.
@@ -585,7 +585,7 @@
 
 ## 06-application-layer-class-diagram-full — Application Layer Class Diagram
 
-![06-application-layer-class-diagram-full](../views/png/06-application-layer-class-diagram-full.png)
+![06-application-layer-class-diagram-full](../views/svg/06-application-layer-class-diagram-full.svg)
 
 ### Описание
 Диаграмма «Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). Схема имеет плотность порядка 22 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineService.
@@ -602,7 +602,7 @@
 
 ## 06-application-layer-class-diagram-infra — 06 Application Layer Class Diagram
 
-![06-application-layer-class-diagram-infra](../views/png/06-application-layer-class-diagram-infra.png)
+![06-application-layer-class-diagram-infra](../views/svg/06-application-layer-class-diagram-infra.svg)
 
 ### Описание
 Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: RunnerServices, RecordProcessor, PipelineRunner, BasePipeline, PipelineExecutor, BatchTransformer.
@@ -617,7 +617,7 @@
 
 ## 06-application-layer-class-diagram-overview — 06 Application Layer Class Diagram
 
-![06-application-layer-class-diagram-overview](../views/png/06-application-layer-class-diagram-overview.png)
+![06-application-layer-class-diagram-overview](../views/svg/06-application-layer-class-diagram-overview.svg)
 
 ### Описание
 Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 15 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: PipelineRunner, RunnerServices, BaseChemblTransformer, BaseTransformer, PreflightService, PostrunService.
@@ -632,7 +632,7 @@
 
 ## 07-circuit-breaker-states-dataflow — 07 Circuit Breaker States
 
-![07-circuit-breaker-states-dataflow](../views/png/07-circuit-breaker-states-dataflow.png)
+![07-circuit-breaker-states-dataflow](../views/svg/07-circuit-breaker-states-dataflow.svg)
 
 ### Описание
 Диаграмма «07 Circuit Breaker States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `07-circuit-breaker-states-full.mermaid`. Схема имеет плотность порядка 12 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: RecordSuccess, RecordFailure, Success, ProcessRequest, *, CLOSED.
@@ -647,7 +647,7 @@
 
 ## 07-circuit-breaker-states-domain — 07 Circuit Breaker States
 
-![07-circuit-breaker-states-domain](../views/png/07-circuit-breaker-states-domain.png)
+![07-circuit-breaker-states-domain](../views/svg/07-circuit-breaker-states-domain.svg)
 
 ### Описание
 Диаграмма «07 Circuit Breaker States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `07-circuit-breaker-states-full.mermaid`. Схема имеет плотность порядка 20 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: RecordSuccess, RecordFailure, Success, ProcessRequest, *, CLOSED.
@@ -662,7 +662,7 @@
 
 ## 07-circuit-breaker-states-full — Circuit Breaker State Machine
 
-![07-circuit-breaker-states-full](../views/png/07-circuit-breaker-states-full.png)
+![07-circuit-breaker-states-full](../views/svg/07-circuit-breaker-states-full.svg)
 
 ### Описание
 Диаграмма «Circuit Breaker State Machine» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.6 (Resilience), ADR-007.
@@ -679,7 +679,7 @@
 
 ## 07-circuit-breaker-states-infra — 07 Circuit Breaker States
 
-![07-circuit-breaker-states-infra](../views/png/07-circuit-breaker-states-infra.png)
+![07-circuit-breaker-states-infra](../views/svg/07-circuit-breaker-states-infra.svg)
 
 ### Описание
 Диаграмма «07 Circuit Breaker States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `07-circuit-breaker-states-full.mermaid`. Схема имеет плотность порядка 20 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: HP, Blocking, *, CLOSED, ProcessRequest, OPEN.
@@ -694,7 +694,7 @@
 
 ## 07-circuit-breaker-states-overview — 07 Circuit Breaker States
 
-![07-circuit-breaker-states-overview](../views/png/07-circuit-breaker-states-overview.png)
+![07-circuit-breaker-states-overview](../views/svg/07-circuit-breaker-states-overview.svg)
 
 ### Описание
 Диаграмма «07 Circuit Breaker States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `07-circuit-breaker-states-full.mermaid`. Схема имеет плотность порядка 15 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: *, CLOSED, ProcessRequest, SendProbe, Waiting, Operational.
@@ -709,7 +709,7 @@
 
 ## 08-complete-etl-workflow-dataflow — 08 Complete Etl Workflow
 
-![08-complete-etl-workflow-dataflow](../views/png/08-complete-etl-workflow-dataflow.png)
+![08-complete-etl-workflow-dataflow](../views/svg/08-complete-etl-workflow-dataflow.svg)
 
 ### Описание
 Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 12 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: A6, A7, A8, B1, A4, A5.
@@ -724,7 +724,7 @@
 
 ## 08-complete-etl-workflow-domain — 08 Complete Etl Workflow
 
-![08-complete-etl-workflow-domain](../views/png/08-complete-etl-workflow-domain.png)
+![08-complete-etl-workflow-domain](../views/svg/08-complete-etl-workflow-domain.svg)
 
 ### Описание
 Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: B1, B2, B4, B3, B5, B8.
@@ -739,7 +739,7 @@
 
 ## 08-complete-etl-workflow-full — Complete ETL Workflow (6 Phases)
 
-![08-complete-etl-workflow-full](../views/png/08-complete-etl-workflow-full.png)
+![08-complete-etl-workflow-full](../views/svg/08-complete-etl-workflow-full.svg)
 
 ### Описание
 Диаграмма «Complete ETL Workflow (6 Phases)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3 (Pipeline Execution), §3.2 (Preflight), §3.4 (Postrun). Схема имеет плотность порядка 16 узлов и 57 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Phase 1: Prepare, Phase 2: Extract, Phase 3: Transform, Normalization Rules, Metadata Fields, Phase 4: Validate. Показательные узлы для быстрого чтения: Load YAML Config, Fetch from API, Load Bronze Records, NaN/Inf → null, Floats → round(10), Dates → ISO YYYY-MM-DD.
@@ -756,7 +756,7 @@
 
 ## 08-complete-etl-workflow-infra — 08 Complete Etl Workflow
 
-![08-complete-etl-workflow-infra](../views/png/08-complete-etl-workflow-infra.png)
+![08-complete-etl-workflow-infra](../views/svg/08-complete-etl-workflow-infra.svg)
 
 ### Описание
 Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: A6, A7, A8, B1, A4, A5.
@@ -771,7 +771,7 @@
 
 ## 08-complete-etl-workflow-overview — 08 Complete Etl Workflow
 
-![08-complete-etl-workflow-overview](../views/png/08-complete-etl-workflow-overview.png)
+![08-complete-etl-workflow-overview](../views/svg/08-complete-etl-workflow-overview.svg)
 
 ### Описание
 Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: D8, D7, D10, E_ERR, D9, E1.
@@ -786,7 +786,7 @@
 
 ## 08-domain-ddd-dataflow — 08 Domain Ddd
 
-![08-domain-ddd-dataflow](../views/png/08-domain-ddd-dataflow.png)
+![08-domain-ddd-dataflow](../views/svg/08-domain-ddd-dataflow.svg)
 
 ### Описание
 Диаграмма «08 Domain Ddd» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `08-domain-ddd-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: BatchID, RunID, EntityID, Batch, PipelineRun, BatchCreated.
@@ -801,7 +801,7 @@
 
 ## 08-domain-ddd-domain — 08 Domain Ddd
 
-![08-domain-ddd-domain](../views/png/08-domain-ddd-domain.png)
+![08-domain-ddd-domain](../views/svg/08-domain-ddd-domain.svg)
 
 ### Описание
 Диаграмма «08 Domain Ddd» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `08-domain-ddd-full.mermaid`. Схема имеет плотность порядка 20 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: BatchID, EntityID, ContentHash, HealthStatus, RunID, RunStarted.
@@ -816,7 +816,7 @@
 
 ## 08-domain-ddd-full — Domain Layer — DDD Components
 
-![08-domain-ddd-full](../views/png/08-domain-ddd-full.png)
+![08-domain-ddd-full](../views/svg/08-domain-ddd-full.svg)
 
 ### Описание
 Диаграмма «Domain Layer — DDD Components» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Domain Layer), §1.3 (DDD Aggregates), ADR-021. Схема имеет плотность порядка 12 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer (DDD), ports/, aggregates/, Domain Events, value_objects/, types.py. Показательные узлы для быстрого чтения: Batch Aggregate add_record(), quarantine_record() seal(), mark_committed(), PipelineRun Aggregate start(), record_stage_success() complete(), fail(), QuarantineEntry Aggregate mark_retrying(), mark_recovered() mark_dead_letter(), RunID (UUID), BatchID (UUID), EntityID (str).
@@ -833,7 +833,7 @@
 
 ## 08-domain-ddd-infra — 08 Domain Ddd
 
-![08-domain-ddd-infra](../views/png/08-domain-ddd-infra.png)
+![08-domain-ddd-infra](../views/svg/08-domain-ddd-infra.svg)
 
 ### Описание
 Диаграмма «08 Domain Ddd» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `08-domain-ddd-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: RunID, BatchID, EntityID, Batch, PipelineRun, BatchCreated.
@@ -848,7 +848,7 @@
 
 ## 08-domain-ddd-overview — 08 Domain Ddd
 
-![08-domain-ddd-overview](../views/png/08-domain-ddd-overview.png)
+![08-domain-ddd-overview](../views/svg/08-domain-ddd-overview.svg)
 
 ### Описание
 Диаграмма «08 Domain Ddd» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `08-domain-ddd-full.mermaid`. Схема имеет плотность порядка 15 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: RunID, BatchID, Batch, BatchCreated, BatchSealed, BatchWritten.
@@ -863,7 +863,7 @@
 
 ## 10-infrastructure-layer-class-diagram-dataflow — 10 Infrastructure Layer Class Diagram
 
-![10-infrastructure-layer-class-diagram-dataflow](../views/png/10-infrastructure-layer-class-diagram-dataflow.png)
+![10-infrastructure-layer-class-diagram-dataflow](../views/svg/10-infrastructure-layer-class-diagram-dataflow.svg)
 
 ### Описание
 Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, QuarantinePort, StoragePort, SilverWriter, GoldWriter.
@@ -878,7 +878,7 @@
 
 ## 10-infrastructure-layer-class-diagram-domain — 10 Infrastructure Layer Class Diagram
 
-![10-infrastructure-layer-class-diagram-domain](../views/png/10-infrastructure-layer-class-diagram-domain.png)
+![10-infrastructure-layer-class-diagram-domain](../views/svg/10-infrastructure-layer-class-diagram-domain.svg)
 
 ### Описание
 Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: DataSourcePort, StoragePort, CsvExporter, MetricsPort, RetryPolicy, FilterableDataSourcePort.
@@ -893,7 +893,7 @@
 
 ## 10-infrastructure-layer-class-diagram-full — Infrastructure Layer Class Diagram
 
-![10-infrastructure-layer-class-diagram-full](../views/png/10-infrastructure-layer-class-diagram-full.png)
+![10-infrastructure-layer-class-diagram-full](../views/svg/10-infrastructure-layer-class-diagram-full.svg)
 
 ### Описание
 Диаграмма «Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience). Схема имеет плотность порядка 18 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: HTTP Infrastructure, DataSource Adapters, Storage Writers, Locking, Quarantine, Checkpoint. Показательные узлы для быстрого чтения: UnifiedHTTPClient, CircuitBreaker, TokenBucket, RetryPolicy, ChemblAdapter, PubchemAdapter.
@@ -910,7 +910,7 @@
 
 ## 10-infrastructure-layer-class-diagram-infra — 10 Infrastructure Layer Class Diagram
 
-![10-infrastructure-layer-class-diagram-infra](../views/png/10-infrastructure-layer-class-diagram-infra.png)
+![10-infrastructure-layer-class-diagram-infra](../views/svg/10-infrastructure-layer-class-diagram-infra.svg)
 
 ### Описание
 Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: StoragePort, MetricsPort, LockPort, CheckpointPort, QuarantinePort, LoggerPort.
@@ -925,7 +925,7 @@
 
 ## 10-infrastructure-layer-class-diagram-overview — 10 Infrastructure Layer Class Diagram
 
-![10-infrastructure-layer-class-diagram-overview](../views/png/10-infrastructure-layer-class-diagram-overview.png)
+![10-infrastructure-layer-class-diagram-overview](../views/svg/10-infrastructure-layer-class-diagram-overview.svg)
 
 ### Описание
 Диаграмма «10 Infrastructure Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `10-infrastructure-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 15 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: RetryPolicy, DataSourcePort, StoragePort, FilterableDataSourcePort, CsvExporter, ChemblAdapter.
@@ -940,7 +940,7 @@
 
 ## 12-local-deployment-architecture-dataflow — 12 Local Deployment Architecture
 
-![12-local-deployment-architecture-dataflow](../views/png/12-local-deployment-architecture-dataflow.png)
+![12-local-deployment-architecture-dataflow](../views/svg/12-local-deployment-architecture-dataflow.svg)
 
 ### Описание
 Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. Схема имеет плотность порядка 2 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: External APIs, CLI.
@@ -955,7 +955,7 @@
 
 ## 12-local-deployment-architecture-domain — 12 Local Deployment Architecture
 
-![12-local-deployment-architecture-domain](../views/png/12-local-deployment-architecture-domain.png)
+![12-local-deployment-architecture-domain](../views/svg/12-local-deployment-architecture-domain.svg)
 
 ### Описание
 Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. Схема имеет плотность порядка 1 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Local scheduler.
@@ -970,7 +970,7 @@
 
 ## 12-local-deployment-architecture-full — Local Deployment Architecture
 
-![12-local-deployment-architecture-full](../views/png/12-local-deployment-architecture-full.png)
+![12-local-deployment-architecture-full](../views/svg/12-local-deployment-architecture-full.svg)
 
 ### Описание
 Диаграмма «Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: local-only runtime, in-process locking, local filesystem outputs. Схема имеет плотность порядка 21 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External APIs, Local Machine (Single Instance), CLI Execution, Local Pipeline Workers, In-Process Locking, Local filesystem (data/). Показательные узлы для быстрого чтения: ChEMBL API, PubChem API, UniProt API, PubMed API, CLI / Manual run, Local scheduler.
@@ -987,7 +987,7 @@
 
 ## 12-local-deployment-architecture-infra — 12 Local Deployment Architecture
 
-![12-local-deployment-architecture-infra](../views/png/12-local-deployment-architecture-infra.png)
+![12-local-deployment-architecture-infra](../views/svg/12-local-deployment-architecture-infra.svg)
 
 ### Описание
 Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. Схема имеет плотность порядка 2 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Local workers, No cross-process coordination; lock is in-process only..
@@ -1002,7 +1002,7 @@
 
 ## 12-local-deployment-architecture-overview — 12 Local Deployment Architecture
 
-![12-local-deployment-architecture-overview](../views/png/12-local-deployment-architecture-overview.png)
+![12-local-deployment-architecture-overview](../views/svg/12-local-deployment-architecture-overview.svg)
 
 ### Описание
 Диаграмма «12 Local Deployment Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `12-local-deployment-architecture-full.mermaid`. Схема имеет плотность порядка 2 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CLI / scheduler, External APIs.
@@ -1017,7 +1017,7 @@
 
 ## 13-port-protocol-contracts-full — 13 Port Protocol Contracts
 
-![13-port-protocol-contracts-full](../views/png/13-port-protocol-contracts-full.png)
+![13-port-protocol-contracts-full](../views/svg/13-port-protocol-contracts-full.svg)
 
 ### Описание
 Диаграмма «13 Port Protocol Contracts» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Full. Родительская диаграмма: `13-port-protocol-contracts.mmd`. Схема имеет плотность порядка 9 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Port Groups, Implementations. Показательные узлы для быстрого чтения: Data Source Ports, Storage + Validation Ports, Observability Ports, Operational Ports, Provider Adapters, Writers + Readers.
@@ -1032,7 +1032,7 @@
 
 ## 13-port-protocol-contracts-overview — 13 Port Protocol Contracts
 
-![13-port-protocol-contracts-overview](../views/png/13-port-protocol-contracts-overview.png)
+![13-port-protocol-contracts-overview](../views/svg/13-port-protocol-contracts-overview.svg)
 
 ### Описание
 Диаграмма «13 Port Protocol Contracts» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `13-port-protocol-contracts.mmd`. Схема имеет плотность порядка 3 узлов и 3 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Domain Port Catalog, Implementation Catalog, Import Matrix / Contracts.
@@ -1047,7 +1047,7 @@
 
 ## 14-provider-health-states-dataflow — 14 Provider Health States
 
-![14-provider-health-states-dataflow](../views/png/14-provider-health-states-dataflow.png)
+![14-provider-health-states-dataflow](../views/svg/14-provider-health-states-dataflow.svg)
 
 ### Описание
 Диаграмма «14 Provider Health States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `14-provider-health-states-full.mermaid`. Схема имеет плотность порядка 12 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: WatchingErrors, ErrorAccumulating, *, ProcessingRequest, HEALTHY, DEGRADED.
@@ -1062,7 +1062,7 @@
 
 ## 14-provider-health-states-domain — 14 Provider Health States
 
-![14-provider-health-states-domain](../views/png/14-provider-health-states-domain.png)
+![14-provider-health-states-domain](../views/svg/14-provider-health-states-domain.svg)
 
 ### Описание
 Диаграмма «14 Provider Health States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `14-provider-health-states-full.mermaid`. Схема имеет плотность порядка 20 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Composition Layer. Показательные узлы для быстрого чтения: WatchingErrors, HEALTHY, ErrorAccumulating, UNHEALTHY, MinorError, *.
@@ -1077,7 +1077,7 @@
 
 ## 14-provider-health-states-full — Provider Health State Machine
 
-![14-provider-health-states-full](../views/png/14-provider-health-states-full.png)
+![14-provider-health-states-full](../views/svg/14-provider-health-states-full.svg)
 
 ### Описание
 Диаграмма «Provider Health State Machine» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.6 (Resilience), §4 (Provider Specifications).
@@ -1094,7 +1094,7 @@
 
 ## 14-provider-health-states-infra — 14 Provider Health States
 
-![14-provider-health-states-infra](../views/png/14-provider-health-states-infra.png)
+![14-provider-health-states-infra](../views/svg/14-provider-health-states-infra.svg)
 
 ### Описание
 Диаграмма «14 Provider Health States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `14-provider-health-states-full.mermaid`. Схема имеет плотность порядка 20 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Composition Layer. Показательные узлы для быстрого чтения: HP, WatchingErrors, ErrorAccumulating, MinorError, *, ProcessingRequest.
@@ -1109,7 +1109,7 @@
 
 ## 14-provider-health-states-overview — 14 Provider Health States
 
-![14-provider-health-states-overview](../views/png/14-provider-health-states-overview.png)
+![14-provider-health-states-overview](../views/svg/14-provider-health-states-overview.svg)
 
 ### Описание
 Диаграмма «14 Provider Health States» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `14-provider-health-states-full.mermaid`. Схема имеет плотность порядка 15 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Composition Layer. Показательные узлы для быстрого чтения: WatchingErrors, ErrorAccumulating, MinorError, *, ProcessingRequest, HEALTHY.
@@ -1124,7 +1124,7 @@
 
 ## 15-dq-check-workflow-dataflow — 15 Dq Check Workflow
 
-![15-dq-check-workflow-dataflow](../views/png/15-dq-check-workflow-dataflow.png)
+![15-dq-check-workflow-dataflow](../views/svg/15-dq-check-workflow-dataflow.svg)
 
 ### Описание
 Диаграмма «15 Dq Check Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `15-dq-check-workflow-full.mermaid`. Схема имеет плотность порядка 12 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: record_error_rate, Schema Validation, Required Fields, Error Rate, Type Checks, Value Rules.
@@ -1139,7 +1139,7 @@
 
 ## 15-dq-check-workflow-domain — 15 Dq Check Workflow
 
-![15-dq-check-workflow-domain](../views/png/15-dq-check-workflow-domain.png)
+![15-dq-check-workflow-domain](../views/svg/15-dq-check-workflow-domain.svg)
 
 ### Описание
 Диаграмма «15 Dq Check Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `15-dq-check-workflow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 22 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Schema Validation, Required Fields, Error Rate, Type Checks, Value Rules, Relation Checks.
@@ -1154,7 +1154,7 @@
 
 ## 15-dq-check-workflow-full — Data Quality Check Workflow
 
-![15-dq-check-workflow-full](../views/png/15-dq-check-workflow-full.png)
+![15-dq-check-workflow-full](../views/svg/15-dq-check-workflow-full.svg)
 
 ### Описание
 Диаграмма «Data Quality Check Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.1 (DQ Checks), §2.3 (Quarantine). Схема имеет плотность порядка 25 узлов и 29 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Input Stage, Validation Stage, Error Classification, Action Paths, Record Routing, Metrics Export. Показательные узлы для быстрого чтения: /"📥 Input Records (from Bronze)"/, 🔍 Pandera Schema Validation, Check required fields, Validate data types, Check value constraints, Validate relationships.
@@ -1171,7 +1171,7 @@
 
 ## 15-dq-check-workflow-infra — 15 Dq Check Workflow
 
-![15-dq-check-workflow-infra](../views/png/15-dq-check-workflow-infra.png)
+![15-dq-check-workflow-infra](../views/svg/15-dq-check-workflow-infra.svg)
 
 ### Описание
 Диаграмма «15 Dq Check Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `15-dq-check-workflow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 22 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: record_error_rate, Schema Validation, Required Fields, Error Rate, Type Checks, Value Rules.
@@ -1186,7 +1186,7 @@
 
 ## 15-dq-check-workflow-overview — 15 Dq Check Workflow
 
-![15-dq-check-workflow-overview](../views/png/15-dq-check-workflow-overview.png)
+![15-dq-check-workflow-overview](../views/svg/15-dq-check-workflow-overview.svg)
 
 ### Описание
 Диаграмма «15 Dq Check Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `15-dq-check-workflow-full.mermaid`. Схема имеет плотность порядка 15 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer. Показательные узлы для быстрого чтения: record_error_rate, Schema Validation, Required Fields, Type Checks, Value Rules, Relation Checks.
@@ -1201,7 +1201,7 @@
 
 ## 16-transformer-hierarchy-full — 16 Transformer Hierarchy
 
-![16-transformer-hierarchy-full](../views/png/16-transformer-hierarchy-full.png)
+![16-transformer-hierarchy-full](../views/svg/16-transformer-hierarchy-full.svg)
 
 ### Описание
 Диаграмма «16 Transformer Hierarchy» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Full. Родительская диаграмма: `16-transformer-hierarchy.mmd`. Схема имеет плотность порядка 6 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: BaseTransformer, ChEMBL Transformers, Publication Transformers, UniProt Transformers, Other Transformers, Extractor Pattern.
@@ -1216,7 +1216,7 @@
 
 ## 16-transformer-hierarchy-overview — 16 Transformer Hierarchy
 
-![16-transformer-hierarchy-overview](../views/png/16-transformer-hierarchy-overview.png)
+![16-transformer-hierarchy-overview](../views/svg/16-transformer-hierarchy-overview.svg)
 
 ### Описание
 Диаграмма «16 Transformer Hierarchy» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `16-transformer-hierarchy.mmd`. Схема имеет плотность порядка 3 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Template Method, Transformer Families, Reusable Extractors.
@@ -1231,7 +1231,7 @@
 
 ## 21-activity-entity-data-flow-dataflow — 21 Activity Entity Data Flow
 
-![21-activity-entity-data-flow-dataflow](../views/png/21-activity-entity-data-flow-dataflow.png)
+![21-activity-entity-data-flow-dataflow](../views/svg/21-activity-entity-data-flow-dataflow.svg)
 
 ### Описание
 Диаграмма «21 Activity Entity Data Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `21-activity-entity-data-flow-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Fetch Activity Batch, Fetch Related IDs, Write Bronze, Record Lineage, Normalize Units, Add Metadata.
@@ -1246,7 +1246,7 @@
 
 ## 21-activity-entity-data-flow-domain — 21 Activity Entity Data Flow
 
-![21-activity-entity-data-flow-domain](../views/png/21-activity-entity-data-flow-domain.png)
+![21-activity-entity-data-flow-domain](../views/svg/21-activity-entity-data-flow-domain.svg)
 
 ### Описание
 Диаграмма «21 Activity Entity Data Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `21-activity-entity-data-flow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Fetch Activity Batch, Fetch Related IDs, Write Bronze, Record Lineage, Normalize Units, Add Metadata.
@@ -1261,7 +1261,7 @@
 
 ## 21-activity-entity-data-flow-full — Activity Entity Data Flow (Extract → Transform → Load)
 
-![21-activity-entity-data-flow-full](../views/png/21-activity-entity-data-flow-full.png)
+![21-activity-entity-data-flow-full](../views/svg/21-activity-entity-data-flow-full.svg)
 
 ### Описание
 Диаграмма «Activity Entity Data Flow (Extract → Transform → Load)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.8 (Transformation), §4.1 (ChEMBL Activity). Схема имеет плотность порядка 30 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External API, Extract Phase, Transform Phase, Validate Phase, Load Phase, Related Entities (Silver). Показательные узлы для быстрого чтения: 🌐 ChEMBL API /activities endpoint, 📥 Fetch activity_id batch (ChemblAdapter), 🔗 Fetch related entities assay_id, molecule_id, target_id, 💾 Write Bronze JSONL + zstd, 📊 Record Lineage batch_id, paths, 🔧 Normalize units nM → μM standardization.
@@ -1278,7 +1278,7 @@
 
 ## 21-activity-entity-data-flow-infra — 21 Activity Entity Data Flow
 
-![21-activity-entity-data-flow-infra](../views/png/21-activity-entity-data-flow-infra.png)
+![21-activity-entity-data-flow-infra](../views/svg/21-activity-entity-data-flow-infra.svg)
 
 ### Описание
 Диаграмма «21 Activity Entity Data Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `21-activity-entity-data-flow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Local FS, Fetch Activity Batch, Fetch Related IDs, Write Bronze, Record Lineage, Normalize Units.
@@ -1293,7 +1293,7 @@
 
 ## 21-activity-entity-data-flow-overview — 21 Activity Entity Data Flow
 
-![21-activity-entity-data-flow-overview](../views/png/21-activity-entity-data-flow-overview.png)
+![21-activity-entity-data-flow-overview](../views/svg/21-activity-entity-data-flow-overview.svg)
 
 ### Описание
 Диаграмма «21 Activity Entity Data Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `21-activity-entity-data-flow-full.mermaid`. Схема имеет плотность порядка 15 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Fetch Activity Batch, Fetch Related IDs, Write Bronze, Record Lineage, Normalize Units, Add Metadata.
@@ -1308,7 +1308,7 @@
 
 ## 26-hexagonal-ports-adapters-dataflow — 26 Hexagonal Ports Adapters
 
-![26-hexagonal-ports-adapters-dataflow](../views/png/26-hexagonal-ports-adapters-dataflow.png)
+![26-hexagonal-ports-adapters-dataflow](../views/svg/26-hexagonal-ports-adapters-dataflow.svg)
 
 ### Описание
 Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, StoragePort, ChemblAdapter, PubchemAdapter, UniprotAdapter, PubmedAdapter.
@@ -1323,7 +1323,7 @@
 
 ## 26-hexagonal-ports-adapters-domain — 26 Hexagonal Ports Adapters
 
-![26-hexagonal-ports-adapters-domain](../views/png/26-hexagonal-ports-adapters-domain.png)
+![26-hexagonal-ports-adapters-domain](../views/svg/26-hexagonal-ports-adapters-domain.svg)
 
 ### Описание
 Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 20 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DQMonitorPort, DataSourcePort, StoragePort, DeltaReaderPort, LockPort, CheckpointPort.
@@ -1338,7 +1338,7 @@
 
 ## 26-hexagonal-ports-adapters-full — Hexagonal Architecture — Ports and Adapters Overview
 
-![26-hexagonal-ports-adapters-full](../views/png/26-hexagonal-ports-adapters-full.png)
+![26-hexagonal-ports-adapters-full](../views/svg/26-hexagonal-ports-adapters-full.svg)
 
 ### Описание
 Диаграмма «Hexagonal Architecture — Ports and Adapters Overview» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.2 (Ports & Adapters), §1.1 (Five-Layer Architecture). Схема имеет плотность порядка 48 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer — Ports (Protocol), Data Ports, Coordination Ports, Observability Ports, Quality & Security Ports, Metadata & Config Ports. Показательные узлы для быстрого чтения: DataSourcePort • fetch() → AsyncIterator • health_check() → HealthStatus, FilterableDataSourcePort • fetch_filtered(), StoragePort • write_bronze() • write_silver() • write_gold(), DeltaReaderPort • read_table() • get_schema(), LockPort • acquire() • release() • renew(), CheckpointPort • save() • load() • delete().
@@ -1355,7 +1355,7 @@
 
 ## 26-hexagonal-ports-adapters-infra — 26 Hexagonal Ports Adapters
 
-![26-hexagonal-ports-adapters-infra](../views/png/26-hexagonal-ports-adapters-infra.png)
+![26-hexagonal-ports-adapters-infra](../views/svg/26-hexagonal-ports-adapters-infra.svg)
 
 ### Описание
 Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 20 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, StoragePort, DeltaReaderPort, LockPort, CheckpointPort, QuarantinePort.
@@ -1370,7 +1370,7 @@
 
 ## 26-hexagonal-ports-adapters-overview — 26 Hexagonal Ports Adapters
 
-![26-hexagonal-ports-adapters-overview](../views/png/26-hexagonal-ports-adapters-overview.png)
+![26-hexagonal-ports-adapters-overview](../views/svg/26-hexagonal-ports-adapters-overview.svg)
 
 ### Описание
 Диаграмма «26 Hexagonal Ports Adapters» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `26-hexagonal-ports-adapters-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, StoragePort, DeltaReaderPort, LockPort, ChemblAdapter, PubchemAdapter.
@@ -1385,7 +1385,7 @@
 
 ## 28-composition-root-di-graph-dataflow — 28 Composition Root Di Graph
 
-![28-composition-root-di-graph-dataflow](../views/png/28-composition-root-di-graph-dataflow.png)
+![28-composition-root-di-graph-dataflow](../views/svg/28-composition-root-di-graph-dataflow.svg)
 
 ### Описание
 Диаграмма «28 Composition Root Di Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `28-composition-root-di-graph-full.mermaid`. Схема имеет плотность порядка 12 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: BOOT, SB, BL, HCF, DSF, STF.
@@ -1400,7 +1400,7 @@
 
 ## 28-composition-root-di-graph-domain — 28 Composition Root Di Graph
 
-![28-composition-root-di-graph-domain](../views/png/28-composition-root-di-graph-domain.png)
+![28-composition-root-di-graph-domain](../views/svg/28-composition-root-di-graph-domain.svg)
 
 ### Описание
 Диаграмма «28 Composition Root Di Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `28-composition-root-di-graph-full.mermaid`. Схема имеет плотность порядка 20 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: DQF, BOOT, SB, BL, HCF, DSF.
@@ -1415,7 +1415,7 @@
 
 ## 28-composition-root-di-graph-full — Composition Root Wiring — Full DI Graph
 
-![28-composition-root-di-graph-full](../views/png/28-composition-root-di-graph-full.png)
+![28-composition-root-di-graph-full](../views/svg/28-composition-root-di-graph-full.svg)
 
 ### Описание
 Диаграмма «Composition Root Wiring — Full DI Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005. Схема имеет плотность порядка 19 узлов и 35 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Entry Point, Composition Factories, Logger & Observability, Client & Data Source, Storage & Services, Pipeline Construction. Показательные узлы для быстрого чтения: CLI run command, bootstrap/runtime/assembly.py, BootstrapLogger • configure structlog, DQServicesFactory • create() → DQ analyzers + monitor, HttpClientFactory • create(provider) → UnifiedHTTPClient, DataSourceFactory • create(provider, config) → DataSourcePort impl.
@@ -1432,7 +1432,7 @@
 
 ## 28-composition-root-di-graph-infra — 28 Composition Root Di Graph
 
-![28-composition-root-di-graph-infra](../views/png/28-composition-root-di-graph-infra.png)
+![28-composition-root-di-graph-infra](../views/svg/28-composition-root-di-graph-infra.svg)
 
 ### Описание
 Диаграмма «28 Composition Root Di Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `28-composition-root-di-graph-full.mermaid`. Схема имеет плотность порядка 20 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: ADP, BOOT, SB, BL, HCF, DSF.
@@ -1447,7 +1447,7 @@
 
 ## 28-composition-root-di-graph-overview — 28 Composition Root Di Graph
 
-![28-composition-root-di-graph-overview](../views/png/28-composition-root-di-graph-overview.png)
+![28-composition-root-di-graph-overview](../views/svg/28-composition-root-di-graph-overview.svg)
 
 ### Описание
 Диаграмма «28 Composition Root Di Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `28-composition-root-di-graph-full.mermaid`. Схема имеет плотность порядка 12 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Entry, Composition Factories, Created Runtime. Показательные узлы для быстрого чтения: CLI run, Bootstrap runtime, LoggerFactory, HttpClientFactory, DataSourceFactory, StorageFactory.
@@ -1462,7 +1462,7 @@
 
 ## 29-composite-pipeline-workflow-dataflow — 29 Composite Pipeline Workflow
 
-![29-composite-pipeline-workflow-dataflow](../views/png/29-composite-pipeline-workflow-dataflow.png)
+![29-composite-pipeline-workflow-dataflow](../views/svg/29-composite-pipeline-workflow-dataflow.svg)
 
 ### Описание
 Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. Схема имеет плотность порядка 1 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Seed Silver.
@@ -1477,7 +1477,7 @@
 
 ## 29-composite-pipeline-workflow-domain — 29 Composite Pipeline Workflow
 
-![29-composite-pipeline-workflow-domain](../views/png/29-composite-pipeline-workflow-domain.png)
+![29-composite-pipeline-workflow-domain](../views/svg/29-composite-pipeline-workflow-domain.svg)
 
 ### Описание
 Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. Схема имеет плотность порядка 1 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: bootstrap + legacy FSM adapter.
@@ -1492,7 +1492,7 @@
 
 ## 29-composite-pipeline-workflow-full — Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
 
-![29-composite-pipeline-workflow-full](../views/png/29-composite-pipeline-workflow-full.png)
+![29-composite-pipeline-workflow-full](../views/svg/29-composite-pipeline-workflow-full.svg)
 
 ### Описание
 Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: application/composite runner, checkpoint service, runtime bootstrap. Схема имеет плотность порядка 4 узлов и 23 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Load CompositeConfig, CompositeCheckpointService, Direct LockPort acquire / release fixed TTL, Legacy FSM adapter.
@@ -1509,7 +1509,7 @@
 
 ## 29-composite-pipeline-workflow-infra — 29 Composite Pipeline Workflow
 
-![29-composite-pipeline-workflow-infra](../views/png/29-composite-pipeline-workflow-infra.png)
+![29-composite-pipeline-workflow-infra](../views/svg/29-composite-pipeline-workflow-infra.svg)
 
 ### Описание
 Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. Схема имеет плотность порядка 4 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Seed Silver table, Dependency silver outputs, CompositeCheckpointService, LockPort with fixed TTL.
@@ -1524,7 +1524,7 @@
 
 ## 29-composite-pipeline-workflow-overview — 29 Composite Pipeline Workflow
 
-![29-composite-pipeline-workflow-overview](../views/png/29-composite-pipeline-workflow-overview.png)
+![29-composite-pipeline-workflow-overview](../views/svg/29-composite-pipeline-workflow-overview.svg)
 
 ### Описание
 Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. Схема имеет плотность порядка 3 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Config + preflight, Checkpoint service, Direct lock path.
@@ -1539,7 +1539,7 @@
 
 ## 30-port-adapter-mapping-dataflow — 30 Port Adapter Mapping
 
-![30-port-adapter-mapping-dataflow](../views/png/30-port-adapter-mapping-dataflow.png)
+![30-port-adapter-mapping-dataflow](../views/svg/30-port-adapter-mapping-dataflow.svg)
 
 ### Описание
 Диаграмма «30 Port Adapter Mapping» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `30-port-adapter-mapping-full.mermaid`. Схема имеет плотность порядка 12 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: P1, P2, P3, P4, P5, P6.
@@ -1554,7 +1554,7 @@
 
 ## 30-port-adapter-mapping-domain — 30 Port Adapter Mapping
 
-![30-port-adapter-mapping-domain](../views/png/30-port-adapter-mapping-domain.png)
+![30-port-adapter-mapping-domain](../views/svg/30-port-adapter-mapping-domain.svg)
 
 ### Описание
 Диаграмма «30 Port Adapter Mapping» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `30-port-adapter-mapping-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: P1, P2, P3, P4, P5, P6.
@@ -1569,7 +1569,7 @@
 
 ## 30-port-adapter-mapping-full — Port-to-Adapter Mapping Table Diagram
 
-![30-port-adapter-mapping-full](../views/png/30-port-adapter-mapping-full.png)
+![30-port-adapter-mapping-full](../views/svg/30-port-adapter-mapping-full.svg)
 
 ### Описание
 Диаграмма «Port-to-Adapter Mapping Table Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.2 (Ports & Adapters), ARCH-008 (Single Source). Схема имеет плотность порядка 54 узлов и 79 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Ports (domain/ports/), Core Data & State, Observability & DQ, Validation & Policy, Runtime Controls, Infrastructure Adapters. Показательные узлы для быстрого чтения: [P] DataSourcePort, [P] FilterableDataSourcePort, [P] StoragePort, [P] LockPort, [P] CheckpointPort, [P] QuarantinePort.
@@ -1586,7 +1586,7 @@
 
 ## 30-port-adapter-mapping-infra — 30 Port Adapter Mapping
 
-![30-port-adapter-mapping-infra](../views/png/30-port-adapter-mapping-infra.png)
+![30-port-adapter-mapping-infra](../views/svg/30-port-adapter-mapping-infra.svg)
 
 ### Описание
 Диаграмма «30 Port Adapter Mapping» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `30-port-adapter-mapping-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: P1, P2, P3, P4, P5, P6.
@@ -1601,7 +1601,7 @@
 
 ## 30-port-adapter-mapping-overview — 30 Port Adapter Mapping
 
-![30-port-adapter-mapping-overview](../views/png/30-port-adapter-mapping-overview.png)
+![30-port-adapter-mapping-overview](../views/svg/30-port-adapter-mapping-overview.svg)
 
 ### Описание
 Диаграмма «30 Port Adapter Mapping» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `30-port-adapter-mapping-full.mermaid`. Схема имеет плотность порядка 10 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Port Families, Infrastructure Adapter Families, Fallbacks. Показательные узлы для быстрого чтения: [P] Core Data Ports, [P] Observability Ports, [P] Validation/Policy Ports, [P] Runtime Control Ports, [A] Provider Adapters, [A] Storage Adapters.
@@ -1616,7 +1616,7 @@
 
 ## 31-pipeline-run-lifecycle-dataflow — 31 Pipeline Run Lifecycle
 
-![31-pipeline-run-lifecycle-dataflow](../views/png/31-pipeline-run-lifecycle-dataflow.png)
+![31-pipeline-run-lifecycle-dataflow](../views/svg/31-pipeline-run-lifecycle-dataflow.svg)
 
 ### Описание
 Диаграмма «31 Pipeline Run Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `31-pipeline-run-lifecycle-full.mermaid`. Схема имеет плотность порядка 12 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: VALIDATING, PREFLIGHT, TRANSFORMING, BATCH_DONE, BatchLoop, PREFLIGHT_PASSED.
@@ -1631,7 +1631,7 @@
 
 ## 31-pipeline-run-lifecycle-domain — 31 Pipeline Run Lifecycle
 
-![31-pipeline-run-lifecycle-domain](../views/png/31-pipeline-run-lifecycle-domain.png)
+![31-pipeline-run-lifecycle-domain](../views/svg/31-pipeline-run-lifecycle-domain.svg)
 
 ### Описание
 Диаграмма «31 Pipeline Run Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `31-pipeline-run-lifecycle-full.mermaid`. Схема имеет плотность порядка 20 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: EXTRACTING, FAILED, WRITING, VALIDATING, DRAINING, RELEASING.
@@ -1646,7 +1646,7 @@
 
 ## 31-pipeline-run-lifecycle-full — Pipeline Run Lifecycle — From Config to Completion
 
-![31-pipeline-run-lifecycle-full](../views/png/31-pipeline-run-lifecycle-full.png)
+![31-pipeline-run-lifecycle-full](../views/svg/31-pipeline-run-lifecycle-full.svg)
 
 ### Описание
 Диаграмма «Pipeline Run Lifecycle — From Config to Completion» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3 (Execution), domain/aggregates/pipeline_run.py.
@@ -1663,7 +1663,7 @@
 
 ## 31-pipeline-run-lifecycle-infra — 31 Pipeline Run Lifecycle
 
-![31-pipeline-run-lifecycle-infra](../views/png/31-pipeline-run-lifecycle-infra.png)
+![31-pipeline-run-lifecycle-infra](../views/svg/31-pipeline-run-lifecycle-infra.svg)
 
 ### Описание
 Диаграмма «31 Pipeline Run Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `31-pipeline-run-lifecycle-full.mermaid`. Схема имеет плотность порядка 20 узлов и 36 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: VALIDATING, PREFLIGHT, POSTRUN, PREFLIGHT_PASSED, TRANSFORMING, BATCH_DONE.
@@ -1678,7 +1678,7 @@
 
 ## 31-pipeline-run-lifecycle-overview — 31 Pipeline Run Lifecycle
 
-![31-pipeline-run-lifecycle-overview](../views/png/31-pipeline-run-lifecycle-overview.png)
+![31-pipeline-run-lifecycle-overview](../views/svg/31-pipeline-run-lifecycle-overview.svg)
 
 ### Описание
 Диаграмма «31 Pipeline Run Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `31-pipeline-run-lifecycle-full.mermaid`. Схема имеет плотность порядка 15 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: VALIDATING, EXTRACTING, FAILED, PREFLIGHT_PASSED, TRANSFORMING, DRAINING.
@@ -1693,7 +1693,7 @@
 
 ## 32-single-record-journey-dataflow — 32 Single Record Journey
 
-![32-single-record-journey-dataflow](../views/png/32-single-record-journey-dataflow.png)
+![32-single-record-journey-dataflow](../views/svg/32-single-record-journey-dataflow.svg)
 
 ### Описание
 Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: SW, ST, TFG, GV, GW, CLEAN.
@@ -1708,7 +1708,7 @@
 
 ## 32-single-record-journey-domain — 32 Single Record Journey
 
-![32-single-record-journey-domain](../views/png/32-single-record-journey-domain.png)
+![32-single-record-journey-domain](../views/svg/32-single-record-journey-domain.svg)
 
 ### Описание
 Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 20 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: HASH, DQ, META, NORM, TI, BT.
@@ -1723,7 +1723,7 @@
 
 ## 32-single-record-journey-full — Record Processing Pipeline — Single Record Journey
 
-![32-single-record-journey-full](../views/png/32-single-record-journey-full.png)
+![32-single-record-journey-full](../views/svg/32-single-record-journey-full.svg)
 
 ### Описание
 Диаграмма «Record Processing Pipeline — Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1-§2.6 (Data Flow, DQ), §2.8 (Normalization). Схема имеет плотность порядка 18 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: 1. External API, 2. Bronze Layer, 3. Transform (RecordProcessor), 4. Validate, 5. Route Decision, 6. Silver Layer. Показательные узлы для быстрого чтения: REST API Response (e.g., ChEMBL /activity), BronzeWriter.write_bronze() JSONL + zstd + atomic rename manifest update, ("Bronze File bronze/chembl/activity/ 2026-02-17/batch_001.jsonl.zst"  ), BatchTransformer.transform(), BaseTransformer._transform_impl() (e.g., ActivityTransformer), Add Metadata _run_id, _run_type _source_batch_id, _ingestion_ts.
@@ -1740,7 +1740,7 @@
 
 ## 32-single-record-journey-infra — 32 Single Record Journey
 
-![32-single-record-journey-infra](../views/png/32-single-record-journey-infra.png)
+![32-single-record-journey-infra](../views/svg/32-single-record-journey-infra.svg)
 
 ### Описание
 Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 20 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: SW, ST, TFG, GV, GW, CLEAN.
@@ -1755,7 +1755,7 @@
 
 ## 32-single-record-journey-overview — 32 Single Record Journey
 
-![32-single-record-journey-overview](../views/png/32-single-record-journey-overview.png)
+![32-single-record-journey-overview](../views/svg/32-single-record-journey-overview.svg)
 
 ### Описание
 Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 15 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: ST, BF, BT, TI, NORM, META.
@@ -1770,7 +1770,7 @@
 
 ## 33-cli-run-interaction-dataflow — 33 Cli Run Interaction
 
-![33-cli-run-interaction-dataflow](../views/png/33-cli-run-interaction-dataflow.png)
+![33-cli-run-interaction-dataflow](../views/svg/33-cli-run-interaction-dataflow.svg)
 
 ### Описание
 Диаграмма «33 Cli Run Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `33-cli-run-interaction-full.mermaid`. Схема имеет плотность порядка 12 узлов и 20 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Runner, PRS, Boot, PF, LM, BE.
@@ -1785,7 +1785,7 @@
 
 ## 33-cli-run-interaction-domain — 33 Cli Run Interaction
 
-![33-cli-run-interaction-domain](../views/png/33-cli-run-interaction-domain.png)
+![33-cli-run-interaction-domain](../views/svg/33-cli-run-interaction-domain.svg)
 
 ### Описание
 Диаграмма «33 Cli Run Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `33-cli-run-interaction-full.mermaid`. Схема имеет плотность порядка 20 узлов и 28 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Interfaces Layer. Показательные узлы для быстрого чтения: config, health, errors, DQ, PRS, Boot.
@@ -1800,7 +1800,7 @@
 
 ## 33-cli-run-interaction-full — CLI Run Command → PipelineRunner Full Interaction
 
-![33-cli-run-interaction-full](../views/png/33-cli-run-interaction-full.png)
+![33-cli-run-interaction-full](../views/svg/33-cli-run-interaction-full.svg)
 
 ### Описание
 Диаграмма «CLI Run Command → PipelineRunner Full Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Interfaces → Composition → Application).
@@ -1817,7 +1817,7 @@
 
 ## 33-cli-run-interaction-infra — 33 Cli Run Interaction
 
-![33-cli-run-interaction-infra](../views/png/33-cli-run-interaction-infra.png)
+![33-cli-run-interaction-infra](../views/svg/33-cli-run-interaction-infra.svg)
 
 ### Описание
 Диаграмма «33 Cli Run Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `33-cli-run-interaction-full.mermaid`. Схема имеет плотность порядка 20 узлов и 28 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Interfaces Layer. Показательные узлы для быстрого чтения: config, owner_id, Runner, storage, metrics, PF.
@@ -1832,7 +1832,7 @@
 
 ## 33-cli-run-interaction-overview — 33 Cli Run Interaction
 
-![33-cli-run-interaction-overview](../views/png/33-cli-run-interaction-overview.png)
+![33-cli-run-interaction-overview](../views/svg/33-cli-run-interaction-overview.svg)
 
 ### Описание
 Диаграмма «33 Cli Run Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `33-cli-run-interaction-full.mermaid`. Схема имеет плотность порядка 15 узлов и 22 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Interfaces Layer. Показательные узлы для быстрого чтения: config, owner_id, PRS, Runner, PF, LM.
@@ -1847,7 +1847,7 @@
 
 ## 34-batch-processing-flow-dataflow — 34 Batch Processing Flow
 
-![34-batch-processing-flow-dataflow](../views/png/34-batch-processing-flow-dataflow.png)
+![34-batch-processing-flow-dataflow](../views/svg/34-batch-processing-flow-dataflow.svg)
 
 ### Описание
 Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 12 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: errors, Runner, batch_num, Bronze, Silver, Gold.
@@ -1862,7 +1862,7 @@
 
 ## 34-batch-processing-flow-domain — 34 Batch Processing Flow
 
-![34-batch-processing-flow-domain](../views/png/34-batch-processing-flow-domain.png)
+![34-batch-processing-flow-domain](../views/svg/34-batch-processing-flow-domain.svg)
 
 ### Описание
 Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: errors, error_count, BatchExecutor, BatchTransformer, BatchTracingManagerService, DataSourcePort.
@@ -1877,7 +1877,7 @@
 
 ## 34-batch-processing-flow-full — Batch Processing Flow — Extract to Write
 
-![34-batch-processing-flow-full](../views/png/34-batch-processing-flow-full.png)
+![34-batch-processing-flow-full](../views/svg/34-batch-processing-flow-full.svg)
 
 ### Описание
 Диаграмма «Batch Processing Flow — Extract to Write» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Data Flow), application/core/batch_executor.py.
@@ -1894,7 +1894,7 @@
 
 ## 34-batch-processing-flow-infra — 34 Batch Processing Flow
 
-![34-batch-processing-flow-infra](../views/png/34-batch-processing-flow-infra.png)
+![34-batch-processing-flow-infra](../views/svg/34-batch-processing-flow-infra.svg)
 
 ### Описание
 Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: strip_values, errors, filter_ids, _run_type, PipelineRunner, BatchExecutor.
@@ -1909,7 +1909,7 @@
 
 ## 34-batch-processing-flow-overview — 34 Batch Processing Flow
 
-![34-batch-processing-flow-overview](../views/png/34-batch-processing-flow-overview.png)
+![34-batch-processing-flow-overview](../views/svg/34-batch-processing-flow-overview.svg)
 
 ### Описание
 Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 15 узлов и 20 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: strip, errors, filter_ids, error_count, BE, BT.
@@ -1924,7 +1924,7 @@
 
 ## 35-bootstrap-sequence-dataflow — 35 Bootstrap Sequence
 
-![35-bootstrap-sequence-dataflow](../views/png/35-bootstrap-sequence-dataflow.png)
+![35-bootstrap-sequence-dataflow](../views/svg/35-bootstrap-sequence-dataflow.svg)
 
 ### Описание
 Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: S2A, S1B, S2B, S3A, S3B, S4A.
@@ -1939,7 +1939,7 @@
 
 ## 35-bootstrap-sequence-domain — 35 Bootstrap Sequence
 
-![35-bootstrap-sequence-domain](../views/png/35-bootstrap-sequence-domain.png)
+![35-bootstrap-sequence-domain](../views/svg/35-bootstrap-sequence-domain.svg)
 
 ### Описание
 Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 20 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: S2A, S1B, S2B, S3A, S3B, S4A.
@@ -1954,7 +1954,7 @@
 
 ## 35-bootstrap-sequence-full — Composition Layer Bootstrap Sequence
 
-![35-bootstrap-sequence-full](../views/png/35-bootstrap-sequence-full.png)
+![35-bootstrap-sequence-full](../views/svg/35-bootstrap-sequence-full.svg)
 
 ### Описание
 Диаграмма «Composition Layer Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/. Схема имеет плотность порядка 35 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Step 1: Logger, Step 2: Configuration, Step 3: Observability Bundle, Step 4: Storage, Step 5: HTTP Client, Step 6: Data Source. Показательные узлы для быстрого чтения: BootstrapLogger.configure(), StructlogLogger (JSON, ISO timestamps, run_id binding), ConfigLoader.load(pipeline_name), PipelineYamlConfig (_base.yaml merged with entity.yaml), DQConfigLoader.load(), FilterConfigLoader.load().
@@ -1971,7 +1971,7 @@
 
 ## 35-bootstrap-sequence-infra — 35 Bootstrap Sequence
 
-![35-bootstrap-sequence-infra](../views/png/35-bootstrap-sequence-infra.png)
+![35-bootstrap-sequence-infra](../views/svg/35-bootstrap-sequence-infra.svg)
 
 ### Описание
 Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 20 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: S2A, S1B, S2B, S3A, S3B, S4A.
@@ -1986,7 +1986,7 @@
 
 ## 35-bootstrap-sequence-overview — 35 Bootstrap Sequence
 
-![35-bootstrap-sequence-overview](../views/png/35-bootstrap-sequence-overview.png)
+![35-bootstrap-sequence-overview](../views/svg/35-bootstrap-sequence-overview.svg)
 
 ### Описание
 Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 15 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: S5A, S5B, S1B, S2A, S2B, S4D.
@@ -2001,7 +2001,7 @@
 
 ## 36-architecture-principles-mindmap-dataflow — 36 Architecture Principles Mindmap
 
-![36-architecture-principles-mindmap-dataflow](../views/png/36-architecture-principles-mindmap-dataflow.png)
+![36-architecture-principles-mindmap-dataflow](../views/svg/36-architecture-principles-mindmap-dataflow.svg)
 
 ### Описание
 Диаграмма «36 Architecture Principles Mindmap» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `36-architecture-principles-mindmap-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer. Показательные узлы для быстрого чтения: DataSourcePort, Batch, PipelineRun, PipelineRunner, BatchExecutor, 23 Transformers.
@@ -2016,7 +2016,7 @@
 
 ## 36-architecture-principles-mindmap-domain — 36 Architecture Principles Mindmap
 
-![36-architecture-principles-mindmap-domain](../views/png/36-architecture-principles-mindmap-domain.png)
+![36-architecture-principles-mindmap-domain](../views/svg/36-architecture-principles-mindmap-domain.svg)
 
 ### Описание
 Диаграмма «36 Architecture Principles Mindmap» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `36-architecture-principles-mindmap-full.mermaid`. Схема имеет плотность порядка 20 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Composition Layer. Показательные узлы для быстрого чтения: 24 Domain Ports, Domain, DDD Aggregates, DataSourcePort, StoragePort, LockPort.
@@ -2031,7 +2031,7 @@
 
 ## 36-architecture-principles-mindmap-full — Architecture Principles Mind Map
 
-![36-architecture-principles-mindmap-full](../views/png/36-architecture-principles-mindmap-full.png)
+![36-architecture-principles-mindmap-full](../views/svg/36-architecture-principles-mindmap-full.svg)
 
 ### Описание
 Диаграмма «Architecture Principles Mind Map» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате интеллект-карта (mindmap) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1 (Architecture), all ADRs.
@@ -2048,7 +2048,7 @@
 
 ## 36-architecture-principles-mindmap-infra — 36 Architecture Principles Mindmap
 
-![36-architecture-principles-mindmap-infra](../views/png/36-architecture-principles-mindmap-infra.png)
+![36-architecture-principles-mindmap-infra](../views/svg/36-architecture-principles-mindmap-infra.svg)
 
 ### Описание
 Диаграмма «36 Architecture Principles Mindmap» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `36-architecture-principles-mindmap-full.mermaid`. Схема имеет плотность порядка 20 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Composition Layer. Показательные узлы для быстрого чтения: StoragePort, LockPort, MetricsPort, LoggerPort, TracingPort, Infrastructure Adapters.
@@ -2063,7 +2063,7 @@
 
 ## 36-architecture-principles-mindmap-overview — 36 Architecture Principles Mindmap
 
-![36-architecture-principles-mindmap-overview](../views/png/36-architecture-principles-mindmap-overview.png)
+![36-architecture-principles-mindmap-overview](../views/svg/36-architecture-principles-mindmap-overview.svg)
 
 ### Описание
 Диаграмма «36 Architecture Principles Mindmap» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `36-architecture-principles-mindmap-full.mermaid`. Схема имеет плотность порядка 15 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer. Показательные узлы для быстрого чтения: DDD Aggregates, 24 Domain Ports, BioETL Architecture, Five-Layer Architecture, Local Only Deployment, Resilience Patterns.
@@ -2078,7 +2078,7 @@
 
 ## 39-medallion-invariants-dataflow — 39 Medallion Invariants
 
-![39-medallion-invariants-dataflow](../views/png/39-medallion-invariants-dataflow.png)
+![39-medallion-invariants-dataflow](../views/svg/39-medallion-invariants-dataflow.svg)
 
 ### Описание
 Диаграмма «39 Medallion Invariants» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `39-medallion-invariants-full.mermaid`. Схема имеет плотность порядка 12 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CHECK, INC, BF, RB, E1, I2.
@@ -2093,7 +2093,7 @@
 
 ## 39-medallion-invariants-domain — 39 Medallion Invariants
 
-![39-medallion-invariants-domain](../views/png/39-medallion-invariants-domain.png)
+![39-medallion-invariants-domain](../views/svg/39-medallion-invariants-domain.svg)
 
 ### Описание
 Диаграмма «39 Medallion Invariants» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `39-medallion-invariants-full.mermaid`. Схема имеет плотность порядка 20 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Policy, E2, CHECK, INC, BF, RB.
@@ -2108,7 +2108,7 @@
 
 ## 39-medallion-invariants-full — Medallion Architecture Invariants (ARCH-007)
 
-![39-medallion-invariants-full](../views/png/39-medallion-invariants-full.png)
+![39-medallion-invariants-full](../views/svg/39-medallion-invariants-full.svg)
 
 ### Описание
 Диаграмма «Medallion Architecture Invariants (ARCH-007)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Medallion), ARCH-007 clear policy. Схема имеет плотность порядка 19 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: RunType Enum (domain/types.py), MedallionLifecycleService\n(application/services/medallion_lifecycle.py), INCREMENTAL Path, BACKFILL Path, REBUILD Path, Enforcement. Показательные узлы для быстрого чтения: RunType.INCREMENTAL 'Fetch new data since last run', RunType.BACKFILL 'Re-fetch a date range', RunType.REBUILD 'Full clean rebuild', ❌ DO NOT clear Silver, ❌ DO NOT clear Gold, Silver: merge/upsert (content_hash dedup).
@@ -2125,7 +2125,7 @@
 
 ## 39-medallion-invariants-infra — 39 Medallion Invariants
 
-![39-medallion-invariants-infra](../views/png/39-medallion-invariants-infra.png)
+![39-medallion-invariants-infra](../views/svg/39-medallion-invariants-infra.svg)
 
 ### Описание
 Диаграмма «39 Medallion Invariants» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `39-medallion-invariants-full.mermaid`. Схема имеет плотность порядка 20 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: Policy, CHECK, INC, BF, RB, E1.
@@ -2140,7 +2140,7 @@
 
 ## 39-medallion-invariants-overview — 39 Medallion Invariants
 
-![39-medallion-invariants-overview](../views/png/39-medallion-invariants-overview.png)
+![39-medallion-invariants-overview](../views/svg/39-medallion-invariants-overview.svg)
 
 ### Описание
 Диаграмма «39 Medallion Invariants» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `39-medallion-invariants-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: INC, CHECK, BF, RB, E1, I2.
@@ -2155,7 +2155,7 @@
 
 ## 41-error-classification-tree-dataflow — 41 Error Classification Tree
 
-![41-error-classification-tree-dataflow](../views/png/41-error-classification-tree-dataflow.png)
+![41-error-classification-tree-dataflow](../views/svg/41-error-classification-tree-dataflow.svg)
 
 ### Описание
 Диаграмма «41 Error Classification Tree» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `41-error-classification-tree-full.mermaid`. Схема имеет плотность порядка 12 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: SCHEMA, HTTP, ERROR, BATCH_FAIL, QUARANTINE2, MISSING.
@@ -2170,7 +2170,7 @@
 
 ## 41-error-classification-tree-domain — 41 Error Classification Tree
 
-![41-error-classification-tree-domain](../views/png/41-error-classification-tree-domain.png)
+![41-error-classification-tree-domain](../views/svg/41-error-classification-tree-domain.svg)
 
 ### Описание
 Диаграмма «41 Error Classification Tree» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `41-error-classification-tree-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: ERROR, DOMAIN, DQTHRESH, INFRA, no, classify.
@@ -2185,7 +2185,7 @@
 
 ## 41-error-classification-tree-full — Error Classification Decision Tree — Full Logic
 
-![41-error-classification-tree-full](../views/png/41-error-classification-tree-full.png)
+![41-error-classification-tree-full](../views/svg/41-error-classification-tree-full.svg)
 
 ### Описание
 Диаграмма «Error Classification Decision Tree — Full Logic» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.1 (Error Handling), domain/exceptions/. Схема имеет плотность порядка 4 узлов и 44 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: HTTP Branch Outcomes, Domain Branch Outcomes, Infrastructure Branch Outcomes, Error Actions. Показательные узлы для быстрого чтения: Error Occurred, [A] RETRY max_attempts: 3 multiplier: 2.0 jitter: MD5-based, [A] FAIL FAST No retry Pipeline terminates ExitCode.PIPELINE_ERROR, [A] BATCH FAIL error_rate > 20% Entire batch rejected Checkpoint NOT saved.
@@ -2202,7 +2202,7 @@
 
 ## 41-error-classification-tree-infra — 41 Error Classification Tree
 
-![41-error-classification-tree-infra](../views/png/41-error-classification-tree-infra.png)
+![41-error-classification-tree-infra](../views/svg/41-error-classification-tree-infra.svg)
 
 ### Описание
 Диаграмма «41 Error Classification Tree» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `41-error-classification-tree-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: SCHEMA, HTTP, ERROR, QUARANTINE2, LOCK, LOCKACQ.
@@ -2217,7 +2217,7 @@
 
 ## 41-error-classification-tree-overview — 41 Error Classification Tree
 
-![41-error-classification-tree-overview](../views/png/41-error-classification-tree-overview.png)
+![41-error-classification-tree-overview](../views/svg/41-error-classification-tree-overview.svg)
 
 ### Описание
 Диаграмма «41 Error Classification Tree» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `41-error-classification-tree-full.mermaid`. Схема имеет плотность порядка 5 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Action Outcomes. Показательные узлы для быстрого чтения: Error Occurred, [A] Retry, [A] Quarantine, [A] Batch Fail, [A] Fail Fast.
@@ -2232,7 +2232,7 @@
 
 ## 44-cross-provider-enrichment-dataflow — 44 Cross Provider Enrichment
 
-![44-cross-provider-enrichment-dataflow](../views/png/44-cross-provider-enrichment-dataflow.png)
+![44-cross-provider-enrichment-dataflow](../views/svg/44-cross-provider-enrichment-dataflow.svg)
 
 ### Описание
 Диаграмма «44 Cross Provider Enrichment» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `44-cross-provider-enrichment-full.mermaid`. Схема имеет плотность порядка 12 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: pmid, CS, CT, CA, ntitle, authors.
@@ -2247,7 +2247,7 @@
 
 ## 44-cross-provider-enrichment-domain — 44 Cross Provider Enrichment
 
-![44-cross-provider-enrichment-domain](../views/png/44-cross-provider-enrichment-domain.png)
+![44-cross-provider-enrichment-domain](../views/svg/44-cross-provider-enrichment-domain.svg)
 
 ### Описание
 Диаграмма «44 Cross Provider Enrichment» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `44-cross-provider-enrichment-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CS, CT, pmid, ntitle, authors, CRS.
@@ -2262,7 +2262,7 @@
 
 ## 44-cross-provider-enrichment-full — Cross-Provider Data Enrichment Flow — Publication
 
-![44-cross-provider-enrichment-full](../views/png/44-cross-provider-enrichment-full.png)
+![44-cross-provider-enrichment-full](../views/svg/44-cross-provider-enrichment-full.svg)
 
 ### Описание
 Диаграмма «Cross-Provider Data Enrichment Flow — Publication» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: ADR-026 (Composite), publication composite pipeline config. Схема имеет плотность порядка 19 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: ChEMBL (Seed), CrossRef (Enricher), PubMed (Enricher), OpenAlex (Enricher), Semantic Scholar (Enricher), Merge Phase. Показательные узлы для быстрого чтения: ChemblAdapter /document endpoint, PublicationTransformer, ("Silver chembl/publication"), CrossRefAdapter /works?filter=doi:..., CrossRefPublicationTransformer, ("Silver crossref/publication").
@@ -2279,7 +2279,7 @@
 
 ## 44-cross-provider-enrichment-infra — 44 Cross Provider Enrichment
 
-![44-cross-provider-enrichment-infra](../views/png/44-cross-provider-enrichment-infra.png)
+![44-cross-provider-enrichment-infra](../views/svg/44-cross-provider-enrichment-infra.svg)
 
 ### Описание
 Диаграмма «44 Cross Provider Enrichment» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `44-cross-provider-enrichment-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: pmid, pub_type, CS, CT, CA, ntitle.
@@ -2294,7 +2294,7 @@
 
 ## 44-cross-provider-enrichment-overview — 44 Cross Provider Enrichment
 
-![44-cross-provider-enrichment-overview](../views/png/44-cross-provider-enrichment-overview.png)
+![44-cross-provider-enrichment-overview](../views/svg/44-cross-provider-enrichment-overview.svg)
 
 ### Описание
 Диаграмма «44 Cross Provider Enrichment» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `44-cross-provider-enrichment-full.mermaid`. Схема имеет плотность порядка 15 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer. Показательные узлы для быстрого чтения: pmid, CT, CS, CRT, CRS, PMT.
@@ -2309,7 +2309,7 @@
 
 ## 46-yaml-config-resolution-dataflow — 46 Yaml Config Resolution
 
-![46-yaml-config-resolution-dataflow](../views/png/46-yaml-config-resolution-dataflow.png)
+![46-yaml-config-resolution-dataflow](../views/svg/46-yaml-config-resolution-dataflow.svg)
 
 ### Описание
 Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. Схема имеет плотность порядка 2 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: base/provider/entity YAML, source config.
@@ -2324,7 +2324,7 @@
 
 ## 46-yaml-config-resolution-domain — 46 Yaml Config Resolution
 
-![46-yaml-config-resolution-domain](../views/png/46-yaml-config-resolution-domain.png)
+![46-yaml-config-resolution-domain](../views/svg/46-yaml-config-resolution-domain.svg)
 
 ### Описание
 Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. Схема имеет плотность порядка 3 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: PipelineYamlConfig, DQConfigFile, FilterConfigFile.
@@ -2339,7 +2339,7 @@
 
 ## 46-yaml-config-resolution-full — YAML Configuration Resolution Chain
 
-![46-yaml-config-resolution-full](../views/png/46-yaml-config-resolution-full.png)
+![46-yaml-config-resolution-full](../views/svg/46-yaml-config-resolution-full.svg)
 
 ### Описание
 Диаграмма «YAML Configuration Resolution Chain» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: unified config path plus still-active normalization compatibility. Схема имеет плотность порядка 4 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: base + provider + entity YAML, provider source config, DQ hierarchy base + provider + entity + inline, Filter hierarchy base + provider + entity + inline.
@@ -2356,7 +2356,7 @@
 
 ## 46-yaml-config-resolution-infra — 46 Yaml Config Resolution
 
-![46-yaml-config-resolution-infra](../views/png/46-yaml-config-resolution-infra.png)
+![46-yaml-config-resolution-infra](../views/svg/46-yaml-config-resolution-infra.svg)
 
 ### Описание
 Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. Схема имеет плотность порядка 4 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: base / provider / entity YAML, DQ hierarchy, Filter hierarchy, legacy-flat source payload.
@@ -2371,7 +2371,7 @@
 
 ## 46-yaml-config-resolution-overview — 46 Yaml Config Resolution
 
-![46-yaml-config-resolution-overview](../views/png/46-yaml-config-resolution-overview.png)
+![46-yaml-config-resolution-overview](../views/svg/46-yaml-config-resolution-overview.svg)
 
 ### Описание
 Диаграмма «46 Yaml Config Resolution» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `46-yaml-config-resolution-full.mermaid`. Схема имеет плотность порядка 2 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Base / provider / entity YAML, Legacy-flat source config.
@@ -2386,7 +2386,7 @@
 
 ## 48-composite-phase-lifecycle-dataflow — 48 Composite Phase Lifecycle
 
-![48-composite-phase-lifecycle-dataflow](../views/png/48-composite-phase-lifecycle-dataflow.png)
+![48-composite-phase-lifecycle-dataflow](../views/svg/48-composite-phase-lifecycle-dataflow.svg)
 
 ### Описание
 Диаграмма «48 Composite Phase Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `48-composite-phase-lifecycle-full.mermaid`. Схема имеет плотность порядка 12 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CompositePipelineState, ErrorType (CRITICAL/RECOVERABLE/DQ), KeyExtractorService, Enrichment Plan, Merge Plan, Bronze: seed dataset.
@@ -2401,7 +2401,7 @@
 
 ## 48-composite-phase-lifecycle-domain — 48 Composite Phase Lifecycle
 
-![48-composite-phase-lifecycle-domain](../views/png/48-composite-phase-lifecycle-domain.png)
+![48-composite-phase-lifecycle-domain](../views/svg/48-composite-phase-lifecycle-domain.svg)
 
 ### Описание
 Диаграмма «48 Composite Phase Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `48-composite-phase-lifecycle-full.mermaid`. Схема имеет плотность порядка 11 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer. Показательные узлы для быстрого чтения: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, DEPENDENCIES_RUNNING, DEPENDENCIES_COMPLETED, ENRICHING.
@@ -2416,7 +2416,7 @@
 
 ## 48-composite-phase-lifecycle-full — Composite Pipeline Phase Lifecycle (FSM)
 
-![48-composite-phase-lifecycle-full](../views/png/48-composite-phase-lifecycle-full.png)
+![48-composite-phase-lifecycle-full](../views/svg/48-composite-phase-lifecycle-full.svg)
 
 ### Описание
 Диаграмма «Composite Pipeline Phase Lifecycle (FSM)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: domain/composite/state.py, application/composite/fsm_helper.py.
@@ -2433,7 +2433,7 @@
 
 ## 48-composite-phase-lifecycle-infra — 48 Composite Phase Lifecycle
 
-![48-composite-phase-lifecycle-infra](../views/png/48-composite-phase-lifecycle-infra.png)
+![48-composite-phase-lifecycle-infra](../views/svg/48-composite-phase-lifecycle-infra.svg)
 
 ### Описание
 Диаграмма «48 Composite Phase Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `48-composite-phase-lifecycle-full.mermaid`. Схема имеет плотность порядка 9 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CompositePipelineState, CompositePipelineRunner, PhaseDispatcher, PipelineRunner (seed), DependencyCoordinator, EnrichmentCoordinator.
@@ -2448,7 +2448,7 @@
 
 ## 48-composite-phase-lifecycle-overview — 48 Composite Phase Lifecycle
 
-![48-composite-phase-lifecycle-overview](../views/png/48-composite-phase-lifecycle-overview.png)
+![48-composite-phase-lifecycle-overview](../views/svg/48-composite-phase-lifecycle-overview.svg)
 
 ### Описание
 Диаграмма «48 Composite Phase Lifecycle» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `48-composite-phase-lifecycle-full.mermaid`. Схема имеет плотность порядка 9 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: SEED, DEPENDENCIES, ENRICHING, MERGING, COMPLETED, FAILED.
@@ -2463,7 +2463,7 @@
 
 ## 50-exception-hierarchy-dataflow — 50 Exception Hierarchy
 
-![50-exception-hierarchy-dataflow](../views/png/50-exception-hierarchy-dataflow.png)
+![50-exception-hierarchy-dataflow](../views/svg/50-exception-hierarchy-dataflow.svg)
 
 ### Описание
 Диаграмма «50 Exception Hierarchy» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `50-exception-hierarchy-full.mermaid`. Схема имеет плотность порядка 12 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DELTA_SCHEMA_V, BRONZE_VALID, record_id, MERGE_CONFLICT, EXT_SERVICE, DELTA_TX.
@@ -2478,7 +2478,7 @@
 
 ## 50-exception-hierarchy-domain — 50 Exception Hierarchy
 
-![50-exception-hierarchy-domain](../views/png/50-exception-hierarchy-domain.png)
+![50-exception-hierarchy-domain](../views/svg/50-exception-hierarchy-domain.svg)
 
 ### Описание
 Диаграмма «50 Exception Hierarchy» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `50-exception-hierarchy-full.mermaid`. Схема имеет плотность порядка 20 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DQ_ERROR, POLICY_VIOLATION, METRICS_ERROR, port, INFRA_ERROR, last_error.
@@ -2493,7 +2493,7 @@
 
 ## 50-exception-hierarchy-full — Exception Hierarchy — Full Tree
 
-![50-exception-hierarchy-full](../views/png/50-exception-hierarchy-full.png)
+![50-exception-hierarchy-full](../views/svg/50-exception-hierarchy-full.svg)
 
 ### Описание
 Диаграмма «Exception Hierarchy — Full Tree» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: domain/exceptions/ (base, network, validation, internal, infrastructure, data_quality). Схема имеет плотность порядка 6 узлов и 50 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Exception (Python built-in), BioETLError domain/exceptions/base.py error_type: ErrorType context: dict, ErrorClassifier domain/error_classifier.py .classify(error) → ErrorType, Action: ABORT Pipeline stops immediately PipelineRunState → FAILED, Action: RETRY Exponential backoff Max retries from AdapterConfig, Action: QUARANTINE Record → QuarantineEntry Pipeline continues.
@@ -2510,7 +2510,7 @@
 
 ## 50-exception-hierarchy-infra — 50 Exception Hierarchy
 
-![50-exception-hierarchy-infra](../views/png/50-exception-hierarchy-infra.png)
+![50-exception-hierarchy-infra](../views/svg/50-exception-hierarchy-infra.svg)
 
 ### Описание
 Диаграмма «50 Exception Hierarchy» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `50-exception-hierarchy-full.mermaid`. Схема имеет плотность порядка 20 узлов и 22 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: METRICS_ERROR, DELTA_SCHEMA_V, DQ_ERROR, VALIDATION, EXT_SERVICE, STORAGE_ERR.
@@ -2525,7 +2525,7 @@
 
 ## 50-exception-hierarchy-overview — 50 Exception Hierarchy
 
-![50-exception-hierarchy-overview](../views/png/50-exception-hierarchy-overview.png)
+![50-exception-hierarchy-overview](../views/svg/50-exception-hierarchy-overview.svg)
 
 ### Описание
 Диаграмма «50 Exception Hierarchy» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `50-exception-hierarchy-full.mermaid`. Схема имеет плотность порядка 15 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: INVALID_STATE, POLICY_VIOLATION, run_id, BIOETL, CRITICAL, RECOVERABLE.

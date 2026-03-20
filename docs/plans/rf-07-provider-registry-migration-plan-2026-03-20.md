@@ -214,6 +214,40 @@ This is intentionally narrower than a repo-wide ban.
 - Adjacent factory seam expanded without entering bootstrap/runtime:
   - [`assembler.py`](../../src/bioetl/composition/factories/pipeline/assembler.py) accepts explicit `provider_registry`
   - [`contract_validator.py`](../../src/bioetl/composition/factories/pipeline/contract_validator.py) threads explicit registry into `get_data_source_creator(...)`
+- Provider-assembly simplification slices completed inside
+  [`registration.py`](../../src/bioetl/composition/providers/registration.py),
+  [`registration_bio.py`](../../src/bioetl/composition/providers/registration_bio.py),
+  [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py),
+  and [`_registration_contracts.py`](../../src/bioetl/composition/providers/_registration_contracts.py):
+  - canonical `ProviderAssemblySupport` resolution now goes through
+    `resolve_provider_assembly_support(...)`
+  - support-aware data-source creator binding now goes through
+    `bind_provider_data_source_creator(...)`
+  - repeated HTTP-oriented `ProviderConfig` assembly now goes through
+    `build_http_provider_config(...)`
+  - remaining non-HTTP/special-case data-source entries now go through
+    `build_data_source_provider_config(...)`
+
+### Current interpretation after the helper slices
+
+The current RF-07 provider-assembly scope should now be read as materially
+reduced even though runtime ownership remains deferred.
+
+What is already true:
+
+- internal provider registration code no longer repeats local
+  `assembly_support or create_provider_assembly_support(...)` patterns
+- bio/biblio registration families no longer build their dominant
+  `ProviderConfig` skeletons manually
+- `pubchem` remains an intentional special case, but it now uses the canonical
+  non-HTTP config helper instead of a one-off inline `ProviderConfig(...)`
+  block
+
+What remains intentionally outside this plan slice:
+
+- explicit runtime `ProviderRegistry` instance threading
+- bootstrap lifecycle migration
+- broad redesign of provider-specific creator functions
 
 ### Explicitly deferred
 

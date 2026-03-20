@@ -88,3 +88,36 @@ def test_views_bundle_wrapper_delegates_to_canonical_generator() -> None:
     assert "Compatibility wrapper" in content
     assert "generate_all_bundles.py --collection views" in content
     assert 'canonical_main(["--collection", "views"])' in content
+
+
+def test_bundle_generator_prefers_svg_embed_over_png(tmp_path: Path) -> None:
+    module = _load_generate_all_bundles()
+    collection_dir = tmp_path / "architecture"
+    output_md = tmp_path / "bundles" / "architecture.bundle.md"
+    (collection_dir / "svg").mkdir(parents=True)
+    (collection_dir / "png").mkdir(parents=True)
+    output_md.parent.mkdir(parents=True)
+    (collection_dir / "svg" / "01-sample.svg").write_text("<svg/>", encoding="utf-8")
+    (collection_dir / "png" / "01-sample.png").write_bytes(b"png")
+
+    markdown = module.resolve_bundle_image_markdown(
+        collection_dir, "01-sample", output_md
+    )
+
+    assert "svg/01-sample.svg" in markdown
+    assert "png/01-sample.png" not in markdown
+
+
+def test_bundle_generator_falls_back_to_png_when_svg_missing(tmp_path: Path) -> None:
+    module = _load_generate_all_bundles()
+    collection_dir = tmp_path / "architecture"
+    output_md = tmp_path / "bundles" / "architecture.bundle.md"
+    (collection_dir / "png").mkdir(parents=True)
+    output_md.parent.mkdir(parents=True)
+    (collection_dir / "png" / "01-sample.png").write_bytes(b"png")
+
+    markdown = module.resolve_bundle_image_markdown(
+        collection_dir, "01-sample", output_md
+    )
+
+    assert "png/01-sample.png" in markdown

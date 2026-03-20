@@ -45,6 +45,7 @@
 | Docs drift | `documentation-audit` → `py-doc-bot` |
 | Большой review | `py-review-orchestrator` → `py-audit-bot` |
 | Branch cleanup / consolidation | `using-git-worktrees` → `git-workflow-manager` |
+| Иерархическая evidence-wave | `hierarchical-evidence-orchestration` → `collecting-evidence` → `synthesizing-pillars` |
 
 ## Полный Индекс Уже Описанных Skills
 
@@ -55,6 +56,7 @@
 | Skill | Назначение | Когда вызывать | Обычно сочетать |
 |---|---|---|---|
 | `agent-orchestration` | Координация multi-agent или multi-role workflow по одной сложной задаче. Помогает разложить работу по профилям и сохранить целостность результата. | Когда задача затрагивает код, тесты, docs, конфиги и review одновременно. | `py-plan-bot`, `py-review-orchestrator`, `py-test-swarm` |
+| `hierarchical-evidence-orchestration` | Запускает topic-level evidence программу по shard-пакетам: сначала collection, затем synthesis, затем parent cross-synthesis. Полезен, когда один `collecting-evidence` уже слишком узок для темы. | Когда нужно исследовать repo-wide тему по слоям, package families или doc domains. | `collecting-evidence`, `synthesizing-pillars`, `making-decisions` |
 | `architecture-guardian` | Проверяет архитектурные границы, ADR compliance, naming и anti-patterns. Смотрит на форму системы, а не только на зелёные тесты. | После рефакторинга, перед PR, при review изменений по слоям. | `verify-architecture`, `py-audit-bot` |
 | `capability-discovery` | Находит доступные skills, agents, commands и quality gates проекта. Помогает не изобретать workflow вручную. | В начале работы в насыщенном или незнакомом repo. | `repo-config`, `py-plan-bot` |
 | `create-pr` | Упаковывает изменения в понятный PR с хорошим scope, verification context и reviewer-friendly структурой. | Когда реализация завершена и её нужно передать в review. | `suggest-users`, `verify-implementation` |
@@ -136,6 +138,7 @@
 | Skill | Назначение | Когда вызывать | Обычно сочетать |
 |---|---|---|---|
 | `collecting-evidence` | Собирает traceable evidence-объекты с источниками, уверенностью и допущениями. Делает исследование проверяемым и сравнимым. | Когда нужно строить решение на доказательной базе, а не на интуиции. | `deep-research`, `synthesizing-pillars` |
+| `hierarchical-evidence-orchestration` | Оркестрирует несколько evidence packs как одну wave: shard decomposition, gate checks, synthesis handoff, parent cross-synthesis. | Когда одна тема требует не одного pillar pack, а нескольких coordinated shard packs. | `collecting-evidence`, `synthesizing-pillars`, `making-decisions` |
 | `synthesizing-pillars` | Превращает набор evidence в структурированное понимание по pillar-областям. Находит паттерны, противоречия и сильные сигналы. | Когда evidence уже собрано, но ясной картины ещё нет. | `collecting-evidence`, `making-decisions` |
 | `making-decisions` | Помогает зафиксировать явное решение с trade-offs, рисками и альтернативами. Делает выбор объяснимым и переносимым во времени. | Когда исследование завершено и пора выбирать путь. | `synthesizing-pillars`, `generating-constrained-specs` |
 | `generating-constrained-specs` | Пишет спецификации только на основе подтверждённых решений и ссылок. Не даёт документу расползтись в догадки и scope creep. | Когда нужен PRD или arch doc, опирающийся на уже принятые решения. | `making-decisions`, `collecting-evidence` |

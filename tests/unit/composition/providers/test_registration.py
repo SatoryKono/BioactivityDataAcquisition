@@ -23,6 +23,7 @@ from bioetl.composition.providers.registration import (
 )
 from bioetl.composition.providers._registration_contracts import (
     bind_provider_data_source_creator,
+    build_data_source_provider_config,
     build_http_provider_config,
     create_provider_assembly_support,
     resolve_provider_assembly_support,
@@ -392,3 +393,25 @@ def test_build_http_provider_config_uses_canonical_http_provider_shape() -> None
     assert config.custom_creator is custom_creator
     assert config.data_source_creator is not None
     assert config.data_source_creator(MagicMock(), MagicMock(), MagicMock()) is support
+
+
+@pytest.mark.unit
+def test_build_data_source_provider_config_supports_non_http_special_case() -> None:
+    """Non-HTTP provider entries should still use one canonical assembly helper."""
+    creator = MagicMock(name="creator")
+    custom_creator = MagicMock(name="custom_creator")
+
+    config = build_data_source_provider_config(
+        adapter_class=MagicMock(name="adapter_class"),
+        http_config=None,
+        requires_http_client=False,
+        requires_logger=True,
+        custom_creator=custom_creator,
+        data_source_creator=creator,
+    )
+
+    assert config.http_config is None
+    assert config.requires_http_client is False
+    assert config.requires_logger is True
+    assert config.custom_creator is custom_creator
+    assert config.data_source_creator is creator

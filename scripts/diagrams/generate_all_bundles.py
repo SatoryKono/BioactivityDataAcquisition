@@ -380,6 +380,21 @@ def build_toc_lines(
     return lines
 
 
+def resolve_bundle_image_markdown(
+    collection_dir: Path, stem: str, output_md: Path
+) -> str:
+    svg_file = collection_dir / "svg" / f"{stem}.svg"
+    png_file = collection_dir / "png" / f"{stem}.png"
+    svg_rel = Path(os.path.relpath(svg_file, output_md.parent)).as_posix()
+    png_rel = Path(os.path.relpath(png_file, output_md.parent)).as_posix()
+
+    if svg_file.exists():
+        return f"![{stem}]({svg_rel})\n"
+    if png_file.exists():
+        return f"![{stem}]({png_rel})\n"
+    return f"*SVG/PNG не найдены: `{svg_rel}`, `{png_rel}`*\n"
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate Markdown bundles for diagram collections."
@@ -409,7 +424,6 @@ def generate_bundle(
         print(f"[ERROR] No {file_ext} files in {collection_dir.name}/")
         return 0
 
-    png_dir = collection_dir / "png"
     output_md = bundle_markdown_path(collection_key)
     parsed_diagrams = [
         (diagram_path, parse_mermaid(diagram_path)) for diagram_path in diagram_files
@@ -434,8 +448,6 @@ def generate_bundle(
     for df, meta in parsed_diagrams:
         stem = df.stem
         title = format_title(meta)
-        png_file = png_dir / f"{stem}.png"
-
         # Page break between diagrams
         if not first:
             lines.append("\\newpage")
@@ -445,14 +457,7 @@ def generate_bundle(
         first = False
 
         lines.append(f"## {stem} — {title}\n")
-
-        png_rel = Path(
-            os.path.relpath(png_dir / f"{stem}.png", output_md.parent)
-        ).as_posix()
-        if png_file.exists():
-            lines.append(f"![{stem}]({png_rel})\n")
-        else:
-            lines.append(f"*PNG не найден: `{png_rel}`*\n")
+        lines.append(resolve_bundle_image_markdown(collection_dir, stem, output_md))
 
         lines.append("### Описание")
         lines.append(build_description(meta, collection_key))

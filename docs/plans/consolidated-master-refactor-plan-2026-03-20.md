@@ -139,6 +139,12 @@ technical-debt roadmap, не потеряв важные предложения.
 - явная фиксация retained compatibility obligations;
 - зелёные architecture guards по provider-registry decomposition.
 
+Локальный статус на текущий момент:
+- canonical helper path уже зафиксирован для `ProviderAssemblySupport`
+  resolution, support-aware data-source creator binding, HTTP-oriented
+  `ProviderConfig` assembly и non-HTTP data-source config assembly;
+- remaining runtime `ProviderRegistry` ownership intentionally stays deferred.
+
 ### Wave 2. Composition hotspots и ownership-heavy seams
 
 Приоритет: `P1`
@@ -164,6 +170,14 @@ technical-debt roadmap, не потеряв важные предложения.
 - composition меньше зависит от исторически накопленных compatibility-shaped
   seams;
 - ownership state для ключевых узлов становится явно зафиксированным.
+
+Локальный статус на текущий момент:
+- `registration_biblio.py` и `pipeline_builder.py` уже прошли intended
+  decomposition path;
+- `composite_support_service_builders.py` сейчас лучше трактовать как
+  guarded facade-only seam, а не как кандидат на ещё один forced split.
+- `pipeline_builder.py` тоже лучше удерживать как guarded service-factory
+  facade, а не как новый decomposition target.
 
 ### Wave 3. Adapter и infrastructure hotspot reduction
 
@@ -193,6 +207,13 @@ technical-debt roadmap, не потеряв важные предложения.
 Выход этой волны:
 - уменьшение концентрации в adapter/infrastructure hotspot tails;
 - сохранение зелёных drift, size и mypy gates.
+
+Локальный статус на текущий момент:
+- первым bounded cluster для этой волны выбран `crossref/batch.py` family;
+- cluster start зафиксирован в
+  `wave-3-crossref-batch-cluster-plan-2026-03-20.md`;
+- следующий implementation step для `Wave 3` сужен до internal workflow split
+  with compatibility seam, а не к broad adapter rewrite.
 
 ### Wave 4. Complexity hotspot implementation
 
