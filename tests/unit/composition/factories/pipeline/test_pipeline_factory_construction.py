@@ -9,9 +9,6 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
-from bioetl.composition.factories.pipeline.config_resolution import (
-    DomainConfigResolver,
-)
 from bioetl.composition.factories.pipeline.run_context_factory import (
     RunContextFactory,
 )
@@ -19,6 +16,9 @@ from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
 from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.config.domain_config_resolver import (
+    DomainConfigResolver,
+)
 
 
 @pytest.mark.unit
@@ -145,7 +145,11 @@ def test_transformer_builder_builds_transformer_with_policy_fallback() -> None:
 @pytest.mark.unit
 def test_construction_module_reexports_canonical_helpers() -> None:
     from bioetl.composition.factories.pipeline import construction
+    from bioetl.composition.factories.pipeline.config_resolution import (
+        DomainConfigResolver as CompatDomainConfigResolver,
+    )
 
     assert construction.RunContextFactory is RunContextFactory
     assert construction.DomainConfigResolver is DomainConfigResolver
     assert construction.TransformerBuilder is TransformerBuilder
+    assert CompatDomainConfigResolver is DomainConfigResolver

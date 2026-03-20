@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
 if TYPE_CHECKING:
@@ -60,6 +60,7 @@ class RunnerFactory:
         registry: PipelineRegistry | None = None,
         registry_factory: Callable[[], PipelineRegistry] | None = None,
         runner_builder: Callable[..., ExecutionMetricsRunnerPort] | None = None,
+        ensure_providers_loaded_fn: Callable[[], None] = ensure_providers_loaded,
     ) -> None:
         """Initialize the factory.
 
@@ -73,6 +74,7 @@ class RunnerFactory:
         self._registry = registry
         self._registry_factory = registry_factory or create_registry
         self._runner_builder = runner_builder
+        self._ensure_providers_loaded_fn = ensure_providers_loaded_fn
         self._registrations_done = False
 
     def _ensure_registrations(self) -> None:
@@ -81,7 +83,7 @@ class RunnerFactory:
         Idempotent - safe to call multiple times.
         """
         if not self._registrations_done:
-            ProviderRegistry.ensure_loaded()
+            self._ensure_providers_loaded_fn()
             if not self._effective_registry.list_pipelines():
                 register_all_pipelines(registry=self._effective_registry)
             self._registrations_done = True
@@ -171,6 +173,7 @@ def create_runner_factory(
     registry: PipelineRegistry | None = None,
     registry_factory: Callable[[], PipelineRegistry] | None = None,
     runner_builder: Callable[..., ExecutionMetricsRunnerPort] | None = None,
+    ensure_providers_loaded_fn: Callable[[], None] = ensure_providers_loaded,
 ) -> RunnerFactory:
     """Create a new RunnerFactory instance.
 
@@ -179,6 +182,7 @@ def create_runner_factory(
         registry_factory: Optional registry factory used when ``registry`` is not
             provided.
         runner_builder: Optional runner assembly function for DI/testing.
+        ensure_providers_loaded_fn: Optional runtime provider bootstrap callable.
 
     Returns:
         RunnerFactory instance.
@@ -187,6 +191,7 @@ def create_runner_factory(
         registry=registry,
         registry_factory=registry_factory,
         runner_builder=runner_builder,
+        ensure_providers_loaded_fn=ensure_providers_loaded_fn,
     )
 
 

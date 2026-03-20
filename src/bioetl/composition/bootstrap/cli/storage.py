@@ -27,7 +27,8 @@ from bioetl.application.services.medallion_lifecycle import MedallionLifecycleSe
 from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 

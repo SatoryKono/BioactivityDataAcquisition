@@ -53,3 +53,18 @@ def test_services_creation_api_reexports_pipeline_creation_symbols() -> None:
 
     assert _PipelineCreationInputs is CanonicalPipelineCreationInputs
     assert _create_pipeline_with_services_impl is canonical_create_pipeline
+
+
+def test_pipeline_configs_module_reexports_registry_manifest() -> None:
+    """Legacy pipeline configs module should stay as a compatibility shim."""
+    from bioetl.composition.factories.pipeline.configs import (
+        PIPELINE_CONFIGS,
+        PipelineFactoryConfig,
+    )
+    from bioetl.composition.factories.pipeline.registry_manifest import (
+        PIPELINE_CONFIGS as canonical_pipeline_configs,
+        PipelineFactoryConfig as CanonicalPipelineFactoryConfig,
+    )
+
+    assert PIPELINE_CONFIGS is canonical_pipeline_configs
+    assert PipelineFactoryConfig is CanonicalPipelineFactoryConfig

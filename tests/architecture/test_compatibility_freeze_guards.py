@@ -30,9 +30,18 @@ CONFIG_LOADER_MODULE = "bioetl.infrastructure.config_loader"
 CONFIG_LOADER_MODULE_PATH = (
     ROOT / "src" / "bioetl" / "infrastructure" / "config_loader.py"
 )
+CONFIG_LOAD_API_MODULE = "bioetl.infrastructure.config_load_api"
+CONFIG_LOAD_API_MODULE_PATH = (
+    ROOT / "src" / "bioetl" / "infrastructure" / "config_load_api.py"
+)
+INFRASTRUCTURE_CONFIG_PUBLIC_MODULE = "bioetl.infrastructure.config"
 SERVICES_CREATION_API_COMPAT_MODULE = (
     "bioetl.composition.factories.services.creation_api"
 )
+PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE = (
+    "bioetl.composition.factories.pipeline.config_resolution"
+)
+PIPELINE_CONFIGS_COMPAT_MODULE = "bioetl.composition.factories.pipeline.configs"
 PIPELINE_RUNNER_SERVICE_MODULE = (
     "bioetl.application.services.pipeline_runner_service"
 )
@@ -241,6 +250,25 @@ ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES = frozenset({})
 ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES = frozenset({})
 ALLOWED_CONFIG_LOADER_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_CONFIG_LOADER_TEST_FILES: frozenset[Path] = frozenset()
+ALLOWED_CONFIG_LOAD_API_SRC_FILES: frozenset[Path] = frozenset()
+ALLOWED_CONFIG_LOAD_API_TEST_FILES: frozenset[Path] = frozenset()
+ALLOWED_INFRASTRUCTURE_CONFIG_LOADER_SYMBOL_SRC_FILES: frozenset[Path] = frozenset()
+ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES = frozenset(
+    {
+        ROOT
+        / "tests"
+        / "unit"
+        / "composition"
+        / "factories"
+        / "pipeline"
+        / "test_pipeline_factory_construction.py",
+    }
+)
+ALLOWED_PIPELINE_CONFIGS_COMPAT_TEST_FILES = frozenset(
+    {
+        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
+    }
+)
 ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_MERGE_SERVICE_SRC_FILES = frozenset(
     {
@@ -625,6 +653,66 @@ def test_config_loader_module_is_confined_to_dedicated_tests(
 
 
 @pytest.mark.architecture
+def test_config_load_api_compat_shim_file_has_been_removed() -> None:
+    """Historical config_load_api bridge should remain deleted."""
+    assert not CONFIG_LOAD_API_MODULE_PATH.exists(), (
+        "Legacy config_load_api compatibility shim must stay removed: "
+        "src/bioetl/infrastructure/config_load_api.py"
+    )
+
+
+@pytest.mark.architecture
+def test_config_load_api_module_is_absent_from_first_party_src_imports(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src must import canonical config modules, not config_load_api."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=CONFIG_LOAD_API_MODULE,
+        allowed_files=ALLOWED_CONFIG_LOAD_API_SRC_FILES,
+    )
+    assert not violations, (
+        "config_load_api compatibility module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_config_load_api_module_is_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests must not keep importing the removed config_load_api shim."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name=CONFIG_LOAD_API_MODULE,
+        allowed_files=ALLOWED_CONFIG_LOAD_API_TEST_FILES,
+    )
+    assert not violations, (
+        "config_load_api compatibility shim must stay removed from tests:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize("symbol", ("load_pipeline_config", "load_source_config"))
+def test_infrastructure_config_loader_symbols_are_confined_to_canonical_owner_imports_in_src(
+    symbol: str,
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src must import config loader symbols from canonical owner modules."""
+    violations = _iter_imported_symbol_violations(
+        source_ast_cache,
+        module_names=frozenset({INFRASTRUCTURE_CONFIG_PUBLIC_MODULE}),
+        symbol=symbol,
+        allowed_files=ALLOWED_INFRASTRUCTURE_CONFIG_LOADER_SYMBOL_SRC_FILES,
+    )
+    assert not violations, (
+        "infrastructure.config loader re-export surface leaked into first-party "
+        "src imports:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
 def test_services_creation_api_compat_module_is_not_used_in_src(
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
@@ -637,6 +725,70 @@ def test_services_creation_api_compat_module_is_not_used_in_src(
     assert not violations, (
         "services.creation_api compatibility shim leaked into first-party src "
         "imports:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_pipeline_config_resolution_compat_module_is_not_used_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src must import the canonical infrastructure domain-config resolver."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE,
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "pipeline.config_resolution compatibility shim leaked into first-party src "
+        "imports:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_pipeline_config_resolution_compat_module_is_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests must treat pipeline.config_resolution as a dedicated compatibility seam."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name=PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE,
+        allowed_files=ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES,
+    )
+    assert not violations, (
+        "pipeline.config_resolution compatibility shim leaked beyond dedicated "
+        "tests:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_pipeline_configs_compat_module_is_not_used_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src must import the canonical pipeline registry manifest."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=PIPELINE_CONFIGS_COMPAT_MODULE,
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "pipeline.configs compatibility shim leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_pipeline_configs_compat_module_is_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests must treat pipeline.configs as a dedicated compatibility seam."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name=PIPELINE_CONFIGS_COMPAT_MODULE,
+        allowed_files=ALLOWED_PIPELINE_CONFIGS_COMPAT_TEST_FILES,
+    )
+    assert not violations, (
+        "pipeline.configs compatibility shim leaked beyond dedicated tests:\n"
+        + "\n".join(violations)
     )
 
 

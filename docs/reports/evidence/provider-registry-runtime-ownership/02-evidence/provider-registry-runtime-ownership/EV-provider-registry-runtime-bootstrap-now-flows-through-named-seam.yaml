@@ -1,0 +1,18 @@
+id: EV-provider-registry-runtime-bootstrap-now-flows-through-named-seam
+pillar: provider-registry-runtime-ownership
+source:
+  type: code
+  ref: "src/bioetl/composition/_pipeline_execution.py:49-53; src/bioetl/composition/bootstrap/runtime/pipeline.py:61-70; src/bioetl/composition/factories/pipeline/runner.py:61-87; src/bioetl/composition/runtime_builders/runner_builder.py:50-58,85-129"
+  retrieved_at: 2026-03-20
+claim: "The deferred runtime/bootstrap paths no longer depend on raw class-level ProviderRegistry bootstrap calls; they now route provider loading through a named composition seam."
+quote: "\"ensure_providers_loaded()\" and \"ensure_providers_loaded_fn\" now appear as the runtime bootstrap entry points across the four deferred files."
+confidence: 0.96
+assumptions:
+  - "The inspected runtime files are the complete intended scope of RF-07D runtime migration."
+notes: "This is the strongest direct code signal against immediate further ownership migration. The hidden registry dependency has already been reduced to a visible seam."
+tags:
+  - provider-registry
+  - runtime
+  - bootstrap
+  - seam
+  - rf-07d

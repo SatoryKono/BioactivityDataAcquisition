@@ -10,6 +10,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
     get_data_source_creator,
 )
+from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.factories.dq.context_resolver import (
     extract_dq_configs as _extract_dq_configs,
 )
@@ -87,6 +88,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pandera_silver_schema: object | None = None,
         data_source_creator: DataSourceCreatorProtocol | None = None,
         transformer_class: type[BaseTransformer] | None = None,
+        provider_registry: ProviderRegistry | None = None,
     ) -> None:
         """Initialize factory dependencies and schema contracts."""
         if gold_schema is None:
@@ -101,9 +103,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.gold_schema = gold_schema
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
+        self.provider_registry = provider_registry
         # Use custom creator or resolve the canonical provider-bound creator.
         self._create_data_source = data_source_creator or get_data_source_creator(
-            provider
+            provider,
+            provider_registry=provider_registry,
         )
 
     def create_transformer(
@@ -241,6 +245,7 @@ def create_pipeline_factory(
     gold_schema: GoldSchemaType | None = None,
     pandera_silver_schema: object | None = None,
     transformer_class: type[BaseTransformer] | None = None,
+    provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Create a configured :class:`GenericPipelineFactory`."""
     return GenericPipelineFactory(
@@ -251,6 +256,7 @@ def create_pipeline_factory(
         gold_schema=gold_schema,
         pandera_silver_schema=pandera_silver_schema,
         transformer_class=transformer_class,
+        provider_registry=provider_registry,
     )
 
 

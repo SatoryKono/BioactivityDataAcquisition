@@ -20,12 +20,12 @@ spawn_agent(
 
 | # | Субагент (`subagent_type`) | Model | Роль | Артефакт |
 |:-:|----------------------------|-------|------|----------|
-| I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `00-audit-baseline.md`, `07-audit-final.md` |
-| II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `01-plan-initial.md`, `03-plan-updated.md` |
-| III | **py-test-bot** | sonnet | Тестирование | `02-test-baseline.md`, `05-test-final.md` |
-| IV | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
-| V | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
-| VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `06-doc-update-log.md` |
+| I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md` |
+| II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md` |
+| III | **py-test-bot** | sonnet | Тестирование | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md` |
+| IV | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md` |
+| V | **py-debug-bot** | opus | Отладка падений | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md` |
+| VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md` |
 | VII | **py-test-swarm** | opus | Иерархическое тестирование (L1→L2→L3) | test reports |
 | VIII | **py-doc-swarm** | opus | Иерархическое документирование, drift detection | doc reports |
 | IX | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
@@ -60,20 +60,20 @@ spawn_agent(
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ① py-audit-bot (baseline)   │──→ 00-audit-baseline.md
+│  ① py-audit-bot (baseline)   │──→ review_py-audit-bot_{YYYYMMDD}_{HHMM}_baseline.md
 │  Аудит целевого фрагмента   │
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ② py-plan-bot (initial)     │──→ 01-plan-initial.md
+│  ② py-plan-bot (initial)     │──→ review_py-plan-bot_{YYYYMMDD}_{HHMM}.md
 │  Формирование плана RF-*    │
 │  (+консолидация с user plan)│
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ③ py-test-bot (baseline)    │──→ 02-test-baseline.md
+│  ③ py-test-bot (baseline)    │──→ review_py-test-bot_{YYYYMMDD}_{HHMM}.md
 │  Фиксация состояния тестов  │
 └─────────────┬───────────────┘
               │
@@ -85,13 +85,13 @@ spawn_agent(
 ┌─────────────┤    │
 │ py-debug-bot│    │
 │→ py-test-bot│    │
-│ (цикл)      │──→ 04-refactoring-log.md (debug-секции)
+│ (цикл)      │──→ review_py-debug-bot_{YYYYMMDD}_{HHMM}.md
 └──────┬──────┘    │
        │           │
        ▼           │
 ┌──────────────┐   │
 │ py-plan-bot  │   │
-│ (update)     │──→ 03-plan-updated.md
+│ (update)     │──→ review_py-plan-bot_{YYYYMMDD}_{HHMM}.md
 └──────┬───────┘   │
        │           │
        ◄───────────┘
@@ -100,16 +100,16 @@ spawn_agent(
 ┌─────────────────────────────────────────────────────┐
 │  ④ РЕАЛИЗАЦИЯ (параллельно по зонам ответственности) │
 │                                                       │
-│  orchestrator ─→ src/bioetl/ ──→ 04-refactoring-log.md│
+│  orchestrator ─→ src/bioetl/ ──→ direct edits in scope │
 │       │                                                │
 │       ├─ (entity scaffolding?) ──→ py-config-bot        │
 │       │                                                │
-│  py-config-bot → configs/  ──→ 04a-config-log.md       │
+│  py-config-bot → configs/  ──→ review_py-config-bot_{YYYYMMDD}_{HHMM}.md │
 └─────────────────────┬───────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────┐
-│  ⑤ py-test-bot (final)       │──→ 05-test-final.md
+│  ⑤ py-test-bot (final)       │──→ review_py-test-bot_{YYYYMMDD}_{HHMM}.md
 │  Финальный прогон тестов    │
 └─────────────┬───────────────┘
               │
@@ -128,13 +128,13 @@ spawn_agent(
        │
        ▼
 ┌─────────────────────────────┐
-│  ⑥ py-doc-bot                │──→ 06-doc-update-log.md
+│  ⑥ py-doc-bot                │──→ review_py-doc-bot_{YYYYMMDD}_{HHMM}.md
 │  Обновление docs/docstrings │
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ⑦ py-audit-bot (final)      │──→ 07-audit-final.md
+│  ⑦ py-audit-bot (final)      │──→ review_py-audit-bot_{YYYYMMDD}_{HHMM}_final.md
 │  Финальная верификация       │
 └─────────────────┬───────────┘
                   │
@@ -193,21 +193,20 @@ py-config-bot (DQ migration)
 ## 4. Структура артефактов
 
 ```
-reports/plans/<task_id>/
-├── 00-audit-baseline.md      ← py-audit-bot (baseline)
-├── 01-plan-initial.md        ← py-plan-bot (initial)
-├── 02-test-baseline.md       ← py-test-bot (baseline)
-├── 03-plan-updated.md        ← py-plan-bot (update)          [опционально]
-├── 04-refactoring-log.md     ← orchestrator + py-debug-bot
-├── 04a-config-log.md         ← py-config-bot
-├── 05-test-final.md          ← py-test-bot (final)
-├── 06-doc-update-log.md      ← py-doc-bot
-└── 07-audit-final.md         ← py-audit-bot (final)
+reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 ```
+
+Правило: любой агент/субагент формирует итоговый отчёт только по этому пути
+(LLM = вызывающая модель, agent = профиль/skill, `phase` — опциональный
+суффикс для baseline/final/targeted, если это закреплено в contract
+конкретного `py-*` профиля). Дополнительные артефакты (телеметрия, метрики,
+промежуточные планы) сохраняйте рядом в той же директории, но итоговый отчёт
+должен соответствовать шаблону
+`reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md`.
 
 Требования к каждому файлу (минимум):
 
-- Дата/время создания
+- Дата/время создания (UTC), LLM, agent
 - Scope (файлы/модули)
 - Команды верификации
 - Ссылки на `RF-*` / `DBG-*` / `AUD-*` / `DOC-*` / `CFG-*` идентификаторы

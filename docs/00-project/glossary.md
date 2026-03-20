@@ -230,7 +230,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | Pattern | Example | Usage |
 |---------|---------|-------|
 | `{Entity}Transformer` | `ActivityTransformer`, `MoleculeTransformer` | Bronze → Silver transformation |
-| `{Provider}{Entity}Transformer` | `PubChemCompoundTransformer` | Cross-provider distinction |
+| `{Provider}{EntitySurfaceTerm}Transformer` | `PubChemCompoundTransformer` | Public pipeline surface; may intentionally differ from canonical domain entity name |
 | `{Layer}Writer` | `BronzeWriter`, `GoldWriter` | Data persistence |
 | `{Provider}Adapter` | `ChemblAdapter`, `UniProtAdapter` | External API access |
 | `{Resource}Manager` | `CheckpointManager` | Resource lifecycle |
@@ -238,17 +238,24 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 ### CLI Conventions
 
-**Pipeline Names**: CLI uses `{provider}-{entity}` format for pipeline identifiers:
+**Pipeline Names**: CLI uses `{provider}_{entity}` format for pipeline identifiers:
 - `chembl_molecule`, `chembl_activity`, `chembl_assay`
 - `pubchem_compound`
 - `uniprot_protein`
 - `pubmed_publication`
+
+These pipeline IDs are **stable external identifiers**. They may intentionally
+preserve provider API terms even when the canonical domain entity name differs.
+Examples:
+- Domain: `PubchemMolecule` → CLI/config/public pipeline ID: `pubchem_compound`
+- Domain: `UniprotTarget` → CLI/config/public pipeline ID: `uniprot_protein`
 
 **Language Policy**: All CLI help texts, error messages, and user-facing output use **English** for consistency and international accessibility. Internal documentation (CLAUDE.md, RULES.md) may use Russian per project convention.
 
 **Entity Terms in CLI**: Use provider-specific terms as defined in this glossary:
 - ChEMBL pipelines use `molecule`, `activity`, `target`, etc.
 - PubChem pipelines use `compound`
+- UniProt pipelines use `protein`
 - Avoid generic terms like `testitem`, `drug`, `substance` in pipeline names
 
 ---

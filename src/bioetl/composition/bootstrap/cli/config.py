@@ -17,7 +17,7 @@ from bioetl.infrastructure.config import (
     get_settings,
     yaml_config_to_domain,
 )
-from bioetl.infrastructure.config_load_api import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 __all__ = ["bootstrap_config_service"]
 

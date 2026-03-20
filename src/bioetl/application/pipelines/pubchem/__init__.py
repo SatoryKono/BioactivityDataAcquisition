@@ -6,6 +6,11 @@ processing data from the PubChem database.
 Main Components:
 - PubChemCompoundPipeline: Pipeline for compound data
 - PubChemCompoundTransformer: Transformer for compound data
+
+Naming note:
+- Application/public pipeline surface intentionally keeps `Compound` to match the
+  stable external identifier `pubchem_compound`.
+- Canonical domain entity naming still uses `PubchemMolecule`.
 """
 
 from __future__ import annotations

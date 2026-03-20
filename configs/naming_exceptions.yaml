@@ -1,7 +1,7 @@
 # Naming Convention Exceptions
 # This file documents allowed exceptions to the naming conventions in RULES.md §2.
-# Version: 2.1
-# Last Updated: 2026-02-24
+# Version: 2.2
+# Last Updated: 2026-03-20
 
 # Documentation files that are allowed to use UPPER_CASE names.
 # These are conventional files recognized by GitHub and standard tooling.
@@ -15,6 +15,12 @@ documentation_exceptions:
     - LICENSE.md          # License file
     - CLAUDE.md           # Claude Code instructions
     - AGENT.md            # Agent instructions (Jules)
+    - SKILL.md            # Skill instruction files
+    - INDEX.md            # Index / navigation hubs
+    - ORCHESTRATION.md    # Runtime orchestration docs
+    - TOOLS.md            # Tool reference docs
+    - CODEX.md            # Codex runtime docs
+    - GEMINI.md           # Gemini runtime docs
 
 # Root-level files that may use non-standard naming
 root_file_exceptions:
@@ -169,7 +175,8 @@ function_prefix_exceptions:
 
 # Pipeline naming format
 # Pipeline IDs follow the format: {provider}_{entity}
-# This is an exception to general snake_case for uniqueness
+# They are stable external identifiers for CLI/config/public surfaces and may
+# intentionally differ from canonical domain entity names defined by ADR-024.
 pipeline_id_format:
     pattern: "{provider}_{entity}"
     examples:
@@ -185,13 +192,63 @@ pipeline_id_format:
         - uniprot_protein    # Uses API term per glossary.md CLI conventions
         - pubmed_publication
 
+# Stable public surface names that intentionally preserve provider API terms.
+# These names are not canonical domain entities, but they are normative for CLI,
+# pipeline classes, transformers, and generated public contracts.
+stable_public_surface:
+    pipeline_ids:
+        -   name: pubchem_compound
+            location: configs/entities/pubchem/compound.yaml
+            reason: Stable external pipeline identifier uses PubChem API term for CLI/config compatibility.
+        -   name: uniprot_protein
+            location: configs/entities/uniprot/protein.yaml
+            reason: Stable external pipeline identifier uses UniProt API term for CLI/config compatibility.
+    pipeline_classes:
+        -   name: PubChemCompoundPipeline
+            location: src/bioetl/application/pipelines/pubchem/__init__.py
+            reason: Public application pipeline surface follows stable pipeline identifier rather than canonical domain entity name.
+        -   name: UniProtProteinPipeline
+            location: src/bioetl/application/pipelines/uniprot/__init__.py
+            reason: Public application pipeline surface follows stable pipeline identifier rather than canonical domain entity name.
+    transformers:
+        -   name: PubChemCompoundTransformer
+            location: src/bioetl/application/pipelines/pubchem/transformer.py
+            reason: Transformer name matches stable external pipeline surface while validating against PubchemMolecule.
+        -   name: UniProtProteinTransformer
+            location: src/bioetl/application/pipelines/uniprot/transformer.py
+            reason: Transformer name matches stable external pipeline surface while validating against UniprotTarget.
+    gold_schemas:
+        -   name: PubChemCompoundGoldSchema
+            location: src/bioetl/domain/contracts/gold/pubchem.py
+            reason: Generated/public Gold contract keeps the stable pipeline surface term Compound.
+        -   name: UniProtProteinGoldSchema
+            location: src/bioetl/domain/contracts/gold/uniprot.py
+            reason: Generated/public Gold contract keeps the stable pipeline surface term Protein.
+
+# Legacy domain aliases forbidden by ADR-024. These names are not valid
+# replacements for canonical domain entities and must not reappear on export
+# surfaces without an explicit, time-bound compatibility decision.
+forbidden_domain_entity_aliases:
+    -   legacy_name: Document
+        canonical_name: ChemblPublication
+        export_surface: src/bioetl/domain/entities/__init__.py
+        reason: ADR-024 direct migration removed the need for a Document alias in the canonical domain layer.
+    -   legacy_name: Compound
+        canonical_name: PubchemMolecule
+        export_surface: src/bioetl/domain/entities/__init__.py
+        reason: ADR-024 direct migration removed the need for a Compound alias in the canonical domain layer.
+    -   legacy_name: Protein
+        canonical_name: UniprotTarget
+        export_surface: src/bioetl/domain/entities/__init__.py
+        reason: ADR-024 direct migration removed the need for a Protein alias in the canonical domain layer.
+
 # Notes on enforcement
-# - The naming_audit.py tool uses this file's content as reference
-# - Violations against these exceptions should NOT be flagged
-# - Add new exceptions here with justification
+# - scripts/qa/naming_audit.py loads this file as the naming exception registry.
+# - Violations against these exceptions should NOT be flagged.
+# - Add new exceptions here with justification and concrete location.
 
 
-# ADR-024 exception registry (audited 2026-02-24)
+# ADR-024 exception registry (audited 2026-03-20)
 adr_024_known_exceptions:
     derived_entities:
         -   entity: DocumentSimilarity
@@ -203,10 +260,10 @@ adr_024_known_exceptions:
     pipeline_ids:
         -   pipeline: pubchem_compound
             location: configs/entities/pubchem/compound.yaml
-            reason: CLI compatibility uses provider API term per glossary
+            reason: CLI compatibility uses provider API term per glossary and stable public ID policy.
         -   pipeline: uniprot_protein
             location: configs/entities/uniprot/protein.yaml
-            reason: CLI compatibility uses provider API term per glossary
+            reason: CLI compatibility uses provider API term per glossary and stable public ID policy.
     legacy_fields:
         -   field: document_id
             reason: foreign-key compatibility with ChEMBL API source model

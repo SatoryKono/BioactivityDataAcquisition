@@ -6,9 +6,6 @@ module remains the sanctioned aggregate seam for construction helpers.
 
 from __future__ import annotations
 
-from bioetl.composition.factories.pipeline.config_resolution import (
-    DomainConfigResolver,
-)
 from bioetl.composition.factories.pipeline.construction_types import (
     ContractPolicyLoader,
     DomainConfigMapper,
@@ -20,6 +17,7 @@ from bioetl.composition.factories.pipeline.run_context_factory import (
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
+from bioetl.infrastructure.config.domain_config_resolver import DomainConfigResolver
 
 # Architecture marker: the construction path ultimately instantiates
 # ``transformer_class(...)`` inside ``TransformerBuilder.build``.

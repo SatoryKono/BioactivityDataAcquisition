@@ -8,9 +8,6 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-from bioetl.composition.factories.pipeline.config_resolution import (
-    DomainConfigResolver,
-)
 from bioetl.composition.factories.pipeline.run_context_factory import (
     RunContextFactory,
 )
@@ -19,6 +16,7 @@ from bioetl.composition.factories.pipeline.transformer_builder import (
 )
 from bioetl.composition.services.versioning import get_git_commit, get_pipeline_version
 from bioetl.infrastructure.config import load_pipeline_contract_policy
+from bioetl.infrastructure.config.domain_config_resolver import DomainConfigResolver
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
 if TYPE_CHECKING:

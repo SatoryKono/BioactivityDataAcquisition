@@ -7,6 +7,11 @@ Main Components:
 - UniProtProteinPipeline: Pipeline for protein data
 - UniProtProteinTransformer: Transformer for protein data
 - IDMappingTransformer: Transformer for ChEMBL → UniProt ID mapping
+
+Naming note:
+- Application/public pipeline surface intentionally keeps `Protein` to match the
+  stable external identifier `uniprot_protein`.
+- Canonical domain entity naming still uses `UniprotTarget`.
 """
 
 from __future__ import annotations

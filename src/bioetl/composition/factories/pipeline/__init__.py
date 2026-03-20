@@ -3,9 +3,13 @@
 Canonical import paths::
 
     GenericPipelineFactory : from bioetl.composition.factories.pipeline import GenericPipelineFactory
-    PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.configs import PIPELINE_CONFIGS
+    PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.registry_manifest import PIPELINE_CONFIGS
     register_all_pipelines : from bioetl.composition.factories.pipeline.registry import register_all_pipelines
     PipelineRegistry       : from bioetl.composition import PipelineRegistry
+
+Compatibility path::
+
+    PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.configs import PIPELINE_CONFIGS
 """
 
 from __future__ import annotations

@@ -2,21 +2,7 @@
 
 
   
-  7. RF-07. Поздняя и осторожная миграция ProviderRegistry
-
-  - Проблема с ProviderRegistry реальна, но в прошлом плане я переоценил её срочность. Сейчас в проекте уже есть instance-scoped модель через create_provider_registry() и одновременно широкий compatibility layer
-    через class-level dispatch. Это значит, что задача не должна идти рано и “в лоб”. Её место — после RF-02 и RF-04, когда regression net уже усилен, а часть composition hubs уже стала понятнее. Только тогда можно
-    безопасно сокращать hidden dependency seam без риска разрушить bootstrap/test ecosystem.
-  - Первый шаг этой задачи должен быть инвентаризацией. Нужно получить полный список ProviderRegistry.ensure_loaded/is_registered/create_adapter/build_data_source_creator call sites в src и tests, разделить их на
-    production paths, compatibility paths и test conveniences. Сейчас class-level API используется широко, и это нельзя игнорировать. Пока такой карты нет, любые разговоры о “удалить singleton seam” — слишком
-    абстрактны.
-  - Второй шаг — ввести explicit registry path там, где это даёт реальный выигрыш и минимальный blast radius. Например, начать с одного factory chain, где registry already conceptually local. При этом class-level
-    methods должны остаться рабочим compatibility layer на переходный период. Цель не “сломать старое”, а постепенно сделать новое предпочтительным и лучше тестируемым.
-  - Третий шаг — поставить ratchet. Когда первый explicit path заработает, нужен тест или search-based architectural guard, который не позволит новым production call sites без нужды добавлять ещё больше class-level
-    registry access. Это важнее полного удаления legacy path на ранней стадии.
-  - DoD для RF-07: есть карта текущих registry consumers; хотя бы один production path использует explicit registry instance; compatibility layer сохранён, но не растёт; tests подтверждают отсутствие скрытых
-    регрессий в adapter creation/bootstrap lifecycle. Полное удаление default registry в этой задаче не требуется; главное — начать контролируемое уменьшение зависимости от него.
-
+ 
   8. RF-08. Уточнить naming policy и exception model, не устраивая массовых renames
 
   - Эта задача исправляет второй крупный перекос старого плана. Naming drift в проекте есть, но он не везде означает необходимость переименования. В частности, pubchem_compound и PubChemCompound* нельзя просто

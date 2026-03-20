@@ -22,7 +22,7 @@ from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMa
 from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
     PubChemFetchStrategies,
 )
-from bioetl.infrastructure.config_load_api import load_source_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 __all__ = ["PubChemRuntimeDependencies", "create_pubchem_adapter"]
 

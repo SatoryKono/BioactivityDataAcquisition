@@ -28,6 +28,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+import yaml
+
 # Configure logging for CLI output
 logging.basicConfig(
     level=logging.INFO,
@@ -35,6 +37,8 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
+REPO_ROOT = Path(__file__).resolve().parents[2]
+NAMING_EXCEPTIONS_PATH = REPO_ROOT / "configs" / "naming_exceptions.yaml"
 
 
 class ViolationType(StrEnum):
@@ -58,6 +62,40 @@ class Violation:
     current_name: str
     issue: ViolationType
     recommendation: str
+
+
+@dataclass(frozen=True)
+class StablePublicName:
+    """Registry entry for an intentionally stable public identifier."""
+
+    name: str
+    location: str
+    reason: str
+
+
+@dataclass(frozen=True)
+class ForbiddenAlias:
+    """Registry entry for a forbidden legacy alias."""
+
+    legacy_name: str
+    canonical_name: str
+    export_surface: str
+    reason: str
+
+
+@dataclass(frozen=True)
+class NamingRegistry:
+    """Parsed naming exception registry."""
+
+    documentation_exceptions: frozenset[str]
+    root_file_exceptions: frozenset[str]
+    class_suffix_exceptions: frozenset[str]
+    function_prefix_exceptions: frozenset[str]
+    stable_pipeline_ids: tuple[StablePublicName, ...]
+    stable_pipeline_classes: tuple[StablePublicName, ...]
+    stable_transformers: tuple[StablePublicName, ...]
+    stable_gold_schemas: tuple[StablePublicName, ...]
+    forbidden_domain_entity_aliases: tuple[ForbiddenAlias, ...]
 
 
 # Суффиксы для классов по ролям
@@ -90,132 +128,6 @@ ROLE_SUFFIXES = {
     "Collector": ["Collector"],
 }
 
-# Допустимые классы без суффиксов (domain entities, enums, etc.)
-ALLOWED_NO_SUFFIX = {
-    # Domain entities
-    "Bioactivity",
-    "Assay",
-    "Target",
-    "TargetComponent",
-    "Molecule",
-    "Document",
-    "Compound",
-    "Protein",
-    "Publication",
-    # Enums
-    "Layer",
-    "WriteMode",
-    "SilverWriteMode",
-    "GoldWriteMode",
-    "ClearPolicy",
-    "RunType",
-    "HealthStatus",
-    "DriftLevel",
-    "CircuitBreakerState",
-    "DataClassification",
-    "ErrorType",
-    "QuarantineRecordStatus",
-    "LifecyclePhase",
-    "AuditOperation",
-    "AuditLayer",
-    "AnomalyType",
-    "AnomalySeverity",
-    # TypedDict classes
-    "BronzeRecord",
-    "SilverRecord",
-    "RawDate",
-    "NormalizedDate",
-    "RawAuthor",
-    "RawIdentifiers",
-    "NormalizedIdentifiers",
-    "RawClassification",
-    "NormalizedClassification",
-    # Value objects and results
-    "Anomaly",
-    "LineageRecord",
-    "BatchLineage",
-    "PrepareResult",
-    "ClearResult",
-    "CleanupPreview",
-    "CleanupResult",
-    "LayerInfo",
-    "TransformResult",
-    "TransformedRecord",
-    "BatchResult",
-    "DQResult",
-    "VacuumResult",
-    "ValidationResult",
-    "HealthReport",
-    "PreflightReport",
-    "ComponentHealthResult",
-    "ConfigValidationError",
-    "FilterLoadResult",
-    "MemoryStats",
-    "ProviderHealthState",
-    "ShutdownSignal",
-    "AuditEntry",
-    "LockContext",
-    "PipelineEvent",
-    "RetryPolicy",
-    # Context classes
-    "InputFilterContext",
-    "PipelineContext",
-    "PipelineRunContext",
-    "StorageContext",
-    "ObservabilityBundle",
-    "PipelineServices",
-    "PipelineDefinition",
-    "ProviderConfig",
-    "HttpConfig",
-    "RunOptions",
-    "VacuumOptions",
-    "ArchiveOptions",
-    "RecordProcessorConfig",
-    "MemoryConfig",
-    # Base classes
-    "BaseEntity",
-    "BasePipeline",
-    "BaseTransformer",
-    "BaseHttpAdapter",
-    "BaseSyncAdapter",
-    "BaseFieldExtractor",
-    "BaseChemblTransformer",
-    "BaseServicesFactory",
-    # Private helpers
-    "_NoOpSpan",
-    "_NoOpOtelTracer",
-    # Policies
-    "MedallionPolicy",
-    "WriteModePolicy",
-    # Filters
-    "GoldRangeFilter",
-    "GoldColumnFilter",
-    "GoldListLengthFilter",
-    "GoldListContainsFilter",
-    "GoldFilterConfig",
-    "InputFilterConfig",
-    "FilteredDataSource",
-}
-
-# Конвенционные файлы документации верхнего уровня (допустимы в UPPER_CASE)
-DOC_EXCEPTIONS = {
-    "README.md",
-    "CHANGELOG.md",
-    "REQUIREMENTS.md",
-    "RULES.md",
-    "CONTRIBUTING.md",
-    "SECURITY.md",
-    "LICENSE.md",
-    "CLAUDE.md",
-    "AGENT.md",
-    "SKILL.md",
-    "INDEX.md",
-    "ORCHESTRATION.md",
-    "TOOLS.md",
-    "CODEX.md",
-    "GEMINI.md",
-}
-
 # Directories excluded from doc naming audit (archives, plans, AI content)
 _DOC_EXCLUDED_DIRS = {
     "99-archive",
@@ -239,6 +151,132 @@ def _normalize_doc_excluded_subpath(subpath: str) -> str:
     return normalized
 
 
+def _flatten_string_values(raw: object) -> list[str]:
+    """Flatten nested YAML lists/dicts to strings only."""
+    values: list[str] = []
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, str):
+                values.append(item)
+    elif isinstance(raw, dict):
+        for value in raw.values():
+            values.extend(_flatten_string_values(value))
+    return values
+
+
+def _load_stable_names(raw: object) -> tuple[StablePublicName, ...]:
+    """Parse stable public surface entries from YAML."""
+    if not isinstance(raw, list):
+        return ()
+    entries: list[StablePublicName] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        location = str(item.get("location", "")).strip()
+        reason = str(item.get("reason", "")).strip()
+        if name and location and reason:
+            entries.append(
+                StablePublicName(name=name, location=location, reason=reason)
+            )
+    return tuple(entries)
+
+
+def _load_forbidden_aliases(raw: object) -> tuple[ForbiddenAlias, ...]:
+    """Parse forbidden legacy alias entries from YAML."""
+    if not isinstance(raw, list):
+        return ()
+    entries: list[ForbiddenAlias] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        legacy_name = str(item.get("legacy_name", "")).strip()
+        canonical_name = str(item.get("canonical_name", "")).strip()
+        export_surface = str(item.get("export_surface", "")).strip()
+        reason = str(item.get("reason", "")).strip()
+        if legacy_name and canonical_name and export_surface and reason:
+            entries.append(
+                ForbiddenAlias(
+                    legacy_name=legacy_name,
+                    canonical_name=canonical_name,
+                    export_surface=export_surface,
+                    reason=reason,
+                )
+            )
+    return tuple(entries)
+
+
+def load_naming_registry(registry_path: Path = NAMING_EXCEPTIONS_PATH) -> NamingRegistry:
+    """Load the naming exception registry from configs/."""
+    if not registry_path.exists():
+        raise FileNotFoundError(f"Naming exception registry missing: {registry_path}")
+
+    payload = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        raise ValueError("Naming exception registry must be a YAML mapping at top level")
+
+    stable_public_surface = payload.get("stable_public_surface", {})
+    if not isinstance(stable_public_surface, dict):
+        raise ValueError("stable_public_surface must be a mapping")
+
+    return NamingRegistry(
+        documentation_exceptions=frozenset(
+            _flatten_string_values(payload.get("documentation_exceptions", []))
+        ),
+        root_file_exceptions=frozenset(
+            _flatten_string_values(payload.get("root_file_exceptions", []))
+        ),
+        class_suffix_exceptions=frozenset(
+            _flatten_string_values(payload.get("class_suffix_exceptions", {}))
+        ),
+        function_prefix_exceptions=frozenset(
+            _flatten_string_values(payload.get("function_prefix_exceptions", []))
+        ),
+        stable_pipeline_ids=_load_stable_names(
+            stable_public_surface.get("pipeline_ids", [])
+        ),
+        stable_pipeline_classes=_load_stable_names(
+            stable_public_surface.get("pipeline_classes", [])
+        ),
+        stable_transformers=_load_stable_names(
+            stable_public_surface.get("transformers", [])
+        ),
+        stable_gold_schemas=_load_stable_names(
+            stable_public_surface.get("gold_schemas", [])
+        ),
+        forbidden_domain_entity_aliases=_load_forbidden_aliases(
+            payload.get("forbidden_domain_entity_aliases", [])
+        ),
+    )
+
+
+def validate_naming_registry(registry: NamingRegistry) -> list[str]:
+    """Return consistency errors for the loaded naming registry."""
+    errors: list[str] = []
+
+    overlap = {
+        alias.legacy_name for alias in registry.forbidden_domain_entity_aliases
+    } & set(registry.class_suffix_exceptions)
+    if overlap:
+        joined = ", ".join(sorted(overlap))
+        errors.append(
+            "Forbidden legacy aliases are still declared as class suffix exceptions: "
+            f"{joined}"
+        )
+
+    stable_id_names = {entry.name for entry in registry.stable_pipeline_ids}
+    if not stable_id_names:
+        errors.append("stable_public_surface.pipeline_ids must declare at least one entry")
+
+    for required in ("pubchem_compound", "uniprot_protein"):
+        if required not in stable_id_names:
+            errors.append(
+                f"stable_public_surface.pipeline_ids is missing required entry: {required}"
+            )
+
+    return errors
+
+
 def is_pascal_case(name: str) -> bool:
     """Проверяет, что имя в PascalCase."""
     return bool(re.match(r"^[A-Z][a-zA-Z0-9]*$", name))
@@ -259,9 +297,9 @@ def is_prefixed_doc(name: str) -> bool:
     return bool(re.match(r"^\d{2}-", name))
 
 
-def has_valid_suffix(class_name: str) -> bool:
-    """Проверяет, что класс имеет допустимый суффикс или в списке исключений."""
-    if class_name in ALLOWED_NO_SUFFIX:
+def has_valid_suffix(class_name: str, allowed_no_suffix: frozenset[str]) -> bool:
+    """Check whether a class name has a valid suffix or registry-backed exception."""
+    if class_name in allowed_no_suffix:
         return True
 
     for suffixes in ROLE_SUFFIXES.values():
@@ -337,13 +375,15 @@ def check_classes(base_path: Path) -> Iterator[Violation]:
                     )
 
 
-def check_documentation(docs_path: Path) -> Iterator[Violation]:
+def check_documentation(
+    docs_path: Path, documentation_exceptions: frozenset[str]
+) -> Iterator[Violation]:
     """Проверяет naming conventions для файлов документации."""
     for md_file in docs_path.rglob("*.md"):
         filename = md_file.name
 
         # Исключения для конвенционных файлов
-        if filename in DOC_EXCEPTIONS:
+        if filename in documentation_exceptions:
             continue
 
         # Пропуск исключённых директорий (архивы, планы, AI)
@@ -417,7 +457,10 @@ def check_yaml_configs(configs_path: Path) -> Iterator[Violation]:
 
 
 def run_audit(
-    src_path: Path, docs_path: Path, configs_path: Path
+    src_path: Path,
+    docs_path: Path,
+    configs_path: Path,
+    registry: NamingRegistry,
 ) -> dict[str, list[Violation]]:
     """Запускает полный аудит naming conventions."""
     results: dict[str, list[Violation]] = {
@@ -435,7 +478,9 @@ def run_audit(
 
     # Проверка документации
     if docs_path.exists():
-        results["docs"].extend(check_documentation(docs_path))
+        results["docs"].extend(
+            check_documentation(docs_path, registry.documentation_exceptions)
+        )
 
     # Проверка YAML-конфигов
     if configs_path.exists():
@@ -521,13 +566,25 @@ def main() -> int:
     args = parser.parse_args()
 
     # Определяем базовые пути
-    base_dir = Path(__file__).parent.parent.parent
+    base_dir = REPO_ROOT
     src_path = base_dir / args.src
     docs_path = base_dir / args.docs
     configs_path = base_dir / args.configs
 
+    try:
+        registry = load_naming_registry()
+    except (FileNotFoundError, OSError, ValueError, yaml.YAMLError) as exc:
+        logger.error("Failed to load naming exception registry: %s", exc)
+        return 1
+
+    registry_errors = validate_naming_registry(registry)
+    if registry_errors:
+        for error in registry_errors:
+            logger.error("Naming exception registry error: %s", error)
+        return 1
+
     # Запуск аудита
-    results = run_audit(src_path, docs_path, configs_path)
+    results = run_audit(src_path, docs_path, configs_path, registry)
     report = format_report(results)
 
     # Вывод или сохранение отчёта

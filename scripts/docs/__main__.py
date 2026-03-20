@@ -7,7 +7,7 @@ Usage:
 
 Commands:
     check-links        Check documentation links, specs, and configs
-    check-drift        Check documentation drift (ports, classes)
+    check-drift        Check documentation drift (ports, classes, runtime mirrors, freshness)
     check-docstrings   Check docstring coverage
     check-kpi          Report documentation KPI metrics
     fix-links-auto     Auto-fix broken documentation links

@@ -64,23 +64,19 @@ model: sonnet
 
 ## Выходы
 
-Сохранять в `reports/plans/<task_id>/`:
-
-| Файл | Описание |
-|------|----------|
-| `04a-config-log.md` | Лог изменений конфигураций (append) |
-
-Фактические изменения вносятся в `configs/`.
+- Итоговый отчёт: `reports/{LLM}/review_py-config-bot_{YYYYMMDD}_{HHMM}.md`
+  - Фиксируй изменённые конфиги, ссылки на пайплайны/провайдеры, команды валидации.
+  - Фактические изменения вносятся в `configs/`; вложения допускается сохранять рядом.
 
 ---
 
 ## Обязательные правила
 
-1. Все конфигурации MUST проходить `python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` без critical findings.
-2. Inline DQ-пороги (в pipeline YAML) запрещены — использовать externalized DQ (ADR-027).
+1. Все конфигурации MUST проходить `uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` без critical findings.
+2. DQ и filter настройки являются частью unified hierarchy: `configs/base/*` → `configs/providers/{provider}.yaml` → `configs/entities/{provider}/{entity}.yaml`.
 3. Silver sink MUST содержать `sort_by` (ADR-014).
 4. Composite config MUST содержать `seed`, `enrichers`, `merge` (ADR-026).
-5. При создании нового entity — генерировать unified entity config в `configs/entities/{provider}/{entity}.yaml`; quality/filter rules согласовывать с provider/base hierarchy и external overrides использовать только при документированной необходимости.
+5. При создании нового entity — генерировать unified entity config в `configs/entities/{provider}/{entity}.yaml`; provider config обновлять только если нужен provider-level override.
 
 ---
 
@@ -89,24 +85,20 @@ model: sonnet
 ```
 configs/
 ├── base/
-│   ├── pipeline.yaml               # Глобальные pipeline/filter defaults
-│   └── quality.yaml                # Глобальные DQ defaults
+│   ├── pipeline.yaml               # Global pipeline/filter defaults
+│   └── quality.yaml                # Global DQ defaults
 ├── providers/
-│   └── {provider}.yaml             # Provider source + quality + filters
+│   └── {provider}.yaml             # Source + provider-level quality/filters
 ├── entities/
 │   └── {provider}/
-│       └── {entity}.yaml           # Unified entity config
-├── composites/
-│   └── {name}.yaml                 # Composite pipeline config
-└── quality/
-    └── entities/
-        └── {provider}/
-            └── {entity}.yaml       # Externalized DQ overrides (when used)
+│       └── {entity}.yaml           # Unified entity config (pipeline/schema/quality/filters/contracts)
+└── composites/
+    └── {entity}.yaml               # Composite pipeline config
 ```
 
 Порядок merge:
-- pipeline/filter: `base/pipeline.yaml → providers/{provider}.yaml → entities/{provider}/{entity}.yaml`
-- DQ: `base/quality.yaml → providers/{provider}.yaml → entities/{provider}/{entity}.yaml → quality/entities/{provider}/{entity}.yaml → inline overrides`
+- Pipeline/filter defaults: `configs/base/pipeline.yaml → configs/providers/{provider}.yaml → configs/entities/{provider}/{entity}.yaml → inline overrides`
+- DQ defaults: `configs/base/quality.yaml → configs/providers/{provider}.yaml → configs/entities/{provider}/{entity}.yaml → inline overrides`
 
 ---
 

@@ -128,6 +128,30 @@ def test_domain_subfacade_ports_is_complete() -> None:
     assert not missing, f"Missing essential ports from sub-facade: {missing}"
 
 
+def test_domain_ports_facade_explicitly_exports_runtime_contracts() -> None:
+    """Verify runtime-oriented contracts remain sanctioned facade exports.
+
+    RF-06: BioETL intentionally keeps pure runtime/cross-layer contracts in
+    ``bioetl.domain.ports``. This guard makes that policy explicit so future
+    reviews do not misclassify these exports as architecture drift.
+    """
+    from bioetl.domain import ports
+
+    sanctioned_runtime_ports = {
+        "LoggerPort",
+        "RunnerFactoryPort",
+        "RunnablePort",
+        "RateLimiterPort",
+        "CircuitBreakerPort",
+    }
+    ports_all = set(ports.__all__)
+    missing = sanctioned_runtime_ports - ports_all
+    assert not missing, (
+        "Runtime-oriented cross-layer contracts must remain available from "
+        f"bioetl.domain.ports facade: missing {sorted(missing)}"
+    )
+
+
 def test_domain_subfacade_exceptions_is_complete() -> None:
     """Verify exceptions sub-facade exports all essential exceptions.
 

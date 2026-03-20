@@ -13,7 +13,7 @@ from bioetl.composition.factories.services.bundle import (
     create_pipeline_with_services,
 )
 from bioetl.domain.services import IdentityService
-from bioetl.infrastructure.config import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 if TYPE_CHECKING:
     import pyarrow as pa

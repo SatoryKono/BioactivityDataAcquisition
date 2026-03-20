@@ -1,0 +1,18 @@
+id: EV-provider-registry-runtime-ratchet-already-prevents-raw-regression
+pillar: provider-registry-runtime-ownership
+source:
+  type: test
+  ref: "tests/architecture/test_registry_contracts.py:106-133"
+  retrieved_at: 2026-03-20
+claim: "A narrow architecture ratchet already protects the migrated runtime files from silently regressing back to raw class-level ProviderRegistry.ensure_loaded() usage."
+quote: "\"Deferred runtime paths should use the named runtime bootstrap seam instead of raw class-level ProviderRegistry.ensure_loaded().\""
+confidence: 0.97
+assumptions:
+  - "The ratchet remains part of normal architecture verification and will be maintained."
+notes: "This significantly lowers the urgency of additional runtime ownership work because the main regression mode is already guarded."
+tags:
+  - provider-registry
+  - runtime
+  - architecture-test
+  - ratchet
+  - rf-07d

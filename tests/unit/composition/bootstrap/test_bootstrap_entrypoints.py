@@ -181,7 +181,7 @@ class TestBootstrapPipeline:
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
     )
     @patch(
-        "bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry.ensure_loaded"
+        "bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded"
     )
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")

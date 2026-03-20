@@ -8,6 +8,7 @@ Updated for instance-level PipelineRegistry (2025-12).
 
 from __future__ import annotations
 
+from pathlib import Path
 
 import pytest
 
@@ -67,6 +68,69 @@ class TestRegistryProtocol:
 
         assert hasattr(ProviderRegistry, "create_adapter"), (
             "ProviderRegistry MUST have create_adapter() method for DI"
+        )
+
+    def test_datasource_factory_path_avoids_class_level_provider_registry_access(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """Datasource composition path should prefer explicit registry instances.
+
+        RF-07C: after introducing an explicit registry path in datasource
+        factories, new class-level ``ProviderRegistry`` method calls in this
+        subtree should not grow back unnoticed.
+        """
+        datasource_path = src_dir / "bioetl" / "composition" / "factories" / "datasource"
+        forbidden_patterns = [
+            "ProviderRegistry.ensure_loaded(",
+            "ProviderRegistry.is_registered(",
+            "ProviderRegistry.list_providers(",
+            "ProviderRegistry.get_http_config(",
+            "ProviderRegistry.create_adapter(",
+            "ProviderRegistry.build_data_source_creator(",
+        ]
+        violations: list[str] = []
+
+        for py_file in datasource_path.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for pattern in forbidden_patterns:
+                if pattern in content:
+                    violations.append(f"{py_file.relative_to(src_dir)}: {pattern}")
+
+        assert not violations, (
+            "Datasource composition should use explicit ProviderRegistry instances "
+            "instead of new class-level registry access.\n"
+            + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_runtime_paths_avoid_raw_class_level_provider_registry_bootstrap(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """Deferred runtime files should use the named provider bootstrap seam.
+
+        RF-07D3: runtime/bootstrap migration moved these files away from raw
+        ``ProviderRegistry.ensure_loaded()`` access. This guard keeps that seam
+        from silently regressing.
+        """
+        runtime_files = [
+            src_dir / "bioetl" / "composition" / "_pipeline_execution.py",
+            src_dir / "bioetl" / "composition" / "bootstrap" / "runtime" / "pipeline.py",
+            src_dir / "bioetl" / "composition" / "factories" / "pipeline" / "runner.py",
+            src_dir / "bioetl" / "composition" / "runtime_builders" / "runner_builder.py",
+        ]
+        forbidden_pattern = "ProviderRegistry.ensure_loaded("
+        violations: list[str] = []
+
+        for py_file in runtime_files:
+            content = py_file.read_text(encoding="utf-8")
+            if forbidden_pattern in content:
+                violations.append(f"{py_file.relative_to(src_dir)}: {forbidden_pattern}")
+
+        assert not violations, (
+            "Deferred runtime paths should use the named runtime bootstrap seam "
+            "instead of raw class-level ProviderRegistry.ensure_loaded().\n"
+            + "\n".join(f"  - {item}" for item in violations)
         )
 
 

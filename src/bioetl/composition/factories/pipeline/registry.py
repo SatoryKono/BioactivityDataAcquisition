@@ -34,7 +34,7 @@ from bioetl.composition import PipelineRegistry, get_default_registry
 from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,
 )
-from bioetl.composition.factories.pipeline.configs import (
+from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.composition.factories.pipeline.contract_validator import create_factory

@@ -13,6 +13,7 @@ from bioetl.composition.factories.pipeline.contract_validator import (
     _validate_contract_policy,
     create_factory,
 )
+from bioetl.composition.providers.provider_registry import create_provider_registry
 
 
 @pytest.mark.unit
@@ -212,4 +213,43 @@ class TestCreateFactory:
 
         create_factory(config)
 
-        mock_get_creator_cv.assert_called_once_with("custom_provider")
+        mock_get_creator_cv.assert_called_once_with(
+            "custom_provider",
+            provider_registry=None,
+        )
+
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    @patch(
+        "bioetl.composition.factories.pipeline.contract_validator._validate_contract_policy"
+    )
+    @patch(
+        "bioetl.composition.factories.pipeline.contract_validator.get_data_source_creator"
+    )
+    def test_threads_explicit_provider_registry_to_data_source_creator(
+        self,
+        mock_get_creator_cv: MagicMock,
+        mock_validate: MagicMock,
+        mock_get_creator_asm: MagicMock,
+    ) -> None:
+        """create_factory should pass explicit provider registry to creator resolution."""
+        mock_get_creator_cv.return_value = MagicMock()
+        mock_get_creator_asm.return_value = MagicMock()
+        registry = create_provider_registry()
+        config = SimpleNamespace(
+            pipeline_name="test_pipe",
+            provider="test",
+            entity_type="entity",
+            silver_schema=None,
+            gold_schema=MagicMock(),
+            pandera_silver_schema=None,
+            transformer_class=None,
+            data_source_provider="custom_provider",
+        )
+
+        result = create_factory(config, provider_registry=registry)
+
+        assert result.provider_registry is registry
+        mock_get_creator_cv.assert_called_once_with(
+            "custom_provider",
+            provider_registry=registry,
+        )

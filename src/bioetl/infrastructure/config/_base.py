@@ -67,8 +67,8 @@ def get_pipeline_config(
         ValueError: If pipeline configuration not found
 
     """
+    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
     from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
-    from bioetl.infrastructure.config_load_api import load_pipeline_config
 
     yaml_config = load_pipeline_config(pipeline_name)
 

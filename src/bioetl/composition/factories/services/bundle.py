@@ -32,7 +32,7 @@ from bioetl.composition.services.versioning import (
 from bioetl.infrastructure.config import (
     yaml_config_to_domain as _yaml_config_to_domain_direct,
 )
-from bioetl.infrastructure.config_load_api import (
+from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config as _load_pipeline_config_direct,
 )
 

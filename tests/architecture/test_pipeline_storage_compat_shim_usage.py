@@ -13,12 +13,15 @@ REMOVED_PIPELINE_STORAGE_COMPAT_MODULES = frozenset(
         "bioetl.composition.factories.pipeline.facade",
         "bioetl.composition.factories.storage.facade",
         "bioetl.infrastructure.storage.delta_writer",
+        "bioetl.infrastructure.storage.silver_writer_runtime_helpers",
     }
 )
 REMOVED_PIPELINE_STORAGE_PARENT_IMPORTS = {
     "bioetl.composition.factories.pipeline": frozenset({"facade"}),
     "bioetl.composition.factories.storage": frozenset({"facade"}),
-    "bioetl.infrastructure.storage": frozenset({"delta_writer"}),
+    "bioetl.infrastructure.storage": frozenset(
+        {"delta_writer", "silver_writer_runtime_helpers"}
+    ),
 }
 REMOVED_PIPELINE_STORAGE_FILES = frozenset(
     {
@@ -31,6 +34,12 @@ REMOVED_PIPELINE_STORAGE_FILES = frozenset(
         / "facade.py",
         ROOT / "src" / "bioetl" / "composition" / "factories" / "storage" / "facade.py",
         ROOT / "src" / "bioetl" / "infrastructure" / "storage" / "delta_writer.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "storage"
+        / "silver_writer_runtime_helpers.py",
     }
 )
 

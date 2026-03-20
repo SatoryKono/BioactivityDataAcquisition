@@ -1,0 +1,23 @@
+- id: RISK-provider-registry-runtime-hidden-benefit-left-unrealized
+  risk: "By stopping at the named runtime seam, the project may delay discovering a real but currently unproven benefit of explicit runtime ProviderRegistry ownership."
+  linked_decision: DEC-provider-registry-runtime-stop-at-named-bootstrap-seam
+  severity: low
+  likelihood: medium
+  triggers:
+    - "A new runtime caller later needs isolated registry state for testing or parallel execution."
+    - "Bootstrap/runtime code starts carrying more provider-bound configuration behavior than it does today."
+  mitigations:
+    - "Reopen RF-07D4 only when a caller-driven case is concrete and reproducible."
+    - "Keep runtime seams injectable so a later ownership wave can be introduced incrementally if needed."
+
+- id: RISK-provider-registry-runtime-pattern-overgeneralization
+  risk: "Maintainers may overgeneralize the successful datasource explicit-registry pattern and reintroduce unnecessary runtime ownership plumbing without a natural owner."
+  linked_decision: DEC-provider-registry-runtime-stop-at-named-bootstrap-seam
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Future refactors treat all class-level compatibility seams as equally urgent migration targets."
+    - "Reviews assume local-factory wins automatically apply to bootstrap/runtime orchestration."
+  mitigations:
+    - "Point future runtime work back to the RF-07D synthesis and decision ledger."
+    - "Require new runtime ownership proposals to cite a concrete caller, a concrete limitation of the current seam, and targeted tests."

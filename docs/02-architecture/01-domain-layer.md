@@ -5,7 +5,9 @@
 ## 1. Назначение
 
 Слой `Domain` содержит чистую предметную логику BioETL: доменные сущности, value objects, агрегаты, доменные события,
-контракты портов и правила валидации. Слой не должен зависеть от `application`, `infrastructure` и `interfaces`.
+контракты портов и правила валидации. В BioETL это не только "business-only" слой: он также является sanctioned owner
+для чистых cross-layer contracts и детерминированных runtime context primitives. Слой не должен зависеть от
+`application`, `infrastructure` и `interfaces`.
 
 Ключевые характеристики:
 
@@ -25,6 +27,10 @@
 - runtime/resilience (`RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
 - NoOp реализации для опциональных зависимостей.
 
+Runtime-oriented порты намеренно остаются в `domain.ports`: это допустимо, потому что они выражают чистые абстракции
+межслойного контракта, а не concrete infrastructure behavior. Правило слоя звучит как "в domain нельзя тянуть I/O и
+конкретные adapter/framework dependencies", а не как "в domain нельзя описывать runtime contracts".
+
 Правило импорта:
 
 ```python
@@ -36,6 +42,10 @@ from bioetl.domain.ports.storage import StoragePort
 ```
 
 Проверка выполняется архитектурным тестом `test_ports_imported_only_from_facade`.
+
+Фасад `bioetl.domain.ports` остаётся единственной sanctioned import surface для всех first-party слоёв. Это снижает
+навигационную стоимость, не раскрывает internal port modules наружу и делает policy вокруг runtime/resilience ports
+явной и стабильной.
 
 ### 2.2. DDD Aggregates (`aggregates/`)
 
@@ -144,6 +154,21 @@ Split internal modules остаются implementation detail owner packages и 
 
 `src/bioetl/domain/types/` содержит типизированные идентификаторы и alias-ы, используемые агрегатами и сущностями:
 `RunID`, `BatchID`, `EntityID`, `ContentHash`, `RunType`, `MetaDict`, `JsonDict` и другие.
+
+### 2.5.1. Runtime Context (`context.py`)
+
+`src/bioetl/domain/context.py` содержит `PipelineContext` и связанные runtime context objects.
+
+`PipelineContext` является нормативным domain-level execution context:
+
+- `started_at` — единый детерминированный источник времени для batch и writer flows по ADR-014;
+- `logger` хранится как `LoggerPort`, то есть как чистая абстракция, а не как привязка к `structlog`;
+- `bind_logger()` остаётся частью того же контекста, потому что он распространяет execution metadata через порт,
+  не вводя concrete logging dependency в domain.
+
+Следовательно, `PipelineContext` не считается infrastructure leakage. Concrete logger implementation по-прежнему
+создаётся вне domain и внедряется через composition/infrastructure, а domain удерживает только value semantics и
+portable execution context contract.
 
 ### 2.6. Доменные сервисы (`services/`)
 

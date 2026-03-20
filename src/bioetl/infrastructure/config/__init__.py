@@ -48,11 +48,15 @@ def __getattr__(name: str) -> type:
 
         return PipelineConfigLoader
     if name == "load_pipeline_config":
-        from bioetl.infrastructure.config_load_api import load_pipeline_config
+        from bioetl.infrastructure.config.pipeline_config_api import (
+            load_pipeline_config,
+        )
 
         return load_pipeline_config  # type: ignore[return-value]
     if name == "load_source_config":
-        from bioetl.infrastructure.config_load_api import load_source_config
+        from bioetl.infrastructure.config.source_config_loader import (
+            load_source_config,
+        )
 
         return load_source_config  # type: ignore[return-value]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

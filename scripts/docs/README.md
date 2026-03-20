@@ -14,7 +14,7 @@ python -m scripts.docs <command> [args...]
 | Command | Script | Description |
 |---------|--------|-------------|
 | `check-links` | `check_doc_links.py` | Check documentation links, specs, and configs |
-| `check-drift` | `check_doc_drift.py` | Check documentation drift (ports, classes) |
+| `check-drift` | `check_doc_drift.py` | Check documentation drift (ports, classes, runtime mirrors, freshness) |
 | `check-docstrings` | `check_docstring_coverage.py` | Check docstring coverage |
 | `check-kpi` | `report_docs_kpi.py` | Report documentation KPI metrics |
 | `fix-links-auto` | `fix_doc_links_auto.py` | Auto-fix broken documentation links |
@@ -27,7 +27,7 @@ python -m scripts.docs <command> [args...]
 | Command | When | Trigger |
 |---------|------|---------|
 | `check-links` | After editing docs; validates internal links, spec files, contracts, legacy path guardrails | CI gate (`docs.yml`, every PR) |
-| `check-drift` | After renaming classes, moving modules, or changing ports; detects doc/code desync | CI gate (`architecture.yml`) |
+| `check-drift` | After renaming classes, moving modules, changing ports, or updating active runtime docs; detects doc/code desync, runtime mirror drift, and freshness conflicts | CI gate (`architecture.yml`) |
 | `check-docstrings` | After adding new modules/classes/functions; enforces coverage thresholds (modules 100%, classes 95%, functions 90%) | CI gate (`architecture.yml`) |
 | `check-kpi` | Weekly documentation health tracking; generates coverage, links, and drift metrics | Scheduled weekly (Monday 4:00 UTC) |
 | `fix-links-auto` | After bulk renames or restructuring; auto-rewrites broken doc links | Manual, after refactoring |

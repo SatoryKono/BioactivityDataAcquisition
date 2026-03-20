@@ -21,9 +21,11 @@ from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
-from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
@@ -59,7 +61,7 @@ def bootstrap_pipeline_runner(
 
     # Keep runtime bootstrap behind the registry facade while preserving
     # deterministic explicit registration in this composition root.
-    ProviderRegistry.ensure_loaded()
+    ensure_providers_loaded()
     if not effective_registry.list_pipelines():
         register_all_pipelines(registry=effective_registry)
 
