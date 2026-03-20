@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
@@ -13,9 +12,11 @@ from bioetl.application.core.publication_term_data_source import (
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
+from bioetl.composition.factories.datasource.pubchem import (
+    create_pubchem_adapter,
+)
 from bioetl.composition.providers._config_helpers import (
     _get_adapter_config,
-    _get_circuit_breaker_from_config,
     _get_rate_limit_from_config,
     _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
@@ -27,8 +28,6 @@ from bioetl.composition.providers._registration_contracts import (
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.input import IDMappingCsvReaderAdapter
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
@@ -39,8 +38,7 @@ from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -105,60 +103,12 @@ def _create_pubchem_adapter(
     settings: Settings | None = None,
     **kwargs: object,
 ) -> DataSourcePort:
-    """Create PubChem adapter with composition-owned helper injection."""
-    if logger is None:
-        raise ValueError("PubChem adapter requires logger")
-
-    del http_client, settings
-    rate_limit = _get_rate_limit_from_config("pubchem")
-    cb_config = _get_circuit_breaker_from_config("pubchem")
-    rate = cast(float, kwargs.pop("rate", rate_limit.rate))
-    capacity = cast(int, kwargs.pop("capacity", rate_limit.capacity))
-    cb_threshold = cast(
-        int, kwargs.pop("circuit_breaker_threshold", cb_config.failure_threshold)
-    )
-    cb_timeout = cast(
-        int, kwargs.pop("circuit_breaker_timeout", cb_config.recovery_timeout)
-    )
-    max_workers = cast(int, kwargs.pop("max_workers", 4))
-    strict_error_handling = cast(bool, kwargs.pop("strict_error_handling", False))
-    metrics = cast("MetricsPort | None", kwargs.pop("metrics", None))
-    error_handler = cast(
-        "ErrorHandlerPort | None",
-        kwargs.pop("error_handler", None),
-    )
-    request_collector = cast(
-        "APIRequestCollector | None",
-        kwargs.pop("request_collector", None),
-    )
-
-    if error_handler is None or request_collector is None:
-        helper_services = AdapterHelpersFactory.create_sync_helpers(
-            provider="pubchem",
-            logger=logger,
-            metrics=metrics,
-        )
-        if error_handler is None:
-            error_handler = helper_services.error_handler
-        if request_collector is None:
-            request_collector = helper_services.request_collector
-
-    return PubChemAdapter(
+    """Retained provider-registration wrapper for the PubChem composition factory."""
+    return create_pubchem_adapter(
+        http_client=http_client,
         logger=logger,
-        rate_limiter=TokenBucketRateLimiter(
-            rate=rate, capacity=capacity, provider="pubchem"
-        ),
-        circuit_breaker=CircuitBreakerGuard(
-            provider="pubchem",
-            failure_threshold=cb_threshold,
-            recovery_timeout=cb_timeout,
-            metrics=metrics,
-        ),
-        thread_pool=ThreadPoolExecutor(max_workers=max_workers),
-        owns_thread_pool=True,
-        strict_error_handling=strict_error_handling,
-        error_handler=error_handler,
-        request_collector=request_collector,
+        settings=settings,
+        **kwargs,
     )
 
 

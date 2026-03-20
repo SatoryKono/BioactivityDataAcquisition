@@ -70,67 +70,35 @@ class TestChemblPublicationTermBranch:
 
 @pytest.mark.unit
 class TestPubChemCreatorGuard:
-    """Covers logger guard in PubChem adapter creation."""
+    """Covers logger guard and delegation in PubChem adapter creation."""
 
     def test_pubchem_adapter_requires_logger(self) -> None:
         with pytest.raises(ValueError, match="requires logger"):
             _create_pubchem_adapter(logger=None)
 
-    @patch("bioetl.composition.providers.registration_bio.PubChemAdapter")
-    @patch(
-        "bioetl.composition.providers.registration_bio."
-        "AdapterHelpersFactory.create_sync_helpers"
-    )
-    def test_pubchem_adapter_injects_sync_helpers_from_composition(
+    @patch("bioetl.composition.providers.registration_bio.create_pubchem_adapter")
+    def test_pubchem_adapter_delegates_to_factory(
         self,
-        mock_create_sync_helpers: MagicMock,
-        mock_pubchem_adapter_cls: MagicMock,
+        mock_create_pubchem_adapter: MagicMock,
     ) -> None:
-        mock_helpers = MagicMock()
-        mock_helpers.error_handler = MagicMock(name="error_handler")
-        mock_helpers.request_collector = MagicMock(name="request_collector")
-        mock_create_sync_helpers.return_value = mock_helpers
-        mock_adapter = MagicMock()
-        mock_pubchem_adapter_cls.return_value = mock_adapter
-
         logger = MagicMock()
         metrics = MagicMock()
+        adapter = MagicMock()
+        mock_create_pubchem_adapter.return_value = adapter
 
-        result = _create_pubchem_adapter(logger=logger, metrics=metrics)
-
-        mock_create_sync_helpers.assert_called_once_with(
-            provider="pubchem",
+        result = _create_pubchem_adapter(
             logger=logger,
+            settings=MagicMock(),
             metrics=metrics,
-        )
-        call_kwargs = mock_pubchem_adapter_cls.call_args.kwargs
-        assert call_kwargs["error_handler"] is mock_helpers.error_handler
-        assert call_kwargs["request_collector"] is mock_helpers.request_collector
-        assert result is mock_adapter
-
-    @patch("bioetl.composition.providers.registration_bio.PubChemAdapter")
-    @patch(
-        "bioetl.composition.providers.registration_bio."
-        "AdapterHelpersFactory.create_sync_helpers"
-    )
-    def test_pubchem_adapter_preserves_explicit_helper_overrides(
-        self,
-        mock_create_sync_helpers: MagicMock,
-        mock_pubchem_adapter_cls: MagicMock,
-    ) -> None:
-        explicit_error_handler = MagicMock(name="explicit_error_handler")
-        explicit_request_collector = MagicMock(name="explicit_request_collector")
-
-        _create_pubchem_adapter(
-            logger=MagicMock(),
-            error_handler=explicit_error_handler,
-            request_collector=explicit_request_collector,
+            strict_error_handling=True,
         )
 
-        mock_create_sync_helpers.assert_not_called()
-        call_kwargs = mock_pubchem_adapter_cls.call_args.kwargs
-        assert call_kwargs["error_handler"] is explicit_error_handler
-        assert call_kwargs["request_collector"] is explicit_request_collector
+        mock_create_pubchem_adapter.assert_called_once()
+        call_kwargs = mock_create_pubchem_adapter.call_args.kwargs
+        assert call_kwargs["logger"] is logger
+        assert call_kwargs["metrics"] is metrics
+        assert call_kwargs["strict_error_handling"] is True
+        assert result is adapter
 
 
 @pytest.mark.unit
