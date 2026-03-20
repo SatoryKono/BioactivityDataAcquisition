@@ -108,6 +108,8 @@ dev = [
     "pytest-vcr>=1.0",
     # Code formatting and linting - ruff replaces black+isort
     "import-linter>=2.0",
+    "lxml>=5.2",
+    "pyyaml>=6.0",
     # Docstring style checking
     "pydocstyle>=6.3",
     # Tracing stack for OpenTelemetry-backed tests

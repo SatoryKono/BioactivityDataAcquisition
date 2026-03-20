@@ -136,28 +136,27 @@ def validate_exemption_target_references(
     for registry_name, entries in sorted(registries.items()):
         if not isinstance(entries, dict):
             continue
-        if registry_name in _CLASS_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="class",
-                        symbols_by_module=classes_by_module,
-                        global_counts=class_counts,
-                        errors=errors,
-                    )
-        elif registry_name in _FUNCTION_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="function",
-                        symbols_by_module=functions_by_module,
-                        global_counts=function_counts,
-                        errors=errors,
-                    )
+
+        is_class_reg = registry_name in _CLASS_SYMBOL_REGISTRIES
+        is_func_reg = registry_name in _FUNCTION_SYMBOL_REGISTRIES
+
+        if not (is_class_reg or is_func_reg):
+            continue
+
+        symbol_kind = "class" if is_class_reg else "function"
+        sym_map = classes_by_module if is_class_reg else functions_by_module
+        counts = class_counts if is_class_reg else function_counts
+
+        for key in sorted(entries):
+            if isinstance(key, str):
+                _validate_symbol_key_reference(
+                    registry_name=registry_name,
+                    key=key,
+                    symbol_kind=symbol_kind,
+                    symbols_by_module=sym_map,
+                    global_counts=counts,
+                    errors=errors,
+                )
 
     return errors
 
