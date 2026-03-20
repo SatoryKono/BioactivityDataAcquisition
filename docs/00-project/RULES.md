@@ -1070,7 +1070,7 @@ class MyAdapter:
 - **MUST NOT** выбрасывать исключения
 - **SHOULD** обнулять ссылки после закрытия (`self.-client = None`)
 
-**PipelineServices Lifecycle:**
+**PipelineService Lifecycle:**
 
 ```python
 async with services:  # --aenter-- инициализирует ресурсы

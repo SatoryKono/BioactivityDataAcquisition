@@ -32,7 +32,7 @@
 
 ## 07-application-core-services — Application Core Services
 
-Диаграмма «Application Core Services» описывает модуль `07-application-core-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: PipelineRunner, BatchExecutor, and their composition. В текущей версии выделено примерно 16 классов и 17 связей. Для быстрого чтения и ревью полезно начать с элементов: PipelineRunner, PipelineServices, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
+Диаграмма «Application Core Services» описывает модуль `07-application-core-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: PipelineRunner, BatchExecutor, and their composition. В текущей версии выделено примерно 16 классов и 17 связей. Для быстрого чтения и ревью полезно начать с элементов: PipelineRunner, PipelineService, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
 
 ## 08-application-services — Application Services
 

@@ -139,7 +139,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 | Class | Description |
 |---|---|
-| `ProviderRegistry` | Central registry of all data providers and their configurations |
+| `ProviderRegistry` | Instance-scoped registry for provider metadata and creation, with a shared default compatibility facade |
 | `ProviderConfig` | Configuration for a single provider |
 | `HttpConfig` | HTTP client configuration per provider |
 
@@ -148,7 +148,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | `registration` | Provider registration orchestration over internal config builders |
 | `registration_*` | Internal provider config builders; not a canonical application-facing surface |
 | `decorators` | Provider adapter decorators (circuit breaker, retry) |
-| `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) |
+| `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) for the shared runtime/bootstrap registry |
 | `_loading` | Leaf loading helpers behind the public `loader` lifecycle |
 | `_registration_contracts` | Leaf provider assembly/loading contracts used by registration helpers |
 | `_default_registry` | Approved module-level singleton helper for default provider registry |

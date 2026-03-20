@@ -12,7 +12,7 @@
 %% @uniform class width=176 height=240 max_title_len=17 max_desc_lines=14
 classDiagram
     class PipelineRunner {
-        -_services: PipelineServices
+        -_services: PipelineService
         -_data_source: DataSourcePort
         -_config: PipelineYamlConfig
         -_lock_manager: LockCoordinator
@@ -28,7 +28,7 @@ classDiagram
         
     }
 
-    class PipelineServices {
+    class PipelineService {
         <<frozen dataclass>>
         +storage_bronze: BronzeWriter
         +storage_silver: SilverWriter
@@ -63,7 +63,7 @@ classDiagram
     }
 
     class PreflightService {
-        -_services: PipelineServices
+        -_services: PipelineService
         -_config: PipelineYamlConfig
         +run() PreflightReport
         
@@ -97,7 +97,7 @@ classDiagram
     }
 
     class PostrunService {
-        -_services: PipelineServices
+        -_services: PipelineService
         +run() PostrunResult
         
         
@@ -164,7 +164,7 @@ classDiagram
         
     }
 
-    PipelineRunner --> PipelineServices : uses
+    PipelineRunner --> PipelineService : uses
     PipelineRunner --> LockCoordinator : _lock_manager
     PipelineRunner --> PreflightService : _preflight
     PipelineRunner --> BatchExecutor : _batch_executor

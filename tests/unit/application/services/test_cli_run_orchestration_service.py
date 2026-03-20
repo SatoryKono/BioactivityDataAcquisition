@@ -144,7 +144,10 @@ class TestPrepareExecutionRequest:
         )
 
         assert result.is_valid is False
-        assert result.error_message == "--start-offset and --resume cannot be used together"
+        assert (
+            result.error_message
+            == "--start-offset and --resume cannot be used together"
+        )
 
     def test_build_options_normalizes_false_vacuum_after_run_to_none(self) -> None:
         service = CliRunOrchestrationService()

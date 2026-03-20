@@ -56,8 +56,7 @@
 
 **Сервисы ядра:**
 
-- **`PipelineService`** (`pipeline_services.py`) — DI bundle портов для pipeline execution
-- **`PipelineServices`** (`pipeline_services.py`) — Extended DI bundle с DQ-портами для PipelineRunner
+- **`PipelineService`** (`pipeline_services.py`) — Frozen DI bundle портов и optional DQ/metadata collaborators для pipeline execution и `PipelineRunner`
 - **`LockCoordinator`** (`lifecycle/lock_manager.py`) — Координация блокировок
 - **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
@@ -147,7 +146,7 @@ factory = GenericPipelineFactory(
 | `runner.py`                       | `PipelineRunner`            | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
 | `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись              |
 | `../services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM (`application/services/`) |
-| `pipeline_services.py`            | `PipelineServices`          | DI bundle сервисов для PipelineRunner                                    |
+| `pipeline_services.py`            | `PipelineService`           | DI bundle сервисов для PipelineRunner                                    |
 
 **`PipelineRunner`** — координатор исполнения:
 
@@ -157,11 +156,11 @@ factory = GenericPipelineFactory(
 - Управляет postrun-операциями через `PostrunService`
 - Оркестрирует очистку слоёв через `MedallionLifecycleService`
 
-**`PipelineServices`** — frozen dataclass, bundling зависимостей:
+**`PipelineService`** — frozen dataclass, bundling зависимостей:
 
 ```python
 @dataclass(frozen=True)
-class PipelineServices:
+class PipelineService:
     data_source: DataSourcePort
     storage: StoragePort
     lock: LockPort

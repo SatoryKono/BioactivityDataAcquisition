@@ -5,8 +5,9 @@ runtime shape.
 
 - `PipelineRegistry` is an instance-based registry in
   `src/bioetl/composition/registry.py`.
-- `ProviderRegistry` is the canonical class-based provider registry in
-  `src/bioetl/composition/providers/provider_registry.py`.
+- `ProviderRegistry` is an instance-scoped provider registry in
+  `src/bioetl/composition/providers/provider_registry.py`, with a shared
+  default-registry compatibility facade exposed through class-level methods.
 - `get_data_source_creator()` and `DataSourceFactory` are the canonical data-source
   assembly path over `ProviderRegistry`.
 
@@ -15,7 +16,7 @@ runtime shape.
 | Surface | Kind | Canonical Import | Notes |
 |---------|------|------------------|-------|
 | `PipelineRegistry` | Instance-based | `bioetl.composition.registry` | Prefer `create_registry()` for tests and isolated flows. |
-| `ProviderRegistry` | Class-based | `bioetl.composition.providers` | Canonical registry for provider metadata and creation. |
+| `ProviderRegistry` | Instance-scoped + compatibility facade | `bioetl.composition.providers` | Prefer explicit instances for isolated/local seams; class-level methods target the shared default registry. |
 | `get_data_source_creator()` / `DataSourceFactory` | Canonical creator path | `bioetl.composition.factories.datasource.data_source_factory` | Preferred for data-source assembly; backed by `ProviderRegistry`. |
 
 Governance status for the two transition-heavy surfaces:
@@ -85,7 +86,11 @@ runtime `PipelineRegistry` instance and pass it through the execution path.
 ## ProviderRegistry
 
 `ProviderRegistry` is the canonical registry for provider configuration and
-provider-backed creation.
+provider-backed creation. The underlying model is instance-scoped:
+`create_provider_registry()` creates an isolated registry, and
+`ensure_provider_registry_ready(registry)` hydrates it before use. Class-level
+methods remain an approved compatibility facade over the shared default
+registry.
 
 Runtime/bootstrap code should call `ensure_providers_loaded()` instead of
 calling the registration function directly. The loader is the lifecycle
@@ -94,9 +99,18 @@ idempotent, and stale `_loaded` state is repaired if isolated flows or tests
 clear `ProviderRegistry` after an earlier successful load.
 
 ```python
-from bioetl.composition.providers import ProviderRegistry
+from bioetl.composition.providers import (
+    ProviderRegistry,
+    create_provider_registry,
+    ensure_provider_registry_ready,
+)
 
-providers = ProviderRegistry.list_providers()
+isolated_registry = create_provider_registry()
+isolated_registry = ensure_provider_registry_ready(isolated_registry)
+providers = isolated_registry.list_providers()
+
+# Shared default-registry compatibility access remains available:
+shared_providers = ProviderRegistry.list_providers()
 
 if ProviderRegistry.is_registered("chembl"):
     config = ProviderRegistry.get("chembl")
@@ -133,8 +147,9 @@ creator = get_data_source_creator("chembl")
 ```
 
 `DataSourceRegistry.register()` is no longer part of the supported API. Register
-new providers through `ProviderRegistry.register(...)`; keep the legacy facade
-only where compatibility tests explicitly require it.
+new providers through the composition-owned registration flow
+(`register_all_providers()` / registration helpers over a target registry); keep
+the legacy facade only where compatibility tests explicitly require it.
 
 The broader module-level status and deprecation plan for compatibility facades
 is tracked in

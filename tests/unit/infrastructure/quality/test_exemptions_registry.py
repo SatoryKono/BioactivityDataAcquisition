@@ -539,7 +539,9 @@ class TestValidateExemptionTargetReferences:
 
         assert any("bare symbol key is ambiguous" in error for error in errors)
 
-    def test_path_qualified_symbol_requires_non_empty_name(self, tmp_path: Path) -> None:
+    def test_path_qualified_symbol_requires_non_empty_name(
+        self, tmp_path: Path
+    ) -> None:
         """Path-qualified keys with an empty symbol suffix should fail clearly."""
         src_dir = tmp_path / "src" / "bioetl" / "application"
         src_dir.mkdir(parents=True)

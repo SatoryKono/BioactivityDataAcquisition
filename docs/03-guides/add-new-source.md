@@ -120,11 +120,11 @@ Update `src/bioetl/composition/providers/registration.py`:
 1. Add provider-specific creator function:
 - `_create_{provider}_data_source(...) -> DataSourcePort`
 
-2. Register provider inside the bootstrap function (`src/bioetl/composition/providers/registration.py`):
+2. Register provider inside the composition registration flow (`src/bioetl/composition/providers/registration.py`), after resolving `target_registry`:
 
 ```python
-if not ProviderRegistry.is_registered("myprovider"):
-    ProviderRegistry.register(
+if not target_registry.is_registered("myprovider"):
+    target_registry.register(
         "myprovider",
         ProviderConfig(
             adapter_class=MyProviderAdapter,
@@ -137,6 +137,9 @@ if not ProviderRegistry.is_registered("myprovider"):
 ```
 
 If provider needs custom lifecycle/constructor wiring, use `custom_creator=` as in existing providers.
+
+Runtime/bootstrap code should continue to use `ensure_providers_loaded()` as the
+shared lifecycle seam rather than calling registration directly.
 
 ---
 

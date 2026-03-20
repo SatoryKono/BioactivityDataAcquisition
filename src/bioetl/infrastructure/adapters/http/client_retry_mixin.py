@@ -1,11 +1,11 @@
-"""Retry/backoff and observability flow for UnifiedHTTPClient."""
+"""Retry/backoff flow for UnifiedHTTPClient."""
 
 from __future__ import annotations
 
 import asyncio
 import time
 from dataclasses import dataclass
-from typing import Any, NoReturn, Protocol, cast
+from typing import Any
 
 import httpx
 
@@ -13,7 +13,6 @@ from bioetl.domain.exceptions import (
     BioETLError,
     CircuitBreakerOpenError,
     RecoverableError,
-    RetryExhaustedError,
 )
 from bioetl.domain.ports import (
     CircuitBreakerPort,
@@ -24,34 +23,14 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import RunID
-
-
-class _SpanLike(Protocol):
-    """Minimal span contract used by retry observability flow."""
-
-    def __enter__(self) -> _SpanLike: ...
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: object | None,
-    ) -> object | None: ...
-
-    def set_attribute(self, key: str, value: object) -> None: ...
-
-    def record_exception(self, exception: Exception) -> None: ...
-
-
-class _OtelTracerLike(Protocol):
-    """Minimal tracer contract returned by TracingPort.get_tracer()."""
-
-    def start_as_current_span(
-        self,
-        name: str,
-        *,
-        attributes: dict[str, object],
-    ) -> _SpanLike: ...
+from bioetl.infrastructure.adapters.http.client_retry_observability import (
+    SpanLike,
+    finalize_request_observability,
+    handle_circuit_breaker_trip,
+    mark_span_error,
+    raise_retry_exhausted,
+    start_request_span,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -173,72 +152,6 @@ class HTTPClientRetryMixin:
         """Provided by HTTPClientContextMixin in UnifiedHTTPClient."""
         raise NotImplementedError
 
-    def _start_request_span(
-        self,
-        method: str,
-        url: str,
-    ) -> _SpanLike:
-        """Create and enter the request span for retry orchestration."""
-        otel_tracer = cast(_OtelTracerLike, self._tracer.get_tracer("bioetl.http"))
-        span = otel_tracer.start_as_current_span(
-            f"http.{method.lower()}",
-            attributes={
-                "http.method": method,
-                "http.url": url,
-                "bioetl.provider": self.provider,
-                "bioetl.run_id": str(self.run_id) if self.run_id else "unknown",
-            },
-        )
-        span.__enter__()
-        return span
-
-    def _mark_span_error(
-        self,
-        span: _SpanLike,
-        error_type: str,
-        exc: Exception | None = None,
-    ) -> None:
-        """Mark span as failed and optionally record the triggering exception."""
-        span.set_attribute("error", True)
-        span.set_attribute("error.type", error_type)
-        if exc is not None:
-            span.record_exception(exc)
-
-    def _finalize_request_observability(
-        self,
-        span: _SpanLike,
-        retry_state: _RetryRequestState,
-        *,
-        method: str,
-        start_time: float,
-    ) -> None:
-        """Finalize span and metrics for a completed request lifecycle."""
-        duration = time.perf_counter() - start_time
-        span.set_attribute("http.retries", retry_state.retries)
-        span.set_attribute("bioetl.duration_ms", duration * 1000)
-        span.__exit__(None, None, None)
-        self._record_request_metrics(
-            method,
-            duration,
-            retry_state.status_code,
-            retry_state.retries,
-            retry_state.last_error,
-        )
-
-    def _raise_retry_exhausted(
-        self,
-        url: str,
-        retry_state: _RetryRequestState,
-        span: _SpanLike,
-    ) -> NoReturn:
-        """Raise the terminal retry exhaustion error after span bookkeeping."""
-        self._mark_span_error(span, "retry_exhausted", retry_state.last_error)
-        raise RetryExhaustedError(
-            url,
-            retry_state.attempts_made,
-            retry_state.last_error,
-        )
-
     async def _handle_retry_delay(
         self,
         attempt: int,
@@ -351,8 +264,13 @@ class HTTPClientRetryMixin:
         client = self._get_client()
         retry_state = _RetryRequestState()
         start_time = time.perf_counter()
-        span = self._start_request_span(method, url)
-
+        span = start_request_span(
+            self._tracer,
+            provider=self.provider,
+            run_id=self.run_id,
+            method=method,
+            url=url,
+        )
         try:
             for attempt in range(self.retry_config.max_attempts):
                 retry_state.record_attempt(attempt)
@@ -362,17 +280,16 @@ class HTTPClientRetryMixin:
                 if isinstance(result, httpx.Response):
                     retry_state.status_code = result.status_code
                     return result
-
                 if not retry_state.apply_attempt_outcome(result):
                     break
-
-            self._raise_retry_exhausted(url, retry_state, span)
+            raise_retry_exhausted(url, retry_state, span)
         finally:
-            self._finalize_request_observability(
+            finalize_request_observability(
                 span,
                 retry_state,
                 method=method,
                 start_time=start_time,
+                record_metrics=self._record_request_metrics,
             )
 
     def _is_retryable_error(
@@ -404,7 +321,7 @@ class HTTPClientRetryMixin:
         url: str,
         attempt: int,
         retries_used: int,
-        span: _SpanLike,
+        span: SpanLike,
         kwargs: dict[
             str, Any  # Any: dynamic payload or structural mixin boundary
         ],  # Any: forwarding arbitrary request kwargs to underlying HTTP client
@@ -422,7 +339,14 @@ class HTTPClientRetryMixin:
             )
 
         except CircuitBreakerOpenError as exc:
-            self._handle_circuit_breaker_open(exc, method=method, url=url, span=span)
+            handle_circuit_breaker_trip(
+                exc,
+                method=method,
+                url=url,
+                span=span,
+                provider=self.provider,
+                logger=self.logger,
+            )
             raise
 
         except (
@@ -454,7 +378,7 @@ class HTTPClientRetryMixin:
         url: str,
         attempt: int,
         retries_used: int,
-        span: _SpanLike,
+        span: SpanLike,
     ) -> httpx.Response | _RequestAttemptOutcome:
         """Process a completed HTTP response without changing retry semantics."""
         status_code = response.status_code
@@ -477,25 +401,6 @@ class HTTPClientRetryMixin:
         span.set_attribute("http.status_code", status_code)
         return response
 
-    def _handle_circuit_breaker_open(
-        self,
-        exc: CircuitBreakerOpenError,
-        *,
-        method: str,
-        url: str,
-        span: _SpanLike,
-    ) -> None:
-        """Record circuit-breaker open state without altering propagation semantics."""
-        self._mark_span_error(span, "circuit_breaker_open", exc)
-        if self.logger:
-            self.logger.warning(
-                "http_circuit_breaker_open",
-                url=url,
-                method=method,
-                provider=self.provider,
-                retry_after=exc.retry_after,
-            )
-
     async def _handle_request_exception(
         self,
         exc: Exception,
@@ -504,11 +409,11 @@ class HTTPClientRetryMixin:
         url: str,
         attempt: int,
         retries_used: int,
-        span: _SpanLike,
+        span: SpanLike,
     ) -> _RequestAttemptOutcome | None:
         """Process retryable vs terminal exception paths for one request attempt."""
         if not self._is_retryable_error(exc):
-            self._mark_span_error(span, type(exc).__name__, exc)
+            mark_span_error(span, type(exc).__name__, exc)
             return None
 
         if _can_retry(self.retry_config, attempt, retries_used):

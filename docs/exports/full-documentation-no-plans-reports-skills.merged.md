@@ -116,7 +116,7 @@ docs/
 | Document                                                                                     | Covers                                   | RULES.md |
 |----------------------------------------------------------------------------------------------|------------------------------------------|----------|
 | [system-context.md](../02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
-| [container-diagram.md](../02-architecture/diagrams/guide/container-reference.md)                               | C4 Container, Docker services            | §5.6     |
+| [container-diagram.md](../02-architecture/diagrams/guide/container-reference.md)                               | C4 Container, Local-Only runtime         | §5.6     |
 | [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
 | [05-composition-layer.md](../02-architecture/05-composition-layer.md)                           | Composition Root, DI, Factories          | §1.1     |
 | [ADR-001: Delta Lake](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |
@@ -520,6 +520,8 @@ graph TD
 
 *Last updated: 2026-03-19. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*
 
+\newpage
+
 # Source: `00-project/RULES.md`
 
 # BioETL: Правила Проекта
@@ -599,7 +601,7 @@ graph TD
   > **Текущее состояние:** Все 68 портов декорированы `@runtime-checkable` (100% coverage).
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 
-- **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
+- **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Это правило относится и к runtime-oriented контрактам (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они по проектной политике остаются в `domain.ports` как чистые cross-layer abstractions, а не считаются infrastructure leakage. Проверяется архитектурным тестом.
 
 - **Суффикс `*Protocol` вне `domain/ports/`**: Классы с суффиксом `*Protocol` **MAY** определяться в любом слое для layer-internal structural typing (mixin contracts, local interface shapes). Они **НЕ являются** нарушением ARCH-003. Разграничение: `*Port` — cross-layer контракт в `domain/ports/`, `*Protocol` — layer-internal контракт, не экспортируемый за пределы модуля/слоя.
 
@@ -1444,7 +1446,7 @@ pip install -e ".[tests]"
 1. Timestamps **MUST** передаваться из application слоя, не создаваться в infrastructure
 1. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
 1. `PipelineContext.started-at` — единственный источник времени для batch
-1. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort` (см. ADR-019)
+1. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort` из `domain.ports`
 
 #### Архитектурные Тесты (REQ-ARCH-030)
 
@@ -1484,6 +1486,10 @@ context = PipelineContext.create(run_id, run_type, logger)
 await bronze_writer.write_bronze(..., ingestion_ts=context.started_at)
 await quarantine.write(..., ingestion_ts=context.started_at)
 ```
+
+`PipelineContext` остаётся нормативным execution context, а не "ошибочно размещённым infra object". Его `logger`
+поле и `bind_logger()` нужны для детерминированной и переносимой передачи run metadata через `LoggerPort`; concrete
+logging framework по-прежнему создаётся вне domain и не пробивает layer boundary.
 
 ### 4.4. Python Standards
 
@@ -1590,7 +1596,7 @@ class MyAdapter:
 - **MUST NOT** выбрасывать исключения
 - **SHOULD** обнулять ссылки после закрытия (`self.-client = None`)
 
-**PipelineServices Lifecycle:**
+**PipelineService Lifecycle:**
 
 ```python
 async with services:  # --aenter-- инициализирует ресурсы
@@ -2285,6 +2291,8 @@ fields:
 - **2.0** (2025-05-20): Классификация ошибок, Medallion, Rate limiting, Перевод на русский.
 - **1.0** (2025-04-01): Черновик.
 
+\newpage
+
 # Source: `00-project/TOOLS.md`
 
 # BioETL: Утилиты Проекта
@@ -2315,6 +2323,7 @@ fields:
 ## Docs Toolchain
 
 - `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
+- Docs site tooling lives in the separate `docs` extra; install it via `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"` before running MkDocs commands.
 - Standard docs checks:
 ```bash
 python -m scripts.docs check-links
@@ -2417,6 +2426,8 @@ pytest src/tools/benchmarks/ -v --benchmark-only
 | 2.0 | 2026-01-07 | Разделение на src/tools/ и scripts/ по критерию импорта bioetl |
 | 1.1 | 2026-01-07 | Добавлены все инструменты |
 | 1.0 | 2025-01-07 | Начальная версия |
+
+\newpage
 
 # Source: `00-project/ai/agents/guides/AGENT.md`
 
@@ -2774,6 +2785,8 @@ git commit -m "..."
 
 **Строй надёжно. Документируй честно. Спрашивай смело.**
 
+\newpage
+
 # Source: `00-project/ai/agents/CLAUDE.md`
 
 # CLAUDE (Compatibility Stub)
@@ -2784,6 +2797,8 @@ Deprecated compatibility path.
 - Runtime-oriented docs: [runtime/agent-memory.md](runtime/agent-memory.md)
 
 *Synchronized with RULES.md v5.24 (2026-03-13)*
+
+\newpage
 
 # Source: `00-project/ai/agents/guides/CODEX.md`
 
@@ -2999,6 +3014,8 @@ Scope: ...
 1. Документация обновлена при изменении поведения/контрактов.
 1. В отчёте нет недоказанных утверждений.
 
+\newpage
+
 # Source: `00-project/ai/agents/guides/GEMINI.md`
 
 # GEMINI.md: Context & Instructions for BioETL
@@ -3087,6 +3104,8 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 *   **Transformer Mapping**: Use declarative `FieldGroup`/`FieldSpec`. Normalize empty collections to `None`. Compact JSON serialization for list/dict fields.
 *   **VCR Governance**: Organize cassettes in `tests/fixtures/vcr/{provider}/`. NEVER store in root. Use `once` mode locally, `none` in CI.
 
+\newpage
+
 # Source: `00-project/ai/agents/README.md`
 
 # AI Agents Context
@@ -3150,6 +3169,8 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 - `docs/00-project/RULES.md` остаётся canonical source RFC 2119 требований.
 - При конфликте инструкций приоритет: System/Developer/User > локальные инструкции агента.
 
+\newpage
+
 # Source: `00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md`
 
 # BioETL Diagram Docs Orchestrator Agent
@@ -3212,6 +3233,8 @@ bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks
 
 Примечание: пересборка выполняется для Markdown-бандлов, доступных как источники `*-with-descriptions.md`.
 
+\newpage
+
 # Source: `00-project/ai/agents/runtime/agent-memory.md`
 
 # Memory: BioETL (краткая выжимка)
@@ -3251,6 +3274,8 @@ bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks
 - Артефакты → `reports/` или `logs/`, временные дампы → `tmp/`.
 - Корень репозитория защищён политикой allowlist.
 
+\newpage
+
 # Source: `00-project/ai/agents/orchestration/ORCHESTRATION.md`
 
 # Deprecated Alias: `ORCHESTRATION.md`
@@ -3260,6 +3285,8 @@ This document path is deprecated.
 Canonical file: [../agents/ORCHESTRATION.md](../agents/ORCHESTRATION.md)
 
 Do not edit this alias directly.
+
+\newpage
 
 # Source: `00-project/ai/agents/runtime/py-qa-orchestrator.md`
 
@@ -3386,6 +3413,8 @@ Each agent must produce a report. The Root Orchestrator compiles them into `repo
 
 You are now ready to begin. Await the target scope and testing type.
 
+\newpage
+
 # Source: `00-project/architecture-index.md`
 
 # Архитектурные документы (канонические ссылки)
@@ -3404,6 +3433,8 @@ You are now ready to begin. Await the target scope and testing type.
 > **Примечание:** Ранее использовались файлы-алиасы (`01-domain-objects.md`,
 > `02-etl-layers.md` и т.д.) в `docs/00-project/`. Они удалены — используйте
 > канонические документы напрямую.
+
+\newpage
 
 # Source: `00-project/glossary.md`
 
@@ -3524,7 +3555,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 |----------------|------------|-------|
 | **BatchID** | UUID uniquely identifying a batch within a pipeline run | `chunk-id`, `batch number` |
 | **ContentHash** | SHA-256 hash for record deduplication: `sha256(provider + canonical_json(record))` | `checksum`, `fingerprint` |
-| **PipelineContext** | Immutable value object carrying run-id, provider, entity, run-type, and config through the pipeline | `execution context`, `run state` |
+| **PipelineContext** | Immutable domain-level execution context carrying `run_id`, `run_type`, `LoggerPort`, and deterministic `started_at` for batch/write flows | `run state`, `infra context object` |
 
 ### Composite Pipeline Services
 
@@ -3639,7 +3670,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | Pattern | Example | Usage |
 |---------|---------|-------|
 | `{Entity}Transformer` | `ActivityTransformer`, `MoleculeTransformer` | Bronze → Silver transformation |
-| `{Provider}{Entity}Transformer` | `PubChemCompoundTransformer` | Cross-provider distinction |
+| `{Provider}{EntitySurfaceTerm}Transformer` | `PubChemCompoundTransformer` | Public pipeline surface; may intentionally differ from canonical domain entity name |
 | `{Layer}Writer` | `BronzeWriter`, `GoldWriter` | Data persistence |
 | `{Provider}Adapter` | `ChemblAdapter`, `UniProtAdapter` | External API access |
 | `{Resource}Manager` | `CheckpointManager` | Resource lifecycle |
@@ -3647,17 +3678,24 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 ### CLI Conventions
 
-**Pipeline Names**: CLI uses `{provider}-{entity}` format for pipeline identifiers:
+**Pipeline Names**: CLI uses `{provider}_{entity}` format for pipeline identifiers:
 - `chembl_molecule`, `chembl_activity`, `chembl_assay`
 - `pubchem_compound`
 - `uniprot_protein`
 - `pubmed_publication`
+
+These pipeline IDs are **stable external identifiers**. They may intentionally
+preserve provider API terms even when the canonical domain entity name differs.
+Examples:
+- Domain: `PubchemMolecule` → CLI/config/public pipeline ID: `pubchem_compound`
+- Domain: `UniprotTarget` → CLI/config/public pipeline ID: `uniprot_protein`
 
 **Language Policy**: All CLI help texts, error messages, and user-facing output use **English** for consistency and international accessibility. Internal documentation (CLAUDE.md, RULES.md) may use Russian per project convention.
 
 **Entity Terms in CLI**: Use provider-specific terms as defined in this glossary:
 - ChEMBL pipelines use `molecule`, `activity`, `target`, etc.
 - PubChem pipelines use `compound`
+- UniProt pipelines use `protein`
 - Avoid generic terms like `testitem`, `drug`, `substance` in pipeline names
 
 ---
@@ -3920,6 +3958,8 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 
 *See also: [RULES.md](RULES.md) §2.4.1 for pipeline naming conventions.*
 
+\newpage
+
 # Source: `00-project/governance/02-naming-policy.md`
 
 # Политика именования сущностей
@@ -3943,6 +3983,19 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 | Биологическая мишень | **Target** | `ChemblTarget`, `UniprotTarget` |
 | Результат анализа | **Activity** | `ChemblActivity` |
 
+### 1.2. Две поверхности именования
+
+BioETL использует два согласованных, но не всегда одинаковых naming surface:
+
+| Поверхность | Назначение | Примеры |
+| :--- | :--- | :--- |
+| **Canonical domain names** | Domain entities, domain DTOs, часть domain schemas и терминология Ubiquitous Language | `PubchemMolecule`, `UniprotTarget`, `ChemblPublication` |
+| **Stable external identifiers** | CLI `--pipeline`, `pipeline.pipeline_name`, часть pipeline/transformer/schema public surface | `pubchem_compound`, `uniprot_protein`, `PubChemCompoundPipeline`, `UniProtProteinGoldSchema` |
+
+Правило по умолчанию: использовать canonical term. Исключения допустимы только
+для stable external/public surface и должны быть зафиксированы в
+`configs/naming_exceptions.yaml`.
+
 ---
 
 ## 2. Правила именования по категориям
@@ -3959,25 +4012,42 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 ### 2.2. Пайплайны (Pipelines)
 
 #### 2.2.1. Идентификаторы пайплайнов (Pipeline IDs)
-**Формат:** `{provider}-{entity}` (snake-case)
-**Используется в:** YAML конфигах (`pipeline-name`), CLI (`--pipeline`).
+**Формат:** `{provider}_{entity}` (snake_case)
+**Используется в:** YAML конфигах (`pipeline_name`), CLI (`--pipeline`).
+
+Pipeline ID — это **stable external identifier**, а не обязательно canonical
+domain term. Поэтому `pubchem_compound` и `uniprot_protein` допустимы как
+policy-backed external IDs, хотя domain использует `PubchemMolecule` и
+`UniprotTarget`.
 
 #### 2.2.2. Классы пайплайнов
-**Формат:** `{Provider}{CanonicalTerm}Pipeline` (PascalCase)
+**Формат:** `{Provider}{EntitySurfaceTerm}Pipeline` (PascalCase)
 **Место:** `src/bioetl/application/pipelines/{provider}/`
+
+- **SHOULD**: По умолчанию использовать canonical term.
+- **MAY**: Для stable external/public surface использовать provider-facing term,
+  если он зафиксирован в `configs/naming_exceptions.yaml`.
+- **Примеры**: `ChemblPublicationPipeline`, `PubChemCompoundPipeline`, `UniProtProteinPipeline`.
 
 ### 2.3. Трансформеры (Transformers)
 
-**Формат:** `{Provider}{CanonicalTerm}Transformer` (PascalCase)
+**Формат:** `{Provider}{EntitySurfaceTerm}Transformer` (PascalCase)
 **Место:** `src/bioetl/application/pipelines/{provider}/`
 
 - **MUST**: Наследовать от `BaseTransformer` или `BaseChemblTransformer`.
+- **SHOULD**: Использовать canonical term по умолчанию.
+- **MAY**: Использовать stable public surface term для provider-facing pipeline layers,
+  если это policy-backed exception.
 
 ### 2.4. Схемы валидации (Pandera/PyArrow)
 
 #### 2.4.1. Pandera Schemas (Gold)
-**Формат:** `{Provider}{CanonicalTerm}GoldSchema` (PascalCase)
+**Формат:** `{Provider}{EntitySurfaceTerm}GoldSchema` (PascalCase)
 **Место:** `src/bioetl/domain/contracts/gold/`
+
+- **SHOULD**: Canonical term по умолчанию.
+- **MAY**: Stable public surface term для generated/public contract names,
+  если это зафиксировано в exception registry.
 
 #### 2.4.2. PyArrow Schemas (Silver)
 **Формат:** `CHEMBL-{CANONICAL-TERM}-SCHEMA` (UPPER-SNAKE-CASE)
@@ -3989,7 +4059,7 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 
 ### 3.1. Имена таблиц (Silver/Gold)
 
-**Формат:** `{provider}-{entity}` (snake-case)
+**Формат:** `{provider}_{entity}` (snake_case)
 - Должны совпадать с идентификатором пайплайна.
 - **Пример**: `chembl_publication`.
 
@@ -4004,7 +4074,11 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 ## 4. Исключения (Naming Exceptions)
 
 Полный список разрешенных отклонений от правил (напр., `README.md`, `LICENSE`) зафиксирован в файле:
-`configs/naming-exceptions.yaml`
+`configs/naming_exceptions.yaml`
+
+Этот реестр также фиксирует различие между canonical domain names и stable
+external/public IDs. Если имя намеренно сохраняет provider API term для
+CLI/pipeline/schema surface, это должно быть оформлено именно там.
 
 Добавление нового исключения требует обоснования в PR и обновления этого файла.
 
@@ -4016,11 +4090,13 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 - [03-file-policy.md](03-file-policy.md) — Политика файлов и директорий
 - [glossary.md](../glossary.md) — Ubiquitous Language
 
+\newpage
+
 # Source: `00-project/governance/03-file-policy.md`
 
 # Политика файлов и директорий
 
-*Синхронизировано с RULES.md v5.24 | Последнее обновление: 2026-03-13*
+*Синхронизировано с RULES.md v5.24 | Последнее обновление: 2026-03-20*
 
 ----------------------------------------------------------------------
 
@@ -4277,7 +4353,7 @@ pre-commit run validate-pipeline-configs --all-files
 
 ----------------------------------------------------------------------
 
-*Последнее обновление: 2026-03-03*
+\newpage
 
 # Source: `00-project/governance/04-extending-bioetl.md`
 
@@ -4374,6 +4450,8 @@ Then run targeted unit tests for changed provider/pipeline.
 - [ ] `pipeline/registry.py` updated (`PIPELINE_CONFIGS`, imports).
 - [ ] Silver/Gold schemas updated and exported.
 - [ ] Unit/integration docs updated.
+
+\newpage
 
 # Source: `00-project/governance/05-github-policy.md`
 
@@ -4701,6 +4779,8 @@ concurrency:
 
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
 
+\newpage
+
 # Source: `00-project/governance/06-doc-publication-policy.md`
 
 # Documentation Publication Policy
@@ -4781,6 +4861,8 @@ bash scripts/docs/build_docs_site.sh --strict
 ## Связанный документ
 
 - [Documentation Navigation Policy](07-doc-nav-policy.md)
+
+\newpage
 
 # Source: `00-project/governance/07-doc-nav-policy.md`
 
@@ -4962,6 +5044,8 @@ Decision record:
 - [File Policy](03-file-policy.md)
 - [RULES](../RULES.md)
 
+\newpage
+
 # Source: `00-project/index.md`
 
 # Welcome to BioETL
@@ -5055,6 +5139,8 @@ make test
 ----------------------------------------------------------------------
 
 *Last updated: 2026-03-13*
+
+\newpage
 
 # Source: `00-project/rules-summary.md`
 
@@ -5199,6 +5285,8 @@ make test
 
 *Полная версия: [RULES.md](RULES.md)*
 
+\newpage
+
 # Source: `01-requirements/REQUIREMENTS.md`
 
 # BioETL: Требования к Проекту
@@ -5222,7 +5310,7 @@ make test
 
 ### REQ-ARCH-001
 - **Уровень**: MUST
-- **Описание**: Интерфейсы (Ports) определяются в пакете `domain/ports/` через `typing.Protocol`. Импорт **MUST** быть из фасада (`from bioetl.domain.ports import ...`).
+- **Описание**: Интерфейсы (Ports) определяются в пакете `domain/ports/` через `typing.Protocol`. Импорт **MUST** быть из фасада (`from bioetl.domain.ports import ...`). Это правило относится и к runtime-oriented cross-layer contracts (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они остаются санкционированной частью `bioetl.domain.ports`, потому что выражают чистые абстракции, а не concrete infrastructure behavior.
 - **Проверка**: Статический анализ — проверить наличие пакета и использование Protocol. Архитектурный тест `test-ports-imported-only-from-facade`.
 
 ### REQ-ARCH-002
@@ -5933,7 +6021,7 @@ make test
 
 #### REQ-CLEANUP-004
 - **Уровень**: MUST
-- **Описание**: PipelineServices реализует async context manager (`--aenter--`/`--aexit--`)
+- **Описание**: `PipelineService` реализует async context manager (`__aenter__`/`__aexit__`)
 - **Проверка**: Проверить использование `async with services:` в runner
 
 ### 5.5 Security
@@ -6138,6 +6226,8 @@ make test
 - **1.1** (2025-12-25): Добавлены требования REQ-ARCH-005..007 (Health Check), REQ-CLEAR-001..004 (Medallion Clear Policy), REQ-PYTHON-001..003 (Future Annotations), REQ-CLEANUP-001..004 (Async Resource Cleanup). Синхронизировано с RULES.md v5.4.
 - **1.0** (2025-12-15): Первоначальная версия. Извлечено из RULES.md v5.0.
 
+\newpage
+
 # Source: `02-architecture/00-overview.md`
 
 # Architecture Overview
@@ -6270,6 +6360,8 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 - [00-map.md](../00-project/00-map.md) — Full project navigator
 - [glossary.md](../00-project/glossary.md) — Ubiquitous language terminology
 
+\newpage
+
 # Source: `02-architecture/01-domain-layer.md`
 
 # Слой Domain (Домен)
@@ -6279,7 +6371,9 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 ## 1. Назначение
 
 Слой `Domain` содержит чистую предметную логику BioETL: доменные сущности, value objects, агрегаты, доменные события,
-контракты портов и правила валидации. Слой не должен зависеть от `application`, `infrastructure` и `interfaces`.
+контракты портов и правила валидации. В BioETL это не только "business-only" слой: он также является sanctioned owner
+для чистых cross-layer contracts и детерминированных runtime context primitives. Слой не должен зависеть от
+`application`, `infrastructure` и `interfaces`.
 
 Ключевые характеристики:
 
@@ -6299,6 +6393,10 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 - runtime/resilience (`RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
 - NoOp реализации для опциональных зависимостей.
 
+Runtime-oriented порты намеренно остаются в `domain.ports`: это допустимо, потому что они выражают чистые абстракции
+межслойного контракта, а не concrete infrastructure behavior. Правило слоя звучит как "в domain нельзя тянуть I/O и
+конкретные adapter/framework dependencies", а не как "в domain нельзя описывать runtime contracts".
+
 Правило импорта:
 
 ```python
@@ -6310,6 +6408,10 @@ from bioetl.domain.ports.storage import StoragePort
 ```
 
 Проверка выполняется архитектурным тестом `test_ports_imported_only_from_facade`.
+
+Фасад `bioetl.domain.ports` остаётся единственной sanctioned import surface для всех first-party слоёв. Это снижает
+навигационную стоимость, не раскрывает internal port modules наружу и делает policy вокруг runtime/resilience ports
+явной и стабильной.
 
 ### 2.2. DDD Aggregates (`aggregates/`)
 
@@ -6419,6 +6521,21 @@ Split internal modules остаются implementation detail owner packages и 
 `src/bioetl/domain/types/` содержит типизированные идентификаторы и alias-ы, используемые агрегатами и сущностями:
 `RunID`, `BatchID`, `EntityID`, `ContentHash`, `RunType`, `MetaDict`, `JsonDict` и другие.
 
+### 2.5.1. Runtime Context (`context.py`)
+
+`src/bioetl/domain/context.py` содержит `PipelineContext` и связанные runtime context objects.
+
+`PipelineContext` является нормативным domain-level execution context:
+
+- `started_at` — единый детерминированный источник времени для batch и writer flows по ADR-014;
+- `logger` хранится как `LoggerPort`, то есть как чистая абстракция, а не как привязка к `structlog`;
+- `bind_logger()` остаётся частью того же контекста, потому что он распространяет execution metadata через порт,
+  не вводя concrete logging dependency в domain.
+
+Следовательно, `PipelineContext` не считается infrastructure leakage. Concrete logger implementation по-прежнему
+создаётся вне domain и внедряется через composition/infrastructure, а domain удерживает только value semantics и
+portable execution context contract.
+
 ### 2.6. Доменные сервисы (`services/`)
 
 `src/bioetl/domain/services/` содержит чистые доменные сервисы без I/O, например:
@@ -6487,6 +6604,8 @@ Split internal modules остаются implementation detail owner packages и 
 - [API Reference: Domain](../04-reference/api/domain.md)
 - [Glossary](../00-project/glossary.md)
 
+\newpage
+
 # Source: `02-architecture/02-application-layer.md`
 
 # Слой Application (Приложение)
@@ -6547,8 +6666,7 @@ Split internal modules остаются implementation detail owner packages и 
 
 **Сервисы ядра:**
 
-- **`PipelineService`** (`pipeline_services.py`) — DI bundle портов для pipeline execution
-- **`PipelineServices`** (`pipeline_services.py`) — Extended DI bundle с DQ-портами для PipelineRunner
+- **`PipelineService`** (`pipeline_services.py`) — Frozen DI bundle портов и optional DQ/metadata collaborators для pipeline execution и `PipelineRunner`
 - **`LockCoordinator`** (`lifecycle/lock_manager.py`) — Координация блокировок
 - **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
@@ -6638,7 +6756,7 @@ factory = GenericPipelineFactory(
 | `runner.py`                       | `PipelineRunner`            | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
 | `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись              |
 | `../services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM (`application/services/`) |
-| `pipeline_services.py`            | `PipelineServices`          | DI bundle сервисов для PipelineRunner                                    |
+| `pipeline_services.py`            | `PipelineService`           | DI bundle сервисов для PipelineRunner                                    |
 
 **`PipelineRunner`** — координатор исполнения:
 
@@ -6648,11 +6766,11 @@ factory = GenericPipelineFactory(
 - Управляет postrun-операциями через `PostrunService`
 - Оркестрирует очистку слоёв через `MedallionLifecycleService`
 
-**`PipelineServices`** — frozen dataclass, bundling зависимостей:
+**`PipelineService`** — frozen dataclass, bundling зависимостей:
 
 ```python
 @dataclass(frozen=True)
-class PipelineServices:
+class PipelineService:
     data_source: DataSourcePort
     storage: StoragePort
     lock: LockPort
@@ -6877,6 +6995,8 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 - [Composition Layer](05-composition-layer.md) — сборка и DI пайплайнов
 - [API Reference: Application](../04-reference/api/application.md) — API документация слоя
 - [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов
+
+\newpage
 
 # Source: `02-architecture/03-infrastructure-layer.md`
 
@@ -7220,6 +7340,8 @@ PubMedAdapter                         (pubchempy)
 - [API Reference: Infrastructure](../04-reference/api/infrastructure.md) — API документация слоя
 - [RULES.md §3 "Ошибки"](../00-project/RULES.md) — классификация ошибок, retry logic
 
+\newpage
+
 # Source: `02-architecture/04-interfaces-layer.md`
 
 # Слой Interfaces (Интерфейсы)
@@ -7360,6 +7482,8 @@ Graceful shutdown обрабатывается непосредственно в
 - [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
 - [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов (interfaces может импортировать всё)
 
+\newpage
+
 # Source: `02-architecture/05-composition-layer.md`
 
 # Слой Composition (Композиция)
@@ -7457,6 +7581,8 @@ composition/bootstrap/
 
 **Расположение:** `src/bioetl/composition/factories/`
 
+Ключевой класс этого слоя: `GenericPipelineFactory`. Он служит канонической декларативной factory для сборки pipeline instance и runner assembly через DI.
+
 | Подпакет / Файл             | Ключевые компоненты                          | Назначение                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline/assembler.py`     | `GenericPipelineFactory`                     | Универсальный конструктор пайплайнов (декларативно)            |
@@ -7468,7 +7594,7 @@ composition/bootstrap/
 | `storage/factory.py`        | `StorageFactory`                             | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
 | `storage/adapter.py`        | `StorageAdapter`                             | Создание отдельных storage адаптеров                           |
 | `services/factory.py`       | `BaseServicesFactory`                        | Создание core сервисов                                         |
-| `services/builder.py`       | `ServicesBuilder`                            | Создание `PipelineServices` bundle                             |
+| `services/builder.py`       | `ServicesBuilder`                            | Создание `PipelineService` bundle                              |
 | `services/port_factories.py`| Port factory functions                       | Boundary-validated port creation                               |
 | `dq/factory.py`             | `DQServicesFactory`                          | Создание Data Quality компонентов                              |
 | `transformer_factory.py`    | `register_transformer() / create_transformer()` | Создание трансформеров по провайдеру                        |
@@ -7518,9 +7644,10 @@ composition/bootstrap/
 
 Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
 
-- **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
+- **`ProviderRegistry`**: Thread-safe instance-scoped реестр provider metadata и creation callbacks. Class-level методы сохраняются как compatibility facade над shared default registry.
+- **`ensure_providers_loaded()`**: Канонический lifecycle boundary для shared runtime/bootstrap registration state.
 - **`get_data_source_creator()`**: Каноническая точка получения provider-bound creator callback для data source assembly.
-- **`DataSourceFactory`**: Канонический façade для создания `DataSourcePort` через `ProviderRegistry`.
+- **`DataSourceFactory`**: Канонический façade для создания `DataSourcePort` через `ProviderRegistry`; local factory seams при необходимости принимают explicit `provider_registry`.
 
 Legacy registry façade сохраняется только для explicit compatibility coverage.
 Полная deprecation/inventory картина по этому compatibility surface и соседним compat-модулям описана в
@@ -7533,7 +7660,7 @@ Legacy registry façade сохраняется только для explicit comp
 creator = get_data_source_creator("chembl")
 data_source = creator(settings, config, logger)
 
-# Или напрямую через DataSourceFactory / ProviderRegistry
+# Или напрямую через DataSourceFactory
 data_source = DataSourceFactory.create("chembl", settings=settings, logger=logger)
 ```
 
@@ -7612,6 +7739,8 @@ runner = bootstrap_composite_runner(
 - [Infrastructure Layer](03-infrastructure-layer.md) — адаптеры, регистрируемые в ProviderRegistry
 - [Compatibility Facade Inventory](07-compatibility-facade-inventory.md) — статус и план вывода compat-модулей
 - [API Reference: Composition](../04-reference/api/composition.md) — API документация слоя
+
+\newpage
 
 # Source: `02-architecture/diagrams/governance/policy.md`
 
@@ -7744,6 +7873,8 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 1. Любое изменение архитектурных модулей или порт-контрактов требует обновления релевантных диаграмм.
 2. Изменение диаграммы без изменения кода допускается только для устранения рассинхрона или улучшения читаемости.
 3. Сначала документируем фактическую реализацию, затем желаемую (если есть расхождение).
+
+\newpage
 
 # Source: `02-architecture/diagrams/guide/architecture-reference.md`
 
@@ -8492,6 +8623,8 @@ bioetl run --pipeline chembl_activity \
 
 *Создано автоматически | Claude Code | 2026-01-20*
 
+\newpage
+
 # Source: `02-architecture/diagrams/guide/container-reference.md`
 
 # C4: Диаграмма Контейнеров
@@ -8508,6 +8641,8 @@ bioetl run --pipeline chembl_activity \
 *   **BronzeWriter / SilverWriter / GoldWriter**: Реализации `StoragePort`, которые пишут данные в локальную файловую систему `data/`.
 *   **LockPort / MemoryLock**: Локальный механизм блокировок, реализующий `LockPort` в рамках single-instance выполнения (ADR-010).
 *   **Локальная файловая система (`data/`)**: Хранилище Bronze/Silver/Gold и checkpoints в рамках Local-Only развертывания.
+
+\newpage
 
 # Source: `02-architecture/diagrams/guide/data-flow-reference.md`
 
@@ -8642,6 +8777,8 @@ flowchart TD
 
 - **System Context**: [system-context.md](../../system-context.md)
 - **Architecture Diagrams**: [policy.md](../governance/policy.md)
+
+\newpage
 
 # Source: `02-architecture/data-layers.md`
 
@@ -8807,6 +8944,8 @@ Gold слой имеет строгие публичные контракты.
 | **PII** | Plain Text (Restricted Access) | Hashed + Salted | Aggregated / Excluded |
 | **Recovery** | Replay source | Rebuild from Bronze | Recompute from Silver |
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md`
 
 # ADR-001: Why Delta Lake over Raw Parquet?
@@ -8856,6 +8995,8 @@ While Parquet is an excellent columnar storage format, it lacks critical feature
 - [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — uses Delta Lake for Silver and Gold layers (Updated: 2025-05-20)
 - [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — defines clear/cleanup operations for Delta tables (Updated: 2025-12-25)
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — schema validation for Gold layer Delta tables (Updated: 2025-12-26)
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-002-medallion-architecture.md`
 
@@ -8910,6 +9051,8 @@ The Medallion Architecture provides a clear and logical separation of concerns, 
 - [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark — simplifies load strategy within Medallion (Updated: 2025-12-23)
 - [ADR-012](ADR-012-storage-clear-contract-and-run-id.md): Storage Clear Contract — Medallion invariants for destructive operations (Updated: 2025-12-25)
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — quality guarantees for Gold layer (Updated: 2025-12-26)
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-003-in-memory-locking-strategy.md`
 
@@ -9079,6 +9222,8 @@ await lock.aclose()
 3. Удалить зависимости: `pip uninstall redis aioredis fakeredis`
 4. Обновить код: заменить `RedisLock` на `MemoryLock`
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md`
 
 # ADR-004: Why Pydantic over Standard Dataclasses?
@@ -9129,6 +9274,8 @@ While `dataclasses` provide a convenient way to create classes for storing data,
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — uses Pydantic/Pandera for Gold schema validation
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses dataclasses for domain aggregates (different concern)
 - [ADR-023](ADR-023-entity-type-patterns.md): Entity Type Patterns — defines entity modeling with Pydantic
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-005-composition-layer-separation.md`
 
@@ -9318,6 +9465,8 @@ src/bioetl/
 - [Composition Root Pattern](https://blog.ploeh.dk/2011/07/28/CompositionRoot/)
 - [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/)
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-006-logger-metrics-ports.md`
 
 # ADR-006: Ports for Logger and Metrics
@@ -9489,6 +9638,8 @@ Rejected because:
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — enforces LoggerPort usage in all layers
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — applies NoOp pattern established here to tracing
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-007-circuit-breaker-implementation.md`
 
 # ADR-007: Circuit Breaker Implementation
@@ -9651,6 +9802,8 @@ async def fetch-activity(activity-id: int) -> dict:
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy — coordinates with circuit breaker during shutdown (Updated: 2025-12-22)
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin — wraps fetch calls with circuit breaker (Updated: 2025-12-22)
 - [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — circuit breaker is part of error handling (Updated: 2025-12-26)
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md`
 
@@ -9886,6 +10039,8 @@ The 5-minute grace period allows:
 - [ADR-015](ADR-015-pipeline-services-lifecycle.md): Pipeline Services Lifecycle — aclose() during shutdown (Updated: 2025-12-24)
 - [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy — shutdown on critical errors (Updated: 2025-12-26)
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md`
 
 # ADR-009: PaginatedFetcherMixin Design
@@ -10110,6 +10265,8 @@ class UniProtAdapter(PaginatedFetcherMixin):
 - ADR-030: Full Scan Loading Strategy (uses pagination for complete data loads)
 - ADR-031: Loading Strategy Formalization (orchestrates paginated fetches across providers)
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-010-local-only-deployment.md`
 
 # ADR-010: Local-Only Deployment Strategy
@@ -10316,6 +10473,8 @@ class Settings:
 3. Переустановить зависимости: `pip install -e .[dev]`
 4. Перенести данные из S3 в локальную директорию `data/`
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-011-remove-watermark-mechanism.md`
 
 # ADR-011: Отказ от механизма Watermark
@@ -10486,6 +10645,8 @@ class BasePipeline(ABC):
 1. Удалить поле `watermark-field` из конфигов пайплайнов
 2. Удалить метод `extract-watermark()` из кастомных пайплайнов
 3. Обновить тесты, использующие Watermark
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md`
 
@@ -10663,6 +10824,8 @@ Post-run maintenance идёт отдельным путём:
 - RULES.md §1.1 — Ports & Adapters architecture
 - CLAUDE.md §3.2 — Content Hash нормализация
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-013-async-storage-cleanup.md`
 
 # ADR-013: Асинхронная очистка хранилища в PipelineRunner
@@ -10796,6 +10959,8 @@ async def test_clear_exports(...):
 
 - CLAUDE.md §3: Medallion Architecture
 - tests/integration/test_runner_lifecycle.py — Тесты инвариантов
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-014-deterministic-writes.md`
 
@@ -10937,6 +11102,8 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 - `tests/architecture/test_no_random_in_writers.py`
 - `tests/architecture/test_no_datetime_now_in_infrastructure.py`
 - `tests/architecture/test_no_structlog_in_application_interfaces.py`
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md`
 
@@ -11085,6 +11252,8 @@ class TestObservabilityPortLifecycle:
 - [ADR-013](ADR-013-async-storage-cleanup.md): Async Storage Cleanup — async cleanup methods
 - [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition — PipelineServices design
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses PipelineServices lifecycle
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-016-error-handling-strategy.md`
 
@@ -11348,6 +11517,8 @@ Rejected because:
 - [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation (Updated: 2025-12-22)
 - [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy (Updated: 2025-12-22)
 - [ADR-014](ADR-014-deterministic-writes.md): Deterministic Writes and Retries (Updated: 2025-12-24)
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-017-observability-architecture.md`
 
@@ -11690,6 +11861,8 @@ Rejected because:
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — logging integration
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement — enforces this architecture
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing — NoOp pattern for tracing defined here
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-018-gold-strict-validation.md`
 
@@ -12098,6 +12271,8 @@ def test-non-strict-validation-warns-without-schema(caplog):
 - `Series[object]` для JSON-like полей в Gold-контрактах считается нарушением контракта.
 - Миграция выполняется через dual-read совместимость 14 дней, затем обязательный backfill Delta-таблиц.
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-019-observability-port-enforcement.md`
 
 # ADR-019: Observability Port Enforcement
@@ -12297,6 +12472,8 @@ test_no_structlog_import_in_application_interfaces PASSED
 - ADR-006: LoggerPort definition
 - ADR-017: Observability architecture overview
 - RULES.md §11: Anti-Patterns (structlog in application/interfaces)
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-020-basepipeline-decomposition.md`
 
@@ -12620,6 +12797,8 @@ finally:
 
 > **Note:** Planning docs `docs/refactoring/basepipeline-dependency-map.md` and `docs/refactoring/entry-criteria-check.md` were archived after the refactoring was completed.
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md`
 
 # ADR-021: Внедрение DDD Aggregates в Domain Layer
@@ -12911,6 +13090,8 @@ async def run(self) -> None:
 - **Минусы**: Over-engineering для текущего масштаба
 - **Решение**: Отклонено, рассмотреть при масштабировании
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-022-tracing-noop.md`
 
 # ADR-022: NoOp Tracing for Local-Only Deployment
@@ -13096,6 +13277,8 @@ If distributed deployment becomes necessary:
 - **ADR-010**: Local-Only Deployment Strategy — establishes single-process model
 - **ADR-017**: Observability Architecture — defines TracingPort and NoOp pattern
 - **ADR-006**: Logger and Metrics Ports — initial observability ports design
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-023-entity-type-patterns.md`
 
@@ -13369,6 +13552,8 @@ If more readable names needed, a mapping dictionary can be added later without b
 ## Related Documents
 
 - **Audit Report**: `docs/audits/entity_type-audit.md` — detailed analysis of all 19 transformers
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-024-entity-naming-unification.md`
 
@@ -13696,6 +13881,8 @@ class ChemblEntityMapper:
 - [RULES.md §8.2](../../00-project/RULES.md) — Domain Layer guidelines
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md) — DDD Aggregates
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-025-pipeline-config-unification.md`
 
 # ADR-025: Pipeline Configuration Unification
@@ -13988,6 +14175,8 @@ pipeline-name: chembl_activity
 | 2026-02-17 | Claude Code | Fixed: Removed `_schema.json` reference (validation via Pydantic schemas) |
 | 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |
 | 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/entities/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-026-composite-pipeline-pattern.md`
 
@@ -15340,6 +15529,8 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 - RULES.md v5.24 §2.4 (Backfill/Replay)
 - RULES.md v5.24 §3.3 (Concurrency & Locks)
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-027-dq-rules-externalization.md`
 
 # ADR-027: DQ Rules Externalization
@@ -15506,6 +15697,8 @@ Store DQ rules in a database. Rejected because:
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-19 | Claude Code | Initial version |
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-028-filter-rules-externalization.md`
 
@@ -15791,6 +15984,8 @@ Define filters in Python code. Rejected because:
 | 2026-02-17 | Claude Code | Consolidated filter merge: removed legacy `load_filter_config`/`merge_filter_config` from `config_loader.py`, unified via `FilterConfigLoader._merge_hierarchy()`. All 4 filter sections (`input-filter`, `silver-filters`, `gold-filters`, `extraction-params`) now load from full hierarchy. |
 | 2026-02-17 | Claude Code | Fixed: ChEMBL provider batch-size in table: 20 → 1000 (actual provider default) |
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-029-output-metadata-unification.md`
 
 # ADR-029: Output Metadata Unification
@@ -15985,6 +16180,8 @@ class OutputMetadata(BaseModel):
 - ADR-014 — Deterministic Writes (content hash)
 - glossary.md — Ubiquitous Language definitions
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-030-publication-pagination-strategy.md`
 
 # ADR-030: Publication Pagination Strategy (force-full-scan)
@@ -16177,6 +16374,8 @@ Records with identical `content-hash` are deduplicated during merge.
 - ADR-011 — Remove Watermark Mechanism (rationale for abandoning offset tracking)
 - ADR-009 — Paginated Fetcher Mixin (pagination abstraction)
 - ChEMBL API Documentation — `/document` endpoint pagination
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-031-loading-strategy-formalization.md`
 
@@ -16381,6 +16580,8 @@ Once watermark is implemented:
 - ADR-011 — Remove Watermark Mechanism
 - ChEMBL API Documentation — Offset pagination behavior
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-032-unified-http-client.md`
 
 # ADR-032: Unified HTTP Client Pattern
@@ -16566,6 +16767,8 @@ class ChemblAdapter(BaseHttpAdapter):
 - [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy (retry classification)
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement (TracingPort, MetricsPort)
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-033-publication-validation-strategy.md`
 
@@ -17073,6 +17276,8 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 **Версия документа:** 1.1.0
 **Последнее обновление:** 2026-03-15
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-034-schema-domain-pairs.md`
 
 # ADR-034: Schema↔Domain Configuration Pairs
@@ -17134,6 +17339,8 @@ Legacy aliases допускаются только как временный mig
 
 - YAML prefix (YamlDQConfig) — отвергнуто, избыточно
 - Schema suffix (DQConfigSchema) — возможная альтернатива для будущих пар
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-035-json-field-typing-policy.md`
 
@@ -17288,6 +17495,8 @@ PY
 - [ADR-018](ADR-018-gold-strict-validation.md): strict validation опирается на консистентные типы.
 - [ADR-034](ADR-034-schema-domain-pairs.md): выравнивание контрактов между слоями.
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md`
 
 # ADR-036: Gold Contract Versioning Policy
@@ -17378,6 +17587,8 @@ Breaking change откатывается если:
 - [ADR-035](ADR-035-json-field-typing-policy.md): JSON typing migration — пример managed breaking change
 - [ADR-026](ADR-026-composite-pipeline-pattern.md): Composite pipeline field groups подвержены breaking changes
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-037-canonical-schema-generation.md`
 
 # ADR-037: Canonical Schema Source and Generated Artifacts
@@ -17431,6 +17642,8 @@ Breaking change откатывается если:
 - ADR-002 (Medallion Architecture)
 - ADR-018 (Gold strict validation)
 - ADR-034 (Schema↔Domain config pairs)
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-038-enum-externalization.md`
 
@@ -17554,6 +17767,8 @@ Generate `constants.py` from YAML via template. Rejected because:
 - `configs/enums/chembl.yaml` — SSOT file
 - `src/bioetl/domain/schemas/constants.py` — pure Python constants
 - `tests/unit/domain/schemas/test_constants_yaml.py` — sync tests
+
+\newpage
 
 # Source: `02-architecture/decisions/ADR-039-unified-entity-config-format.md`
 
@@ -17957,6 +18172,8 @@ contracts:
 |------|--------|--------|
 | 2026-02-24 | Claude Code | Initial version — documenting completed implementation |
 
+\newpage
+
 # Source: `02-architecture/decisions/ADR-040-diagram-governance.md`
 
 # ADR-040: Diagram Governance and Layout Policy
@@ -18246,6 +18463,8 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 - **ADR-005** — Layered Architecture (Hexagonal / Ports & Adapters)
 - **ADR-020** — Composition Layer isolation
 - **POL-LLM-DIAGRAMS-001** — `docs/02-architecture/diagrams/governance/policy.md`
+
+\newpage
 
 # Source: `02-architecture/decisions/README.md`
 
@@ -18576,6 +18795,8 @@ ADR files follow the pattern: `ADR-NNN-kebab-case-title.md`
 - [CLAUDE.md](../../00-project/ai/agents/guides/CLAUDE.md) — Developer guide with ADR context
 - [Michael Nygard's ADR format](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/INDEX.md`
 
 # Diagram Descriptions Index
@@ -18882,6 +19103,8 @@ _Автогенерация: 2026-02-27_
 - [diagrams/mermaid/44-cross-provider-enrichment-full.mermaid](./legacy/mermaid/44-cross-provider-enrichment-full.md)
 - [diagrams/mermaid/46-yaml-config-resolution-full.mermaid](./legacy/mermaid/46-yaml-config-resolution-full.md)
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/01-full-system-component-full.md`
 
 # Full System Component Full
@@ -18895,6 +19118,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-full.md`
 
@@ -18910,6 +19135,8 @@ _Автогенерация: 2026-02-27_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/21-activity-entity-data-flow-full.md`
 
 # Activity Entity Data Flow Full
@@ -18923,6 +19150,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/26-hexagonal-ports-adapters-full.md`
 
@@ -18938,6 +19167,8 @@ _Автогенерация: 2026-02-27_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/28-composition-root-di-graph-full.md`
 
 # Composition Root Di Graph Full
@@ -18951,6 +19182,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/29-composite-pipeline-workflow-full.md`
 
@@ -18966,6 +19199,8 @@ _Автогенерация: 2026-02-27_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/30-port-adapter-mapping-full.md`
 
 # Port Adapter Mapping Full
@@ -18979,6 +19214,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/32-single-record-journey-full.md`
 
@@ -18994,6 +19231,8 @@ _Автогенерация: 2026-02-27_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/35-bootstrap-sequence-full.md`
 
 # Bootstrap Sequence Full
@@ -19007,6 +19246,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/39-medallion-invariants-full.md`
 
@@ -19022,6 +19263,8 @@ _Автогенерация: 2026-02-27_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/44-cross-provider-enrichment-full.md`
 
 # Cross Provider Enrichment Full
@@ -19035,6 +19278,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/46-yaml-config-resolution-full.md`
 
@@ -19050,6 +19295,8 @@ _Автогенерация: 2026-02-27_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/01-high-level-hexagonal.md`
 
 # High-Level Hexagonal Architecture
@@ -19063,6 +19310,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/01a-hexagonal-overview.md`
 
@@ -19078,6 +19327,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/01b-hexagonal-domain-app.md`
 
 # Hexagonal Domain and Application
@@ -19091,6 +19342,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/01c-hexagonal-infra-comp.md`
 
@@ -19106,6 +19359,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/01d-hexagonal-overview-rounded.md`
 
 # Hexagonal Overview (Rounded Nodes)
@@ -19119,6 +19374,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-03-01`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/02-layer-dependency-matrix.md`
 
@@ -19134,6 +19391,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/03-medallion-data-flow.md`
 
 # Medallion Architecture Data Flow (Bronze → Silver → Gold)
@@ -19147,6 +19406,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/03a-medallion-layers-overview.md`
 
@@ -19162,6 +19423,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/04-pipeline-execution-flow.md`
 
 # Pipeline Execution Lifecycle
@@ -19175,6 +19438,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `sequenceDiagram`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/05-provider-adapter-hierarchy.md`
 
@@ -19190,6 +19455,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/05a-adapter-hierarchy-base.md`
 
 # Adapter Hierarchy: Base Types
@@ -19203,6 +19470,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/05b-adapter-hierarchy-providers.md`
 
@@ -19218,6 +19487,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/06-storage-layer.md`
 
 # Storage Layer Components
@@ -19231,6 +19502,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/06a-storage-writers.md`
 
@@ -19246,6 +19519,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/06b-storage-support.md`
 
 # Storage Support Components
@@ -19259,6 +19534,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/07-dq-system.md`
 
@@ -19274,6 +19551,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/07a-dq-analysis.md`
 
 # DQ Analysis Services
@@ -19287,6 +19566,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/07b-dq-pipeline.md`
 
@@ -19302,6 +19583,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/08-composite-pipeline.md`
 
 # Composite Pipeline Architecture
@@ -19315,6 +19598,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/08a-composite-config.md`
 
@@ -19330,6 +19615,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/08b-composite-execution.md`
 
 # Composite Pipeline Execution
@@ -19343,6 +19630,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/09-observability-stack.md`
 
@@ -19358,6 +19647,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/09a-observability-app.md`
 
 # Observability: Application Layer
@@ -19372,6 +19663,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/09b-observability-infra.md`
 
 # Observability: Infrastructure Layer
@@ -19385,6 +19678,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/10-resilience-patterns.md`
 
@@ -19420,6 +19715,8 @@ _Автогенерация: 2026-02-27_
 - Дата метаданных: `2026-03-08` (обновлено: расширено описание Data Source Decorators и delegation pattern)
 - Связь: Детализирует архитектуру decorators из class diagram 10-adapters
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/11-configuration-system.md`
 
 # Configuration System
@@ -19433,6 +19730,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/11a-config-loading.md`
 
@@ -19448,6 +19747,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/11b-config-domain.md`
 
 # Configuration: Domain & Application Config
@@ -19461,6 +19762,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/12-bootstrap-di-container.md`
 
@@ -19476,6 +19779,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/12a-bootstrap-factories.md`
 
 # Bootstrap: Factories and Registries
@@ -19489,6 +19794,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/12b-bootstrap-wiring.md`
 
@@ -19504,6 +19811,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/13-port-protocol-contracts.md`
 
 # Port/Protocol Contracts (Full Map)
@@ -19517,6 +19826,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/13a-data-storage-ports.md`
 
@@ -19532,6 +19843,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/13a-port-contracts-data-sources.md`
 
 # Port Contracts: Data Sources
@@ -19545,6 +19858,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/13b-operational-ports.md`
 
@@ -19560,6 +19875,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/13b-port-contracts-storage.md`
 
 # Port Contracts: Storage
@@ -19573,6 +19890,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/13c-port-contracts-observability.md`
 
@@ -19588,6 +19907,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/13c-validation-dq-ports.md`
 
 # Validation and Data Quality Ports
@@ -19601,6 +19922,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/13d-port-contracts-services.md`
 
@@ -19616,6 +19939,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-25`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/13e-operational-ports-domain.md`
 
 # Domain Operational Ports
@@ -19629,6 +19954,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/13f-operational-ports-infra.md`
 
@@ -19644,6 +19971,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/14-cli-interface-layer.md`
 
 # CLI / Interface Layer
@@ -19657,6 +19986,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/14a-cli-commands.md`
 
@@ -19672,6 +20003,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/14b-cli-routing.md`
 
 # CLI: Routing to Composition & Application
@@ -19685,6 +20018,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/15-batch-executor-internals.md`
 
@@ -19700,6 +20035,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/16-transformer-hierarchy.md`
 
 # Transformer Hierarchy
@@ -19713,6 +20050,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/16a-transformer-base.md`
 
@@ -19728,6 +20067,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/16b-transformer-pub-other.md`
 
 # Publication, UniProt, Other Transformers and Extractors
@@ -19741,6 +20082,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/17-security-pii-audit.md`
 
@@ -19756,6 +20099,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/18-lock-checkpoint-shutdown.md`
 
 # Locking, Checkpoint, and Graceful Shutdown
@@ -19769,6 +20114,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/architecture/18a-lock-system.md`
 
@@ -19784,6 +20131,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/architecture/18b-checkpoint-shutdown.md`
 
 # Checkpoint and Shutdown System
@@ -19797,6 +20146,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `flowchart`
 - Уровень: `System / Component`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/01-domain-ports.md`
 
@@ -19812,6 +20163,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/02-entities-aggregates.md`
 
 # Class Diagram: 02 Entities Aggregates
@@ -19825,6 +20178,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/03-value-objects.md`
 
@@ -19840,6 +20195,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/04-types-enums.md`
 
 # Class Diagram: 04 Types Enums
@@ -19853,6 +20210,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-26`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/05-exceptions.md`
 
@@ -19868,6 +20227,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/06-config-classes.md`
 
 # Class Diagram: 06 Config Classes
@@ -19882,6 +20243,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-26`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/07-application-core-services.md`
 
 # Class Diagram: 07 Application Core Services
@@ -19889,12 +20252,14 @@ _Автогенерация: 2026-02-27_
 - Исходная диаграмма: `class-diagrams/07-application-core-services.mmd`
 
 ## Описание
-Диаграмма Application Core Services показывает архитектурную модель модуля `07-application-core-services` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: PipelineRunner, BatchExecutor, and their composition. На схеме отражено примерно 16 классов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: PipelineRunner, PipelineServices, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
+Диаграмма Application Core Services показывает архитектурную модель модуля `07-application-core-services` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: PipelineRunner, BatchExecutor, and their composition. На схеме отражено примерно 16 классов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: PipelineRunner, PipelineService, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
 
 ## Метаданные
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-26`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/08-application-services.md`
 
@@ -19910,6 +20275,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-26`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/09-transformers.md`
 
 # Class Diagram: 09 Transformers
@@ -19923,6 +20290,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-26`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/10-adapters.md`
 
@@ -19946,6 +20315,8 @@ _Автогенерация: 2026-02-27_
 - Дата метаданных: `2026-03-08` (обновлено: добавлены детали RetryingDataSourceDecorator с delegation pattern)
 - Версия диаграммы: `1.2.0`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/11-storage.md`
 
 # Class Diagram: 11 Storage
@@ -19959,6 +20330,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-03-01`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/12-composite-pipeline.md`
 
@@ -19974,6 +20347,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-03-01`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/13-domain-services.md`
 
 # Class Diagram: 13 Domain Services
@@ -19987,6 +20362,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/14-observability.md`
 
@@ -20002,6 +20379,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/15-extractors.md`
 
 # Class Diagram: 15 Extractors
@@ -20016,6 +20395,8 @@ _Автогенерация: 2026-02-27_
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class/16-factories-bootstrap.md`
 
 # Class Diagram: 16 Factories Bootstrap
@@ -20029,6 +20410,8 @@ _Автогенерация: 2026-02-27_
 - Тип: `classDiagram`
 - Уровень: `Class / Interface`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/class/INDEX.md`
 
@@ -20053,6 +20436,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - [15-extractors](15-extractors.md) — 15 Extractors
 - [16-factories-bootstrap](16-factories-bootstrap.md) — 16 Factories Bootstrap
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/01-full-system-component.md`
 
 # Title: Full System Component Diagram
@@ -20066,6 +20451,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-27`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/01-high-level.md`
 
@@ -20081,6 +20468,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/02-full-medallion-data-flow.md`
 
 # Title: Full Medallion Data Flow with Lineage and DQ
@@ -20094,6 +20483,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/03-pipeline-execution-happy-path.md`
 
@@ -20109,6 +20500,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/04-domain-layer-class-diagram.md`
 
 # Title: Domain Layer Class Diagram
@@ -20122,6 +20515,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/04-error-flow.md`
 
@@ -20137,6 +20532,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/05-layers-interaction.md`
 
 # Title: Layer Interaction — Hexagonal Architecture
@@ -20150,6 +20547,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/05-pipeline-lifecycle-states.md`
 
@@ -20165,6 +20564,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/06-application-layer-class-diagram.md`
 
 # Title: Application Layer Class Diagram
@@ -20178,6 +20579,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/06-pipeline-execution.md`
 
@@ -20193,6 +20596,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/07-circuit-breaker-states.md`
 
 # Title: Circuit Breaker State Machine
@@ -20206,6 +20611,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `stateDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/07-medallion-flow.md`
 
@@ -20221,6 +20628,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/08-complete-etl-workflow.md`
 
 # Title: Complete ETL Workflow (6 Phases)
@@ -20234,6 +20643,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/08-domain-ddd.md`
 
@@ -20249,6 +20660,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/09-full-er-diagram.md`
 
 # Title: Entity-Relationship Diagram (All Providers)
@@ -20262,6 +20675,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `erDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/10-infrastructure-layer-class-diagram.md`
 
@@ -20277,6 +20692,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/11-lock-acquisition-sequence.md`
 
 # Title: Lock Acquisition Sequence (Two Workers)
@@ -20290,6 +20707,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/12-local-deployment-architecture.md`
 
@@ -20305,6 +20724,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/13-domain-models-relationship.md`
 
 # Title: Domain Models Relationship Hierarchy
@@ -20318,6 +20739,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/14-provider-health-states.md`
 
@@ -20333,6 +20756,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/15-dq-check-workflow.md`
 
 # Title: Data Quality Check Workflow
@@ -20346,6 +20771,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/16-memory-lock-class.md`
 
@@ -20361,6 +20788,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/17-pipeline-hierarchy.md`
 
 # Title: Pipeline and Transformer Class Hierarchy
@@ -20374,6 +20803,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/18-bronze-write-sequence.md`
 
@@ -20389,6 +20820,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/19-delta-lake-write-sequence.md`
 
 # Title: Delta Lake Write Sequence (Silver Layer)
@@ -20402,6 +20835,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/20-quarantine-record-states.md`
 
@@ -20417,6 +20852,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/21-activity-entity-data-flow.md`
 
 # Title: Activity Entity Data Flow (Extract → Transform → Load)
@@ -20430,6 +20867,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/22-client-api-request-sequence.md`
 
@@ -20445,6 +20884,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/23-silver-writer-class.md`
 
 # Title: SilverWriter Class Diagram
@@ -20458,6 +20899,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/24-hash-service-class.md`
 
@@ -20473,6 +20916,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/25-circuit-breaker-observer-class.md`
 
 # Title: Circuit Breaker and Observer Classes
@@ -20486,6 +20931,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/26-hexagonal-ports-adapters.md`
 
@@ -20501,6 +20948,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/27-import-matrix-enforcement.md`
 
 # Title: Five-Layer Import Matrix Enforcement (ARCH-001)
@@ -20514,6 +20963,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/28-composition-root-di-graph.md`
 
@@ -20529,6 +20980,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/29-composite-pipeline-workflow.md`
 
 # Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
@@ -20542,6 +20995,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/30-port-adapter-mapping.md`
 
@@ -20557,6 +21012,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/31-pipeline-run-lifecycle.md`
 
 # Title: Pipeline Run Lifecycle — From Config to Completion
@@ -20570,6 +21027,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `stateDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/32-single-record-journey.md`
 
@@ -20585,6 +21044,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/33-cli-run-interaction.md`
 
 # Title: CLI Run Command → PipelineRunner Full Interaction
@@ -20598,6 +21059,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/34-batch-processing-flow.md`
 
@@ -20613,6 +21076,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/36-architecture-principles-mindmap.md`
 
 # Title: Architecture Principles Mind Map
@@ -20626,6 +21091,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `mindmap`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/37-cli-entry-full-chain.md`
 
@@ -20641,6 +21108,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/38-runtime-assembly-sequence.md`
 
 # Title: Runtime Assembly Sequence — bootstrap/runtime/assembly.py
@@ -20654,6 +21123,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/39-medallion-invariants.md`
 
@@ -20669,6 +21140,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/40-application-core-collaboration.md`
 
 # Title: Application Core Component Collaboration
@@ -20682,6 +21155,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/41-error-classification-tree.md`
 
@@ -20697,6 +21172,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/42-pipeline-runner-class.md`
 
 # Title: PipelineRunner Internal Component Diagram
@@ -20710,6 +21187,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/43-fan-out-fan-in-pattern.md`
 
@@ -20725,6 +21204,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/44-cross-provider-enrichment.md`
 
 # Title: Cross-Provider Data Enrichment Flow — Publication
@@ -20738,6 +21219,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/46-yaml-config-resolution.md`
 
@@ -20753,6 +21236,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-27`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/47-publication-merge-sources.md`
 
 # Title: Publication Composite — Merge All Sources
@@ -20766,6 +21251,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/48-composite-phase-lifecycle.md`
 
@@ -20781,6 +21268,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/foundation/49-composite-runner-class.md`
 
 # Title: CompositePipelineRunner — Component Diagram
@@ -20794,6 +21283,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `classDiagram`
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/foundation/50-exception-hierarchy.md`
 
@@ -20809,6 +21300,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата метаданных: `2026-02-24`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/00-legend.md`
 
 # Legend
@@ -20822,6 +21315,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Legend`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/01-full-system-component-dataflow.md`
 
@@ -20837,6 +21332,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `01-full-system-component-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/01-full-system-component-domain.md`
 
 # Full System Component Domain
@@ -20850,6 +21347,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `01-full-system-component-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/01-full-system-component-infra.md`
 
@@ -20865,6 +21364,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `01-full-system-component-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/01-full-system-component-overview.md`
 
 # Full System Component Overview
@@ -20878,6 +21379,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `01-full-system-component-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/01-high-level-dataflow.md`
 
@@ -20893,6 +21396,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `01-high-level-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/01-high-level-domain.md`
 
 # High Level Domain
@@ -20906,6 +21411,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `01-high-level-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/01-high-level-full.md`
 
@@ -20921,6 +21428,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/01-high-level-infra.md`
 
 # High Level Infra
@@ -20934,6 +21443,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `01-high-level-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/01-high-level-overview.md`
 
@@ -20949,6 +21460,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `01-high-level-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/02-medallion-dataflow.md`
 
 # Medallion Dataflow
@@ -20962,6 +21475,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `02-medallion-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/02-medallion-domain.md`
 
@@ -20977,6 +21492,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `02-medallion-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/02-medallion-full.md`
 
 # Medallion Full
@@ -20990,6 +21507,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/02-medallion-infra.md`
 
@@ -21005,6 +21524,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `02-medallion-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/02-medallion-overview.md`
 
 # Medallion Overview
@@ -21018,6 +21539,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `02-medallion-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-dataflow.md`
 
@@ -21033,6 +21556,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `04-domain-layer-class-diagram-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-domain.md`
 
 # Domain Layer Class Diagram Domain
@@ -21046,6 +21571,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `04-domain-layer-class-diagram-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-infra.md`
 
@@ -21061,6 +21588,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `04-domain-layer-class-diagram-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/04-domain-layer-class-diagram-overview.md`
 
 # Domain Layer Class Diagram Overview
@@ -21074,6 +21603,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `04-domain-layer-class-diagram-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/05-layers-interaction-dataflow.md`
 
@@ -21089,6 +21620,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `05-layers-interaction-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/05-layers-interaction-domain.md`
 
 # Layers Interaction Domain
@@ -21102,6 +21635,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `05-layers-interaction-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/05-layers-interaction-full.md`
 
@@ -21117,6 +21652,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/05-layers-interaction-infra.md`
 
 # Layers Interaction Infra
@@ -21130,6 +21667,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `05-layers-interaction-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/05-layers-interaction-overview.md`
 
@@ -21145,6 +21684,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `05-layers-interaction-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/05-pipeline-lifecycle-states-dataflow.md`
 
 # Pipeline Lifecycle States Dataflow
@@ -21158,6 +21699,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `05-pipeline-lifecycle-states-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/05-pipeline-lifecycle-states-domain.md`
 
@@ -21173,6 +21716,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `05-pipeline-lifecycle-states-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/05-pipeline-lifecycle-states-full.md`
 
 # Pipeline Lifecycle States Full
@@ -21186,6 +21731,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `stateDiagram`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/05-pipeline-lifecycle-states-infra.md`
 
@@ -21201,6 +21748,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `05-pipeline-lifecycle-states-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/05-pipeline-lifecycle-states-overview.md`
 
 # Pipeline Lifecycle States Overview
@@ -21214,6 +21763,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `05-pipeline-lifecycle-states-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/06-application-layer-class-diagram-dataflow.md`
 
@@ -21229,6 +21780,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `06-application-layer-class-diagram-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/06-application-layer-class-diagram-domain.md`
 
 # Application Layer Class Diagram Domain
@@ -21242,6 +21795,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `06-application-layer-class-diagram-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/06-application-layer-class-diagram-full.md`
 
@@ -21257,6 +21812,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/06-application-layer-class-diagram-infra.md`
 
 # Application Layer Class Diagram Infra
@@ -21270,6 +21827,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `06-application-layer-class-diagram-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/06-application-layer-class-diagram-overview.md`
 
@@ -21285,6 +21844,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `06-application-layer-class-diagram-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/07-circuit-breaker-states-dataflow.md`
 
 # Circuit Breaker States Dataflow
@@ -21298,6 +21859,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `07-circuit-breaker-states-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/07-circuit-breaker-states-domain.md`
 
@@ -21313,6 +21876,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `07-circuit-breaker-states-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/07-circuit-breaker-states-full.md`
 
 # Circuit Breaker States Full
@@ -21326,6 +21891,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `stateDiagram`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/07-circuit-breaker-states-infra.md`
 
@@ -21341,6 +21908,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `07-circuit-breaker-states-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/07-circuit-breaker-states-overview.md`
 
 # Circuit Breaker States Overview
@@ -21354,6 +21923,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `07-circuit-breaker-states-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/08-complete-etl-workflow-dataflow.md`
 
@@ -21369,6 +21940,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `08-complete-etl-workflow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/08-complete-etl-workflow-domain.md`
 
 # Complete Etl Workflow Domain
@@ -21382,6 +21955,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `08-complete-etl-workflow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/08-complete-etl-workflow-full.md`
 
@@ -21397,6 +21972,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/08-complete-etl-workflow-infra.md`
 
 # Complete Etl Workflow Infra
@@ -21410,6 +21987,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `08-complete-etl-workflow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/08-complete-etl-workflow-overview.md`
 
@@ -21425,6 +22004,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `08-complete-etl-workflow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/08-domain-ddd-dataflow.md`
 
 # Domain Ddd Dataflow
@@ -21438,6 +22019,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `08-domain-ddd-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/08-domain-ddd-domain.md`
 
@@ -21453,6 +22036,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `08-domain-ddd-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/08-domain-ddd-full.md`
 
 # Domain Ddd Full
@@ -21466,6 +22051,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/08-domain-ddd-infra.md`
 
@@ -21481,6 +22068,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `08-domain-ddd-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/08-domain-ddd-overview.md`
 
 # Domain Ddd Overview
@@ -21494,6 +22083,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `08-domain-ddd-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/10-infrastructure-layer-class-diagram-dataflow.md`
 
@@ -21509,6 +22100,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `10-infrastructure-layer-class-diagram-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/10-infrastructure-layer-class-diagram-domain.md`
 
 # Infrastructure Layer Class Diagram Domain
@@ -21522,6 +22115,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `10-infrastructure-layer-class-diagram-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/10-infrastructure-layer-class-diagram-full.md`
 
@@ -21537,6 +22132,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/10-infrastructure-layer-class-diagram-infra.md`
 
 # Infrastructure Layer Class Diagram Infra
@@ -21550,6 +22147,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `10-infrastructure-layer-class-diagram-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/10-infrastructure-layer-class-diagram-overview.md`
 
@@ -21565,6 +22164,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `10-infrastructure-layer-class-diagram-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/12-local-deployment-architecture-dataflow.md`
 
 # Local Deployment Architecture Dataflow
@@ -21578,6 +22179,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `12-local-deployment-architecture-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/12-local-deployment-architecture-domain.md`
 
@@ -21593,6 +22196,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `12-local-deployment-architecture-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/12-local-deployment-architecture-full.md`
 
 # Local Deployment Architecture Full
@@ -21606,6 +22211,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/12-local-deployment-architecture-infra.md`
 
@@ -21621,6 +22228,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `12-local-deployment-architecture-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/12-local-deployment-architecture-overview.md`
 
 # Local Deployment Architecture Overview
@@ -21634,6 +22243,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `12-local-deployment-architecture-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/14-provider-health-states-dataflow.md`
 
@@ -21649,6 +22260,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `14-provider-health-states-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/14-provider-health-states-domain.md`
 
 # Provider Health States Domain
@@ -21662,6 +22275,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `14-provider-health-states-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/14-provider-health-states-full.md`
 
@@ -21677,6 +22292,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/14-provider-health-states-infra.md`
 
 # Provider Health States Infra
@@ -21690,6 +22307,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `14-provider-health-states-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/14-provider-health-states-overview.md`
 
@@ -21705,6 +22324,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `14-provider-health-states-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/15-dq-check-workflow-dataflow.md`
 
 # Dq Check Workflow Dataflow
@@ -21718,6 +22339,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `15-dq-check-workflow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/15-dq-check-workflow-domain.md`
 
@@ -21733,6 +22356,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `15-dq-check-workflow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/15-dq-check-workflow-full.md`
 
 # Dq Check Workflow Full
@@ -21746,6 +22371,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `unknown`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/15-dq-check-workflow-infra.md`
 
@@ -21761,6 +22388,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `15-dq-check-workflow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/15-dq-check-workflow-overview.md`
 
 # Dq Check Workflow Overview
@@ -21774,6 +22403,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `15-dq-check-workflow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/21-activity-entity-data-flow-dataflow.md`
 
@@ -21789,6 +22420,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `21-activity-entity-data-flow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/21-activity-entity-data-flow-domain.md`
 
 # Activity Entity Data Flow Domain
@@ -21802,6 +22435,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `21-activity-entity-data-flow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/21-activity-entity-data-flow-infra.md`
 
@@ -21817,6 +22452,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `21-activity-entity-data-flow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/21-activity-entity-data-flow-overview.md`
 
 # Activity Entity Data Flow Overview
@@ -21830,6 +22467,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `21-activity-entity-data-flow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/26-hexagonal-ports-adapters-dataflow.md`
 
@@ -21845,6 +22484,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `26-hexagonal-ports-adapters-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/26-hexagonal-ports-adapters-domain.md`
 
 # Hexagonal Ports Adapters Domain
@@ -21858,6 +22499,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `26-hexagonal-ports-adapters-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/26-hexagonal-ports-adapters-infra.md`
 
@@ -21873,6 +22516,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `26-hexagonal-ports-adapters-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/26-hexagonal-ports-adapters-overview.md`
 
 # Hexagonal Ports Adapters Overview
@@ -21886,6 +22531,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `26-hexagonal-ports-adapters-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/28-composition-root-di-graph-dataflow.md`
 
@@ -21901,6 +22548,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `28-composition-root-di-graph-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/28-composition-root-di-graph-domain.md`
 
 # Composition Root Di Graph Domain
@@ -21914,6 +22563,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `28-composition-root-di-graph-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/28-composition-root-di-graph-infra.md`
 
@@ -21929,6 +22580,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `28-composition-root-di-graph-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/28-composition-root-di-graph-overview.md`
 
 # Composition Root Di Graph Overview
@@ -21942,6 +22595,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `28-composition-root-di-graph-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/29-composite-pipeline-workflow-dataflow.md`
 
@@ -21957,6 +22612,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `29-composite-pipeline-workflow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/29-composite-pipeline-workflow-domain.md`
 
 # Composite Pipeline Workflow Domain
@@ -21970,6 +22627,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `29-composite-pipeline-workflow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/29-composite-pipeline-workflow-infra.md`
 
@@ -21985,6 +22644,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `29-composite-pipeline-workflow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/29-composite-pipeline-workflow-overview.md`
 
 # Composite Pipeline Workflow Overview
@@ -21998,6 +22659,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `29-composite-pipeline-workflow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/30-port-adapter-mapping-dataflow.md`
 
@@ -22013,6 +22676,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `30-port-adapter-mapping-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/30-port-adapter-mapping-domain.md`
 
 # Port Adapter Mapping Domain
@@ -22026,6 +22691,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `30-port-adapter-mapping-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/30-port-adapter-mapping-infra.md`
 
@@ -22041,6 +22708,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `30-port-adapter-mapping-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/30-port-adapter-mapping-overview.md`
 
 # Port Adapter Mapping Overview
@@ -22054,6 +22723,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `30-port-adapter-mapping-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/31-pipeline-run-lifecycle-dataflow.md`
 
@@ -22069,6 +22740,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `31-pipeline-run-lifecycle-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/31-pipeline-run-lifecycle-domain.md`
 
 # Pipeline Run Lifecycle Domain
@@ -22082,6 +22755,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `31-pipeline-run-lifecycle-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/31-pipeline-run-lifecycle-full.md`
 
@@ -22097,6 +22772,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/31-pipeline-run-lifecycle-infra.md`
 
 # Pipeline Run Lifecycle Infra
@@ -22110,6 +22787,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `31-pipeline-run-lifecycle-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/31-pipeline-run-lifecycle-overview.md`
 
@@ -22125,6 +22804,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `31-pipeline-run-lifecycle-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/32-single-record-journey-dataflow.md`
 
 # Single Record Journey Dataflow
@@ -22138,6 +22819,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `32-single-record-journey-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/32-single-record-journey-domain.md`
 
@@ -22153,6 +22836,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `32-single-record-journey-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/32-single-record-journey-infra.md`
 
 # Single Record Journey Infra
@@ -22166,6 +22851,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `32-single-record-journey-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/32-single-record-journey-overview.md`
 
@@ -22181,6 +22868,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `32-single-record-journey-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/33-cli-run-interaction-dataflow.md`
 
 # Cli Run Interaction Dataflow
@@ -22194,6 +22883,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `33-cli-run-interaction-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/33-cli-run-interaction-domain.md`
 
@@ -22209,6 +22900,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `33-cli-run-interaction-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/33-cli-run-interaction-full.md`
 
 # Cli Run Interaction Full
@@ -22222,6 +22915,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `sequenceDiagram`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/33-cli-run-interaction-infra.md`
 
@@ -22237,6 +22932,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `33-cli-run-interaction-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/33-cli-run-interaction-overview.md`
 
 # Cli Run Interaction Overview
@@ -22250,6 +22947,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `33-cli-run-interaction-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/34-batch-processing-flow-dataflow.md`
 
@@ -22265,6 +22964,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `34-batch-processing-flow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/34-batch-processing-flow-domain.md`
 
 # Batch Processing Flow Domain
@@ -22278,6 +22979,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `34-batch-processing-flow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/34-batch-processing-flow-full.md`
 
@@ -22293,6 +22996,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/34-batch-processing-flow-infra.md`
 
 # Batch Processing Flow Infra
@@ -22306,6 +23011,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `34-batch-processing-flow-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/34-batch-processing-flow-overview.md`
 
@@ -22321,6 +23028,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `34-batch-processing-flow-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/35-bootstrap-sequence-dataflow.md`
 
 # Bootstrap Sequence Dataflow
@@ -22334,6 +23043,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `35-bootstrap-sequence-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/35-bootstrap-sequence-domain.md`
 
@@ -22349,6 +23060,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `35-bootstrap-sequence-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/35-bootstrap-sequence-infra.md`
 
 # Bootstrap Sequence Infra
@@ -22362,6 +23075,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `35-bootstrap-sequence-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/35-bootstrap-sequence-overview.md`
 
@@ -22377,6 +23092,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `35-bootstrap-sequence-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/36-architecture-principles-mindmap-dataflow.md`
 
 # Architecture Principles Mindmap Dataflow
@@ -22390,6 +23107,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `36-architecture-principles-mindmap-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/36-architecture-principles-mindmap-domain.md`
 
@@ -22405,6 +23124,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `36-architecture-principles-mindmap-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/36-architecture-principles-mindmap-full.md`
 
 # Architecture Principles Mindmap Full
@@ -22418,6 +23139,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `mindmap`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/36-architecture-principles-mindmap-infra.md`
 
@@ -22433,6 +23156,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `36-architecture-principles-mindmap-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/36-architecture-principles-mindmap-overview.md`
 
 # Architecture Principles Mindmap Overview
@@ -22446,6 +23171,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `36-architecture-principles-mindmap-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/39-medallion-invariants-dataflow.md`
 
@@ -22461,6 +23188,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `39-medallion-invariants-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/39-medallion-invariants-domain.md`
 
 # Medallion Invariants Domain
@@ -22474,6 +23203,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `39-medallion-invariants-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/39-medallion-invariants-infra.md`
 
@@ -22489,6 +23220,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `39-medallion-invariants-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/39-medallion-invariants-overview.md`
 
 # Medallion Invariants Overview
@@ -22502,6 +23235,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `39-medallion-invariants-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/41-error-classification-tree-dataflow.md`
 
@@ -22517,6 +23252,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `41-error-classification-tree-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/41-error-classification-tree-domain.md`
 
 # Error Classification Tree Domain
@@ -22530,6 +23267,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `41-error-classification-tree-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/41-error-classification-tree-full.md`
 
@@ -22545,6 +23284,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/41-error-classification-tree-infra.md`
 
 # Error Classification Tree Infra
@@ -22558,6 +23299,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `41-error-classification-tree-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/41-error-classification-tree-overview.md`
 
@@ -22573,6 +23316,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `41-error-classification-tree-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/44-cross-provider-enrichment-dataflow.md`
 
 # Cross Provider Enrichment Dataflow
@@ -22586,6 +23331,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `44-cross-provider-enrichment-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/44-cross-provider-enrichment-domain.md`
 
@@ -22601,6 +23348,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `44-cross-provider-enrichment-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/44-cross-provider-enrichment-infra.md`
 
 # Cross Provider Enrichment Infra
@@ -22614,6 +23363,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `44-cross-provider-enrichment-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/44-cross-provider-enrichment-overview.md`
 
@@ -22629,6 +23380,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `44-cross-provider-enrichment-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/46-yaml-config-resolution-dataflow.md`
 
 # Yaml Config Resolution Dataflow
@@ -22642,6 +23395,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Data-Flow`
 - Parent: `46-yaml-config-resolution-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/46-yaml-config-resolution-domain.md`
 
@@ -22657,6 +23412,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `46-yaml-config-resolution-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/46-yaml-config-resolution-infra.md`
 
 # Yaml Config Resolution Infra
@@ -22670,6 +23427,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Infrastructure-Mapping`
 - Parent: `46-yaml-config-resolution-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/46-yaml-config-resolution-overview.md`
 
@@ -22685,6 +23444,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Overview`
 - Parent: `46-yaml-config-resolution-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/48-composite-phase-lifecycle-dataflow.md`
 
 # Composite Phase Lifecycle Dataflow
@@ -22698,6 +23459,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `unknown`
 - View: `Data-Flow`
 - Parent: `48-composite-phase-lifecycle-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/48-composite-phase-lifecycle-domain.md`
 
@@ -22713,6 +23476,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Domain-Focus`
 - Parent: `48-composite-phase-lifecycle-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/48-composite-phase-lifecycle-full.md`
 
 # Composite Phase Lifecycle Full
@@ -22726,6 +23491,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `stateDiagram`
 - View: `Full`
 - Parent: `(root)`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/48-composite-phase-lifecycle-infra.md`
 
@@ -22741,6 +23508,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `48-composite-phase-lifecycle-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/48-composite-phase-lifecycle-overview.md`
 
 # Composite Phase Lifecycle Overview
@@ -22754,6 +23523,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `unknown`
 - View: `Overview`
 - Parent: `48-composite-phase-lifecycle-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/50-exception-hierarchy-dataflow.md`
 
@@ -22769,6 +23540,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Data-Flow`
 - Parent: `50-exception-hierarchy-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/50-exception-hierarchy-domain.md`
 
 # Exception Hierarchy Domain
@@ -22782,6 +23555,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Domain-Focus`
 - Parent: `50-exception-hierarchy-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/descriptions/views/50-exception-hierarchy-full.md`
 
@@ -22797,6 +23572,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Full`
 - Parent: `(root)`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/50-exception-hierarchy-infra.md`
 
 # Exception Hierarchy Infra
@@ -22811,6 +23588,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - View: `Infrastructure-Mapping`
 - Parent: `50-exception-hierarchy-full.mermaid`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/views/50-exception-hierarchy-overview.md`
 
 # Exception Hierarchy Overview
@@ -22824,6 +23603,8 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Тип: `flowchart`
 - View: `Overview`
 - Parent: `50-exception-hierarchy-full.mermaid`
+
+\newpage
 
 # Source: `02-architecture/diagrams/README.md`
 
@@ -23272,6 +24053,8 @@ Insert anywhere in the file (commonly after the diagram-type declaration).
 edge (e.g. `Bronze --> Silver`) are **not** flagged — they are considered
 descriptive children of a connected subgraph container.
 
+\newpage
+
 # Source: `02-architecture/diagrams/architecture/png/INDEX.md`
 
 # BioETL Diagrams — PNG Index
@@ -23589,6 +24372,8 @@ _Generated: 2026-03-19T11:31:08+03:00_
 ![18b-checkpoint-shutdown](./18b-checkpoint-shutdown.png)
 
 ---
+
+\newpage
 
 # Source: `02-architecture/diagrams/architecture/svg/INDEX.md`
 
@@ -23908,6 +24693,8 @@ _Generated: 2026-03-19T11:31:08+03:00_
 
 ---
 
+\newpage
+
 # Source: `02-architecture/diagrams/class-diagrams/png/INDEX.md`
 
 # BioETL Diagrams — PNG Index
@@ -24027,6 +24814,8 @@ _Generated: 2026-03-19T11:31:09+03:00_
 ![16-factories-bootstrap](./16-factories-bootstrap.png)
 
 ---
+
+\newpage
 
 # Source: `02-architecture/diagrams/class-diagrams/svg/INDEX.md`
 
@@ -24148,11 +24937,13 @@ _Generated: 2026-03-19T11:31:09+03:00_
 
 ---
 
+\newpage
+
 # Source: `02-architecture/diagrams/bundles/class.bundle.md`
 
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-03-19T11:31:48
+- Generated: 2026-03-20T17:51:44
 - Diagram count: 19
 
 ## Table of Contents
@@ -24305,7 +25096,7 @@ _Generated: 2026-03-19T11:31:09+03:00_
 ![07-application-core-services](../class-diagrams/png/07-application-core-services.png)
 
 ### Описание
-Диаграмма «Class Diagram: Application Core Services» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: PipelineRunner, BatchExecutor, and their composition.. На схеме отражено примерно 16 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Runner Core, Batch Processing, Execution Managers, Support Services. Показательные узлы для быстрого чтения: PipelineRunner, PipelineServices, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
+Диаграмма «Class Diagram: Application Core Services» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Class / Interface». В комментариях исходника зафиксирован фокус диаграммы: PipelineRunner, BatchExecutor, and their composition.. На схеме отражено примерно 16 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Runner Core, Batch Processing, Execution Managers, Support Services. Показательные узлы для быстрого чтения: PipelineRunner, PipelineService, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -24500,6 +25291,8 @@ _Generated: 2026-03-19T11:31:09+03:00_
 - Дата: `2026-03-16`
 - Узлы (metadata): `9`
 
+\newpage
+
 # Source: `02-architecture/diagrams/descriptions/class-summary.md`
 
 # Class Diagram Descriptions
@@ -24536,7 +25329,7 @@ _Generated: 2026-03-19T11:31:09+03:00_
 
 ## 07-application-core-services — Application Core Services
 
-Диаграмма «Application Core Services» описывает модуль `07-application-core-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: PipelineRunner, BatchExecutor, and their composition. В текущей версии выделено примерно 16 классов и 17 связей. Для быстрого чтения и ревью полезно начать с элементов: PipelineRunner, PipelineServices, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
+Диаграмма «Application Core Services» описывает модуль `07-application-core-services` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: PipelineRunner, BatchExecutor, and their composition. В текущей версии выделено примерно 16 классов и 17 связей. Для быстрого чтения и ревью полезно начать с элементов: PipelineRunner, PipelineService, BatchExecutor, BatchTransformer, BatchWriter, BatchMemoryManager.
 
 ## 08-application-services — Application Services
 
@@ -24581,6 +25374,8 @@ _Generated: 2026-03-19T11:31:09+03:00_
 ## 16-factories-bootstrap — Factories & Bootstrap
 
 Диаграмма «Factories & Bootstrap» описывает модуль `16-factories-bootstrap` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: current composition-layer factories, provider registry, and runtime assembly seams. В текущей версии выделено примерно 9 классов и 7 связей. Для быстрого чтения и ревью полезно начать с элементов: ProviderRegistry, DataSourceFactory, PipelineRegistry, RunnerFactory, RunnerFactoryBuilderService, CompositeSupportServicesFactory.
+
+\newpage
 
 # Source: `02-architecture/diagrams/governance/00-diagramming-policy.md`
 
@@ -24888,6 +25683,8 @@ Worker -> MemoryLock: release lock
 
 - [RULES.md](../../../00-project/RULES.md) - Project rules
 - [00-map.md](../../../00-project/00-map.md) - Project navigator
+
+\newpage
 
 # Source: `02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md`
 
@@ -25328,6 +26125,8 @@ scripts/diagrams/run_diagram_checks.sh --profile pr \
 ---
 
 *Документ основан на ADR-040-diagram-governance.md, 00-diagramming-policy.md и исходном коде инструментов проекта.*
+
+\newpage
 
 # Source: `02-architecture/diagrams/governance/PROMPT-diagram-expansion.md`
 
@@ -25933,6 +26732,8 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 | interfaces     | ~25           |
 | **Всего**      | **~534**      |
 
+\newpage
+
 # Source: `02-architecture/diagrams/governance/diagram-catalog.md`
 
 # Исторический Каталог Диаграмм BioETL
@@ -25981,7 +26782,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 22. **Pipeline Lifecycle** - State - Состояния выполнения пайплайна
 23. **Services Architecture** - Component - 14 application services
 24. **Transformer Hierarchy** - Class - BaseTransformer и конкретные реализации
-25. **Pipeline Services Bundle** - Component - PipelineServices и его компоненты
+25. **Pipeline Services Bundle** - Component - PipelineService и его компоненты
 26. **Batch Processing Flow** - Activity - Полный цикл обработки батча
 27. **Preflight Checklist** - Activity - PreflightService проверки
 28. **Postrun Operations** - Activity - PostrunService cleanup
@@ -25997,7 +26798,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 36. **Provider Registration** - Component - 7 провайдеров
 37. **Configuration Builders** - Class - FilterConfigBuilder и др.
 38. **Entrypoints Mapping** - Flowchart - CLI → Composition → Application
-39. **Services Factory** - Sequence - Создание PipelineServices bundle
+39. **Services Factory** - Sequence - Создание PipelineService bundle
 40. **Storage Factory** - Sequence - Создание storage adapters
 
 ### 1.5 Infrastructure Layer (10)
@@ -26217,7 +27018,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 218. **BasePipeline** - Class - Abstract pipeline
 219. **LockCoordinator** - Class - Lock orchestration
 220. **CheckpointManager** - Class - Checkpoint handling
-221. **PipelineServices** - Class - Services bundle
+221. **PipelineService** - Class - Services bundle
 222. **QuarantineManager** - Class - Quarantine management
 223. **PreflightService** - Class - Pre-run checks
 224. **PostrunService** - Class - Post-run operations
@@ -26570,6 +27371,8 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 
 *Следующий шаг: Оценка и выбор TOP-50 диаграмм*
 
+\newpage
+
 # Source: `02-architecture/diagrams/governance/diagram-modernization-program.md`
 
 # Программа Модификации Диаграмм (Draft)
@@ -26711,6 +27514,8 @@ _Основание: POL-LLM-DIAGRAMS-001, ADR-040, DIAGRAM-WORKFLOW-GUIDE.md_
 2. Утвердить пороги quality-gates (строгость по тексту/пересечениям/плотности).
 3. Утвердить rollout-модель: batch migration vs incremental per-PR.
 4. Утвердить SLA исправления diagram-регрессий.
+
+\newpage
 
 # Source: `02-architecture/diagrams/governance/diagram-regression-test-plan.md`
 
@@ -26911,6 +27716,8 @@ scripts/diagrams/run_diagram_checks.sh --profile quick \
 
 Примечание: для `DIAG-T001`/`DIAG-T009` нужен рабочий `mmdc` + браузер Puppeteer (`chrome-headless-shell`).
 
+\newpage
+
 # Source: `02-architecture/diagrams/governance/diagram-views-inventory.md`
 
 # Diagram Views Inventory
@@ -26967,6 +27774,8 @@ Parent-source truth stays in the canonical `.mmd` files under
 | `48-composite-phase-lifecycle` | `docs/02-architecture/diagrams/foundation/48-composite-phase-lifecycle.mmd` | `dataflow, domain, full, infra, overview` | 5 |
 | `50-exception-hierarchy` | `docs/02-architecture/diagrams/foundation/50-exception-hierarchy.mmd` | `dataflow, domain, full, infra, overview` | 5 |
 
+\newpage
+
 # Source: `02-architecture/diagrams/governance/diagram-views-plan.md`
 
 # Diagram Decomposition Plan
@@ -27001,6 +27810,8 @@ Parent-source truth stays in the canonical `.mmd` files under
 | 46-yaml-config-resolution.mermaid | OVERLOADED | 30 | ≤15 | ≤20 | ≤20 | ≤12 |
 | 48-composite-phase-lifecycle.mermaid | OVERLOADED | 22 | ≤15 | ≤20 | ≤20 | ≤12 |
 | 50-exception-hierarchy.mermaid | CRITICAL | 82 | ≤15 | ≤20 | ≤20 | ≤12 |
+
+\newpage
 
 # Source: `02-architecture/diagrams/governance/diagrams-index.md`
 
@@ -27080,6 +27891,8 @@ python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-archi
 - Decomposed views are maintained in `diagrams/views/*.mermaid`.
 - Rendered `svg/png` artifacts under sibling `svg/` and `png/` directories are maintained outputs and must be refreshed when source diagrams change.
 - Legacy snapshots may still exist in `docs/02-architecture/diagrams/mermaid/`, but they are not canonical for new work.
+
+\newpage
 
 # Source: `02-architecture/diagrams/foundation/png/INDEX.md`
 
@@ -27417,6 +28230,8 @@ _Generated: 2026-03-19T11:31:09+03:00_
 
 ---
 
+\newpage
+
 # Source: `02-architecture/diagrams/foundation/svg/INDEX.md`
 
 # BioETL Diagrams — SVG Index
@@ -27753,11 +28568,13 @@ _Generated: 2026-03-19T11:31:09+03:00_
 
 ---
 
+\newpage
+
 # Source: `02-architecture/diagrams/bundles/foundation.bundle.md`
 
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-03-19T11:31:48
+- Generated: 2026-03-20T17:51:43
 - Diagram count: 55
 
 ## Table of Contents
@@ -27964,7 +28781,7 @@ _Generated: 2026-03-19T11:31:09+03:00_
 ![06-application-layer-class-diagram](../foundation/png/06-application-layer-class-diagram.png)
 
 ### Описание
-Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineServices.
+Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineService.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -28593,7 +29410,7 @@ _Generated: 2026-03-19T11:31:09+03:00_
 ![40-application-core-collaboration](../foundation/png/40-application-core-collaboration.png)
 
 ### Описание
-Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. На схеме отражено примерно 15 узлов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineServices (frozen dataclass). Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(), ShutdownService • should_shutdown() • request_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • finalize_run() • emit_summary().
+Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. На схеме отражено примерно 15 узлов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineService (frozen dataclass). Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(), ShutdownService • should_shutdown() • request_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • finalize_run() • emit_summary().
 
 ### Метаданные
 - Тип: `flowchart`
@@ -28627,7 +29444,7 @@ _Generated: 2026-03-19T11:31:09+03:00_
 ![42-pipeline-runner-class](../foundation/png/42-pipeline-runner-class.png)
 
 ### Описание
-Диаграмма «PipelineRunner Internal Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py. На схеме отражено примерно 9 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: PipelineRunner, PipelineServices, LockCoordinator, PreflightService, BatchExecutor, PostrunService.
+Диаграмма «PipelineRunner Internal Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py. На схеме отражено примерно 9 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: PipelineRunner, PipelineService, LockCoordinator, PreflightService, BatchExecutor, PostrunService.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -28678,7 +29495,7 @@ _Generated: 2026-03-19T11:31:09+03:00_
 ![46-yaml-config-resolution](../foundation/png/46-yaml-config-resolution.png)
 
 ### Описание
-Диаграмма «YAML Configuration Resolution Chain» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: unified config path plus still-active normalization compatibility. На схеме отражено примерно 18 узлов и 21 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML File Hierarchy, Infrastructure Config Loaders, Domain Config Objects (Frozen), Pydantic Validation Layer. Показательные узлы для быстрого чтения: configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (unified entity config), configs/providers/{provider}.yaml (source config + legacy-flat fallback), DQ hierarchy base + provider + entity + inline, Filter hierarchy base + provider + entity + inline.
+Диаграмма «YAML Configuration Resolution Chain» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: unified config path plus canonical staged normalization flow. На схеме отражено примерно 18 узлов и 21 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML File Hierarchy, Infrastructure Config Loaders, Domain Config Objects (Frozen), Pydantic Validation Layer. Показательные узлы для быстрого чтения: configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (unified entity config), configs/providers/{provider}.yaml (source config + legacy-flat fallback), DQ hierarchy base + provider + entity + inline, Filter hierarchy base + provider + entity + inline.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -28753,6 +29570,8 @@ _Generated: 2026-03-19T11:31:09+03:00_
 - Уровень: `Mixed (System / Component / Class)`
 - Дата: `2026-02-24`
 - Узлы (metadata): `35`
+
+\newpage
 
 # Source: `02-architecture/diagrams/views/png/INDEX.md`
 
@@ -29732,6 +30551,8 @@ _Generated: 2026-03-19T11:31:11+03:00_
 
 ---
 
+\newpage
+
 # Source: `02-architecture/diagrams/views/svg/INDEX.md`
 
 # BioETL Diagrams — SVG Index
@@ -30710,6 +31531,8 @@ _Generated: 2026-03-19T11:31:10+03:00_
 
 ---
 
+\newpage
+
 # Source: `02-architecture/module-consolidation-migration-requirements.md`
 
 # Требования к плану консолидации модулей BioETL
@@ -30876,6 +31699,8 @@ RFC/ADR считается неполным, если отсутствует х�
 - [ ] KPI baseline/target по слоям, Protocol/ABC, coupling
 - [ ] Mermaid диаграммы AS-IS/TO-BE для каждого варианта
 
+\newpage
+
 # Source: `02-architecture/observability-layers.md`
 
 # Observability Layers Architecture
@@ -30931,6 +31756,8 @@ All metrics MUST follow these naming conventions:
 *   Current registry size: **68 metrics** (see `src/bioetl/infrastructure/observability/metrics_export_names.py`)
 
 See `docs/04-reference/contracts/observability.md` for the current canonical contract (v3.0.0).
+
+\newpage
 
 # Source: `02-architecture/policies/content-hash-identity-policy.md`
 
@@ -30991,6 +31818,8 @@ This includes (non-exhaustive):
 
 - Property-based determinism: metadata-only changes keep hash stable.
 - Schema drift contract: adding new `_` fields keeps hash stable.
+
+\newpage
 
 # Source: `02-architecture/system-context.md`
 
@@ -31129,6 +31958,8 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 - **Architecture Diagrams**: [policy.md](diagrams/governance/policy.md)
 - **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)
 
+\newpage
+
 # Source: `03-guides/add-new-source.md`
 
 # Guide: Add a New Provider
@@ -31253,11 +32084,11 @@ Update `src/bioetl/composition/providers/registration.py`:
 1. Add provider-specific creator function:
 - `_create_{provider}_data_source(...) -> DataSourcePort`
 
-2. Register provider inside the bootstrap function (`src/bioetl/composition/providers/registration.py`):
+2. Register provider inside the composition registration flow (`src/bioetl/composition/providers/registration.py`), after resolving `target_registry`:
 
 ```python
-if not ProviderRegistry.is_registered("myprovider"):
-    ProviderRegistry.register(
+if not target_registry.is_registered("myprovider"):
+    target_registry.register(
         "myprovider",
         ProviderConfig(
             adapter_class=MyProviderAdapter,
@@ -31270,6 +32101,9 @@ if not ProviderRegistry.is_registered("myprovider"):
 ```
 
 If provider needs custom lifecycle/constructor wiring, use `custom_creator=` as in existing providers.
+
+Runtime/bootstrap code should continue to use `ensure_providers_loaded()` as the
+shared lifecycle seam rather than calling registration directly.
 
 ---
 
@@ -31324,6 +32158,8 @@ Provider onboarding is complete when:
 - at least one pipeline runs end-to-end (`run --pipeline {provider}_{entity}`)
 - config/schema/contract validations pass
 - provider docs and pipeline docs are updated
+
+\newpage
 
 # Source: `03-guides/add-pipeline-existing-source.md`
 
@@ -31465,6 +32301,8 @@ Pipeline is complete when:
 - Silver and Gold contracts are available and exported
 - unit tests pass
 - documentation/spec for pipeline is updated
+
+\newpage
 
 # Source: `03-guides/cleanup-policy.md`
 
@@ -31783,6 +32621,8 @@ Production cleanup **MUST** be done through CI/CD only. Manual cleanup **MUST NO
 | Bronze archive   | No (local retention policy) |
 | Manual delete    | Yes (P0 incident only)      |
 
+\newpage
+
 # Source: `03-guides/dashboards/dashboard-v2-updates.md`
 
 # Dashboard v2 Updates (Audit 2026-02-24)
@@ -31828,6 +32668,8 @@ histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket
 ## Примечание по старым гайдам
 
 Документы в `docs/03-guides/dashboards/`, где фигурируют `$run-id`, `execution` или "latest run only", относятся к устаревшей версии и не описывают текущее состояние JSON.
+
+\newpage
 
 # Source: `03-guides/dashboards/dashboard-v2-usage.md`
 
@@ -31880,6 +32722,8 @@ p95 latency по провайдерам.
 3. Пустой `$run-type`:
 нет метрик `bioetl-records-processed-total` для выбранного `$pipeline`.
 
+\newpage
+
 # Source: `03-guides/dashboards/monitoring-index.md`
 
 # Monitoring Docs Index
@@ -31895,6 +32739,8 @@ p95 latency по провайдерам.
 ## Примечание
 
 Архивные файлы перенесены в `docs/03-guides/dashboards/legacy/` и могут описывать устаревшие переменные (`$run-id`, `execution`) или старые метрики.
+
+\newpage
 
 # Source: `03-guides/dashboards/README.md`
 
@@ -31914,6 +32760,8 @@ p95 latency по провайдерам.
 Архивные материалы перемещены в `docs/03-guides/dashboards/legacy/`.
 
 Они могут содержать устаревшие переменные (`$run-id`, `execution`) и старые формулы.
+
+\newpage
 
 # Source: `03-guides/dashboards/variables-guide.md`
 
@@ -31961,6 +32809,8 @@ histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket
 
 - Для `simple/overview/dq`: `$run-type` зависит от `$pipeline`.
 - Для `provider-health-v2`: `$provider` независим от `$pipeline`, но обе переменные участвуют в фильтрации панелей.
+
+\newpage
 
 # Source: `03-guides/date-handling.md`
 
@@ -32244,6 +33094,8 @@ pytest tests/integration/pipelines/test_crossref_date_normalization.py -v
 - **Normalization Functions**: `src/bioetl/domain/normalization.py`
 - **Data Normalization Service**: `src/bioetl/domain/services/data_normalization_service.py`
 - **RULES.md**: §2.4 Content Hash normalization
+
+\newpage
 
 # Source: `03-guides/development/config-schema-guidelines.md`
 
@@ -32577,6 +33429,8 @@ def test_threshold_validation():
 ---
 
 *Строй надёжно. Документируй честно. Не дублируй код.*
+
+\newpage
 
 # Source: `03-guides/dq-configuration.md`
 
@@ -32976,6 +33830,8 @@ FileNotFoundError: Required DQ defaults file not found: configs/base/quality.yam
 - Schema: `src/bioetl/infrastructure/schemas/dq_config.py`
 - Loader: `src/bioetl/infrastructure/config/dq_config_loader.py`
 
+\newpage
+
 # Source: `03-guides/file-path-audit-report.md`
 
 # BioETL File Path Audit Report
@@ -33259,6 +34115,8 @@ ls -la data/output/quarantine/common.quarantine/_delta_log/
 
 *End of Audit Report*
 
+\newpage
+
 # Source: `03-guides/getting-started.md`
 
 # Getting Started Guide
@@ -33313,12 +34171,18 @@ Manual fallback without `make`:
 uv sync --extra dev --extra tracing
 ```
 
+If you need MkDocs or `make docs-build`, install the separate docs toolchain extra:
+
+```bash
+uv sync --extra dev --extra tracing --extra docs
+```
+
 On Windows without `make` or `uv`:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e .[dev,tracing]
+pip install -e .[dev,tracing,docs]
 ```
 
 If you prefer the convenience aggregate target, `make setup-dev` is still valid;
@@ -33434,6 +34298,8 @@ Another pipeline instance may be running. Check for zombie Python processes or w
 - [Add New Source](add-new-source.md) - Integrate a new data provider
 - [Project Navigator](../00-project/00-map.md) - Full documentation index
 - [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md) - Architecture decision details
+
+\newpage
 
 # Source: `03-guides/local-storage-layout.md`
 
@@ -33742,6 +34608,8 @@ If migrating from a previous S3-based deployment:
 3. Reinstall: `pip install -e .[dev]`
 
 See [ADR-010 Migration Notes](../02-architecture/decisions/ADR-010-local-only-deployment.md#migration-notes).
+
+\newpage
 
 # Source: `03-guides/metrics-monitoring.md`
 
@@ -34277,6 +35145,8 @@ groups:
 - [ADR-017: Observability Architecture](../02-architecture/decisions/ADR-017-observability-architecture.md)
 - [ADR-019: Observability Port Enforcement](../02-architecture/decisions/ADR-019-observability-port-enforcement.md)
 
+\newpage
+
 # Source: `99-archive/guides/migration-5.14-to-6.0.md`
 
 # Migration guide: 5.14.x → 6.0.0
@@ -34310,6 +35180,8 @@ composite:
 - Planned removal: **6.2.0**.
 
 After removal, configs without `composite.version` will fail validation.
+
+\newpage
 
 # Source: `99-archive/guides/migration-5.9-to-5.14.md`
 
@@ -34767,6 +35639,8 @@ export BIOETL_VALIDATION_MODE=fast  # Base only
 - Dependencies: See `pyproject.toml` for updated versions
 - Operating systems: Linux, macOS, Windows (unchanged)
 
+\newpage
+
 # Source: `99-archive/guides/migration-schema-artifacts.md`
 
 # Migration Guide: Canonical Schema Generation
@@ -34818,6 +35692,8 @@ uv run python scripts/schema/generate_schema_artifacts.py --check
 
 - Gold JSON contracts continue to be exported from `src/bioetl/domain/contracts/gold/*GoldSchema` classes.
 - `--check` mode is the canonical CI guard for generated schema artifacts.
+
+\newpage
 
 # Source: `03-guides/pipeline-configuration.md`
 
@@ -35577,6 +36453,8 @@ bioetl config validate chembl_activity
 - [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) — иерархическая Filter загрузка
 - [ADR-029: Convention-based Path Resolution](../02-architecture/decisions/ADR-029-output-metadata-unification.md) — авто-вычисление путей
 
+\newpage
+
 # Source: `03-guides/pipeline-lifecycle.md`
 
 # Жизненный цикл пайплайна
@@ -35686,6 +36564,8 @@ Composite pipelines используют отдельный оркестрато
 - [ADR-012: Storage Clear Contract](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md)
 - [ADR-013: Async Storage Cleanup](../02-architecture/decisions/ADR-013-async-storage-cleanup.md)
 - [Running Pipelines](./running-pipelines.md)
+
+\newpage
 
 # Source: `03-guides/publication-validation-guide.md`
 
@@ -36523,6 +37403,8 @@ pytest tests/integration/validation/ --record-mode=once
 **Последнее обновление:** 2026-02-06
 **Статус:** Готов к использованию ✅
 
+\newpage
+
 # Source: `03-guides/quick-start.md`
 
 # Quick Start
@@ -36628,6 +37510,8 @@ data/
 - [Running Pipelines](running-pipelines.md) - Comprehensive CLI reference
 - [Add New Source](add-new-source.md) - Integrate a new data provider
 
+\newpage
+
 # Source: `03-guides/registry-pattern.md`
 
 # Registry Pattern
@@ -36637,8 +37521,9 @@ runtime shape.
 
 - `PipelineRegistry` is an instance-based registry in
   `src/bioetl/composition/registry.py`.
-- `ProviderRegistry` is the canonical class-based provider registry in
-  `src/bioetl/composition/providers/provider_registry.py`.
+- `ProviderRegistry` is an instance-scoped provider registry in
+  `src/bioetl/composition/providers/provider_registry.py`, with a shared
+  default-registry compatibility facade exposed through class-level methods.
 - `get_data_source_creator()` and `DataSourceFactory` are the canonical data-source
   assembly path over `ProviderRegistry`.
 
@@ -36647,7 +37532,7 @@ runtime shape.
 | Surface | Kind | Canonical Import | Notes |
 |---------|------|------------------|-------|
 | `PipelineRegistry` | Instance-based | `bioetl.composition.registry` | Prefer `create_registry()` for tests and isolated flows. |
-| `ProviderRegistry` | Class-based | `bioetl.composition.providers` | Canonical registry for provider metadata and creation. |
+| `ProviderRegistry` | Instance-scoped + compatibility facade | `bioetl.composition.providers` | Prefer explicit instances for isolated/local seams; class-level methods target the shared default registry. |
 | `get_data_source_creator()` / `DataSourceFactory` | Canonical creator path | `bioetl.composition.factories.datasource.data_source_factory` | Preferred for data-source assembly; backed by `ProviderRegistry`. |
 
 Governance status for the two transition-heavy surfaces:
@@ -36717,7 +37602,11 @@ runtime `PipelineRegistry` instance and pass it through the execution path.
 ## ProviderRegistry
 
 `ProviderRegistry` is the canonical registry for provider configuration and
-provider-backed creation.
+provider-backed creation. The underlying model is instance-scoped:
+`create_provider_registry()` creates an isolated registry, and
+`ensure_provider_registry_ready(registry)` hydrates it before use. Class-level
+methods remain an approved compatibility facade over the shared default
+registry.
 
 Runtime/bootstrap code should call `ensure_providers_loaded()` instead of
 calling the registration function directly. The loader is the lifecycle
@@ -36726,9 +37615,18 @@ idempotent, and stale `_loaded` state is repaired if isolated flows or tests
 clear `ProviderRegistry` after an earlier successful load.
 
 ```python
-from bioetl.composition.providers import ProviderRegistry
+from bioetl.composition.providers import (
+    ProviderRegistry,
+    create_provider_registry,
+    ensure_provider_registry_ready,
+)
 
-providers = ProviderRegistry.list_providers()
+isolated_registry = create_provider_registry()
+isolated_registry = ensure_provider_registry_ready(isolated_registry)
+providers = isolated_registry.list_providers()
+
+# Shared default-registry compatibility access remains available:
+shared_providers = ProviderRegistry.list_providers()
 
 if ProviderRegistry.is_registered("chembl"):
     config = ProviderRegistry.get("chembl")
@@ -36765,8 +37663,9 @@ creator = get_data_source_creator("chembl")
 ```
 
 `DataSourceRegistry.register()` is no longer part of the supported API. Register
-new providers through `ProviderRegistry.register(...)`; keep the legacy facade
-only where compatibility tests explicitly require it.
+new providers through the composition-owned registration flow
+(`register_all_providers()` / registration helpers over a target registry); keep
+the legacy facade only where compatibility tests explicitly require it.
 
 The broader module-level status and deprecation plan for compatibility facades
 is tracked in
@@ -36821,6 +37720,8 @@ def isolated_registry():
 
 This keeps tests independent and avoids coupling to private attributes such as
 `_registry`.
+
+\newpage
 
 # Source: `03-guides/running-pipelines.md`
 
@@ -37314,6 +38215,8 @@ bioetl run-composite --composite publication --seed-limit 100
 - [Metrics & Monitoring](metrics-monitoring.md) — метрики и мониторинг
 - [Troubleshooting](troubleshooting.md) — решение проблем
 - [Getting Started](getting-started.md) — начало работы
+
+\newpage
 
 # Source: `03-guides/silver-schema-testing-guide.md`
 
@@ -37876,6 +38779,8 @@ pytest tests/contract/silver_schemas/ -n auto
 
 **Last Updated:** 2026-02-10
 
+\newpage
+
 # Source: `03-guides/testing.md`
 
 # Testing Guide
@@ -38197,6 +39102,8 @@ make test-deps-dev
 
 В CI для этого используется не `make test`, а отдельный набор шагов в `.github/workflows/tests.yml`: `smoke-check`, quality gates и затем `test-fast` / `test-matrix` / `coverage-verify`.
 
+\newpage
+
 # Source: `03-guides/troubleshooting.md`
 
 # Руководство по устранению неполадок
@@ -38265,21 +39172,31 @@ make test-deps-dev
 - [Local Storage Layout](local-storage-layout.md) — структура `data/` и слоёв хранения
 - [Project Rules](../00-project/RULES.md) — пороги качества данных и обработка ошибок
 
+\newpage
+
 # Source: `04-reference/api/application/core.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/application/pipelines.md`
 
 
 
+\newpage
+
 # Source: `04-reference/api/application/services.md`
 
 
 
+\newpage
+
 # Source: `04-reference/api/application/transformers.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/application.md`
 
@@ -38551,13 +39468,19 @@ All ChEMBL transformers extend `BaseChemblTransformer` which extends `BaseTransf
 Provider-specific field extractors are organized under each provider's
 `extractors` subpackage (e.g., `pubmed/extractors/`, `uniprot/extractors/`).
 
+\newpage
+
 # Source: `04-reference/api/composition/bootstrap.md`
 
 
 
+\newpage
+
 # Source: `04-reference/api/composition/factories.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/composition.md`
 
@@ -38702,7 +39625,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 | Class | Description |
 |---|---|
-| `ProviderRegistry` | Central registry of all data providers and their configurations |
+| `ProviderRegistry` | Instance-scoped registry for provider metadata and creation, with a shared default compatibility facade |
 | `ProviderConfig` | Configuration for a single provider |
 | `HttpConfig` | HTTP client configuration per provider |
 
@@ -38711,7 +39634,7 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 | `registration` | Provider registration orchestration over internal config builders |
 | `registration_*` | Internal provider config builders; not a canonical application-facing surface |
 | `decorators` | Provider adapter decorators (circuit breaker, retry) |
-| `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) |
+| `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) for the shared runtime/bootstrap registry |
 | `_loading` | Leaf loading helpers behind the public `loader` lifecycle |
 | `_registration_contracts` | Leaf provider assembly/loading contracts used by registration helpers |
 | `_default_registry` | Approved module-level singleton helper for default provider registry |
@@ -38817,21 +39740,31 @@ retained facade.
 | `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` |
 | `_services` | Internal implementation module behind `entrypoints`/`services_api` |
 
+\newpage
+
 # Source: `04-reference/api/domain/entities.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/domain/exceptions.md`
 
 
 
+\newpage
+
 # Source: `04-reference/api/domain/ports.md`
 
 
 
+\newpage
+
 # Source: `04-reference/api/domain/types.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/domain.md`
 
@@ -38839,10 +39772,11 @@ retained facade.
 
 > Autogenerated from source code. Layer overview: [Domain Layer](../../02-architecture/01-domain-layer.md)
 
-The Domain layer contains pure business logic with no I/O operations. It defines
-entities, value objects, ports (Protocol interfaces), configuration objects,
-validation functions, and domain services. All other layers depend on this layer;
-it depends on nothing external.
+The Domain layer contains pure domain logic and cross-layer abstractions with no
+I/O operations. It defines entities, value objects, ports (Protocol interfaces),
+runtime context primitives, configuration objects, validation functions, and
+domain services. All other layers depend on this layer; it depends on nothing
+external.
 
 ---
 
@@ -38850,7 +39784,8 @@ it depends on nothing external.
 
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
-| `domain.ports` | Protocol interfaces for dependency inversion (DI) | `DataSourcePort`, `StoragePort`, `LoggerPort`, `TracingPort`, `MetricsPort` |
+| `domain.ports` | Protocol interfaces for dependency inversion (DI), including sanctioned runtime/resilience contracts | `DataSourcePort`, `StoragePort`, `LoggerPort`, `RunnerFactoryPort`, `RateLimiterPort` |
+| `domain.context` | Deterministic execution context primitives carried through pipeline flows | `PipelineContext`, `PipelineRunContext` |
 | `domain.entities` | Rich domain objects and Pydantic DTOs | `Bioactivity`, `Molecule`, `Target`, `BaseEntity` |
 | `domain.value_objects` | Immutable domain primitives with self-validation | `ChemblId`, `DOI`, `InChI`, `SMILES`, `PubMedId` |
 | `domain.types` | Enums, NewType IDs, TypedDicts, health reports | `RunType`, `HealthStatus`, `ErrorType`, `BatchID` |
@@ -38877,6 +39812,18 @@ it depends on nothing external.
 
 All ports are defined as `typing.Protocol` in `domain.ports`. Consumers MUST import
 from the facade `bioetl.domain.ports`, not from internal modules (ARCH-008).
+This sanctioned facade also includes runtime-oriented cross-layer contracts such
+as `LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, and
+`CircuitBreakerPort`; they remain in `domain.ports` because they are pure
+abstractions rather than infrastructure implementations.
+
+### Runtime Context
+
+`PipelineContext` is the normative domain-level execution context for deterministic
+pipeline flows. It carries `run_id`, `run_type`, `LoggerPort`, and the canonical
+`started_at` timestamp used across batch/write paths under ADR-014. Its
+`bind_logger()` method extends contextual metadata through the logger port without
+introducing a concrete logging framework into the domain layer.
 
 ### Data Source Ports
 
@@ -39288,6 +40235,8 @@ BioETLError (base)
 +-- MetricsServerError
 ```
 
+\newpage
+
 # Source: `04-reference/api/index.md`
 
 # API Reference
@@ -39318,25 +40267,37 @@ This section is intentionally compact in navigation to avoid exposing empty plac
   - `cross_layer_group_edges` — top-60 slice used in the markdown table.
   - `cross_layer_group_edges_total` — full graph count before slicing; enforced by `test_cross_layer_group_edges_total_budget` with a ratchet budget (baseline: 232, budget: 243).
 
+\newpage
+
 # Source: `04-reference/api/infrastructure/adapters-common.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/infrastructure/adapters.md`
 
 
 
+\newpage
+
 # Source: `04-reference/api/infrastructure/observability.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/infrastructure/storage.md`
 
 
 
+\newpage
+
 # Source: `04-reference/api/infrastructure/unified-http-client.md`
 
 
+
+\newpage
 
 # Source: `04-reference/api/infrastructure.md`
 
@@ -39681,6 +40642,8 @@ Pydantic models for YAML configuration validation:
 |---|---|
 | `DebtScorecardEvaluation` | Technical debt scorecard evaluation |
 | `ExemptionInventory` | Exemption tracking for quality rules |
+
+\newpage
 
 # Source: `04-reference/cli.md`
 
@@ -40238,6 +41201,8 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 - [Metrics & Monitoring](../03-guides/metrics-monitoring.md) — метрики и мониторинг
 - [Troubleshooting](../03-guides/troubleshooting.md) — решение проблем
 
+\newpage
+
 # Source: `04-reference/contracts/README.md`
 
 # Contracts Registry
@@ -40257,6 +41222,8 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 ```bash
 python scripts/schema/generate_contracts.py
 ```
+
+\newpage
 
 # Source: `04-reference/contracts/gold-schemas.md`
 
@@ -41170,6 +42137,8 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 | UniProt | protein | `accession` | 1 column | ~8 |
 | PubMed | publication | `pmid` | required only | ~24 |
 
+\newpage
+
 # Source: `04-reference/contracts/observability.md`
 
 # BioETL Observability Specification (DD)
@@ -41350,6 +42319,8 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 - Поле времени в лог-схеме описано как `timestamp` (или явно как dual-mode `timestamp/ts`)
 - Алерты используют реальные `status` (`failed`, `success`, `shutdown`) из runtime
 
+\newpage
+
 # Source: `04-reference/hash-policy.md`
 
 # Hash Policy Contract
@@ -41390,6 +42361,8 @@ Hash policy фиксирует детерминированные правила
 - Snapshot стабильности hash на фиксированных fixtures.
 - Проверка, что policy-изменение требует version bump + migration note.
 
+\newpage
+
 # Source: `04-reference/pipelines/INDEX.md`
 
 # Pipeline Documentation Index
@@ -41410,6 +42383,8 @@ For publication-specific pipeline details, see the individual specs:
 - [Composite Publication](composite/01-publication-spec.md)
 
 *Last updated: 2026-02-17*
+
+\newpage
 
 # Source: `04-reference/pipelines/README.md`
 
@@ -41594,6 +42569,8 @@ configs/
 - [Pipeline Configuration Guide](../../03-guides/pipeline-configuration.md)
 - [DQ Configuration Guide](../../03-guides/dq-configuration.md)
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/01-protein-class-spec.md`
 
 # ChEMBL Protein Classification Pipeline Specification
@@ -41626,6 +42603,8 @@ configs/
   active contract.
 - For hierarchy validation, filter settings, and partitioning details, use the
   provider reference and entity config above.
+
+\newpage
 
 # Source: `04-reference/pipelines/chembl/02-cell-line-spec.md`
 
@@ -41662,6 +42641,8 @@ configs/
 - For DQ rules, filter behavior, schema groups, and contract paths, use the
   provider reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/03-molecule-spec.md`
 
 # ChEMBL Molecule Pipeline Specification
@@ -41695,6 +42676,8 @@ configs/
 - For quality rules, aliases, and flattened field groups, use the provider
   reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/04-target-spec.md`
 
 # ChEMBL Target Pipeline Deep Spec
@@ -41712,6 +42695,8 @@ Current canonical summary:
 - Canonical identifiers and business keys are defined in the entity config, not in this historical spec.
 - Current target payloads use normalized fields such as `target_type`, `organism`, and provider-specific alias resolution configured via `field_aliases`.
 - Composite and downstream enrichment behavior should be verified against the live entity config and current application code, not against this archived deep table.
+
+\newpage
 
 # Source: `04-reference/pipelines/chembl/05-activity-spec.md`
 
@@ -41877,6 +42862,8 @@ bioetl run --pipeline chembl_activity \
   `chembl_activity` currently writes Gold output.
 - For architectural rationale, see ADR-010, ADR-014, ADR-032, ADR-037, and ADR-039.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/06-assay-spec.md`
 
 # ChEMBL Assay Pipeline Specification
@@ -41909,6 +42896,8 @@ bioetl run --pipeline chembl_activity \
   validation.
 - This page no longer republishes the older dashed API field tables or legacy
   Pandera snippets.
+
+\newpage
 
 # Source: `04-reference/pipelines/chembl/07-publication-spec.md`
 
@@ -41943,6 +42932,8 @@ bioetl run --pipeline chembl_activity \
 - This page no longer republishes the older dashed extraction tables,
   cross-provider mapping tables, or legacy schema snippets.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/08-assay-parameters-spec.md`
 
 # ChEMBL Assay Parameters Pipeline Specification
@@ -41976,6 +42967,8 @@ bioetl run --pipeline chembl_activity \
 - For required Gold fields, input filtering, and validation rules, use the
   provider reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/09-compound-record-spec.md`
 
 # ChEMBL Compound Record Pipeline Specification
@@ -42008,6 +43001,8 @@ bioetl run --pipeline chembl_activity \
 - For input filters, merge keys, and record-linkage validation, use the
   provider reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/10-target-component-spec.md`
 
 # ChEMBL Target Component Pipeline Deep Spec
@@ -42024,6 +43019,8 @@ Current canonical summary:
 - Active configs and reference examples use snake_case names.
 - Component relationships, identifiers, and alias handling are defined in the current entity config and provider transformer logic.
 - Use the provider reference plus the live config as the source of truth for target component fields and loading behavior.
+
+\newpage
 
 # Source: `04-reference/pipelines/chembl/11-publication-term-spec.md`
 
@@ -42042,6 +43039,8 @@ Current canonical summary:
 - Publication identifiers and alias mappings are defined in the entity config and current provider pipeline implementation.
 - Use the entity config and provider reference for current behavior; do not copy field names or loading examples from this legacy page.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/12-publication-similarity-spec.md`
 
 # ChEMBL Publication Similarity Pipeline Deep Spec
@@ -42058,6 +43057,8 @@ Current canonical summary:
 - Current config keys use snake_case, including `loading_strategy`.
 - Canonical publication identifiers and downstream field mappings are owned by the live entity config and application pipeline code.
 - Treat this file as historical evidence, not as the current publication similarity contract.
+
+\newpage
 
 # Source: `04-reference/pipelines/chembl/14-subcellular-fraction-spec.md`
 
@@ -42092,6 +43093,8 @@ Current canonical summary:
 - For derived-entity behavior, validation rules, and filter settings, use the
   provider reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/chembl/15-tissue-spec.md`
 
 # ChEMBL Tissue Pipeline Specification
@@ -42122,6 +43125,8 @@ Current canonical summary:
   `tissue-id`, `pref-name`, `bto-id`, `efo-id`, and `uberon-id`.
 - For DQ rules, field groups, and related file paths, use the provider
   reference and entity config above.
+
+\newpage
 
 # Source: `04-reference/pipelines/chembl-activity.md`
 
@@ -42223,6 +43228,8 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 ----------------------------------------------------------------------
 
 *See [full documentation in Russian](../providers/chembl/activity.md) for complete schema details, normalization rules, and data flow diagrams.*
+
+\newpage
 
 # Source: `04-reference/pipelines/chembl-assay.md`
 
@@ -42331,6 +43338,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 
 *See [full documentation in Russian](../providers/chembl/assay.md) for complete schema details, normalization rules, and data flow diagrams.*
 
+\newpage
+
 # Source: `04-reference/pipelines/composite/01-publication-spec.md`
 
 # Composite Publication Pipeline Specification
@@ -42365,6 +43374,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - This page no longer republishes the older dashed field tables and merge notes.
 - For implementation, filters, DQ rules, and field priority changes, use the
   composite YAML config above.
+
+\newpage
 
 # Source: `04-reference/pipelines/composite/02-molecule-spec.md`
 
@@ -42401,6 +43412,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For merge priorities, field aliases, and output groups, use the composite
   YAML config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/composite/03-target-spec.md`
 
 # Composite Target Pipeline Specification
@@ -42434,6 +43447,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
   dashed dependency tables.
 - For dependency order, merge priorities, and column groups, use the composite
   YAML config above.
+
+\newpage
 
 # Source: `04-reference/pipelines/composite/04-activity-spec.md`
 
@@ -42472,6 +43487,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For merge settings, column groups, DQ rules, and output ordering, use the
   composite YAML config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/composite/05-assay-spec.md`
 
 # Composite Assay Pipeline Specification
@@ -42508,6 +43525,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For enricher thresholds, filter conditions, column groups, and merge rules,
   use the composite YAML config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/crossref/01-publication-spec.md`
 
 # CrossRef Publication Pipeline Specification
@@ -42541,6 +43560,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For DQ rules, field aliases, and implementation details, use the provider
   reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/openalex/01-publication-spec.md`
 
 # OpenAlex Publication Pipeline Specification
@@ -42570,6 +43591,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - This page no longer republishes the older dashed contract tables.
 - For implementation, tests, and config changes, use the provider reference and
   entity config above.
+
+\newpage
 
 # Source: `04-reference/pipelines/openalex-publication.md`
 
@@ -42607,6 +43630,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For new code, configs, and documentation updates, use the provider reference
   page and entity config listed above.
 
+\newpage
+
 # Source: `04-reference/pipelines/pubchem/01-compound-spec.md`
 
 # PubChem Compound Pipeline Specification
@@ -42642,6 +43667,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For partitioning, DQ rules, and input-filter behavior, use the provider
   reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/pubmed/01-publication-spec.md`
 
 # PubMed Publication Pipeline Specification
@@ -42675,6 +43702,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For quality rules, aliases, and extraction details, use the provider
   reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/semanticscholar/01-publication-spec.md`
 
 # Semantic Scholar Publication Pipeline Specification
@@ -42704,6 +43733,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - This page no longer republishes the older dashed contract tables.
 - For implementation, tests, and config changes, use the provider reference and
   entity config above.
+
+\newpage
 
 # Source: `04-reference/pipelines/semanticscholar-publication.md`
 
@@ -42741,6 +43772,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For new code, configs, and documentation updates, use the provider reference
   page and entity config listed above.
 
+\newpage
+
 # Source: `04-reference/pipelines/uniprot/01-protein-spec.md`
 
 # UniProt Protein Pipeline Specification
@@ -42774,6 +43807,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 - For DQ rules, cross-reference coverage, and implementation details, use the
   provider reference and entity config above.
 
+\newpage
+
 # Source: `04-reference/pipelines/uniprot/02-idmapping-spec.md`
 
 # UniProt ID Mapping Pipeline Specification
@@ -42806,6 +43841,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
   active contract.
 - For filter settings, DQ thresholds, and API flow details, use the provider
   reference and entity config above.
+
+\newpage
 
 # Source: `04-reference/providers/README.md`
 
@@ -42872,6 +43909,8 @@ configs/entities/
 - [RULES.md](../../00-project/RULES.md) Appendix A - Provider rate limits and libraries
 - [03-guides/add-new-source.md](../../03-guides/add-new-source.md) - Adding new providers
 - [02-architecture/03-infrastructure-layer.md](../../02-architecture/03-infrastructure-layer.md) - Adapter architecture
+
+\newpage
 
 # Source: `04-reference/providers/chembl/activity.md`
 
@@ -43371,6 +44410,8 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 
 *Последнее обновление: 2026-03-10*
 
+\newpage
+
 # Source: `04-reference/providers/chembl/assay-parameters.md`
 
 # Пайплайн: ChEMBL Assay Parameters
@@ -43506,6 +44547,8 @@ Silver-таблица партиционируется по полю `type` дл
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/chembl/assay.md`
 
@@ -43956,6 +44999,8 @@ bioetl run --pipeline chembl_assay --input-csv data/input/assay.csv
 
 *Последнее обновление: 2025-12-24*
 
+\newpage
+
 # Source: `04-reference/providers/chembl/cell-line.md`
 
 # Пайплайн: ChEMBL Cell Line
@@ -44119,6 +45164,8 @@ Cell Line (cell_id)
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/chembl/compound-record.md`
 
@@ -44313,6 +45360,8 @@ gold_filters:
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/providers/chembl/molecule.md`
 
 # Пайплайн: ChEMBL Molecule
@@ -44435,6 +45484,8 @@ bioetl run --pipeline chembl_molecule --run-type rebuild
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/chembl/protein-class.md`
 
@@ -44559,6 +45610,8 @@ Gold-таблица сортируется по `class_level`, `sort_order`, `pr
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/providers/chembl/publication-similarity.md`
 
 # Пайплайн: ChEMBL Publication Similarity
@@ -44657,6 +45710,8 @@ bioetl run --pipeline chembl_publication_similarity --limit 1000
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/chembl/publication-term.md`
 
@@ -44796,6 +45851,8 @@ bioetl run --pipeline chembl_publication_term --limit 1000
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/providers/chembl/publication.md`
 
 # Пайплайн: ChEMBL Publication
@@ -44891,6 +45948,8 @@ bioetl run --pipeline chembl_publication --limit 1000
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/providers/chembl/subcellular-fraction.md`
 
 # Пайплайн: ChEMBL Subcellular Fraction
@@ -44967,6 +46026,8 @@ bioetl run --pipeline chembl_publication --limit 1000
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/chembl/target-component.md`
 
@@ -45051,6 +46112,8 @@ bioetl run --pipeline chembl_target_component --limit 500
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/chembl/target.md`
 
@@ -45166,6 +46229,8 @@ bioetl run --pipeline chembl_target --run-type rebuild
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/chembl/tissue.md`
 
@@ -45307,6 +46372,8 @@ normalized contract publishes this field as `tissue_id`.
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/crossref/publication.md`
 
@@ -45595,6 +46662,8 @@ gold_filters:
 ----------------------------------------------------------------------
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/openalex/publication.md`
 
@@ -46091,6 +47160,8 @@ Silver → GoldWriter (validated)
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/providers/pubchem/compound.md`
 
 # Пайплайн: PubChem Compound
@@ -46148,6 +47219,8 @@ Silver → GoldWriter (validated)
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/pubmed/publication.md`
 
@@ -46272,6 +47345,8 @@ bioetl run --pipeline pubmed_publication --run-type rebuild
 ---
 
 *Последнее обновление: 2026-03-03*
+
+\newpage
 
 # Source: `04-reference/providers/semanticscholar/publication.md`
 
@@ -46676,6 +47751,8 @@ GET https://api.semanticscholar.org/graph/v1/paper/search?query=...&fields=...&l
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/providers/uniprot/idmapping.md`
 
 # Пайплайн: UniProt ID Mapping
@@ -46910,6 +47987,8 @@ CHEMBL9999999
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/providers/uniprot/protein.md`
 
 # Пайплайн: UniProt Protein
@@ -46968,6 +48047,8 @@ CHEMBL9999999
 
 *Последнее обновление: 2026-03-03*
 
+\newpage
+
 # Source: `04-reference/publication-fields-reference.md`
 
 # Publication Fields Reference
@@ -47015,12 +48096,14 @@ For implementation, validation, and schema work:
    [../03-guides/publication-validation-guide.md](../03-guides/publication-validation-guide.md)
    for workflow guidance, not this historical artifact.
 
+\newpage
+
 # Source: `04-reference/publication-validation-index.md`
 
 # Publication Validation Documentation Index
 
-**Версия:** 1.0.0
-**Дата:** 2026-02-06
+**Версия:** 1.0.1
+**Дата:** 2026-03-20
 **Статус:** Production Ready ✅
 
 ---
@@ -47029,10 +48112,10 @@ For implementation, validation, and schema work:
 
 Комплексная система валидации публикационных данных BioETL, охватывающая **191 поле** из **5 провайдеров** (ChEMBL, PubMed, CrossRef, OpenAlex, Semantic Scholar) с **5-уровневой стратегией валидации**.
 
-**Ключевые метрики:**
+**Ключевые метрики и артефакты:**
 - 📊 **191 поле** × 5 провайдеров
 - ✅ **5 уровней валидации** (Base → Structural → External → Logical → Semantic)
-- 🧪 **471 тест** (64% от целевых 735)
+- 🧪 **471 тест** (64% от целевых 735) по состоянию на 2026-02-06; актуальное покрытие проверяй по `tests/` и CI
 - 📈 **Target DQ Pass Rate:** ≥ 95%
 
 ---
@@ -47075,14 +48158,14 @@ For implementation, validation, and schema work:
 
 | Документ | Описание | Покрытие |
 |----------|----------|----------|
-| **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver-schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
+| **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver_schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
 | **[Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)** | Тесты валидации схем публикаций | Contract tests |
 
 **Test Organization:**
 ```
 tests/
 ├── contract/
-│   ├── silver-schemas/README.md    # Contract test docs
+│   ├── silver_schemas/README.md    # Contract test docs
 │   └── test_publication_schema_contracts.py
 ├── unit/domain/schemas/            # Base validation tests
 ├── unit/application/services/dq/   # Structural/logical/semantic tests
@@ -47369,6 +48452,8 @@ cat logs/bioetl.log | \
 **Владелец:** Data Engineering Team
 **Статус:** Production Ready ✅
 
+\newpage
+
 # Source: `04-reference/schemas/domain/chembl/activity-schema.md`
 
 # ChEMBL Activity Domain Schema
@@ -47386,6 +48471,8 @@ Current canonical summary:
 - Publication linkage and related identifiers are defined in the entity config and current transformer implementation.
 - For current schema expectations, use the provider reference, current entity config, and runtime validation artifacts instead of this archived schema page.
 
+\newpage
+
 # Source: `04-reference/schemas/domain/chembl/assay-schema.md`
 
 # ChEMBL Assay Domain Schema
@@ -47402,6 +48489,8 @@ Current canonical summary:
 - Active configs and schema checks use snake_case names.
 - Publication and target relationships are represented through the current entity config and provider implementation, not through the legacy dashed names shown in older material.
 - Use the provider reference and live config for current assay contract details.
+
+\newpage
 
 # Source: `04-reference/schemas/domain/chembl/molecule-schema.md`
 
@@ -47742,6 +48831,8 @@ def -validate-invariants(self) -> None:
 
 *Build reliably. Document honestly. Ask boldly.*
 
+\newpage
+
 # Source: `04-reference/schemas/domain/chembl/target-schema.md`
 
 # Target Schema (ChEMBL)
@@ -47774,6 +48865,8 @@ def -validate-invariants(self) -> None:
   `target-type`, `pref-name`, `component-id`, or `target-components`.
 - For Gold filters, field groups, aliases, and DQ rules, use the target entity
   config above.
+
+\newpage
 
 # Source: `04-reference/templates/pipeline-review-checklist.md`
 
@@ -47967,6 +49060,8 @@ Use this checklist when reviewing new or modified pipelines.
 
 -Add any additional notes or exceptions here.-
 
+\newpage
+
 # Source: `05-operations/01-monitoring-guide.md`
 
 # 05.01 Руководство по мониторингу (Monitoring Guide)
@@ -48037,6 +49132,8 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - [Архитектурное решение ADR-017 (Observability)](../02-architecture/decisions/ADR-017-observability-architecture.md)
 - [Правила именования метрик (RULES.md)](../00-project/RULES.md)
 
+\newpage
+
 # Source: `05-operations/README.md`
 
 # Operations Documentation
@@ -48095,6 +49192,8 @@ standard runbook path.
 - [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful shutdown (**Superseded**, historical context)
 - [Pipeline Lifecycle](../03-guides/pipeline-lifecycle.md) — Current lifecycle and shutdown behavior
 - [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md) — Local deployment
+
+\newpage
 
 # Source: `05-operations/release-checklist.md`
 
@@ -48205,6 +49304,8 @@ Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
 
 *Verified: 2026-01-13*
 *Version: 5.9.0*
+
+\newpage
 
 # Source: `05-operations/deployment/deployment-guide.md`
 
@@ -48698,6 +49799,8 @@ resources:
 - [Grafana Helm Chart](https://grafana.com/grafana/helm-charts/)
 - Docker Documentation: https://docs.docker.com/reference/cli/docker/container/run/
 
+\newpage
+
 # Source: `05-operations/deployment/k8s-summary.md`
 
 # BioETL Kubernetes Manifests - Summary
@@ -48986,6 +50089,8 @@ See DEPLOYMENT-GUIDE.md for detailed troubleshooting.
 - Grafana Docs: https://grafana.com/docs/
 - Docker Docs: https://docs.docker.com/reference/cli/docker/container/run/
 - BioETL README: ../README.md
+
+\newpage
 
 # Source: `05-operations/deployment/mcp-neo4j-memory-final-summary.md`
 
@@ -49413,6 +50518,8 @@ A complete, professional-grade MCP server for Neo4j memory management has been s
 
 Thank you for using MCP Neo4j Memory!
 
+\newpage
+
 # Source: `05-operations/deployment/mcp-neo4j-memory-summary.md`
 
 # MCP Neo4j Memory Configuration - Setup Summary
@@ -49747,6 +50854,8 @@ Neo4j Container (bioetl-neo4j)
 
 Let me know if you have any other questions!
 
+\newpage
+
 # Source: `05-operations/deployment/neo4j-memory-setup.md`
 
 # Neo4j Memory Configuration Guide
@@ -49891,6 +51000,8 @@ docker compose down neo4j
 - Neo4j Docker: https://neo4j.com/docker/
 - Neo4j Cypher: https://neo4j.com/docs/cypher-manual/current/
 
+\newpage
+
 # Source: `05-operations/performance-baselines.md`
 
 # Performance Baselines
@@ -50006,6 +51117,8 @@ When performance improvements are made:
 - [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
 - Architecture Review Report (R5)
 
+\newpage
+
 # Source: `05-operations/runbooks/backfill-rebuild.md`
 
 # Backfill and Rebuild Operations
@@ -50066,6 +51179,8 @@ This runbook describes how to perform Backfill (historical load) and Rebuild (fu
 
 - **LockAcquisitionError**: Another process holds the lock. Wait or investigate.
 - **Memory Issues**: Backfills process large volumes. Watch for OOM. Reduce batch size if needed.
+
+\newpage
 
 # Source: `05-operations/runbooks/checkpoint-debugging.md`
 
@@ -50256,6 +51371,8 @@ Track and alert on:
 - missing checkpoint after abnormal termination
 - write/permission errors in `data/output/checkpoints/`
 
+\newpage
+
 # Source: `05-operations/runbooks/data-recovery.md`
 
 # Data Recovery Runbook
@@ -50318,6 +51435,8 @@ This runbook provides procedures for recovering data in case of corruption, acci
      - **Note**: For checkpoint reset, delete the file at `data/output/checkpoints/{pipeline-name}.json`.
      - **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.
   1. **Option B (Advanced)**: Manually determine the last successfully processed record ID or timestamp from the Silver table and create a new checkpoint file. This is faster but more error-prone.
+
+\newpage
 
 # Source: `05-operations/runbooks/dq-failure-investigation.md`
 
@@ -50588,6 +51707,8 @@ Escalate if:
 - New error type not in known issues
 - Upstream API changes suspected
 
+\newpage
+
 # Source: `05-operations/runbooks/incident-response.md`
 
 # Incident Response Playbook
@@ -50659,6 +51780,8 @@ If an incident cannot be resolved within the Response SLA:
 2.  **Tech Lead**: Notify stakeholders if P0/P1.
 3.  **Post-Mortem**: Required for all P0/P1 incidents within 48 hours.
 
+\newpage
+
 # Source: `05-operations/runbooks/index.md`
 
 # Operations Runbooks (Playbooks)
@@ -50708,6 +51831,8 @@ This section contains playbooks for handling common alerts and operational tasks
 
 ---
 *Last updated: 2026-03-13*
+
+\newpage
 
 # Source: `05-operations/runbooks/observability-checklist.md`
 
@@ -50844,6 +51969,8 @@ def test_adapters_have_health_check(src_dir: Path) -> None:
 
 Run with: `make test-architecture`
 
+\newpage
+
 # Source: `05-operations/runbooks/pipeline-failure-critical.md`
 
 # Pipeline Failure: Critical Error (P1)
@@ -50903,6 +52030,8 @@ This runbook describes how to handle critical pipeline failures (P1 incidents).
 - Analyze why the error wasn't caught in staging.
 - Add new regression tests if applicable.
 
+\newpage
+
 # Source: `05-operations/runbooks/pipeline-failure-dq.md`
 
 # Pipeline Failure: High DQ Rate (P2)
@@ -50958,6 +52087,8 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
   ```bash
   make quarantine-purge PIPELINE=...
   ```
+
+\newpage
 
 # Source: `05-operations/runbooks/pipeline-failure-recovery.md`
 
@@ -51147,6 +52278,8 @@ If recovery fails after 3 attempts:
 1. Check for upstream API issues
 1. Review recent code changes
 1. Escalate to development team
+
+\newpage
 
 # Source: `05-operations/runbooks/publication-validation-runbook.md`
 
@@ -51993,6 +53126,8 @@ scrape-configs:
 **Владелец:** Data Engineering Team
 **Статус:** Production Ready ✅
 
+\newpage
+
 # Source: `05-operations/runbooks/quarantine-management.md`
 
 # Quarantine Management
@@ -52039,6 +53174,8 @@ bioetl quarantine purge --pipeline {pipeline-name}
 
 ## Retention
 Quarantine data is retained for **30 days** by default. Cleanup is executed via explicit purge operations (`bioetl quarantine purge`).
+
+\newpage
 
 # Source: `05-operations/runbooks/scaling.md`
 
@@ -52095,6 +53232,8 @@ If a single pipeline run is slow, consider increasing the resources available to
 *   **Action**:
     *   Ensure you are partitioning on low-cardinality fields that are frequently used in `WHERE` clauses (e.g., `year`, `month`, `entity-type`).
     *   **Avoid over-partitioning**: Do not partition on high-cardinality fields like UUIDs or hashes. This creates a "small files" problem and slows down the metadata log. Refer to the partitioning limits in `RULES.md`.
+
+\newpage
 
 # Source: `05-operations/runbooks/schema-evolution.md`
 
@@ -52154,6 +53293,8 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
 - **Critical**: "Missing required field: [...]".
   - **Immediate Action**: Fix the parser or contact provider. Pipeline is broken.
 
+\newpage
+
 # Source: `05-operations/runbooks/stale-lock.md`
 
 # Stale Lock Detected (P2)
@@ -52204,6 +53345,8 @@ This runbook describes how to handle "Stale Lock" alerts.
 - **Heartbeats**: Ensure workers send heartbeats regularly.
 - **Timeouts**: Configure appropriate timeouts for HTTP requests and DB queries.
 - **Resource Limits**: Ensure workers have enough memory to avoid OOM kills.
+
+\newpage
 
 # Source: `05-operations/runbooks/vacuum-procedures.md`
 
@@ -52392,6 +53535,8 @@ INFO  | vacuum_completed | table=chembl_activity | files_removed=150 | bytes_fre
 3. **Monitor storage trends** to adjust retention
 4. **Document VACUUM runs** in operations log
 5. **Test time travel** after VACUUM to ensure required history preserved
+
+\newpage
 
 # Source: `05-operations/vacuum-retention.md`
 
@@ -52622,6 +53767,8 @@ VACUUM операции логируются с structlog pattern:
 - [RULES.md §3.1: Medallion Architecture](../00-project/RULES.md)
 - [VacuumService](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/application/services/vacuum_service.py)
 - [RetentionPolicy](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/storage/support/retention.py)
+
+\newpage
 
 # Source: `05-operations/verification/endpoint-validation-checklist.md`
 
@@ -53434,6 +54581,8 @@ curl -s "https://rest.uniprot.org/uniprotkb/stream?query=accession:P62988&format
 | Semantic Scholar | 10 | 600 sec (10 min) |
 | UniProt | 5 | 300 sec (5 min) |
 
+\newpage
+
 # Source: `99-archive/verification/git-preflight-status-2026-02-24.md`
 
 # Git Pre-flight Status Report — 2026-02-24
@@ -53456,6 +54605,8 @@ curl -s "https://rest.uniprot.org/uniprotkb/stream?query=accession:P62988&format
 - `origin` присутствует и корректно задан.
 - Доступ к remote в текущем окружении не подтверждён из-за отсутствия/недоступности credentials.
 - Проверка расхождения с `origin/main` требует успешного `git fetch origin`.
+
+\newpage
 
 # Source: `99-archive/verification/publication-field-mapping-report.md`
 
@@ -53720,6 +54871,8 @@ All providers use `normalize-pmc-id()`:
 - **RULES.md §3.2**: Silver Layer Requirements
 - **RULES.md §3.3**: Gold Layer Requirements
 - **ADR-024**: Document → Publication Renaming
+
+\newpage
 
 # Source: `99-archive/verification/pubmed-extraction-verification-report.md`
 
@@ -54093,6 +55246,8 @@ BaseFieldExtractor (Template Method)
 
 **Обновление 2026-01-25**: Добавлена поддержка MedlineDate формата (+7 тестов).
 
+\newpage
+
 # Source: `99-archive/verification/refactor-plan-validation-2026-02-15.md`
 
 # Валидация плана рефакторинга (PROMPT 1.2–4.2, CFG-001)
@@ -54343,6 +55498,8 @@ BaseFieldExtractor (Template Method)
 - `grep -rn "from.*composite.*lineage.*import.*LineageMetadata" src/bioetl tests`
 - `test -f src/bioetl/domain/version.py && echo exists || echo missing`
 
+\newpage
+
 # Source: `99-archive/verification/schema-review-2026-02-17.md`
 
 # Schema Coverage Review
@@ -54494,6 +55651,8 @@ Full passthrough.
 | uniprot/protein | 54% | Gold = drug-discovery focused fields |
 | uniprot/idmapping | 0% | Full passthrough + `-dq-warn` |
 | publication providers | 0% | Full passthrough (all 4 providers) |
+
+\newpage
 
 # Source: `99-archive/verification/semanticscholar-publication-pipeline-verification.md`
 
@@ -54745,6 +55904,8 @@ Semantic Scholar Publication Pipeline **полностью реализован*
 1. `a29023c` — docs: add Semantic Scholar pipeline verification report
 2. `e103fc2` — feat(semanticscholar): implement verification findings
 
+\newpage
+
 # Source: `99-archive/verification/sync-report-2026-02-17.md`
 
 # Docs↔Cfg↔Code Sync Report
@@ -54939,6 +56100,8 @@ Gold schemas are curated subsets. Fields in Silver but not Gold are intentional 
 | DENORM | Denormalized from related entity |
 | DERIVED | Computed field, not direct API mapping |
 | EMPTY | Config exists but has no content |
+
+\newpage
 
 # Source: `05-operations/verification/vcr-test-tasks.md`
 
@@ -55259,6 +56422,8 @@ These corrupted field names will cause data to be written with wrong column name
 9. Remove 3 root-level duplicate cassettes
 10. Consider migrating CrossRef respx tests to VCR for consistency
 
+\newpage
+
 # Source: `99-archive/CONFIG-GUIDE.md`
 
 # Pipeline Configuration Guide
@@ -55558,6 +56723,8 @@ Rule loading:
 - `dq-overrides` are loaded from `dq-config-file`
 - Inline pipeline values are merged on top of file-based defaults
 
+\newpage
+
 # Source: `99-archive/README.md`
 
 # 99-Archive Index
@@ -55659,6 +56826,8 @@ These documents are preserved for traceability and historical context.
 
 - [Documentation Publication Policy](../00-project/governance/06-doc-publication-policy.md)
 - [Documentation Navigation Policy](../00-project/governance/07-doc-nav-policy.md)
+
+\newpage
 
 # Source: `99-archive/analysis/data-normalization-comparison.md`
 
@@ -55872,6 +57041,8 @@ ID полей, встречающихся в нескольких ChEMBL-сущ�
 | **Page range processing** | PubMed и CrossRef: полный парсинг (`parse-page-range()`). Остальные: прямое извлечение или без обработки. |
 | **PII protection** | `hash-pii-list()` применяется ко всем publication pipelines одинаково. |
 | **Content hash** | `normalize-for-hash()` + SHA-256 — единый для всех пайплайнов (RULES.md §2.8.1). |
+
+\newpage
 
 # Source: `99-archive/analysis/normalization-unification-plan.md`
 
@@ -56251,6 +57422,8 @@ Phase 4 (Polish):
 5. **Идемпотентная нормализация** — `strip-html-tags()`, `normalize-doi()` безопасны для повторного применения
 6. **Обратная совместимость** — все изменения через расширение, не ломать существующие Silver-таблицы
 
+\newpage
+
 # Source: `99-archive/dashboards-legacy/BIOETL_DASHBOARD_COMPLETE.md`
 
 # 📊 BioETL Dashboard — Полная подготовка завершена ✅
@@ -56620,6 +57793,8 @@ open http://localhost:3000/d/bioetl-simple
 🎊 **Спасибо за использование BioETL Dashboard!** 🎊
 
 Начните с [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md) прямо сейчас! ⏱️
+
+\newpage
 
 # Source: `99-archive/dashboards-legacy/BIOETL_DASHBOARD_EXAMPLES.md`
 
@@ -57237,6 +58412,8 @@ metric1 > 100                                      # Сравнение
 **Дата:** 22 февраля 2026  
 **Версия:** 1.0
 
+\newpage
+
 # Source: `99-archive/dashboards-legacy/BIOETL_DASHBOARD_QUICKSTART.md`
 
 # BioETL Dashboard — Чек-лист быстрого старта
@@ -57435,6 +58612,8 @@ A: `http://localhost:9090/api/v1/query-range?query=...&start=...&end=...`
 **Дата:** 22 февраля 2026  
 **Версия:** 1.0  
 **Поддержка:** См. BIOETL-DASHBOARD-SETUP.md (раздел Troubleshooting)
+
+\newpage
 
 # Source: `99-archive/dashboards-legacy/BIOETL_DASHBOARD_README.md`
 
@@ -57783,6 +58962,8 @@ curl http://localhost:8000/health
 **Статус:** ✅ Готово к использованию
 
 Начните с [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md) — займет 5 минут! ⏱️
+
+\newpage
 
 # Source: `99-archive/dashboards-legacy/BIOETL_DASHBOARD_SETUP.md`
 
@@ -58534,6 +59715,8 @@ avg(bioetl-processing-duration-seconds-bucket)
 **Последнее обновление:** 22 февраля 2026  
 **Совместимость:** BioETL v6.0.0, Prometheus 3.9.1, Grafana 10.2.0+
 
+\newpage
+
 # Source: `99-archive/dashboards-legacy/BIOETL_DASHBOARD_VISUAL_GUIDE.md`
 
 # BioETL Dashboard — Визуальный гайд
@@ -58883,6 +60066,8 @@ python ./metrics-server.py &
 **Дата:** 22 февраля 2026  
 **Версия:** 1.0  
 **Для:** Визуальное понимание BioETL Dashboard
+
+\newpage
 
 # Source: `99-archive/dashboards-legacy/BIOETL_DATA_EXTRACTION_AND_DASHBOARDS.md`
 
@@ -59385,6 +60570,8 @@ docker compose -f docker-compose.monitoring.yml down
 **Статус:** Production Ready  
 **Дата:** 22 февраля 2026
 
+\newpage
+
 # Source: `99-archive/dashboards-legacy/INFO_PANELS_ADDED.md`
 
 # Info Panels (Pipeline, Run Type, Timestamp) добавлены!
@@ -59553,6 +60740,8 @@ grafana/dashboards/
 
 **Все три дашборда v2 теперь полностью готовы к использованию!** 🎉
 
+\newpage
+
 # Source: `99-archive/dashboards-legacy/README.md`
 
 # Legacy Dashboard Docs
@@ -59575,6 +60764,8 @@ grafana/dashboards/
 
 - Документы в этой папке не являются источником истины для текущей конфигурации.
 - Актуальное состояние: `grafana/dashboards/*.json` и файлы в `docs/03-guides/dashboards/` (вне `legacy`).
+
+\newpage
 
 # Source: `99-archive/dashboards-legacy/TIMESTAMP_FIXED.md`
 
@@ -59688,6 +60879,8 @@ curl http://localhost:8000/metrics | grep bioetl-run-start-timestamp
 
 **Дата:** 22 февраля 2026  
 **Статус:** ✅ Production Ready
+
+\newpage
 
 # Source: `99-archive/dashboards-legacy/TIMESTAMP_WITH_VARIABLES_FIX.md`
 
@@ -59881,6 +61074,8 @@ Execution Timestamp теперь полностью интегрирован с 
 **Дата:** 22 февраля 2026  
 **Статус:** ✅ Production Ready
 
+\newpage
+
 # Source: `99-archive/data-model/consolidated-refactoring-plan.md`
 
 # Консолидированный план рефакторинга: унификация полей ChEMBL-пайплайнов
@@ -60044,6 +61239,8 @@ grep -rn "from bioetl.*-bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include
 | `-normalize-source-config` | Декомпозиция на 4 функции | 147 LOC → 40 LOC, CC>15 → CC<10 |
 | Filter config types | SilverFilterConfig nominal type | Structurally identical to Gold but type-distinct |
 | DQ config naming | `dq-overrides` (backward-compat alias `dq-overrides`) | AliasChoices обеспечивает обратную совместимость |
+
+\newpage
 
 # Source: `99-archive/data-model/field-catalog-source-pipelines.md`
 
@@ -60664,6 +61861,8 @@ grep -rn "from bioetl.*-bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include
 - `-index`: порядковый номер записи в партии.
 - `-dq-error`, `-dq-warn`: флаги контроля качества (True/False).
 
+\newpage
+
 # Source: `99-archive/data-model/field-migration-checklist.md`
 
 # Field Migration Checklist (breaking-now)
@@ -60696,6 +61895,8 @@ grep -rn "from bioetl.*-bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include
 - [ ] Repo-wide проверка на отсутствие legacy имён (кроме changelog/migration notes).
 - [ ] Обновить CHANGELOG и миграционные заметки.
 - [ ] Зафиксировать version bump/contract change.
+
+\newpage
 
 # Source: `99-archive/data-model/field-naming-unification-matrix.md`
 
@@ -60791,6 +61992,8 @@ grep -rn "from bioetl.*-bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include
 - Названия/описания:
   - `pref-name` для сущностей; контекстный префикс только при многократном присутствии в записи (`molecule-pref-name`, `target-pref-name` внутри activity).
   - `description` — основное описание сущности; специализированные варианты переименовывать в `*-description` только при наличии нескольких описаний.
+
+\newpage
 
 # Source: `99-archive/data-model/json-field-typing-inventory.md`
 
@@ -61084,6 +62287,8 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `variant-sequence` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `variant-sequence-json` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `volume` | `integer|null` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+
+\newpage
 
 # Source: `99-archive/data-model/pipeline-validation-matrix.md`
 
@@ -61480,6 +62685,8 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 - **Transformers**: `src/bioetl/application/pipelines/chembl/{entity}-transformer.py`
 - **Schema Constants**: `src/bioetl/domain/schemas/constants.py`
 - **Validation Functions**: `src/bioetl/domain/validation.py`
+
+\newpage
 
 # Source: `99-archive/data-model/rf-naming-unification-plan.md`
 
@@ -62087,6 +63294,8 @@ RF-NAMING-02 (cell-line type) ←── CRITICAL, может вызвать runt
 - **S2 Publication Schema:** `src/bioetl/domain/schemas/semanticscholar/publication.py`
 - **ChEMBL Publication Transformer:** `src/bioetl/application/pipelines/chembl/publication-transformer.py`
 
+\newpage
+
 # Source: `99-archive/decisions/ADR-030-api-offset-stability.md`
 
 # ADR-030: API Offset Stability
@@ -62128,6 +63337,8 @@ The canonical, detailed decision record is:
 This ADR exists to preserve legacy links. Use ADR-030 (Publication Pagination Strategy)
 for the full decision and implementation details.
 
+\newpage
+
 # Source: `99-archive/decisions/ADR-030-openalex-offset-stability.md`
 
 # ADR-030: OpenAlex Offset Stability
@@ -62166,6 +63377,8 @@ Full details and cross-provider context are documented in:
 
 This file preserves the legacy ADR name used in older docs. Use the canonical ADR-030
 for implementation and config specifics.
+
+\newpage
 
 # Source: `99-archive/decisions/ADR-030-publication-field-unification-SUPERSEDED.md`
 
@@ -62270,6 +63483,8 @@ Update the following areas in one coordinated release:
 - `configs/pipelines/composite/publication.yaml`
 - `configs/schemas/composite/publication.yaml`
 - `src/bioetl/application/pipelines/crossref/transformer.py`
+
+\newpage
 
 # Source: `99-archive/decisions/ADR-030-publication-field-unification.md`
 
@@ -62377,6 +63592,8 @@ Update the following areas in one coordinated release:
 - `configs/schemas/composite/publication.yaml`
 - `src/bioetl/application/pipelines/crossref/transformer.py`
 
+\newpage
+
 # Source: `99-archive/decisions/ADR-031-full-scan-loading.md`
 
 # ADR-031: Full Scan Loading Strategy
@@ -62416,6 +63633,8 @@ See the canonical ADR for full details:
 
 This file preserves the legacy ADR name used in older docs. Use ADR-031
 (Loading Strategy Formalization) for the full decision and implementation plan.
+
+\newpage
 
 # Source: `99-archive/pyAuditBot.md`
 
@@ -62459,6 +63678,8 @@ uv run mypy src/bioetl/ --strict
 - `00-audit-baseline.md`
 - `07-audit-final.md`
 - ID найденных нарушений: `AUD-NNN`.
+
+\newpage
 
 # Source: `99-archive/refactoring-plan.md`
 
@@ -62641,6 +63862,8 @@ grep -n "heartbeat\|-ttl-checker" src/bioetl/infrastructure/locking/memory-lock.
 
 *Документ восстановлен согласно протоколу двойной верификации REQ-ARCH-040.*
 
+\newpage
+
 # Source: `99-archive/subagents_registry.md`
 
 # Реестр субагентов BioETL
@@ -62674,3 +63897,4 @@ grep -n "heartbeat\|-ttl-checker" src/bioetl/infrastructure/locking/memory-lock.
 - **Действие**: Обновляет `docs/` по системе Johnny.Decimal. Следит за актуальностью `ADR`.
 - **Артефакт**: `06-doc-update-log.md`.
 
+\newpage

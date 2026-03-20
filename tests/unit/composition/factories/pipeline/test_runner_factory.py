@@ -100,7 +100,9 @@ class TestRunnerFactory:
         factory = RunnerFactory(registry=custom_registry)
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ) as mock_pipelines,
@@ -115,7 +117,9 @@ class TestRunnerFactory:
         factory = RunnerFactory(registry_factory=lambda: created_registry)
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ) as mock_pipelines,
@@ -148,7 +152,9 @@ class TestRunnerFactoryCreate:
         mock_runner = _make_mock_runner()
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ),
@@ -168,7 +174,9 @@ class TestRunnerFactoryCreate:
         mock_runner = _make_mock_runner()
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ),
@@ -190,7 +198,9 @@ class TestRunnerFactoryCreate:
         factory = RunnerFactory(registry_factory=lambda: created_registry)
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ),
@@ -215,7 +225,9 @@ class TestRunnerFactoryCreate:
                 return None
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ),
@@ -240,7 +252,9 @@ class TestRunnerFactoryListPipelines:
         factory = RunnerFactory(registry=mock_registry)
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ),
@@ -283,7 +297,9 @@ class TestRunnerFactoryContains:
         factory = RunnerFactory(registry=mock_registry)
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ),
@@ -301,7 +317,9 @@ class TestRunnerFactoryContains:
         factory = RunnerFactory(registry=mock_registry)
 
         with (
-            patch("bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
             patch(
                 "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
             ),

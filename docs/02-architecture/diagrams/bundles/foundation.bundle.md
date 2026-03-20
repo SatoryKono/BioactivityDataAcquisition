@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-03-19T11:31:48
+- Generated: 2026-03-20T17:51:43
 - Diagram count: 55
 
 ## Table of Contents
@@ -207,7 +207,7 @@
 ![06-application-layer-class-diagram](../foundation/png/06-application-layer-class-diagram.png)
 
 ### Описание
-Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineServices.
+Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineService.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -836,7 +836,7 @@
 ![40-application-core-collaboration](../foundation/png/40-application-core-collaboration.png)
 
 ### Описание
-Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. На схеме отражено примерно 15 узлов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineServices (frozen dataclass). Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(), ShutdownService • should_shutdown() • request_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • finalize_run() • emit_summary().
+Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. На схеме отражено примерно 15 узлов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineService (frozen dataclass). Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(), ShutdownService • should_shutdown() • request_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • finalize_run() • emit_summary().
 
 ### Метаданные
 - Тип: `flowchart`
@@ -870,7 +870,7 @@
 ![42-pipeline-runner-class](../foundation/png/42-pipeline-runner-class.png)
 
 ### Описание
-Диаграмма «PipelineRunner Internal Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py. На схеме отражено примерно 9 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: PipelineRunner, PipelineServices, LockCoordinator, PreflightService, BatchExecutor, PostrunService.
+Диаграмма «PipelineRunner Internal Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py. На схеме отражено примерно 9 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: PipelineRunner, PipelineService, LockCoordinator, PreflightService, BatchExecutor, PostrunService.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -921,7 +921,7 @@
 ![46-yaml-config-resolution](../foundation/png/46-yaml-config-resolution.png)
 
 ### Описание
-Диаграмма «YAML Configuration Resolution Chain» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: unified config path plus still-active normalization compatibility. На схеме отражено примерно 18 узлов и 21 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML File Hierarchy, Infrastructure Config Loaders, Domain Config Objects (Frozen), Pydantic Validation Layer. Показательные узлы для быстрого чтения: configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (unified entity config), configs/providers/{provider}.yaml (source config + legacy-flat fallback), DQ hierarchy base + provider + entity + inline, Filter hierarchy base + provider + entity + inline.
+Диаграмма «YAML Configuration Resolution Chain» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: unified config path plus canonical staged normalization flow. На схеме отражено примерно 18 узлов и 21 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML File Hierarchy, Infrastructure Config Loaders, Domain Config Objects (Frozen), Pydantic Validation Layer. Показательные узлы для быстрого чтения: configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (unified entity config), configs/providers/{provider}.yaml (source config + legacy-flat fallback), DQ hierarchy base + provider + entity + inline, Filter hierarchy base + provider + entity + inline.
 
 ### Метаданные
 - Тип: `flowchart`

@@ -255,7 +255,6 @@ class TestConfigFilesExist:
                 missing.append(f"{_rel(pipeline_path)}: missing schema section")
         assert not missing, "\n".join(missing)
 
-
     def test_quality_section_exists(
         self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
     ) -> None:

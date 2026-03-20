@@ -109,8 +109,8 @@ Snapshot for this cycle:
 - Curated inventory rows: `7`
 - Transition debt rows: `0`
 - Retained public entrypoints: `7`
-- Measured tracked modules: `9`
-- Measured-only modules outside curated inventory: `2`
+- Measured tracked modules: `11`
+- Measured-only modules outside curated inventory: `4`
 
 Tracked module paths:
 
@@ -120,6 +120,8 @@ Tracked module paths:
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
 - `src/bioetl/application/composite/merger.py`
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
+- `src/bioetl/composition/factories/pipeline/config_resolution.py`
+- `src/bioetl/composition/factories/pipeline/configs.py`
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
 - `src/bioetl/composition/factories/services/creation_api.py`

@@ -6,7 +6,7 @@
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   16
-%% @uniform-group core    nodes=PipelineRunner,PipelineServices,BatchExecutor
+%% @uniform-group core    nodes=PipelineRunner,PipelineService,BatchExecutor
 %% @uniform-group batch   nodes=BatchTransformer,BatchWriter
 %% @uniform-group infra   nodes=BatchMemoryManager,BatchMetricsRecorder,BatchTracingManager
 %% @uniform-group manager nodes=CheckpointManager,LockCoordinator
@@ -36,7 +36,7 @@ classDiagram
             +... : lifecycle orchestration
         }
 
-        class PipelineServices {
+        class PipelineService {
             <<frozen dataclass>>
             +data_source
             +storage
@@ -187,7 +187,7 @@ classDiagram
     PipelineRunner *-- PreflightService
     PipelineRunner *-- PostrunService
     PipelineRunner *-- ShutdownSignal
-    PipelineRunner o-- PipelineServices
+    PipelineRunner o-- PipelineService
 
     BatchExecutor *-- BatchTransformer
     BatchExecutor *-- BatchWriter
@@ -203,7 +203,7 @@ classDiagram
     LockCoordinator *-- HeartbeatTask
 
     style PipelineRunner fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style PipelineServices fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PipelineService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style BatchExecutor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style BatchTransformer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style BatchWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px

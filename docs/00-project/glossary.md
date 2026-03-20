@@ -115,7 +115,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 |----------------|------------|-------|
 | **BatchID** | UUID uniquely identifying a batch within a pipeline run | `chunk-id`, `batch number` |
 | **ContentHash** | SHA-256 hash for record deduplication: `sha256(provider + canonical_json(record))` | `checksum`, `fingerprint` |
-| **PipelineContext** | Immutable value object carrying run-id, provider, entity, run-type, and config through the pipeline | `execution context`, `run state` |
+| **PipelineContext** | Immutable domain-level execution context carrying `run_id`, `run_type`, `LoggerPort`, and deterministic `started_at` for batch/write flows | `run state`, `infra context object` |
 
 ### Composite Pipeline Services
 

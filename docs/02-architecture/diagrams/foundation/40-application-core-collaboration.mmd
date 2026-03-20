@@ -50,7 +50,7 @@ flowchart TB
         BTM["BatchTracingManager<br/>• start_span()<br/>• end_span()"]
     end
 
-    subgraph Bundle["PipelineServices (frozen dataclass)"]
+    subgraph Bundle["PipelineService (frozen dataclass)"]
         PS["Ports bundle<br/>storage + lock + checkpoint<br/>quarantine + logger<br/>metrics + tracing"]
     end
 
@@ -72,7 +72,7 @@ flowchart TB
     BMR -.->|"records"| BE
     BTM -.->|"traces"| BE
 
-    %% PipelineServices dependencies for orchestration components
+    %% PipelineService dependencies for orchestration components
     PS -.->|"provides ports"| RUN
     PS -.->|"provides ports"| LM
     PS -.->|"provides ports"| PF

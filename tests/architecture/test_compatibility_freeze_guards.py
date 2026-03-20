@@ -42,9 +42,7 @@ PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE = (
     "bioetl.composition.factories.pipeline.config_resolution"
 )
 PIPELINE_CONFIGS_COMPAT_MODULE = "bioetl.composition.factories.pipeline.configs"
-PIPELINE_RUNNER_SERVICE_MODULE = (
-    "bioetl.application.services.pipeline_runner_service"
-)
+PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
         "deduplicator",

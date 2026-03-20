@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter

@@ -1,0 +1,18 @@
+id: EV-rf-fs-004-governance-still-treats-loader-as-mixed-hotspot
+pillar: pipeline-config-loader-ownership
+source:
+  type: internal-doc
+  ref: "docs/plans/rf-fs-004-execution-plan-2026-03-20.md:30-34,45-49,151-156,230-233,250-259"
+  retrieved_at: 2026-03-20
+claim: "The active `RF-FS-004` plan still classifies `pipeline_config_loader.py` as a mixed ownership hotspot to narrow, not as a settled canonical owner to preserve."
+quote: "The plan labels `pipeline_config_loader.py` as a \"main Wave 4C hotspot\" and a remaining mixed owner inside `infrastructure/config`."
+confidence: 0.89
+assumptions:
+  - "The current execution plan remains the authoritative governance artifact for the active wave."
+notes: "Governance evidence aligns with the code evidence: retain the class for now, but do not let it re-expand into the canonical config topology owner."
+tags:
+  - rf-fs-004
+  - governance
+  - execution-plan
+  - hotspot
+  - ownership

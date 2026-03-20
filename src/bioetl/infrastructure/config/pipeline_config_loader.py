@@ -21,11 +21,18 @@ from pathlib import Path
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config_uncached as load_yaml_config_uncached,
+)
+from bioetl.infrastructure.config.pipeline_dq_resolution import (
+    conditional_validation_to_dict,
+    cross_field_validation_to_dict,
+    field_validation_to_dict,
+    has_inline_dq_overrides,
+    normalize_inline_dq_overrides,
+    resolve_pipeline_dq_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.pipeline_config_dq import (
@@ -121,39 +128,10 @@ class PipelineConfigLoader:
                 and no inline overrides are present.
 
         """
-        provider = yaml_config.provider
-        entity = yaml_config.entity_type
-
-        # Check if dq_config_file is specified
-        dq_config_file = getattr(yaml_config, "dq_config_file", None)
-
-        # Get inline dq_overrides if present (non-empty)
-        has_inline_rules = self._has_inline_dq_overrides(yaml_config)
-
-        if dq_config_file is not None or has_inline_rules:
-            # Use hierarchical DQ config system
-            inline_overrides = (
-                self._normalize_inline_dq_overrides(yaml_config.dq_overrides)
-                if has_inline_rules
-                else None
-            )
-
-            return self._dq_loader.load(
-                provider=provider,
-                entity=entity,
-                inline_overrides=inline_overrides,
-            )
-
-        # Fallback: try to load from hierarchy if available, otherwise use inline rules
-        try:
-            return self._dq_loader.load(
-                provider=provider,
-                entity=entity,
-                inline_overrides=None,
-            )
-        except FileNotFoundError:
-            # No DQ hierarchy available, use inline overrides as-is
-            return dq_overrides_to_domain(yaml_config)
+        return resolve_pipeline_dq_config(
+            yaml_config,
+            dq_loader=self._dq_loader,
+        )
 
     def _has_inline_dq_overrides(self, yaml_config: PipelineYamlConfig) -> bool:
         """Check if YAML config has non-default inline DQ overrides.
@@ -164,68 +142,14 @@ class PipelineConfigLoader:
         Returns:
             True if inline dq_overrides contains meaningful overrides.
         """
-        dq = yaml_config.dq_overrides
-
-        # Check for any field validations or non-default thresholds
-        has_validations = bool(
-            dq.field_validations
-            or dq.cross_field_validations
-            or dq.conditional_validations
-        )
-
-        # Check for non-default thresholds
-        has_custom_thresholds = (
-            dq.soft_fail_threshold != 0.05 or dq.hard_fail_threshold != 0.20
-        )
-
-        return has_validations or has_custom_thresholds
+        return has_inline_dq_overrides(yaml_config)
 
     def _normalize_inline_dq_overrides(
         self,
         dq_overrides: InlineDQConfig,
     ) -> JsonDict:  # Any: dynamic YAML config values
         """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
-        result: JsonDict = {}  # Any: dynamic YAML config values
-
-        # Thresholds normalization
-        result["thresholds"] = {
-            "soft_fail": dq_overrides.soft_fail_threshold,
-            "hard_fail": dq_overrides.hard_fail_threshold,
-        }
-
-        # Direct copy for compatible fields
-        result["strict_validation"] = dq_overrides.strict_validation
-        result["invalid_record_policy"] = dq_overrides.invalid_record_policy
-
-        # Report config
-        result["report"] = {
-            "enabled": dq_overrides.report.enabled,
-            "format": dq_overrides.report.format,
-            "include_sample_failures": dq_overrides.report.include_sample_failures,
-            "sample_size": dq_overrides.report.sample_size,
-            "output_path": dq_overrides.report.output_path,
-        }
-
-        # Validation lists → entity-level (inline = highest priority)
-        if dq_overrides.field_validations:
-            result["entity_field_validations"] = [
-                self._field_validation_to_dict(fv)
-                for fv in dq_overrides.field_validations
-            ]
-
-        if dq_overrides.cross_field_validations:
-            result["entity_cross_field_validations"] = [
-                self._cross_field_validation_to_dict(cfv)
-                for cfv in dq_overrides.cross_field_validations
-            ]
-
-        if dq_overrides.conditional_validations:
-            result["entity_conditional_validations"] = [
-                self._conditional_validation_to_dict(cv)
-                for cv in dq_overrides.conditional_validations
-            ]
-
-        return result
+        return normalize_inline_dq_overrides(dq_overrides)
 
     def _field_validation_to_dict(
         self,
@@ -239,24 +163,7 @@ class PipelineConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: JsonDict = {  # Any: dynamic YAML config values
-            "field": fv.field,
-            "type": fv.type,
-            "nullable": fv.nullable,
-        }
-        if fv.min is not None:
-            result["min"] = fv.min
-        if fv.max is not None:
-            result["max"] = fv.max
-        if fv.pattern:
-            result["pattern"] = fv.pattern
-        if fv.allowed:
-            result["allowed"] = list(fv.allowed)
-        if fv.validator:
-            result["validator"] = fv.validator
-        if fv.error_message:
-            result["error_message"] = fv.error_message
-        return result
+        return field_validation_to_dict(fv)
 
     def _cross_field_validation_to_dict(
         self,
@@ -270,22 +177,7 @@ class PipelineConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: JsonDict = {  # Any: dynamic YAML config values
-            "name": cfv.name,
-            "fields": list(cfv.fields),
-            "condition": cfv.condition,
-        }
-        if cfv.severity != "error":
-            result["severity"] = cfv.severity
-        if cfv.trigger_field:
-            result["trigger_field"] = cfv.trigger_field
-        if cfv.required_field:
-            result["required_field"] = cfv.required_field
-        if cfv.validator:
-            result["validator"] = cfv.validator
-        if cfv.error_message:
-            result["error_message"] = cfv.error_message
-        return result
+        return cross_field_validation_to_dict(cfv)
 
     def _conditional_validation_to_dict(
         self,
@@ -299,21 +191,7 @@ class PipelineConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: JsonDict = {  # Any: dynamic YAML config values
-            "name": cv.name,
-            "condition_field": cv.condition_field,
-            "condition_value": (
-                list(cv.condition_value)
-                if isinstance(cv.condition_value, list)
-                else cv.condition_value
-            ),
-            "condition_operator": cv.condition_operator,
-        }
-        if cv.then_validations:
-            result["then_validations"] = [
-                self._field_validation_to_dict(tv) for tv in cv.then_validations
-            ]
-        return result
+        return conditional_validation_to_dict(cv)
 
     def clear_cache(self) -> None:
         """Clear all caches (DQ and filter loader caches).
