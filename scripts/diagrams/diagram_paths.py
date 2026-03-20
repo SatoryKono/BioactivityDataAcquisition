@@ -73,6 +73,10 @@ VISUAL_SMOKE_MANIFEST = _resolve_first_existing(
     DIAGRAM_MANIFESTS_DIR / "visual-smoke.txt",
     DIAGRAM_ROOT / "manifests/visual-smoke.txt",
 )
+PNG_COMPATIBILITY_MANIFEST = _resolve_first_existing(
+    DIAGRAM_MANIFESTS_DIR / "png-compatibility.txt",
+    DIAGRAM_ROOT / "manifests/png-compatibility.txt",
+)
 
 SOURCE_FAMILIES = ("architecture", "class-diagrams", "foundation", "views")
 

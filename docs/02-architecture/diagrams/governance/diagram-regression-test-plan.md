@@ -73,7 +73,7 @@ _Связанные документы: diagram-modernization-program.md, diagra
 8. `DIAG-T008`: проверяет orphan-ноды (узлы без связей).
 9. `DIAG-T009`: проверяет, что рендер-пайплайн выполняется без ошибок.
 10. `DIAG-T010`: проверяет наличие обязательных SVG артефактов.
-11. `DIAG-T011`: проверяет наличие PNG-артефактов там, где они ещё нужны как compatibility/export surface.
+11. `DIAG-T011`: проверяет наличие PNG-артефактов для curated compatibility smoke set, а не для всего visual-smoke пула.
 12. `DIAG-T012`: проверяет, что обязательные артефакты не пустые.
 13. `DIAG-T013`: проверяет smoke-бейзлайн эталонного SVG-пула.
 14. `DIAG-T014`: проверяет наличие читаемых text-node в SVG.
@@ -100,7 +100,8 @@ _Связанные документы: diagram-modernization-program.md, diagra
 ## 5. Минимальный стартовый набор (обязательный до rollout)
 
 1. DIAG-T001, T002, T007, T009, T010, T012, T013, T017.
-2. Эталонный пул: минимум 5 диаграмм из `manifests/visual-smoke.txt`.
+2. Эталонный SVG-пул: минимум 5 диаграмм из `manifests/visual-smoke.txt`.
+3. Curated PNG compatibility pool: отдельный небольшой набор в `manifests/png-compatibility.txt`.
 3. Авто-отчет в PR: статус обязательных тестов + ссылки на primary SVG artifacts.
 
 ## 6. Кандидаты в эталонный пул

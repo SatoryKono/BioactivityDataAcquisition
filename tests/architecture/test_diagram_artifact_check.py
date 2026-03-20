@@ -87,3 +87,30 @@ def test_parse_args_supports_optional_png_requirement() -> None:
     args = module.parse_args([])
 
     assert args.require_png is False
+
+
+def test_png_compatibility_manifest_is_svg_only_and_curated() -> None:
+    visual_manifest = Path("docs/02-architecture/diagrams/manifests/visual-smoke.txt")
+    png_manifest = Path("docs/02-architecture/diagrams/manifests/png-compatibility.txt")
+
+    visual_entries = [
+        line.strip()
+        for line in visual_manifest.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+    png_entries = [
+        line.strip()
+        for line in png_manifest.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+
+    assert png_entries
+    assert all(entry.endswith(".svg") for entry in png_entries)
+    assert len(png_entries) < len(visual_entries)
+
+
+def test_nightly_workflow_uses_curated_png_compatibility_manifest() -> None:
+    workflow = Path(".github/workflows/diagram-nightly.yml").read_text(encoding="utf-8")
+
+    assert "png-compatibility.txt" in workflow
+    assert "--require-png" in workflow

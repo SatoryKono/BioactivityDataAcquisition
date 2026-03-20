@@ -212,6 +212,9 @@ technical-debt roadmap, не потеряв важные предложения.
 - первым bounded cluster для этой волны выбран `crossref/batch.py` family;
 - cluster start зафиксирован в
   `wave-3-crossref-batch-cluster-plan-2026-03-20.md`;
+- preflight inventory для cluster start уже завершён:
+  прямых `src`-импортёров у `crossref.batch` сейчас нет, а внешний контракт
+  удерживается в основном tests/architecture touchpoints;
 - следующий implementation step для `Wave 3` сужен до internal workflow split
   with compatibility seam, а не к broad adapter rewrite.
 
