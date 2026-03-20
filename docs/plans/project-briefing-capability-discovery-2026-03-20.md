@@ -8,7 +8,7 @@ itself: active rules, capability surface, quality commands, and recommended
 reading/working order for common task types.
 
 Related follow-up:
-- `docs/reports/onboarding-checklist-day-1-2026-03-20.md`
+- `docs/plans/onboarding-checklist-day-1-2026-03-20.md`
 
 Authoritative guidance remains in:
 - `docs/00-project/`

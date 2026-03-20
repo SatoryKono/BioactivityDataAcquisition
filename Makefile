@@ -10,7 +10,15 @@ UV_EXISTS := $(shell command -v uv 2> /dev/null)
 # Python configuration
 PYTHON := python3
 VENV := .venv
-ifeq ($(OS),Windows_NT)
+ifneq ("$(wildcard $(VENV)/bin/python)","")
+	VENV_BIN := $(VENV)/bin
+	VENV_PYTHON := $(VENV_BIN)/python
+	VENV_PIP := $(VENV_BIN)/pip
+else ifneq ("$(wildcard $(VENV)/Scripts/python.exe)","")
+	VENV_BIN := $(VENV)/Scripts
+	VENV_PYTHON := $(VENV_BIN)/python.exe
+	VENV_PIP := $(VENV_BIN)/pip.exe
+else ifeq ($(OS),Windows_NT)
 	VENV_BIN := $(VENV)/Scripts
 	VENV_PYTHON := $(VENV_BIN)/python.exe
 	VENV_PIP := $(VENV_BIN)/pip.exe

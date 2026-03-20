@@ -31,8 +31,8 @@ graph TB
 
     subgraph AppObserver["Application Observability"]
         PO["PipelineObserver<br/>logger + metrics + tracing hooks"]:::size-lg
-        BMR["BatchMetricsRecorder<br/>track size/processed/error/quarantine"]:::size-lg
-        BTM["BatchTracingManager<br/>start execution/batch/layer span<br/>end span"]:::size-lg
+        BMR["BatchMetricsRecorderService<br/>track size/processed/error/quarantine"]:::size-lg
+        BTM["BatchTracingManagerService<br/>start execution/batch/layer span<br/>end span"]:::size-lg
     end
 
     subgraph InfraLogging["Infrastructure: Logging"]

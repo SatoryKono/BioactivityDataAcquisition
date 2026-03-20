@@ -86,6 +86,7 @@ These documents are preserved for traceability and historical context.
 ### Plans
 
 - [plans/optimize-config-deduplication.md](plans/optimize-config-deduplication.md)
+- [plans/rf-fs-2026-03/README.md](plans/rf-fs-2026-03/README.md)
 
 ### Reports
 

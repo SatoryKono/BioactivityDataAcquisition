@@ -32,8 +32,6 @@ if TYPE_CHECKING:
         EntityTypeExtractor,
     )
     from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
         DQMonitorPort,
         LoggerPort,
@@ -83,11 +81,11 @@ class _BuildPipelineServicesFn(Protocol):
         settings: Settings,
         logger: LoggerPort,
         config: PipelineYamlConfig | None = None,
-        filter_config: InputFilterConfig | None = None,
+        filter_config: object | None = None,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
-        cached_bronze: CachedBronzeContext | None = None,
+        cached_bronze: object | None = None,
         silver_validator: SilverValidatorPort | None = None,
         _deps: object | None = None,
     ) -> PipelineService: ...
@@ -107,11 +105,11 @@ class _PipelineCreationInputs:
     settings: Settings
     logger: LoggerPort
     config: PipelineYamlConfig | None = None
-    filter_config: InputFilterConfig | None = None
+    filter_config: object | None = None
     tracer: TracingPort | None = None
     dq_monitor: DQMonitorPort | None = None
     metrics: MetricsPort | None = None
-    cached_bronze: CachedBronzeContext | None = None
+    cached_bronze: object | None = None
     pandera_silver_schema: object | None = None
 
 

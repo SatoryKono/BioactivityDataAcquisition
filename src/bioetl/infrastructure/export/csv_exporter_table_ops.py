@@ -38,7 +38,7 @@ def flatten_table_for_csv(table: pa.Table) -> pa.Table:
         return table
 
     new_columns = []
-    for i, field in enumerate(table.schema):
+    for i, _field in enumerate(table.schema):
         col = table.column(i)
         if complex_flags[i]:
             new_columns.append(serialize_column_to_json(col))

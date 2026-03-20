@@ -19,24 +19,6 @@ Usage:
 
 from __future__ import annotations
 
-# Pipeline marker classes (canonical owner: pipeline_types.py)
-from bioetl.application.pipelines.chembl.pipeline_types import (
-    ChEMBLActivityPipeline,
-    ChEMBLAssayParametersPipeline,
-    ChEMBLAssayPipeline,
-    ChEMBLCellLinePipeline,
-    ChEMBLCompoundRecordPipeline,
-    ChEMBLMoleculePipeline,
-    ChEMBLProteinClassPipeline,
-    ChEMBLPublicationPipeline,
-    ChEMBLPublicationSimilarityPipeline,
-    ChEMBLPublicationTermPipeline,
-    ChEMBLSubcellularFractionPipeline,
-    ChEMBLTargetComponentPipeline,
-    ChEMBLTargetPipeline,
-    ChEMBLTissuePipeline,
-)
-
 # Transformers
 from bioetl.application.pipelines.chembl.activity_transformer import (
     ActivityTransformer,
@@ -56,6 +38,24 @@ from bioetl.application.pipelines.chembl.compound_record_transformer import (
 )
 from bioetl.application.pipelines.chembl.molecule_transformer import (
     MoleculeTransformer,
+)
+
+# Pipeline marker classes (canonical owner: pipeline_types.py)
+from bioetl.application.pipelines.chembl.pipeline_types import (
+    ChEMBLActivityPipeline,
+    ChEMBLAssayParametersPipeline,
+    ChEMBLAssayPipeline,
+    ChEMBLCellLinePipeline,
+    ChEMBLCompoundRecordPipeline,
+    ChEMBLMoleculePipeline,
+    ChEMBLProteinClassPipeline,
+    ChEMBLPublicationPipeline,
+    ChEMBLPublicationSimilarityPipeline,
+    ChEMBLPublicationTermPipeline,
+    ChEMBLSubcellularFractionPipeline,
+    ChEMBLTargetComponentPipeline,
+    ChEMBLTargetPipeline,
+    ChEMBLTissuePipeline,
 )
 from bioetl.application.pipelines.chembl.protein_class_transformer import (
     ProteinClassTransformer,

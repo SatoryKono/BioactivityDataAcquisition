@@ -41,6 +41,15 @@ class _OtelTracerLike(Protocol):
     ) -> SpanLike: ...
 
 
+class RetryStateLike(Protocol):
+    """Minimal retry-state contract used by retry observability helpers."""
+
+    retries: int
+    status_code: int
+    attempts_made: int
+    last_error: Exception | None
+
+
 def start_request_span(
     tracer: TracingPort,
     *,
@@ -78,7 +87,7 @@ def mark_span_error(
 
 def finalize_request_observability(
     span: SpanLike,
-    retry_state: object,
+    retry_state: RetryStateLike,
     *,
     method: str,
     start_time: float,
@@ -86,9 +95,9 @@ def finalize_request_observability(
 ) -> None:
     """Finalize span and metrics for a completed request lifecycle."""
     duration = time.perf_counter() - start_time
-    retries = cast(int, getattr(retry_state, "retries"))
-    status_code = cast(int, getattr(retry_state, "status_code"))
-    last_error = cast(Exception | None, getattr(retry_state, "last_error"))
+    retries = retry_state.retries
+    status_code = retry_state.status_code
+    last_error = retry_state.last_error
     span.set_attribute("http.retries", retries)
     span.set_attribute("bioetl.duration_ms", duration * 1000)
     span.__exit__(None, None, None)
@@ -97,12 +106,12 @@ def finalize_request_observability(
 
 def raise_retry_exhausted(
     url: str,
-    retry_state: object,
+    retry_state: RetryStateLike,
     span: SpanLike,
 ) -> NoReturn:
     """Raise the terminal retry exhaustion error after span bookkeeping."""
-    last_error = cast(Exception | None, getattr(retry_state, "last_error"))
-    attempts_made = cast(int, getattr(retry_state, "attempts_made"))
+    last_error = retry_state.last_error
+    attempts_made = retry_state.attempts_made
     mark_span_error(span, "retry_exhausted", last_error)
     raise RetryExhaustedError(url, attempts_made, last_error)
 

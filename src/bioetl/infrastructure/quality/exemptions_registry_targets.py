@@ -25,8 +25,8 @@ _FUNCTION_SYMBOL_REGISTRIES = frozenset(
 )
 
 _SYMBOL_REGISTRY_CONTEXT = {
-    **{name: "class" for name in _CLASS_SYMBOL_REGISTRIES},
-    **{name: "function" for name in _FUNCTION_SYMBOL_REGISTRIES},
+    **dict.fromkeys(_CLASS_SYMBOL_REGISTRIES, "class"),
+    **dict.fromkeys(_FUNCTION_SYMBOL_REGISTRIES, "function"),
 }
 
 

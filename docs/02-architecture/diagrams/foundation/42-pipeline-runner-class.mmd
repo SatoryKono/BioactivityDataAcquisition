@@ -19,7 +19,7 @@ classDiagram
         -_preflight: PreflightService
         -_batch_executor: BatchExecutor
         -_postrun: PostrunService
-        -_checkpoint_manager: CheckpointManager
+        -_checkpoint_manager: CheckpointManagerService
         -_heartbeat: HeartbeatTask
         -_observer: PipelineObserver
         -_shutdown: ShutdownService
@@ -82,8 +82,8 @@ classDiagram
     class BatchExecutor {
         -_transformer: BatchTransformer
         -_writer: BatchWriter
-        -_metrics: BatchMetricsRecorder
-        -_tracing: BatchTracingManager
+        -_metrics: BatchMetricsRecorderService
+        -_tracing: BatchTracingManagerService
         +execute_batch(batch_num) BatchResult
         
         
@@ -113,7 +113,7 @@ classDiagram
         
     }
 
-    class CheckpointManager {
+    class CheckpointManagerService {
         -_checkpoint: CheckpointPort
         +save(last_id, batch_num) void
         +load() CheckpointState
@@ -169,6 +169,6 @@ classDiagram
     PipelineRunner --> PreflightService : _preflight
     PipelineRunner --> BatchExecutor : _batch_executor
     PipelineRunner --> PostrunService : _postrun
-    PipelineRunner --> CheckpointManager : _checkpoint_manager
+    PipelineRunner --> CheckpointManagerService : _checkpoint_manager
     PipelineRunner --> HeartbeatTask : _heartbeat
     PipelineRunner --> PipelineObserver : _observer

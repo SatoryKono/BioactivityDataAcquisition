@@ -1,6 +1,6 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-03-20T17:51:44
+- Generated: 2026-03-20T18:50:13
 - Diagram count: 162
 
 ## Table of Contents
@@ -1992,7 +1992,7 @@
 ![34-batch-processing-flow-domain](../views/png/34-batch-processing-flow-domain.png)
 
 ### Описание
-Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. На схеме отражено примерно 20 узлов и 25 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: errors, error_count, BatchExecutor, BatchTransformer, BatchTracingManager, DataSourcePort.
+Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. На схеме отражено примерно 20 узлов и 25 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: errors, error_count, BatchExecutor, BatchTransformer, BatchTracingManagerService, DataSourcePort.
 
 ### Метаданные
 - Тип: `flowchart`

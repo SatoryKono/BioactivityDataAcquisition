@@ -21,7 +21,7 @@ sequenceDiagram
     participant BE as BatchExecutor<br/>(786 LOC)
     participant BT as BatchTransformer
     participant Trans as BaseTransformer<br/>(e.g., ActivityTransformer)
-    participant BTM as BatchTracingManager
+    participant BTM as BatchTracingManagerService
     end
 
     box Infrastructure Layer
@@ -31,8 +31,8 @@ sequenceDiagram
     participant Silver as SilverWriter
     participant Gold as GoldWriter
     participant QM as QuarantineManager
-    participant BMR as BatchMetricsRecorder
-    participant CM as CheckpointManager
+    participant BMR as BatchMetricsRecorderService
+    participant CM as CheckpointManagerService
     end
 
     Runner->>BE: execute_batch(batch_num)

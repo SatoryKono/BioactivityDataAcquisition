@@ -32,9 +32,9 @@ RF-06 must **not**:
 
 1. `domain/ports/` is already the sanctioned facade import surface.
    This is documented in:
-   - [`docs/02-architecture/01-domain-layer.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/01-domain-layer.md)
-   - [`docs/00-project/RULES.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md)
-   - [`docs/01-requirements/REQUIREMENTS.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/01-requirements/REQUIREMENTS.md)
+   - [`docs/02-architecture/01-domain-layer.md`](../02-architecture/01-domain-layer.md)
+   - [`docs/00-project/RULES.md`](../00-project/RULES.md)
+   - [`docs/01-requirements/REQUIREMENTS.md`](../01-requirements/REQUIREMENTS.md)
 
 2. Runtime-oriented ports already live in `domain/ports/` by design.
    Current domain-layer docs explicitly list runtime/resilience contracts there:
@@ -45,8 +45,8 @@ RF-06 must **not**:
 
 3. `PipelineContext` is already normative under ADR-014.
    The deterministic-write narrative is explicit in:
-   - [`ADR-014-deterministic-writes.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/decisions/ADR-014-deterministic-writes.md)
-   - [`RULES.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md)
+   - [`ADR-014-deterministic-writes.md`](../02-architecture/decisions/ADR-014-deterministic-writes.md)
+   - [`RULES.md`](../00-project/RULES.md)
 
 ### What is still ambiguous
 
@@ -71,8 +71,8 @@ RF-06 must **not**:
 - **Goal:** make it explicit that `domain` in BioETL includes cross-layer contracts and value semantics, not just business aggregates.
 
 **Primary file scope**
-- [`docs/02-architecture/01-domain-layer.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/01-domain-layer.md)
-- optional targeted wording in [`docs/00-project/RULES.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md)
+- [`docs/02-architecture/01-domain-layer.md`](../02-architecture/01-domain-layer.md)
+- optional targeted wording in [`docs/00-project/RULES.md`](../00-project/RULES.md)
 
 **Required wording outcome**
 - clearly state that `domain.ports` is the approved home for runtime-oriented cross-layer contracts;
@@ -87,9 +87,9 @@ RF-06 must **not**:
 - **Goal:** explain `PipelineContext` as a normative deterministic runtime context, not a misplaced infrastructure object.
 
 **Primary file scope**
-- [`docs/02-architecture/01-domain-layer.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/01-domain-layer.md)
-- [`docs/00-project/RULES.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md)
-- optionally [`docs/02-architecture/decisions/ADR-014-deterministic-writes.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/decisions/ADR-014-deterministic-writes.md) if a cross-reference note is missing
+- [`docs/02-architecture/01-domain-layer.md`](../02-architecture/01-domain-layer.md)
+- [`docs/00-project/RULES.md`](../00-project/RULES.md)
+- optionally [`docs/02-architecture/decisions/ADR-014-deterministic-writes.md`](../02-architecture/decisions/ADR-014-deterministic-writes.md) if a cross-reference note is missing
 
 **Required wording outcome**
 - `PipelineContext` remains the single source of deterministic time;
@@ -107,8 +107,8 @@ RF-06 must **not**:
 - add a small architecture test or extension to an existing domain public API test that explicitly asserts the documented acceptability of facade-level runtime ports in `bioetl.domain.ports`
 
 **Good targets**
-- [`tests/architecture/test_domain_public_api.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_domain_public_api.py)
-- [`tests/architecture/test_forbidden_imports.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_forbidden_imports.py)
+- [`tests/architecture/test_domain_public_api.py`](../../tests/architecture/test_domain_public_api.py)
+- [`tests/architecture/test_forbidden_imports.py`](../../tests/architecture/test_forbidden_imports.py)
 
 **What this check should do**
 - verify that selected runtime ports remain exported from the `domain.ports` facade;

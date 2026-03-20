@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-20
 **Status:** Implemented locally, verification passed
-**Primary baseline:** `docs/reports/RF-FS-005-baseline-2026-03-19.md`
+**Primary baseline:** `docs/99-archive/plans/rf-fs-2026-03/RF-FS-005-baseline-2026-03-19.md`
 **Wave goal:** close the remaining `cli_run_orchestration_service` cleanup and replace the misnamed ChEMBL `_pipelines.py` hotspot with an honest canonical module shape, without widening the blast radius beyond import/export seams.
 
 ## 0. Implementation Closeout

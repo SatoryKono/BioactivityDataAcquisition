@@ -82,14 +82,20 @@ class TestCreateCheckpointManager:
 class TestCreateBatchProcessingComponents:
     """Tests for create_batch_processing_components."""
 
-    @patch("bioetl.composition.factories.services.pipeline_builder.ColumnOrderer")
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchWriter")
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchTransformer")
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchMetricsRecorderService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.ColumnOrderer"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.QuarantineManagerService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchTransformer"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchMetricsRecorderService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineManagerService"
     )
     def test_returns_batch_processing_components(
         self,
@@ -136,14 +142,20 @@ class TestCreateBatchProcessingComponents:
         assert result.writer is wr
         mock_column_orderer.assert_not_called()
 
-    @patch("bioetl.composition.factories.services.pipeline_builder.ColumnOrderer")
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchWriter")
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchTransformer")
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchMetricsRecorderService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.ColumnOrderer"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.QuarantineManagerService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchTransformer"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchMetricsRecorderService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineManagerService"
     )
     def test_creates_column_orderer_when_column_groups_present(
         self,
@@ -188,13 +200,17 @@ class TestCreateBatchProcessingComponents:
         options = mock_batch_writer.call_args.kwargs["options"]
         assert options.column_orderer is ordered
 
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchWriter")
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchTransformer")
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchMetricsRecorderService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.QuarantineManagerService"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchTransformer"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchMetricsRecorderService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.QuarantineManagerService"
     )
     def test_forwards_tracer_and_lock_validator_into_writer_options(
         self,

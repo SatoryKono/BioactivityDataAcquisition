@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-20  
 **Status:** Active, implementation in progress  
-**Primary baseline:** `docs/reports/RF-FS-004-baseline-2026-03-19.md`  
+**Primary baseline:** `docs/99-archive/plans/rf-fs-2026-03/RF-FS-004-baseline-2026-03-19.md`
 **Goal:** normalize config topology so the ownership flow reads clearly as `configs -> infrastructure -> domain -> composition`, while preserving the current YAML corpus and avoiding behavior drift.
 
 ## 0. Current Status

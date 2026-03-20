@@ -28,8 +28,8 @@ flowchart TB
     subgraph Lifecycle["Lifecycle Services"]
         LM["LockCoordinator<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()"]
         HB["HeartbeatService<br/>• start()<br/>• stop()"]
-        CM["CheckpointManager<br/>• read_checkpoint()<br/>• save_checkpoint()"]
-        SD["ShutdownService<br/>• should_shutdown()<br/>• request_shutdown()"]
+        CM["CheckpointManagerService<br/>• load_checkpoint()<br/>• save_checkpoint()"]
+        SD["ShutdownService<br/>• is_shutting_down()<br/>• initiate_shutdown()"]
     end
 
     subgraph Validation["Pre/Post Services"]
@@ -46,8 +46,8 @@ flowchart TB
 
     subgraph Observability["Observability"]
         OBS["PipelineObserver<br/>• __enter__() → started<br/>• __exit__() → completed/failed"]
-        BMR["BatchMetricsRecorder<br/>• record(size, duration, errors)"]
-        BTM["BatchTracingManager<br/>• start_span()<br/>• end_span()"]
+        BMR["BatchMetricsRecorderService<br/>• track_batch_size()<br/>• track_error()"]
+        BTM["BatchTracingManagerService<br/>• start_batch_span()<br/>• end_span()"]
     end
 
     subgraph Bundle["PipelineService (frozen dataclass)"]

@@ -1,10 +1,13 @@
-"""Pipeline configuration loader with DQ integration.
+"""Retained convenience loader for pipeline YAML plus DQ integration.
 
 Loads and validates pipeline configurations from YAML files.
 Integrates with DQConfigLoader for hierarchical DQ config resolution.
 
-This module provides the ConfigLoader class which serves as the main entry point
-for loading pipeline configurations with proper DQ config resolution.
+This module intentionally remains as a thin convenience class for callers that
+still benefit from object-shaped loading, DQ resolution, and cache clearing.
+Canonical staged YAML loading lives in ``pipeline_config_api.py`` and the
+canonical YAML + DQ -> domain bridge lives in
+``domain_config_resolver.py``.
 
 Example:
     >>> from pathlib import Path
@@ -46,12 +49,11 @@ from bioetl.infrastructure.schemas.pipeline_config_dq import (
 
 
 class PipelineConfigLoader:
-    """Pipeline configuration loader with DQ and filter config integration.
+    """Retained convenience facade for YAML loading plus DQ/filter integration.
 
     Loads pipeline configurations from YAML files and resolves DQ config
     through the hierarchical DQConfigLoader system. Filter configs are
-    resolved via FilterConfigLoader during pipeline config loading
-    (see :func:`load_pipeline_config` in ``bioetl.infrastructure.config``).
+    resolved via FilterConfigLoader during pipeline config loading.
 
     Resolution order for DQ config:
     1. If dq_config_file present: load from DQ hierarchy
@@ -60,7 +62,6 @@ class PipelineConfigLoader:
     4. If neither: load defaults from DQ hierarchy
 
     Attributes:
-        _configs_root: Root path to configs/ directory.
         _dq_loader: DQ configuration loader instance.
         _filter_loader: Filter configuration loader instance.
     """
@@ -80,7 +81,6 @@ class PipelineConfigLoader:
             filter_loader: Optional filter config loader. Created automatically if None.
             relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
-        self._configs_root = configs_root
         self._dq_loader = dq_loader or DQConfigLoader(
             configs_root, relaxed_dq=relaxed_dq
         )

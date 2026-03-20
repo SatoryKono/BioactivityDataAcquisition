@@ -19,7 +19,7 @@ def _load_doc_drift_module() -> ModuleType:
 
 
 def _issues_to_text(report: object) -> str:
-    issues = getattr(report, "issues")
+    issues = report.issues
     return "\n".join(
         f"{issue.category}::{issue.doc_file}::{issue.detail}" for issue in issues
     )

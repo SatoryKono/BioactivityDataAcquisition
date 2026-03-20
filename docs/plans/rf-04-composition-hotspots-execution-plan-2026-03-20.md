@@ -3,13 +3,13 @@
 **Date:** 2026-03-20
 **Status:** Partially implemented, core slices verified
 **Primary rationale:** decompose composition hotspots by actual seams and change coupling, not by file length alone
-**Normative constraint:** [`RULES.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md)
+**Normative constraint:** [`RULES.md`](../00-project/RULES.md)
 
 ## 0. Planning Contract
 
 This plan corrects the earlier framing of RF-04.
 
-The repo explicitly warns against treating large files as monoliths by default. In particular, [`RULES.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md) requires delegation analysis before asserting that a hotspot needs decomposition. For RF-04, this means:
+The repo explicitly warns against treating large files as monoliths by default. In particular, [`RULES.md`](../00-project/RULES.md) requires delegation analysis before asserting that a hotspot needs decomposition. For RF-04, this means:
 
 - do not start from `wc -l`;
 - start from repeated assembly patterns, change coupling, and mixed reasons to change;
@@ -26,36 +26,36 @@ Success is:
 
 RF-04 has now completed the intended core path:
 
-- RF-04A completed as an explicit seam-analysis memo in [`rf-04a-composition-seam-map-2026-03-20.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/plans/rf-04a-composition-seam-map-2026-03-20.md)
-- RF-04B completed for [`registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py)
-- RF-04C completed for [`pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py)
-- RF-04D remains intentionally deferred for [`composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py)
+- RF-04A completed as an explicit seam-analysis memo in [`rf-04a-composition-seam-map-2026-03-20.md`](rf-04a-composition-seam-map-2026-03-20.md)
+- RF-04B completed for [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py)
+- RF-04C completed for [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py)
+- RF-04D remains intentionally deferred for [`composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py)
 
 Delivered structural changes:
 
-- bibliographic provider request-profile resolution moved into [`_registration_biblio_profiles.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/_registration_biblio_profiles.py)
-- [`registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py) now stays focused on provider registration and data-source facade wiring
-- record-processor projection/config assembly moved into [`pipeline_record_processor_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_record_processor_builder.py)
-- [`pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py) remains the public facade while delegating the extracted seam
+- bibliographic provider request-profile resolution moved into [`_registration_biblio_profiles.py`](../../src/bioetl/composition/providers/_registration_biblio_profiles.py)
+- [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py) now stays focused on provider registration and data-source facade wiring
+- record-processor projection/config assembly moved into [`pipeline_record_processor_builder.py`](../../src/bioetl/composition/factories/services/pipeline_record_processor_builder.py)
+- [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py) remains the public facade while delegating the extracted seam
 
 Verification completed successfully for implemented slices:
 
 - provider registration tests:
-  - [`test_registration_biblio_profiles.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_biblio_profiles.py)
-  - [`test_registration_data_sources.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_data_sources.py)
-  - [`test_registration_biblio_provider_configs.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_biblio_provider_configs.py)
-  - [`test_registration.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration.py)
+  - [`test_registration_biblio_profiles.py`](../../tests/unit/composition/providers/test_registration_biblio_profiles.py)
+  - [`test_registration_data_sources.py`](../../tests/unit/composition/providers/test_registration_data_sources.py)
+  - [`test_registration_biblio_provider_configs.py`](../../tests/unit/composition/providers/test_registration_biblio_provider_configs.py)
+  - [`test_registration.py`](../../tests/unit/composition/providers/test_registration.py)
 - provider registration architecture guards:
-  - [`test_provider_registry_decomposition.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_provider_registry_decomposition.py)
-  - [`test_compatibility_freeze_guards.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_compatibility_freeze_guards.py)
+  - [`test_provider_registry_decomposition.py`](../../tests/architecture/test_provider_registry_decomposition.py)
+  - [`test_compatibility_freeze_guards.py`](../../tests/architecture/test_compatibility_freeze_guards.py)
 - pipeline builder / composition tests:
-  - [`test_pipeline_record_processor_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_record_processor_builder.py)
-  - [`test_pipeline_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_unit.py)
-  - [`test_pipeline_builder_batch_executor.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py)
-  - [`test_services_factory.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_services_factory.py)
-  - [`test_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_builder_unit.py)
-  - [`test_smoke_composition.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/smoke/test_smoke_composition.py)
-  - [`test_layer_dependencies.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_layer_dependencies.py)
+  - [`test_pipeline_record_processor_builder.py`](../../tests/unit/composition/factories/services/test_pipeline_record_processor_builder.py)
+  - [`test_pipeline_builder_unit.py`](../../tests/unit/composition/factories/services/test_pipeline_builder_unit.py)
+  - [`test_pipeline_builder_batch_executor.py`](../../tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py)
+  - [`test_services_factory.py`](../../tests/unit/composition/factories/services/test_services_factory.py)
+  - [`test_builder_unit.py`](../../tests/unit/composition/factories/services/test_builder_unit.py)
+  - [`test_smoke_composition.py`](../../tests/smoke/test_smoke_composition.py)
+  - [`test_layer_dependencies.py`](../../tests/architecture/test_layer_dependencies.py)
 
 ## 1. Scope Snapshot
 
@@ -63,14 +63,14 @@ Verification completed successfully for implemented slices:
 
 | File | Current role | Initial read |
 | --- | --- | --- |
-| [`src/bioetl/composition/providers/registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py) | bibliographic provider data-source creation and provider config assembly | already partially decomposed; best treated as closeout/hardening slice |
-| [`src/bioetl/composition/factories/services/pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py) | pipeline-bound builder surface for processing, checkpointing, record processor, batch executor | strongest candidate for primary decomposition wave |
-| [`src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) | composite runtime support bundles for execution, runtime management, merge dependencies | may already be sufficiently cohesive; requires evidence before refactor |
+| [`src/bioetl/composition/providers/registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py) | bibliographic provider data-source creation and provider config assembly | already partially decomposed; best treated as closeout/hardening slice |
+| [`src/bioetl/composition/factories/services/pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py) | pipeline-bound builder surface for processing, checkpointing, record processor, batch executor | strongest candidate for primary decomposition wave |
+| [`src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) | composite runtime support bundles for execution, runtime management, merge dependencies | may already be sufficiently cohesive; requires evidence before refactor |
 
 ### Current-state observations
 
 1. `registration_biblio.py` already has one real seam extracted.
-   Adapter binding for bibliographic providers has already been moved to [`_registration_biblio_adapters.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/_registration_biblio_adapters.py). That lowers the value of using it as the main decomposition wave.
+   Adapter binding for bibliographic providers has already been moved to [`_registration_biblio_adapters.py`](../../src/bioetl/composition/providers/_registration_biblio_adapters.py). That lowers the value of using it as the main decomposition wave.
 
 2. `pipeline_builder.py` contains multiple distinct assembly responsibilities.
    Current responsibilities include:
@@ -87,24 +87,24 @@ Verification completed successfully for implemented slices:
 
 ### `registration_biblio.py`
 
-- [`tests/unit/composition/providers/test_registration_data_sources.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_data_sources.py)
-- [`tests/unit/composition/providers/test_registration_biblio_provider_configs.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_biblio_provider_configs.py)
-- [`tests/unit/composition/providers/test_registration.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration.py)
-- [`tests/architecture/test_provider_registry_decomposition.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_provider_registry_decomposition.py)
-- [`tests/architecture/test_compatibility_freeze_guards.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_compatibility_freeze_guards.py)
+- [`tests/unit/composition/providers/test_registration_data_sources.py`](../../tests/unit/composition/providers/test_registration_data_sources.py)
+- [`tests/unit/composition/providers/test_registration_biblio_provider_configs.py`](../../tests/unit/composition/providers/test_registration_biblio_provider_configs.py)
+- [`tests/unit/composition/providers/test_registration.py`](../../tests/unit/composition/providers/test_registration.py)
+- [`tests/architecture/test_provider_registry_decomposition.py`](../../tests/architecture/test_provider_registry_decomposition.py)
+- [`tests/architecture/test_compatibility_freeze_guards.py`](../../tests/architecture/test_compatibility_freeze_guards.py)
 
 ### `pipeline_builder.py`
 
-- [`tests/unit/composition/factories/services/test_pipeline_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_unit.py)
-- [`tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py)
-- [`tests/unit/composition/factories/services/test_services_factory.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_services_factory.py)
-- [`tests/unit/composition/factories/services/test_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_builder_unit.py)
-- [`tests/smoke/test_smoke_composition.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/smoke/test_smoke_composition.py)
+- [`tests/unit/composition/factories/services/test_pipeline_builder_unit.py`](../../tests/unit/composition/factories/services/test_pipeline_builder_unit.py)
+- [`tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py`](../../tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py)
+- [`tests/unit/composition/factories/services/test_services_factory.py`](../../tests/unit/composition/factories/services/test_services_factory.py)
+- [`tests/unit/composition/factories/services/test_builder_unit.py`](../../tests/unit/composition/factories/services/test_builder_unit.py)
+- [`tests/smoke/test_smoke_composition.py`](../../tests/smoke/test_smoke_composition.py)
 
 ### `composite_support_service_builders.py`
 
-- [`tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py)
-- [`tests/architecture/test_composite_cli_runtime_config_boundaries.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_composite_cli_runtime_config_boundaries.py)
+- [`tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py`](../../tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py)
+- [`tests/architecture/test_composite_cli_runtime_config_boundaries.py`](../../tests/architecture/test_composite_cli_runtime_config_boundaries.py)
 
 Current implication:
 - `registration_biblio` and `pipeline_builder` already have enough coverage to support small structural waves.

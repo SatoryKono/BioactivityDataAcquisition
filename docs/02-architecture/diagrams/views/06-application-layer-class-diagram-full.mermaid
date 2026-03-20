@@ -4,7 +4,7 @@
 %% Title: Application Layer Class Diagram
 %% Covers: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution)
 %% Updated: 2026-02-17
-%% Components: PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, LockCoordinator, CheckpointManager
+%% Components: PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, LockCoordinator, CheckpointManagerService
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -69,7 +69,7 @@ classDiagram
             -_transformer: BatchTransformer
             -_writer: BatchWriter
             -_quarantine: QuarantineManager
-            -_metrics: BatchMetricsRecorder
+            -_metrics: BatchMetricsRecorderService
             +process_batch(records) BatchResult
             +process_stream(records) AsyncIterator~BatchResult~
             
@@ -147,7 +147,7 @@ classDiagram
             
         }
 
-        class CheckpointManager {
+        class CheckpointManagerService {
             -_checkpoint: CheckpointPort
             -_logger: LoggerPort
             +load_checkpoint(key) CheckpointState?
@@ -259,7 +259,7 @@ classDiagram
             
         }
 
-        class BatchMetricsRecorder {
+        class BatchMetricsRecorderService {
             -_metrics: MetricsPort
             +record_fetch(count, duration) None
             +record_transform(count, duration) None
@@ -388,7 +388,7 @@ classDiagram
     PipelineExecutor --> RecordProcessor
     RecordProcessor --> BatchTransformer
     RecordProcessor --> QuarantineManager
-    RecordProcessor --> BatchMetricsRecorder
+    RecordProcessor --> BatchMetricsRecorderService
     BatchTransformer --> BaseTransformer
 
     BasePipeline --> PipelineService

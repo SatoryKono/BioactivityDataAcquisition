@@ -108,6 +108,12 @@ ALLOWED_REGISTER_ALL_PROVIDERS_SRC_FILES = frozenset(
         ROOT / "src" / "bioetl" / "composition" / "providers" / "registration.py",
     }
 )
+ALLOWED_DEFAULT_PROVIDER_REGISTRATION_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "composition" / "providers" / "provider_registry.py",
+        ROOT / "src" / "bioetl" / "composition" / "providers" / "decorators.py",
+    }
+)
 ALLOWED_REGISTRATION_BIBLIO_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "providers" / "registration.py",
@@ -952,6 +958,22 @@ def test_register_all_providers_symbol_is_confined_to_provider_loading_modules(
     )
     assert not violations, (
         "register_all_providers leaked beyond provider loading internals:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_register_default_provider_config_symbol_is_confined_to_provider_compat_seams(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Default-registry provider writes must remain confined to compat seams."""
+    violations = _iter_symbol_mentions(
+        source_content_cache,
+        symbol="register_default_provider_config",
+        allowed_files=ALLOWED_DEFAULT_PROVIDER_REGISTRATION_SRC_FILES,
+    )
+    assert not violations, (
+        "register_default_provider_config leaked beyond provider compat seams:\n"
         + "\n".join(violations)
     )
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 
 from scripts.qa.report_duplication_baseline import _parse_pylint_duplicate_output
 from scripts.qa.report_duplication_baseline import _render_markdown

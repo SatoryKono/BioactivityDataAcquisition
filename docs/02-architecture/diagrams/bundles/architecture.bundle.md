@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams Bundle
 
-- Generated: 2026-03-20T17:51:43
+- Generated: 2026-03-20T18:50:13
 - Diagram count: 52
 
 ## Table of Contents
@@ -425,7 +425,7 @@
 ![09-observability-stack](../architecture/png/09-observability-stack.png)
 
 ### Описание
-Диаграмма «Observability Stack» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Logging, Metrics, Tracing architecture.. На схеме отражено примерно 24 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Observability, Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing, Infrastructure: Anomaly Detection. Показательные узлы для быстрого чтения: LoggerPort (Protocol) bind + info/warn/error/debug/exception, MetricsPort (Protocol) observe_histogram + increment_counter set_gauge + close, TracingPort (Protocol) get_tracer + close, DQMonitorPort (Protocol) add_metric + check_quality update_baseline, PipelineObserver logger + metrics + tracing hooks, BatchMetricsRecorder track size/processed/error/quarantine. Примечание: Decomposed into 09a-observability-app, 09b-observability-infra.
+Диаграмма «Observability Stack» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Logging, Metrics, Tracing architecture.. На схеме отражено примерно 24 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Observability, Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing, Infrastructure: Anomaly Detection. Показательные узлы для быстрого чтения: LoggerPort (Protocol) bind + info/warn/error/debug/exception, MetricsPort (Protocol) observe_histogram + increment_counter set_gauge + close, TracingPort (Protocol) get_tracer + close, DQMonitorPort (Protocol) add_metric + check_quality update_baseline, PipelineObserver logger + metrics + tracing hooks, BatchMetricsRecorderService track size/processed/error/quarantine. Примечание: Decomposed into 09a-observability-app, 09b-observability-infra.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -442,7 +442,7 @@
 ![09a-observability-app](../architecture/png/09a-observability-app.png)
 
 ### Описание
-Диаграмма «Observability: Application Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Application-level observability: ports, pipeline observer, batch metrics, adapter metrics.. На схеме отражено примерно 8 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Observability, Adapter-Level Metrics. Показательные узлы для быстрого чтения: LoggerPort (Protocol), MetricsPort (Protocol), TracingPort (Protocol), DQMonitorPort (Protocol), PipelineObserver, BatchMetricsRecorder.
+Диаграмма «Observability: Application Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Application-level observability: ports, pipeline observer, batch metrics, adapter metrics.. На схеме отражено примерно 8 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Observability, Adapter-Level Metrics. Показательные узлы для быстрого чтения: LoggerPort (Protocol), MetricsPort (Protocol), TracingPort (Protocol), DQMonitorPort (Protocol), PipelineObserver, BatchMetricsRecorderService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -816,7 +816,7 @@
 ![15-batch-executor-internals](../architecture/png/15-batch-executor-internals.png)
 
 ### Описание
-Диаграмма «BatchExecutor Internal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the composition of BatchExecutor and its helper components.. На схеме отражено примерно 15 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: BatchExecutor, Composed Helper Components, Data Flow Through Batch, TransformResult, Error Classification. Показательные узлы для быстрого чтения: BatchTracingManager -------- execution spans + start_batch_span() + end_span(), QuarantineManager -------- quarantine failed records + quarantine_record(), CheckpointManager -------- offset checkpoints + load/save/delete, Raw API Records (dict[str, Any]), Silver Records (Delta Lake), TransformResult silver_records + gold_records quarantined_count + errors.
+Диаграмма «BatchExecutor Internal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the composition of BatchExecutor and its helper components.. На схеме отражено примерно 15 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: BatchExecutor, Composed Helper Components, Data Flow Through Batch, TransformResult, Error Classification. Показательные узлы для быстрого чтения: QuarantineManager -------- quarantine failed records + quarantine_record(), CheckpointManagerService -------- offset checkpoints + load/save/delete, Raw API Records (dict[str, Any]), Silver Records (Delta Lake), TransformResult silver_records + gold_records quarantined_count + errors, ErrorClassifier -------- QUARANTINE / RETRY / FATAL.
 
 ### Метаданные
 - Тип: `flowchart`

@@ -22,9 +22,9 @@ sequenceDiagram
     participant Silver as SilverWriter
     participant Gold as GoldWriter
     participant QM as QuarantineManager
-    participant BMR as BatchMetricsRecorder
-    participant BTM as BatchTracingManager
-    participant CM as CheckpointManager
+    participant BMR as BatchMetricsRecorderService
+    participant BTM as BatchTracingManagerService
+    participant CM as CheckpointManagerService
 
     Runner->>BE: execute_batch(batch_num)
     BE->>BTM: start_span("batch")

@@ -8,8 +8,8 @@
 %% @nodes   16
 %% @uniform-group core    nodes=PipelineRunner,PipelineService,BatchExecutor
 %% @uniform-group batch   nodes=BatchTransformer,BatchWriter
-%% @uniform-group infra   nodes=BatchMemoryManager,BatchMetricsRecorder,BatchTracingManager
-%% @uniform-group manager nodes=CheckpointManager,LockCoordinator
+%% @uniform-group infra   nodes=BatchMemoryManagerService,BatchMetricsRecorderService,BatchTracingManagerService
+%% @uniform-group manager nodes=CheckpointManagerService,LockCoordinator
 %% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManager,ShutdownSignal,HeartbeatTask,ErrorClassifier
 
 %% @uniform-width group
@@ -93,7 +93,7 @@ classDiagram
             +... : validation and lock checks
         }
 
-        class BatchMemoryManager {
+        class BatchMemoryManagerService {
             -_memory_monitor
             -_memory_config
             -_initial_batch_size
@@ -103,7 +103,7 @@ classDiagram
             +maybe_recover(current_size)
         }
 
-        class BatchMetricsRecorder {
+        class BatchMetricsRecorderService {
             -_metrics
             -_pipeline_label
             -_run_type_label
@@ -113,7 +113,7 @@ classDiagram
             +track_quarantined_records(error_type, count)
         }
 
-        class BatchTracingManager {
+        class BatchTracingManagerService {
             -_tracer
             -_context
             +TRACER_NAME
@@ -125,7 +125,7 @@ classDiagram
     }
 
     namespace Execution_Managers {
-        class CheckpointManager {
+        class CheckpointManagerService {
             -_checkpoint
             -_logger
             -_pipeline_name
@@ -183,7 +183,7 @@ classDiagram
 
     PipelineRunner *-- BatchExecutor
     PipelineRunner *-- LockCoordinator
-    PipelineRunner *-- CheckpointManager
+    PipelineRunner *-- CheckpointManagerService
     PipelineRunner *-- PreflightService
     PipelineRunner *-- PostrunService
     PipelineRunner *-- ShutdownSignal
@@ -191,11 +191,11 @@ classDiagram
 
     BatchExecutor *-- BatchTransformer
     BatchExecutor *-- BatchWriter
-    BatchExecutor *-- BatchMemoryManager
-    BatchExecutor *-- BatchMetricsRecorder
-    BatchExecutor *-- BatchTracingManager
+    BatchExecutor *-- BatchMemoryManagerService
+    BatchExecutor *-- BatchMetricsRecorderService
+    BatchExecutor *-- BatchTracingManagerService
     BatchExecutor *-- QuarantineManager
-    BatchExecutor *-- CheckpointManager
+    BatchExecutor *-- CheckpointManagerService
 
     BatchTransformer --> ErrorClassifier
     BatchWriter --> ErrorClassifier
@@ -207,10 +207,10 @@ classDiagram
     style BatchExecutor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style BatchTransformer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style BatchWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style BatchMemoryManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BatchMetricsRecorder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BatchTracingManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style CheckpointManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchMemoryManagerService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchMetricsRecorderService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchTracingManagerService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CheckpointManagerService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style LockCoordinator fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PreflightService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PostrunService fill:#eff6ff,stroke:#2563eb,stroke-width:2px

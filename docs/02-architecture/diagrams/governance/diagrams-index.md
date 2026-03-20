@@ -3,7 +3,7 @@
 *Updated: 2026-03-19*
 
 > **Canonical root:** [docs/02-architecture/diagrams/](../README.md)
-> **Policy:** [POL-LLM-DIAGRAMS-001](../governance/policy.md)
+> **Diagram governance:** [ADR-040](../../decisions/ADR-040-diagram-governance.md)
 > **ADR:** [ADR-040](../../decisions/ADR-040-diagram-governance.md)
 
 ## Repository Layout

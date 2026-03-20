@@ -13,7 +13,7 @@ from bioetl.composition.providers._models import (
     ProviderConfig,
 )
 from bioetl.composition.providers.provider_registry import (
-    ProviderRegistry,
+    register_default_provider_config,
 )
 
 if TYPE_CHECKING:
@@ -73,7 +73,9 @@ def _register_provider_class(
         default_kwargs=default_kwargs,
         custom_creator=custom_creator,
     )
-    ProviderRegistry.register(name, config)
+    # Decorators remain the sanctioned import-time compatibility seam for
+    # populating the lazy default registry.
+    register_default_provider_config(name, config)
     cls.__provider_name__ = name  # type: ignore[attr-defined]
 
 

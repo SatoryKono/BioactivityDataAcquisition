@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import partial
 from typing import TYPE_CHECKING, Any
+
 from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
 )
@@ -12,6 +13,7 @@ from bioetl.composition.providers._config_helpers import (
     _get_batch_size_from_config,
     _get_rate_limit_from_config,
 )
+from bioetl.composition.providers._models import HttpConfig, ProviderConfig
 from bioetl.composition.providers._registration_biblio_adapters import (
     _build_openalex_adapter_from_settings,
     _build_pubmed_adapter_from_settings,
@@ -21,7 +23,6 @@ from bioetl.composition.providers._registration_biblio_profiles import (
     _resolve_pubmed_request_profile,
     _resolve_semanticscholar_request_profile,
 )
-from bioetl.composition.providers._models import HttpConfig, ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
     create_provider_assembly_support,

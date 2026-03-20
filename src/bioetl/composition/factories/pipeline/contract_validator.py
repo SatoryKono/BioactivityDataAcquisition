@@ -1,12 +1,8 @@
-"""Pipeline contract validation.
-
-Validates that pipeline contract policy keys exist in Silver and Gold schemas.
-Extracted from pipeline_factories.py for LOC compliance.
-"""
+"""Assembly wrapper for pipeline contract preflight and factory creation."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Any, Protocol, cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
@@ -16,20 +12,21 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PipelineFactoryConfig,
 )
 from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.domain.types import GoldSchemaType
+from bioetl.infrastructure.config.contract_policy_validation import (
+    resolve_silver_columns as _resolve_silver_columns_impl,
+)
+from bioetl.infrastructure.config.contract_policy_validation import (
+    schema_columns as _schema_columns_impl,
+)
+from bioetl.infrastructure.config.contract_policy_validation import (
+    validate_pipeline_contract_policy as _validate_pipeline_contract_policy_impl,
+)
 from bioetl.infrastructure.config import load_pipeline_contract_policy
-
-if TYPE_CHECKING:
-    from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceCreatorProtocol,
-    )
-    from bioetl.composition.factories.pipeline.assembler import (
-        GenericPipelineFactory,
-    )
-    from bioetl.domain.types import GoldSchemaType
 
 
 class _SchemaBuilder(Protocol):
-    """Protocol for schema classes exposing ``to_schema``."""
+    """Compatibility protocol retained for nearby composition assembly helpers."""
 
     @classmethod
     def to_schema(cls) -> object:
@@ -37,71 +34,40 @@ class _SchemaBuilder(Protocol):
         ...
 
 
-class _ResolvedSchema(Protocol):
-    """Protocol for resolved schema objects exposing columns mapping."""
-
-    columns: dict[str, object]
-
-
 def _schema_columns(
     schema_class: object,
 ) -> set[str]:
-    """Extract column names from a Pandera DataFrameModel class."""
-    if not hasattr(schema_class, "to_schema"):
-        raise ValueError(f"Schema {schema_class!r} does not expose to_schema()")
-    try:
-        schema_builder = cast("_SchemaBuilder", schema_class)
-        schema = cast(_ResolvedSchema, schema_builder.to_schema())
-    except (
-        AttributeError,
-        TypeError,
-        ValueError,
-        RuntimeError,
-        ImportError,
-    ) as exc:  # pragma: no cover - defensive
-        raise ValueError(f"Failed to materialize schema {schema_class}: {exc}") from exc
-    return set(schema.columns.keys())
+    """Compatibility wrapper over canonical schema-column extraction helper."""
+    return _schema_columns_impl(schema_class)
 
 
 def _resolve_silver_columns(config: PipelineFactoryConfig) -> set[str]:
-    """Resolve Silver column names from config's schema sources."""
-    if config.pandera_silver_schema is not None:
-        return _schema_columns(config.pandera_silver_schema)
-    if config.silver_schema is not None:
-        return set(config.silver_schema.names)
-    raise ValueError(
-        f"No Silver schema available for {config.provider}/{config.entity_type}"
+    """Compatibility wrapper over canonical Silver schema resolution helper."""
+    return _resolve_silver_columns_impl(
+        provider=config.provider,
+        entity_type=config.entity_type,
+        pandera_silver_schema=config.pandera_silver_schema,
+        silver_schema=config.silver_schema,
     )
 
 
 def _validate_contract_policy(config: PipelineFactoryConfig) -> None:
-    """Preflight check that policy keys exist in Silver and Gold contracts."""
-    policy = load_pipeline_contract_policy(config.provider, config.entity_type)
-
-    silver_columns = _resolve_silver_columns(config)
-    gold_columns = _schema_columns(config.gold_schema)
-
-    required_keys = set(policy.primary_key) | set(policy.merge_keys)
-    missing_in_silver = sorted(required_keys - silver_columns)
-    missing_in_gold = sorted(required_keys - gold_columns)
-
-    details: list[str] = []
-    if missing_in_silver:
-        details.append(f"silver missing {missing_in_silver}")
-    if missing_in_gold:
-        details.append(f"gold missing {missing_in_gold}")
-    if details:
-        raise ValueError(
-            f"Invalid contract policy for {config.provider}/{config.entity_type}: "
-            + ", ".join(details)
-        )
+    """Assembly-scoped wrapper over canonical contract-policy validation."""
+    _validate_pipeline_contract_policy_impl(
+        provider=config.provider,
+        entity_type=config.entity_type,
+        pandera_silver_schema=config.pandera_silver_schema,
+        silver_schema=config.silver_schema,
+        gold_schema=config.gold_schema,
+        load_policy=load_pipeline_contract_policy,
+    )
 
 
 def create_factory(
     config: PipelineFactoryConfig,
     *,
     provider_registry: ProviderRegistry | None = None,
-) -> GenericPipelineFactory[GenericPipeline]:
+) -> Any:
     """Create a GenericPipelineFactory from configuration.
 
     Args:
@@ -116,12 +82,14 @@ def create_factory(
     )
 
     # Resolve data source creator: use data_source_provider override if set
-    data_source_creator: DataSourceCreatorProtocol | None = None
-    if config.data_source_provider:
-        data_source_creator = get_data_source_creator(
+    data_source_creator = (
+        get_data_source_creator(
             config.data_source_provider,
             provider_registry=provider_registry,
         )
+        if config.data_source_provider
+        else None
+    )
 
     return GenericPipelineFactory(
         pipeline_name=config.pipeline_name,

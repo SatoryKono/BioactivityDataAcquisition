@@ -32,7 +32,7 @@ sequenceDiagram
     participant Processor as RecordProcessor
     participant Writers as Bronze/Silver/Gold Writers
     participant Postrun as PostrunService
-    participant Checkpoint as CheckpointManager
+    participant Checkpoint as CheckpointManagerService
 
     CLI->>Bootstrap: run(pipeline_name, config)
     Bootstrap->>Runner: create(services, config)

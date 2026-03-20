@@ -21,7 +21,7 @@ classDiagram
         -_dependency_coordinator: DependencyCoordinator
         -_coordinator: EnrichmentCoordinator
         -_merger: MergeService
-        -_checkpoint_manager: CompositeCheckpointManager
+        -_checkpoint_manager: CompositeCheckpointService
         -_logger: LoggerPort
         -_lock: LockPort
         -_fsm: FSMStateHelper
@@ -211,7 +211,7 @@ classDiagram
         
     }
 
-    class CompositeCheckpointManager {
+    class CompositeCheckpointService {
         -_checkpoint_dir: Path
         -_logger: LoggerPort
         +save(state) None
@@ -344,7 +344,7 @@ classDiagram
     CompositePipelineRunner --> DependencyCoordinator : run dependencies
     CompositePipelineRunner --> EnrichmentCoordinator : fan-out enrichers
     CompositePipelineRunner --> MergeService : merge → Gold
-    CompositePipelineRunner --> CompositeCheckpointManager : checkpoint/resume
+    CompositePipelineRunner --> CompositeCheckpointService : checkpoint/resume
     CompositePipelineRunner --> CompositePreflightValidator : pre-run validation
     CompositePipelineRunner ..> CompositeResult : produces
     FSMStateHelper --> CompositePipelineState : manages

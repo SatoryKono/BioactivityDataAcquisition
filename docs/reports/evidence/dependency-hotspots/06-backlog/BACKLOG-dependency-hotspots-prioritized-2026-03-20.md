@@ -25,9 +25,9 @@ This backlog turns the current hotspot evidence into an execution-oriented queue
 Freeze the prioritization baseline before code movement starts.
 
 **Scope**
-- Keep [`module-dependency-map.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/generated/module-dependency-map.md) current.
-- Use [`RAW-dependency-hotspot-metrics-2026-03-20.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md) as the baseline snapshot.
-- Carry the wave ordering from [`DEC-HOTSPOT-proposed-decisions-2026-03-20.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/dependency-hotspots/04-decisions/DEC-HOTSPOT-proposed-decisions-2026-03-20.md).
+- Keep [`module-dependency-map.md`](../../../../02-architecture/generated/module-dependency-map.md) current.
+- Use [`RAW-dependency-hotspot-metrics-2026-03-20.md`](../02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md) as the baseline snapshot.
+- Carry the wave ordering from [`DEC-HOTSPOT-proposed-decisions-2026-03-20.md`](../04-decisions/DEC-HOTSPOT-proposed-decisions-2026-03-20.md).
 
 **Definition of done**
 - Baseline metrics are referenced in the implementation issue or branch plan.
@@ -43,13 +43,13 @@ Freeze the prioritization baseline before code movement starts.
 - This is the single most concentrated dense-file package in the current snapshot.
 
 **Target files**
-- [crossref/batch.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/crossref/batch.py)
-- [client_retry_mixin.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/http/client_retry_mixin.py)
-- [health_check_mixin.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/health_check_mixin.py)
-- [fetch_resilience_mixin.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py)
-- [error_handling.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/error_handling.py)
-- [health_monitor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/http/health_monitor.py)
-- [filter_fetch_adapter_mixin.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py)
+- [crossref/batch.py](../../../../../src/bioetl/infrastructure/adapters/crossref/batch.py)
+- [client_retry_mixin.py](../../../../../src/bioetl/infrastructure/adapters/http/client_retry_mixin.py)
+- [health_check_mixin.py](../../../../../src/bioetl/infrastructure/adapters/health_check_mixin.py)
+- [fetch_resilience_mixin.py](../../../../../src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py)
+- [error_handling.py](../../../../../src/bioetl/infrastructure/adapters/error_handling.py)
+- [health_monitor.py](../../../../../src/bioetl/infrastructure/adapters/http/health_monitor.py)
+- [filter_fetch_adapter_mixin.py](../../../../../src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py)
 
 **Execution intent**
 - Split mixin-heavy modules by concern, not mechanically by line count.
@@ -70,11 +70,11 @@ Freeze the prioritization baseline before code movement starts.
 - User-facing orchestration logic still contains overlap hotspots and should not wait until the entire infrastructure backlog is done.
 
 **Target files**
-- [command.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/interfaces/cli/commands/domains/run/command.py)
-- [command_policy.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/interfaces/cli/commands/domains/run/command_policy.py)
-- [silver_statistics_helpers.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/dq/silver_statistics_helpers.py)
-- [date.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/pipelines/pubmed/extractors/date.py)
-- [_comment_facets.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py)
+- [command.py](../../../../../src/bioetl/interfaces/cli/commands/domains/run/command.py)
+- [command_policy.py](../../../../../src/bioetl/interfaces/cli/commands/domains/run/command_policy.py)
+- [silver_statistics_helpers.py](../../../../../src/bioetl/application/services/dq/silver_statistics_helpers.py)
+- [date.py](../../../../../src/bioetl/application/pipelines/pubmed/extractors/date.py)
+- [_comment_facets.py](../../../../../src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py)
 
 **Execution intent**
 - Decompose CLI run command modules by parsing/policy/presentation seams.
@@ -95,11 +95,11 @@ Freeze the prioritization baseline before code movement starts.
 - They still contribute to dense infrastructure maintenance burden.
 
 **Target files**
-- [io_delta_mixins.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/storage/gold/io_delta_mixins.py)
-- [base_delta_writer.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/storage/base_delta_writer.py)
-- [_base.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/config/_base.py)
-- [_governance_validation.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/quality/_governance_validation.py)
-- [silver_chembl_core.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/schemas/silver_chembl_core.py)
+- [io_delta_mixins.py](../../../../../src/bioetl/infrastructure/storage/gold/io_delta_mixins.py)
+- [base_delta_writer.py](../../../../../src/bioetl/infrastructure/storage/base_delta_writer.py)
+- [_base.py](../../../../../src/bioetl/infrastructure/config/_base.py)
+- [_governance_validation.py](../../../../../src/bioetl/infrastructure/quality/_governance_validation.py)
+- [silver_chembl_core.py](../../../../../src/bioetl/infrastructure/schemas/silver_chembl_core.py)
 
 **Execution intent**
 - Separate I/O, policy, and assembly concerns in storage/config modules.
@@ -120,12 +120,12 @@ Freeze the prioritization baseline before code movement starts.
 - They are the best candidates for the second-wave inventory after overlap reduction starts.
 
 **Target files**
-- [silver_publications.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/schemas/silver_publications.py)
-- [_filtered_data_source_mixins.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/_filtered_data_source_mixins.py)
-- [configs.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/pipeline/configs.py)
-- [blocks.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/pipelines/pubmed/blocks.py)
-- [transformer_business_data_mixin.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py)
-- [runner.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/runner.py)
+- [silver_publications.py](../../../../../src/bioetl/infrastructure/schemas/silver_publications.py)
+- [_filtered_data_source_mixins.py](../../../../../src/bioetl/application/core/_filtered_data_source_mixins.py)
+- [configs.py](../../../../../src/bioetl/composition/factories/pipeline/configs.py)
+- [blocks.py](../../../../../src/bioetl/application/pipelines/pubmed/blocks.py)
+- [transformer_business_data_mixin.py](../../../../../src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py)
+- [runner.py](../../../../../src/bioetl/application/core/runner.py)
 
 **Execution intent**
 - Review these modules for packed responsibilities, not just file size.
@@ -153,7 +153,7 @@ Freeze the prioritization baseline before code movement starts.
 After each wave:
 
 1. Recompute the hotspot snapshot against the same thresholds.
-2. Recheck [`module-dependency-map.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/generated/module-dependency-map.md) to ensure clean layer policy remains intact.
+2. Recheck [`module-dependency-map.md`](../../../../02-architecture/generated/module-dependency-map.md) to ensure clean layer policy remains intact.
 3. Compare package-level hotspot concentration, especially for:
    - `src/bioetl/infrastructure/adapters`
    - `src/bioetl/interfaces/cli`

@@ -200,3 +200,6 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 /data/миграция
 /docs/02-architecture/diagrams/mermaid/png
 *.png
+/docs/reports
+/g-drive05_AIgithubBioactivityDataAcquisition2.pytest-tmpinfra-integ/test_list_all_multiple0/checkpoints/alpha.json
+/g-drive05_AIgithubBioactivityDataAcquisition2.pytest-tmpinfra-integ

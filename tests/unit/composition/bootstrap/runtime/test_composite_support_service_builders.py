@@ -38,25 +38,25 @@ def _make_config(
 
 @pytest.mark.unit
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.EnrichmentCoordinatorService"
+    "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.EnrichmentCoordinatorService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.DependencyCoordinatorService"
+    "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.DependencyCoordinatorService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.DependencyResultService"
+    "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.DependencyResultService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.DependencyProgressService"
+    "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.DependencyProgressService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.create_chained_key_resolver"
+    "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.create_chained_key_resolver"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.create_seed_key_resolver"
+    "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.create_seed_key_resolver"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.KeyExtractorService"
+    "bioetl.composition.bootstrap.runtime.composite_execution_support_builder.KeyExtractorService"
 )
 def test_build_execution_support_services_wires_expected_collaborators(
     mock_key_extractor_cls: MagicMock,
@@ -102,13 +102,13 @@ def test_build_execution_support_services_wires_expected_collaborators(
 
 @pytest.mark.unit
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.FSMStateHelperService"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.bootstrap_quarantine_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_port"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
 )
 def test_build_runtime_management_services_enables_quarantine_when_configured(
     mock_checkpoint_port: MagicMock,
@@ -158,13 +158,13 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
 
 @pytest.mark.unit
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.FSMStateHelperService"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.bootstrap_quarantine_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_port"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
 )
 def test_build_runtime_management_services_skips_quarantine_when_disabled(
     mock_checkpoint_port: MagicMock,
@@ -191,37 +191,37 @@ def test_build_runtime_management_services_skips_quarantine_when_disabled(
 
 @pytest.mark.unit
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.JoinPlannerService"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.JoinPlannerService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.DependencyJoinerService"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.DependencyJoinerService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.PolarsJoinAdapter"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.PolarsJoinAdapter"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.JoinKeyResolverService"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.JoinKeyResolverService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.ConflictResolverService"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ConflictResolverService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.CoalescePolicyService"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.CoalescePolicyService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.ColumnPriorityOrderer"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ColumnPriorityOrderer"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.ColumnOrderer"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ColumnOrderer"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.ColumnRenamer"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ColumnRenamer"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.EnricherAggregator"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.EnricherAggregator"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.EnricherDeduplicatorService"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.EnricherDeduplicatorService"
 )
 def test_build_merge_dependencies_wires_join_adapter_and_planner(
     mock_deduplicator_cls: MagicMock,
