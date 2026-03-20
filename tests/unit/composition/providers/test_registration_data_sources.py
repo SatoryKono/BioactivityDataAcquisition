@@ -76,6 +76,62 @@ class TestPubChemCreatorGuard:
         with pytest.raises(ValueError, match="requires logger"):
             _create_pubchem_adapter(logger=None)
 
+    @patch("bioetl.composition.providers.registration_bio.PubChemAdapter")
+    @patch(
+        "bioetl.composition.providers.registration_bio."
+        "AdapterHelpersFactory.create_sync_helpers"
+    )
+    def test_pubchem_adapter_injects_sync_helpers_from_composition(
+        self,
+        mock_create_sync_helpers: MagicMock,
+        mock_pubchem_adapter_cls: MagicMock,
+    ) -> None:
+        mock_helpers = MagicMock()
+        mock_helpers.error_handler = MagicMock(name="error_handler")
+        mock_helpers.request_collector = MagicMock(name="request_collector")
+        mock_create_sync_helpers.return_value = mock_helpers
+        mock_adapter = MagicMock()
+        mock_pubchem_adapter_cls.return_value = mock_adapter
+
+        logger = MagicMock()
+        metrics = MagicMock()
+
+        result = _create_pubchem_adapter(logger=logger, metrics=metrics)
+
+        mock_create_sync_helpers.assert_called_once_with(
+            provider="pubchem",
+            logger=logger,
+            metrics=metrics,
+        )
+        call_kwargs = mock_pubchem_adapter_cls.call_args.kwargs
+        assert call_kwargs["error_handler"] is mock_helpers.error_handler
+        assert call_kwargs["request_collector"] is mock_helpers.request_collector
+        assert result is mock_adapter
+
+    @patch("bioetl.composition.providers.registration_bio.PubChemAdapter")
+    @patch(
+        "bioetl.composition.providers.registration_bio."
+        "AdapterHelpersFactory.create_sync_helpers"
+    )
+    def test_pubchem_adapter_preserves_explicit_helper_overrides(
+        self,
+        mock_create_sync_helpers: MagicMock,
+        mock_pubchem_adapter_cls: MagicMock,
+    ) -> None:
+        explicit_error_handler = MagicMock(name="explicit_error_handler")
+        explicit_request_collector = MagicMock(name="explicit_request_collector")
+
+        _create_pubchem_adapter(
+            logger=MagicMock(),
+            error_handler=explicit_error_handler,
+            request_collector=explicit_request_collector,
+        )
+
+        mock_create_sync_helpers.assert_not_called()
+        call_kwargs = mock_pubchem_adapter_cls.call_args.kwargs
+        assert call_kwargs["error_handler"] is explicit_error_handler
+        assert call_kwargs["request_collector"] is explicit_request_collector
+
 
 @pytest.mark.unit
 class TestCrossRefAndOpenAlexCreators:
