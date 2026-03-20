@@ -1,7 +1,4 @@
-"""Data source creators for bio providers: ChEMBL, PubChem, UniProt, IDMapping.
-
-Extracted from registration.py for LOC compliance.
-"""
+"""Data source creators for bio providers: ChEMBL, PubChem, UniProt, IDMapping."""
 
 from __future__ import annotations
 
@@ -42,15 +39,8 @@ from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import (
-        DataSourcePort,
-        ErrorHandlerPort,
-        LoggerPort,
-        MetricsPort,
-    )
-    from bioetl.infrastructure.adapters.common.api_request_collector import (
-        APIRequestCollector,
-    )
+    from bioetl.domain.ports import DataSourcePort, ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -180,11 +170,7 @@ def _create_pubchem_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create PubChem data source with optional filtering.
-
-    PubChem adapter dependencies are assembled in `_create_pubchem_adapter`
-    (Composition Root), then optionally wrapped with input filtering.
-    """
+    """Create PubChem data source with composition-owned adapter wiring."""
     data_source = _create_pubchem_adapter(
         logger=logger,
         settings=settings,
