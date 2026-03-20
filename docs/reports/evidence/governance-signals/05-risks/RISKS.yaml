@@ -1,0 +1,59 @@
+- id: RISK-governance-c901-refactor-friction
+  risk: "A strict zero-new-debt C901 baseline may slow refactors that temporarily increase branching before decomposition is complete."
+  linked_decision: DEC-governance-c901-zero-new-debt-baseline
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Large orchestration refactors touch high-branching functions in one wave."
+    - "Teams optimize for delivery speed and postpone helper extraction."
+  mitigations:
+    - "Stage refactors into behavior-preserving decomposition steps with characterization tests."
+    - "Review high-branching changes earlier to catch complexity creep before final integration."
+
+- id: RISK-governance-duplication-noise-overload
+  risk: "Expanding duplication reporting to composition and application may produce enough noisy R0801 output to reduce trust in the signal."
+  linked_decision: DEC-governance-duplication-expand-report-only-baseline
+  severity: medium
+  likelihood: high
+  triggers:
+    - "Facade modules, export barrels, and compatibility seams dominate the first report."
+    - "No normalization rules exist for tolerated duplicate classes."
+  mitigations:
+    - "Start in report-only mode and label known tolerated duplication classes."
+    - "Scope initial review to top duplicate clusters rather than treating all R0801 hits equally."
+
+- id: RISK-governance-duplication-check-runtime
+  risk: "Adding composition and application duplication scans to regular governance may increase local or CI check time."
+  linked_decision: DEC-governance-duplication-expand-report-only-baseline
+  severity: low
+  likelihood: medium
+  triggers:
+    - "Duplication scans are added to default workflows without timeout or scoping."
+    - "The application layer continues to grow faster than check cadence is adjusted."
+  mitigations:
+    - "Run report-only duplication on scheduled or targeted workflows first."
+    - "Benchmark scan duration before promoting it into default blocking quality paths."
+
+- id: RISK-governance-metric-semantics-confusion
+  risk: "Maintainers may misread a green file-size ratchet plus a red raw hotspot report as contradictory rather than complementary."
+  linked_decision: DEC-governance-file-size-report-dual-track
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Dashboards present exemption-state and raw hotspot inventory without clear labels."
+    - "PR discussions use 'file-size debt' to mean two different things."
+  mitigations:
+    - "Name the metrics explicitly as 'exemption debt' and 'hotspot inventory'."
+    - "Add a short interpretation note wherever the dual-track metrics are reported."
+
+- id: RISK-governance-misprioritized-hotspots
+  risk: "New named hotspot programs may target visible but low-leverage seams while missing the highest maintenance pressure areas."
+  linked_decision: DEC-governance-expand-named-hotspot-programs-after-calibration
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Hotspot candidates are selected only by file size or duplication count."
+    - "No calibration compares pressure signals against actual maintenance cost."
+  mitigations:
+    - "Use one calibration wave before creating new named hotspot budgets."
+    - "Compare candidate seams across multiple signals such as size, duplication, and architecture pressure before selecting them."

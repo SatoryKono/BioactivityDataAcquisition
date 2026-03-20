@@ -1348,7 +1348,7 @@ def test_run_prepared_request_async_uses_compat_runtime_path():
     import asyncio
 
     from bioetl.application.services import PipelineRunResult, RunResult
-    from bioetl.application.services.cli_run_orchestration_service import (
+    from bioetl.application.services.cli_run_orchestration_models import (
         RunExecutionRequest,
     )
     from bioetl.interfaces.cli.commands import run as run_module

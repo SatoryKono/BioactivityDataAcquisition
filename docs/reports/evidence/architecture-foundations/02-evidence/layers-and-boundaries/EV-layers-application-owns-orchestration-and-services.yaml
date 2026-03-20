@@ -1,0 +1,19 @@
+id: EV-layers-application-owns-orchestration-and-services
+pillar: layers-and-boundaries
+source:
+  type: internal-doc
+  ref: "README.md:35-43; README.md:451-454; AGENTS.md:56-60; tests/architecture/test_di_runtime_inline_construction.py:1-16"
+  retrieved_at: 2026-03-20
+claim: "The `application` layer is the orchestration layer: active docs place `PipelineRunner`, executors, transformers, and lifecycle-style services there, while DI-hardening tests assume application code consumes injected dependencies instead of assembling them."
+quote: "`application/      # Pipeline orchestration & services`"
+confidence: 0.94
+assumptions:
+  - "The current project structure still maps `PipelineRunner`, executors, and service orchestration into the application layer rather than scattering them into composition."
+  - "The inline-construction guard is a meaningful proxy for the intended application-layer responsibility boundary."
+notes: "This separates use-case orchestration from both the pure domain and the object-graph assembly work of composition."
+tags:
+  - layers
+  - application
+  - orchestration
+  - services
+  - transformers

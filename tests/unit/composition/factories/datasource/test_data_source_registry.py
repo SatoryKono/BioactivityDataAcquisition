@@ -15,6 +15,10 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     get_data_source_creator,
 )
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
+from bioetl.composition.providers.provider_registry import (
+    ProviderConfig,
+    create_provider_registry,
+)
 
 
 class TestDataSourceRegistry:
@@ -133,6 +137,35 @@ class TestCanonicalDataSourceCreator:
 
         with pytest.raises(KeyError, match="Unknown provider"):
             get_data_source_creator("unknown_provider")
+
+    def test_get_data_source_creator_uses_explicit_registry_instance(self):
+        """Explicit registry path should not depend on the default singleton."""
+        isolated = create_provider_registry()
+        expected = MagicMock(name="data_source")
+        creator = MagicMock(return_value=expected)
+        isolated.register(
+            "isolated_provider",
+            ProviderConfig(
+                adapter_class=MagicMock(),
+                requires_http_client=False,
+                requires_logger=False,
+                data_source_creator=creator,
+            ),
+        )
+
+        bound_creator = get_data_source_creator(
+            "isolated_provider",
+            provider_registry=isolated,
+        )
+
+        result = bound_creator(
+            settings=MagicMock(),
+            pipeline_config=MagicMock(),
+            logger=MagicMock(),
+        )
+
+        assert result is expected
+        creator.assert_called_once()
 
 
 class TestDataSourceCreatorProtocol:

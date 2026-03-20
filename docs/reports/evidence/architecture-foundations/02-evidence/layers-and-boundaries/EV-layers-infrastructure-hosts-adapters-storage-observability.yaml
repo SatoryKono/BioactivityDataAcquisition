@@ -1,0 +1,19 @@
+id: EV-layers-infrastructure-hosts-adapters-storage-observability
+pillar: layers-and-boundaries
+source:
+  type: internal-doc
+  ref: "README.md:44-49; README.md:467-471; docs/02-architecture/system-context.md:115-126; AGENTS.md:28-30"
+  retrieved_at: 2026-03-20
+claim: "The `infrastructure` layer is the implementation side of the architecture: active docs place provider adapters, Bronze/Silver/Gold writers, locking, metrics, tracing, and logging there as the concrete implementations behind domain-level ports."
+quote: "`infrastructure/   # Adapters (API clients, Delta Lake, Storage)`"
+confidence: 0.96
+assumptions:
+  - "The current directory layout still reflects the runtime implementation boundary rather than transitional leftovers."
+  - "The system-context document's Ports & Adapters description is aligned with the active source layout."
+notes: "This evidence is the adapter-side counterpart to the domain-port evidence and explains why infrastructure is allowed to depend on domain types while the reverse is forbidden."
+tags:
+  - layers
+  - infrastructure
+  - adapters
+  - storage
+  - observability

@@ -23,9 +23,27 @@ import pytest
 import yaml
 
 from bioetl.domain.constants import META_FIELDS
+from bioetl.infrastructure.config.config_ci_contract import (
+    COMPOSITE_ALLOWED_KEYS,
+    CONTRACT_ALLOWED_KEYS,
+    ENTITY_ALLOWED_KEYS,
+    FILTER_ALLOWED_KEYS,
+    LEGACY_ENTITY_NAMES,
+    LEGACY_PATH_FRAGMENTS,
+    PIPELINE_ALLOWED_KEYS,
+    PROVIDER_ALLOWED_KEYS,
+    PROVIDER_AUTH_REQUIREMENTS,
+    QUALITY_ALLOWED_KEYS,
+    REQUIRED_ENTITY_SECTIONS,
+    RETIRED_PIPELINE_KEYS,
+    TRANSITIONAL_PIPELINE_KEYS,
+    VALID_LOADING_STRATEGIES,
+)
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
+from scripts.schema import check_config_invariants as invariant_script
+from scripts.schema.validate_pipeline_configs import _canonical_script
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -51,89 +69,6 @@ KNOWN_PROVIDERS: set[str] = {
     "uniprot",
     "composite",
 }
-
-# Providers that require authentication credentials in configs/providers/
-# Maps provider -> list of required env-var keys (at least one must appear)
-PROVIDER_AUTH_REQUIREMENTS: dict[str, list[str]] = {
-    "openalex": ["mailto"],
-    "crossref": ["mailto"],
-    "pubmed": ["api_key_env", "email_env"],
-}
-
-VALID_LOADING_STRATEGIES: set[str] = {"full_scan_only"}
-
-# Allowed top-level keys per config category.
-# Derived from PipelineYamlConfig Pydantic model and existing YAML files.
-PIPELINE_ALLOWED_KEYS: set[str] = {
-    "pipeline_name",
-    "provider",
-    "entity_type",
-    "version",
-    "description",
-    "batch_size",
-    "filter_batch_size",
-    "checkpoint_interval",
-    "business_primary_keys",
-    "technical_primary_key",
-    "silver_table",
-    "gold_table",
-    "loading_strategy",
-    "source",
-    "sink",
-    "dq_config_file",
-    "dq_overrides",
-    "circuit_breaker",
-    "filter_config_file",
-    "filter_rules",
-    "column_groups",
-    "input_filter",
-    "silver_filters",
-    "gold_filters",
-    "maintenance",
-    "transform",
-    "extraction_params",
-    "page_size_override",
-}
-
-ENTITY_ALLOWED_KEYS: set[str] = {
-    "version",
-    "provider",
-    "entity",
-    "pipeline",
-    "schema",
-    "quality",
-    "filters",
-    "contracts",
-    "hash_policy",
-}
-
-COMPOSITE_ALLOWED_KEYS: set[str] = {
-    "composite",
-    "gold_filters",
-    "silver_filters",
-    "filter_config_file",
-    "filter_rules",
-    "maintenance",
-}
-
-PROVIDER_ALLOWED_KEYS: set[str] = {
-    "version",
-    "provider",
-    "source",
-    "quality",
-    "filters",
-    "entities",
-    "entity_notes",
-}
-
-# Legacy entity names that MUST NOT appear in configs (ADR-024).
-LEGACY_ENTITY_NAMES: set[str] = {"document", "document_similarity", "document_term"}
-
-# Legacy path fragments that MUST NOT appear in any YAML value.
-LEGACY_PATH_FRAGMENTS: list[tuple[str, str]] = [
-    ("../../dq/", "../../quality/"),
-    ("../../filter/", "../../filters/"),
-]
 
 SCD2_CANDIDATE_CONFIGS: tuple[Path, ...] = tuple(
     PROJECT_ROOT / relative_path
@@ -320,6 +255,7 @@ class TestConfigFilesExist:
                 missing.append(f"{_rel(pipeline_path)}: missing schema section")
         assert not missing, "\n".join(missing)
 
+
     def test_quality_section_exists(
         self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
     ) -> None:
@@ -364,6 +300,44 @@ class TestConfigFilesExist:
             if not provider_path.exists():
                 missing.append(f"Missing provider config: {_rel(provider_path)}")
         assert not missing, "\n".join(missing)
+
+
+class TestConfigContractSourceOfTruth:
+    """Config CI contract must stay shared across scripts, tests, and wrappers."""
+
+    def test_check_config_invariants_imports_shared_contract(self) -> None:
+        """Pre-commit hook must reuse the shared config contract constants."""
+        assert invariant_script.PIPELINE_ALLOWED_KEYS is PIPELINE_ALLOWED_KEYS
+        assert invariant_script.ENTITY_ALLOWED_KEYS is ENTITY_ALLOWED_KEYS
+        assert invariant_script.COMPOSITE_ALLOWED_KEYS is COMPOSITE_ALLOWED_KEYS
+        assert invariant_script.PROVIDER_ALLOWED_KEYS is PROVIDER_ALLOWED_KEYS
+        assert invariant_script.QUALITY_ALLOWED_KEYS is QUALITY_ALLOWED_KEYS
+        assert invariant_script.FILTER_ALLOWED_KEYS is FILTER_ALLOWED_KEYS
+        assert invariant_script.CONTRACT_ALLOWED_KEYS is CONTRACT_ALLOWED_KEYS
+        assert invariant_script.REQUIRED_ENTITY_SECTIONS is REQUIRED_ENTITY_SECTIONS
+        assert invariant_script.PROVIDER_AUTH_REQUIREMENTS is PROVIDER_AUTH_REQUIREMENTS
+        assert invariant_script.VALID_LOADING_STRATEGIES is VALID_LOADING_STRATEGIES
+
+    def test_retired_pipeline_keys_are_not_part_of_active_ci_contract(self) -> None:
+        """Retired keys must stay rejected by the active CI contract."""
+        overlap = RETIRED_PIPELINE_KEYS & PIPELINE_ALLOWED_KEYS
+        assert not overlap, (
+            "Retired pipeline keys must not remain in PIPELINE_ALLOWED_KEYS: "
+            f"{sorted(overlap)}"
+        )
+
+    def test_transitional_pipeline_keys_stay_explicitly_allowed(self) -> None:
+        """Transitional aliases must remain explicit until the migration ends."""
+        missing = TRANSITIONAL_PIPELINE_KEYS - PIPELINE_ALLOWED_KEYS
+        assert not missing, (
+            "Transitional pipeline keys must stay explicit in the active CI "
+            f"contract until removed intentionally: {sorted(missing)}"
+        )
+
+    def test_validate_configs_wrapper_points_to_existing_canonical_script(self) -> None:
+        """Supported validate-configs wrapper must keep pointing to a real script."""
+        script = _canonical_script()
+        assert script.exists(), f"Canonical validate-configs script missing: {script}"
 
 
 # ---------------------------------------------------------------------------
@@ -441,6 +415,42 @@ class TestNoUnknownKeys:
             f"Allowed: {sorted(PIPELINE_ALLOWED_KEYS)}"
         )
 
+    @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
+    def test_quality_section_keys(self, config_path: Path) -> None:
+        data = _load_yaml(config_path)
+        quality_cfg = data.get("quality")
+        if not isinstance(quality_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing quality section")
+        unknown = set(quality_cfg.keys()) - QUALITY_ALLOWED_KEYS
+        assert not unknown, (
+            f"{_rel(config_path)}: unknown quality section keys: {unknown}. "
+            f"Allowed: {sorted(QUALITY_ALLOWED_KEYS)}"
+        )
+
+    @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
+    def test_filters_section_keys(self, config_path: Path) -> None:
+        data = _load_yaml(config_path)
+        filters_cfg = data.get("filters")
+        if not isinstance(filters_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing filters section")
+        unknown = set(filters_cfg.keys()) - FILTER_ALLOWED_KEYS
+        assert not unknown, (
+            f"{_rel(config_path)}: unknown filters section keys: {unknown}. "
+            f"Allowed: {sorted(FILTER_ALLOWED_KEYS)}"
+        )
+
+    @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
+    def test_contracts_section_keys(self, config_path: Path) -> None:
+        data = _load_yaml(config_path)
+        contracts_cfg = data.get("contracts")
+        if not isinstance(contracts_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing contracts section")
+        unknown = set(contracts_cfg.keys()) - CONTRACT_ALLOWED_KEYS
+        assert not unknown, (
+            f"{_rel(config_path)}: unknown contracts section keys: {unknown}. "
+            f"Allowed: {sorted(CONTRACT_ALLOWED_KEYS)}"
+        )
+
     @pytest.mark.parametrize("config_path", _collect_composite_configs(), ids=_rel)
     def test_composite_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
@@ -457,6 +467,30 @@ class TestNoUnknownKeys:
         assert not unknown, (
             f"{_rel(config_path)}: unknown top-level keys: {unknown}. "
             f"Allowed: {sorted(PROVIDER_ALLOWED_KEYS)}"
+        )
+
+    @pytest.mark.parametrize("config_path", _collect_provider_configs(), ids=_rel)
+    def test_provider_quality_keys(self, config_path: Path) -> None:
+        data = _load_yaml(config_path)
+        quality_cfg = data.get("quality")
+        if not isinstance(quality_cfg, dict):
+            pytest.skip(f"{_rel(config_path)}: provider config has no quality section")
+        unknown = set(quality_cfg.keys()) - QUALITY_ALLOWED_KEYS
+        assert not unknown, (
+            f"{_rel(config_path)}: unknown provider quality keys: {unknown}. "
+            f"Allowed: {sorted(QUALITY_ALLOWED_KEYS)}"
+        )
+
+    @pytest.mark.parametrize("config_path", _collect_provider_configs(), ids=_rel)
+    def test_provider_filters_keys(self, config_path: Path) -> None:
+        data = _load_yaml(config_path)
+        filters_cfg = data.get("filters")
+        if not isinstance(filters_cfg, dict):
+            pytest.skip(f"{_rel(config_path)}: provider config has no filters section")
+        unknown = set(filters_cfg.keys()) - FILTER_ALLOWED_KEYS
+        assert not unknown, (
+            f"{_rel(config_path)}: unknown provider filters keys: {unknown}. "
+            f"Allowed: {sorted(FILTER_ALLOWED_KEYS)}"
         )
 
 

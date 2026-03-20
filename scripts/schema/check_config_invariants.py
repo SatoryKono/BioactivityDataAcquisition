@@ -10,7 +10,7 @@ Checks:
   INV-CFG-006  pipeline_name == {provider}_{entity_type}
 
 Usage:
-    python scripts/check_config_invariants.py [--verbose]
+    python scripts/schema/check_config_invariants.py [--verbose]
 
 Exit codes:
     0 - All invariants pass
@@ -30,122 +30,28 @@ from typing import Any
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+from bioetl.infrastructure.config.config_ci_contract import (
+    COMPOSITE_ALLOWED_KEYS,
+    CONTRACT_ALLOWED_KEYS,
+    ENTITY_ALLOWED_KEYS,
+    FILTER_ALLOWED_KEYS,
+    LEGACY_ENTITY_NAMES,
+    LEGACY_PATH_FRAGMENTS,
+    PIPELINE_ALLOWED_KEYS,
+    PROVIDER_ALLOWED_KEYS,
+    PROVIDER_AUTH_REQUIREMENTS,
+    QUALITY_ALLOWED_KEYS,
+    REQUIRED_ENTITY_SECTIONS,
+    VALID_LOADING_STRATEGIES,
+)
+
 CONFIGS_DIR = PROJECT_ROOT / "configs"
 ENTITIES_DIR = CONFIGS_DIR / "entities"
 COMPOSITES_DIR = CONFIGS_DIR / "composites"
 PROVIDERS_DIR = CONFIGS_DIR / "providers"
-
-# --- Legacy names (ADR-024) ---
-LEGACY_ENTITY_NAMES = {"document", "document_similarity", "document_term"}
-LEGACY_PATH_FRAGMENTS = [
-    ("../../dq/", "../../quality/"),
-    ("../../filter/", "../../filters/"),
-]
-
-# --- Auth requirements ---
-PROVIDER_AUTH_REQUIREMENTS: dict[str, list[str]] = {
-    "openalex": ["mailto"],
-    "crossref": ["mailto"],
-    "pubmed": ["api_key_env", "email_env"],
-}
-
-VALID_LOADING_STRATEGIES = {"full_scan_only"}
-
-# --- Allowed keys ---
-PIPELINE_ALLOWED_KEYS = {
-    "pipeline_name",
-    "provider",
-    "entity_type",
-    "version",
-    "description",
-    "batch_size",
-    "filter_batch_size",
-    "checkpoint_interval",
-    "business_primary_keys",
-    "technical_primary_key",
-    "silver_table",
-    "gold_table",
-    "loading_strategy",
-    "source",
-    "sink",
-    "dq_config_file",
-    "dq_overrides",
-    "circuit_breaker",
-    "filter_config_file",
-    "filter_rules",
-    "column_groups_file",
-    "data_schema_file",
-    "column_groups",
-    "input_filter",
-    "silver_filters",
-    "gold_filters",
-    "maintenance",
-    "transform",
-    "extraction_params",
-    "page_size_override",
-    "schema_file",
-}
-ENTITY_ALLOWED_KEYS = {
-    "version",
-    "provider",
-    "entity",
-    "pipeline",
-    "schema",
-    "quality",
-    "filters",
-    "contracts",
-    "hash_policy",
-}
-COMPOSITE_ALLOWED_KEYS = {
-    "composite",
-    "gold_filters",
-    "silver_filters",
-    "filter_config_file",
-    "filter_rules",
-    "maintenance",
-}
-PROVIDER_ALLOWED_KEYS = {
-    "version",
-    "provider",
-    "source",
-    "quality",
-    "filters",
-    "entities",
-    "entity_notes",
-}
-QUALITY_ALLOWED_KEYS = {
-    "version",
-    "provider",
-    "entity",
-    "thresholds",
-    "strict_validation",
-    "invalid_record_policy",
-    "field_validations",
-    "cross_field_validations",
-    "conditional_validations",
-    "report",
-    "required_fields",
-    "key_nullability",
-}
-FILTER_ALLOWED_KEYS = {
-    "version",
-    "provider",
-    "entity",
-    "input_filter",
-    "silver_filters",
-    "gold_filters",
-    "extraction_params",
-    "batch_size",
-    "page_size",
-}
-CONTRACT_ALLOWED_KEYS = {
-    "primary_key",
-    "merge_keys",
-    "rename_map",
-    "hash_include",
-    "hash_exclude",
-}
-REQUIRED_ENTITY_SECTIONS = {"pipeline", "schema", "quality", "filters", "contracts"}
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:

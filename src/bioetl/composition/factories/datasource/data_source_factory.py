@@ -10,6 +10,8 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 from bioetl.composition.providers.provider_registry import (
     DataSourceCreatorProtocol,
     ProviderRegistry,
+    ensure_provider_registry_ready,
+    get_default_provider_registry,
 )
 from bioetl.domain.ports import DataSourcePort
 
@@ -21,9 +23,25 @@ if TYPE_CHECKING:
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
 
-def get_data_source_creator(provider: str) -> DataSourceCreatorProtocol:
+def _resolve_provider_registry(
+    provider_registry: ProviderRegistry | None = None,
+) -> ProviderRegistry:
+    """Resolve and initialize the registry used for provider-bound creators."""
+    return ensure_provider_registry_ready(
+        provider_registry
+        if provider_registry is not None
+        else get_default_provider_registry()
+    )
+
+
+def get_data_source_creator(
+    provider: str,
+    *,
+    provider_registry: ProviderRegistry | None = None,
+) -> DataSourceCreatorProtocol:
     """Return the canonical provider-bound data-source creator callback."""
-    return ProviderRegistry.build_data_source_creator(provider)
+    registry = _resolve_provider_registry(provider_registry)
+    return registry.build_data_source_creator(provider)
 
 
 class DataSourceRegistry:
@@ -35,15 +53,27 @@ class DataSourceRegistry:
     _creators: ClassVar[dict[str, DataSourceCreatorProtocol]] = {}
 
     @classmethod
-    def get(cls, provider: str) -> DataSourceCreatorProtocol:
+    def get(
+        cls,
+        provider: str,
+        *,
+        provider_registry: ProviderRegistry | None = None,
+    ) -> DataSourceCreatorProtocol:
         """Get creator function for provider via the canonical creator path."""
-        return get_data_source_creator(provider)
+        return get_data_source_creator(
+            provider,
+            provider_registry=provider_registry,
+        )
 
     @classmethod
-    def list_providers(cls) -> list[str]:
+    def list_providers(
+        cls,
+        *,
+        provider_registry: ProviderRegistry | None = None,
+    ) -> list[str]:
         """List providers that expose data-source creators."""
-        ProviderRegistry.ensure_loaded()
-        return ProviderRegistry.list_providers()
+        registry = _resolve_provider_registry(provider_registry)
+        return registry.list_providers()
 
     @classmethod
     def list_keys(cls) -> list[str]:
@@ -53,8 +83,8 @@ class DataSourceRegistry:
     @classmethod
     def contains(cls, key: str) -> bool:
         """Check if provider is registered and has a data-source creator."""
-        ProviderRegistry.ensure_loaded()
-        return ProviderRegistry.has_data_source_creator(key)
+        registry = _resolve_provider_registry()
+        return registry.has_data_source_creator(key)
 
     @classmethod
     def clear(cls) -> None:
@@ -72,13 +102,14 @@ class DataSourceFactory:
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
         settings: Settings | None = None,
+        provider_registry: ProviderRegistry | None = None,
         **kwargs: object,
     ) -> DataSourcePort:
         """Create a data source adapter."""
-        ProviderRegistry.ensure_loaded()
+        registry = _resolve_provider_registry(provider_registry)
 
-        if not ProviderRegistry.is_registered(provider):
-            available = ", ".join(ProviderRegistry.list_providers())
+        if not registry.is_registered(provider):
+            available = ", ".join(registry.list_providers())
             raise ValueError(f"Unknown provider: {provider}. Available: {available}")
 
         adapter_kwargs = {k: v for k, v in kwargs.items() if k != "filter_config"}
@@ -88,7 +119,7 @@ class DataSourceFactory:
             adapter_kwargs=adapter_kwargs,
         )
 
-        adapter = ProviderRegistry.create_adapter(
+        adapter = registry.create_adapter(
             provider,
             http_client=http_client,
             logger=logger,
@@ -137,8 +168,7 @@ class DataSourceFactory:
     @classmethod
     def list_providers(cls) -> list[str]:
         """List all available providers."""
-        ProviderRegistry.ensure_loaded()
-        return ProviderRegistry.list_providers()
+        return _resolve_provider_registry().list_providers()
 
 
 __all__ = [

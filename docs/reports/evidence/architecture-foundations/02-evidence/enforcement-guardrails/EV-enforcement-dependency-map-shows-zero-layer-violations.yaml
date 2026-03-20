@@ -1,0 +1,19 @@
+id: EV-enforcement-dependency-map-shows-zero-layer-violations
+pillar: enforcement-guardrails
+source:
+  type: internal-doc
+  ref: "docs/02-architecture/generated/module-dependency-map.md"
+  retrieved_at: 2026-03-20
+claim: "The current generated dependency map reports 0 layer-policy violations across 1196 scanned modules, 4445 internal import edges, and 248 cross-layer module-group edges."
+quote: "- Layer policy violations: `0`"
+confidence: 0.97
+assumptions:
+  - "The generated dependency map artifact is up to date with the current source tree."
+  - "The generator's notion of layers matches the active architectural rules in AGENTS and ADR-005."
+notes: "This evidence shows that the documented layer model is currently reflected in the generated import graph, not only in prose."
+tags:
+  - enforcement
+  - dependency-map
+  - import-graph
+  - zero-violations
+  - baseline

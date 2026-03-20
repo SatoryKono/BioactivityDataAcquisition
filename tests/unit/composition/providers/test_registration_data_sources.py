@@ -137,6 +137,29 @@ class TestCrossRefAndOpenAlexCreators:
 
     @patch(_BIBLIO_BATCH)
     @patch(_BIBLIO_HTTP_DS)
+    def test_crossref_creator_preserves_injected_assembly_support(
+        self,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
+    ) -> None:
+        mock_get_batch_size.return_value = 77
+        mock_create_http_ds.return_value = MagicMock()
+
+        support = MagicMock(name="assembly_support")
+        pipeline_config = MagicMock()
+        pipeline_config.source.email = "pipeline@example.org"
+
+        _create_crossref_data_source(
+            settings=MagicMock(default_email="default@example.org"),
+            pipeline_config=pipeline_config,
+            logger=MagicMock(),
+            assembly_support=support,
+        )
+
+        assert mock_create_http_ds.call_args.kwargs["assembly_support"] is support
+
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
     def test_openalex_creator_uses_settings_email_fallback(
         self,
         mock_create_http_ds: MagicMock,
@@ -164,6 +187,29 @@ class TestCrossRefAndOpenAlexCreators:
         assert call_kwargs["extra_kwargs"]["batch_size"] == 55
         assert "settings" not in call_kwargs["extra_kwargs"]
         assert result is mock_adapter
+
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
+    def test_openalex_creator_preserves_injected_assembly_support(
+        self,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
+    ) -> None:
+        mock_get_batch_size.return_value = 55
+        mock_create_http_ds.return_value = MagicMock()
+
+        support = MagicMock(name="assembly_support")
+        pipeline_config = MagicMock()
+        pipeline_config.source.email = ""
+
+        _create_openalex_data_source(
+            settings=MagicMock(default_email="default@example.org"),
+            pipeline_config=pipeline_config,
+            logger=MagicMock(),
+            assembly_support=support,
+        )
+
+        assert mock_create_http_ds.call_args.kwargs["assembly_support"] is support
 
     @patch("bioetl.composition.providers.registration_biblio.OpenAlexAdapter")
     def test_openalex_custom_creator_uses_settings_email_fallback(
@@ -274,6 +320,69 @@ class TestPlaceholderResolution:
 
 
 @pytest.mark.unit
+class TestPubMedCreatorContracts:
+    """Covers PubMed-specific creator precedence and passthrough contracts."""
+
+    @patch(_BIBLIO_HTTP_DS)
+    def test_pubmed_creator_prefers_pipeline_email_and_api_key_over_settings(
+        self,
+        mock_create_http_ds: MagicMock,
+    ) -> None:
+        mock_create_http_ds.return_value = MagicMock()
+
+        settings = MagicMock()
+        settings.default_email = "default@example.org"
+        settings.pubmed_api_key = MagicMock()
+        settings.pubmed_api_key.get_secret_value.return_value = "settings-key"
+
+        pipeline_config = MagicMock()
+        pipeline_config.source.email = "pipeline@example.org"
+        pipeline_config.source.api_key = "pipeline-key"
+
+        _create_pubmed_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=MagicMock(),
+        )
+
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["email"] == "pipeline@example.org"
+        assert call_kwargs["extra_kwargs"]["api_key"] == "pipeline-key"
+
+    @patch(_BIBLIO_HTTP_DS)
+    def test_pubmed_creator_forwards_filter_metrics_and_pipeline_name(
+        self,
+        mock_create_http_ds: MagicMock,
+    ) -> None:
+        mock_adapter = MagicMock()
+        mock_create_http_ds.return_value = mock_adapter
+
+        settings = MagicMock()
+        settings.default_email = "default@example.org"
+        settings.pubmed_api_key = None
+        pipeline_config = MagicMock()
+        pipeline_config.source.email = ""
+        pipeline_config.source.api_key = ""
+        filter_config = MagicMock(name="filter_config")
+        metrics = MagicMock(name="metrics")
+
+        result = _create_pubmed_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=MagicMock(),
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name="pubmed_publication",
+        )
+
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["filter_config"] is filter_config
+        assert call_kwargs["metrics"] is metrics
+        assert call_kwargs["pipeline_name"] == "pubmed_publication"
+        assert result is mock_adapter
+
+
+@pytest.mark.unit
 class TestSemanticScholarCreatorBranches:
     """Covers API key warning / non-warning branches."""
 
@@ -327,6 +436,31 @@ class TestSemanticScholarCreatorBranches:
         logger.warning.assert_not_called()
         call_kwargs = mock_create_http_ds.call_args.kwargs
         assert call_kwargs["extra_kwargs"]["api_key"] == "secret"
+
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
+    def test_forwards_pipeline_name_and_batch_size(
+        self,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
+    ) -> None:
+        mock_get_batch_size.return_value = 100
+        mock_create_http_ds.return_value = MagicMock()
+
+        settings = MagicMock()
+        settings.semanticscholar_api_key = MagicMock()
+        settings.semanticscholar_api_key.get_secret_value.return_value = "secret"
+
+        _create_semanticscholar_data_source(
+            settings=settings,
+            pipeline_config=MagicMock(),
+            logger=MagicMock(),
+            pipeline_name="semanticscholar_publication",
+        )
+
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["pipeline_name"] == "semanticscholar_publication"
+        assert call_kwargs["extra_kwargs"]["batch_size"] == 100
 
 
 @pytest.mark.unit

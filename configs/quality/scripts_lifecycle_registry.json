@@ -622,6 +622,162 @@
       "decision": "integrated_ci",
       "review_by": "2026-06-30",
       "next_step": "Integrated into pre-commit custom hook."
+    },
+    "scripts/ci/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.ci package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/ci/_compatibility_telemetry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual CI compatibility-reporting helper and document the operator workflow plus a periodic smoke check."
+    },
+    "scripts/ci/apply-ci-optimizations.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual PowerShell CI optimization helper until its supported operator workflow is documented or the script is archived."
+    },
+    "scripts/data/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.data package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/data/check_vcr_secrets.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual VCR secret-safety check and document the expected operator workflow plus periodic smoke validation."
+    },
+    "scripts/dev/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical development scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/dev/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.dev package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/dev/run_pytest.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep the canonical PowerShell pytest launcher while Windows developer workflows remain supported and documented."
+    },
+    "scripts/dev/test_changed.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual changed-files test helper until a documented replacement workflow exists or the script is archived."
+    },
+    "scripts/diagnostics/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical diagnostics scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/diagnostics/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.diagnostics package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/diagnostics/_tmp_inspect_vcr.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual debug helper until it is either folded into a documented diagnostics workflow or archived."
+    },
+    "scripts/diagnostics/debug_pandera.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual Pandera debugging helper until it is either folded into a documented diagnostics workflow or archived."
+    },
+    "scripts/diagnostics/debug_storage_health.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual storage-health debugging helper until it is either folded into a documented diagnostics workflow or archived."
+    },
+    "scripts/diagrams/__main__.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.diagrams package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/diagrams/diagram_paths.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual diagram-path helper behind the package CLI and document when operators should rely on it."
+    },
+    "scripts/diagrams/generate_all_bundles.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual diagram bundle-generation helper until an explicit docs or CI call-site is added or the script is archived."
+    },
+    "scripts/docs/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.docs package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/ops/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical operations scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/ops/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.ops package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/ops/check_mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual operations guard for MCP configuration and document the invocation path plus periodic smoke validation."
+    },
+    "scripts/qa/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.qa package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/run_pytest.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Root compatibility wrapper for scripts/dev/run_pytest.ps1. Keep while Windows wrapper entrypoints remain supported."
+    },
+    "scripts/run_pytest.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Root compatibility wrapper for scripts/dev/run_pytest.sh. Keep while shell wrapper entrypoints remain supported."
+    },
+    "scripts/schema/__main__.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.schema package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "src/tools/apply_entity_naming_rename_plan.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual architecture refactor helper until the entity-naming rename workflow is closed or the tool is archived."
     }
   }
 }

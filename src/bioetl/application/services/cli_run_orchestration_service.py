@@ -1,4 +1,10 @@
-"""Application-level orchestration for CLI run command execution."""
+"""Application-level orchestration for CLI run command execution.
+
+`CliRunOrchestrationService` is the behavioral owner for CLI request validation,
+request preparation, and prepared execution. Data models and callable
+protocols live in sibling canonical modules and are re-exported here only for
+compatibility with existing imports.
+"""
 
 from __future__ import annotations
 
@@ -23,7 +29,7 @@ from bioetl.application.services.cli_run_orchestration_models import (
     RunPreparationResult,
     StartOffsetValidationResult,
 )
-from bioetl.application.services.pipeline_runner_service import RunOptions, RunResult
+from bioetl.application.services.pipeline_runner_models import RunOptions, RunResult
 
 
 class CliRunOrchestrationService:

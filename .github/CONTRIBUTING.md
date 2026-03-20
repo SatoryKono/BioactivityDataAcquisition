@@ -44,6 +44,13 @@ For the full local GitHub workflow, including worktrees, sync/rebase, PR creatio
 
 - [docs/03-guides/github-local-workflow.md](../docs/03-guides/github-local-workflow.md)
 
+### Governance Metrics Note
+
+- `check-c901` is the blocking baseline for new complexity debt.
+- Scorecard file-size values describe **exemption debt** from `configs/quality/architecture_metric_exemptions.yaml`.
+- Raw large-file counts like `>10 KB` or `>350 LOC` are **hotspot inventory**, not automatically blocking debt.
+- When you need the structural size snapshot, use the canonical command in [`scripts/README.md`](../scripts/README.md) and treat the result as analysis/evidence unless a policy explicitly says otherwise.
+
 ## Commit Format
 
 ```

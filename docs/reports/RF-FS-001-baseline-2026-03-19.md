@@ -1,120 +1,65 @@
-# RF-FS-001 Baseline Plan
 
-**Дата:** 2026-03-19  
-**Тема:** Разорвать циклы импортов в composition и соседних runtime-кластерах  
-**Связанные находки:** `FS-004`, `FS-005`, `FS-006`  
-**Основной scope:** `src/bioetl/composition/providers/`, `src/bioetl/composition/factories/datasource/`, `src/bioetl/composition/factories/pipeline/`, `src/bioetl/composition/factories/services/`, а также малые циклы в `application` и `infrastructure`
 
-## Актуализация на 2026-03-19 16:58
 
-По существу baseline для `RF-FS-001` не изменился. Последние test-ownership waves (`Wave 3B` и `Wave 3C`) улучшили диагностируемость `application/services`, но не уменьшили сам composition/runtime cycle debt. Этот RF по-прежнему остаётся архитектурным блокером перед полномасштабным `RF-FS-004` и перед широкими package-split waves из `RF-FS-002`.
+  6. RF-06. Улучшить domain facade hygiene без переноса ports из domain
 
-## Цель
+  - Это исправленная версия старого RF-05. Переносить runtime ports из domain/ports нельзя и не нужно: это противоречит текущей политике проекта. Но задача на улучшение всё равно есть. Она состоит в том, чтобы
+    сделать domain.ports более прозрачным как фасад и уменьшить риск, что следующие планы снова примут допустимую структуру за дефект. То есть это не structural migration, а combination из документации, точечных
+    упорядочиваний и, возможно, небольших façade-level тестов/подсказок.
+  - Первая часть задачи — явно зафиксировать в active architecture docs, что runtime-oriented cross-layer contracts по проектной политике остаются в domain/ports. Это уже имплицитно верно, но недостаточно явно
+    защищено от неверной интерпретации. Хорошее место — docs/02-architecture/01-domain-layer.md и, возможно, расширение формулировки в RULES.md. Важно подчеркнуть: “это не business-only слой, а слой cross-layer
+    contracts и value semantics”.
+  - Вторая часть — аккуратно улучшить PipelineContext narrative, а не переносить его. По docs/00-project/RULES.md:956 и ADR-014 он уже играет ключевую нормативную роль как единый источник времени. Значит,
+    корректная задача — проверить, не нужно ли уточнить documentation around logger/bind_logger() и роль контекста, чтобы не путать readers, но не инициировать дорогую migration wave без жёсткого evidence.
+  - Третий подшаг — усилить архитектурную самопроверку там, где это дешево. Например, можно добавить точечный test или documentation check, который делает допустимость runtime ports в domain.ports более явной для
+    будущих ревью и агентов. Это поможет не повторить прошлую ошибку плана.
+  - DoD для RF-06: active docs явно описывают назначение domain.ports, включая runtime ports; PipelineContext остаётся в своей нормативной роли и не выглядит “архитектурной ошибкой”; никаких миграций портов по
+    слоям не производится; архитектурный narrative становится яснее. Это небольшая задача, но она полезна именно как страховка от ложных рефакторингов в будущем.
 
-Цель `RF-FS-001` не в том, чтобы механически переписать импорты до исчезновения циклов на графе зависимостей. Настоящая цель другая: восстановить односторонний поток зависимостей в bootstrap и runtime-сборке проекта так, чтобы composition снова выглядел как слой wiring, а не как самозамкнутый набор взаимно импортирующих factory-модулей. По текущему baseline это самый опасный архитектурный долг в файловой структуре: в composition обнаружен крупный цикл из девяти модулей вокруг `providers` и `datasource factory`, отдельный цикл из семи модулей вокруг `pipeline/services factory`, плюс несколько малых циклов в runtime hot spots. Это уже не косметика. Такие циклы затрудняют перенос кода, скрывают ownership, делают import-time behavior менее предсказуемым и мешают адресно тестировать factory/registry слой.
+  7. RF-07. Поздняя и осторожная миграция ProviderRegistry
 
-## Текущее состояние
+  - Проблема с ProviderRegistry реальна, но в прошлом плане я переоценил её срочность. Сейчас в проекте уже есть instance-scoped модель через create_provider_registry() и одновременно широкий compatibility layer
+    через class-level dispatch. Это значит, что задача не должна идти рано и “в лоб”. Её место — после RF-02 и RF-04, когда regression net уже усилен, а часть composition hubs уже стала понятнее. Только тогда можно
+    безопасно сокращать hidden dependency seam без риска разрушить bootstrap/test ecosystem.
+  - Первый шаг этой задачи должен быть инвентаризацией. Нужно получить полный список ProviderRegistry.ensure_loaded/is_registered/create_adapter/build_data_source_creator call sites в src и tests, разделить их на
+    production paths, compatibility paths и test conveniences. Сейчас class-level API используется широко, и это нельзя игнорировать. Пока такой карты нет, любые разговоры о “удалить singleton seam” — слишком
+    абстрактны.
+  - Второй шаг — ввести explicit registry path там, где это даёт реальный выигрыш и минимальный blast radius. Например, начать с одного factory chain, где registry already conceptually local. При этом class-level
+    methods должны остаться рабочим compatibility layer на переходный период. Цель не “сломать старое”, а постепенно сделать новое предпочтительным и лучше тестируемым.
+  - Третий шаг — поставить ratchet. Когда первый explicit path заработает, нужен тест или search-based architectural guard, который не позволит новым production call sites без нужды добавлять ещё больше class-level
+    registry access. Это важнее полного удаления legacy path на ранней стадии.
+  - DoD для RF-07: есть карта текущих registry consumers; хотя бы один production path использует explicit registry instance; compatibility layer сохранён, но не растёт; tests подтверждают отсутствие скрытых
+    регрессий в adapter creation/bootstrap lifecycle. Полное удаление default registry в этой задаче не требуется; главное — начать контролируемое уменьшение зависимости от него.
 
-На старте нужно считать подтверждёнными три проблемы. Первая: вокруг `src/bioetl/composition/providers/provider_registry.py`, `registration.py`, `registration_bio.py`, `registration_biblio.py`, `factory_loader.py`, `loader.py`, `_config_helpers.py`, а также `src/bioetl/composition/factories/datasource/data_source_factory.py` и `http_client.py` уже есть большой SCC. Вторая: вокруг `src/bioetl/composition/factories/pipeline/creation_api.py`, `_creation_wiring.py`, `assembler.py`, `factory_method_helpers.py`, `contract_validator.py` и `src/bioetl/composition/factories/services/creation_api.py`, `bundle.py` есть отдельный SCC. Третья: вне composition есть малые циклы между `batch_transformer_streaming` и `batch_transformer`, между `pipeline_run_context_service` и `pipeline_runner_service`, а также между `health_tracker` и `health_monitor`.
+  8. RF-08. Уточнить naming policy и exception model, не устраивая массовых renames
 
-Важно не путать symptom и cause. Причина не только в том, что импорты “плохо расставлены”. По текущей структуре часть модулей одновременно содержит:
-- публичный construction API;
-- internal assembly helpers;
-- registration state;
-- config normalization;
-- runtime bundle creation.
+  - Эта задача исправляет второй крупный перекос старого плана. Naming drift в проекте есть, но он не везде означает необходимость переименования. В частности, pubchem_compound и PubChemCompound* нельзя просто
+    объявить “ошибкой”, потому что репозиторий уже фиксирует это как осознанное исключение для CLI/pipeline/API surface. Исправленная задача должна разделить два случая: где naming действительно плавает без
+    политики, и где naming intentionally stabilized by exception registry.
+  - Первая часть работы — ревизия configs/naming_exceptions.yaml. Нужно убедиться, что exception registry полон, актуален и соответствует реальному public surface. Если pubchem_compound — допустимая совместимость,
+    это должно быть явно проверяемой частью naming governance, а не “негласным знанием”. Аналогично для uniprot_protein и других зафиксированных исключений.
+  - Вторая часть — выровнять документацию вокруг различия “canonical domain name” и “stable external pipeline identifier”. Именно здесь прошлый план смешал два уровня. Доменная сущность PubchemMolecule и pipeline
+    id pubchem_compound могут сосуществовать, если это явно объяснено и проверяется. Значит, задача не в rename, а в устранении двусмысленности. Хорошие кандидаты для обновления — glossary, naming policy docs и,
+    возможно, targeted comments/docstrings в затронутых pipeline/contracts modules.
+  - Риск задачи — снова скатиться в rename-churn без реальной пользы. Чтобы этого избежать, любые renames в этой волне должны происходить только там, где нет policy-backed exception и где drift действительно мешает
+    поиску, ревью или automation. Второй риск — размножить exceptions без ясной причины. Поэтому каждый exception должен быть обоснован и проверяем.
+  - DoD для RF-08: naming policy явно различает canonical domain names и intentional public IDs; exception registry синхронизирован с кодом и тестами; accidental naming drift устранён, а intentional exceptions
+    формализованы. Массовых renames pubchem_compound в этой задаче быть не должно.
 
-Пока эти роли живут вперемешку, циклы будут возвращаться даже после локальных fixes.
+  9. RF-09. Разгрузить и типизировать resilience/observability logic без изменения поведения
 
-## Стратегия
+  - Эта задача остаётся почти такой же, как в старом плане, потому что она опирается на реальный risk hotspot, а не на спорную интерпретацию политики. src/bioetl/infrastructure/adapters/http/client_retry_mixin.py
+    действительно критичен, типово ослаблен и cognitively dense. Но исправленный план должен быть более строгим по последовательности: сначала фиксация поведения, потом только рефакторинг. Любая попытка “сразу
+    улучшить дизайн” здесь рискованна.
+  - Первый подэтап — characterization tests. Нужно зафиксировать backoff, retry classification, honoring Retry-After, circuit-breaker interaction, metrics emission и error-path behavior. Эти tests должны быть не на
+    внутренние helper names, а на observable operational semantics. Без этого вся задача будет строиться на предположении, что мы и так понимаем поведение, а это как раз опасно для infrastructure cross-cutting
+    code.
+  - Второй подэтап — выделение узких collaborators. Не обязательно сразу разбивать всё на много классов; достаточно сначала отделить policy decision, metrics/tracing sink и request/retry context shape. Уже это
+    уменьшит Any-пространство и облегчит targeted testing. Только после этого имеет смысл снижать mypy suppressions и усиливать типизацию интерфейсов.
+  - Третий подэтап — повторная верификация на representative adapter paths. Поскольку mixin используется широко, нужно прогонять не только локальные tests, но и хоть небольшой набор реальных adapter-level
+    сценариев. Это защитит от тихих regressions в operational behavior.
+  - Риск здесь — либо сломать сетевую семантику, либо утонуть в типах без архитектурного выигрыша. Поэтому критерий успеха должен быть практическим: легче тестировать, легче читать, меньше опасных Any, при этом
+    поведение не меняется.
+  - DoD для RF-09: ключевое retry/resilience поведение зафиксировано tests; critical collaborators typed лучше; модуль становится проще для локального reasoning; representative adapter checks остаются зелёными. Это
+    хороший завершающий этап, когда уже стабилизированы governance, tests и composition seams.
 
-`RF-FS-001` лучше выполнять тремя батчами, а не одной волной.
-
-### Батч 1. Provider/DataSource cycle
-
-Первый подэтап должен быть сфокусирован только на `composition/providers` и `composition/factories/datasource`. Здесь нужно провести жёсткую границу между тремя типами модулей:
-- registry API и registration state;
-- provider descriptors / config DTO / metadata;
-- datasource construction helpers.
-
-Правильная конечная форма такая: registry знает только о registration contract и provider descriptors; datasource factory знает только о публичном registry API и leaf-конструкторах; helper-модули не импортируют обратно registry internals. Это значит, что часть helper-кода, вероятно, придётся вынести в leaf modules, которые никто не импортирует “сверху назад”. Особенно подозрительны `_config_helpers.py` и `factory_loader.py`: такие модули часто становятся мостом между тем, что должно быть раздельным.
-
-### Батч 2. Pipeline/Services cycle
-
-Второй подэтап должен быть ограничен `composition/factories/pipeline` и `composition/factories/services`. Здесь задача в том, чтобы сделать один направленный construction flow. Практически это означает:
-- один внешний creation API;
-- leaf assembler modules ниже этого API;
-- validation/helpers как подчинённые зависимости, а не как равноправные центры импорта;
-- bundle-модули не должны тянуть creation API обратно.
-
-Если этого не сделать, package будет продолжать расти как “factory mesh”, а не как иерархия.
-
-### Батч 3. Малые циклы
-
-Третий подэтап должен быть коротким и адресным. Малые SCC в application и infrastructure почти всегда чинятся выделением моделей/протоколов/utility seam в отдельный leaf module. Эти пары нельзя тянуть в один большой refactor с composition: там другой риск-профиль и другой verify-set.
-
-## Конкретные изменения по модулям
-
-Ожидаемые точки вмешательства:
-- `src/bioetl/composition/providers/provider_registry.py`
-- `src/bioetl/composition/providers/registration.py`
-- `src/bioetl/composition/providers/registration_bio.py`
-- `src/bioetl/composition/providers/registration_biblio.py`
-- `src/bioetl/composition/providers/factory_loader.py`
-- `src/bioetl/composition/providers/loader.py`
-- `src/bioetl/composition/providers/_config_helpers.py`
-- `src/bioetl/composition/factories/datasource/data_source_factory.py`
-- `src/bioetl/composition/factories/datasource/http_client.py`
-- `src/bioetl/composition/factories/pipeline/creation_api.py`
-- `src/bioetl/composition/factories/pipeline/_creation_wiring.py`
-- `src/bioetl/composition/factories/pipeline/assembler.py`
-- `src/bioetl/composition/factories/pipeline/factory_method_helpers.py`
-- `src/bioetl/composition/factories/pipeline/contract_validator.py`
-- `src/bioetl/composition/factories/services/creation_api.py`
-- `src/bioetl/composition/factories/services/bundle.py`
-
-Здесь нельзя сразу “раскидать всё по новым папкам”. На первом проходе важнее восстановить направление зависимостей, чем менять каталог.
-
-## Риски
-
-Главный риск высокий, потому что composition — это центральный wiring layer. Ошибка здесь редко проявляется как простой unit failure; чаще ломается bootstrap конкретного pipeline, lazy registration или construction path, который покрыт несимметрично. Второй риск — совместить в одном батче и cycle fix, и API cleanup, и package move. Это создаст лишний churn. Третий риск — перепутать решение цикла с service locator: если слишком многое спрятать в registry/bundle, граф импорта станет чище, но архитектура деградирует.
-
-## Минимизация рисков
-
-- Делить `RF-FS-001` на три батча с отдельной верификацией.
-- Не менять публичные factory entrypoints в том же батче, где рвётся цикл, без необходимости.
-- Сначала выделять leaf types/helpers, потом переподключать imports.
-- Не переносить код между слоями; задача только про направленность зависимостей и структуру composition/runtime.
-
-## Верификация
-
-После каждого батча:
-
-```bash
-./.venv/Scripts/python.exe -m pytest tests/unit/composition/providers tests/unit/composition/factories/datasource tests/unit/composition/factories/pipeline tests/unit/composition/factories/services -q
-```
-
-Параллельно:
-
-```bash
-./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --configs
-```
-
-После импортных изменений дополнительно:
-
-```bash
-./.venv/Scripts/python.exe -m pytest tests/architecture/test_forbidden_imports.py tests/architecture/test_layer_dependencies.py -q
-./.venv/Scripts/python.exe -m mypy --strict --no-incremental src/bioetl/
-```
-
-## Definition of Done
-
-`RF-FS-001` можно считать закрытым только если выполнены все условия:
-- крупный SCC в `composition/providers` и `composition/factories/datasource` исчез;
-- SCC в `composition/factories/pipeline` и `composition/factories/services` исчез;
-- три малых цикла вне composition тоже устранены;
-- composition по-прежнему остаётся wiring-слоем без дрейфа в application/domain;
-- unit, architecture и `mypy` проверки зелёные;
-- не появилось новых compatibility shims, которые только маскируют цикл вместо устранения причины.
-
-Итоговая цель этого RF: не “красивый import graph”, а предсказуемая, односторонняя и тестируемая композиция runtime-сборки.

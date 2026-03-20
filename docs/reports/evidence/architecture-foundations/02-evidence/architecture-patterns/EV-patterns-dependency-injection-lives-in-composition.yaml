@@ -1,0 +1,19 @@
+id: EV-patterns-dependency-injection-lives-in-composition
+pillar: architecture-patterns
+source:
+  type: internal-doc
+  ref: "AGENTS.md:32-37; docs/02-architecture/decisions/ADR-005-composition-layer-separation.md:33-38; tests/architecture/test_di_runtime_inline_construction.py:1-16; tests/architecture/test_no_inline_construction_in_adapters.py:1-21"
+  retrieved_at: 2026-03-20
+claim: "Dependency Injection is an explicit architectural pattern in BioETL: dependencies must be injected via constructors, application/adapters are guarded against inline assembly, and `composition` is treated as the only legitimate object-graph assembly root."
+quote: "MUST inject dependencies via constructor, NOT hard-code them."
+confidence: 0.97
+assumptions:
+  - "The listed architecture tests are active guardrails rather than temporary migration scaffolding."
+  - "Constructor injection remains the project's preferred pattern even where transitional facades still exist."
+notes: "This is stronger than a style guideline because both application and adapter layers have explicit no-inline-construction tests."
+tags:
+  - patterns
+  - dependency-injection
+  - composition
+  - factories
+  - constructor-injection

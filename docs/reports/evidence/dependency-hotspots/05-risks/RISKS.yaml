@@ -1,0 +1,103 @@
+- id: RISK-hotspot-wave-scatter
+  risk: "The first wave pulls in too many unrelated overlap files and loses package or seam cohesion."
+  linked_decisions:
+    - DEC-hotspot-overlap-first-wave
+  severity: high
+  likelihood: medium
+  triggers:
+    - "The 17-file overlap set is treated as one undifferentiated batch"
+    - "Wave planning ignores package concentration and change conflict risk"
+  mitigations:
+    - "Cluster the first wave by package family"
+    - "Keep wave size constrained and verify one cluster at a time"
+
+- id: RISK-hotspot-pressure-underweighting
+  risk: "Architecturally sensitive seams below the overlap threshold are deferred too long because the backlog follows file size too literally."
+  linked_decisions:
+    - DEC-hotspot-overlap-first-wave
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "CLI/composition/composite pressure seams are ignored because they are not all in the overlap set"
+    - "Backlog order uses file thresholds without escalation rules"
+  mitigations:
+    - "Annotate backlog items with dependency-pressure exceptions"
+    - "Use the dependency map as a tie-break rule in wave selection"
+
+- id: RISK-hotspot-size-only-neglect
+  risk: "Large dense files below 350 LOC never enter the backlog because the program focuses only on overlap hotspots."
+  linked_decisions:
+    - DEC-hotspot-size-only-phase-two
+  severity: medium
+  likelihood: high
+  triggers:
+    - "Phase-two inventory is not explicitly tracked"
+    - "Below-threshold files are treated as solved by default"
+  mitigations:
+    - "Maintain a named phase-two list"
+    - "Review the size-only tail after each overlap wave"
+
+- id: RISK-hotspot-threshold-gaming
+  risk: "Refactors optimize files just under 350 LOC while leaving the same cohesion problems intact."
+  linked_decisions:
+    - DEC-hotspot-size-only-phase-two
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Success is measured only by crossing under numeric thresholds"
+    - "Files are split mechanically without clearer responsibility boundaries"
+  mitigations:
+    - "Use threshold reduction as a secondary metric only"
+    - "Require responsibility and naming clarity as completion criteria"
+
+- id: RISK-hotspot-adapter-regression
+  risk: "Decomposing infrastructure adapters first causes behavioral regressions in provider fetch, retry, or error-handling logic."
+  linked_decisions:
+    - DEC-hotspot-adapters-first
+  severity: high
+  likelihood: medium
+  triggers:
+    - "Refactors move logic across mixins without preserving regression coverage"
+    - "Provider-specific retry/error semantics are altered during decomposition"
+  mitigations:
+    - "Attach targeted provider tests to each adapter wave"
+    - "Refactor one adapter family or concern seam at a time"
+
+- id: RISK-hotspot-package-monoculture
+  risk: "Focusing first on adapters creates a local win but leaves cross-layer CLI/application pressure unaddressed for too long."
+  linked_decisions:
+    - DEC-hotspot-adapters-first
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "Backlog stalls after wave 1"
+    - "CLI/application hotspots are not scheduled as the next explicit wave"
+  mitigations:
+    - "Predeclare the next wave before starting the first"
+    - "Track non-adapter pressure seams in the same backlog document"
+
+- id: RISK-hotspot-priority-inconsistency
+  risk: "Different reviewers apply dependency-pressure escalation differently, producing unstable backlog ordering."
+  linked_decisions:
+    - DEC-hotspot-two-track-prioritization
+  severity: medium
+  likelihood: high
+  triggers:
+    - "No written two-track prioritization rule exists"
+    - "Review decisions depend on local preference rather than evidence"
+  mitigations:
+    - "Keep the prioritization rule explicit in the backlog"
+    - "Require backlog edits when a seam is escalated outside raw hotspot order"
+
+- id: RISK-hotspot-false-precision-return
+  risk: "The team reintroduces an unsupported single numeric priority score before file-level graph metrics exist."
+  linked_decisions:
+    - DEC-hotspot-two-track-prioritization
+  severity: medium
+  likelihood: medium
+  triggers:
+    - "A combined score is invented from partial evidence"
+    - "Package pressure is treated as a file-level metric without attribution"
+  mitigations:
+    - "Keep hotspot density and dependency pressure as separate columns"
+    - "Only unify scoring after per-file graph metrics are collected"
