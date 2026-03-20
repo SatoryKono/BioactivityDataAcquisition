@@ -13,8 +13,6 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.protocols import GoldFilterCallback
-    from bioetl.application.core.protocols import GoldTransformCallback
     from bioetl.application.core.record_processor import RecordProcessor
     from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
     from bioetl.domain.config import DQConfig

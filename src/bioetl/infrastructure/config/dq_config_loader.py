@@ -1,4 +1,4 @@
-"""DQ configuration loader with hierarchical merge."""
+"""Retained convenience loader for hierarchical DQ config resolution."""
 
 from __future__ import annotations
 
@@ -7,8 +7,14 @@ from typing import Any
 
 from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.dq_config_resolution import (
+    build_dq_cache_key,
+    map_dq_config,
+    merge_dq_config_hierarchy,
+    run_dq_config_flow,
+    validate_dq_config_payload,
+)
 from bioetl.infrastructure.config_merge import ListMergeFn, config_merge
-from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
 from ._dq_config_layers import (
     load_defaults_layer as _load_defaults_layer_impl,
@@ -35,7 +41,7 @@ from .base_config_loader import _load_yaml_file
 
 
 class DQConfigLoader:
-    """Load and merge DQ configurations from base/provider/entity/inline layers."""
+    """Retained convenience facade for cached hierarchical DQ config loading."""
 
     def __init__(self, configs_root: Path, relaxed_dq: bool = False) -> None:
         """Initialize DQ config loader with root path and relaxed mode flag.
@@ -107,28 +113,16 @@ class DQConfigLoader:
         Raises:
             FileNotFoundError: When the required defaults file does not exist.
         """
-        merged = self._load_defaults_layer()
-        if not merged:
-            raise FileNotFoundError(
-                "Required DQ defaults file not found in configs/base/quality.yaml. "
-                "Create defaults in this location."
-            )
-
-        layers = (
-            self._load_provider_layer(provider),
-            self._load_entity_layer(provider, entity),
-            inline_overrides or {},
+        return merge_dq_config_hierarchy(
+            provider,
+            entity,
+            inline_overrides=inline_overrides,
+            load_defaults_layer=self._load_defaults_layer,
+            load_provider_layer=self._load_provider_layer,
+            load_entity_layer=self._load_entity_layer,
+            deep_merge=self._deep_merge,
+            relaxed_dq=self._relaxed_dq,
         )
-        for layer in layers:
-            if layer:
-                merged = self._deep_merge(merged, layer)
-
-        if self._relaxed_dq:
-            merged = self._deep_merge(
-                merged,
-                {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},
-            )
-        return merged
 
     def _load_defaults_layer(
         self,
@@ -155,14 +149,27 @@ class DQConfigLoader:
         Returns:
             Validated and merged DQConfig domain object.
         """
-        cache_key = f"{provider}:{entity}:relaxed={self._relaxed_dq}"
+        cache_key = build_dq_cache_key(
+            provider,
+            entity,
+            relaxed_dq=self._relaxed_dq,
+        )
         if inline_overrides is None and cache_key in self._cache:
             return self._cache[cache_key]
 
-        merged = self._merge_hierarchy(provider, entity, inline_overrides)
-        normalized = self._normalize_to_file_format(merged)
-        validated = DQConfigFile.model_validate(normalized)
-        domain_config: DQConfig = validated.to_domain()
+        domain_config = run_dq_config_flow(
+            provider,
+            entity,
+            inline_overrides=inline_overrides,
+            load_defaults_layer=self._load_defaults_layer,
+            load_provider_layer=self._load_provider_layer,
+            load_entity_layer=self._load_entity_layer,
+            deep_merge=self._deep_merge,
+            normalize_payload=self._normalize_to_file_format,
+            validate_payload=validate_dq_config_payload,
+            map_config=map_dq_config,
+            relaxed_dq=self._relaxed_dq,
+        )
 
         if inline_overrides is None:
             self._cache[cache_key] = domain_config

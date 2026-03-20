@@ -51,8 +51,9 @@ def get_pipeline_config(
     Convenience function that loads and maps config in one step.
     Results are cached for efficiency.
 
-    Uses the canonical DomainConfigResolver bridge to combine validated YAML
-    config with hierarchical DQ resolution from infrastructure config loaders.
+    Uses the canonical function-based domain-config bridge to combine validated
+    YAML config with hierarchical DQ resolution from infrastructure config
+    loaders.
 
     Args:
         pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
@@ -66,19 +67,16 @@ def get_pipeline_config(
         ValueError: If pipeline configuration not found
 
     """
-    from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
     from bioetl.infrastructure.config.domain_config_resolver import (
-        DomainConfigResolver,
+        load_domain_pipeline_config,
     )
-    from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
-
-    yaml_config = load_pipeline_config(pipeline_name)
 
     root = Path(config_root) if config_root is not None else Path("configs")
-    resolver = DomainConfigResolver(
-        configs_root=root, loader_class=PipelineConfigLoader
+    return load_domain_pipeline_config(
+        pipeline_name,
+        configs_root=root,
+        relaxed_dq=False,
     )
-    return resolver.resolve(yaml_config, relaxed_dq=False)
 
 
 class ObservabilitySettings(BaseSettings):

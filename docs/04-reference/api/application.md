@@ -64,8 +64,9 @@ Composition and Interfaces layers.
 |---|---|
 | `BatchProcessingService` | Batch-level processing orchestration |
 | `BatchProgressService` | Progress tracking for batch execution |
-| `BatchMemoryManager` | Memory pressure monitoring during batch processing |
-| `BatchMetricsRecorder` | Batch-level metrics recording |
+| `BatchMemoryManagerService` | Memory pressure monitoring during batch processing |
+| `BatchMetricsRecorderService` | Batch-level metrics recording |
+| `BatchTracingManagerService` | Batch-level tracing span management |
 
 ### Pipeline Support
 

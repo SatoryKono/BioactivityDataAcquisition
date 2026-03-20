@@ -141,7 +141,7 @@
 101. **Batch Sealing** - Activity - seal() operation
 102. **Batch Writing** - Sequence - Mark writing → Commit
 103. **Batch Failure** - Activity - mark-failed() и rollback
-104. **Batch Metrics Recording** - Activity - BatchMetricsRecorder
+104. **Batch Metrics Recording** - Activity - BatchMetricsRecorderService
 105. **Adaptive Batch Sizing** - Activity - Memory-based sizing
 106. **Batch Transformation** - Sequence - BatchTransformer процесс
 107. **Quarantine Handling** - Activity - Failed record flow
@@ -275,11 +275,11 @@
 213. **RecordProcessor** - Class - Record processing
 214. **BatchTransformer** - Class - Transformation logic
 215. **BatchWriter** - Class - Write orchestration
-216. **BatchMetricsRecorder** - Class - Metrics recording
+216. **BatchMetricsRecorderService** - Class - Metrics recording
 217. **BaseTransformer** - Class - Abstract transformer
 218. **BasePipeline** - Class - Abstract pipeline
 219. **LockCoordinator** - Class - Lock orchestration
-220. **CheckpointManager** - Class - Checkpoint handling
+220. **CheckpointManagerService** - Class - Checkpoint handling
 221. **PipelineService** - Class - Services bundle
 222. **QuarantineManager** - Class - Quarantine management
 223. **PreflightService** - Class - Pre-run checks
@@ -388,7 +388,7 @@
 312. **HTTPClient ↔ RateLimiter** - Sequence - Rate limiting
 313. **HTTPClient ↔ CircuitBreaker** - Sequence - Fault tolerance
 314. **LockCoordinator ↔ LockPort** - Sequence - Lock lifecycle
-315. **CheckpointManager ↔ CheckpointPort** - Sequence - State persistence
+315. **CheckpointManagerService ↔ CheckpointPort** - Sequence - State persistence
 316. **QuarantineManager ↔ QuarantinePort** - Sequence - Quarantine ops
 317. **Observer ↔ Services** - Sequence - Observability integration
 318. **Preflight ↔ HealthChecks** - Sequence - Pre-run validation

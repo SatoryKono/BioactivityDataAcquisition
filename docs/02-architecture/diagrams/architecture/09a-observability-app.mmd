@@ -30,8 +30,8 @@ graph TB
 
     subgraph AppObserver["Application Observability"]
         PO["PipelineObserver"]:::size-sm
-        BMR["BatchMetricsRecorder"]:::size-sm
-        BTM["BatchTracingManager"]:::size-sm
+        BMR["BatchMetricsRecorderService"]:::size-sm
+        BTM["BatchTracingManagerService"]:::size-sm
     end
 
     subgraph AdapterMetrics["Adapter-Level Metrics"]

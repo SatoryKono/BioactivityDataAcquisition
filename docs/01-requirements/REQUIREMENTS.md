@@ -288,7 +288,7 @@
 #### REQ-LOAD-001
 - **Уровень**: MUST
 - **Описание**: Для `loading_strategy: full_scan_only` checkpoint resume MUST быть отключён
-- **Проверка**: Unit/architecture тесты `CheckpointManager` блокируют resume для `full_scan_only`
+- **Проверка**: Unit/architecture тесты `CheckpointManagerService` блокируют resume для `full_scan_only`
 
 #### REQ-LOAD-002
 - **Уровень**: MUST

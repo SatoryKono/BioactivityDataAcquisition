@@ -22,7 +22,6 @@ from bioetl.composition.bootstrap.runtime.observability import (
 )
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.providers import ensure_providers_loaded
-from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config

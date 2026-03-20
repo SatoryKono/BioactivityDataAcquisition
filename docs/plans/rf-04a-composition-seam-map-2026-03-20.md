@@ -2,15 +2,15 @@
 
 **Date:** 2026-03-20
 **Status:** Completed analysis, decisions executed for RF-04B/RF-04C
-**Parent plan:** [`rf-04-composition-hotspots-execution-plan-2026-03-20.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/plans/rf-04-composition-hotspots-execution-plan-2026-03-20.md)
+**Parent plan:** [`rf-04-composition-hotspots-execution-plan-2026-03-20.md`](rf-04-composition-hotspots-execution-plan-2026-03-20.md)
 
 ## Purpose
 
 This memo records the delegation map and seam decisions for the three RF-04 hotspot candidates:
 
-- [`registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py)
-- [`pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py)
-- [`composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py)
+- [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py)
+- [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py)
+- [`composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py)
 
 The goal is to decide `refactor now`, `closeout only`, or `defer` from actual assembly seams rather than raw file size.
 
@@ -18,9 +18,9 @@ The goal is to decide `refactor now`, `closeout only`, or `defer` from actual as
 
 | File | Decision | Why |
 | --- | --- | --- |
-| [`registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py) | `closeout only` | one important seam is already extracted; remaining work is tightening profile assembly, not major decomposition |
-| [`pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py) | `refactor now` | multiple entry points still mix distinct assembly responsibilities and already delegate into adjacent helper modules |
-| [`composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) | `defer` | three existing builders are already cohesive and backed by targeted unit tests; evidence for a cleaner new seam is weak |
+| [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py) | `closeout only` | one important seam is already extracted; remaining work is tightening profile assembly, not major decomposition |
+| [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py) | `refactor now` | multiple entry points still mix distinct assembly responsibilities and already delegate into adjacent helper modules |
+| [`composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) | `defer` | three existing builders are already cohesive and backed by targeted unit tests; evidence for a cleaner new seam is weak |
 
 ## 1. `registration_biblio.py`
 
@@ -28,10 +28,10 @@ The goal is to decide `refactor now`, `closeout only`, or `defer` from actual as
 
 Current composition responsibilities are split across:
 
-- adapter helper ownership in [`_registration_biblio_adapters.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/_registration_biblio_adapters.py)
-- config normalization and HTTP data-source wrapping in [`_config_helpers.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/_config_helpers.py)
-- contract/support ownership in [`_registration_contracts.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/_registration_contracts.py)
-- provider-level wiring in [`registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py)
+- adapter helper ownership in [`_registration_biblio_adapters.py`](../../src/bioetl/composition/providers/_registration_biblio_adapters.py)
+- config normalization and HTTP data-source wrapping in [`_config_helpers.py`](../../src/bioetl/composition/providers/_config_helpers.py)
+- contract/support ownership in [`_registration_contracts.py`](../../src/bioetl/composition/providers/_registration_contracts.py)
+- provider-level wiring in [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py)
 
 ### Real seams found
 
@@ -59,9 +59,9 @@ That is real composition logic, but it is no longer an uncontrolled hotspot. The
 
 ### Test net
 
-- [`test_registration_data_sources.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_data_sources.py)
-- [`test_registration_biblio_provider_configs.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_biblio_provider_configs.py)
-- [`test_registration.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration.py)
+- [`test_registration_data_sources.py`](../../tests/unit/composition/providers/test_registration_data_sources.py)
+- [`test_registration_biblio_provider_configs.py`](../../tests/unit/composition/providers/test_registration_biblio_provider_configs.py)
+- [`test_registration.py`](../../tests/unit/composition/providers/test_registration.py)
 - architecture freeze and registry decomposition checks
 
 ### Decision
@@ -78,8 +78,8 @@ This file no longer justifies being the main RF-04 decomposition wave. The corre
 
 The module already delegates into:
 
-- [`runtime_managers.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/runtime_managers.py)
-- [`pipeline_processing.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_processing.py)
+- [`runtime_managers.py`](../../src/bioetl/composition/factories/services/runtime_managers.py)
+- [`pipeline_processing.py`](../../src/bioetl/composition/factories/services/pipeline_processing.py)
 
 But the facade still owns several distinct responsibilities:
 
@@ -129,11 +129,11 @@ That is a strong indicator of mixed reasons to change. It is also important that
 
 ### Test net
 
-- [`test_pipeline_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_unit.py)
-- [`test_pipeline_builder_batch_executor.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py)
-- [`test_services_factory.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_services_factory.py)
-- [`test_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_builder_unit.py)
-- [`test_smoke_composition.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/smoke/test_smoke_composition.py)
+- [`test_pipeline_builder_unit.py`](../../tests/unit/composition/factories/services/test_pipeline_builder_unit.py)
+- [`test_pipeline_builder_batch_executor.py`](../../tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py)
+- [`test_services_factory.py`](../../tests/unit/composition/factories/services/test_services_factory.py)
+- [`test_builder_unit.py`](../../tests/unit/composition/factories/services/test_builder_unit.py)
+- [`test_smoke_composition.py`](../../tests/smoke/test_smoke_composition.py)
 
 ### Decision
 
@@ -150,7 +150,7 @@ This is the strongest RF-04 hotspot because:
 
 ### Recommended target shape
 
-- keep [`pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py) as the public facade,
+- keep [`pipeline_builder.py`](../../src/bioetl/composition/factories/services/pipeline_builder.py) as the public facade,
 - extract 2-3 themed helpers,
 - avoid generic utility modules,
 - preserve caller-facing contracts during the first decomposition wave.
@@ -198,8 +198,8 @@ This is a large collaborator bundle, but it is all in one merge-assembly reason 
 
 There is targeted unit coverage here after all:
 
-- [`test_composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py)
-- plus architecture boundary coverage in [`test_composite_cli_runtime_config_boundaries.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_composite_cli_runtime_config_boundaries.py)
+- [`test_composite_support_service_builders.py`](../../tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py)
+- plus architecture boundary coverage in [`test_composite_cli_runtime_config_boundaries.py`](../../tests/architecture/test_composite_cli_runtime_config_boundaries.py)
 
 ### Decision
 
@@ -218,4 +218,4 @@ The recommended next step from this memo has now been executed:
 
 1. RF-04B completed as a low-risk `registration_biblio` closeout slice.
 2. RF-04C completed as the main `pipeline_builder` decomposition wave.
-3. [`composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) remains intentionally outside implementation scope until stronger evidence appears.
+3. [`composite_support_service_builders.py`](../../src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py) remains intentionally outside implementation scope until stronger evidence appears.

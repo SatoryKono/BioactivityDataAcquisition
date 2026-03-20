@@ -26,13 +26,13 @@ graph TB
     end
 
     subgraph Helpers["Composed Helper Components"]
-        BMM["BatchMemoryManager<br/>--------<br/>adaptive batch sizing<br/>+ check_pressure()<br/>+ maybe_recover()"]:::size-md
-        BMR["BatchMetricsRecorder<br/>--------<br/>batch and error metrics<br/>+ track_batch_size()<br/>+ track_error()"]:::size-md
-        BTM["BatchTracingManager<br/>--------<br/>execution spans<br/>+ start_batch_span()<br/>+ end_span()"]:::size-md
+        BMM["BatchMemoryManagerService<br/>--------<br/>adaptive batch sizing<br/>+ check_pressure()<br/>+ maybe_recover()"]:::size-md
+        BMR["BatchMetricsRecorderService<br/>--------<br/>batch and error metrics<br/>+ track_batch_size()<br/>+ track_error()"]:::size-md
+        BTM["BatchTracingManagerService<br/>--------<br/>execution spans<br/>+ start_batch_span()<br/>+ end_span()"]:::size-md
         BT["BatchTransformer<br/>--------<br/>transform callbacks<br/>+ transform_batch()<br/>+ _check_dq_thresholds()"]:::size-md
         BW["BatchWriter<br/>--------<br/>bronze/silver/gold writes<br/>+ write_bronze()<br/>+ _validate_lock()"]:::size-md
         QM["QuarantineManager<br/>--------<br/>quarantine failed records<br/>+ quarantine_record()"]:::size-md
-        CM["CheckpointManager<br/>--------<br/>offset checkpoints<br/>+ load/save/delete"]:::size-md
+        CM["CheckpointManagerService<br/>--------<br/>offset checkpoints<br/>+ load/save/delete"]:::size-md
     end
 
     subgraph DataFlow["Data Flow Through Batch"]

@@ -128,4 +128,4 @@ flowchart TD
 ## Related Documents
 
 - **System Context**: [system-context.md](../../system-context.md)
-- **Architecture Diagrams**: [policy.md](../governance/policy.md)
+- **Architecture Diagrams**: [diagram catalog](../README.md)

@@ -70,7 +70,7 @@ classDiagram
         +extract_keys(df, key_column)
     }
 
-    class CompositeCheckpointManager {
+    class CompositeCheckpointService {
         +save_state(stage, data)
         +load_state()
         +get_completed_stages()
@@ -92,7 +92,7 @@ classDiagram
     CompositePipelineRunner *-- EnrichmentCoordinator
     CompositePipelineRunner *-- DependencyCoordinator
     CompositePipelineRunner *-- MergeService
-    CompositePipelineRunner *-- CompositeCheckpointManager
+    CompositePipelineRunner *-- CompositeCheckpointService
     CompositePipelineRunner *-- CompositePreflightValidator
     CompositePipelineRunner o-- CompositeRuntimeConfig
 

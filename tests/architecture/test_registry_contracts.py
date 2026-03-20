@@ -8,6 +8,7 @@ Updated for instance-level PipelineRegistry (2025-12).
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -143,6 +144,37 @@ class TestRegistryProtocol:
         assert not violations, (
             "Deferred runtime paths should use the named runtime bootstrap seam "
             "instead of raw class-level ProviderRegistry.ensure_loaded().\n"
+            + "\n".join(f"  - {item}" for item in violations)
+        )
+
+    def test_src_paths_avoid_raw_class_level_provider_registry_calls(
+        self,
+        src_dir: Path,
+    ) -> None:
+        """Production src should use named/provider-instance seams, not raw class calls."""
+        src_root = src_dir / "bioetl"
+        violations: list[str] = []
+
+        for py_file in src_root.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                func = node.func
+                if not isinstance(func, ast.Attribute):
+                    continue
+                if not isinstance(func.value, ast.Name):
+                    continue
+                if func.value.id != "ProviderRegistry":
+                    continue
+                violations.append(
+                    f"{py_file.relative_to(src_dir)}:{node.lineno}: "
+                    f"ProviderRegistry.{func.attr}(...)"
+                )
+
+        assert not violations, (
+            "Production src should use explicit registry instances or named default "
+            "registry seams instead of raw class-level ProviderRegistry calls.\n"
             + "\n".join(f"  - {item}" for item in violations)
         )
 

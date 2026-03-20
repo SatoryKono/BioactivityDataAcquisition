@@ -9,7 +9,6 @@ import os
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio

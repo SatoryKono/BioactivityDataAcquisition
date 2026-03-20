@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
 if TYPE_CHECKING:
@@ -24,12 +26,32 @@ class DomainConfigMapper(Protocol):
     ) -> PipelineConfig: ...
 
 
+class PipelineConfigDQResolver(Protocol):
+    """Typed resolver seam for DQ enrichment of validated pipeline YAML config."""
+
+    def resolve_dq_config(
+        self,
+        yaml_config: PipelineYamlConfig,
+    ) -> DQConfig: ...
+
+
+class PipelineConfigDQResolverBuilder(Protocol):
+    """Typed builder seam for creating pipeline DQ resolvers."""
+
+    def __call__(
+        self,
+        configs_root: Path,
+        *,
+        relaxed_dq: bool = False,
+    ) -> PipelineConfigDQResolver: ...
+
+
 @dataclass(frozen=True, slots=True)
 class DomainConfigResolver:
     """Resolve domain config from validated YAML config plus hierarchical DQ config."""
 
     configs_root: Path = Path("configs")
-    loader_class: type[PipelineConfigLoader] = PipelineConfigLoader
+    loader_class: PipelineConfigDQResolverBuilder = PipelineConfigLoader
     domain_mapper: DomainConfigMapper = yaml_config_to_domain
 
     def resolve(
@@ -44,4 +66,23 @@ class DomainConfigResolver:
         return self.domain_mapper(yaml_config, resolved_dq_config=resolved_dq)
 
 
-__all__ = ["DomainConfigResolver"]
+def load_domain_pipeline_config(
+    pipeline_name: str,
+    *,
+    configs_root: Path = Path("configs"),
+    relaxed_dq: bool = False,
+    yaml_loader: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
+    loader_class: PipelineConfigDQResolverBuilder = PipelineConfigLoader,
+    domain_mapper: DomainConfigMapper = yaml_config_to_domain,
+) -> PipelineConfig:
+    """Load domain config through the canonical function-based config flow."""
+    yaml_config = yaml_loader(pipeline_name)
+    resolver = DomainConfigResolver(
+        configs_root=configs_root,
+        loader_class=loader_class,
+        domain_mapper=domain_mapper,
+    )
+    return resolver.resolve(yaml_config, relaxed_dq=relaxed_dq)
+
+
+__all__ = ["DomainConfigResolver", "load_domain_pipeline_config"]

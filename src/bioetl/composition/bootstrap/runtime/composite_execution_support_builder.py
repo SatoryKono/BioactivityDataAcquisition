@@ -1,0 +1,60 @@
+"""Execution-support builders for composite runtime composition."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinatorService,
+)
+from bioetl.application.composite.dependency_key_resolvers import (
+    create_chained_key_resolver,
+    create_seed_key_resolver,
+)
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
+)
+from bioetl.application.composite.dependency_result_mapper import (
+    DependencyResultService,
+)
+from bioetl.application.composite.key_extractor import KeyExtractorService
+from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+    ExecutionSupportServicesBundle,
+)
+
+if TYPE_CHECKING:
+    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.storage.delta_reader import DeltaReader
+
+
+def build_execution_support_services(
+    *,
+    config: CompositeConfig,
+    logger: LoggerPort,
+    delta_reader: DeltaReader,
+) -> ExecutionSupportServicesBundle:
+    """Build execution-facing support services shared across runtime stages."""
+    return ExecutionSupportServicesBundle(
+        key_extractor=KeyExtractorService(
+            delta_reader=delta_reader,
+            logger=logger,
+        ),
+        dependency_coordinator=DependencyCoordinatorService(
+            logger=logger,
+            seed_key_resolver=create_seed_key_resolver(logger),
+            chained_key_resolver=create_chained_key_resolver(logger),
+            progress_service=DependencyProgressService(logger),
+            result_service=DependencyResultService(logger),
+            delta_reader=delta_reader,
+        ),
+        coordinator=EnrichmentCoordinatorService(
+            logger=logger,
+            dq_config=config.dq,
+            max_concurrency=config.execution.max_concurrency,
+        ),
+    )
+
+
+__all__ = ["build_execution_support_services"]

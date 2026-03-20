@@ -34,7 +34,7 @@ stateDiagram-v2
         VALIDATING --> QUARANTINING: DQ error rate > threshold
         QUARANTINING --> WRITING: QuarantineManager.route()
         WRITING --> CHECKPOINTING: BatchWriter.write()
-        CHECKPOINTING --> EXTRACTING: CheckpointManager.save()\nmore batches
+        CHECKPOINTING --> EXTRACTING: CheckpointManagerService.save()\nmore batches
         CHECKPOINTING --> BATCH_DONE: no more batches
     }
 

@@ -21,7 +21,7 @@ flowchart TB
         N1["BatchExecutor"]
         N2["BatchTransformer"]
         N3["BatchWriter"]
-        N5["BatchTracingManager"]
+        N5["BatchTracingManagerService"]
         N6["DataSourcePort"]
         N7["BaseTransformer"]
         N9["BronzeWriter"]
@@ -32,7 +32,7 @@ flowchart TB
         N17["primary_keys"]
         N18["Gold Layer"]
         N19["QuarantineManager"]
-        N20["BatchMetricsRecorder"]
+        N20["BatchMetricsRecorderService"]
     end
 
     N4 --> N1

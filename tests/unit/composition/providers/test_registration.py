@@ -191,6 +191,25 @@ class TestRegisterAllProviders:
 
         mock_create_support.assert_called_once_with(provider_registry=registry)
 
+    @patch("bioetl.composition.providers.registration.get_default_provider_registrar")
+    @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
+    @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
+    def test_default_registration_uses_named_default_registry_seam(
+        self,
+        mock_biblio: MagicMock,
+        mock_bio: MagicMock,
+        mock_get_default_registrar: MagicMock,
+    ) -> None:
+        """Implicit registration should resolve the default registry via helper."""
+        default_registry = create_provider_registry()
+        mock_get_default_registrar.return_value = default_registry
+        mock_bio.return_value = {}
+        mock_biblio.return_value = {}
+
+        register_all_providers()
+
+        mock_get_default_registrar.assert_called_once_with()
+
 
 @pytest.mark.unit
 class TestBuildProviderConfigs:

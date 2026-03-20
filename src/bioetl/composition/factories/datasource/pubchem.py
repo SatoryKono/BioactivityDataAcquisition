@@ -8,10 +8,10 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import cast
 
-from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
+from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )

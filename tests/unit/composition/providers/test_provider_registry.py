@@ -18,6 +18,9 @@ from bioetl.composition.providers import (
     create_provider_registry,
     register_provider,
 )
+from bioetl.composition.providers.provider_registry import (
+    register_default_provider_config,
+)
 from bioetl.composition.providers.loader import (
     ensure_providers_loaded,
     get_loaded_status,
@@ -211,6 +214,21 @@ class TestProviderRegistry:
         ProviderRegistry.clear()
 
         assert ProviderRegistry.list_providers() == []
+
+    def test_register_default_provider_config_targets_lazy_singleton(self):
+        """Named compatibility helper should register on the default singleton only."""
+        isolated = create_provider_registry()
+        config = ProviderConfig(
+            adapter_class=MockAdapter,
+            requires_http_client=False,
+            requires_logger=False,
+        )
+
+        register_default_provider_config("default_seam_provider", config)
+
+        assert ProviderRegistry.is_registered("default_seam_provider") is True
+        assert ProviderRegistry.get("default_seam_provider") is config
+        assert isolated.is_registered("default_seam_provider") is False
 
     def test_isolated_registry_keeps_state_local(self):
         """Instance-scoped registries must not leak writes into the default singleton."""

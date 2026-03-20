@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-03-20T17:51:43
+- Generated: 2026-03-20T18:50:13
 - Diagram count: 55
 
 ## Table of Contents
@@ -836,7 +836,7 @@
 ![40-application-core-collaboration](../foundation/png/40-application-core-collaboration.png)
 
 ### Описание
-Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. На схеме отражено примерно 15 узлов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineService (frozen dataclass). Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(), ShutdownService • should_shutdown() • request_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • finalize_run() • emit_summary().
+Диаграмма «Application Core Component Collaboration» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/. На схеме отражено примерно 15 узлов и 19 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability, PipelineService (frozen dataclass). Показательные узлы для быстрого чтения: run() — main orchestrator, HeartbeatService • start() • stop(), CheckpointManagerService • load_checkpoint() • save_checkpoint(), ShutdownService • is_shutting_down() • initiate_shutdown(), PreflightService • validate_pipeline_config() • validate_provider_health(), PostrunService • finalize_run() • emit_summary().
 
 ### Метаданные
 - Тип: `flowchart`

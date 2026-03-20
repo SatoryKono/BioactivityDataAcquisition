@@ -10,9 +10,9 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
     from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
 

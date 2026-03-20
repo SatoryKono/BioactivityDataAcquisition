@@ -212,6 +212,16 @@ def get_default_provider_registry() -> ProviderRegistry:
     return _default_provider_registry
 
 
+def get_default_provider_registrar() -> ProviderRegistry:
+    """Return the sanctioned default-registry seam for provider registration."""
+    return get_default_provider_registry()
+
+
+def register_default_provider_config(name: str, config: ProviderConfig) -> None:
+    """Register a provider config through the named default-registry seam."""
+    get_default_provider_registrar().register(name, config)
+
+
 def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegistry:
     """Ensure a provider registry instance is populated before use."""
     ensure_provider_registry_loaded(registry)

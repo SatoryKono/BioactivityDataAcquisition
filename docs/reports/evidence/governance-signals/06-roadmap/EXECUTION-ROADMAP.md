@@ -4,7 +4,7 @@
 
 - Wave 1 completed on 2026-03-20.
 - Wave 2 completed on 2026-03-20.
-- Wave 3 calibration artifact now lives in [`WAVE-3-CALIBRATION-MEMO.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/governance-signals/06-roadmap/WAVE-3-CALIBRATION-MEMO.md).
+- Wave 3 calibration artifact now lives in [`WAVE-3-CALIBRATION-MEMO.md`](./WAVE-3-CALIBRATION-MEMO.md).
 
 ## Purpose
 
@@ -17,9 +17,9 @@ It is intentionally staged:
 
 ## Inputs
 
-- [`SYN-governance-signals.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/governance-signals/03-synthesis/SYN-governance-signals.md)
-- [`DECISIONS.yaml`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/governance-signals/04-decisions/DECISIONS.yaml)
-- [`RISKS.yaml`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/governance-signals/05-risks/RISKS.yaml)
+- [`SYN-governance-signals.md`](../03-synthesis/SYN-governance-signals.md)
+- [`DECISIONS.yaml`](../04-decisions/DECISIONS.yaml)
+- [`RISKS.yaml`](../05-risks/RISKS.yaml)
 
 ## Ordering Logic
 

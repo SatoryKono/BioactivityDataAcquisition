@@ -15,6 +15,9 @@ from typing import (
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
+    from bioetl.composition.providers._registration_contracts import (
+        ProviderRegistrarProtocol,
+    )
 
 R = TypeVar("R")
 
@@ -98,3 +101,12 @@ class ProvidersDescriptor(Generic[ProviderRegistryT]):
     ) -> dict[str, ProviderConfig]:
         target = obj if obj is not None else objtype._get_default()
         return target._store._providers
+
+
+def get_default_provider_registrar() -> ProviderRegistrarProtocol:
+    """Return the sanctioned default-registry seam for provider registration."""
+    from bioetl.composition.providers.provider_registry import (
+        get_default_provider_registry,
+    )
+
+    return get_default_provider_registry()

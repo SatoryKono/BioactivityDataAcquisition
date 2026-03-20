@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.composition.providers._models import ProviderConfig
 
 if TYPE_CHECKING:
+    from bioetl.composition.providers.provider_registry import ProviderRegistry
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
-    from bioetl.composition.providers.provider_registry import ProviderRegistry
 
 
 class ProviderRegistrarProtocol(Protocol):

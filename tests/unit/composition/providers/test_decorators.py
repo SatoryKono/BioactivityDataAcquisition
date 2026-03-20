@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 
@@ -65,6 +66,30 @@ class TestRegisterProviderClass:
         )
 
         assert ProviderRegistry.is_registered("fake_provider")
+
+    def test_registers_via_named_default_registry_seam(self) -> None:
+        """Registration should go through the named default-registry seam."""
+        with patch(
+            "bioetl.composition.providers.decorators.register_default_provider_config"
+        ) as mock_register:
+            _register_provider_class(
+                cls=_FakeAdapter,
+                name="seam_provider",
+                http_rate=5.0,
+                http_capacity=10,
+                requires_http_client=False,
+                requires_logger=False,
+                rate_overrides=None,
+                custom_creator=None,
+                default_kwargs={"batch_size": 100},
+            )
+
+        mock_register.assert_called_once()
+        name, config = mock_register.call_args.args
+        assert name == "seam_provider"
+        assert config.adapter_class is _FakeAdapter
+        assert config.default_kwargs == {"batch_size": 100}
+        assert config.http_config is None
 
     def test_creates_http_config_when_http_required(self) -> None:
         """Should create HttpConfig when requires_http_client is True."""

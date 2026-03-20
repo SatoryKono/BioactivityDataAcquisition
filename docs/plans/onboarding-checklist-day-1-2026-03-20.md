@@ -12,7 +12,7 @@ Use together with:
 - `docs/00-project/00-map.md`
 - `docs/00-project/RULES.md`
 - `docs/00-project/TOOLS.md`
-- `docs/reports/project-briefing-capability-discovery-2026-03-20.md`
+- `docs/plans/project-briefing-capability-discovery-2026-03-20.md`
 
 ## Goal By End Of Day
 

@@ -449,14 +449,14 @@ Delta merge by content-hash — критическая операция для i
    - Lock validation
    - Writes to Bronze/Silver/Gold
 
-1. **BatchMetricsRecorder** (130 LOC)
+1. **BatchMetricsRecorderService** (130 LOC)
 
    - Records start/success/failure
    - Emits to Prometheus
 
 **Supporting Managers:**
 
-- LockCoordinator, CheckpointManager, QuarantineManager, MemoryMonitor
+- LockCoordinator, CheckpointManagerService, QuarantineManager, MemoryMonitor
 
 **Services:**
 
@@ -725,7 +725,7 @@ bioetl run --pipeline chembl_activity \
 
 ### Полный Список Диаграмм
 
-См. [`diagram-catalog.md`](../governance/diagram-catalog.md) для каталога диаграмм.
+См. [`diagrams/README.md`](../README.md) для каталога диаграмм.
 
 ### TOP-50 Таблица
 

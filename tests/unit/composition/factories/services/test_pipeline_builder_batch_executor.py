@@ -52,17 +52,19 @@ class TestCreateBatchExecutorFromPipeline:
     """Tests for batch-executor assembly from pipeline context."""
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.PanderaGoldValidator"
-    )
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchExecutor")
-    @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchExtractionLoopService"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_components_and_processing_service"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_runtime_managers"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExtractionLoopService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_components_and_processing_service"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_runtime_managers"
     )
     def test_uses_false_gold_filter_when_runtime_skip_gold(
         self,
@@ -106,17 +108,19 @@ class TestCreateBatchExecutorFromPipeline:
         mock_extraction_loop.assert_called_once()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.PanderaGoldValidator"
-    )
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchExecutor")
-    @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchExtractionLoopService"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_components_and_processing_service"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_runtime_managers"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExtractionLoopService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_components_and_processing_service"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_runtime_managers"
     )
     def test_forwards_runtime_manager_inputs(
         self,
@@ -172,17 +176,19 @@ class TestCreateBatchExecutorFromPipeline:
         mock_batch_executor.assert_called_once()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.PanderaGoldValidator"
-    )
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchExecutor")
-    @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchExtractionLoopService"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_components_and_processing_service"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_runtime_managers"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExtractionLoopService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_components_and_processing_service"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_runtime_managers"
     )
     def test_uses_default_checkpoint_interval_when_pipeline_config_missing(
         self,
@@ -220,17 +226,19 @@ class TestCreateBatchExecutorFromPipeline:
         )
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.PanderaGoldValidator"
-    )
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchExecutor")
-    @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchExtractionLoopService"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_components_and_processing_service"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_runtime_managers"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExtractionLoopService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_components_and_processing_service"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_runtime_managers"
     )
     def test_propagates_output_paths_and_flat_structure_into_record_processor_config(
         self,
@@ -273,17 +281,19 @@ class TestCreateBatchExecutorFromPipeline:
         mock_extraction_loop.assert_called_once()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.PanderaGoldValidator"
-    )
-    @patch("bioetl.composition.factories.services.pipeline_builder.BatchExecutor")
-    @patch(
-        "bioetl.composition.factories.services.pipeline_builder.BatchExtractionLoopService"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.PanderaGoldValidator"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_components_and_processing_service"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExecutor"
     )
     @patch(
-        "bioetl.composition.factories.services.pipeline_builder.build_runtime_managers"
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.BatchExtractionLoopService"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_components_and_processing_service"
+    )
+    @patch(
+        "bioetl.composition.factories.services.pipeline_batch_executor_builder.build_runtime_managers"
     )
     def test_wires_batch_size_and_checkpoint_interval_from_pipeline_config(
         self,

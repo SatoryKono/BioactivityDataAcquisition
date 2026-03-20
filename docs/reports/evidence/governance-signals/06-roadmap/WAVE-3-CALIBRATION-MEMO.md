@@ -11,12 +11,12 @@ The goal is intentionally narrow:
 
 ## Inputs
 
-- [`SYN-governance-signals.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/governance-signals/03-synthesis/SYN-governance-signals.md)
-- [`DECISIONS.yaml`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/governance-signals/04-decisions/DECISIONS.yaml)
-- [`EXECUTION-ROADMAP.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/evidence/governance-signals/06-roadmap/EXECUTION-ROADMAP.md)
-- [`duplication-baseline.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/reports/quality/duplication-baseline.md)
-- [`RF-FS-002-baseline-2026-03-19.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/RF-FS-002-baseline-2026-03-19.md)
-- [`RF-FS-001-baseline-2026-03-19.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/RF-FS-001-baseline-2026-03-19.md)
+- [`SYN-governance-signals.md`](../03-synthesis/SYN-governance-signals.md)
+- [`DECISIONS.yaml`](../04-decisions/DECISIONS.yaml)
+- [`EXECUTION-ROADMAP.md`](./EXECUTION-ROADMAP.md)
+- [`duplication-baseline.md`](../../../../../reports/quality/duplication-baseline.md)
+- [`RF-FS-002-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-002-baseline-2026-03-19.md)
+- [`RF-FS-001-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-001-baseline-2026-03-19.md)
 
 ## Calibration Rules
 
@@ -34,7 +34,7 @@ Candidates were ranked against four questions:
 **Status:** keep as the current named hotspot program.
 
 This remains the cleanest existing program boundary:
-- it is already budgeted in [`debt_scorecard.yaml`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/quality/debt_scorecard.yaml),
+- it is already budgeted in [`debt_scorecard.yaml`](../../../../../configs/quality/debt_scorecard.yaml),
 - it still appears in the raw large-file tail,
 - it was already called out in prior structural planning as a cognitively wide package that mixes lifecycle, batch execution, callbacks, tracing-adjacent helpers, and shared execution contracts.
 
@@ -47,7 +47,7 @@ This is still the best reference model for what a named hotspot program should l
 **Recommendation:** add as the next named hotspot program in a future follow-up wave.
 
 **Why it ranks first**
-- It is already called out in [`RF-FS-002-baseline-2026-03-19.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/RF-FS-002-baseline-2026-03-19.md) as one of the four hotspot packages and is described there as mixing planning, dependency/join logic, validation, preflight, and runner behavior.
+- It is already called out in [`RF-FS-002-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-002-baseline-2026-03-19.md) as one of the four hotspot packages and is described there as mixing planning, dependency/join logic, validation, preflight, and runner behavior.
 - The raw file tail is concentrated enough to look like one seam rather than scattered provider noise. Current larger files include:
   - `runner_pkg/runner_support_mixin.py`
   - `dependency_joiner.py`
@@ -74,7 +74,7 @@ This is still the best reference model for what a named hotspot program should l
   - `factories/storage/_helpers.py`
   - `factories/services/pipeline_builder.py`
   - `factories/pipeline/runner_assembly.py`
-- Prior planning in [`RF-FS-001-baseline-2026-03-19.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/RF-FS-001-baseline-2026-03-19.md) already identifies `pipeline_builder.py` as a composition hotspot that should be decomposed by actual seams, not just by line count.
+- Prior planning in [`RF-FS-001-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-001-baseline-2026-03-19.md) already identifies `pipeline_builder.py` as a composition hotspot that should be decomposed by actual seams, not just by line count.
 
 **Why it does not rank first**
 - The current duplication baseline for `composition` is still visibly noisy around:
@@ -141,7 +141,7 @@ and defer any `composition` expansion until after one more normalization/calibra
 
 If the user wants to operationalize Wave 3, the next change should be a small governance PR that:
 
-1. adds a second named hotspot program in [`debt_scorecard.yaml`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/quality/debt_scorecard.yaml) for `src/bioetl/application/composite/`,
+1. adds a second named hotspot program in [`debt_scorecard.yaml`](../../../../../configs/quality/debt_scorecard.yaml) for `src/bioetl/application/composite/`,
 2. keeps budgets intentionally narrow and symmetric with the existing `core_orchestration` style,
 3. does not add any new blocking duplication gate,
 4. leaves `composition/factories` in report-only observation mode.

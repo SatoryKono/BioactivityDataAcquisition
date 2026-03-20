@@ -8,9 +8,11 @@ ProviderConfig building delegated to sibling modules (Wave 3 simplification).
 
 from __future__ import annotations
 
-from importlib import import_module
 from typing import Any, cast
 
+from bioetl.composition.providers._default_registry import (
+    get_default_provider_registrar,
+)
 from bioetl.composition.providers._models import ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
@@ -76,10 +78,4 @@ def _resolve_registration_registry(
     if registry is not None:
         return registry
 
-    provider_registry_module = import_module(
-        "bioetl.composition.providers.provider_registry"
-    )
-    return cast(
-        ProviderRegistrarProtocol,
-        provider_registry_module.get_default_provider_registry(),
-    )
+    return get_default_provider_registrar()

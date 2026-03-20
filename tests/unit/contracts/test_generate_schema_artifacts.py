@@ -34,7 +34,7 @@ def test_check_mode_does_not_invoke_subprocess_generation(monkeypatch) -> None:
 
     called = False
 
-    def _fail_subprocess(*args, **kwargs):  # noqa: ANN001, ANN002
+    def _fail_subprocess(*args, **kwargs):
         nonlocal called
         called = True
         raise AssertionError("subprocess.run must not be called in check mode")
@@ -61,7 +61,7 @@ def test_check_mode_reports_stale_snapshot_without_writing(monkeypatch) -> None:
 
     called = False
 
-    def _fail_subprocess(*args, **kwargs):  # noqa: ANN001, ANN002
+    def _fail_subprocess(*args, **kwargs):
         nonlocal called
         called = True
         raise AssertionError("subprocess.run must not be called in check mode")
