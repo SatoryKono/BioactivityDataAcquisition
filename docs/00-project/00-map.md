@@ -102,7 +102,7 @@ docs/
 | Document                                                                                     | Covers                                   | RULES.md |
 |----------------------------------------------------------------------------------------------|------------------------------------------|----------|
 | [system-context.md](../02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
-| [container-diagram.md](../02-architecture/diagrams/guide/container-reference.md)                               | C4 Container, Docker services            | §5.6     |
+| [container-diagram.md](../02-architecture/diagrams/guide/container-reference.md)                               | C4 Container, Local-Only runtime         | §5.6     |
 | [data-flow.md](../02-architecture/diagrams/guide/data-flow-reference.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
 | [05-composition-layer.md](../02-architecture/05-composition-layer.md)                           | Composition Root, DI, Factories          | §1.1     |
 | [ADR-001: Delta Lake](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |

@@ -50,12 +50,18 @@ Manual fallback without `make`:
 uv sync --extra dev --extra tracing
 ```
 
+If you need MkDocs or `make docs-build`, install the separate docs toolchain extra:
+
+```bash
+uv sync --extra dev --extra tracing --extra docs
+```
+
 On Windows without `make` or `uv`:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e .[dev,tracing]
+pip install -e .[dev,tracing,docs]
 ```
 
 If you prefer the convenience aggregate target, `make setup-dev` is still valid;

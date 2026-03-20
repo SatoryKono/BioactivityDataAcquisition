@@ -26,6 +26,7 @@
 ## Docs Toolchain
 
 - `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
+- Docs site tooling lives in the separate `docs` extra; install it via `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"` before running MkDocs commands.
 - Standard docs checks:
 ```bash
 python -m scripts.docs check-links

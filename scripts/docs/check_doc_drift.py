@@ -132,7 +132,10 @@ def _collect_modules(directory: Path) -> set[str]:
 
 def _extract_backtick_refs(text: str) -> list[str]:
     """Extract all backtick-quoted references from markdown text."""
-    return re.findall(r"`([^`]+)`", text)
+    # Ignore fenced code blocks so triple-backtick regions do not swallow
+    # unrelated inline code references during naive regex matching.
+    text_without_fences = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+    return re.findall(r"(?<!`)`([^`\n]+)`(?!`)", text_without_fences)
 
 
 def _read_doc(path: Path) -> str:
