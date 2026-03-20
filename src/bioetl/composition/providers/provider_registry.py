@@ -33,6 +33,7 @@ __all__ = [
     "ProviderConfig",
     "ProviderRegistry",
     "create_provider_registry",
+    "ensure_provider_registry_ready",
     "get_default_provider_registry",
 ]
 
@@ -209,6 +210,12 @@ def get_default_provider_registry() -> ProviderRegistry:
     if _default_provider_registry is None:
         _default_provider_registry = ProviderRegistry()
     return _default_provider_registry
+
+
+def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegistry:
+    """Ensure a provider registry instance is populated before use."""
+    ensure_provider_registry_loaded(registry)
+    return registry
 
 
 def create_provider_registry() -> ProviderRegistry:

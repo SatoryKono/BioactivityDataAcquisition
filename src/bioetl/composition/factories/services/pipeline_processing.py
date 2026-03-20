@@ -14,11 +14,14 @@ from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.protocols import GoldFilterCallback
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
-    from bioetl.domain.ports import BatchIdGeneratorPort, TracingPort
+    from bioetl.domain.ports import (
+        BatchIdGeneratorPort,
+        GoldValidatorPort,
+        TracingPort,
+    )
 
 
 def build_components_and_processing_service(
@@ -28,7 +31,7 @@ def build_components_and_processing_service(
     error_classifier: ErrorClassifier,
     callbacks: PipelineCallbacksContext,
     gold_filter: GoldFilterCallback,
-    gold_validator: PanderaGoldValidator,
+    gold_validator: GoldValidatorPort,
     tracer: TracingPort | None,
     lock_validator: Callable[[], Awaitable[bool]] | None,
     tracing_manager: BatchTracingManagerService,
@@ -43,7 +46,7 @@ def build_components_and_processing_service(
         error_classifier: Classifier for categorizing processing errors.
         callbacks: Pipeline transformation callbacks (transform, gold_filter, gold_transform).
         gold_filter: Predicate determining if a Silver record writes to Gold.
-        gold_validator: Pandera validator applied to Gold-layer DataFrames.
+        gold_validator: Gold-layer validator port applied to processed records.
         tracer: Optional TracingPort for distributed tracing.
         lock_validator: Optional async callable for lock validation before writes.
         tracing_manager: Batch-level tracing manager for span lifecycle.

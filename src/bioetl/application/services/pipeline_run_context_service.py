@@ -19,7 +19,7 @@ __all__ = [
 
 
 if TYPE_CHECKING:
-    from bioetl.application.services.pipeline_runner_service import RunOptions
+    from bioetl.application.services.pipeline_runner_models import RunOptions
 
 
 TOptions = TypeVar("TOptions")

@@ -32,6 +32,10 @@ from bioetl.application.core.protocols import (
 )
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
+from bioetl.composition.factories.services.pipeline_record_processor_builder import (
+    build_record_processor_config_and_validator,
+    create_record_processor_from_pipeline as build_record_processor_from_pipeline,
+)
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
 )
@@ -49,7 +53,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.record_processor import RecordProcessor
-    from bioetl.domain.config import DQConfig, MemoryConfig
+    from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.medallion import LoadingStrategy
     from bioetl.domain.ports import (
@@ -152,63 +156,16 @@ def create_record_processor_from_pipeline(
     tracer: TracingPort | None = None,
 ) -> RecordProcessor:
     """Create RecordProcessor from pipeline using delegated builder."""
-    return create_record_processor_fn(
-        services=pipeline.services,
-        context=pipeline.context,
-        pipeline_name=pipeline.config.pipeline_name,
-        provider=pipeline.config.provider,
-        entity_type=pipeline.config.entity_type,
+    return build_record_processor_from_pipeline(
+        pipeline=pipeline,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
-        dq_config=pipeline.config.dq,
-        primary_keys=pipeline.config.table.primary_keys,
-        silver_table=pipeline.config.effective_silver_table,
-        gold_table=pipeline.config.effective_gold_table,
-        silver_write_mode=pipeline.config.table.silver_write_mode,
-        gold_write_mode=pipeline.config.table.gold_write_mode,
-        on_schema_mismatch=pipeline.config.table.on_schema_mismatch,
-        transform_callback=callbacks.transform,
-        gold_filter_callback=callbacks.gold_filter,
-        gold_transform_callback=callbacks.gold_transform,
+        callbacks=callbacks,
+        create_record_processor_fn=create_record_processor_fn,
         strict_gold_validation=strict_gold_validation,
         lock_validator=lock_validator,
         tracer=tracer,
-        column_groups=tuple(pipeline.config.column_groups),
-        scd_config=pipeline.config.scd_config,
     )
-
-
-def _build_record_processor_config(
-    *,
-    pipeline: BasePipeline,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    strict_gold_validation: bool,
-    bronze_output_path: str | None,
-    silver_output_path: str | None,
-    gold_output_path: str | None,
-    flat_structure: bool,
-) -> tuple[RecordProcessorConfig, PanderaGoldValidator]:
-    processor_config = RecordProcessorConfig(
-        pipeline_name=pipeline.config.pipeline_name,
-        provider=pipeline.config.provider,
-        entity_type=pipeline.config.entity_type,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        dq_config=cast("DQConfig | None", pipeline.config.dq),
-        table_config=pipeline.config.table,
-        bronze_output_path=bronze_output_path,
-        silver_output_path=silver_output_path,
-        gold_output_path=gold_output_path,
-        flat_structure=flat_structure,
-        column_groups=pipeline.config.column_groups,
-        scd_config=pipeline.config.scd_config,
-    )
-    gold_validator = PanderaGoldValidator(
-        cast("pdr.DataFrameSchema | None", cast(object, gold_schema)),
-        strict=strict_gold_validation,
-    )
-    return processor_config, gold_validator
 
 
 def create_batch_executor_from_pipeline(
@@ -237,7 +194,7 @@ def create_batch_executor_from_pipeline(
         if pipeline.runtime.skip_gold
         else callbacks.gold_filter
     )
-    processor_config, gold_validator = _build_record_processor_config(
+    processor_config, gold_validator = build_record_processor_config_and_validator(
         pipeline=pipeline,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
@@ -246,6 +203,7 @@ def create_batch_executor_from_pipeline(
         silver_output_path=silver_output_path,
         gold_output_path=gold_output_path,
         flat_structure=flat_structure,
+        gold_validator_factory=PanderaGoldValidator,
     )
     (
         memory_manager,

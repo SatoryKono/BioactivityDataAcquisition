@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1199,
-    "total_internal_imports": 4452,
+    "scanned_modules": 1200,
+    "total_internal_imports": 4462,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 248,
@@ -23,19 +23,19 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 213,
+      "imports": 218,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 312,
+      "imports": 314,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 234,
+      "imports": 237,
       "allowed": true
     },
     {
@@ -94,14 +94,14 @@
       "imports": 98
     },
     {
+      "source": "composition.factories",
+      "target": "application.core",
+      "imports": 88
+    },
+    {
       "source": "infrastructure.adapters",
       "target": "domain.types",
       "imports": 85
-    },
-    {
-      "source": "composition.factories",
-      "target": "application.core",
-      "imports": 83
     },
     {
       "source": "application.pipelines",
@@ -146,7 +146,7 @@
     {
       "source": "composition.factories",
       "target": "domain.ports",
-      "imports": 41
+      "imports": 42
     },
     {
       "source": "composition.factories",
@@ -220,6 +220,11 @@
     },
     {
       "source": "composition.factories",
+      "target": "domain.types",
+      "imports": 20
+    },
+    {
+      "source": "composition.factories",
       "target": "infrastructure.schemas",
       "imports": 20
     },
@@ -231,11 +236,6 @@
     {
       "source": "composition.factories",
       "target": "domain.schemas",
-      "imports": 19
-    },
-    {
-      "source": "composition.factories",
-      "target": "domain.types",
       "imports": 19
     },
     {
@@ -279,6 +279,11 @@
       "imports": 15
     },
     {
+      "source": "composition.factories",
+      "target": "domain.config",
+      "imports": 15
+    },
+    {
       "source": "infrastructure.config",
       "target": "domain.types",
       "imports": 15
@@ -296,11 +301,6 @@
     {
       "source": "application.pipelines",
       "target": "domain.value_objects",
-      "imports": 14
-    },
-    {
-      "source": "composition.factories",
-      "target": "domain.config",
       "imports": 14
     },
     {

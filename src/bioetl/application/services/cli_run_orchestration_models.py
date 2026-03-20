@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.pipeline_runner_service import RunOptions
+from bioetl.application.services.pipeline_runner_models import RunOptions
 
 __all__ = [
     "RunExecutionContext",

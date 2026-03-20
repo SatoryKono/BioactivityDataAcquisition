@@ -1,7 +1,7 @@
 # RF-04 Composition Hotspots Execution Plan
 
 **Date:** 2026-03-20
-**Status:** Proposed
+**Status:** Partially implemented, core slices verified
 **Primary rationale:** decompose composition hotspots by actual seams and change coupling, not by file length alone
 **Normative constraint:** [`RULES.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md)
 
@@ -21,6 +21,41 @@ Success is:
 - cleaner assembly ownership,
 - lower duplication in real wiring paths,
 - clearer navigation across `composition/`.
+
+## 0.1. Implementation Closeout
+
+RF-04 has now completed the intended core path:
+
+- RF-04A completed as an explicit seam-analysis memo in [`rf-04a-composition-seam-map-2026-03-20.md`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/plans/rf-04a-composition-seam-map-2026-03-20.md)
+- RF-04B completed for [`registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py)
+- RF-04C completed for [`pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py)
+- RF-04D remains intentionally deferred for [`composite_support_service_builders.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py)
+
+Delivered structural changes:
+
+- bibliographic provider request-profile resolution moved into [`_registration_biblio_profiles.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/_registration_biblio_profiles.py)
+- [`registration_biblio.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/registration_biblio.py) now stays focused on provider registration and data-source facade wiring
+- record-processor projection/config assembly moved into [`pipeline_record_processor_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_record_processor_builder.py)
+- [`pipeline_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/services/pipeline_builder.py) remains the public facade while delegating the extracted seam
+
+Verification completed successfully for implemented slices:
+
+- provider registration tests:
+  - [`test_registration_biblio_profiles.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_biblio_profiles.py)
+  - [`test_registration_data_sources.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_data_sources.py)
+  - [`test_registration_biblio_provider_configs.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration_biblio_provider_configs.py)
+  - [`test_registration.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/providers/test_registration.py)
+- provider registration architecture guards:
+  - [`test_provider_registry_decomposition.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_provider_registry_decomposition.py)
+  - [`test_compatibility_freeze_guards.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_compatibility_freeze_guards.py)
+- pipeline builder / composition tests:
+  - [`test_pipeline_record_processor_builder.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_record_processor_builder.py)
+  - [`test_pipeline_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_unit.py)
+  - [`test_pipeline_builder_batch_executor.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py)
+  - [`test_services_factory.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_services_factory.py)
+  - [`test_builder_unit.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/unit/composition/factories/services/test_builder_unit.py)
+  - [`test_smoke_composition.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/smoke/test_smoke_composition.py)
+  - [`test_layer_dependencies.py`](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_layer_dependencies.py)
 
 ## 1. Scope Snapshot
 
@@ -79,6 +114,7 @@ Current implication:
 
 ### RF-04A. Seam Analysis And Delegation Map
 
+- **Status:** completed
 - **Type:** analysis
 - **Layer:** composition
 - **Risk:** low
@@ -97,6 +133,7 @@ Current implication:
 
 ### RF-04B. Registration Biblio Closeout Slice
 
+- **Status:** completed
 - **Type:** refactor
 - **Layer:** composition/providers
 - **Risk:** low
@@ -119,6 +156,7 @@ Current implication:
 
 ### RF-04C. Main Decomposition Wave For Pipeline Builder
 
+- **Status:** completed
 - **Type:** refactor
 - **Layer:** composition/factories/services
 - **Risk:** medium
@@ -142,6 +180,7 @@ Current implication:
 
 ### RF-04D. Evidence Gate For Composite Support Builders
 
+- **Status:** deferred by explicit seam analysis
 - **Type:** analysis-first
 - **Layer:** composition/bootstrap/runtime
 - **Risk:** medium if executed blindly, low if deferred
@@ -244,11 +283,16 @@ RF-04 is complete only if all of the following are true:
    - given an evidence-backed follow-up slice, or
    - explicitly deferred as cohesive enough for now.
 
-## 8. Recommended Immediate Start
+## 8. Current Outcome
 
-Start with **RF-04A + RF-04B**, not with `pipeline_builder.py`.
+The executed path matched the intended sequence:
 
-Why:
-- `registration_biblio.py` is lower-risk and already partially prepared for seam-first cleanup;
-- it lets us validate the execution style for RF-04 without opening the wider `pipeline_builder` blast radius;
-- once that control slice is green, `pipeline_builder.py` becomes the main refactor wave with much lower uncertainty.
+- start with **RF-04A + RF-04B**,
+- use that low-risk slice to validate the seam-first approach,
+- then complete RF-04C as the main decomposition wave,
+- keep RF-04D deferred until stronger evidence appears.
+
+This means RF-04 has already delivered the intended practical result:
+- one provider-registration hotspot reduced to a cleaner facade,
+- one composition/factory hotspot decomposed by actual assembly seams,
+- one visible but cohesive candidate explicitly left out of churn-heavy refactoring.
