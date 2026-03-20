@@ -1,0 +1,18 @@
+id: EV-provider-registry-governance-still-defers-runtime-instance-ownership-decision
+pillar: provider-registry-runtime-ownership
+source:
+  type: internal-doc
+  ref: "docs/plans/rf-07d-runtime-deferred-wave-plan-2026-03-20.md:97-100,129-143,149-166,198-203,209-219; docs/plans/rf-07-provider-registry-migration-plan-2026-03-20.md:180-193,229-231"
+  retrieved_at: 2026-03-20
+claim: "The active RF-07 governance plan still treats explicit runtime ProviderRegistry ownership as a post-stabilization decision, not as a required next step."
+quote: "\"Do not make runtime code own a provider registry instance yet unless a specific caller already has one naturally.\""
+confidence: 0.86
+assumptions:
+  - "The current plan artifacts accurately reflect the intended migration policy for RF-07D4."
+notes: "This is governance evidence rather than direct runtime proof. It matters because the project has already chosen to separate 'named bootstrap seam' from 'instance ownership' until stronger evidence appears."
+tags:
+  - provider-registry
+  - runtime
+  - governance
+  - migration-plan
+  - rf-07d4

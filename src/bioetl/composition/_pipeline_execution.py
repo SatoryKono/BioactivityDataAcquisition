@@ -19,7 +19,7 @@ from bioetl.composition.bootstrap import (
 )
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
-from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,
@@ -48,7 +48,7 @@ __all__ = [
 
 def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure providers and pipelines are registered for shared entrypoints."""
-    ProviderRegistry.ensure_loaded()
+    ensure_providers_loaded()
     if registry is None or not registry.list_pipelines():
         register_all_pipelines(registry=registry)
 

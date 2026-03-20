@@ -18,7 +18,7 @@ configs/
 │   └── entities/{provider}/{entity}.yaml
 ├── enums/              # Externalized enum value sets
 ├── _schema/            # JSON Schemas for config validation
-└── naming_exceptions.yaml  # Allowed naming convention exceptions
+└── naming_exceptions.yaml  # Allowed naming convention exceptions and stable public naming surface
 ```
 
 ## 3-Layer Merge Hierarchy

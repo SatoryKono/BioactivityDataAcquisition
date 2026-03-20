@@ -73,7 +73,10 @@ class TestGenericPipelineFactory:
         )
 
         assert factory._create_data_source is mock_creator
-        mock_get_creator.assert_called_once_with("chembl")
+        mock_get_creator.assert_called_once_with(
+            "chembl",
+            provider_registry=None,
+        )
 
     def test_uses_custom_data_source_creator(self) -> None:
         """Explicit data_source_creator is used instead of resolved one."""

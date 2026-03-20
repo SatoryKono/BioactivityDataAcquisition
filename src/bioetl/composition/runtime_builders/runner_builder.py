@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
     assemble_cached_bronze_context,
@@ -24,11 +24,9 @@ from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config import (
-    get_settings,
-    load_pipeline_config,
-    load_source_config,
-)
+from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
@@ -86,7 +84,7 @@ def build_pipeline_runner(
     registry: PipelineRegistry | None = None,
     *,
     create_registry_fn: Callable[[], PipelineRegistry] = create_registry,
-    ensure_providers_loaded_fn: Callable[[], None] = ProviderRegistry.ensure_loaded,
+    ensure_providers_loaded_fn: Callable[[], None] = ensure_providers_loaded,
     register_all_pipelines_fn: Callable[..., None] = register_all_pipelines,
     get_settings_fn: Callable[[], Settings] = get_settings,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] = load_pipeline_config,

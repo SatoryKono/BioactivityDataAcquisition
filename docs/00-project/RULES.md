@@ -75,7 +75,7 @@
   > **Текущее состояние:** Все 68 портов декорированы `@runtime-checkable` (100% coverage).
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 
-- **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
+- **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Это правило относится и к runtime-oriented контрактам (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они по проектной политике остаются в `domain.ports` как чистые cross-layer abstractions, а не считаются infrastructure leakage. Проверяется архитектурным тестом.
 
 - **Суффикс `*Protocol` вне `domain/ports/`**: Классы с суффиксом `*Protocol` **MAY** определяться в любом слое для layer-internal structural typing (mixin contracts, local interface shapes). Они **НЕ являются** нарушением ARCH-003. Разграничение: `*Port` — cross-layer контракт в `domain/ports/`, `*Protocol` — layer-internal контракт, не экспортируемый за пределы модуля/слоя.
 
@@ -920,7 +920,7 @@ pip install -e ".[tests]"
 1. Timestamps **MUST** передаваться из application слоя, не создаваться в infrastructure
 1. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
 1. `PipelineContext.started-at` — единственный источник времени для batch
-1. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort` (см. ADR-019)
+1. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort` из `domain.ports`
 
 #### Архитектурные Тесты (REQ-ARCH-030)
 
@@ -960,6 +960,10 @@ context = PipelineContext.create(run_id, run_type, logger)
 await bronze_writer.write_bronze(..., ingestion_ts=context.started_at)
 await quarantine.write(..., ingestion_ts=context.started_at)
 ```
+
+`PipelineContext` остаётся нормативным execution context, а не "ошибочно размещённым infra object". Его `logger`
+поле и `bind_logger()` нужны для детерминированной и переносимой передачи run metadata через `LoggerPort`; concrete
+logging framework по-прежнему создаётся вне domain и не пробивает layer boundary.
 
 ### 4.4. Python Standards
 

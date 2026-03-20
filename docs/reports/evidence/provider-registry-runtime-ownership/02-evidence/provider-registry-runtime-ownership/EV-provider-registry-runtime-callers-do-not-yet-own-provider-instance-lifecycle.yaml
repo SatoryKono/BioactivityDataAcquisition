@@ -1,0 +1,18 @@
+id: EV-provider-registry-runtime-callers-do-not-yet-own-provider-instance-lifecycle
+pillar: provider-registry-runtime-ownership
+source:
+  type: code
+  ref: "src/bioetl/composition/bootstrap/runtime/pipeline.py:61-70; src/bioetl/composition/factories/pipeline/runner.py:61-87,174-194; src/bioetl/composition/runtime_builders/runner_builder.py:50-58,85-129"
+  retrieved_at: 2026-03-20
+claim: "Current runtime callers explicitly own pipeline-registry setup and bootstrap ordering, but they do not naturally own ProviderRegistry instance lifecycle beyond calling the named provider-loading seam."
+quote: "Runtime signatures expose \"registry: PipelineRegistry | None\", \"create_registry_fn\", and \"ensure_providers_loaded_fn\" rather than an explicit ProviderRegistry owner contract."
+confidence: 0.91
+assumptions:
+  - "Constructor and function signatures are a reliable proxy for current ownership boundaries."
+notes: "This is the main evidence against immediately threading an explicit ProviderRegistry instance through runtime code: there is no strong natural owner in these entrypoints yet."
+tags:
+  - provider-registry
+  - runtime
+  - ownership
+  - pipeline-registry
+  - bootstrap

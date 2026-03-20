@@ -13,8 +13,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
+from bioetl.domain.ports import NoOpTracing
 from bioetl.domain.exceptions import (
+    CircuitBreakerOpenError,
     RecoverableError,
+    RetryExhaustedError,
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
@@ -33,6 +36,7 @@ class _ConcreteRetryClient(HTTPClientRetryMixin):
         retry_config: RetryConfig,
         provider: str = "test_provider",
         logger: MagicMock | None = None,
+        tracer: MagicMock | None = None,
     ) -> None:
         self.retry_config = retry_config
         self.provider = provider
@@ -41,9 +45,11 @@ class _ConcreteRetryClient(HTTPClientRetryMixin):
         self._metrics = MagicMock()
         self.rate_limiter = AsyncMock()
         self.circuit_breaker = AsyncMock()
+        self._tracer = tracer if tracer is not None else NoOpTracing()
+        self._client = AsyncMock(spec=httpx.AsyncClient)
 
-    def _get_client(self) -> MagicMock:
-        return AsyncMock(spec=httpx.AsyncClient)
+    def _get_client(self) -> AsyncMock:
+        return self._client
 
 
 # ---------------------------------------------------------------------------
@@ -77,6 +83,32 @@ def client(default_config: RetryConfig, mock_logger: MagicMock) -> _ConcreteRetr
         provider="chembl",
         logger=mock_logger,
     )
+
+
+@pytest.fixture
+def mock_span() -> MagicMock:
+    span = MagicMock()
+    span.__enter__ = MagicMock(return_value=span)
+    span.__exit__ = MagicMock(return_value=None)
+    span.set_attribute = MagicMock()
+    span.record_exception = MagicMock()
+    return span
+
+
+@pytest.fixture
+def mock_tracing(mock_span: MagicMock) -> tuple[MagicMock, MagicMock, MagicMock]:
+    otel_tracer = MagicMock()
+    otel_tracer.start_as_current_span = MagicMock(return_value=mock_span)
+
+    tracing = MagicMock()
+    tracing.get_tracer = MagicMock(return_value=otel_tracer)
+
+    return tracing, otel_tracer, mock_span
+
+
+async def _passthrough_circuit_breaker_call(func, *args, **kwargs):
+    """Execute wrapped request function without changing its semantics."""
+    return await func(*args, **kwargs)
 
 
 # ---------------------------------------------------------------------------
@@ -450,3 +482,187 @@ def test_is_retryable_error_custom_retryable_exception_type() -> None:
     )
     client = _ConcreteRetryClient(retry_config=config)
     assert client._is_retryable_error(OSError("disk error")) is True
+
+
+# ---------------------------------------------------------------------------
+# Characterization — full retry loop and attempt semantics
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_request_with_retry_honors_retry_after_in_full_flow(
+    default_config: RetryConfig,
+    mock_logger: MagicMock,
+    mock_tracing: tuple[MagicMock, MagicMock, MagicMock],
+) -> None:
+    """503 + Retry-After should sleep for the header value before retrying."""
+    tracing, _, span = mock_tracing
+    client = _ConcreteRetryClient(
+        retry_config=default_config,
+        provider="chembl",
+        logger=mock_logger,
+        tracer=tracing,
+    )
+    request = httpx.Request("GET", "https://api.example.com/data")
+    client._client.request.side_effect = [
+        httpx.Response(503, headers={"Retry-After": "7.0"}, request=request),
+        httpx.Response(200, json={"status": "ok"}, request=request),
+    ]
+    client.circuit_breaker.call.side_effect = _passthrough_circuit_breaker_call
+
+    with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+        response = await client._request_with_retry(
+            "GET",
+            "https://api.example.com/data",
+        )
+
+    assert response.status_code == 200
+    mock_sleep.assert_awaited_once_with(pytest.approx(7.0))
+    client._metrics.increment_counter.assert_any_call(
+        "http_retries_total",
+        1,
+        {"provider": "chembl", "method": "GET"},
+    )
+    span.__enter__.assert_called_once()
+    span.__exit__.assert_called_once()
+    span_calls = [call.args for call in span.set_attribute.call_args_list]
+    assert ("http.status_code", 200) in span_calls
+    assert ("http.retries", 1) in span_calls
+
+
+@pytest.mark.asyncio
+async def test_request_with_retry_finalizes_span_and_metrics_on_retry_exhausted(
+    default_config: RetryConfig,
+    mock_logger: MagicMock,
+    mock_tracing: tuple[MagicMock, MagicMock, MagicMock],
+) -> None:
+    """Retry exhaustion should mark span error, record exception, and flush metrics."""
+    tracing, _, span = mock_tracing
+    client = _ConcreteRetryClient(
+        retry_config=default_config,
+        provider="chembl",
+        logger=mock_logger,
+        tracer=tracing,
+    )
+    client._client.request.side_effect = httpx.ConnectError("Connection failed")
+    client.circuit_breaker.call.side_effect = _passthrough_circuit_breaker_call
+
+    with patch("asyncio.sleep", new_callable=AsyncMock):
+        with pytest.raises(RetryExhaustedError) as exc_info:
+            await client._request_with_retry("GET", "https://api.example.com/data")
+
+    assert exc_info.value.attempts == default_config.max_attempts
+    assert isinstance(exc_info.value.last_error, httpx.ConnectError)
+    span_calls = [call.args for call in span.set_attribute.call_args_list]
+    assert ("error", True) in span_calls
+    assert ("error.type", "retry_exhausted") in span_calls
+    assert ("http.retries", 2) in span_calls
+    assert any(name == "bioetl.duration_ms" for name, _ in span_calls)
+    span.record_exception.assert_called_once()
+    span.__exit__.assert_called_once()
+
+    error_calls = [
+        call
+        for call in client._metrics.increment_counter.call_args_list
+        if call.args[0] == "http_request_errors_total"
+    ]
+    assert len(error_calls) == 1
+    assert error_calls[0].args[2]["error_type"] == "ConnectError"
+
+
+@pytest.mark.asyncio
+async def test_request_with_retry_records_retry_budget_exhaustion_end_to_end(
+    mock_logger: MagicMock,
+) -> None:
+    """End-to-end flow should emit retry-budget exhaustion signal once budget blocks retries."""
+    config = RetryConfig(
+        max_attempts=5,
+        retry_budget_per_request=1,
+        jitter_range=(0.0, 0.0),
+    )
+    client = _ConcreteRetryClient(
+        retry_config=config,
+        provider="chembl",
+        logger=mock_logger,
+    )
+    client._client.request.side_effect = httpx.ConnectError("Connection failed")
+    client.circuit_breaker.call.side_effect = _passthrough_circuit_breaker_call
+
+    with patch("asyncio.sleep", new_callable=AsyncMock):
+        with pytest.raises(RetryExhaustedError) as exc_info:
+            await client._request_with_retry("GET", "https://api.example.com/data")
+
+    assert exc_info.value.attempts == 2
+    client._metrics.increment_counter.assert_any_call(
+        "http_retry_budget_exhausted_total",
+        1,
+        {"provider": "chembl", "method": "GET"},
+    )
+    mock_logger.warning.assert_any_call(
+        "http_retry_budget_exhausted",
+        provider="chembl",
+        method="GET",
+        url="https://api.example.com/data",
+        retry_budget=1,
+        max_attempts=5,
+    )
+
+
+@pytest.mark.asyncio
+async def test_attempt_request_non_retryable_error_marks_span_and_reraises(
+    client: _ConcreteRetryClient,
+    mock_span: MagicMock,
+) -> None:
+    """Non-retryable exceptions should be surfaced immediately with span error markers."""
+    client._execute_single_attempt = AsyncMock(side_effect=ValueError("bad input"))  # type: ignore[method-assign]
+
+    with pytest.raises(ValueError, match="bad input"):
+        await client._attempt_request(
+            client._get_client(),
+            "GET",
+            "https://api.example.com/data",
+            0,
+            0,
+            mock_span,
+            {},
+        )
+
+    span_calls = [call.args for call in mock_span.set_attribute.call_args_list]
+    assert ("error", True) in span_calls
+    assert ("error.type", "ValueError") in span_calls
+    mock_span.record_exception.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_attempt_request_circuit_breaker_open_marks_span_and_logs(
+    default_config: RetryConfig,
+    mock_logger: MagicMock,
+    mock_span: MagicMock,
+) -> None:
+    """Circuit breaker open should never be converted into retry outcome."""
+    client = _ConcreteRetryClient(
+        retry_config=default_config,
+        provider="chembl",
+        logger=mock_logger,
+    )
+    client._execute_single_attempt = AsyncMock(  # type: ignore[method-assign]
+        side_effect=CircuitBreakerOpenError("chembl", "Circuit is open")
+    )
+
+    with pytest.raises(CircuitBreakerOpenError):
+        await client._attempt_request(
+            client._get_client(),
+            "GET",
+            "https://api.example.com/data",
+            0,
+            0,
+            mock_span,
+            {},
+        )
+
+    span_calls = [call.args for call in mock_span.set_attribute.call_args_list]
+    assert ("error", True) in span_calls
+    assert ("error.type", "circuit_breaker_open") in span_calls
+    mock_span.record_exception.assert_called_once()
+    mock_logger.warning.assert_called_once()
+    assert mock_logger.warning.call_args.args[0] == "http_circuit_breaker_open"

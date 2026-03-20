@@ -12,7 +12,10 @@ from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
     get_data_source_creator,
 )
-from bioetl.composition.factories.pipeline.configs import PipelineFactoryConfig
+from bioetl.composition.factories.pipeline.registry_manifest import (
+    PipelineFactoryConfig,
+)
+from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.infrastructure.config import load_pipeline_contract_policy
 
 if TYPE_CHECKING:
@@ -96,6 +99,8 @@ def _validate_contract_policy(config: PipelineFactoryConfig) -> None:
 
 def create_factory(
     config: PipelineFactoryConfig,
+    *,
+    provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[GenericPipeline]:
     """Create a GenericPipelineFactory from configuration.
 
@@ -113,7 +118,10 @@ def create_factory(
     # Resolve data source creator: use data_source_provider override if set
     data_source_creator: DataSourceCreatorProtocol | None = None
     if config.data_source_provider:
-        data_source_creator = get_data_source_creator(config.data_source_provider)
+        data_source_creator = get_data_source_creator(
+            config.data_source_provider,
+            provider_registry=provider_registry,
+        )
 
     return GenericPipelineFactory(
         pipeline_name=config.pipeline_name,
@@ -124,6 +132,7 @@ def create_factory(
         pandera_silver_schema=config.pandera_silver_schema,
         transformer_class=config.transformer_class,
         data_source_creator=data_source_creator,
+        provider_registry=provider_registry,
     )
 
 

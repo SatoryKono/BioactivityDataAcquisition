@@ -13,7 +13,7 @@ python -m scripts.qa <command> [args...]
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `check-naming` | `naming_audit.py` | Naming convention audit (RULES.md §2) |
+| `check-naming` | `naming_audit.py` | Naming convention audit (RULES.md §2) with `configs/naming_exceptions.yaml` as exception registry |
 | `check-c901` | `check_c901_baseline.py` | C901 complexity baseline enforcement |
 | `check-naming-pkg` | `check_naming_package_consistency.py` | Package naming consistency check |
 | `check-exemptions` | `check_quality_exemptions.py` | Quality exemptions audit |

@@ -9,12 +9,16 @@ exist in the codebase.  Catches common drift scenarios:
   3. Module paths moved but docs still point to old locations
   4. Provider/entity lists changed but reference docs are stale
   5. Factory/registry changes not reflected in composition docs
+  6. Active runtime docs mirrors drift from canonical `.codex/agents/` sources
+  7. Freshness/version markers in active docs disagree with canonical runtime docs
 
 Usage:
     python scripts/check_doc_drift.py              # Full drift check
     python scripts/check_doc_drift.py --ports       # Only port drift
     python scripts/check_doc_drift.py --classes     # Only class drift
     python scripts/check_doc_drift.py --modules     # Only module path drift
+    python scripts/check_doc_drift.py --runtime-mirrors
+    python scripts/check_doc_drift.py --freshness
     python scripts/check_doc_drift.py --json        # Machine-readable JSON output
 
 Exit code: 0 = no drift, 1 = drift detected
@@ -95,6 +99,53 @@ class DriftReport:
         }
 
 
+@dataclass(frozen=True)
+class RuntimeMirrorRule:
+    """Pairing between a canonical runtime doc and its published mirror."""
+
+    name: str
+    canonical: Path
+    mirror: Path
+    sections: tuple[str, ...] = ()
+    compare_version: bool = False
+
+
+RUNTIME_VERSION_PATTERN = re.compile(r"(?m)^\*Версия:\s*([0-9]+(?:\.[0-9]+)*)")
+AGENT_MEMORY_SYNC_PATTERN = re.compile(
+    r"Синхронизировано с ORCHESTRATION\.md v([0-9]+(?:\.[0-9]+)*)"
+)
+LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(\d{4}-\d{2}-\d{2})")
+
+RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
+    RuntimeMirrorRule(
+        name="orchestration",
+        canonical=Path(".codex/agents/ORCHESTRATION.md"),
+        mirror=Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
+        sections=(
+            "## 1. Обзор",
+            "## 2. Стандартный workflow задачи",
+            "## 4. Структура артефактов",
+        ),
+        compare_version=True,
+    ),
+    RuntimeMirrorRule(
+        name="py-audit-bot",
+        canonical=Path(".codex/agents/py-audit-bot.md"),
+        mirror=Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
+        sections=("## Выходы",),
+    ),
+    RuntimeMirrorRule(
+        name="py-config-bot",
+        canonical=Path(".codex/agents/py-config-bot.md"),
+        mirror=Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
+        sections=("## Выходы", "## Обязательные правила", "## Иерархия конфигураций"),
+    ),
+)
+
+AGENT_MEMORY_PATH = Path("docs/00-project/ai/memory/agent-memory.md")
+FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -143,6 +194,37 @@ def _read_doc(path: Path) -> str:
     if path.exists():
         return path.read_text(encoding="utf-8")
     return ""
+
+
+def _rel(path: Path) -> str:
+    """Return path relative to repo root for human-readable reporting."""
+    return str(path.relative_to(PROJECT_ROOT))
+
+
+def _extract_section(text: str, heading: str) -> str | None:
+    """Extract a markdown section by exact level-2 heading."""
+    match = re.search(rf"(?m)^{re.escape(heading)}\s*$", text)
+    if match is None:
+        return None
+
+    start = match.start()
+    next_heading = re.search(r"(?m)^##\s+", text[match.end() :])
+    if next_heading is None:
+        return text[start:].strip()
+
+    end = match.end() + next_heading.start()
+    return text[start:end].strip()
+
+
+def _normalize_markdown_block(text: str) -> str:
+    """Normalize markdown blocks for deterministic comparison."""
+    return "\n".join(line.rstrip() for line in text.strip().splitlines())
+
+
+def _extract_runtime_version(text: str) -> str | None:
+    """Extract runtime document version from the standard header marker."""
+    match = RUNTIME_VERSION_PATTERN.search(text)
+    return match.group(1) if match else None
 
 
 # ---------------------------------------------------------------------------
@@ -377,6 +459,160 @@ def check_glossary(report: DriftReport) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Check: Runtime doc mirrors
+# ---------------------------------------------------------------------------
+
+def check_runtime_mirrors(report: DriftReport) -> None:
+    """Verify critical published runtime mirrors stay aligned with canonical docs."""
+    for rule in RUNTIME_MIRROR_RULES:
+        canonical_path = PROJECT_ROOT / rule.canonical
+        mirror_path = PROJECT_ROOT / rule.mirror
+
+        canonical_text = _read_doc(canonical_path)
+        mirror_text = _read_doc(mirror_path)
+
+        if not canonical_text:
+            report.add(
+                "runtime-mirrors",
+                "ERROR",
+                _rel(canonical_path),
+                "Canonical runtime doc missing",
+            )
+            continue
+        if not mirror_text:
+            report.add(
+                "runtime-mirrors",
+                "ERROR",
+                _rel(mirror_path),
+                "Published runtime mirror missing",
+            )
+            continue
+
+        if rule.compare_version:
+            canonical_version = _extract_runtime_version(canonical_text)
+            mirror_version = _extract_runtime_version(mirror_text)
+            if canonical_version is None or mirror_version is None:
+                report.add(
+                    "runtime-mirrors",
+                    "ERROR",
+                    _rel(mirror_path),
+                    f"{rule.name}: could not extract version marker from canonical or mirror",
+                )
+            elif canonical_version != mirror_version:
+                report.add(
+                    "runtime-mirrors",
+                    "ERROR",
+                    _rel(mirror_path),
+                    f"{rule.name}: version marker drifted "
+                    f"(canonical v{canonical_version}, mirror v{mirror_version})",
+                )
+
+        for heading in rule.sections:
+            canonical_section = _extract_section(canonical_text, heading)
+            mirror_section = _extract_section(mirror_text, heading)
+
+            if canonical_section is None:
+                report.add(
+                    "runtime-mirrors",
+                    "ERROR",
+                    _rel(canonical_path),
+                    f"{rule.name}: canonical doc missing required section {heading!r}",
+                )
+                continue
+            if mirror_section is None:
+                report.add(
+                    "runtime-mirrors",
+                    "ERROR",
+                    _rel(mirror_path),
+                    f"{rule.name}: mirror doc missing required section {heading!r}",
+                )
+                continue
+
+            if _normalize_markdown_block(canonical_section) != _normalize_markdown_block(
+                mirror_section
+            ):
+                report.add(
+                    "runtime-mirrors",
+                    "ERROR",
+                    _rel(mirror_path),
+                    f"{rule.name}: section {heading!r} drifted from canonical runtime doc",
+                )
+
+
+# ---------------------------------------------------------------------------
+# Check: Freshness markers
+# ---------------------------------------------------------------------------
+
+def check_freshness(report: DriftReport) -> None:
+    """Verify active docs use consistent freshness/version metadata."""
+    canonical_orchestration = PROJECT_ROOT / ".codex" / "agents" / "ORCHESTRATION.md"
+    orchestration_text = _read_doc(canonical_orchestration)
+    current_orchestration_version = _extract_runtime_version(orchestration_text)
+
+    agent_memory_text = _read_doc(PROJECT_ROOT / AGENT_MEMORY_PATH)
+    if not agent_memory_text:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(PROJECT_ROOT / AGENT_MEMORY_PATH),
+            "Agent memory doc missing",
+        )
+    else:
+        sync_match = AGENT_MEMORY_SYNC_PATTERN.search(agent_memory_text)
+        if sync_match is None:
+            report.add(
+                "freshness",
+                "ERROR",
+                _rel(PROJECT_ROOT / AGENT_MEMORY_PATH),
+                "Agent memory is missing the ORCHESTRATION sync marker",
+            )
+        elif current_orchestration_version and sync_match.group(1) != current_orchestration_version:
+            report.add(
+                "freshness",
+                "ERROR",
+                _rel(PROJECT_ROOT / AGENT_MEMORY_PATH),
+                "Agent memory references an outdated ORCHESTRATION version "
+                f"(expected v{current_orchestration_version}, found v{sync_match.group(1)})",
+            )
+
+        if "reports/plans/<task_id>/" in agent_memory_text:
+            report.add(
+                "freshness",
+                "ERROR",
+                _rel(PROJECT_ROOT / AGENT_MEMORY_PATH),
+                "Agent memory still documents the legacy reports/plans/<task_id>/ output layout",
+            )
+
+    file_policy_text = _read_doc(PROJECT_ROOT / FILE_POLICY_PATH)
+    if not file_policy_text:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(PROJECT_ROOT / FILE_POLICY_PATH),
+            "File policy doc missing",
+        )
+        return
+
+    update_dates = LAST_UPDATED_PATTERN.findall(file_policy_text)
+    unique_dates = sorted(set(update_dates))
+    if len(unique_dates) > 1:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(PROJECT_ROOT / FILE_POLICY_PATH),
+            "File policy contains conflicting 'Последнее обновление' markers: "
+            f"{unique_dates}",
+        )
+    elif len(update_dates) > 1:
+        report.add(
+            "freshness",
+            "WARNING",
+            _rel(PROJECT_ROOT / FILE_POLICY_PATH),
+            "File policy contains duplicate freshness markers; keep a single active marker",
+        )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -417,6 +653,16 @@ def main() -> int:
     parser.add_argument("--classes", action="store_true", help="Check class drift only")
     parser.add_argument("--modules", action="store_true", help="Check module path drift only")
     parser.add_argument(
+        "--runtime-mirrors",
+        action="store_true",
+        help="Check published runtime docs mirrors against canonical .codex docs",
+    )
+    parser.add_argument(
+        "--freshness",
+        action="store_true",
+        help="Check freshness/version markers in active runtime/governance docs",
+    )
+    parser.add_argument(
         "--json", action="store_true", dest="json_output",
         help="Output machine-readable JSON",
     )
@@ -424,7 +670,13 @@ def main() -> int:
 
     report = DriftReport()
 
-    run_all = not (args.ports or args.classes or args.modules)
+    run_all = not (
+        args.ports
+        or args.classes
+        or args.modules
+        or args.runtime_mirrors
+        or args.freshness
+    )
 
     if run_all or args.ports:
         check_ports(report)
@@ -432,6 +684,10 @@ def main() -> int:
         check_classes(report)
     if run_all or args.modules:
         check_modules(report)
+    if run_all or args.runtime_mirrors:
+        check_runtime_mirrors(report)
+    if run_all or args.freshness:
+        check_freshness(report)
     if run_all:
         check_providers(report)
         check_glossary(report)

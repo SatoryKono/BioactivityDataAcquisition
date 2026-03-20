@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.5 | Дата: 2026-03-13 | Синхронизировано с ORCHESTRATION.md v4.0, RULES.md v5.24*
+*Версия: 1.0.6 | Дата: 2026-03-20 | Синхронизировано с ORCHESTRATION.md v4.1, RULES.md v5.24*
 
 > **Назначение**: Полный контекст для быстрого онбординга новой AI-сессии в BioETL.
 > При старте новой сессии — попроси агент прочитать этот файл:
@@ -211,17 +211,14 @@ docs/00-project/ai/memory/memory-py-doc-bot.md     — doc structure, ADR manage
 ### 3.4 Выходы (артефакты)
 
 ```
-reports/plans/<task_id>/
-├── 00-audit-baseline.md      ← py-audit-bot (baseline)
-├── 01-plan-initial.md        ← py-plan-bot (initial)
-├── 02-test-baseline.md       ← py-test-bot (baseline)
-├── 03-plan-updated.md        ← py-plan-bot (update)          [опционально]
-├── 04-refactoring-log.md     ← orchestrator + py-debug-bot
-├── 04a-config-log.md         ← py-config-bot
-├── 05-test-final.md          ← py-test-bot (final)
-├── 06-doc-update-log.md      ← py-doc-bot
-└── 07-audit-final.md         ← py-audit-bot (final)
+reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 ```
+
+Единый контракт для итоговых отчётов:
+- Все `py-*` профили сохраняют итоговые отчёты по пути выше.
+- `phase` используется только там, где профиль явно различает `baseline` / `final` / `targeted` в имени файла.
+- `LLM` = вызывающая модель, `agent` = логический профиль/skill.
+- Дополнительные телеметрические артефакты MAY сохраняться рядом, но финальный отчёт должен использовать этот шаблон.
 
 ### 3.5 ID-системы
 
@@ -239,17 +236,17 @@ reports/plans/<task_id>/
 ## 4. Стандартный Workflow
 
 ```
-① py-audit-bot (baseline)     → 00-audit-baseline.md
-② py-plan-bot (initial)       → 01-plan-initial.md
-③ py-test-bot (baseline)      → 02-test-baseline.md
+① py-audit-bot (baseline)     → review_py-audit-bot_{YYYYMMDD}_{HHMM}_baseline.md
+② py-plan-bot (initial)       → review_py-plan-bot_{YYYYMMDD}_{HHMM}.md
+③ py-test-bot (baseline)      → review_py-test-bot_{YYYYMMDD}_{HHMM}.md
    [если FAIL → py-debug-bot → py-test-bot (retest) цикл]
 ④ Реализация (параллельно):
-   - напрямую (orchestrator)   → src/bioetl/  → 04-refactoring-log.md
-   - py-config-bot             → configs/     → 04a-config-log.md
-⑤ py-test-bot (final)         → 05-test-final.md
+   - напрямую (orchestrator)   → src/bioetl/
+   - py-config-bot             → configs/
+⑤ py-test-bot (final)         → review_py-test-bot_{YYYYMMDD}_{HHMM}.md
    [если FAIL → py-debug-bot → py-test-bot (retest) цикл ≤5]
-⑥ py-doc-bot                  → 06-doc-update-log.md
-⑦ py-audit-bot (final)        → 07-audit-final.md
+⑥ py-doc-bot                  → review_py-doc-bot_{YYYYMMDD}_{HHMM}.md
+⑦ py-audit-bot (final)        → review_py-audit-bot_{YYYYMMDD}_{HHMM}_final.md
    [если MUST findings → возврат к debug/plan]
 ```
 

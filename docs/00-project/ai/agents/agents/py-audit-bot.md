@@ -94,10 +94,10 @@ Consolidation note (2026-03-08): `py-audit-bot` — канонический com
 
 ## Выходы
 
-| Файл | Фаза | Описание |
-|------|------|----------|
-| `00-audit-baseline.md` | baseline | Состояние до рефакторинга |
-| `07-audit-final.md` | final | Состояние после всех изменений |
+- Итоговые отчёты:
+  - Baseline: `reports/{LLM}/review_py-audit-bot_{YYYYMMDD}_{HHMM}_baseline.md`
+  - Final/targeted: `reports/{LLM}/review_py-audit-bot_{YYYYMMDD}_{HHMM}_final.md`
+  - Форматируй по RFC 2119, включай evidence и команды проверки.
 
 ---
 

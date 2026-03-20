@@ -11,7 +11,11 @@ from bioetl.composition.factories.datasource.http_client import (
     HttpClientFactory,
     ResolvedHttpConfig,
 )
-from bioetl.composition.providers.provider_registry import HttpConfig
+from bioetl.composition.providers.provider_registry import (
+    HttpConfig,
+    ProviderConfig,
+    create_provider_registry,
+)
 
 
 @pytest.mark.unit
@@ -24,10 +28,13 @@ class TestHttpClientFactory:
         """Factory should fail fast for unknown providers."""
         from bioetl.composition.factories.datasource import http_client as module
 
-        monkeypatch.setattr(module.ProviderRegistry, "ensure_loaded", lambda: None)
-        monkeypatch.setattr(module.ProviderRegistry, "is_registered", lambda _: False)
+        registry = MagicMock()
+        registry.is_registered.return_value = False
+        registry.list_providers.return_value = ["chembl", "pubmed"]
         monkeypatch.setattr(
-            module.ProviderRegistry, "list_providers", lambda: ["chembl", "pubmed"]
+            module,
+            "_resolve_provider_registry",
+            lambda provider_registry=None: registry,
         )
 
         with pytest.raises(ValueError, match="Unknown provider: unknown"):
@@ -50,11 +57,16 @@ class TestHttpClientFactory:
             max_keepalive_connections=20,
         )
         client_ctor = MagicMock(return_value="client-from-source")
+        registry = MagicMock()
+        registry.is_registered.return_value = True
+        registry.get_http_config.return_value = None
 
-        monkeypatch.setattr(module.ProviderRegistry, "ensure_loaded", lambda: None)
-        monkeypatch.setattr(module.ProviderRegistry, "is_registered", lambda _: True)
+        monkeypatch.setattr(
+            module,
+            "_resolve_provider_registry",
+            lambda provider_registry=None: registry,
+        )
         monkeypatch.setattr(module, "load_source_config", lambda _: source_config)
-        monkeypatch.setattr(module.ProviderRegistry, "get_http_config", lambda _: None)
         monkeypatch.setattr(module, "UnifiedHTTPClient", client_ctor)
 
         result = HttpClientFactory.create_for_provider("chembl")
@@ -85,17 +97,20 @@ class TestHttpClientFactory:
             rate_overrides={"pubmed_api_key": 12.0},
         )
         client_ctor = MagicMock(return_value="client-with-override")
+        registry = MagicMock()
+        registry.is_registered.return_value = True
+        registry.get_http_config.return_value = http_config
 
-        monkeypatch.setattr(module.ProviderRegistry, "ensure_loaded", lambda: None)
-        monkeypatch.setattr(module.ProviderRegistry, "is_registered", lambda _: True)
+        monkeypatch.setattr(
+            module,
+            "_resolve_provider_registry",
+            lambda provider_registry=None: registry,
+        )
 
         def _raise_missing_source_config(_: str):
             raise ValueError("missing source config")
 
         monkeypatch.setattr(module, "load_source_config", _raise_missing_source_config)
-        monkeypatch.setattr(
-            module.ProviderRegistry, "get_http_config", lambda _: http_config
-        )
         monkeypatch.setattr(module, "UnifiedHTTPClient", client_ctor)
 
         settings = SimpleNamespace(pubmed_api_key="non-empty")
@@ -109,6 +124,41 @@ class TestHttpClientFactory:
         assert kwargs["retry_config"].max_attempts == 3
         assert kwargs["retry_config"].base_delay == 1.0
         assert kwargs["retry_config"].max_delay == 60.0
+
+    def test_create_uses_explicit_provider_registry_instance(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Explicit registry should drive config lookup without default singleton use."""
+        from bioetl.composition.factories.datasource import http_client as module
+
+        isolated = create_provider_registry()
+        isolated.register(
+            "isolated_provider",
+            ProviderConfig(
+                adapter_class=MagicMock(),
+                http_config=HttpConfig(rate=9.0, capacity=18),
+                requires_http_client=False,
+                requires_logger=False,
+            ),
+        )
+        client_ctor = MagicMock(return_value="client-from-explicit-registry")
+
+        def _raise_missing_source_config(_: str):
+            raise ValueError("missing source config")
+
+        monkeypatch.setattr(module, "load_source_config", _raise_missing_source_config)
+        monkeypatch.setattr(module, "UnifiedHTTPClient", client_ctor)
+
+        result = HttpClientFactory.create_for_provider(
+            "isolated_provider",
+            provider_registry=isolated,
+        )
+
+        assert result == "client-from-explicit-registry"
+        kwargs = client_ctor.call_args.kwargs
+        assert kwargs["provider"] == "isolated_provider"
+        assert kwargs["rate_limiter"].rate == 9.0
+        assert kwargs["rate_limiter"].capacity == 18
 
     def test_check_setting_truthy_and_missing(self) -> None:
         """_check_setting should return True only for truthy existing values."""
@@ -138,8 +188,14 @@ class TestResolvedHttpConfig:
             max_connections=100,
             max_keepalive_connections=20,
         )
+        registry = MagicMock()
+        registry.get_http_config.return_value = None
         monkeypatch.setattr(module, "load_source_config", lambda _: source_config)
-        monkeypatch.setattr(module.ProviderRegistry, "get_http_config", lambda _: None)
+        monkeypatch.setattr(
+            module,
+            "_resolve_provider_registry",
+            lambda provider_registry=None: registry,
+        )
 
         cfg = HttpClientFactory._resolve_config("chembl", None)
 
@@ -162,13 +218,17 @@ class TestResolvedHttpConfig:
         from bioetl.composition.factories.datasource import http_client as module
 
         http_config = HttpConfig(rate=3.0, capacity=6)
+        registry = MagicMock()
+        registry.get_http_config.return_value = http_config
 
         def _raise(_: str) -> None:
             raise ValueError("missing")
 
         monkeypatch.setattr(module, "load_source_config", _raise)
         monkeypatch.setattr(
-            module.ProviderRegistry, "get_http_config", lambda _: http_config
+            module,
+            "_resolve_provider_registry",
+            lambda provider_registry=None: registry,
         )
 
         cfg = HttpClientFactory._resolve_config("test_provider", None)
@@ -189,13 +249,17 @@ class TestResolvedHttpConfig:
         http_config = HttpConfig(
             rate=3.0, capacity=6, rate_overrides={"pubmed_api_key": 12.0}
         )
+        registry = MagicMock()
+        registry.get_http_config.return_value = http_config
 
         def _raise(_: str) -> None:
             raise ValueError("missing")
 
         monkeypatch.setattr(module, "load_source_config", _raise)
         monkeypatch.setattr(
-            module.ProviderRegistry, "get_http_config", lambda _: http_config
+            module,
+            "_resolve_provider_registry",
+            lambda provider_registry=None: registry,
         )
 
         settings = SimpleNamespace(pubmed_api_key="non-empty")

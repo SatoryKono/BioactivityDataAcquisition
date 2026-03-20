@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bioetl.composition.factories.pipeline.configs import PIPELINE_CONFIGS
+from bioetl.composition.factories.pipeline.registry_manifest import PIPELINE_CONFIGS
 
 
 def _find_pipeline_config(provider: str, entity_type: str) -> Path | None:

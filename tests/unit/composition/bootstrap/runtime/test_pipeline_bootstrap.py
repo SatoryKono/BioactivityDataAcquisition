@@ -16,14 +16,14 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_returns_pipeline_runner(
         self,
         mock_build_runner: MagicMock,
         mock_register: MagicMock,
-        mock_provider_registry: MagicMock,
+        mock_ensure_providers_loaded: MagicMock,
         mock_classify: MagicMock,
     ) -> None:
         """bootstrap_pipeline_runner returns the runner from build_pipeline_runner."""
@@ -43,14 +43,14 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_skips_registration_when_pipelines_exist(
         self,
         mock_build_runner: MagicMock,
         mock_register: MagicMock,
-        mock_provider_registry: MagicMock,
+        mock_ensure_providers_loaded: MagicMock,
         mock_classify: MagicMock,
     ) -> None:
         """When registry already has pipelines, register_all_pipelines is not called."""
@@ -65,7 +65,7 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.create_registry")
@@ -74,7 +74,7 @@ class TestBootstrapPipelineRunner:
         mock_create_registry: MagicMock,
         mock_build_runner: MagicMock,
         mock_register: MagicMock,
-        mock_provider_registry: MagicMock,
+        mock_ensure_providers_loaded: MagicMock,
         mock_classify: MagicMock,
     ) -> None:
         """When no registry is provided, create_registry() is used."""
@@ -90,14 +90,14 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_calls_classification_init(
         self,
         mock_build_runner: MagicMock,
         mock_register: MagicMock,
-        mock_provider_registry: MagicMock,
+        mock_ensure_providers_loaded: MagicMock,
         mock_classify: MagicMock,
     ) -> None:
         """Classification initialization is called before pipeline registration."""
@@ -112,21 +112,21 @@ class TestBootstrapPipelineRunner:
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.initialize_publication_type_classification"
     )
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.ProviderRegistry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.ensure_providers_loaded")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.build_pipeline_runner")
     def test_ensures_providers_loaded(
         self,
         mock_build_runner: MagicMock,
         mock_register: MagicMock,
-        mock_provider_registry: MagicMock,
+        mock_ensure_providers_loaded: MagicMock,
         mock_classify: MagicMock,
     ) -> None:
-        """ProviderRegistry.ensure_loaded is always called."""
+        """Runtime provider bootstrap helper is always called."""
         mock_build_runner.return_value = MagicMock()
         registry = MagicMock()
         registry.list_pipelines.return_value = ["p"]
 
         bootstrap_pipeline_runner(MagicMock(), registry=registry)
 
-        mock_provider_registry.ensure_loaded.assert_called_once()
+        mock_ensure_providers_loaded.assert_called_once_with()

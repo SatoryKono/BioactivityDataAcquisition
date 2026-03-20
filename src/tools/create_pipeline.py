@@ -129,7 +129,7 @@ Defines the pipeline structure for ${provider_title} ${entity_title} data.
 Transformation logic is delegated to ${entity_title}Transformer.
 
 Registration: Add a PipelineFactoryConfig entry to
-``bioetl.composition.factories.pipeline.configs`` and call
+``bioetl.composition.factories.pipeline.registry_manifest`` and call
 ``register_all_pipelines()`` at application startup.
 """
 
@@ -138,8 +138,8 @@ from __future__ import annotations
 from bioetl.application.pipelines.generic import GenericPipeline
 
 # ${provider_title} ${entity_title} uses GenericPipeline via GenericPipelineFactory.
-# Register by adding PipelineFactoryConfig to configs.py.
-# See: src/bioetl/composition/factories/pipeline/configs.py
+# Register by adding PipelineFactoryConfig to registry_manifest.py.
+# See: src/bioetl/composition/factories/pipeline/registry_manifest.py
 '''
 )
 

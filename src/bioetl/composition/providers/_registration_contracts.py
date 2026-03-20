@@ -79,6 +79,7 @@ def _create_http_client_for_provider(
     *,
     metrics: MetricsPort | None = None,
     logger: LoggerPort | None = None,
+    provider_registry: ProviderRegistry | None = None,
 ) -> UnifiedHTTPClient:
     """Resolve the canonical HTTP client factory lazily at the composition edge."""
     from bioetl.composition.factories.datasource.http_client import HttpClientFactory
@@ -88,6 +89,7 @@ def _create_http_client_for_provider(
         settings,
         metrics=metrics,
         logger=logger,
+        provider_registry=provider_registry,
     )
 
 
@@ -121,7 +123,10 @@ def create_provider_assembly_support(
 ) -> ProviderAssemblySupport:
     """Build the default injected support bundle for provider registration."""
     return ProviderAssemblySupport(
-        create_http_client=_create_http_client_for_provider,
+        create_http_client=partial(
+            _create_http_client_for_provider,
+            provider_registry=provider_registry,
+        ),
         create_adapter=partial(
             _create_adapter_for_provider,
             provider_registry=provider_registry,

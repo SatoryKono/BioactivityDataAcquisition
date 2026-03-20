@@ -68,7 +68,7 @@ from bioetl.composition.bootstrap.runtime import (
 # =============================================================================
 # Config loader (re-exported for convenience)
 # =============================================================================
-from bioetl.infrastructure.config import load_pipeline_config
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 __all__ = [
     "HealthServerDependencies",

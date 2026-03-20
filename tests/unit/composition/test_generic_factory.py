@@ -12,6 +12,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.pipeline import GenericPipelineFactory
 from bioetl.composition.factories.pipeline import create_pipeline_factory
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
+from bioetl.composition.providers.provider_registry import create_provider_registry
 
 
 @pytest.fixture
@@ -84,12 +85,37 @@ class TestGenericPipelineFactory:
             gold_schema=MagicMock(),
         )
 
-        mock_get_data_source_creator.assert_called_once_with("chembl")
+        mock_get_data_source_creator.assert_called_once_with(
+            "chembl",
+            provider_registry=None,
+        )
         assert factory.pipeline_name == "test_pipeline"
         assert factory.pipeline_class is mock_pipeline_class
         assert factory.provider == "chembl"
         assert factory.silver_schema is None
         assert factory._create_data_source is mock_creator
+
+    @patch("bioetl.composition.factories.pipeline.assembler.get_data_source_creator")
+    def test_init_with_explicit_provider_registry(self, mock_get_data_source_creator):
+        """Factory should thread explicit provider registry into creator resolution."""
+        mock_pipeline_class = MagicMock()
+        mock_creator = MagicMock()
+        mock_get_data_source_creator.return_value = mock_creator
+        registry = create_provider_registry()
+
+        factory = GenericPipelineFactory(
+            pipeline_name="test_pipeline",
+            pipeline_class=mock_pipeline_class,
+            provider="chembl",
+            gold_schema=MagicMock(),
+            provider_registry=registry,
+        )
+
+        mock_get_data_source_creator.assert_called_once_with(
+            "chembl",
+            provider_registry=registry,
+        )
+        assert factory.provider_registry is registry
 
     def test_init_with_custom_creator(self):
         """Test factory initialization with custom data source creator."""

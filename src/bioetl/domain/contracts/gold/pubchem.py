@@ -20,6 +20,8 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
 
     Aligned with domain/entities/pubchem.py (PubchemMolecule domain entity)
     and application/pipelines/pubchem/transformer.py (PubChemCompoundTransformer).
+    The schema name follows the stable public pipeline surface (`compound`),
+    while the canonical domain entity remains `PubchemMolecule`.
     """
 
     entity_id: Series[str] = pa.Field(nullable=False)

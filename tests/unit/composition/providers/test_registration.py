@@ -20,6 +20,9 @@ from bioetl.composition.providers.registration import (
     _build_provider_configs,
     register_all_providers,
 )
+from bioetl.composition.providers._registration_contracts import (
+    create_provider_assembly_support,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -255,3 +258,29 @@ class TestBuildProviderConfigs:
 
         mock_bio.assert_called_once_with(assembly_support=support)
         mock_biblio.assert_called_once_with(assembly_support=support)
+
+
+@pytest.mark.unit
+def test_default_provider_assembly_support_binds_explicit_registry_for_http_clients(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Support bundle should thread explicit registry into HTTP client creation."""
+    registry = create_provider_registry()
+    captured: dict[str, object] = {}
+
+    def _fake_create_for_provider(provider: str, settings=None, **kwargs: object) -> str:
+        captured["provider"] = provider
+        captured["provider_registry"] = kwargs.get("provider_registry")
+        return "client"
+
+    monkeypatch.setattr(
+        "bioetl.composition.factories.datasource.http_client.HttpClientFactory.create_for_provider",
+        _fake_create_for_provider,
+    )
+
+    support = create_provider_assembly_support(provider_registry=registry)
+    result = support.create_http_client("chembl")
+
+    assert result == "client"
+    assert captured["provider"] == "chembl"
+    assert captured["provider_registry"] is registry

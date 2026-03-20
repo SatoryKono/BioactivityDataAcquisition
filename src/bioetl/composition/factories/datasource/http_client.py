@@ -19,12 +19,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.composition.providers.provider_registry import (
+    ProviderRegistry,
+    ensure_provider_registry_ready,
+    get_default_provider_registry,
+)
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
-from bioetl.infrastructure.config import load_source_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
@@ -35,6 +39,17 @@ __all__ = [
     "HttpClientFactory",
     "ResolvedHttpConfig",
 ]
+
+
+def _resolve_provider_registry(
+    provider_registry: ProviderRegistry | None = None,
+) -> ProviderRegistry:
+    """Resolve the provider registry used for HTTP config lookup."""
+    return ensure_provider_registry_ready(
+        provider_registry
+        if provider_registry is not None
+        else get_default_provider_registry()
+    )
 
 
 @dataclass(frozen=True)
@@ -75,6 +90,7 @@ class HttpClientFactory:
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
+        provider_registry: ProviderRegistry | None = None,
     ) -> UnifiedHTTPClient:
         """Create a configured HTTP client for the given provider.
 
@@ -96,11 +112,11 @@ class HttpClientFactory:
         """
         # Keep provider bootstrap behind the registry facade to avoid
         # spreading loader knowledge across internal composition helpers.
-        ProviderRegistry.ensure_loaded()
+        registry = _resolve_provider_registry(provider_registry)
 
         # Validate provider is registered
-        if not ProviderRegistry.is_registered(provider):
-            available = ", ".join(ProviderRegistry.list_providers())
+        if not registry.is_registered(provider):
+            available = ", ".join(registry.list_providers())
             raise ValueError(f"Unknown provider: {provider}. Available: {available}")
 
         return cls._create_from_registry(
@@ -110,6 +126,7 @@ class HttpClientFactory:
             tracer=tracer,
             metrics=metrics,
             logger=logger,
+            provider_registry=registry,
         )
 
     @classmethod
@@ -117,6 +134,8 @@ class HttpClientFactory:
         cls,
         provider: str,
         settings: Settings | None,
+        *,
+        provider_registry: ProviderRegistry | None = None,
     ) -> ResolvedHttpConfig:
         """Pure config resolution — no infrastructure objects created.
 
@@ -130,6 +149,8 @@ class HttpClientFactory:
         Returns:
             ResolvedHttpConfig with all scalar values resolved.
         """
+        registry = _resolve_provider_registry(provider_registry)
+
         # Load source config from provider YAML (primary source) if exists.
         try:
             source_config = load_source_config(provider)
@@ -153,7 +174,7 @@ class HttpClientFactory:
             _FALLBACK_MAX_RETRIES = 3
             _FALLBACK_CB_THRESHOLD = 5
             _FALLBACK_CB_RECOVERY = 300
-            http_config = ProviderRegistry.get_http_config(provider)
+            http_config = registry.get_http_config(provider)
             if http_config is None:
                 rate, capacity = 5.0, 10
                 failure_threshold, recovery_timeout = (
@@ -172,7 +193,7 @@ class HttpClientFactory:
             max_connections, max_keepalive = 50, 10
 
         # Apply rate overrides based on settings (API key boosts)
-        http_config = ProviderRegistry.get_http_config(provider)
+        http_config = registry.get_http_config(provider)
         if settings and http_config and http_config.rate_overrides:
             for setting_name, override_rate in http_config.rate_overrides.items():
                 if cls._check_setting(settings, setting_name):
@@ -203,6 +224,7 @@ class HttpClientFactory:
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
+        provider_registry: ProviderRegistry | None = None,
     ) -> UnifiedHTTPClient:
         """Thin assembler: resolves config, then constructs infrastructure objects.
 
@@ -217,7 +239,11 @@ class HttpClientFactory:
         Returns:
             Configured UnifiedHTTPClient with rate limiter and circuit breaker.
         """
-        cfg = cls._resolve_config(provider, settings)
+        cfg = cls._resolve_config(
+            provider,
+            settings,
+            provider_registry=provider_registry,
+        )
 
         return UnifiedHTTPClient(
             rate_limiter=TokenBucketRateLimiter(

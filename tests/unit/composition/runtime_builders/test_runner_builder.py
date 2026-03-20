@@ -31,15 +31,12 @@ class _FakeRegistry:
 
 
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:
-    """Default provider bootstrap should come from ProviderRegistry facade."""
+    """Default provider bootstrap should come from the named loader helper."""
     default_fn = runner_builder.build_pipeline_runner.__kwdefaults__[
         "ensure_providers_loaded_fn"
     ]
 
-    assert getattr(default_fn, "__self__", None) is runner_builder.ProviderRegistry
-    assert getattr(default_fn, "__func__", None) is (
-        runner_builder.ProviderRegistry.ensure_loaded.__func__
-    )
+    assert default_fn is runner_builder.ensure_providers_loaded
 
 
 def test_build_pipeline_runner_wires_dependencies() -> None:

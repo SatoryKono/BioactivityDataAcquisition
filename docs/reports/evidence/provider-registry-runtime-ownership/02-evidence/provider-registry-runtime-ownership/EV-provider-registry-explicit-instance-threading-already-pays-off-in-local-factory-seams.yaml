@@ -1,0 +1,18 @@
+id: EV-provider-registry-explicit-instance-threading-already-pays-off-in-local-factory-seams
+pillar: provider-registry-runtime-ownership
+source:
+  type: code
+  ref: "src/bioetl/composition/factories/datasource/http_client.py:44-52,91-129,136-153,225-246; src/bioetl/composition/factories/datasource/data_source_factory.py:26-44,58-76,103-110; src/bioetl/composition/factories/pipeline/assembler.py:89-111,246-260; src/bioetl/composition/factories/pipeline/contract_validator.py:99-134"
+  retrieved_at: 2026-03-20
+claim: "Explicit ProviderRegistry instance threading already has a clear payoff in datasource and adjacent factory chains where provider lookup, config resolution, and creator construction are conceptually local."
+quote: "Factory helpers now accept \"provider_registry: ProviderRegistry | None\" and pass it through provider lookup and creator resolution paths."
+confidence: 0.95
+assumptions:
+  - "Local ownership is a valid proxy for where explicit instance threading is worth the cost."
+notes: "This is positive evidence for explicit ownership as a pattern, but only in seams that already own provider lookup concerns. It does not automatically justify pushing the same ownership into runtime/bootstrap."
+tags:
+  - provider-registry
+  - explicit-injection
+  - datasource
+  - factories
+  - locality

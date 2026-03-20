@@ -30,7 +30,7 @@ from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     resolve_runtime_projection as _resolve_runtime_projection,
 )
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config import load_source_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.context import (

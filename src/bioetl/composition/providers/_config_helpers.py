@@ -17,7 +17,7 @@ from bioetl.composition.bootstrap_contexts import (
 )
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
-from bioetl.infrastructure.config_load_api import load_source_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._registration_contracts import (

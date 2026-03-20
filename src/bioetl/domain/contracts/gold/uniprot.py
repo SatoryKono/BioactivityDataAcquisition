@@ -21,6 +21,8 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
 
     Extended schema with functional annotations, cross-references, and quality metrics.
     See Silver schema in infrastructure/schemas/silver.py for field descriptions.
+    The schema name follows the stable public pipeline surface (`protein`),
+    while the canonical domain entity remains `UniprotTarget`.
     """
 
     # System fields
