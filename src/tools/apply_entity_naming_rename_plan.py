@@ -28,7 +28,10 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MATRIX_PATH = (
-    REPO_ROOT / "reports" / "architecture" / "entity-naming-rename-matrix-2026-03-19.csv"
+    REPO_ROOT
+    / "reports"
+    / "architecture"
+    / "entity-naming-rename-matrix-2026-03-19.csv"
 )
 DEFAULT_PLAN_PATH = (
     REPO_ROOT / "reports" / "architecture" / "entity-naming-rename-plan-2026-03-19.yaml"

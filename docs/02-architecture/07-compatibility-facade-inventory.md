@@ -109,7 +109,7 @@ This registry is the measurable compatibility-surface baseline for CI. It is the
 
 Snapshot for this cycle:
 
-- Curated inventory rows: `8`
+- Curated inventory rows: `11`
 - Transition debt rows: `1`
 - Retained public entrypoints: `7`
 - Measured tracked modules: `15`

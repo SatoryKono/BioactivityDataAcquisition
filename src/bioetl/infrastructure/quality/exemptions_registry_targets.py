@@ -115,6 +115,26 @@ def _validate_symbol_key_reference(
         )
 
 
+def _validate_registry_entries(
+    registry_name: str,
+    entries: dict[str, dict[str, str]],
+    symbol_kind: str,
+    symbols_by_module: dict[str, set[str]],
+    global_counts: Counter[str],
+    errors: list[str],
+) -> None:
+    for key in sorted(entries):
+        if isinstance(key, str):
+            _validate_symbol_key_reference(
+                registry_name=registry_name,
+                key=key,
+                symbol_kind=symbol_kind,
+                symbols_by_module=symbols_by_module,
+                global_counts=global_counts,
+                errors=errors,
+            )
+
+
 def validate_exemption_target_references(
     path: Path | str | None = None,
 ) -> list[str]:
@@ -137,27 +157,18 @@ def validate_exemption_target_references(
         if not isinstance(entries, dict):
             continue
         if registry_name in _CLASS_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="class",
-                        symbols_by_module=classes_by_module,
-                        global_counts=class_counts,
-                        errors=errors,
-                    )
+            _validate_registry_entries(
+                registry_name, entries, "class", classes_by_module, class_counts, errors
+            )
         elif registry_name in _FUNCTION_SYMBOL_REGISTRIES:
-            for key in sorted(entries):
-                if isinstance(key, str):
-                    _validate_symbol_key_reference(
-                        registry_name=registry_name,
-                        key=key,
-                        symbol_kind="function",
-                        symbols_by_module=functions_by_module,
-                        global_counts=function_counts,
-                        errors=errors,
-                    )
+            _validate_registry_entries(
+                registry_name,
+                entries,
+                "function",
+                functions_by_module,
+                function_counts,
+                errors,
+            )
 
     return errors
 

@@ -237,9 +237,9 @@ def test_inventory_doc_splits_transition_debt_from_retained_entrypoints() -> Non
         status in {"deprecated-warn", "compat-shim", "mixed-module"}
         for status in transition_rows.values()
     ), "Transition debt ledger must contain only true compatibility-debt statuses."
-    assert all(
-        status == "retained-entrypoint" for status in retained_rows.values()
-    ), "Retained public-entrypoint ledger must contain only retained-entrypoint rows."
+    assert all(status == "retained-entrypoint" for status in retained_rows.values()), (
+        "Retained public-entrypoint ledger must contain only retained-entrypoint rows."
+    )
 
 
 @pytest.mark.architecture
