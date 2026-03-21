@@ -232,9 +232,12 @@ technical-debt roadmap, не потеряв важные предложения.
   `health_check_mixin.py` сохранён как import-stable facade, а observability и
   pure health-policy helpers вынесены в
   `_health_check_observability.py` и `_health_check_policy.py`;
-- следующий implementation step для `Wave 3` теперь уже может идти либо в
-  ratchet/closeout для health cluster, либо в следующий bounded adapter
-  hotspot без broad adapter-base rewrite.
+- следующим bounded cluster после health split выбран
+  `chembl/fetch_resilience_mixin.py`, и cluster start зафиксирован в
+  `wave-3-chembl-fetch-resilience-cluster-plan-2026-03-21.md`;
+- следующий implementation step для `Wave 3` теперь сужен до ChEMBL
+  resilience-flow split внутри provider-bounded family, а не к broad utility
+  rewrite.
 
 ### Wave 4. Complexity hotspot implementation
 
