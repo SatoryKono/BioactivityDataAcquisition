@@ -20,6 +20,7 @@ _NETWORK_PROBE_HOSTS = (
     "eutils.ncbi.nlm.nih.gov",
     "api.crossref.org",
     "api.openalex.org",
+    "api.semanticscholar.org",
 )
 _NETWORK_PROBE_PORT = 443
 _NETWORK_PROBE_TIMEOUT_SECONDS = 2.0
@@ -66,6 +67,9 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "pubmed: PubMed API contract tests")
     config.addinivalue_line("markers", "crossref: Crossref API contract tests")
     config.addinivalue_line("markers", "openalex: OpenAlex API contract tests")
+    config.addinivalue_line(
+        "markers", "semanticscholar: Semantic Scholar API contract tests"
+    )
     config.addinivalue_line(
         "markers", "slow: Tests that may be slow due to rate limits"
     )

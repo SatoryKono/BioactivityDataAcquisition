@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import time
-from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -23,6 +22,16 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.adapters.http._client_retry_models import (
+    _RequestAttemptOutcome,
+    _RetryRequestState,
+)
+from bioetl.infrastructure.adapters.http._client_retry_policy import (
+    _can_retry,
+    _is_retryable_error,
+    _record_request_metrics,
+    _status_code_from_error,
+)
 from bioetl.infrastructure.adapters.http.client_retry_observability import (
     SpanLike,
     finalize_request_observability,
@@ -31,109 +40,6 @@ from bioetl.infrastructure.adapters.http.client_retry_observability import (
     raise_retry_exhausted,
     start_request_span,
 )
-
-
-@dataclass(frozen=True, slots=True)
-class _RequestAttemptOutcome:
-    """Retry-stage outcome for a single request attempt."""
-
-    should_retry: bool
-    status_code: int
-    retries_increment: int
-    last_error: Exception | None
-
-
-@dataclass(slots=True)
-class _RetryRequestState:
-    """Mutable request-level retry state for the main retry loop."""
-
-    status_code: int = 0
-    retries: int = 0
-    attempts_made: int = 0
-    last_error: Exception | None = None
-
-    def record_attempt(self, attempt: int) -> None:
-        """Track the most recent attempt index as a 1-based count."""
-        self.attempts_made = attempt + 1
-
-    def apply_attempt_outcome(self, outcome: _RequestAttemptOutcome) -> bool:
-        """Apply one retry outcome and report whether the loop should continue."""
-        self.status_code = outcome.status_code
-        self.retries += outcome.retries_increment
-        self.last_error = outcome.last_error
-        return outcome.should_retry
-
-
-def _can_retry(
-    retry_config: RetryConfig,
-    attempt: int,
-    retries_used: int,
-) -> bool:
-    """Return True when another retry attempt is allowed.
-
-    Args:
-        retry_config: Retry policy object with attempt and budget methods.
-        attempt: Current attempt index (0-based).
-        retries_used: Number of retries already consumed in this request.
-
-    Returns:
-        True if another attempt is permitted by attempt count and retry budget, False otherwise.
-    """
-    if retry_config.is_last_attempt(attempt):
-        return False
-    return retries_used < retry_config.effective_retry_budget()
-
-
-def _record_request_metrics(
-    metrics: MetricsPort,
-    provider: str,
-    method: str,
-    duration: float,
-    status_code: int,
-    retries: int,
-    last_error: Exception | None,
-) -> None:
-    """Record request duration, retry, and error metrics.
-
-    Args:
-        metrics: Metrics port for emitting counters and histograms.
-        provider: Provider name used as label in metrics.
-        method: HTTP method (GET, POST, etc.) used as label.
-        duration: Total request duration in seconds.
-        status_code: HTTP response status code (0 if connection-level error).
-        retries: Number of retry attempts made.
-        last_error: Final exception if the request failed, or None on success.
-    """
-    labels = {
-        "provider": provider,
-        "method": method.upper(),
-        "status": str(status_code) if status_code else "error",
-    }
-    metrics.observe_histogram("http_request_duration_seconds", duration, labels)
-    if retries > 0:
-        metrics.increment_counter(
-            "http_retries_total",
-            retries,
-            {"provider": provider, "method": method.upper()},
-        )
-    if last_error is not None or status_code >= 400:
-        error_type = type(last_error).__name__ if last_error else f"http_{status_code}"
-        metrics.increment_counter(
-            "http_request_errors_total",
-            1,
-            {
-                "provider": provider,
-                "method": method.upper(),
-                "error_type": error_type,
-            },
-        )
-
-
-def _status_code_from_error(exc: Exception) -> int:
-    """Extract HTTP status code from retryable errors when available."""
-    if isinstance(exc, httpx.HTTPStatusError):
-        return exc.response.status_code
-    return 0
 
 
 class HTTPClientRetryMixin:
@@ -289,22 +195,7 @@ class HTTPClientRetryMixin:
         exc: Exception,
     ) -> bool:
         """Return True when exception is retryable by policy."""
-        if isinstance(
-            exc,
-            httpx.ConnectError
-            | httpx.ConnectTimeout
-            | httpx.ReadTimeout
-            | httpx.ReadError
-            | httpx.WriteError
-            | httpx.ProtocolError
-            | httpx.ProxyError,
-        ):
-            return True
-        if isinstance(exc, RecoverableError):
-            return True
-        if isinstance(exc, httpx.HTTPStatusError):
-            return self.retry_config.is_retryable_status(exc.response.status_code)
-        return self.retry_config.is_retryable_exception(exc)
+        return _is_retryable_error(self.retry_config, exc)
 
     async def _attempt_request(
         self,

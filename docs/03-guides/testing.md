@@ -23,7 +23,7 @@ Source of truth для тестовой governance:
 - canonical tooling paths активированы для partial rollout: `scripts/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical backfill entry point; при этом workflow-level automated backfill всё ещё не включён
 - descriptive test-health taxonomy теперь canonical-фиксируется в `configs/quality/test_health_reporting.yaml`; статусы `fully_exercised_green`, `staged_green`, `environment_limited_green` остаются informational и не заменяют merge-blocking CI status
 - monthly `contract-tests.yml` остаётся активным live-network workflow и должен запускать `tests/contract/` с `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и `--network`
-- минимальный live-contract baseline уже enforceable: `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex` обязаны иметь live contract suites; `semanticscholar` пока остаётся `vcr_only`
+- минимальный live-contract baseline уже enforceable: `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex` обязаны иметь live contract suites; `semanticscholar` переведён в явный `pilot`
 - текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний registry `tests/fixtures/contracts/{provider}/v{version}.json` остаётся future target из ADR-042
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
@@ -89,7 +89,7 @@ compatibility facades, где mirror-path `test_<module>.py` был бы лож�
 - **VCR Policy**: Кассеты хранятся в `tests/fixtures/vcr/`. При запуске в CI сетевые вызовы запрещены (`--vcr-record=none`).
 - **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `partial` rollout. Репозиторий уже держит seeded sidecar inventory и canonical catalog, но глобальный enforcement ещё не repo-wide.
 - **Catalog / Backfill Policy**: canonical VCR metadata catalog и canonical backfill script уже существуют, но automated workflow rollout всё ещё остаётся неполным; это состояние фиксируется matrix и architecture guard'ами.
-- **Live Contract Baseline**: live-network enforcement обязателен для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`; `semanticscholar` остаётся `vcr_only`.
+- **Live Contract Baseline**: live-network enforcement обязателен для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`; `semanticscholar` сейчас проходит как `pilot`.
 
 ### 2.3. End-to-End (E2E) Tests (`tests/e2e/`)
 

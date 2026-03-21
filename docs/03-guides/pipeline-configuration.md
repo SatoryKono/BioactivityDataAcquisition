@@ -79,19 +79,22 @@ configs/
 └── naming_exceptions.yaml
 ```
 
-### Статистика конфигураций
+### Категории конфигураций
 
-| Категория                     | Количество | Описание |
-| ----------------------------- | ---------- | -------- |
-| Entity configs (unified)      | 21         | Standard ETL pipelines (`configs/entities`) |
-| Composite pipeline configs    | 5          | Multi-provider pipelines (`configs/composites/*.yaml`) |
-| Composite field-group configs | 1          | Shared field groups (`configs/composites/field_groups`) |
-| Provider configs              | 7          | Source + provider quality/filters (`configs/providers`) |
-| Base configs                  | 3          | Global defaults (`configs/base`) |
-| Quality/governance configs    | 11         | Quality policy, debt, source-test, and composite quality files (`configs/quality`) |
-| Enum configs                  | 2          | Enum and publication-classification assets (`configs/enums`) |
-| Misc standalone configs       | 1          | Naming exceptions (`configs/naming_exceptions.yaml`) |
-| **Итого файлов конфигурации** | **51**     | Все YAML-конфиги в `configs/` |
+Точный total по YAML-файлам в `configs/` быстро дрейфует по мере добавления
+quality/governance assets и composite helpers, поэтому active guide фиксирует
+категории, а не ручной глобальный count.
+
+| Категория | Описание |
+| --------- | -------- |
+| Entity configs (unified) | Standard ETL pipelines (`configs/entities`) |
+| Composite pipeline configs | Multi-provider pipelines (`configs/composites/*.yaml`) |
+| Composite field-group configs | Shared field groups (`configs/composites/field_groups`) |
+| Provider configs | Source + provider quality/filters (`configs/providers`) |
+| Base configs | Global defaults (`configs/base`) |
+| Quality/governance configs | Quality policy, debt, source-test, and composite quality files (`configs/quality`) |
+| Enum configs | Enum and publication-classification assets (`configs/enums`) |
+| Misc standalone configs | Naming exceptions and similar top-level config assets |
 
 ----------------------------------------------------------------------
 

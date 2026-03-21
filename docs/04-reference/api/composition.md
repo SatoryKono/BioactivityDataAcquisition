@@ -31,56 +31,44 @@ seams are exposed through dedicated submodules such as `entrypoints`,
 
 ## Factories (`composition.factories`)
 
-### Pipeline Factories
+Package-root guidance: `composition.factories` should be read as a narrow facade
+defined by `src/bioetl/composition/factories/__init__.py`. Additional helpers in
+submodules remain useful, but they are not package-root exports unless noted.
 
-| Class | Description |
+### Package-Root Factory Symbols
+
+| Symbol | Description |
 |---|---|
 | `GenericPipelineFactory` | Generic pipeline factory with type parameter |
+| `create_pipeline_factory()` | Narrow public helper for configured pipeline factory creation |
+| `assemble_runner()` | Public helper for runner assembly from a configured pipeline |
+| `DataSourceFactory` | Creates data source adapters for all providers |
+| `StorageFactory` | Creates storage components (Bronze/Silver/Gold writers) |
+| `StorageAdapter` | Unified storage adapter combining all writer ports |
+| `StorageContext` | Storage context with paths and configuration |
+| `DQServicesFactory` | Creates data quality service instances |
+| `BaseServicesFactory` | Base factory for application services |
+| `ServicesBuilder` | Builds application service instances |
+| `build_pipeline_services()` | Public service-bundle assembly helper |
+
+### Notable Nested Factory Symbols
+
+Import the symbols below from their defining submodules rather than from the
+`composition.factories` package root.
+
+| Symbol | Description |
+|---|---|
 | `PipelineFactoryConfig` | Named tuple with factory configuration |
 | `RunContextFactory` | Creates pipeline run contexts |
 | `DomainConfigResolver` | Resolves domain config from YAML sources |
 | `TransformerBuilder` | Builds transformer instances with dependencies |
-| `create_pipeline_factory()` | Narrow public helper for configured pipeline factory creation |
-| `assemble_runner()` | Public helper for runner assembly from a configured pipeline |
-
-### Data Source Factories
-
-| Class | Description |
-|---|---|
-| `DataSourceFactory` | Creates data source adapters for all providers |
 | `HttpClientFactory` | Creates configured HTTP clients with retry/rate limiting |
 | `ResolvedHttpConfig` | Resolved HTTP client configuration |
 | `CrossrefAdapterFactory` | CrossRef-specific adapter factory |
 | `AdapterHelpersFactory` | Creates adapter helper services |
-
-### Storage Factories
-
-| Class | Description |
-|---|---|
-| `StorageFactory` | Creates storage components (Bronze/Silver/Gold writers) |
-| `StorageAdapter` | Unified storage adapter combining all writer ports |
-| `StorageContext` | Storage context with paths and configuration |
-
-### DQ Factories
-
-| Class | Description |
-|---|---|
-| `DQServicesFactory` | Creates data quality service instances |
-
-### Runner Factories
-
-| Class | Description |
-|---|---|
-| `RunnerFactory` | Creates PipelineRunner instances with all dependencies |
+| `RunnerFactory` | Creates `PipelineRunner` instances with all dependencies |
 | `MetricsExtractor` | Extracts metrics from completed runs |
-| `ServicesBuilder` | Builds application service instances |
-| `BaseServicesFactory` | Base factory for application services |
 | `ServiceBundleDependencies` | Dependencies required for service bundle creation |
-
-### Support
-
-| Class | Description |
-|---|---|
 | `UuidBatchIdGenerator` | UUID-based batch ID generation (implements `BatchIdGeneratorPort`) |
 | `PipelineContractValidator` | Validates pipeline contracts at assembly time |
 
@@ -180,12 +168,15 @@ seams are exposed through dedicated submodules such as `entrypoints`,
 
 ## Runtime Builders (`composition.runtime_builders`)
 
+Package-root export status:
+
 | Symbol | Description |
 |---|---|
 | `build_pipeline_runner()` | Assembles a fully configured `PipelineRunner` from resolved inputs |
-| `build_observability_bundle()` | Builds logger + metrics + tracer bundle for a run |
-| `RunnerInputs` | Resolved runner input configuration |
-| `ResolvedVacuumSettings` | Resolved vacuum operation settings |
+
+Nested runtime-builder helpers such as `build_observability_bundle`,
+`RunnerInputs`, and `ResolvedVacuumSettings` live in defining submodules and are
+not exported by the `composition.runtime_builders` package root.
 
 ---
 
