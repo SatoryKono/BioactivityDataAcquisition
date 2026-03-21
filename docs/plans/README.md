@@ -38,6 +38,11 @@ This is now the only active execution/backlog document in `docs/plans/`.
 
 - [onboarding-checklist-day-1-2026-03-20.md](onboarding-checklist-day-1-2026-03-20.md)
 - [project-briefing-capability-discovery-2026-03-20.md](project-briefing-capability-discovery-2026-03-20.md)
+- [architecture-review-and-refactor-plan-2026-03-21.md](architecture-review-and-refactor-plan-2026-03-21.md)
+
+The architecture review plan is a supporting assessment and refactor map.
+It is not a second active backlog and should be read together with the
+consolidated plan rather than instead of it.
 
 ### Retained Historical Context With Live Evidence References
 

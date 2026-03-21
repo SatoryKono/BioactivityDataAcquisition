@@ -11,6 +11,7 @@ See RULES.md §8.2 for JSON response modeling guidelines.
 from __future__ import annotations
 
 import importlib
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -25,6 +26,13 @@ from bioetl.infrastructure.adapters.crossref.models_shared import (
     CrossRefLink,
     CrossRefReference,
 )
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.crossref._response_models import (
+        CrossRefMessage,
+        CrossRefPublicationResponse,
+        CrossRefPublicationsResponse,
+    )
 
 __all__ = [
     "CROSSREF_RECORD_MODELS",
