@@ -9,7 +9,7 @@ exist in the codebase.  Catches common drift scenarios:
   3. Module paths moved but docs still point to old locations
   4. Provider/entity lists changed but reference docs are stale
   5. Factory/registry changes not reflected in composition docs
-  6. Active runtime docs mirrors drift from canonical `.claude/agents/` sources
+  6. Active runtime docs mirrors drift from canonical `.codex/agents/` sources
   7. Freshness/version markers in active docs disagree with canonical runtime docs
 
 Usage:
@@ -119,7 +119,7 @@ LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(
 RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     RuntimeMirrorRule(
         name="orchestration",
-        canonical=Path(".claude/agents/ORCHESTRATION.md"),
+        canonical=Path(".codex/agents/ORCHESTRATION.md"),
         mirror=Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
         sections=(
             "## 1. Обзор",
@@ -130,13 +130,13 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     ),
     RuntimeMirrorRule(
         name="py-audit-bot",
-        canonical=Path(".claude/agents/py-audit-bot.md"),
+        canonical=Path(".codex/agents/py-audit-bot.md"),
         mirror=Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
         sections=("## Выходы",),
     ),
     RuntimeMirrorRule(
         name="py-config-bot",
-        canonical=Path(".claude/agents/py-config-bot.md"),
+        canonical=Path(".codex/agents/py-config-bot.md"),
         mirror=Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
         sections=("## Выходы", "## Обязательные правила", "## Иерархия конфигураций"),
     ),
@@ -545,7 +545,7 @@ def check_runtime_mirrors(report: DriftReport) -> None:
 
 def check_freshness(report: DriftReport) -> None:
     """Verify active docs use consistent freshness/version metadata."""
-    canonical_orchestration = PROJECT_ROOT / ".claude" / "agents" / "ORCHESTRATION.md"
+    canonical_orchestration = PROJECT_ROOT / ".codex" / "agents" / "ORCHESTRATION.md"
     orchestration_text = _read_doc(canonical_orchestration)
     current_orchestration_version = _extract_runtime_version(orchestration_text)
 
@@ -655,7 +655,7 @@ def main() -> int:
     parser.add_argument(
         "--runtime-mirrors",
         action="store_true",
-        help="Check published runtime docs mirrors against canonical .claude docs",
+        help="Check published runtime docs mirrors against canonical .codex docs",
     )
     parser.add_argument(
         "--freshness",
