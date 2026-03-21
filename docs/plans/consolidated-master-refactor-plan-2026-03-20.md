@@ -215,8 +215,21 @@ technical-debt roadmap, не потеряв важные предложения.
 - preflight inventory для cluster start уже завершён:
   прямых `src`-импортёров у `crossref.batch` сейчас нет, а внешний контракт
   удерживается в основном tests/architecture touchpoints;
-- следующий implementation step для `Wave 3` сужен до internal workflow split
-  with compatibility seam, а не к broad adapter rewrite.
+- `3A-2` уже реализован:
+  `batch.py` стал compat facade, а internal workflow split выполнен через
+  `_doi_batch_processor.py`, `_search_paginator.py` и `_batch_support.py`;
+- следующим bounded cluster после `crossref` выбран
+  `http/client_retry_mixin.py`, и cluster start зафиксирован в
+  `wave-3-http-client-retry-cluster-plan-2026-03-21.md`;
+- `3B-2` уже реализован:
+  `client_retry_mixin.py` сохранён как import-stable facade, а retry-state и
+  pure policy helpers вынесены в `_client_retry_models.py` и
+  `_client_retry_policy.py`;
+- следующим bounded cluster после retry split выбран
+  `health_check_mixin.py`, и cluster start зафиксирован в
+  `wave-3-health-check-cluster-plan-2026-03-21.md`;
+- следующий implementation step для `Wave 3` теперь сужен до health-flow split
+  внутри shared adapter health family, а не к broad adapter-base rewrite.
 
 ### Wave 4. Complexity hotspot implementation
 

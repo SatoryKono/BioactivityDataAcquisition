@@ -1,0 +1,192 @@
+"""Internal DOI batch workflow for the CrossRef adapter."""
+
+from __future__ import annotations
+
+import time
+from typing import TYPE_CHECKING, cast
+
+from httpx import Response
+
+from bioetl.domain.normalization import normalize_doi
+from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.crossref._batch_support import (
+    CROSSREF_FALLBACK_ERRORS,
+    CROSSREF_RUNTIME_ERRORS,
+    BaseMetrics,
+    HeadersBuilder,
+    HttpTransport,
+    record_response_timing,
+)
+from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+
+
+class DoiBatchProcessor:
+    """Handles batch DOI resolution for CrossRef API."""
+
+    def __init__(
+        self,
+        http: HttpTransport,
+        logger: LoggerPort,
+        metrics: BaseMetrics,
+        mailto: str,
+        api_base: str,
+        headers_fn: HeadersBuilder,
+        request_collector: APIRequestCollector | None = None,
+    ) -> None:
+        self._http = http
+        self._logger = logger
+        self._metrics = metrics
+        self._mailto = mailto
+        self._api_base = api_base
+        self._headers_fn = headers_fn
+        self._request_collector = request_collector
+
+    async def fetch_single(self, doi: str) -> BronzeRecord | None:
+        """Fetch a single publication by DOI."""
+        normalized_doi = normalize_doi(doi) or ""
+        url = f"{self._api_base}/works/{normalized_doi}"
+        response: Response | None = None
+
+        try:
+            start_time = time.perf_counter()
+            with self._metrics.measure_request("/works/{doi}"):
+                response = await self._http.get(url, headers=self._headers_fn())
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            record_response_timing(
+                self._request_collector,
+                response,
+                duration_ms,
+            )
+
+            if response is None:
+                raise CrossRefApiError(
+                    f"Failed to fetch DOI {normalized_doi}: no response"
+                )
+
+            if response.status_code == 404:
+                self._logger.debug("crossref_doi_not_found", doi=normalized_doi)
+                return None
+
+            if response.status_code != 200:
+                raise CrossRefApiError(
+                    f"CrossRef API error for DOI {normalized_doi}",
+                    status_code=response.status_code,
+                )
+
+            data = response.json()
+            return cast(BronzeRecord, data.get("message", {}))
+
+        except CrossRefApiError:
+            raise
+        except CROSSREF_RUNTIME_ERRORS as error:
+            self._logger.error(
+                "crossref_fetch_failed",
+                doi=normalized_doi,
+                error=str(error),
+            )
+            raise CrossRefApiError(
+                f"Failed to fetch DOI {normalized_doi}: {error}"
+            ) from error
+
+    async def _fallback_individual_fetch(
+        self, dois: list[str]
+    ) -> AsyncIterator[BronzeRecord]:
+        """Fall back to individual DOI fetches."""
+        for doi in dois:
+            try:
+                publication = await self.fetch_single(doi)
+                if publication:
+                    yield publication
+            except CROSSREF_FALLBACK_ERRORS as error:
+                self._logger.debug(
+                    "crossref_individual_fetch_failed",
+                    doi=doi,
+                    error=str(error),
+                )
+
+    def _normalize_dois(self, dois: list[str]) -> list[str]:
+        """Normalize and filter DOI list, removing invalid entries."""
+        return [normalize_doi(doi) or "" for doi in dois if normalize_doi(doi)]
+
+    async def _execute_batch_request(
+        self, normalized_dois: list[str]
+    ) -> Response | None:
+        """Execute the batch DOI filter request."""
+        filter_value = ",".join(f"doi:{doi}" for doi in normalized_dois)
+        url = f"{self._api_base}/works"
+        params = {
+            "filter": filter_value,
+            "rows": str(len(normalized_dois)),
+            "mailto": self._mailto,
+        }
+        response: Response | None = None
+
+        start_time = time.perf_counter()
+        with self._metrics.measure_request("/works?filter=doi"):
+            response = await self._http.get(
+                url,
+                params=params,
+                headers=self._headers_fn(),
+            )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        record_response_timing(
+            self._request_collector,
+            response,
+            duration_ms,
+        )
+
+        return response
+
+    @staticmethod
+    def _parse_batch_items(response: Response) -> list[BronzeRecord]:
+        """Extract publication items from a CrossRef batch response."""
+        data = response.json()
+        message = data.get("message", {})
+        items = message.get("items", []) if isinstance(message, dict) else []
+        return [cast(BronzeRecord, item) for item in items if isinstance(item, dict)]
+
+    async def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
+        """Fetch multiple publications by DOI batch."""
+        if not dois:
+            return
+
+        normalized_dois = self._normalize_dois(dois)
+        if not normalized_dois:
+            return
+
+        try:
+            response = await self._execute_batch_request(normalized_dois)
+
+            if response is None:
+                raise CrossRefApiError("CrossRef batch request returned no response")
+
+            if response.status_code != 200:
+                self._logger.warning(
+                    "crossref_batch_fetch_failed",
+                    status_code=response.status_code,
+                    doi_count=len(dois),
+                )
+                async for publication in self._fallback_individual_fetch(dois):
+                    yield publication
+                return
+
+            for item in self._parse_batch_items(response):
+                yield item
+
+        except CROSSREF_RUNTIME_ERRORS as error:
+            self._logger.warning(
+                "crossref_batch_fetch_error",
+                error=str(error),
+                doi_count=len(dois),
+            )
+            async for publication in self._fallback_individual_fetch(dois):
+                yield publication
+

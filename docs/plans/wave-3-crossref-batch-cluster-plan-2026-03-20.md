@@ -1,7 +1,7 @@
 # Wave 3 CrossRef Batch Cluster Plan
 
 Date: 2026-03-20  
-Status: active bounded-cluster plan, preflight completed  
+Status: active bounded-cluster plan, `3A-2` implemented  
 Parent program: [consolidated-master-refactor-plan-2026-03-20.md](./consolidated-master-refactor-plan-2026-03-20.md)
 
 ## Purpose
@@ -137,6 +137,24 @@ Planned write scope for `3A-2`:
 - avoid broader edits outside `crossref/` unless a test failure proves a real
   caller contract needs adjustment
 
+Implementation result for `3A-2`:
+
+- `batch.py` now acts as a thin compatibility facade
+- DOI batch workflow moved to
+  `src/bioetl/infrastructure/adapters/crossref/_doi_batch_processor.py`
+- cursor-search workflow moved to
+  `src/bioetl/infrastructure/adapters/crossref/_search_paginator.py`
+- shared protocols and request-timing glue moved to
+  `src/bioetl/infrastructure/adapters/crossref/_batch_support.py`
+- public collaborator symbols remained import-stable through
+  `bioetl.infrastructure.adapters.crossref.batch`
+
+Next step after `3A-2`:
+
+- either add a dedicated ratchet to keep `batch.py` facade-only,
+- or move to the next bounded adapter hotspot once the cluster is considered
+  stable enough without extra guardrails
+
 ## Verification
 
 - `./.venv/Scripts/python.exe -m pytest -q tests/unit/infrastructure/adapters/crossref/test_batch.py`
@@ -153,3 +171,7 @@ This cluster-start transition is complete when:
 3. the verify set is explicit before code movement starts;
 4. the next implementation step is narrowed to one safe internal workflow split
    rather than a broad adapter rewrite.
+
+Current state:
+
+- all four cluster-start conditions are now satisfied
