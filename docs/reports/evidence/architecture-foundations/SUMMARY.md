@@ -1,9 +1,11 @@
-# Evidence Collection Complete: architecture-foundations
+# Сбор evidence завершён: architecture-foundations
 
-**Evidence Objects Created:** 15  
-**Gate Status:** PASSED
+**Создано объектов evidence:** 15  
+**Gate Статус:** PASSED
 
-## Evidence Summary
+Revalidated against the current repository state on 2026-03-21.
+
+## Сводка evidence
 
 | ID | Claim Summary | Confidence |
 |----|---------------|------------|
@@ -55,18 +57,18 @@ Total: 5/5 minimum ✓ GATE PASSED
 
 Total: 5/5 minimum ✓ GATE PASSED
 
-## Key Findings
+## Ключевые выводы
 
 - The repository still has a clear five-layer model, and the most important distinction is that `composition` remains a separate DI/assembly root rather than being folded into `interfaces`.
 - The architectural style is not ambiguous: active docs repeatedly converge on Hexagonal Architecture, Medallion data flow, DDD-style domain modeling, and constructor-based DI.
 - The current baseline is not held together only by prose. The generated dependency map reports zero layer-policy violations, and targeted architecture suites for layer dependencies, bootstrap/composition boundaries, and interface/DI guardrails all pass locally.
 
-## Contradictions Noted
+## Отмеченные противоречия
 
 - ADR-005 documents that `interfaces -> infrastructure` is technically allowed in the import matrix, while the current `test_interfaces_no_infrastructure.py` suite encodes a stronger preferred practice for CLI-facing code. This is a tension in guidance scope, not a direct contradiction in the current baseline.
 - The architecture style is strongly documented at the repo level, but individual provider pipelines may still expose transitional compatibility surfaces that are outside the scope of this pack.
 
-## Gaps Remaining
+## Оставшиеся пробелы
 
 - This pack does not yet map every subpackage below the five top-level layers to a finer-grained responsibility inventory.
 - It does not quantify how much of the codebase still relies on compatibility facades versus canonical public seams.

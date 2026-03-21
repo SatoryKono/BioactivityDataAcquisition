@@ -16,8 +16,10 @@ from bioetl.composition.providers._default_registry import (
 from bioetl.composition.providers._models import ProviderConfig
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
-    ProviderRegistrarProtocol,
     resolve_provider_assembly_support,
+)
+from bioetl.composition.providers._registry_protocols import (
+    ProviderRegistrarProtocol,
 )
 from bioetl.composition.providers.registration_biblio import (
     _get_biblio_provider_configs,

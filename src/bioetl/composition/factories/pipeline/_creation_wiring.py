@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.composition.factories.pipeline.construction_types import (
+    _SchemaBuilder,
+)
 from bioetl.composition.factories.pipeline.run_context_factory import (
     RunContextFactory,
 )
@@ -42,12 +45,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
-
-from bioetl.composition.factories.pipeline.contract_validator import (
-    _SchemaBuilder,
-)
-
 
 class _ServiceBundleDeps(Protocol):
     """Subset of dependencies required by pipeline creation internals."""

@@ -1,5 +1,7 @@
 # Pipeline Config Loader Ownership Evidence Summary
 
+Примечание о rebaseline: the current repo state still supports the retain-and-thin interpretation for `PipelineConfigLoader`; canonical ownership remains with the narrower resolver/API seams.
+
 ## Question
 
 After the current `RF-FS-004` slices, should `PipelineConfigLoader` remain a
@@ -26,7 +28,7 @@ around `pipeline_config_api.py` and `domain_config_resolver.py`?
 4. `PipelineConfigLoader` still adds real retained value as a tested
    infrastructure convenience seam.
 
-## Current Interpretation Boundary
+## Текущая интерпретация Boundary
 
 This evidence pack supports a conservative interpretation:
 
@@ -43,6 +45,6 @@ convenience methods should ultimately stay as a sanctioned shim or collapse into
 smaller explicit APIs. The current evidence is strong enough to reject
 re-centering the class, but not yet strong enough to justify deletion.
 
-## Risks
+## Риски
 
 - Formal risk tracking now lives in [05-risks/RISKS.yaml](./05-risks/RISKS.yaml).

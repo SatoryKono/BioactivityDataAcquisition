@@ -1,5 +1,7 @@
 # Synthesis: provider-registry-runtime-ownership
 
+Rebaseline note: the current repo still supports stopping at the named runtime bootstrap seam; explicit runtime instance ownership remains unproven.
+
 ## Executive Summary
 
 - The runtime/bootstrap area has already crossed the most important architectural threshold: raw class-level `ProviderRegistry.ensure_loaded()` access has been reduced behind a named composition seam. (`EV-provider-registry-runtime-bootstrap-now-flows-through-named-seam`)

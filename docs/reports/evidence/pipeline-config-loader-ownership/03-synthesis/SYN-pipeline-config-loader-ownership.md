@@ -1,5 +1,7 @@
 # Synthesis: pipeline-config-loader-ownership
 
+Rebaseline note: the current repo still supports the retain-and-thin reading for `PipelineConfigLoader`; canonical ownership remains in the narrower API/resolver seams.
+
 ## Executive Summary
 
 - Canonical staged YAML loading now lives in

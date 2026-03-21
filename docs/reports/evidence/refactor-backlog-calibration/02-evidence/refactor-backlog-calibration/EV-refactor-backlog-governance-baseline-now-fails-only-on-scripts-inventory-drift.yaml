@@ -3,7 +3,7 @@ pillar: refactor-backlog-calibration
 source:
   type: experiment
   ref: "docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/RAW-refactor-backlog-calibration-2026-03-20.md; ./.venv/Scripts/python.exe -m scripts.qa check-c901; ./.venv/Scripts/python.exe -m scripts.qa check-naming --check; ./.venv/Scripts/python.exe -m scripts.repo check-inventory --check"
-  retrieved_at: 2026-03-20
+  retrieved_at: 2026-03-21
 claim: "The governance baseline is no longer broadly red: `check-c901` and `check-naming --check` are green, and the only remaining failing gate in RF-01 is scripts inventory drift."
 quote: "Result: OK (no new C901 structural debt) ... Total violations: 0 ... [FAIL] Scripts inventory drift detected"
 confidence: 0.98
@@ -17,4 +17,3 @@ tags:
   - inventory
   - c901
   - naming
-

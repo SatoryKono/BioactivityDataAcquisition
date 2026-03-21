@@ -21,27 +21,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
-class ProviderRegistrarProtocol(Protocol):
-    """Minimal registry contract for provider registration assembly."""
-
-    def register(self, name: str, config: ProviderConfig) -> None:
-        """Register a provider config."""
-        ...
-
-    def is_registered(self, name: str) -> bool:
-        """Return whether the provider is already registered."""
-        ...
-
-    def list_providers(self) -> list[str]:
-        """List registered providers."""
-        ...
-
-    def clear(self) -> None:
-        """Clear all registered providers."""
-        ...
-
-
 class ProviderHttpClientFactoryProtocol(Protocol):
     """Callable contract for provider HTTP client construction."""
 

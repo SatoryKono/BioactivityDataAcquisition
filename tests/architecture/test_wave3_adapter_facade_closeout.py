@@ -59,6 +59,14 @@ FACADE_RATCHETS: dict[str, tuple[int, set[str]]] = {
         295,
         {"bioetl.infrastructure.adapters.crossref._client_fallback_policy"},
     ),
+    "src/bioetl/infrastructure/adapters/crossref/batch.py": (
+        35,
+        {
+            "bioetl.infrastructure.adapters.crossref._batch_support",
+            "bioetl.infrastructure.adapters.crossref._doi_batch_processor",
+            "bioetl.infrastructure.adapters.crossref._search_paginator",
+        },
+    ),
     "src/bioetl/infrastructure/adapters/pubmed/models.py": (
         280,
         {"bioetl.infrastructure.adapters.pubmed._search_models"},
@@ -102,6 +110,24 @@ def _top_level_class_names(relative_path: str) -> set[str]:
     return {
         node.name for node in _tree(relative_path).body if isinstance(node, ast.ClassDef)
     }
+
+
+def _src_importers_of(module_name: str) -> set[str]:
+    src_root = ROOT / "src"
+    importers: set[str] = set()
+    for path in src_root.rglob("*.py"):
+        relative_path = path.relative_to(ROOT).as_posix()
+        if relative_path == "src/bioetl/infrastructure/adapters/crossref/batch.py":
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        imported_modules = {
+            node.module
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module is not None
+        }
+        if module_name in imported_modules:
+            importers.add(relative_path)
+    return importers
 
 
 @pytest.mark.architecture
@@ -154,4 +180,15 @@ def test_wave3_model_facades_do_not_reabsorb_split_response_dtos(
         f"{relative_path} reintroduced split response/search DTOs into the "
         "public facade:\n"
         + "\n".join(sorted(unexpected_local_classes))
+    )
+
+
+@pytest.mark.architecture
+def test_crossref_batch_shim_is_not_used_by_first_party_src_modules() -> None:
+    """First-party src modules should use CrossRef private owners, not batch shim."""
+    importers = _src_importers_of("bioetl.infrastructure.adapters.crossref.batch")
+    assert not importers, (
+        "crossref.batch should now be a compatibility/testing facade only. "
+        "First-party src modules must import private owners instead:\n"
+        + "\n".join(sorted(importers))
     )

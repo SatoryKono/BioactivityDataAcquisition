@@ -15,7 +15,7 @@ from typing import (
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
-    from bioetl.composition.providers._registration_contracts import (
+    from bioetl.composition.providers._registry_protocols import (
         ProviderRegistrarProtocol,
     )
 

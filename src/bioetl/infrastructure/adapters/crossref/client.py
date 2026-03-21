@@ -24,12 +24,14 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
 )
+from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
+    DoiBatchProcessor,
+)
+from bioetl.infrastructure.adapters.crossref._search_paginator import (
+    SearchPaginator,
+)
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
     _CrossRefFallbackPolicyMixin,
-)
-from bioetl.infrastructure.adapters.crossref.batch import (
-    DoiBatchProcessor,
-    SearchPaginator,
 )
 from bioetl.infrastructure.adapters.crossref.client_fetch_helpers import (
     aclose_crossref_http_client,

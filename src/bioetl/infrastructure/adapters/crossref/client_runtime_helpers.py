@@ -6,8 +6,10 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
-from bioetl.infrastructure.adapters.crossref.batch import (
+from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
     DoiBatchProcessor,
+)
+from bioetl.infrastructure.adapters.crossref._search_paginator import (
     SearchPaginator,
 )
 from bioetl.infrastructure.adapters.crossref.client_builders import (
