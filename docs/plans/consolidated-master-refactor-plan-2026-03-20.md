@@ -264,8 +264,14 @@ technical-debt roadmap, не потеряв важные предложения.
 - `3H-2` уже реализован:
   `adapter_filter_fetch_mixin.py` сохранён как import-stable facade, а
   filter/fallback/resume helpers вынесены в `_filter_fetch_support.py`;
+- следующим bounded cluster после `pubmed/adapter_filter_fetch_mixin.py`
+  выбран `pubchem/fetch_strategies.py`, и cluster start зафиксирован в
+  `wave-3-pubchem-fetch-strategies-cluster-plan-2026-03-21.md`;
+- `3I-2` уже реализован:
+  `fetch_strategies.py` сохранён как import-stable facade, а query/search flow
+  вынесен в `_fetch_strategy_search.py`;
 - следующий implementation step для `Wave 3` теперь сужен до closeout/ratchet
-  для `adapter_filter_fetch_mixin.py` или к выбору следующего bounded adapter
+  для `pubchem/fetch_strategies.py` или к выбору следующего bounded adapter
   hotspot.
 
 ### Wave 4. Complexity hotspot implementation
