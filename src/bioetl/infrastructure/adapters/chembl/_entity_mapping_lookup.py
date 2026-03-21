@@ -107,7 +107,10 @@ def has_entity_composite_key(entity_type: str) -> bool:
 
 def is_known_entity_type(entity_type: str) -> bool:
     """Return True when entity is known via publication or non-publication lookup."""
-    return is_publication_entity(entity_type) or entity_type in _NON_PUBLICATION_ENTITY_MAPPING
+    return (
+        is_publication_entity(entity_type)
+        or entity_type in _NON_PUBLICATION_ENTITY_MAPPING
+    )
 
 
 def build_legacy_entity_mapping() -> dict[str, str]:

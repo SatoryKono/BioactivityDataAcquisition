@@ -10,6 +10,25 @@ See RULES.md §8.2 for JSON response modeling guidelines.
 
 from __future__ import annotations
 
+from pydantic import BaseModel, ConfigDict, Field
+
+from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.crossref._response_models import (
+    CrossRefMessage,
+    CrossRefPublicationResponse,
+    CrossRefPublicationsResponse,
+)
+from bioetl.infrastructure.adapters.crossref.models_shared import (
+    CrossRefAssertion,
+    CrossRefAuthor,
+    CrossRefClinicalTrial,
+    CrossRefDateParts,
+    CrossRefFunder,
+    CrossRefLicense,
+    CrossRefLink,
+    CrossRefReference,
+)
+
 __all__ = [
     "CROSSREF_RECORD_MODELS",
     "CrossRefAssertion",
@@ -25,21 +44,6 @@ __all__ = [
     "CrossRefPublicationsResponse",
     "CrossRefReference",
 ]
-
-
-from pydantic import BaseModel, ConfigDict, Field
-
-from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.adapters.crossref.models_shared import (
-    CrossRefAssertion,
-    CrossRefAuthor,
-    CrossRefClinicalTrial,
-    CrossRefDateParts,
-    CrossRefFunder,
-    CrossRefLicense,
-    CrossRefLink,
-    CrossRefReference,
-)
 
 # === Publication Record Model ===
 
@@ -230,13 +234,6 @@ class CrossRefPublicationRecord(BaseModel):
     update_policy: str | None = Field(
         default=None, alias="update-policy", description="Update policy DOI"
     )
-
-
-from bioetl.infrastructure.adapters.crossref._response_models import (
-    CrossRefMessage,
-    CrossRefPublicationResponse,
-    CrossRefPublicationsResponse,
-)
 
 
 # === Record Type Mapping ===

@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 class _ServiceBundleDeps(Protocol):
     """Subset of dependencies required by pipeline creation internals."""
 

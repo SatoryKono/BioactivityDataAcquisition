@@ -28,7 +28,6 @@ FACTORY_LOADER_PATH = (
 )
 REGISTRY_MAX_LINES = 260  # bumped: RF-001 added __init__, RLock, lazy singleton
 REQUIRED_HELPER_IMPORTS = {
-    "bioetl.composition.providers._loading",
     "bioetl.composition.providers._creation",
     "bioetl.composition.providers._models",
     "bioetl.composition.providers._store",
@@ -105,6 +104,21 @@ def test_provider_registry_uses_split_helper_modules() -> None:
     assert not unexpected_registration_imports, (
         "provider_registry.py must not absorb provider registration logic again:\n"
         + "\n".join(sorted(unexpected_registration_imports))
+    )
+
+
+@pytest.mark.architecture
+def test_provider_registry_keeps_loader_indirection_seam() -> None:
+    """Provider registry may late-bind `_loading`, but must keep the seam explicit."""
+    source = REGISTRY_PATH.read_text(encoding="utf-8")
+
+    assert "_ensure_registry_loaded" in source, (
+        "provider_registry.py must keep an explicit loader indirection helper "
+        "instead of inlining provider bootstrap logic."
+    )
+    assert "bioetl.composition.providers._loading" in source, (
+        "provider_registry.py must still target the private `_loading` helper "
+        "module, even when it is late-bound to avoid import-cycle pressure."
     )
 
 

@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+
 class ProviderHttpClientFactoryProtocol(Protocol):
     """Callable contract for provider HTTP client construction."""
 

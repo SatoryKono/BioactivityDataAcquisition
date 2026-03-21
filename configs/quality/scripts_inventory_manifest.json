@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-20T19:16:40.878697+00:00",
+  "generated_at": "2026-03-21T17:11:12.737176+00:00",
   "summary": {
-    "total_scripts": 193,
+    "total_scripts": 196,
     "status_counts": {
-      "active": 90,
+      "active": 95,
       "legacy": 6,
-      "orphan": 83,
+      "orphan": 81,
       "unknown": 14
     },
     "reference_group_coverage": {
       "build": 28,
       "ci": 39,
-      "docs": 58,
-      "scripts": 40,
+      "docs": 63,
+      "scripts": 41,
       "skills": 3,
-      "tests": 33
+      "tests": 37
     }
   },
   "scripts": [
@@ -251,12 +251,106 @@
       "references": []
     },
     {
+      "path": "scripts/ci/_compatibility_registry.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 29,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py` already loads the YAML and exposes the shared registry contract"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 52,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 66,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 248,
+          "source_group": "docs",
+          "text": "- shared loader contract is active through `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/SUMMARY.md",
+          "line": 15,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-refactor/SUMMARY.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py` already acts as the shared loader contract."
+        }
+      ]
+    },
+    {
       "path": "scripts/ci/_compatibility_telemetry.py",
       "type": "py",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 16,
+      "references": [
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 33,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py` and `tests/architecture/test_compatibility_telemetry_reporting.py` already derive counters from YAML"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py`"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 95,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"tests/architecture/test_compatibility_telemetry_reporting.py; docs/02-architecture/07-compatibility-facade-inventory.md; scripts/ci/_compatibility_telemetry.py\""
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/ci/_compatibility_telemetry.py; docs/02-architecture/07-compatibility-facade-inventory.md\""
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
+          "line": 15,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes `measured_paths = inventory_paths | _iter_docstring_tracked_modules(...)`, so telemetry uses its own trac"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/03-synthesis/SYN-compatibility-registry-curated-ssot-drift.md",
+          "line": 36,
+          "source_group": "docs",
+          "text": "`scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes snapshot counts by combining inventory rows with an AST scan. The telemetry reporting test then re-parses t"
+        }
+      ]
     },
     {
       "path": "scripts/ci/apply-ci-optimizations-fixed.ps1",
@@ -327,13 +421,31 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
           "line": 442,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/ci/quality_integral_gate.py \\"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-skip-conditioned-confidence-now-uses-canonical-buckets.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-50; scripts/ci/quality_integral_gate.py:340-790; tests/unit/scripts/ci/test_quality_integral_gate.py:1-220\""
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-test-health-taxonomy-is-machine-readable-and-non-blocking.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-31; scripts/ci/quality_integral_gate.py:340-786; tests/unit/scripts/ci/test_quality_integral_gate.py:13-170\""
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/RAW-coverage-governance-2026-03-21.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/ci/quality_integral_gate.py`"
         },
         {
           "path": "makefile",
@@ -697,7 +809,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 292,
+          "line": 296,
           "source_group": "docs",
           "text": "dependency verification. `scripts/dev/dev_setup.sh` — legacy placeholder и не"
         },
@@ -1048,9 +1160,9 @@
     {
       "path": "scripts/diagrams/__main__.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-tooling-and-validator-scope.yaml",
@@ -1069,6 +1181,12 @@
           "line": 23,
           "source_group": "docs",
           "text": "- `scripts/diagrams/__main__.py` exposes lint, check, fix, render, and nightly commands for the diagram estate."
+        },
+        {
+          "path": "tests/architecture/test_diagram_description_index_contracts.py",
+          "line": 75,
+          "source_group": "tests",
+          "text": "content = Path(\"scripts/diagrams/__main__.py\").read_text(encoding=\"utf-8\")"
         }
       ]
     },
@@ -1144,13 +1262,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 264,
+          "line": 290,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_class_method_render_integrity.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 384,
+          "line": 411,
           "source_group": "docs",
           "text": "6. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
         },
@@ -1167,7 +1285,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1189,9 +1307,15 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 370,
+          "line": 396,
           "source_group": "docs",
-          "text": "9. **Проверить артефакты SVG/PNG:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
+          "text": "9. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
+          "line": 397,
+          "source_group": "docs",
+          "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/policy.md",
@@ -1200,10 +1324,16 @@
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
-          "line": 9,
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-svg-primary-contract-is-already-rationalized.yaml",
+          "line": 7,
           "source_group": "docs",
-          "text": "- `scripts/diagrams/check_diagram_artifacts.py`"
+          "text": "- scripts/diagrams/check_diagram_artifacts.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-svg-primary-contract.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/diagrams/check_diagram_artifacts.py; scripts/diagrams/README.md; docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md; .github/workflows/docs.yml\""
         }
       ]
     },
@@ -1216,7 +1346,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 52,
+          "line": 53,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -1258,7 +1388,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 372,
+          "line": 399,
           "source_group": "docs",
           "text": "11. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
         }
@@ -1281,7 +1411,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 46,
+          "line": 47,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -1301,7 +1431,7 @@
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
           "line": 96,
           "source_group": "docs",
-          "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
+          "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-modernization-program.md",
@@ -1377,13 +1507,13 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 41,
+          "line": 42,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 169,
+          "line": 170,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
@@ -1407,19 +1537,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 296,
+          "line": 322,
           "source_group": "docs",
           "text": "Скрипт `scripts/diagrams/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 306,
+          "line": 332,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 307,
+          "line": 333,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json"
         }
@@ -1482,7 +1612,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 73,
+          "line": 74,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
         },
@@ -1544,9 +1674,9 @@
     {
       "path": "scripts/diagrams/generate_all_bundles.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/plans/documentation-drift-remediation-plan-2026-03-20.md",
@@ -1555,15 +1685,60 @@
           "text": "1. `./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py`"
         },
         {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-bundles-embed-svg-and-fall-back-to-png.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/diagrams/generate_all_bundles.py; docs/02-architecture/diagrams/bundles/architecture.bundle.md; docs/02-architecture/diagrams/bundles/class.bundle.md; scripts/diagrams/README.md\""
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-bundles-now-render-svg-first.yaml",
+          "line": 6,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/generate_all_bundles.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/diagram-publication-state/02-evidence/diagram-publication-state/EV-diagram-publication-state-svg-primary-bundle-contract.yaml",
+          "line": 6,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/generate_all_bundles.py"
+        },
+        {
           "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
           "line": 10,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_all_bundles.py`"
+        },
+        {
+          "path": "scripts/diagrams/generate_architecture_bundle.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "- scripts/diagrams/generate_all_bundles.py --collection architecture"
+        },
+        {
+          "path": "scripts/diagrams/generate_views_bundle.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "- scripts/diagrams/generate_all_bundles.py --collection views"
         }
       ]
     },
     {
       "path": "scripts/diagrams/generate_architecture_bundle.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 74,
+          "source_group": "tests",
+          "text": "content = Path(\"scripts/diagrams/generate_architecture_bundle.py\").read_text("
+        }
+      ]
+    },
+    {
+      "path": "scripts/diagrams/generate_description_indexes.py",
       "type": "py",
       "status": "orphan",
       "agent_usage": [],
@@ -1573,10 +1748,17 @@
     {
       "path": "scripts/diagrams/generate_views_bundle.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 84,
+          "source_group": "tests",
+          "text": "content = Path(\"scripts/diagrams/generate_views_bundle.py\").read_text("
+        }
+      ]
     },
     {
       "path": "scripts/diagrams/generate_with_descriptions_docx.py",
@@ -1670,7 +1852,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 59,
+          "line": 60,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json \\"
         },
@@ -1811,37 +1993,37 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 412,
+          "line": 439,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 431,
+          "line": 458,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
-          "line": 167,
+          "line": 168,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
-          "line": 173,
+          "line": 174,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile nightly"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
-          "line": 179,
+          "line": 180,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile quick"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
-          "line": 185,
+          "line": 186,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr \\"
         }
@@ -1883,7 +2065,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 64,
+          "line": 65,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/run_diagram_nightly_suite.py \\"
         },
@@ -2031,7 +2213,7 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 145,
+          "line": 146,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -2161,7 +2343,7 @@
         },
         {
           "path": "docs/reports/evidence/project-test-health/06-backlog/BACKLOG-project-test-health-implementation-2026-03-20.md",
-          "line": 234,
+          "line": 243,
           "source_group": "docs",
           "text": "- `uv run python scripts/docs/check_doc_drift.py --runtime-mirrors --freshness`"
         },
@@ -2851,7 +3033,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 38,
+      "reference_count": 50,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -2885,21 +3067,78 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 50,
+          "line": 52,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 51,
+          "line": 53,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 60,
+          "line": 64,
           "source_group": "docs",
           "text": "- dependency map markdown/JSON: generated only by `scripts/qa/generate_architecture_dependency_map.py`"
+        }
+      ]
+    },
+    {
+      "path": "scripts/qa/generate_compatibility_facade_snapshot.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 19,
+      "references": [
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 54,
+          "source_group": "docs",
+          "text": "./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --check"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 55,
+          "source_group": "docs",
+          "text": "./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --update"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 66,
+          "source_group": "docs",
+          "text": "- compatibility snapshot markdown: generated only by `scripts/qa/generate_compatibility_facade_snapshot.py`"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 74,
+          "source_group": "docs",
+          "text": "2. If compatibility snapshot drift fails, update `configs/quality/compatibility_facade_inventory.yaml` first when policy changed, then run `./.venv/Scripts/python.exe scripts/qa/generate_compatibility"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
+          "line": 3,
+          "source_group": "docs",
+          "text": "> Generated by `scripts/qa/generate_compatibility_facade_snapshot.py`. Do not edit manually."
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "- `scripts/qa/generate_compatibility_facade_snapshot.py` already provides `--check` / `--update` snapshot tooling"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 53,
+          "source_group": "docs",
+          "text": "- `scripts/qa/generate_compatibility_facade_snapshot.py`"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 117,
+          "source_group": "docs",
+          "text": "- `scripts/qa/generate_compatibility_facade_snapshot.py`"
         }
       ]
     },
@@ -2972,7 +3211,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 94,
+          "line": 98,
           "source_group": "docs",
           "text": "Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/qa/naming_audit.py`."
         },
@@ -3068,7 +3307,7 @@
         },
         {
           "path": "tests/architecture/test_vcr_metadata_catalog_drift.py",
-          "line": 10,
+          "line": 11,
           "source_group": "tests",
           "text": "script = Path(\"scripts/qa/report_vcr_metadata_catalog.py\")"
         }
@@ -3152,7 +3391,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -3165,6 +3404,12 @@
           "line": 565,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 212,
+          "source_group": "docs",
+          "text": "4. `./.venv/Scripts/python.exe scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml`"
         },
         {
           "path": "makefile",
@@ -3624,43 +3869,43 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 168,
+          "line": 194,
           "source_group": "docs",
           "text": "Утилита `src/tools/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 172,
+          "line": 198,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --dry-run"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 175,
+          "line": 201,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 178,
+          "line": 204,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --dir docs/02-architecture/diagrams/foundation"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 181,
+          "line": 207,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --threshold 15"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 184,
+          "line": 210,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --enforce-routing ORTHOGONAL"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 365,
+          "line": 391,
           "source_group": "docs",
           "text": "5. **Применить ELK** (если @nodes > 20): `python src/tools/apply_elk_layout.py`"
         }
@@ -3691,25 +3936,25 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 201,
+          "line": 227,
           "source_group": "docs",
           "text": "Инструмент `src/tools/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 225,
+          "line": 251,
           "source_group": "docs",
           "text": "python src/tools/differentiate_linkstyle.py --dry-run   # Предпросмотр"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 226,
+          "line": 252,
           "source_group": "docs",
           "text": "python src/tools/differentiate_linkstyle.py              # Применить"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 366,
+          "line": 392,
           "source_group": "docs",
           "text": "6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`"
         }

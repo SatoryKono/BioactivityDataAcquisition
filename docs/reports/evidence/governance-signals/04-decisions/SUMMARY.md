@@ -1,10 +1,10 @@
 # Decisions Complete: governance-signals
 
 **Decisions Made:** 4  
-**Status:** 4 accepted, 0 provisional  
+**Статус:** 4 accepted, 0 provisional  
 **Risks Identified:** 5
 
-## Decisions Summary
+## Решения Summary
 
 | ID | Decision | Status | Evidence Count |
 |----|----------|--------|---------------:|
@@ -13,7 +13,7 @@
 | `DEC-governance-file-size-report-dual-track` | Keep zero-exemption ratchet and add separate raw hotspot tail reporting | `accepted` | 3 |
 | `DEC-governance-expand-named-hotspot-programs-after-calibration` | Keep current `application/core` hotspot program and run one calibration wave for additional named hotspots | `accepted` | 4 |
 
-## Risks Created
+## Риски Created
 
 | ID | Risk | Severity | Linked Decision |
 |----|------|----------|-----------------|
