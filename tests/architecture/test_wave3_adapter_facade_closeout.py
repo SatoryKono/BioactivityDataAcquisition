@@ -108,7 +108,9 @@ def _imported_modules(relative_path: str) -> set[str]:
 
 def _top_level_class_names(relative_path: str) -> set[str]:
     return {
-        node.name for node in _tree(relative_path).body if isinstance(node, ast.ClassDef)
+        node.name
+        for node in _tree(relative_path).body
+        if isinstance(node, ast.ClassDef)
     }
 
 
@@ -164,10 +166,7 @@ def test_wave3_adapter_facades_stay_bounded_and_helper_backed(
 @pytest.mark.architecture
 @pytest.mark.parametrize(
     ("relative_path", "forbidden_classes"),
-    [
-        (relative_path, forbidden_classes)
-        for relative_path, forbidden_classes in MODEL_FACADE_FORBIDDEN_LOCAL_CLASSES.items()
-    ],
+    list(MODEL_FACADE_FORBIDDEN_LOCAL_CLASSES.items()),
 )
 def test_wave3_model_facades_do_not_reabsorb_split_response_dtos(
     relative_path: str,
@@ -178,8 +177,7 @@ def test_wave3_model_facades_do_not_reabsorb_split_response_dtos(
     unexpected_local_classes = forbidden_classes & class_names
     assert not unexpected_local_classes, (
         f"{relative_path} reintroduced split response/search DTOs into the "
-        "public facade:\n"
-        + "\n".join(sorted(unexpected_local_classes))
+        "public facade:\n" + "\n".join(sorted(unexpected_local_classes))
     )
 
 

@@ -2,14 +2,6 @@
 
 from __future__ import annotations
 
-__all__ = [
-    "CROSSREF_API_BASE",
-    "CROSSREF_HEALTH_ERRORS",
-    "CrossRefAdapter",
-    "CrossRefFetchFlow",
-    "CrossRefQueryBuilder",
-    "CrossRefResponseMapper",
-]
 from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING
 
@@ -24,14 +16,14 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
 )
+from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
+    _CrossRefFallbackPolicyMixin,
+)
 from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
     DoiBatchProcessor,
 )
 from bioetl.infrastructure.adapters.crossref._search_paginator import (
     SearchPaginator,
-)
-from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
-    _CrossRefFallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.crossref.client_fetch_helpers import (
     aclose_crossref_http_client,
@@ -59,6 +51,15 @@ from bioetl.infrastructure.adapters.crossref.response_mapper import (
     CrossRefResponseMapper,
 )
 
+__all__ = [
+    "CROSSREF_API_BASE",
+    "CROSSREF_HEALTH_ERRORS",
+    "CrossRefAdapter",
+    "CrossRefFetchFlow",
+    "CrossRefQueryBuilder",
+    "CrossRefResponseMapper",
+]
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
@@ -85,7 +86,9 @@ CROSSREF_HEALTH_ERRORS = (
 
 
 @dataclass
-class CrossRefAdapter(_CrossRefFallbackPolicyMixin, FallbackPolicyMixin, BaseHttpAdapter):
+class CrossRefAdapter(
+    _CrossRefFallbackPolicyMixin, FallbackPolicyMixin, BaseHttpAdapter
+):
     """CrossRef adapter with thin-facade delegation to flow components."""
 
     http_client: UnifiedHTTPClient

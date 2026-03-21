@@ -23,12 +23,6 @@ See Also:
 
 from __future__ import annotations
 
-__all__ = ["ChemblEntityMapper"]
-
-
-from bioetl.infrastructure.adapters.chembl.constants import (
-    CHEMBL_API_BASE,
-)
 from bioetl.infrastructure.adapters.chembl._entity_mapping_lookup import (
     build_legacy_entity_mapping,
     has_entity_composite_key,
@@ -38,6 +32,11 @@ from bioetl.infrastructure.adapters.chembl._entity_mapping_lookup import (
     resolve_primary_key_field,
     resolve_resource_name,
 )
+from bioetl.infrastructure.adapters.chembl.constants import (
+    CHEMBL_API_BASE,
+)
+
+__all__ = ["ChemblEntityMapper"]
 
 
 class ChemblEntityMapper:

@@ -29,7 +29,6 @@ __all__ = ["RetryingDataSourceDecorator"]
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from types import TracebackType
@@ -37,11 +36,17 @@ from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
-    RecoverableError,
-    RetryExhaustedError,
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters.decorators._retry_support import (
+    build_retry_exhausted_error,
+    calculate_and_wait_retry_delay,
+    log_retry_attempt,
+    record_exhaustion_metrics,
+    record_retry_metrics,
+    retryable_exception_types,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -112,85 +117,6 @@ class RetryingDataSourceDecorator:
         """Exit async context by delegating to wrapped data source."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
-    def _is_retryable(self, exc: Exception) -> bool:
-        """Check if exception should trigger a retry."""
-        # Circuit breaker errors should propagate immediately
-        if isinstance(exc, CircuitBreakerOpenError):
-            return False
-
-        # RecoverableError hierarchy (except CB errors)
-        if isinstance(exc, RecoverableError):
-            return True
-
-        # Check configured retryable exceptions
-        return self._retry_config.is_retryable_exception(exc)
-
-    def _retryable_exception_types(self) -> tuple[type[Exception], ...]:
-        """Build tuple of retryable exception types for `except` clauses."""
-        configured = tuple(
-            exc_type
-            for exc_type in self._retry_config.retryable_exceptions
-            if exc_type is not Exception
-        )
-        return (RecoverableError, *configured)
-
-    async def _calculate_and_wait(self, attempt: int, url: str = "") -> float:
-        """Calculate delay and wait before retry."""
-        delay = self._retry_config.calculate_delay(attempt, url)
-        await asyncio.sleep(delay)
-        return delay
-
-    def _log_retry(
-        self,
-        operation: str,
-        attempt: int,
-        wait_seconds: float,
-        error: Exception,
-    ) -> None:
-        """Log retry attempt with structured fields."""
-        if not self._logger:
-            return
-
-        self._logger.warning(
-            "data_source_retry",
-            stage="fetch",
-            operation=operation,
-            attempt=attempt + 1,
-            max_attempts=self._retry_config.max_attempts,
-            wait_seconds=round(wait_seconds, 3),
-            error_type=type(error).__name__,
-            error_message=str(error),
-            provider=self.provider_name,
-        )
-
-    def _record_retry_metrics(self, operation: str, retries: int) -> None:
-        """Record retry metrics."""
-        if not self._metrics or retries == 0:
-            return
-
-        self._metrics.increment_counter(
-            "data_source_retries_total",
-            retries,
-            {
-                "provider": self.provider_name,
-                "operation": operation,
-            },
-        )
-
-    def _record_exhaustion_metrics(self, operation: str) -> None:
-        """Record retry exhaustion metrics."""
-        if not self._metrics:
-            return
-
-        self._metrics.increment_counter(
-            "data_source_retry_exhausted_total",
-            1,
-            {
-                "provider": self.provider_name,
-                "operation": operation,
-            },
-        )
-
     async def fetch(
         self,
         entity_type: str,
@@ -215,26 +141,51 @@ class RetryingDataSourceDecorator:
                     offset=offset,
                 ):
                     yield record
-                self._record_retry_metrics("fetch", retries)
+                record_retry_metrics(
+                    self._metrics,
+                    provider_name=self.provider_name,
+                    operation="fetch",
+                    retries=retries,
+                )
                 return
 
             except CircuitBreakerOpenError:
                 raise
-            except self._retryable_exception_types() as exc:
+            except retryable_exception_types(self._retry_config) as exc:
                 last_error = exc
                 if self._retry_config.is_last_attempt(attempt):
                     break
-                wait_seconds = await self._calculate_and_wait(
-                    attempt, f"fetch:{entity_type}"
+                wait_seconds = await calculate_and_wait_retry_delay(
+                    self._retry_config,
+                    attempt=attempt,
+                    url=f"fetch:{entity_type}",
                 )
-                self._log_retry("fetch", attempt, wait_seconds, exc)
+                log_retry_attempt(
+                    self._logger,
+                    provider_name=self.provider_name,
+                    retry_config=self._retry_config,
+                    operation="fetch",
+                    attempt=attempt,
+                    wait_seconds=wait_seconds,
+                    error=exc,
+                )
                 retries += 1
 
-        self._record_retry_metrics("fetch", retries)
-        self._record_exhaustion_metrics("fetch")
-        raise RetryExhaustedError(
-            url=f"{self.provider_name}:{entity_type}",
-            attempts=self._retry_config.max_attempts,
+        record_retry_metrics(
+            self._metrics,
+            provider_name=self.provider_name,
+            operation="fetch",
+            retries=retries,
+        )
+        record_exhaustion_metrics(
+            self._metrics,
+            provider_name=self.provider_name,
+            operation="fetch",
+        )
+        raise build_retry_exhausted_error(
+            provider_name=self.provider_name,
+            target=entity_type,
+            max_attempts=self._retry_config.max_attempts,
             last_error=last_error,
         )
 
@@ -267,27 +218,54 @@ class RetryingDataSourceDecorator:
         for attempt in range(self._retry_config.max_attempts):
             try:
                 result = await self._data_source.health_check()
-                self._record_retry_metrics("health_check", retries)
+                record_retry_metrics(
+                    self._metrics,
+                    provider_name=self.provider_name,
+                    operation="health_check",
+                    retries=retries,
+                )
                 return result
 
             except CircuitBreakerOpenError:
                 raise
-            except self._retryable_exception_types() as exc:
+            except retryable_exception_types(self._retry_config) as exc:
                 last_error = exc
 
                 if self._retry_config.is_last_attempt(attempt):
                     break
 
-                wait_seconds = await self._calculate_and_wait(attempt, "health_check")
-                self._log_retry("health_check", attempt, wait_seconds, exc)
+                wait_seconds = await calculate_and_wait_retry_delay(
+                    self._retry_config,
+                    attempt=attempt,
+                    url="health_check",
+                )
+                log_retry_attempt(
+                    self._logger,
+                    provider_name=self.provider_name,
+                    retry_config=self._retry_config,
+                    operation="health_check",
+                    attempt=attempt,
+                    wait_seconds=wait_seconds,
+                    error=exc,
+                )
                 retries += 1
 
         # All retries exhausted
-        self._record_retry_metrics("health_check", retries)
-        self._record_exhaustion_metrics("health_check")
-        raise RetryExhaustedError(
-            url=f"{self.provider_name}:health_check",
-            attempts=self._retry_config.max_attempts,
+        record_retry_metrics(
+            self._metrics,
+            provider_name=self.provider_name,
+            operation="health_check",
+            retries=retries,
+        )
+        record_exhaustion_metrics(
+            self._metrics,
+            provider_name=self.provider_name,
+            operation="health_check",
+        )
+        raise build_retry_exhausted_error(
+            provider_name=self.provider_name,
+            target="health_check",
+            max_attempts=self._retry_config.max_attempts,
             last_error=last_error,
         )
 

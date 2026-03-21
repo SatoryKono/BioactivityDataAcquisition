@@ -255,9 +255,7 @@ def create_pipeline_runner(
         >>> await runner.run()
     """
     run_context = build_pipeline_context(name, options)
-    return _require_execution_metrics_runner(
-        bootstrap_pipeline_runner(run_context)
-    )
+    return _require_execution_metrics_runner(bootstrap_pipeline_runner(run_context))
 
 
 async def run_pipeline(name: str, options: RunOptions) -> RunResult:

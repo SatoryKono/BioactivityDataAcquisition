@@ -31,10 +31,10 @@ __all__ = [
     "in_closed_range",
     "is_non_negative",
     "is_positive",
+    "max_str_length",
     "rows_are_valid_json",
     "rows_are_valid_json_array",
     "rows_are_valid_json_object",
-    "max_str_length",
     "str_matches_pattern",
     "str_starts_with",
 ]

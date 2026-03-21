@@ -258,6 +258,7 @@ class PubMedExtendedRecord(BaseModel):
         default_factory=list, description="All article identifiers"
     )
 
+
 # === Record Type Mapping ===
 
 PUBMED_RECORD_MODELS: dict[str, type[BaseModel]] = {
