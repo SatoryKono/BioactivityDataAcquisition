@@ -37,13 +37,9 @@ Plans in this folder must not override normative documents.
 
 - [mkdocs-material-migration-track-2026-03-03.md](mkdocs-material-migration-track-2026-03-03.md)
 - [branch-consolidation-plan-2026-03-19.md](branch-consolidation-plan-2026-03-19.md)
-- [documentation-drift-remediation-plan-2026-03-20.md](documentation-drift-remediation-plan-2026-03-20.md)
-- [compatibility-registry-refactor-plan-2026-03-21.md](compatibility-registry-refactor-plan-2026-03-21.md)
 - [dia-019-diagram-directory-consolidation-plan-2026-03-19.md](dia-019-diagram-directory-consolidation-plan-2026-03-19.md)
 - [onboarding-checklist-day-1-2026-03-20.md](onboarding-checklist-day-1-2026-03-20.md)
 - [project-briefing-capability-discovery-2026-03-20.md](project-briefing-capability-discovery-2026-03-20.md)
-- [rf-04-composition-hotspots-execution-plan-2026-03-20.md](rf-04-composition-hotspots-execution-plan-2026-03-20.md)
-- [rf-06-domain-facade-hygiene-plan-2026-03-20.md](rf-06-domain-facade-hygiene-plan-2026-03-20.md)
 - [rf-07-provider-registry-migration-plan-2026-03-20.md](rf-07-provider-registry-migration-plan-2026-03-20.md)
 - [rf-07a-provider-registry-call-site-ledger-2026-03-20.md](rf-07a-provider-registry-call-site-ledger-2026-03-20.md)
 - [rf-07d-runtime-deferred-wave-plan-2026-03-20.md](rf-07d-runtime-deferred-wave-plan-2026-03-20.md)
@@ -56,11 +52,21 @@ Plans in this folder must not override normative documents.
 - [wave-3-health-monitor-cluster-plan-2026-03-21.md](wave-3-health-monitor-cluster-plan-2026-03-21.md)
 - [wave-3-pubmed-filter-fetch-cluster-plan-2026-03-21.md](wave-3-pubmed-filter-fetch-cluster-plan-2026-03-21.md)
 - [wave-3-pubchem-fetch-strategies-cluster-plan-2026-03-21.md](wave-3-pubchem-fetch-strategies-cluster-plan-2026-03-21.md)
+- [wave-3-chembl-fetch-paging-cluster-plan-2026-03-21.md](wave-3-chembl-fetch-paging-cluster-plan-2026-03-21.md)
 - [rf-fs-004-execution-plan-2026-03-20.md](rf-fs-004-execution-plan-2026-03-20.md)
 - [rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md](rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md)
 - [rf-fs-remaining-backlog-execution-plan-2026-03-20.md](rf-fs-remaining-backlog-execution-plan-2026-03-20.md)
 - [refactor-proposals-consolidation-input-2026-03-20.md](refactor-proposals-consolidation-input-2026-03-20.md)
 - Historical plans and superseded baseline series moved to [docs/99-archive/plans/README.md](../99-archive/plans/README.md) *(archived reference only)*
+
+### Recently Completed Targeted Plans
+
+- [documentation-drift-remediation-plan-2026-03-20.md](documentation-drift-remediation-plan-2026-03-20.md)
+- [compatibility-registry-refactor-plan-2026-03-21.md](compatibility-registry-refactor-plan-2026-03-21.md)
+- [rf-04-composition-hotspots-execution-plan-2026-03-20.md](rf-04-composition-hotspots-execution-plan-2026-03-20.md)
+- [rf-06-domain-facade-hygiene-plan-2026-03-20.md](rf-06-domain-facade-hygiene-plan-2026-03-20.md)
+- [rf-07-provider-registry-migration-plan-2026-03-20.md](rf-07-provider-registry-migration-plan-2026-03-20.md)
+- [rf-07d-runtime-deferred-wave-plan-2026-03-20.md](rf-07d-runtime-deferred-wave-plan-2026-03-20.md)
 
 ### Status Guidance
 

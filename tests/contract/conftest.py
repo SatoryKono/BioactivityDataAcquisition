@@ -76,6 +76,10 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "no_api: Contract tests that don't require live API access"
     )
+    config.addinivalue_line(
+        "markers",
+        "pilot_soak: richer pilot-only live contract checks requiring explicit opt-in",
+    )
 
 
 def pytest_collection_modifyitems(
@@ -88,6 +92,9 @@ def pytest_collection_modifyitems(
     """
     live_tests_enabled = bool(config.getoption("--live-api")) or _is_truthy_env_var(
         "BIOETL_LIVE_API_TESTS"
+    )
+    pilot_soak_enabled = bool(config.getoption("--pilot-soak")) or _is_truthy_env_var(
+        "BIOETL_PILOT_SOAK_TESTS"
     )
 
     for item in items:
@@ -109,6 +116,16 @@ def pytest_collection_modifyitems(
                         )
                     )
                 )
+
+        if "pilot_soak" in item.keywords and not pilot_soak_enabled:
+            item.add_marker(
+                pytest.mark.skip(
+                    reason=(
+                        "Pilot soak tests disabled. Enable via --pilot-soak "
+                        "or BIOETL_PILOT_SOAK_TESTS=true."
+                    )
+                )
+            )
 
 
 @pytest.fixture(scope="session")

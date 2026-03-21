@@ -1,7 +1,7 @@
 # RF-07 ProviderRegistry Migration Plan
 
 **Date:** 2026-03-20  
-**Status:** In progress  
+**Status:** Completed execution plan
 **Primary rationale:** reduce hidden dependency on the default `ProviderRegistry` without breaking the bootstrap/test ecosystem  
 **Normative constraint:** compatibility class-level API remains available during this wave
 
