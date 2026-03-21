@@ -38,8 +38,10 @@ This inventory is also the freeze ledger for compatibility debt in the current c
 
 The following artifacts are operational architecture/config signals and are treated as mandatory:
 
+- `configs/quality/compatibility_facade_inventory.yaml`
 - `docs/02-architecture/generated/module-dependency-map.md`
 - `docs/02-architecture/generated/module-dependency-map.json`
+- `docs/02-architecture/07-compatibility-facade-snapshot.md`
 - `docs/02-architecture/07-compatibility-facade-inventory.md`
 - active config docs synchronized by config/schema guardrails
 
@@ -49,6 +51,8 @@ Canonical commands for this cycle:
 ./.venv/Scripts/python.exe -m pytest tests/architecture/test_architecture_dependency_docs_drift.py -q
 ./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --check
 ./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update
+./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --check
+./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --update
 ./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py -q
 ./.venv/Scripts/python.exe -m pytest tests/architecture/test_config_schema_legacy_status.py -q
 ./.venv/Scripts/python.exe -m pytest tests/architecture/test_documentation_sync.py -q
@@ -58,15 +62,18 @@ Canonical commands for this cycle:
 Artifact-to-command policy:
 
 - dependency map markdown/JSON: generated only by `scripts/qa/generate_architecture_dependency_map.py`
-- compatibility inventory: curated doc guarded by `tests/architecture/test_compatibility_facade_inventory.py`
+- compatibility registry YAML: canonical SSOT for curated rows, measured-only allowlist, and tracked docstring prefixes
+- compatibility snapshot markdown: generated only by `scripts/qa/generate_compatibility_facade_snapshot.py`
+- compatibility inventory: curated operational doc guarded by `tests/architecture/test_compatibility_facade_inventory.py`
 - config/runtime guidance: active docs stay aligned through `tests/architecture/test_config_schema_legacy_status.py`
 - internal docs references: validated through `scripts/docs/check_doc_links.py --configs`
 
 Fast local repair path:
 
 1. If `test_architecture_dependency_docs_drift.py` fails, run `./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update`.
-2. Re-run `test_architecture_dependency_docs_drift.py`, `test_compatibility_facade_inventory.py`, and `test_documentation_sync.py`.
-3. Use [`../../scripts/README.md`](../../scripts/README.md) for the canonical scripts index; treat `docs/reports/**` as historical evidence only, not as repair guidance.
+2. If compatibility snapshot drift fails, update `configs/quality/compatibility_facade_inventory.yaml` first when policy changed, then run `./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --update`.
+3. Re-run `test_architecture_dependency_docs_drift.py`, `test_compatibility_facade_inventory.py`, and `test_documentation_sync.py`.
+4. Use [`../../scripts/README.md`](../../scripts/README.md) for the canonical scripts index; treat `docs/reports/**` as historical evidence only, not as repair guidance.
 
 ## Inventory
 
@@ -97,35 +104,14 @@ No active transition-debt rows remain in the current cycle.
 | `src/bioetl/infrastructure/adapters/pubmed/client.py` | Retained client entrypoint that shields older `pubmed_client` imports while exporting the current adapter surface and public `create_pubmed_adapter` factory alias. | `bioetl.infrastructure.adapters.pubmed.client` | `retained-entrypoint` | `bioetl.infrastructure.adapters.pubmed` | `2026-03 pubmed entrypoint hardening` | `src`: direct `bioetl.infrastructure.adapters.pubmed.client` imports stay confined to `src/bioetl/infrastructure/adapters/pubmed/__init__.py`; first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`, `tests/architecture/test_adapter_contracts.py`, `tests/architecture/test_retained_adapter_entrypoint_policy.py` | `2026-09-30` | Use the provider package root `bioetl.infrastructure.adapters.pubmed` in new first-party code; keep `bioetl.infrastructure.adapters.pubmed.client` only as the retained public seam and do not import `bioetl.infrastructure.adapters.pubmed.pubmed_client` directly. | RF-035 decision is `retain`: direct `client.py` imports stay confined to the provider package root plus dedicated compatibility coverage, and private `_create_pubmed_adapter` remains unexported from the retained entrypoint. |
 | `src/bioetl/infrastructure/adapters/semanticscholar/client.py` | Retained client entrypoint that shields older `adapter` imports. | `bioetl.infrastructure.adapters.semanticscholar.client` | `retained-entrypoint` | `bioetl.infrastructure.adapters.semanticscholar` | `legacy-pre-2026-03` | `src`: direct `bioetl.infrastructure.adapters.semanticscholar.client` imports stay confined to `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`; first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`, `tests/architecture/test_adapter_contracts.py`, `tests/architecture/test_retained_adapter_entrypoint_policy.py` | `2026-09-30` | Use the provider package root `bioetl.infrastructure.adapters.semanticscholar` in new first-party code; keep `bioetl.infrastructure.adapters.semanticscholar.client` only as the retained public seam and do not import `bioetl.infrastructure.adapters.semanticscholar.adapter` directly. | RF-035 decision is `retain`: direct `client.py` imports stay confined to the provider package root plus dedicated compatibility coverage, and legacy-path references remain reduced to that retained seam. |
 
-## Measured Registry
+## Generated Snapshot
 
-This registry is the measurable compatibility-surface baseline for CI. It is the union of:
+The measured compatibility snapshot is generated into
+[`07-compatibility-facade-snapshot.md`](07-compatibility-facade-snapshot.md).
 
-- curated inventory rows listed above;
-- module docstrings whose first line starts with a tracked compatibility prefix.
-
-Snapshot for this cycle:
-
-- Curated inventory rows: `7`
-- Transition debt rows: `0`
-- Retained public entrypoints: `7`
-- Measured tracked modules: `12`
-- Measured-only modules outside curated inventory: `5`
-
-Tracked module paths:
-
-- `src/bioetl/composition/entrypoints.py`
-- `src/bioetl/domain/composite/config.py`
-- `src/bioetl/domain/value_objects/activity_values.py`
-- `src/bioetl/domain/value_objects/publication_field_groups.py`
-- `src/bioetl/application/composite/merger.py`
-- `src/bioetl/application/pipelines/chembl/_pipelines.py`
-- `src/bioetl/composition/factories/pipeline/config_resolution.py`
-- `src/bioetl/composition/factories/pipeline/configs.py`
-- `src/bioetl/infrastructure/adapters/pubmed/client.py`
-- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
-- `src/bioetl/infrastructure/adapters/crossref/batch.py`
-- `src/bioetl/composition/factories/services/creation_api.py`
+That companion file is the only place where measured tracked-module counts and
+docstring-scan validation are rendered. Keep this document curated and
+operational; do not copy generated snapshot counters back into it by hand.
 
 ## Usage Notes
 
@@ -141,108 +127,10 @@ Tracked module paths:
 - For provider adapters, first-party code should prefer provider package roots when those roots are
   the documented canonical path; retained `client.py` modules remain stable compatibility seams.
 
-## Current Import Inventory
+## Historical Review Log
 
-Snapshot for the current compatibility-governance cycle:
-
-- `src/` direct imports of `bioetl.composition._pipeline_execution` outside `src/bioetl/composition/`: `0`
-- `src/` direct imports of `bioetl.composition._resource_management` outside `src/bioetl/composition/`: `0`
-- `src/` direct imports of `bioetl.composition._services` outside `src/bioetl/composition/`: `0`
-- `src/` direct imports of split `bioetl.domain.composite.config_*` internals outside `src/bioetl/domain/composite/`: `0`
-- `src/` direct imports of split activity/publication value-object internals outside `src/bioetl/domain/value_objects/`: `0`
-- `src/` direct imports of `bioetl.infrastructure.storage.metadata_builder_composite_helpers`: module removed
-- `tests/` string patch mentions of local CLI `get_default_registry` compat aliases: `0`
-- `src/` direct imports of `bioetl.infrastructure.adapters.pubmed.client` outside `src/bioetl/infrastructure/adapters/pubmed/__init__.py`: `0`
-- `src/` direct imports of `bioetl.infrastructure.adapters.semanticscholar.client` outside `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`: `0`
-- `src/` direct `DataSourceRegistry` usages outside explicit compatibility re-exports: `0`
-- `tests/` direct `DataSourceRegistry` imports outside dedicated compatibility/contract coverage: `0`
-- `tests/` direct imports of `bioetl.infrastructure.storage.metadata_builder_composite_helpers`: `0`
-- `tests/` direct imports of retained adapter client entrypoints outside dedicated compatibility/contract coverage: `0`
-- Dedicated compatibility coverage remains in tests:
-- `tests/unit/composition/factories/datasource/test_data_source_registry.py`
-- `tests/unit/composition/test_registry_protocol.py`
-- `tests/architecture/test_registry_contracts.py`
-- `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`
-- `tests/unit/domain/composite/test_composite_config_facade.py`
-- `tests/unit/domain/composite/test_composite_config_edge_cases.py`
-- `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`
-- `tests/architecture/test_adapter_contracts.py`
-- `tests/architecture/test_retained_adapter_entrypoint_policy.py`
-- `tests/unit/composition/test_services_entrypoints.py`
-- `tests/unit/composition/test_entrypoints.py`
-- `tests/unit/composition/test_resource_management.py`
-
-Compatibility-only policy for this cycle:
-
-- New first-party code must import canonical modules directly.
-- Existing facade modules remain to preserve public/import stability.
-- New non-compat usages of these module paths in `src/` or ordinary tests are regressions.
-
-## RF-035 Retained Entrypoint Decision
-
-Decision for this cycle:
-
-- `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
-- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
-
-Measured evidence for `retain`:
-
-- PubMed canonical entrypoint is still part of active first-party code:
-  - `src/bioetl/infrastructure/adapters/pubmed/__init__.py`
-  - `src/bioetl/composition/providers/registration_biblio.py`
-- Semantic Scholar canonical entrypoint is still part of active first-party code:
-  - `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`
-- Legacy implementation-module references in `src/` are already effectively zero outside the retained entrypoints themselves:
-  - `bioetl.infrastructure.adapters.pubmed.pubmed_client` appears only inside
-    `src/bioetl/infrastructure/adapters/pubmed/client.py`
-  - `bioetl.infrastructure.adapters.semanticscholar.adapter` appears only inside
-    `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
-- Test-only legacy references remain intentional and limited to compatibility coverage:
-  - `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`
-  - `tests/architecture/test_adapter_contracts.py`
-
-Policy implications:
-
-- Do not start deprecation for these entrypoints in the current cycle.
-- New first-party code should use provider package roots; retained `client.py` entrypoints exist for stability and dedicated compatibility coverage only.
-- New first-party code must not import the older implementation modules
-  `pubmed.pubmed_client` or `semanticscholar.adapter` directly.
-- Any future deprecation proposal must include a fresh usage inventory and an explicit review
-  of the retained public `create_pubmed_adapter` factory surface.
-
-## Retained Entrypoint Review Wave (2026-03-15)
-
-Review outcome for the remaining curated inventory rows:
-
-- `src/bioetl/composition/entrypoints.py`: `retain`
-  because active first-party interface code still uses it as the public seam while
-  `_pipeline_execution`, `_resource_management`, and `_services` remain confined to
-  `composition/` and dedicated entrypoint tests.
-- `src/bioetl/domain/composite/config.py`: `retain`
-  because application, composition, infrastructure, and tests depend on the root config
-  entrypoint while split `config_*` internals remain confined to `domain/composite/`
-  and the dedicated facade test.
-- `src/bioetl/domain/value_objects/activity_values.py`: `retain`
-  because domain/application code uses the public activity value-object entrypoint and
-  the split implementation modules remain confined to `domain/value_objects/`.
-- `src/bioetl/domain/value_objects/publication_field_groups.py`: `retain`
-  because public field-group types are consumed through the root entrypoint while
-  private `_publication_field_group_*` modules remain internal.
-- `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
-  because the package root and provider registration still use the canonical client
-  entrypoint while direct `client.py` imports are already confined to the package
-  root and dedicated compatibility coverage, and legacy `pubmed_client`
-  references stay confined to the retained entrypoint plus dedicated coverage.
-- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
-  because the package root still uses the canonical client entrypoint, direct
-  `client.py` imports are already confined to the package root plus dedicated
-  compatibility coverage, and legacy `adapter` references remain confined to the
-  retained entrypoint plus dedicated coverage.
-
-Wave decision:
-
-- No retained-entrypoint row graduates to removal in the current cycle.
-- Next action is policy enforcement and re-review by `2026-09-30`, not deprecation.
+Historical retained-entrypoint decisions and review narratives now live in
+[`history/compatibility-facade-review-history.md`](history/compatibility-facade-review-history.md).
 
 Related docs:
 

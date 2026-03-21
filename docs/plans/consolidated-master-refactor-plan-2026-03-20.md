@@ -235,9 +235,31 @@ technical-debt roadmap, не потеряв важные предложения.
 - следующим bounded cluster после health split выбран
   `chembl/fetch_resilience_mixin.py`, и cluster start зафиксирован в
   `wave-3-chembl-fetch-resilience-cluster-plan-2026-03-21.md`;
-- следующий implementation step для `Wave 3` теперь сужен до ChEMBL
-  resilience-flow split внутри provider-bounded family, а не к broad utility
-  rewrite.
+- `3D-2` уже реализован:
+  `fetch_resilience_mixin.py` сохранён как import-stable facade, а fallback и
+  retry-recovery логика вынесены в `_fetch_resilience_fallback.py` и
+  `_fetch_resilience_recovery.py`;
+- следующим bounded cluster после ChEMBL resilience split выбран
+  `openalex/filter_fetch_adapter_mixin.py`, и cluster start зафиксирован в
+  `wave-3-openalex-filter-fetch-cluster-plan-2026-03-21.md`;
+- `3E-2` уже реализован:
+  `filter_fetch_adapter_mixin.py` сохранён как import-stable facade, а request
+  shapes и pure filter/fallback flow helpers вынесены в
+  `_filter_fetch_requests.py` и `_filter_fetch_flow.py`;
+- следующим bounded cluster после OpenAlex split выбран `error_handling.py`, и
+  cluster start зафиксирован в
+  `wave-3-error-handling-cluster-plan-2026-03-21.md`;
+- `3F-2` уже реализован:
+  `error_handling.py` сохранён как import-stable facade, а structured context
+  и telemetry helpers вынесены в `_error_handling_support.py`;
+- следующим bounded cluster после `error_handling.py` выбран
+  `http/health_monitor.py`, и cluster start зафиксирован в
+  `wave-3-health-monitor-cluster-plan-2026-03-21.md`;
+- `3G-2` уже реализован:
+  `health_monitor.py` сохранён как import-stable facade, а transition и
+  observability helpers вынесены в `_health_monitor_support.py`;
+- следующий implementation step для `Wave 3` теперь сужен до closeout/ratchet
+  для `health_monitor.py` или к выбору следующего bounded adapter hotspot.
 
 ### Wave 4. Complexity hotspot implementation
 

@@ -43,3 +43,25 @@ def test_test_health_reporting_taxonomy_defines_all_current_statuses() -> None:
         assert (
             isinstance(entry.get("merge_semantics"), str) and entry["merge_semantics"]
         )
+
+
+def test_test_health_reporting_taxonomy_defines_current_skip_classes() -> None:
+    """Canonical taxonomy must define skip/conditional buckets emitted by gate."""
+    taxonomy = _load_taxonomy()
+    skip_classes = taxonomy.get("skip_classes", {})
+    assert isinstance(skip_classes, dict)
+
+    expected = {
+        "architecture_suite_skips",
+        "live_network_opt_in_gate",
+        "live_api_gate_mode_non_always",
+        "pilot_provider_count",
+        "vcr_only_provider_count",
+    }
+    assert expected <= set(skip_classes)
+
+    for skip_class in expected:
+        entry = skip_classes[skip_class]
+        assert isinstance(entry, dict)
+        assert isinstance(entry.get("short_label"), str) and entry["short_label"]
+        assert isinstance(entry.get("definition"), str) and entry["definition"]

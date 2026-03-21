@@ -1,7 +1,7 @@
 # Wave 3 ChEMBL Fetch Resilience Cluster Plan
 
 Date: 2026-03-21  
-Status: active bounded-cluster plan, preflight completed  
+Status: active bounded-cluster plan, `3D-2` implemented  
 Parent program: [consolidated-master-refactor-plan-2026-03-20.md](./consolidated-master-refactor-plan-2026-03-20.md)
 
 ## Purpose
@@ -134,16 +134,38 @@ Next code slice:
 
 Slice `3D-2`: resilience-flow split with compatibility facade.
 
-Planned write scope for `3D-2`:
+Status: `completed`
+
+Implemented write scope for `3D-2`:
 
 - keep
   [`fetch_resilience_mixin.py`](../../src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py)
   as the temporary import-stable facade
-- add one or more small internal ChEMBL modules for retry-recovery or fallback
-  logic
-- avoid changes to `fetch_adapter_mixin.py` or `client.py` unless typing or
-  import wiring requires a minimal adjustment
-- avoid touching unrelated ChEMBL helpers in the same slice
+- add small internal ChEMBL modules for retry-recovery and fallback logic:
+  [`_fetch_resilience_fallback.py`](../../src/bioetl/infrastructure/adapters/chembl/_fetch_resilience_fallback.py)
+  and
+  [`_fetch_resilience_recovery.py`](../../src/bioetl/infrastructure/adapters/chembl/_fetch_resilience_recovery.py)
+- preserve the public collaborator symbols `ChemblFetchResilienceMixin` and
+  `CHEMBL_ADAPTER_ERRORS`
+- keep changes inside the bounded ChEMBL fetch family without reopening
+  broader adapter shared utilities
+
+Implementation result:
+
+- `fetch_resilience_mixin.py` now acts as a thin import-stable facade;
+- direct-record fallback, single-id fallback logging, dedup-aware filtered
+  iteration, and seen-key registration now live in
+  `_fetch_resilience_fallback.py`;
+- retry-exhausted recovery, split-batch retry orchestration, and reduced-batch
+  recovery now live in `_fetch_resilience_recovery.py`;
+- the runtime inheritance shape for `ChemblFetchAdapterMixin` and
+  `ChemblAdapter` remains unchanged.
+
+Next closeout step:
+
+- add a small ratchet so
+  [`fetch_resilience_mixin.py`](../../src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py)
+  stays a bounded facade and does not absorb fallback/recovery policy again.
 
 ## Verification
 

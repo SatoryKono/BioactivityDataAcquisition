@@ -11,64 +11,61 @@ from types import ModuleType
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-INVENTORY_DOC = (
-    ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
-)
+REGISTRY_YAML = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
 
 
-def _load_compatibility_telemetry_module() -> ModuleType:
-    script = (ROOT / "scripts" / "ci" / "_compatibility_telemetry.py").resolve()
-    spec = importlib.util.spec_from_file_location(
-        "compatibility_telemetry_reporting", str(script)
-    )
+def _load_module(path: Path, module_name: str) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(module_name, str(path.resolve()))
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    sys.modules["compatibility_telemetry_reporting"] = module
+    sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
 
 
-def _iter_inventory_statuses() -> Counter[str]:
-    statuses: Counter[str] = Counter()
-    text = INVENTORY_DOC.read_text(encoding="utf-8")
+def _load_compatibility_telemetry_module() -> ModuleType:
+    return _load_module(
+        ROOT / "scripts" / "ci" / "_compatibility_telemetry.py",
+        "compatibility_telemetry_reporting",
+    )
 
-    for line in text.splitlines():
-        stripped = line.strip()
-        if not stripped.startswith("| `src/bioetl/"):
-            continue
-        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
-        statuses[cells[3].strip("`")] += 1
 
-    return statuses
+def _load_compatibility_registry_module() -> ModuleType:
+    return _load_module(
+        ROOT / "scripts" / "ci" / "_compatibility_registry.py",
+        "compatibility_registry_loader",
+    )
 
 
 @pytest.mark.architecture
-def test_compatibility_surface_snapshot_matches_inventory_status_counts() -> None:
-    """CI telemetry should stay aligned with curated compatibility inventory rows."""
-    mod = _load_compatibility_telemetry_module()
-    snapshot = mod.collect_compatibility_surface_snapshot()
-    status_counts = _iter_inventory_statuses()
-    text = INVENTORY_DOC.read_text(encoding="utf-8")
+def test_compatibility_surface_snapshot_matches_registry_status_counts() -> None:
+    """CI telemetry should stay aligned with the canonical YAML registry."""
+    telemetry = _load_compatibility_telemetry_module()
+    registry_mod = _load_compatibility_registry_module()
+    registry = registry_mod.load_compatibility_registry(REGISTRY_YAML)
+    snapshot = telemetry.collect_compatibility_surface_snapshot(
+        registry_path=REGISTRY_YAML
+    )
 
-    assert snapshot.curated_inventory_rows == sum(status_counts.values())
+    status_counts = Counter(row.status for row in registry.curated_rows)
+
+    assert snapshot.curated_inventory_rows == len(registry.curated_rows)
+    assert snapshot.measured_tracked_modules == len(registry.measured_tracked_paths)
+    assert snapshot.measured_only_modules == len(registry.measured_only_paths)
     assert snapshot.deprecated_warn_modules == status_counts["deprecated-warn"]
     assert snapshot.compat_shim_modules == status_counts["compat-shim"]
     assert snapshot.mixed_modules == status_counts["mixed-module"]
     assert snapshot.retained_entrypoints == status_counts["retained-entrypoint"]
-    assert f"- Curated inventory rows: `{snapshot.curated_inventory_rows}`" in text
-    assert f"- Measured tracked modules: `{snapshot.measured_tracked_modules}`" in text
-    assert (
-        f"- Measured-only modules outside curated inventory: `{snapshot.measured_only_modules}`"
-        in text
-    )
 
 
 @pytest.mark.architecture
 def test_compatibility_surface_summary_section_lists_required_metrics() -> None:
     """Rendered telemetry section should expose stable metric names for CI reports."""
-    mod = _load_compatibility_telemetry_module()
-    snapshot = mod.collect_compatibility_surface_snapshot()
-    section = mod.render_compatibility_surface_section(
+    telemetry = _load_compatibility_telemetry_module()
+    snapshot = telemetry.collect_compatibility_surface_snapshot(
+        registry_path=REGISTRY_YAML
+    )
+    section = telemetry.render_compatibility_surface_section(
         snapshot, heading="## Compatibility Surface Snapshot"
     )
 

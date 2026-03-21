@@ -29,7 +29,7 @@ Do not use this skill for a single small pillar that fits cleanly into one `coll
 Read, in this order:
 
 1. `../../../docs/00-project/ai/memory/agent-memory.md`
-2. `../../../.codex/agents/ORCHESTRATION.md`
+2. `../../../docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 3. `../collecting-evidence/SKILL.md`
 4. `../synthesizing-pillars/SKILL.md`
 5. [references/orchestration-contract.md](references/orchestration-contract.md)

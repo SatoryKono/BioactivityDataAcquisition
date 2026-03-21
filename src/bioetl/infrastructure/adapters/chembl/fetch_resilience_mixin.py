@@ -57,6 +57,8 @@ CHEMBL_ADAPTER_ERRORS = (
     AttributeError,
     Exception,
 )
+
+
 class ChemblFetchResilienceMixin:
     """Provides retry, split-batch recovery, and single-ID fallback helpers."""
 
