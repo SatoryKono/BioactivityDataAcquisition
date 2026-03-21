@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import httpx
 
-from bioetl.domain.exceptions import BioETLError, RecoverableError
+from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.resilience import RetryConfig
 

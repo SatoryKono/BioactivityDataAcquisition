@@ -2,11 +2,6 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-
 from bioetl.composition.bootstrap.runtime.composite_execution_support_builder import (
     build_execution_support_services,
 )

@@ -11,7 +11,6 @@ import httpx
 from bioetl.domain.exceptions import (
     BioETLError,
     CircuitBreakerOpenError,
-    RecoverableError,
 )
 from bioetl.domain.ports import (
     CircuitBreakerPort,

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Callable
 from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING, Protocol
 
@@ -13,7 +12,6 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -67,4 +65,3 @@ def record_response_timing(
     if request_collector and response is not None:
         with contextlib.suppress(Exception):
             request_collector.record_from_response(response, duration_ms)
-
