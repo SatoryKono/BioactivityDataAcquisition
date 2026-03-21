@@ -257,6 +257,12 @@
       "review_by": "2026-06-30",
       "next_step": "Archive inventory entry accepted; confirm keep/deprecate/remove decision during next governance review."
     },
+    "scripts/ci/_compatibility_registry.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as the shared compatibility-registry loader contract for telemetry, tests, and snapshot generation while YAML SSOT remains the governed source of truth."
+    },
     "scripts/diagnostics/cleanup_consolidate.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -268,6 +274,12 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Diagram bundle generator is currently orphaned in inventory; keep as manual maintenance tool until bundle regeneration workflow is either restored or the script is archived."
+    },
+    "scripts/diagrams/generate_description_indexes.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as the canonical description-index generator for diagram publication artifacts while description indexes remain generated docs."
     },
     "scripts/diagrams/generate_views_bundle.py": {
       "owner": "@bioetl-architecture",
