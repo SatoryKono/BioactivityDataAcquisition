@@ -1,7 +1,7 @@
 # Wave 3 Health Check Cluster Plan
 
 Date: 2026-03-21  
-Status: active bounded-cluster plan, preflight completed  
+Status: active bounded-cluster plan, `3C-2` implemented  
 Parent program: [consolidated-master-refactor-plan-2026-03-20.md](./consolidated-master-refactor-plan-2026-03-20.md)
 
 ## Purpose
@@ -149,6 +149,26 @@ Planned write scope for `3C-2`:
   requires a minimal adjustment
 - avoid touching unrelated health-monitoring modules in the same slice
 
+Implementation result for `3C-2`:
+
+- `health_check_mixin.py` remains the import-stable facade used by
+  `BaseHttpAdapter` and `BaseSyncAdapter`
+- health-check observability helpers moved to
+  `src/bioetl/infrastructure/adapters/_health_check_observability.py`
+- pure health-policy helpers moved to
+  `src/bioetl/infrastructure/adapters/_health_check_policy.py`
+- live mixin classes stayed in `health_check_mixin.py`, preserving current
+  inheritance and caller contracts
+- dependency-map artifacts were regenerated after the new internal modules were
+  added, so architecture drift is already reconciled with the current code
+
+Next step after `3C-2`:
+
+- either add a dedicated ratchet to keep `health_check_mixin.py` as a narrowed
+  facade/orchestration shell,
+- or move to the next bounded adapter hotspot if this shared health cluster is
+  considered sufficiently stable without an extra guard
+
 ## Verification
 
 - `./.venv/Scripts/python.exe -m pytest -q tests/unit/infrastructure/adapters/test_http_base.py tests/unit/infrastructure/adapters/test_sync_base.py`
@@ -164,3 +184,7 @@ This cluster-start transition is complete when:
 3. the verify set is explicit before code movement starts;
 4. the next implementation step is reduced to one health-flow split rather than
    a broad adapter-base rewrite.
+
+Current state:
+
+- all four cluster-start conditions are now satisfied

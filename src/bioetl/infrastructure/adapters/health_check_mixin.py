@@ -23,20 +23,26 @@ __all__ = [
     "HealthCheckProviderMixin",
 ]
 
-import time
 from abc import abstractmethod
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from httpx import HTTPStatusError, RequestError
-
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters._health_check_observability import (
+    handle_health_check_failure,
+    handle_health_check_success,
+    resolve_metrics,
+    start_health_check,
+)
+from bioetl.infrastructure.adapters._health_check_policy import (
+    _HealthCheckProbeOutcome,
+    build_error_context,
+    fallback_health_status,
+    get_consecutive_health_failures,
+    resolve_failure_health_status,
+)
 from bioetl.infrastructure.adapters.health_check_contract import (
     HEALTH_CHECK_ERRORS,
     HealthCheckContext,
-)
-from bioetl.infrastructure.adapters.health_status_policy import (
-    TRANSIENT_DEGRADED_STATUS_CODES,
 )
 
 if TYPE_CHECKING:
@@ -46,15 +52,6 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
-
-
-@dataclass(frozen=True, slots=True)
-class _HealthCheckProbeOutcome:
-    """Internal probe result used to build ``HealthCheckResult`` consistently."""
-
-    status: HealthStatus
-    last_error: str | None = None
-    consecutive_failures: int = 0
 
 
 class HealthCheckMixin:
@@ -94,9 +91,7 @@ class HealthCheckMixin:
             MetricsPort instance (never None).
 
         """
-        from bioetl.domain.ports import NoOpMetrics
-
-        return self.metrics if self.metrics is not None else NoOpMetrics()
+        return resolve_metrics(self.metrics)
 
     def _start_health_check(self) -> HealthCheckContext:
         """Start a health check context for timing.
@@ -105,9 +100,8 @@ class HealthCheckMixin:
             HealthCheckContext with start time and provider info.
 
         """
-        return HealthCheckContext(
-            start_time=time.monotonic(),
-            provider=self.provider_name,
+        return start_health_check(
+            provider_name=self.provider_name,
             endpoint=self._get_health_endpoint(),
         )
 
@@ -137,29 +131,11 @@ class HealthCheckMixin:
             status: The resulting health status.
 
         """
-        elapsed = ctx.elapsed_seconds
-        labels = {"provider": ctx.provider}
-
-        # Log success at DEBUG level
-        self._logger.debug(
-            "health_check_passed",
-            provider=ctx.provider,
-            endpoint=ctx.endpoint,
-            status=status.value,
-            latency_seconds=elapsed,
-        )
-
-        # Record metrics
-        metrics = self._get_metrics()
-        metrics.increment_counter(
-            "health_check_success_total",
-            1,
-            labels,
-        )
-        metrics.observe_histogram(
-            "health_check_latency_seconds",
-            elapsed,
-            labels,
+        handle_health_check_success(
+            logger=self._logger,
+            metrics=self.metrics,
+            ctx=ctx,
+            status=status,
         )
 
     def _handle_health_check_failure(
@@ -179,33 +155,12 @@ class HealthCheckMixin:
             HealthStatus.UNHEALTHY as fallback status.
 
         """
-        elapsed = ctx.elapsed_seconds
-        labels = {"provider": ctx.provider}
-
-        # Log failure at WARNING level with full context
-        self._logger.warning(
-            "health_check_failed",
-            provider=ctx.provider,
-            endpoint=ctx.endpoint,
-            error_type=type(error).__name__,
-            error_message=str(error),
-            latency_seconds=elapsed,
+        return handle_health_check_failure(
+            logger=self._logger,
+            metrics=self.metrics,
+            ctx=ctx,
+            error=error,
         )
-
-        # Record metrics
-        metrics = self._get_metrics()
-        metrics.increment_counter(
-            "health_check_failures_total",
-            1,
-            labels,
-        )
-        metrics.observe_histogram(
-            "health_check_latency_seconds",
-            elapsed,
-            labels,
-        )
-
-        return HealthStatus.UNHEALTHY
 
 
 class HealthCheckProviderMixin(HealthCheckMixin):
@@ -294,17 +249,10 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         - Transient transport/upstream failures downgrade to ``DEGRADED``
           unless circuit breaker already reports ``UNHEALTHY``.
         """
-        if fallback_status == HealthStatus.UNHEALTHY:
-            return HealthStatus.UNHEALTHY
-        if fallback_status == HealthStatus.HEALTHY:
-            return HealthStatus.DEGRADED
-        if isinstance(error, (TimeoutError, ConnectionError, RequestError)):
-            return HealthStatus.DEGRADED
-        if isinstance(error, HTTPStatusError):
-            status_code = error.response.status_code
-            if status_code in TRANSIENT_DEGRADED_STATUS_CODES:
-                return HealthStatus.DEGRADED
-        return fallback_status
+        return resolve_failure_health_status(
+            error=error,
+            fallback_status=fallback_status,
+        )
 
     async def check_health(self) -> HealthCheckResult:
         """Run probe health check and return status, latency, and failure context."""
@@ -344,10 +292,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
 
     def _get_consecutive_health_failures(self) -> int:
         """Read circuit-breaker failure count with a conservative fallback."""
-        try:
-            return self._circuit_breaker.get_failure_count()
-        except HEALTH_CHECK_ERRORS:
-            return 1
+        return get_consecutive_health_failures(self._circuit_breaker)
 
     async def _probe_health(self) -> HealthStatus:
         """Perform provider-specific health probe.
@@ -370,14 +315,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             HealthStatus based on circuit breaker state.
 
         """
-        from bioetl.infrastructure.adapters.http.health import (
-            assess_health_from_circuit_breaker,
-        )
-
-        try:
-            return assess_health_from_circuit_breaker(self._circuit_breaker)
-        except HEALTH_CHECK_ERRORS:
-            return HealthStatus.UNHEALTHY
+        return fallback_health_status(self._circuit_breaker)
 
     def _get_error_context(
         self, operation: str
@@ -391,14 +329,5 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             Context dictionary for error handling.
 
         """
-        try:
-            cb_state = self._circuit_breaker.get_state().value
-            cb_failures = self._circuit_breaker.get_failure_count()
-        except HEALTH_CHECK_ERRORS:
-            cb_state = None
-            cb_failures = 0
-
-        return {
-            "circuit_breaker_state": cb_state,
-            "circuit_breaker_failures": cb_failures,
-        }
+        del operation
+        return build_error_context(self._circuit_breaker)

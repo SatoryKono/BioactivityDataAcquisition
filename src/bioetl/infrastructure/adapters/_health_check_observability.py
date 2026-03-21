@@ -1,0 +1,94 @@
+"""Internal observability helpers for adapter health checks."""
+
+from __future__ import annotations
+
+import time
+
+from bioetl.domain.ports import LoggerPort, MetricsPort
+from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.health_check_contract import HealthCheckContext
+
+
+def resolve_metrics(metrics: MetricsPort | None) -> MetricsPort:
+    """Return metrics port, defaulting to NoOpMetrics when absent."""
+    from bioetl.domain.ports import NoOpMetrics
+
+    return metrics if metrics is not None else NoOpMetrics()
+
+
+def start_health_check(
+    *,
+    provider_name: str,
+    endpoint: str,
+) -> HealthCheckContext:
+    """Create a timed health-check context for observability."""
+    return HealthCheckContext(
+        start_time=time.monotonic(),
+        provider=provider_name,
+        endpoint=endpoint,
+    )
+
+
+def handle_health_check_success(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+    ctx: HealthCheckContext,
+    status: HealthStatus,
+) -> None:
+    """Record success-side logs and metrics for a health probe."""
+    elapsed = ctx.elapsed_seconds
+    labels = {"provider": ctx.provider}
+    logger.debug(
+        "health_check_passed",
+        provider=ctx.provider,
+        endpoint=ctx.endpoint,
+        status=status.value,
+        latency_seconds=elapsed,
+    )
+
+    metrics_port = resolve_metrics(metrics)
+    metrics_port.increment_counter(
+        "health_check_success_total",
+        1,
+        labels,
+    )
+    metrics_port.observe_histogram(
+        "health_check_latency_seconds",
+        elapsed,
+        labels,
+    )
+
+
+def handle_health_check_failure(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+    ctx: HealthCheckContext,
+    error: Exception,
+) -> HealthStatus:
+    """Record failure-side logs and metrics for a health probe."""
+    elapsed = ctx.elapsed_seconds
+    labels = {"provider": ctx.provider}
+    logger.warning(
+        "health_check_failed",
+        provider=ctx.provider,
+        endpoint=ctx.endpoint,
+        error_type=type(error).__name__,
+        error_message=str(error),
+        latency_seconds=elapsed,
+    )
+
+    metrics_port = resolve_metrics(metrics)
+    metrics_port.increment_counter(
+        "health_check_failures_total",
+        1,
+        labels,
+    )
+    metrics_port.observe_histogram(
+        "health_check_latency_seconds",
+        elapsed,
+        labels,
+    )
+
+    return HealthStatus.UNHEALTHY
