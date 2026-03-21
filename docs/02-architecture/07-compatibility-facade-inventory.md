@@ -127,6 +127,22 @@ operational; do not copy generated snapshot counters back into it by hand.
 - For provider adapters, first-party code should prefer provider package roots when those roots are
   the documented canonical path; retained `client.py` modules remain stable compatibility seams.
 
+## Measured-Only Policy
+
+Measured-only modules are tracked by docstring-prefix measurement and the YAML allowlist, but they
+are not curated ledger rows by default.
+
+- A module may remain measured-only while it is still an unsanctioned compatibility helper and new
+  first-party imports are not being added.
+- Measured-only modules do not count as transition-debt rows and do not require the full curated
+  ledger fields such as `canonical_target`, `allowed_call_sites`, or `exit_criteria`.
+- A measured-only module must be promoted into the curated ledger before or when it becomes a
+  sanctioned public seam that needs explicit canonical-target, call-site, or exit-criteria
+  governance.
+- The machine-readable policy for measured-only rows lives in
+  `configs/quality/compatibility_facade_inventory.yaml` via `new_code_policy` and
+  `promotion_trigger`; keep that contract aligned with tests and snapshot generation.
+
 ## Historical Review Log
 
 Historical retained-entrypoint decisions and review narratives now live in

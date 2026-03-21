@@ -7,6 +7,7 @@ compatible with the current publication adapter expectations.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from time import monotonic
 
 import httpx
@@ -18,13 +19,13 @@ SEMANTICSCHOLAR_API_BASE = "https://api.semanticscholar.org/graph/v1"
 STABLE_DOI = "10.1038/s41586-020-2649-2"
 SEARCH_TITLE = "SARS-CoV-2"
 SEARCH_FIELDS = "paperId,title,externalIds,year"
-REQUEST_SPACING_SECONDS = 1.25
-RATE_LIMIT_RETRY_SECONDS = 2.0
+REQUEST_SPACING_SECONDS = 4.0
+RATE_LIMIT_RETRY_SECONDS = 4.0
+MAX_RATE_LIMIT_ATTEMPTS = 4
 pytestmark = pytest.mark.network
 _LAST_REQUEST_AT = 0.0
 _SEARCH_PAYLOAD_CACHE: JsonDict | None = None
 _BATCH_PAYLOAD_CACHE: list[JsonDict | None] | None = None
-_HEALTH_PAYLOAD_CACHE: JsonDict | None = None
 
 
 async def _respect_request_spacing() -> None:
@@ -35,6 +36,24 @@ async def _respect_request_spacing() -> None:
         await asyncio.sleep(REQUEST_SPACING_SECONDS - elapsed)
 
 
+def _retry_after_seconds(response: httpx.Response) -> float:
+    """Return retry delay from headers, falling back to default backoff."""
+    raw_retry_after = response.headers.get("Retry-After", "").strip()
+    if raw_retry_after:
+        with contextlib.suppress(ValueError):
+            parsed = float(raw_retry_after)
+            if parsed > 0:
+                return parsed
+    return RATE_LIMIT_RETRY_SECONDS
+
+
+def _backoff_seconds(response: httpx.Response, attempt: int) -> float:
+    """Increase waiting time across repeated rate-limit responses."""
+    base_delay = _retry_after_seconds(response)
+    multiplier = max(1, attempt + 1)
+    return base_delay * multiplier
+
+
 async def _request_or_skip(
     client: httpx.AsyncClient,
     method: str,
@@ -43,7 +62,7 @@ async def _request_or_skip(
 ) -> httpx.Response:
     """Execute request and skip on transient network/provider outages."""
     global _LAST_REQUEST_AT
-    for attempt in range(2):
+    for attempt in range(MAX_RATE_LIMIT_ATTEMPTS):
         await _respect_request_spacing()
         try:
             response = await client.request(method, url, **kwargs)
@@ -51,8 +70,8 @@ async def _request_or_skip(
             pytest.skip(f"Semantic Scholar endpoint not reachable: {exc}")
 
         _LAST_REQUEST_AT = monotonic()
-        if response.status_code == 429 and attempt == 0:
-            await asyncio.sleep(RATE_LIMIT_RETRY_SECONDS)
+        if response.status_code == 429 and attempt < (MAX_RATE_LIMIT_ATTEMPTS - 1):
+            await asyncio.sleep(_backoff_seconds(response, attempt))
             continue
         if response.status_code in {429, 502, 503, 504}:
             pytest.skip(
@@ -115,30 +134,8 @@ async def semanticscholar_batch_payload(
     return _BATCH_PAYLOAD_CACHE
 
 
-@pytest_asyncio.fixture
-async def semanticscholar_health_payload(
-    semanticscholar_client: httpx.AsyncClient,
-) -> JsonDict:
-    """Cached low-cost health-style search response."""
-    global _HEALTH_PAYLOAD_CACHE
-    if _HEALTH_PAYLOAD_CACHE is None:
-        response = await _request_or_skip(
-            semanticscholar_client,
-            "GET",
-            f"{SEMANTICSCHOLAR_API_BASE}/paper/search",
-            params={
-                "query": "*",
-                "limit": 1,
-                "offset": 0,
-                "fields": "paperId,title",
-            },
-            headers={"Accept": "application/json"},
-        )
-        _HEALTH_PAYLOAD_CACHE = response.json()
-    return _HEALTH_PAYLOAD_CACHE
-
-
 @pytest.mark.semanticscholar
+@pytest.mark.timeout(120)
 class TestSemanticScholarContract:
     """Contract tests for Semantic Scholar live publication API behavior."""
 
@@ -184,10 +181,10 @@ class TestSemanticScholarContract:
     @pytest.mark.asyncio
     async def test_health_probe_shape(
         self,
-        semanticscholar_health_payload: JsonDict,
+        semanticscholar_search_payload: JsonDict,
     ) -> None:
-        """Verify minimal health-style search request remains successful."""
-        data = semanticscholar_health_payload
+        """Verify search payload still exposes the minimal health-style shape."""
+        data = semanticscholar_search_payload
         assert "data" in data
         assert isinstance(data["data"], list)
         assert "total" in data

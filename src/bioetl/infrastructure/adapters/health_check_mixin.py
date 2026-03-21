@@ -23,6 +23,7 @@ __all__ = [
     "HealthCheckProviderMixin",
 ]
 
+import time
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
@@ -52,6 +53,9 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
+
+# Preserve the module-level clock seam used by health-check tests.
+HEALTH_CHECK_MONOTONIC = time.monotonic
 
 
 class HealthCheckMixin:
