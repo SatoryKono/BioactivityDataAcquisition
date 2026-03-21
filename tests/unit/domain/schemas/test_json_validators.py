@@ -18,6 +18,7 @@ class TestIsValidJson:
         """Should accept valid JSON arrays."""
         series = pd.Series(['["a", "b"]', "[1, 2, 3]", "[]"])
         result = is_valid_json(series)
+        assert isinstance(result, pd.Series)
         assert result.all()
 
     def test_valid_json_object(self) -> None:
@@ -58,6 +59,7 @@ class TestIsValidJsonArray:
         """Should accept valid JSON arrays."""
         series = pd.Series(['["a", "b"]', "[1, 2, 3]", "[]", "[[1], [2]]"])
         result = is_valid_json_array(series)
+        assert isinstance(result, pd.Series)
         assert result.all()
 
     def test_null_values_pass(self) -> None:
@@ -98,6 +100,7 @@ class TestIsValidJsonObject:
         """Should accept valid JSON objects."""
         series = pd.Series(['{"key": "value"}', '{"a": 1, "b": 2}', "{}"])
         result = is_valid_json_object(series)
+        assert isinstance(result, pd.Series)
         assert result.all()
 
     def test_nested_objects(self) -> None:

@@ -12,7 +12,7 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,
     PipelineRegistryView,
     RunAllExecutionPlan,
-    create_run_all_execution_plan,
+    resolve_run_all_execution_plan,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
@@ -165,7 +165,7 @@ def prepare_run_all_execution_plan(
     exit_func: ExitCallable,
 ) -> RunAllExecutionPlan:
     """Validate run-all inputs and build the prepared execution plan."""
-    execution_plan, error_msg = create_run_all_execution_plan(
+    execution_plan, error_msg = resolve_run_all_execution_plan(
         source=cli_input.source,
         run_type=cli_input.run_type,
         limit=cli_input.limit,

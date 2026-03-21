@@ -138,4 +138,3 @@ class SearchPaginator:
         except CROSSREF_RUNTIME_ERRORS as error:
             self._logger.error("crossref_search_failed", query=query, error=str(error))
             raise CrossRefApiError(f"CrossRef search failed: {error}") from error
-

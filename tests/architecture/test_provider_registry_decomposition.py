@@ -138,7 +138,9 @@ def test_registration_helpers_use_injected_assembly_callbacks(path: Path) -> Non
 
 @pytest.mark.architecture
 @pytest.mark.parametrize("path", [REGISTRATION_BIO_PATH, REGISTRATION_BIBLIO_PATH])
-def test_registration_family_uses_canonical_provider_config_builders(path: Path) -> None:
+def test_registration_family_uses_canonical_provider_config_builders(
+    path: Path,
+) -> None:
     """Bio/biblio registration families should not grow manual ProviderConfig skeletons."""
     called_names = _called_names(path)
     assert "ProviderConfig" not in called_names, (

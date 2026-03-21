@@ -19,11 +19,11 @@ from bioetl.interfaces.cli.commands.run_all import (
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     RunAllExecutionPlan,
-    create_run_all_execution_plan,
     create_run_all_options,
     emit_run_all_listing,
     record_pipeline_failure,
     record_pipeline_result,
+    resolve_run_all_execution_plan,
     should_prompt_for_destructive_run,
 )
 from bioetl.interfaces.cli.main import cli
@@ -211,11 +211,11 @@ class TestRunAllHelpers:
         assert options.dry_run is False
         assert options.log_level == "DEBUG"
 
-    def test_create_run_all_execution_plan_resolves_pipelines_and_options(
+    def test_resolve_run_all_execution_plan_resolves_pipelines_and_options(
         self, mock_registry
     ) -> None:
         """Execution plan helper should validate provider and build RunOptions."""
-        plan, error = create_run_all_execution_plan(
+        plan, error = resolve_run_all_execution_plan(
             source="chembl",
             run_type="incremental",
             limit=25,
@@ -240,11 +240,11 @@ class TestRunAllHelpers:
             ),
         )
 
-    def test_create_run_all_execution_plan_returns_error_for_invalid_provider(
+    def test_resolve_run_all_execution_plan_returns_error_for_invalid_provider(
         self, mock_registry
     ) -> None:
         """Execution plan helper should preserve provider validation failures."""
-        plan, error = create_run_all_execution_plan(
+        plan, error = resolve_run_all_execution_plan(
             source="missing",
             run_type="incremental",
             limit=None,

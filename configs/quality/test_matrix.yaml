@@ -233,8 +233,8 @@ contract_testing:
   live_api_gate_mode: scheduled
   network_opt_in_required: true
   live_api_minimum_baseline:
-    enforced_providers: [chembl, pubchem, uniprot, pubmed, crossref, openalex]
-    pilot_providers: [semanticscholar]
+    enforced_providers: [chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar]
+    pilot_providers: []
     vcr_only_providers: []
   provider_live_api:
     chembl: enforced
@@ -243,4 +243,4 @@ contract_testing:
     pubmed: enforced
     crossref: enforced
     openalex: enforced
-    semanticscholar: pilot
+    semanticscholar: enforced

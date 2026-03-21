@@ -20,10 +20,10 @@ import pubchempy as pcp
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 from bioetl.infrastructure.adapters.pubchem._fetch_strategy_search import (
     _PubChemSearchFetchMixin,
 )
+from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlowService
 from bioetl.infrastructure.adapters.pubchem.policy_helper import (
     is_blank_value,

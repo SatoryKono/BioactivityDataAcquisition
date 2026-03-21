@@ -13,6 +13,7 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
 )
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.types import GoldSchemaType
+from bioetl.infrastructure.config import load_pipeline_contract_policy
 from bioetl.infrastructure.config.contract_policy_validation import (
     resolve_silver_columns as _resolve_silver_columns_impl,
 )
@@ -22,7 +23,6 @@ from bioetl.infrastructure.config.contract_policy_validation import (
 from bioetl.infrastructure.config.contract_policy_validation import (
     validate_pipeline_contract_policy as _validate_pipeline_contract_policy_impl,
 )
-from bioetl.infrastructure.config import load_pipeline_contract_policy
 
 
 class _SchemaBuilder(Protocol):

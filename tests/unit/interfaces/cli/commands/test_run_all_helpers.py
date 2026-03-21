@@ -13,7 +13,6 @@ import pytest
 from bioetl.application.services import PipelineRunResult, RunResult
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     BatchRunResult,
-    create_run_all_execution_plan,
     create_run_all_options,
     echo_batch_summary,
     filter_pipelines_by_provider,
@@ -22,6 +21,7 @@ from bioetl.interfaces.cli.commands.run_all_helpers import (
     record_pipeline_failure,
     record_pipeline_result,
     resolve_run_all_registry,
+    resolve_run_all_execution_plan,
     should_prompt_for_destructive_run,
     validate_provider,
 )
@@ -164,12 +164,12 @@ class TestCreateRunAllOptions:
 
 
 @pytest.mark.unit
-class TestCreateRunAllExecutionPlan:
-    """Tests for create_run_all_execution_plan helper."""
+class TestResolveRunAllExecutionPlan:
+    """Tests for resolve_run_all_execution_plan helper."""
 
     def test_valid_provider_returns_plan(self, mock_registry: MagicMock) -> None:
         """Test that a valid provider returns a populated RunAllExecutionPlan."""
-        plan, error = create_run_all_execution_plan(
+        plan, error = resolve_run_all_execution_plan(
             source="chembl",
             run_type="incremental",
             limit=None,
@@ -187,7 +187,7 @@ class TestCreateRunAllExecutionPlan:
         self, mock_registry: MagicMock
     ) -> None:
         """Test that an invalid provider returns (None, error_message)."""
-        plan, error = create_run_all_execution_plan(
+        plan, error = resolve_run_all_execution_plan(
             source="bad_provider",
             run_type="incremental",
             limit=None,

@@ -270,8 +270,14 @@ technical-debt roadmap, не потеряв важные предложения.
 - `3I-2` уже реализован:
   `fetch_strategies.py` сохранён как import-stable facade, а query/search flow
   вынесен в `_fetch_strategy_search.py`;
+- следующим bounded cluster после `pubchem/fetch_strategies.py` выбран
+  `chembl/fetch_paging_mixin.py`, и cluster start зафиксирован в
+  `wave-3-chembl-fetch-paging-cluster-plan-2026-03-21.md`;
+- `3J-2` уже реализован:
+  `fetch_paging_mixin.py` сохранён как import-stable facade, а
+  filtered-pagination и dedup flow вынесены в `_fetch_paging_filtered.py`;
 - следующий implementation step для `Wave 3` теперь сужен до closeout/ratchet
-  для `pubchem/fetch_strategies.py` или к выбору следующего bounded adapter
+  для `chembl/fetch_paging_mixin.py` или к выбору следующего bounded adapter
   hotspot.
 
 ### Wave 4. Complexity hotspot implementation

@@ -110,7 +110,7 @@ class TestPrepareRunAllExecutionPlan:
         expected_plan = _make_plan()
 
         with patch(
-            "bioetl.interfaces.cli.commands.run_all_command_policy.create_run_all_execution_plan",
+            "bioetl.interfaces.cli.commands.run_all_command_policy.resolve_run_all_execution_plan",
             return_value=(expected_plan, None),
         ):
             result = prepare_run_all_execution_plan(
@@ -124,7 +124,7 @@ class TestPrepareRunAllExecutionPlan:
     def test_invalid_provider_echoes_error_and_exits(self) -> None:
         with (
             patch(
-                "bioetl.interfaces.cli.commands.run_all_command_policy.create_run_all_execution_plan",
+                "bioetl.interfaces.cli.commands.run_all_command_policy.resolve_run_all_execution_plan",
                 return_value=(None, "bad provider"),
             ),
             patch(

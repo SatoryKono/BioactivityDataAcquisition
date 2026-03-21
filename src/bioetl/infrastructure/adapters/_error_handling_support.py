@@ -59,9 +59,7 @@ def build_adapter_error_context(
         error_category=error_category,
         retry_after=context.get("retry_after"),
         extra={
-            k: v
-            for k, v in context.items()
-            if k not in _ERROR_CONTEXT_RESERVED_KEYS
+            k: v for k, v in context.items() if k not in _ERROR_CONTEXT_RESERVED_KEYS
         },
     )
 
