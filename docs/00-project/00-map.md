@@ -404,7 +404,6 @@ src/bioetl/
 │   ├── security/                # PII hashing
 │   ├── serialization/           # JSON encoders
 │   ├── validation/              # Pandera validator
-│   ├── config_loader.py         # Main config loader
 │   └── config_merge.py          # Config merge utility
 │
 └── interfaces/                  # External interfaces

@@ -260,7 +260,7 @@ When creating a new entity, generate:
 | Unified entity configs | `configs/entities/{provider}/{entity}.yaml` |
 | Composite configs | `configs/composites/{entity}.yaml` |
 | Gap analysis script | `docs/00-project/ai/agents/scripts/py-config-bot-1.py` |
-| Config loader code | `src/bioetl/infrastructure/config_loader.py`, `src/bioetl/infrastructure/config/` |
+| Config loader code | `src/bioetl/composition/bootstrap/runtime/config_loader.py`, `src/bioetl/infrastructure/config/` |
 
 ---
 

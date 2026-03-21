@@ -21,7 +21,6 @@ bash scripts/check_skills_mirror.sh --sync
 | Skill | Path | Purpose |
 |------|------|---------|
 | `agent-orchestration` | `.codex/skills/agent-orchestration` | Multi-agent coordination map |
-| `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Hierarchical evidence collection and synthesis orchestration |
 | `py-review-orchestrator` | `.codex/skills/py-review-orchestrator` | Hierarchical review campaign |
 | `py-test-swarm` | `.codex/skills/py-test-swarm` | Hierarchical test swarm (L1/L2/L3) |
 
@@ -30,12 +29,14 @@ bash scripts/check_skills_mirror.sh --sync
 | Skill | Path | Purpose |
 |------|------|---------|
 | `py-audit-bot` | `.codex/skills/py-audit-bot` | Audit profile workflow |
-| `py-code-bot` | `.codex/skills/py-code-bot` | Code implementation profile |
+| `py-code-bot` | `.codex/skills/py-code-bot` | Deprecated compatibility profile for historical references |
 | `py-config-bot` | `.codex/skills/py-config-bot` | Config profile workflow |
 | `py-debug-bot` | `.codex/skills/py-debug-bot` | Debug profile workflow |
 | `py-doc-bot` | `.codex/skills/py-doc-bot` | Documentation profile workflow |
 | `py-plan-bot` | `.codex/skills/py-plan-bot` | Planning profile workflow |
 | `py-test-bot` | `.codex/skills/py-test-bot` | Test profile workflow |
+
+`py-code-bot` is retained only as a compatibility surface for historical references. In the current Codex workflow, production code is written directly by the orchestrator.
 
 ### Architecture and Quality
 
@@ -90,7 +91,6 @@ bash scripts/check_skills_mirror.sh --sync
 - [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
 - [generating-constrained-specs](generating-constrained-specs/SKILL.md)
-- [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [initializing-ledger](initializing-ledger/SKILL.md)
 - [making-decisions](making-decisions/SKILL.md)
 - [nci-analysis](nci-analysis/SKILL.md)

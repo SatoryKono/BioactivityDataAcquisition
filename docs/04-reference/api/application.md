@@ -87,9 +87,43 @@ subpackage facades such as `application.services`, `application.composite`,
 
 ## Services (`application.services`)
 
-### Data Quality
+Package-root guidance: `application.services` should be read as a narrow public facade.
+Canonical root exports are defined by `src/bioetl/application/services/__init__.py`.
+Useful nested symbols may still exist in defining submodules, but they are not package-root exports unless stated explicitly.
 
-| Class | Description |
+### Package-Root Exports
+
+| Symbol | Description |
+|---|---|
+| `PipelineRunnerService` | High-level pipeline execution service |
+| `PipelineRunLifecycleService` | Pipeline run lifecycle management |
+| `ConfigService` | Pipeline and settings configuration access |
+| `HealthService` | Provider health checking |
+| `BronzeCleanupService` | Bronze layer cleanup |
+| `CheckpointService` | Checkpoint management service |
+| `VacuumService` | Delta Lake vacuum operations |
+| `ExportService` | Data export to CSV/Parquet |
+| `ExportOptions` | Export configuration |
+| `ExportResult` | Export operation result |
+| `QuarantineService` | Quarantine record management |
+| `MetricsService` | Metrics server management |
+| `RunResult` | High-level pipeline run result model |
+| `RunOptions` | Pipeline run options |
+| `PipelineRunResult` | Structured runner-service result |
+| `PipelineNotFoundError` | Raised when a pipeline name is unknown |
+| `BronzeCleanupResult` | Bronze cleanup result model |
+| `TableVacuumResult` | Per-table vacuum result |
+| `VacuumAllResult` | Aggregate vacuum result |
+| `TablePreview` | Table preview model |
+| `TableInfo` | Table metadata model |
+| `ColumnInfo` | Column metadata model |
+
+### Notable Nested Service Symbols
+
+Import the symbols below from their defining submodules rather than from
+`application.services` package root.
+
+| Symbol | Description |
 |---|---|
 | `DataQualityService` | Facade for DQ analysis across all layers |
 | `BronzeDQAnalyzer` | Bronze layer data quality analysis |
@@ -99,121 +133,63 @@ subpackage facades such as `application.services`, `application.composite`,
 | `SilverStatisticsCalculator` | Silver column statistics computation |
 | `SilverThresholdChecker` | Silver DQ threshold evaluation |
 | `DQReportService` | DQ report generation and persistence |
-
-### Pipeline Management
-
-| Class | Description |
-|---|---|
-| `PipelineRunnerService` | High-level pipeline execution service |
 | `PipelineRunContextService` | Pipeline run context management |
 | `PipelineRunExecutionService` | Pipeline run execution coordination |
-| `PipelineRunLifecycleService` | Pipeline run lifecycle management |
 | `CliRunOrchestrationService` | CLI-specific run orchestration |
-| `ConfigService` | Pipeline and settings configuration access |
-| `HealthService` | Provider health checking |
-
-### Storage Services
-
-| Class | Description |
-|---|---|
 | `MedallionLifecycleService` | Medallion layer lifecycle management |
-| `VacuumService` | Delta Lake vacuum operations |
-| `BronzeCleanupService` | Bronze layer cleanup |
 | `LockService` | Lock management service |
-| `CheckpointService` | Checkpoint management service |
-
-### Export
-
-| Class | Description |
-|---|---|
-| `ExportService` | Data export to CSV/Parquet |
-| `ExportOptions` | Export configuration |
-| `ExportResult` | Export operation result |
-
-### Metadata
-
-| Class | Description |
-|---|---|
 | `MetadataCoordinator` | Metadata sidecar coordination |
 | `MetadataAssemblers` | Metadata assembly helpers |
-
-### Other Services
-
-| Class | Description |
-|---|---|
 | `ShutdownService` | Graceful shutdown coordination |
-| `QuarantineService` | Quarantine record management |
-| `MetricsService` | Metrics server management |
-
-### Service Models
-
-`RunResult`, `RunOptions`, `PipelineRunResult`, `PipelineInfo`, `SettingsInfo`,
-`HealthResult`, `CheckpointInfo`, `BronzeCleanupResult`, `DQReportResult`,
-`DQReportContext`, `PipelineExecutionResult`, `TableVacuumResult`, `VacuumAllResult`,
-`QuarantineRecord`, `ShutdownReason`, `ExportOptions`, `ExportResult`,
-`TablePreview`, `TableInfo`, `ColumnInfo`, `MetricsServerStatus`, `StartResult`
+| `StartResult` | Metrics-server start result model |
 
 ---
 
 ## Composite Pipeline (`application.composite`)
 
-### Runner
+Package-root guidance: `application.composite` re-exports a useful but still
+bounded facade. Additional helpers exist in nested modules and should be imported
+from those modules when used directly.
 
-| Class | Description |
+### Package-Root Exports
+
+| Symbol | Description |
 |---|---|
 | `CompositePipelineRunner` | Main composite pipeline runner (seed + enrich + merge) |
+| `CompositePipelineRunnerService` | Service facade for composite pipeline execution |
 | `CompositeRuntimeConfig` | Composite pipeline runtime configuration |
-
-### Enrichment
-
-| Class | Description |
-|---|---|
 | `EnrichmentCoordinatorService` | Orchestrates enrichment pipeline execution |
-| `EnricherAggregatorService` | Aggregates enrichment results |
-| `EnricherDeduplicatorService` | Deduplicates enrichment records |
 | `KeyExtractorService` | Extracts join keys from records |
-
-### Merge
-
-| Class | Description |
-|---|---|
 | `MergeService` | Merges seed and enrichment data |
-| `ConflictResolverService` | Resolves field conflicts between providers |
-| `CoalescePolicyService` | Coalescing policy for merged fields |
-| `ColumnRenamerService` | Column renaming for merged output |
-| `ColumnOrdererService` | Column ordering for merged output |
-| `ColumnPriorityOrdererService` | Priority-based column ordering |
-
-### Join Planning
-
-| Class | Description |
-|---|---|
-| `JoinPlannerService` | Plans join operations between datasets |
-| `JoinExecutorService` | Executes planned join operations |
-| `JoinKeyResolverService` | Resolves join keys across providers |
-
-### Dependencies
-
-| Class | Description |
-|---|---|
 | `DependencyCoordinatorService` | Coordinates dependent pipeline execution |
-| `DependencyJoinerService` | Joins dependency data with seed data |
-| `SeedKeyResolver` | Resolves seed keys for dependencies |
-| `ChainedKeyResolver` | Chains multiple key resolvers |
-
-### Cross-Validation
-
-| Class | Description |
-|---|---|
-| `EnrichmentCrossValidationService` | Cross-validates enriched vs seed data |
-
-### Support
-
-| Class | Description |
-|---|---|
+| `ColumnRenamer` | Unified column renaming helper |
+| `ColumnOrderer` | Semantic column ordering helper |
 | `CompositeCheckpointService` | Checkpoint management for composite runs |
 | `CompositeCheckpointState` | Checkpoint state tracking |
 | `CompositePreflightValidationService` | Preflight validation for composite pipelines |
+| `CompositePreflightValidator` | Validator for composite preflight rules |
+| `PreflightValidationError` | Composite preflight validation error |
+| `PreflightValidationResult` | Composite preflight validation result |
+
+### Notable Nested Composite Symbols
+
+The symbols below live in nested composite modules and are not exported by the
+`application.composite` package root.
+
+| Symbol | Description |
+|---|---|
+| `EnricherAggregatorService` | Aggregates enrichment results |
+| `EnricherDeduplicatorService` | Deduplicates enrichment records |
+| `ConflictResolverService` | Resolves field conflicts between providers |
+| `CoalescePolicyService` | Coalescing policy for merged fields |
+| `ColumnPriorityOrdererService` | Priority-based column ordering |
+| `JoinPlannerService` | Plans join operations between datasets |
+| `JoinExecutorService` | Executes planned join operations |
+| `JoinKeyResolverService` | Resolves join keys across providers |
+| `DependencyJoinerService` | Joins dependency data with seed data |
+| `SeedKeyResolver` | Resolves seed keys for dependencies |
+| `ChainedKeyResolver` | Chains multiple key resolvers |
+| `EnrichmentCrossValidationService` | Cross-validates enriched vs seed data |
 | `FSMStateHelperService` | Finite state machine transition helpers |
 
 ---

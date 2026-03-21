@@ -1,19 +1,21 @@
 ---
 name: py-code-bot
-description: Execute BioETL py-code-bot profile for role-specific workflow and constraints.
+description: Deprecated compatibility profile retained only to interpret historical py-code-bot references.
 ---
 
 # py-code-bot
 
+*Status: deprecated-compatibility*
+
 ## Objective
-Run the role-specific workflow as defined in the py-code-bot profile.
+Historical compatibility entry retained only to interpret older references to `py-code-bot`.
 
 ## Source Of Truth
-- Primary profile: `../../agents/py-code-bot.md`
-- Team orchestration: `../../agents/ORCHESTRATION.md`
+- Current orchestration: `../../agents/ORCHESTRATION.md`
+- Historical mirror context: `../../../docs/00-project/ai/skills/global/py-code-bot/SKILL.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 
 ## Workflow
-1. Open and follow `../../agents/py-code-bot.md`.
-2. Keep output artifacts and scope aligned with `../../agents/ORCHESTRATION.md`.
-3. Respect BioETL architecture rules from `AGENTS.md` and project constraints.
+1. Treat `py-code-bot` as a deprecated compatibility reference, not as the current production-code workflow.
+2. Use `../../agents/ORCHESTRATION.md` for the active implementation path, where production code is written directly by the orchestrator.
+3. Use this page only to interpret historical notes, mirrors, or workflow artifacts that still mention `py-code-bot`.
