@@ -28,63 +28,30 @@ Plans in this folder must not override normative documents.
 
 ## Active Plan Links
 
-### Authoritative Refactor Program
+### Primary Active Backlog
 
-- [consolidated-master-refactor-plan-2026-03-20.md](consolidated-master-refactor-plan-2026-03-20.md)
-- [consolidated-master-refactor-plan-expanded-waves-2026-03-20.md](consolidated-master-refactor-plan-expanded-waves-2026-03-20.md)
+- [consolidated-open-tasks-plan-2026-03-21.md](consolidated-open-tasks-plan-2026-03-21.md)
 
-### Active Targeted Plans
+This is now the only active execution/backlog document in `docs/plans/`.
 
-- [mkdocs-material-migration-track-2026-03-03.md](mkdocs-material-migration-track-2026-03-03.md)
-- [branch-consolidation-plan-2026-03-19.md](branch-consolidation-plan-2026-03-19.md)
-- [dia-019-diagram-directory-consolidation-plan-2026-03-19.md](dia-019-diagram-directory-consolidation-plan-2026-03-19.md)
+### Retained Operational Context
+
 - [onboarding-checklist-day-1-2026-03-20.md](onboarding-checklist-day-1-2026-03-20.md)
 - [project-briefing-capability-discovery-2026-03-20.md](project-briefing-capability-discovery-2026-03-20.md)
-- [rf-07-provider-registry-migration-plan-2026-03-20.md](rf-07-provider-registry-migration-plan-2026-03-20.md)
-- [rf-07a-provider-registry-call-site-ledger-2026-03-20.md](rf-07a-provider-registry-call-site-ledger-2026-03-20.md)
-- [rf-07d-runtime-deferred-wave-plan-2026-03-20.md](rf-07d-runtime-deferred-wave-plan-2026-03-20.md)
-- [wave-3-crossref-batch-cluster-plan-2026-03-20.md](wave-3-crossref-batch-cluster-plan-2026-03-20.md)
-- [wave-3-http-client-retry-cluster-plan-2026-03-21.md](wave-3-http-client-retry-cluster-plan-2026-03-21.md)
-- [wave-3-health-check-cluster-plan-2026-03-21.md](wave-3-health-check-cluster-plan-2026-03-21.md)
-- [wave-3-chembl-fetch-resilience-cluster-plan-2026-03-21.md](wave-3-chembl-fetch-resilience-cluster-plan-2026-03-21.md)
-- [wave-3-openalex-filter-fetch-cluster-plan-2026-03-21.md](wave-3-openalex-filter-fetch-cluster-plan-2026-03-21.md)
-- [wave-3-error-handling-cluster-plan-2026-03-21.md](wave-3-error-handling-cluster-plan-2026-03-21.md)
-- [wave-3-health-monitor-cluster-plan-2026-03-21.md](wave-3-health-monitor-cluster-plan-2026-03-21.md)
-- [wave-3-pubmed-filter-fetch-cluster-plan-2026-03-21.md](wave-3-pubmed-filter-fetch-cluster-plan-2026-03-21.md)
-- [wave-3-pubchem-fetch-strategies-cluster-plan-2026-03-21.md](wave-3-pubchem-fetch-strategies-cluster-plan-2026-03-21.md)
-- [wave-3-chembl-fetch-paging-cluster-plan-2026-03-21.md](wave-3-chembl-fetch-paging-cluster-plan-2026-03-21.md)
-- [wave-3-semanticscholar-fetch-cluster-plan-2026-03-21.md](wave-3-semanticscholar-fetch-cluster-plan-2026-03-21.md)
-- [wave-3-crossref-client-cluster-plan-2026-03-21.md](wave-3-crossref-client-cluster-plan-2026-03-21.md)
-- [wave-3-chembl-entity-mapper-cluster-plan-2026-03-21.md](wave-3-chembl-entity-mapper-cluster-plan-2026-03-21.md)
-- [wave-3-pubchem-client-cluster-plan-2026-03-21.md](wave-3-pubchem-client-cluster-plan-2026-03-21.md)
-- [wave-3-pubmed-models-cluster-plan-2026-03-21.md](wave-3-pubmed-models-cluster-plan-2026-03-21.md)
-- [wave-3-crossref-models-cluster-plan-2026-03-21.md](wave-3-crossref-models-cluster-plan-2026-03-21.md)
-- [wave-3-cached-bronze-cluster-plan-2026-03-21.md](wave-3-cached-bronze-cluster-plan-2026-03-21.md)
-- [rf-fs-004-execution-plan-2026-03-20.md](rf-fs-004-execution-plan-2026-03-20.md)
-- [rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md](rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md)
-- [rf-fs-remaining-backlog-execution-plan-2026-03-20.md](rf-fs-remaining-backlog-execution-plan-2026-03-20.md)
-- [refactor-proposals-consolidation-input-2026-03-20.md](refactor-proposals-consolidation-input-2026-03-20.md)
-- Historical plans and superseded baseline series moved to [docs/99-archive/plans/README.md](../99-archive/plans/README.md) *(archived reference only)*
 
-### Recently Completed Targeted Plans
+### Retained Historical Context With Live Evidence References
 
-- [documentation-drift-remediation-plan-2026-03-20.md](documentation-drift-remediation-plan-2026-03-20.md)
-- [compatibility-registry-refactor-plan-2026-03-21.md](compatibility-registry-refactor-plan-2026-03-21.md)
-- [rf-04-composition-hotspots-execution-plan-2026-03-20.md](rf-04-composition-hotspots-execution-plan-2026-03-20.md)
-- [rf-06-domain-facade-hygiene-plan-2026-03-20.md](rf-06-domain-facade-hygiene-plan-2026-03-20.md)
 - [rf-07-provider-registry-migration-plan-2026-03-20.md](rf-07-provider-registry-migration-plan-2026-03-20.md)
 - [rf-07d-runtime-deferred-wave-plan-2026-03-20.md](rf-07d-runtime-deferred-wave-plan-2026-03-20.md)
 
-### Status Guidance
+These files are no longer active queues, but are still retained because
+evidence packs and historical runtime-ownership references point to them.
 
-- The consolidated master plan is the primary execution/backlog surface for the
-  current refactor program.
-- `wave-3-crossref-batch-cluster-plan-2026-03-20.md` is the active bounded
-  implementation plan for the current `Wave 3` adapter hotspot reduction start.
-- `rf-fs-remaining-backlog-execution-plan-2026-03-20.md` is now a reconciled
-  context document, not a competing master queue.
-- `refactor-proposals-consolidation-input-2026-03-20.md` is an absorbed input
-  artifact retained for traceability.
+### Cleanup Note
+
+On 2026-03-21 the folder was reduced to remove superseded dated execution
+plans, absorbed backlog inputs, and completed bounded-cluster plans that were
+creating multiple competing “active” surfaces.
 
 ## Related Prompt
 

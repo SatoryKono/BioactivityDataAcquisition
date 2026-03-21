@@ -1,9 +1,11 @@
-# Evidence Collection Complete: adapter-interface-alignment
+# Сбор evidence завершён: adapter-interface-alignment
 
-**Evidence Objects Created:** 10  
-**Gate Status:** PASSED
+Примечание о rebaseline: the current adapter-construction state still matches the same seam-alignment pressure points, so the pack remains a current baseline for decision work.
 
-## Evidence Summary
+**Создано объектов evidence:** 10  
+**Gate Статус:** PASSED
+
+## Сводка evidence
 
 | ID | Claim Summary | Confidence |
 |----|---------------|------------|
@@ -18,7 +20,7 @@
 | EV-adapter-alignment-composite-bootstrap-uses-plan-based-public-facade | Composite runtime creation already exposes a stable plan-based facade instead of a dynamic creator seam. | 0.93 |
 | EV-adapter-alignment-composite-support-bundle-centralizes-runner-collaborators | Composite runtime support services are assembled as an explicit typed bundle rather than through loose kwargs. | 0.91 |
 
-## Key Findings
+## Ключевые выводы
 
 - The cleanest existing contract is the `data_source_creator` seam, not the `custom_creator` seam.
 - Helper DI is a real part of adapter implementation contracts, especially `fallback_fetch_service`; it cannot be treated as optional incidental wiring.
@@ -26,13 +28,13 @@
 - Composite runtime creation is materially more explicit than provider adapter creation: it already uses a narrow public facade plus a typed support-service bundle.
 - Alignment work should move toward centralized helper synthesis in composition, because tests already assume callers should not assemble helper bundles manually.
 
-## Contradictions Noted
+## Отмеченные противоречия
 
 - `ProviderConfig` presents one provider-registration model, but its two creation seams (`custom_creator` vs `data_source_creator`) have materially different strictness and discoverability.
 - `DataSourceFactory.create()` injects helper bundles centrally, while direct custom-creator delegation in `create_provider_adapter()` leaves equivalent alignment burden to each provider-specific creator.
 - Composite bootstrap already preserves a stable facade and typed bundles, but provider adapter construction still relies on dynamic callable contracts for part of the same composition problem.
 
-## Gaps Remaining
+## Оставшиеся пробелы
 
 - No single explicit protocol currently describes the kwargs contract for `custom_creator`.
 - Helper synthesis still exists in multiple places (`DataSourceFactory`, `_create_http_data_source`, provider-specific custom creators, provider-specific factories) instead of one canonical adapter-construction boundary.

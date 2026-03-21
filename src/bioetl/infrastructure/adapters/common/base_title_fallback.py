@@ -20,6 +20,10 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.common._title_fallback_flow import (
+    iter_missing_doi_fallback_records,
+    iter_title_only_fallback_records,
+)
 
 
 class BaseTitleFallbackHandler(ABC):
@@ -207,42 +211,25 @@ class BaseTitleFallbackHandler(ABC):
             Publication records resolved via title search.
 
         """
-        for doi in dois:
-            if limit and fetched >= limit:
-                return
-
-            normalized_doi = (normalize_fn(doi) or "").lower()
-            if normalized_doi in found_dois:
-                continue
-
-            title = self._get_fallback_title(doi, normalized_doi, fallback_mapping)
-            if not title:
-                self._logger.debug(self._event_no_fallback_title, doi=doi)
-                continue
-
-            self._logger.info(
-                self._event_fallback_attempt,
-                doi=doi,
-                title=self._truncate_title(title),
-            )
-
-            result = await self._search_by_title(title)
-            if result:
-                id_field, id_value = self._get_result_identifier(result)
-                self._logger.info(
-                    self._event_fallback_success,
-                    original_doi=doi,
-                    title=title[:50],
-                    **{id_field: id_value},
-                )
-                yield self._process_found_result(result, doi)
-                fetched += 1
-            else:
-                self._logger.warning(
-                    self._event_fallback_not_found,
-                    doi=doi,
-                    title=title[:50],
-                )
+        async for record in iter_missing_doi_fallback_records(
+            dois=dois,
+            found_dois=found_dois,
+            fallback_mapping=fallback_mapping,
+            normalize_fn=normalize_fn,
+            limit=limit,
+            fetched=fetched,
+            get_fallback_title=self._get_fallback_title,
+            truncate_title=self._truncate_title,
+            search_by_title=self._search_by_title,
+            get_result_identifier=self._get_result_identifier,
+            process_found_result=self._process_found_result,
+            logger=self._logger,
+            event_no_fallback_title=self._event_no_fallback_title,
+            event_fallback_attempt=self._event_fallback_attempt,
+            event_fallback_success=self._event_fallback_success,
+            event_fallback_not_found=self._event_fallback_not_found,
+        ):
+            yield record
 
     def _process_title_only_result(
         self,
@@ -291,34 +278,18 @@ class BaseTitleFallbackHandler(ABC):
         Returns:
             Processed result.
         """
-        for entry in entries:
-            if limit and fetched >= limit:
-                return
-
-            # Try entry key first (supports __title_only_N__ markers),
-            # then empty string fallback for legacy compatibility
-            title = fallback_mapping.get(entry, fallback_mapping.get(""))
-            if not title:
-                continue
-
-            self._logger.info(
-                self._event_title_only_attempt,
-                title=self._truncate_title(title),
-                marker=entry if entry.startswith("__title_only_") else None,
-            )
-
-            result = await self._search_by_title(title)
-            if result:
-                id_field, id_value = self._get_result_identifier(result)
-                self._logger.info(
-                    self._event_title_only_success,
-                    title=title[:50],
-                    **{id_field: id_value},
-                )
-                yield self._process_title_only_result(result)
-                fetched += 1
-            else:
-                self._logger.debug(
-                    self._event_title_only_not_found,
-                    title=title[:50],
-                )
+        async for record in iter_title_only_fallback_records(
+            entries=entries,
+            fallback_mapping=fallback_mapping,
+            limit=limit,
+            fetched=fetched,
+            truncate_title=self._truncate_title,
+            search_by_title=self._search_by_title,
+            get_result_identifier=self._get_result_identifier,
+            process_title_only_result=self._process_title_only_result,
+            logger=self._logger,
+            event_title_only_attempt=self._event_title_only_attempt,
+            event_title_only_success=self._event_title_only_success,
+            event_title_only_not_found=self._event_title_only_not_found,
+        ):
+            yield record

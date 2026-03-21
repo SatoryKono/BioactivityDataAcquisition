@@ -18,7 +18,7 @@
 
 ### Insight 2: Green file-size governance does not mean the large-file problem is gone
 
-**Observation:** The enforceable file-size ratchet is tied to the `file_size_limits` exemption registry, which is currently empty, while the raw hotspot inventory still shows `95` files above `10 KB` and `17` above `350 LOC`.  
+**Observation:** The enforceable file-size ratchet is tied to the `file_size_limits` exemption registry, which is currently empty, while the raw hotspot inventory still shows `82` files above `10 KB` and `10` above `350 LOC`.
 **Implication:** Current green-state reporting can be misread if people assume it describes the whole source-tree size profile. Operationally, this means the repo has successfully ratcheted exemptions down, but has not yet converted the broad hotspot tail into a directly enforced budget.  
 **Confidence:** 0.95  
 **Evidence:** `EV-governance-signals-file-size-ratchet-tracks-exemptions-not-raw-hotspots`, `EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero`
@@ -32,7 +32,7 @@
 
 ### Insight 4: Duplication in `application` and `composition` is visible enough to prioritize, but not yet governable as a trend
 
-**Observation:** Ad hoc scans found `28` `R0801` occurrences in `composition` and `88` in `application`, but the default duplication workflow only checks `src/bioetl/infrastructure/adapters`.  
+**Observation:** Ad hoc scans found `31` `R0801` occurrences in `composition` and `88` in `application`, but the default duplication workflow only checks `src/bioetl/infrastructure/adapters`.
 **Implication:** We can say there is current duplication pressure, especially in `application`, but we cannot yet claim a controlled improvement or regression trend for those layers. Until there is a ratcheted baseline, duplication in these areas remains visible debt rather than enforceable debt.  
 **Confidence:** 0.93  
 **Evidence:** `EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences`, `EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences`, `EV-governance-signals-duplication-governance-excludes-composition-and-application`

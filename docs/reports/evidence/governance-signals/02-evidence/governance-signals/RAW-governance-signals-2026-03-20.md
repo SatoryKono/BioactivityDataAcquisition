@@ -1,6 +1,6 @@
 # Raw Governance Signals Snapshot
 
-Date: 2026-03-20
+Date: 2026-03-21
 
 ## Method
 
@@ -11,7 +11,7 @@ Date: 2026-03-20
   - `configs/quality/architecture_metric_exemptions.yaml`
   - `tests/architecture/test_regression_metrics.py`
 - Reused raw source-tree hotspot inventory from:
-  - `docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md`
+- `docs/reports/evidence/dependency-hotspots/02-evidence/dependency-hotspots/RAW-dependency-hotspot-metrics-2026-03-20.md`
 - Captured ad hoc duplication snapshots with:
   - `./.venv/Scripts/python.exe -m pylint --disable=all --enable=duplicate-code src/bioetl/composition`
   - `./.venv/Scripts/python.exe -m pylint --disable=all --enable=duplicate-code src/bioetl/application`
@@ -37,22 +37,22 @@ Result: OK (no new C901 structural debt)
 
 From `RAW-dependency-hotspot-metrics-2026-03-20.md`:
 
-- Total Python files under `src/bioetl`: `1198`
-- Files `>10 KB`: `95`
-- Files `>350 LOC`: `17`
-- Files exceeding both thresholds: `17`
+- Total Python files under `src/bioetl`: `1235`
+- Files `>10 KB`: `82`
+- Files `>350 LOC`: `10`
+- Files exceeding both thresholds: `10`
 
 Layer distribution for files `>10 KB`:
 
-- `infrastructure`: `42`
 - `application`: `31`
-- `composition`: `12`
+- `infrastructure`: `28`
+- `composition`: `13`
 - `domain`: `6`
 - `interfaces`: `4`
 
 Layer distribution for files `>350 LOC`:
 
-- `infrastructure`: `12`
+- `infrastructure`: `5`
 - `application`: `3`
 - `interfaces`: `2`
 - `composition`: `0`
@@ -108,7 +108,7 @@ There is no matching default duplication target for `src/bioetl/composition` or 
 
 ### Composition
 
-- `R0801` occurrences counted from the scan output: `28`
+- `R0801` occurrences counted from the scan output: `31`
 - Representative duplicate clusters:
   - `composition._services` vs `composition.services_api`
   - `composition.providers._creation` vs `composition.providers.provider_registry`

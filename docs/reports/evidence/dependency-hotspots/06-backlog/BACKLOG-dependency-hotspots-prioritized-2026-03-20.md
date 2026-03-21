@@ -1,10 +1,12 @@
 # Prioritized Hotspot Backlog
 
-Date: 2026-03-20  
+Date: 2026-03-21
 Status: Proposed  
 Source pillar: `dependency-hotspots`
 
 This backlog turns the current hotspot evidence into an execution-oriented queue. It follows the proposed prioritization model:
+
+Historical note: the current hotspot snapshot has since shifted to 82 files above 10 KB and 10 files above 350 LOC, with the repeat overlap tail centered on `src/bioetl/interfaces/cli/commands`. The wave ordering below is preserved as a historical backlog artifact, not a live current-state queue.
 
 1. Start with overlap hotspots (`>10 KB` and `>350 LOC`).
 2. Use dependency-pressure seams as escalation and tie-break rules.

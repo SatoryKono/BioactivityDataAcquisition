@@ -1,10 +1,12 @@
 # DEC-HOTSPOT Proposed Decision Draft
 
-Date: 2026-03-20  
+Date: 2026-03-21
 Status: Proposed  
 Scope: `dependency-hotspots`
 
 This draft converts the hotspot synthesis into a concrete decision package. It does not mark any option as accepted yet; it makes the next prioritization step explicit.
+
+Note: the current hotspot snapshot has since changed to 82 files above 10 KB and 10 files above 350 LOC, with the repeat overlap tail centered on `src/bioetl/interfaces/cli/commands` rather than `src/bioetl/infrastructure/adapters`. Treat the wave ordering below as historical draft context, not a live baseline.
 
 ## Decision Package Summary
 

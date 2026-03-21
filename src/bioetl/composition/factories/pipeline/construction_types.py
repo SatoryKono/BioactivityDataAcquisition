@@ -36,3 +36,12 @@ class ContractPolicyLoader(Protocol):
     def __call__(self, provider: str, entity: str) -> ContractPolicyPort:
         """Load contract policy for provider/entity."""
         ...
+
+
+class _SchemaBuilder(Protocol):
+    """Protocol for schema classes that can materialize a runtime schema."""
+
+    @classmethod
+    def to_schema(cls) -> object:
+        """Materialize schema representation."""
+        ...

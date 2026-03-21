@@ -1,5 +1,7 @@
 # Provider Registry Runtime Ownership Evidence Summary
 
+Примечание о rebaseline: the runtime seam is still the correct stopping point for the current repo state; no new caller-driven case for explicit runtime instance ownership has emerged.
+
 ## Question
 
 Do runtime/bootstrap paths still need explicit `ProviderRegistry` instance
@@ -26,7 +28,7 @@ ownership, or is the current named runtime bootstrap seam already sufficient?
    lifecycle and bootstrap ordering, not natural owners of `ProviderRegistry`
    instance lifecycle.
 
-## Current Interpretation Boundary
+## Текущая интерпретация Boundary
 
 This evidence pack supports a conservative interpretation:
 

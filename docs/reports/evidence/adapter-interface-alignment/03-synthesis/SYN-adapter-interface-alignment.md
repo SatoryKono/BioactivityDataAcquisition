@@ -1,5 +1,7 @@
 # Synthesis: adapter-interface-alignment
 
+Rebaseline note: the seam alignment pressure points remain current, so this synthesis still describes the active adapter-construction contract tension.
+
 ## Executive Summary
 
 - The strongest existing interface contract is the `data_source_creator` seam: it is protocol-typed, covered by composition tests, and already centralizes HTTP helper assembly for bibliographic providers. (EV-adapter-alignment-biblio-data-source-creators-centralize-helper-wiring, EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface)

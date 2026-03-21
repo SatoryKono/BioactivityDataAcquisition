@@ -1,9 +1,15 @@
-# Evidence Collection Complete: refactor-backlog-calibration
+# Сбор evidence завершён: refactor-backlog-calibration
 
-**Evidence Objects Created:** 6  
-**Gate Status:** PASSED
+**Создано объектов evidence:** 6  
+**Gate Статус:** PASSED
 
-## Evidence Summary
+## Интерпретация верхнего уровня
+
+- Формальная cross-pack интерпретация теперь находится в [03-synthesis/CROSS-SYNTHESIS.md](./03-synthesis/CROSS-SYNTHESIS.md).
+- Принятая planning-позиция теперь находится в [04-decisions/DECISIONS.yaml](./04-decisions/DECISIONS.yaml).
+- Активные planning-риски теперь находятся в [05-risks/RISKS.yaml](./05-risks/RISKS.yaml).
+
+## Сводка evidence
 
 | ID | Claim Summary | Confidence |
 |----|---------------|------------|
@@ -14,7 +20,7 @@
 | EV-refactor-backlog-provider-registry-runtime-ownership-remains-a-deferred-watchpoint | RF-07 is still best treated as deferred until a new natural runtime owner appears. | 0.95 |
 | EV-refactor-backlog-active-implementation-work-now-concentrates-on-rf01-and-rf04 | The active implementation queue now concentrates on RF-01 and RF-04. | 0.89 |
 
-## Key Findings
+## Ключевые выводы
 
 - The old “remaining tasks” list is stale relative to the current codebase.
 - `RF-01` is now a one-gate cleanup task: refresh and validate the scripts inventory manifest.
@@ -22,7 +28,7 @@
 - `RF-06` no longer reads as an implementation refactor. The current code and docs already make the project’s position explicit.
 - `RF-07` is supported as a deferred/watchlist item, not as active implementation work.
 
-## Updated Remaining Tasks
+## Обновлённые оставшиеся задачи
 
 1. **RF-01 — Finish governance baseline**
    Scope now: `scripts inventory` only.
@@ -43,12 +49,12 @@
 4. **RF-07 — Keep deferred**
    Reopen only if a new runtime caller naturally owns explicit `ProviderRegistry` instance lifecycle.
 
-## Contradictions Noted
+## Отмеченные противоречия
 
 - Historical planning treated `RF-06` and `RF-07` as active implementation work; current code/test/governance evidence no longer supports that framing.
 - `registration_biblio.py` was previously grouped with open composition hotspots, but current evidence places it behind stronger confinement and direct unit coverage than the remaining open assembly hubs.
 
-## Gaps Remaining
+## Оставшиеся пробелы
 
 - This calibration does not measure churn or defect density for the composition hotspots; it only recalibrates the backlog against the present code, tests, and guardrails.
 - Inventory drift is confirmed, but this evidence set does not yet enumerate the exact manifest delta that must be updated.

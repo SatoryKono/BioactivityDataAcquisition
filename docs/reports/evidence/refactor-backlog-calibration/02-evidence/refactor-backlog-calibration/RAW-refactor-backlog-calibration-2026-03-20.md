@@ -1,6 +1,6 @@
 # Raw Evidence: refactor-backlog-calibration
 
-**Date:** 2026-03-20
+**Date:** 2026-03-21
 
 ## Commands
 
@@ -75,4 +75,3 @@ src/bioetl/composition/bootstrap/runtime/pipeline.py:64:    ensure_providers_loa
 - `docs/reports/evidence/provider-registry-runtime-ownership/SUMMARY.md`
 - `docs/00-project/RULES.md`
 - `docs/02-architecture/01-domain-layer.md`
-

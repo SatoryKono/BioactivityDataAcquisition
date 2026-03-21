@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+from importlib import import_module
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers._creation import ProviderCreator
@@ -10,7 +11,6 @@ from bioetl.composition.providers._default_registry import (
     DefaultRegistryMethod,
     ProvidersDescriptor,
 )
-from bioetl.composition.providers._loading import ensure_provider_registry_loaded
 from bioetl.composition.providers._models import (
     AdapterCreator,
     DataSourceCreatorProtocol,
@@ -41,6 +41,12 @@ __all__ = [
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
 
+def _ensure_registry_loaded(registry: ProviderRegistry) -> None:
+    """Late-bind registry loading to avoid hard import coupling into providers."""
+    loading_module = import_module("bioetl.composition.providers._loading")
+    loading_module.ensure_provider_registry_loaded(registry)
+
+
 class ProviderRegistry:
     """Unified data provider registry (thread-safe, instance-scoped)."""
 
@@ -65,7 +71,7 @@ class ProviderRegistry:
     @classmethod
     def ensure_loaded(cls) -> None:
         """Ensure provider registrations are loaded into the registry."""
-        ensure_provider_registry_loaded(cls._get_default())
+        _ensure_registry_loaded(cls._get_default())
 
     @DefaultRegistryMethod
     def register(self, name: str, config: ProviderConfig) -> None:
@@ -224,7 +230,7 @@ def register_default_provider_config(name: str, config: ProviderConfig) -> None:
 
 def ensure_provider_registry_ready(registry: ProviderRegistry) -> ProviderRegistry:
     """Ensure a provider registry instance is populated before use."""
-    ensure_provider_registry_loaded(registry)
+    _ensure_registry_loaded(registry)
     return registry
 
 

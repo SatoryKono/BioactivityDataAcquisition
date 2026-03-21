@@ -3,7 +3,7 @@ pillar: refactor-backlog-calibration
 source:
   type: experiment
   ref: "docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/RAW-refactor-backlog-calibration-2026-03-20.md; tests/unit/composition/factories/services/test_pipeline_builder_batch_executor.py; tests/unit/composition/factories/services/test_pipeline_record_processor_builder.py; tests/architecture/test_composite_cli_runtime_config_boundaries.py"
-  retrieved_at: 2026-03-20
+  retrieved_at: 2026-03-21
 claim: "The remaining RF-04 implementation pressure is concentrated in `pipeline_builder.py` (271 LOC) and `composite_support_service_builders.py` (226 LOC), not in generic provider registration. Both seams are already test-protected, which means the next work should be decomposition-by-seam rather than more baseline testing."
 quote: "271 src/bioetl/composition/factories/services/pipeline_builder.py ... 226 src/bioetl/composition/bootstrap/runtime/composite_support_service_builders.py"
 confidence: 0.92
@@ -17,4 +17,3 @@ tags:
   - composite-runtime
   - hotspots
   - rf-04
-

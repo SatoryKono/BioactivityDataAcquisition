@@ -3,7 +3,7 @@ pillar: refactor-backlog-calibration
 source:
   type: internal-doc
   ref: "docs/00-project/RULES.md; docs/02-architecture/01-domain-layer.md; src/bioetl/domain/context.py; tests/architecture/test_domain_public_api.py; tests/unit/domain/test_pipeline_context.py"
-  retrieved_at: 2026-03-20
+  retrieved_at: 2026-03-21
 claim: "Current project policy and code already settle the two disputed RF-06 questions: runtime-oriented cross-layer contracts intentionally remain in `bioetl.domain.ports`, and `PipelineContext` is treated as the normative execution context rather than a misplaced infrastructure object."
 quote: "\"Runtime-oriented contracts remain sanctioned facade exports.\" and \"`PipelineContext` остаётся нормативным execution context\""
 confidence: 0.96
@@ -17,4 +17,3 @@ tags:
   - pipeline-context
   - rf-06
   - architecture-policy
-

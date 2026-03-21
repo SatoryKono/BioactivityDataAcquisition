@@ -19,8 +19,10 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
-    from bioetl.infrastructure.adapters.crossref.batch import (
+    from bioetl.infrastructure.adapters.crossref._doi_batch_processor import (
         DoiBatchProcessor,
+    )
+    from bioetl.infrastructure.adapters.crossref._search_paginator import (
         SearchPaginator,
     )
 

@@ -3,7 +3,7 @@ pillar: refactor-backlog-calibration
 source:
   type: internal-doc
   ref: "docs/reports/evidence/provider-registry-runtime-ownership/SUMMARY.md; tests/architecture/test_registry_contracts.py; tests/architecture/test_compatibility_freeze_guards.py; docs/reports/evidence/refactor-backlog-calibration/02-evidence/refactor-backlog-calibration/RAW-refactor-backlog-calibration-2026-03-20.md"
-  retrieved_at: 2026-03-20
+  retrieved_at: 2026-03-21
 claim: "Current code and guardrails still support deferring RF-07 as active implementation work: runtime/bootstrap paths already use the named provider bootstrap seam, and existing registry evidence does not show a concrete caller that naturally owns explicit runtime `ProviderRegistry` instance lifecycle."
 quote: "\"The current named runtime bootstrap seam appears sufficient for the present runtime architecture.\""
 confidence: 0.95
@@ -17,4 +17,3 @@ tags:
   - watchlist
   - rf-07
   - composition
-

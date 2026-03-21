@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol, cast
+from typing import Any, cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
@@ -23,15 +23,6 @@ from bioetl.infrastructure.config.contract_policy_validation import (
 from bioetl.infrastructure.config.contract_policy_validation import (
     validate_pipeline_contract_policy as _validate_pipeline_contract_policy_impl,
 )
-
-
-class _SchemaBuilder(Protocol):
-    """Compatibility protocol retained for nearby composition assembly helpers."""
-
-    @classmethod
-    def to_schema(cls) -> object:
-        """Materialize schema representation."""
-        ...
 
 
 def _schema_columns(
