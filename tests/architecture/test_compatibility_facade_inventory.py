@@ -16,15 +16,15 @@ REGISTRY_YAML = ROOT / "configs" / "quality" / "compatibility_facade_inventory.y
 INVENTORY_DOC = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
 )
-SNAPSHOT_DOC = (
-    ROOT / "docs" / "02-architecture" / "07-compatibility-facade-snapshot.md"
-)
+SNAPSHOT_DOC = ROOT / "docs" / "02-architecture" / "07-compatibility-facade-snapshot.md"
 HISTORY_DOC = (
-    ROOT / "docs" / "02-architecture" / "history" / "compatibility-facade-review-history.md"
+    ROOT
+    / "docs"
+    / "02-architecture"
+    / "history"
+    / "compatibility-facade-review-history.md"
 )
-SNAPSHOT_SCRIPT = (
-    ROOT / "scripts" / "qa" / "generate_compatibility_facade_snapshot.py"
-)
+SNAPSHOT_SCRIPT = ROOT / "scripts" / "qa" / "generate_compatibility_facade_snapshot.py"
 COMPOSITION_DOC = ROOT / "docs" / "02-architecture" / "05-composition-layer.md"
 REGISTRY_GUIDE = ROOT / "docs" / "03-guides" / "registry-pattern.md"
 INVENTORY_ROW_CELL_COUNT = 10
@@ -103,9 +103,7 @@ def test_registry_yaml_has_expected_shape() -> None:
         assert row.reason
         assert date.fromisoformat(row.review_date).year >= 2026
         assert row.new_code_policy in mod.ALLOWED_MEASURED_ONLY_NEW_CODE_POLICIES
-        assert (
-            row.promotion_trigger in mod.ALLOWED_MEASURED_ONLY_PROMOTION_TRIGGERS
-        )
+        assert row.promotion_trigger in mod.ALLOWED_MEASURED_ONLY_PROMOTION_TRIGGERS
 
 
 @pytest.mark.architecture
@@ -191,9 +189,7 @@ def test_inventory_doc_tables_match_yaml_registry() -> None:
         assert _normalize(doc_row["allowed_call_sites"]) == _normalize(
             row.allowed_call_sites
         )
-        assert _normalize(doc_row["migration_path"]) == _normalize(
-            row.migration_path
-        )
+        assert _normalize(doc_row["migration_path"]) == _normalize(row.migration_path)
         assert _normalize(doc_row["exit_criteria"]) == _normalize(row.exit_criteria)
 
 
@@ -241,12 +237,12 @@ def test_measured_only_allowlist_matches_docstring_scan() -> None:
 def test_inventory_doc_links_snapshot_and_history() -> None:
     """Operational doc must point to the generated snapshot and the history doc."""
     text = INVENTORY_DOC.read_text(encoding="utf-8")
-    assert (
-        "07-compatibility-facade-snapshot.md" in text
-    ), "Inventory doc must link the generated snapshot companion."
-    assert (
-        "history/compatibility-facade-review-history.md" in text
-    ), "Inventory doc must link the extracted history doc."
+    assert "07-compatibility-facade-snapshot.md" in text, (
+        "Inventory doc must link the generated snapshot companion."
+    )
+    assert "history/compatibility-facade-review-history.md" in text, (
+        "Inventory doc must link the extracted history doc."
+    )
     assert HISTORY_DOC.exists(), "Missing compatibility facade history doc."
 
 

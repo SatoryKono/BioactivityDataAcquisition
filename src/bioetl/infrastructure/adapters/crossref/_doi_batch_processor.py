@@ -189,4 +189,3 @@ class DoiBatchProcessor:
             )
             async for publication in self._fallback_individual_fetch(dois):
                 yield publication
-

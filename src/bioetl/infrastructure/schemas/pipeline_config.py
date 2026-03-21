@@ -212,9 +212,13 @@ class PipelineYamlConfig(BaseModel):
     @model_validator(mode="after")
     def validate_entity_type_canonical(self) -> PipelineYamlConfig:
         """Validate that publication entities use canonical names."""
-        from bioetl.domain.registry.publication import validate_publication_entity_type
+        from bioetl.domain.registry.publication import (
+            get_publication_entity_type_validation_error,
+        )
 
-        error_msg = validate_publication_entity_type(self.entity_type, self.provider)
+        error_msg = get_publication_entity_type_validation_error(
+            self.entity_type, self.provider
+        )
         if error_msg:
             raise ValueError(error_msg)
         return self

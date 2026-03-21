@@ -21,10 +21,10 @@ from bioetl.domain.registry.publication import (
     LEGACY_PUBLICATION_ALIASES,
     PUBLICATION_ENTITY_TYPES,
     PublicationMapping,
+    get_publication_entity_type_validation_error,
     get_publication_mapping,
     is_legacy_publication_alias,
     is_publication_entity,
-    validate_publication_entity_type,
 )
 
 __all__ = [
@@ -36,8 +36,8 @@ __all__ = [
     "get_alias_map_for_provider",
     "get_canonical_name",
     "get_provider_field",
+    "get_publication_entity_type_validation_error",
     "get_publication_mapping",
     "is_legacy_publication_alias",
     "is_publication_entity",
-    "validate_publication_entity_type",
 ]

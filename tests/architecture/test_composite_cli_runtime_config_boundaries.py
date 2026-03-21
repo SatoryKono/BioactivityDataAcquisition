@@ -75,7 +75,9 @@ def test_composite_support_service_builders_stays_facade_only(src_dir: Path) -> 
         for node in ast.walk(tree)
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     ]
-    class_defs = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+    class_defs = [
+        node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
+    ]
 
     assert not function_defs, (
         "composite_support_service_builders.py must stay a facade-only module. "

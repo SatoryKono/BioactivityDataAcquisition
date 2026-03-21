@@ -12,10 +12,10 @@ from bioetl.domain.registry.publication import (
     LEGACY_PUBLICATION_ALIASES,
     PUBLICATION_ENTITY_TYPES,
     PublicationMapping,
+    get_publication_entity_type_validation_error,
     get_publication_mapping,
     is_legacy_publication_alias,
     is_publication_entity,
-    validate_publication_entity_type,
 )
 
 
@@ -219,24 +219,26 @@ class TestIsLegacyPublicationAlias:
         assert is_legacy_publication_alias(entity_type) is False
 
 
-class TestValidatePublicationEntityType:
-    """Tests for validate_publication_entity_type function."""
+class TestGetPublicationEntityTypeValidationError:
+    """Tests for message-returning publication entity-type validation."""
 
     def test_validate_canonical_publication_chembl(self) -> None:
         """Should pass validation for canonical 'publication' with chembl provider."""
-        error = validate_publication_entity_type("publication", "chembl")
+        error = get_publication_entity_type_validation_error("publication", "chembl")
 
         assert error is None
 
     def test_validate_canonical_publication_similarity_chembl(self) -> None:
         """Should pass validation for canonical 'publication_similarity' with chembl."""
-        error = validate_publication_entity_type("publication_similarity", "chembl")
+        error = get_publication_entity_type_validation_error(
+            "publication_similarity", "chembl"
+        )
 
         assert error is None
 
     def test_validate_legacy_document_chembl_fails(self) -> None:
         """Should fail validation for legacy 'document' with chembl provider."""
-        error = validate_publication_entity_type("document", "chembl")
+        error = get_publication_entity_type_validation_error("document", "chembl")
 
         assert error is not None
         assert "publication" in error
@@ -245,7 +247,9 @@ class TestValidatePublicationEntityType:
 
     def test_validate_legacy_document_similarity_chembl_fails(self) -> None:
         """Should fail validation for legacy 'document_similarity' with chembl."""
-        error = validate_publication_entity_type("document_similarity", "chembl")
+        error = get_publication_entity_type_validation_error(
+            "document_similarity", "chembl"
+        )
 
         assert error is not None
         assert "publication_similarity" in error
@@ -253,7 +257,7 @@ class TestValidatePublicationEntityType:
 
     def test_validate_legacy_document_term_chembl_fails(self) -> None:
         """Should fail validation for legacy 'document_term' with chembl."""
-        error = validate_publication_entity_type("document_term", "chembl")
+        error = get_publication_entity_type_validation_error("document_term", "chembl")
 
         assert error is not None
         assert "publication_term" in error
@@ -262,13 +266,13 @@ class TestValidatePublicationEntityType:
     def test_validate_non_chembl_provider_skips_validation(self) -> None:
         """Should skip validation for non-chembl providers."""
         # document is allowed for other providers (may have different meaning)
-        error = validate_publication_entity_type("document", "pubmed")
+        error = get_publication_entity_type_validation_error("document", "pubmed")
 
         assert error is None
 
     def test_validate_non_publication_entity(self) -> None:
         """Should pass validation for non-publication entities."""
-        error = validate_publication_entity_type("activity", "chembl")
+        error = get_publication_entity_type_validation_error("activity", "chembl")
 
         assert error is None
 

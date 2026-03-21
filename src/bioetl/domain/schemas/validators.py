@@ -41,13 +41,13 @@ __all__ = [
 
 
 def is_valid_json(series: pd.Series) -> pd.Series:
-    """Check that non-null values are valid JSON.
+    """Return a boolean Series for non-null values that are valid JSON.
 
     Args:
         series: Pandas Series to validate.
 
     Returns:
-        Boolean Series indicating validity.
+        Boolean Series indicating row-wise validity.
     """
 
     def check(val: object) -> bool:
@@ -71,13 +71,13 @@ def is_valid_json(series: pd.Series) -> pd.Series:
 
 
 def is_valid_json_array(series: pd.Series) -> pd.Series:
-    """Check that non-null values are valid JSON arrays.
+    """Return a boolean Series for non-null values that are valid JSON arrays.
 
     Args:
         series: Pandas Series to validate.
 
     Returns:
-        Boolean Series indicating validity.
+        Boolean Series indicating row-wise validity.
     """
 
     def check(val: object) -> bool:
@@ -101,13 +101,13 @@ def is_valid_json_array(series: pd.Series) -> pd.Series:
 
 
 def is_valid_json_object(series: pd.Series) -> pd.Series:
-    """Check that non-null values are valid JSON objects.
+    """Return a boolean Series for non-null values that are valid JSON objects.
 
     Args:
         series: Pandas Series to validate.
 
     Returns:
-        Boolean Series indicating validity.
+        Boolean Series indicating row-wise validity.
     """
 
     def check(val: object) -> bool:
@@ -158,7 +158,7 @@ def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd
         min_value: When True (from is_non_negative=True), defaults to 0.
 
     Returns:
-        True if the condition is met, False otherwise.
+        Boolean Series indicating which rows satisfy the constraint.
     """
     # When used as is_non_negative=True, min_value comes in as True
     actual_min = 0 if min_value is True else min_value
@@ -180,7 +180,7 @@ def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Serie
         min_value: When True (from is_positive=True), defaults to 1.
 
     Returns:
-        True if the condition is met, False otherwise.
+        Boolean Series indicating which rows satisfy the constraint.
     """
     # When used as is_positive=True, min_value comes in as True
     actual_min = 1 if min_value is True else min_value

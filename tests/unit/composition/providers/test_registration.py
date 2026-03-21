@@ -176,7 +176,9 @@ class TestRegisterAllProviders:
         assert registry.is_registered("chembl")
         assert not ProviderRegistry.is_registered("chembl")
 
-    @patch("bioetl.composition.providers.registration.resolve_provider_assembly_support")
+    @patch(
+        "bioetl.composition.providers.registration.resolve_provider_assembly_support"
+    )
     @patch("bioetl.composition.providers.registration._get_bio_provider_configs")
     @patch("bioetl.composition.providers.registration._get_biblio_provider_configs")
     def test_builds_default_assembly_support_bound_to_explicit_registry(

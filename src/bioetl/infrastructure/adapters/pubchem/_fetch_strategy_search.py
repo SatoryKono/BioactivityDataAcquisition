@@ -19,7 +19,9 @@ from bioetl.infrastructure.adapters.pubchem.query_builder import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlowService
+    from bioetl.infrastructure.adapters.pubchem.fetch_flow import (
+        PubChemFetchFlowService,
+    )
     from bioetl.infrastructure.adapters.pubchem.response_mapper import (
         PubChemResponseMapper,
     )

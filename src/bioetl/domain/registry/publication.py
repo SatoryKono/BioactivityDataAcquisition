@@ -7,11 +7,11 @@ from bioetl.domain.registry.publication_data import (
     LEGACY_PUBLICATION_ALIASES,
     PUBLICATION_ENTITY_TYPES,
     get_dedup_key_fields,
+    get_publication_entity_type_validation_error,
     get_publication_mapping,
     has_composite_key,
     is_legacy_publication_alias,
     is_publication_entity,
-    validate_publication_entity_type,
 )
 from bioetl.domain.registry.publication_models import PublicationMapping
 
@@ -21,9 +21,9 @@ __all__ = [
     "PUBLICATION_ENTITY_TYPES",
     "PublicationMapping",
     "get_dedup_key_fields",
+    "get_publication_entity_type_validation_error",
     "get_publication_mapping",
     "has_composite_key",
     "is_legacy_publication_alias",
     "is_publication_entity",
-    "validate_publication_entity_type",
 ]

@@ -19,7 +19,6 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 __all__ = [
     "BatchRunResult",
     "RunAllExecutionPlan",
-    "create_run_all_execution_plan",
     "create_run_all_options",
     "determine_batch_exit_code",
     "echo_batch_summary",
@@ -31,6 +30,7 @@ __all__ = [
     "handle_destructive_confirmation",
     "record_pipeline_failure",
     "record_pipeline_result",
+    "resolve_run_all_execution_plan",
     "resolve_run_all_registry",
     "should_prompt_for_destructive_run",
     "validate_provider",
@@ -144,7 +144,7 @@ def create_run_all_options(
     )
 
 
-def create_run_all_execution_plan(
+def resolve_run_all_execution_plan(
     *,
     source: str,
     run_type: str,

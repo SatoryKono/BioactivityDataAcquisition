@@ -460,8 +460,9 @@ class TestContractTestingGovernance:
                 "pubmed",
                 "crossref",
                 "openalex",
+                "semanticscholar",
             ],
-            "pilot_providers": ["semanticscholar"],
+            "pilot_providers": [],
             "vcr_only_providers": [],
         }
         assert contract_testing["provider_live_api"]["chembl"] == "enforced"
@@ -470,7 +471,7 @@ class TestContractTestingGovernance:
         assert contract_testing["provider_live_api"]["pubmed"] == "enforced"
         assert contract_testing["provider_live_api"]["crossref"] == "enforced"
         assert contract_testing["provider_live_api"]["openalex"] == "enforced"
-        assert contract_testing["provider_live_api"]["semanticscholar"] == "pilot"
+        assert contract_testing["provider_live_api"]["semanticscholar"] == "enforced"
 
         assert 'BIOETL_LIVE_API_TESTS: "true"' in workflow
         assert 'BIOETL_NETWORK_TESTS: "true"' in workflow

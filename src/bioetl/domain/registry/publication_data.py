@@ -11,11 +11,11 @@ __all__ = [
     "LEGACY_PUBLICATION_ALIASES",
     "PUBLICATION_ENTITY_TYPES",
     "get_dedup_key_fields",
+    "get_publication_entity_type_validation_error",
     "get_publication_mapping",
     "has_composite_key",
     "is_legacy_publication_alias",
     "is_publication_entity",
-    "validate_publication_entity_type",
 ]
 
 _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
@@ -149,15 +149,18 @@ def has_composite_key(entity_type: str) -> bool:
     return fields is not None and len(fields) > 1
 
 
-def validate_publication_entity_type(entity_type: str, provider: str) -> str | None:
-    """Validate publication entity type in YAML configs.
+def get_publication_entity_type_validation_error(
+    entity_type: str, provider: str
+) -> str | None:
+    """Return the publication entity-type policy error for YAML configs.
 
     Args:
         entity_type: Entity type name from YAML config.
         provider: Provider name (only 'chembl' is subject to validation).
 
     Returns:
-        Error message string if entity type is a disallowed legacy alias, None if valid.
+        Error message string if entity type is a disallowed legacy alias, None when
+        the entity type is allowed for the given provider.
     """
     if provider != "chembl":
         return None
