@@ -15,6 +15,11 @@ import importlib
 from pydantic import BaseModel, ConfigDict, Field
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.crossref._response_models import (
+    CrossRefMessage,
+    CrossRefPublicationResponse,
+    CrossRefPublicationsResponse,
+)
 from bioetl.infrastructure.adapters.crossref.models_shared import (
     CrossRefAssertion,
     CrossRefAuthor,
@@ -240,11 +245,3 @@ CROSSREF_RECORD_MODELS: dict[str, type[BaseModel]] = {
     "publication": CrossRefPublicationRecord,
 }
 
-# Load response wrappers only after CrossRefPublicationRecord exists so the
-# wrapper module can safely resolve the record class during import.
-_response_models = importlib.import_module(
-    "bioetl.infrastructure.adapters.crossref._response_models"
-)
-CrossRefMessage = _response_models.CrossRefMessage
-CrossRefPublicationResponse = _response_models.CrossRefPublicationResponse
-CrossRefPublicationsResponse = _response_models.CrossRefPublicationsResponse
