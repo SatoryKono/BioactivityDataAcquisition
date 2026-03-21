@@ -42,6 +42,12 @@ from bioetl.infrastructure.config.config_ci_contract import (
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
+import sys
+
+# Ensure scripts can be imported during tests per memory instruction
+if str(Path(__file__).parent.parent.parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from scripts.schema import check_config_invariants as invariant_script
 from scripts.schema.validate_pipeline_configs import _canonical_script
 
