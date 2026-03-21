@@ -63,6 +63,7 @@ class TestHealthClassification:
     live_contract_enforced_provider_count: int
     live_contract_pilot_provider_count: int
     live_contract_vcr_only_provider_count: int
+    skip_classes: tuple[tuple[str, int], ...]
     staged_rollout_flags: tuple[str, ...]
 
     def as_dict(self) -> dict[str, object]:
@@ -82,6 +83,7 @@ class TestHealthClassification:
             "live_contract_vcr_only_provider_count": (
                 self.live_contract_vcr_only_provider_count
             ),
+            "skip_classes": dict(self.skip_classes),
             "staged_rollout_flags": list(self.staged_rollout_flags),
         }
 
@@ -352,9 +354,30 @@ def _build_test_health_payload(
     short_label = status_entry.get("short_label")
     definition = status_entry.get("definition")
     merge_semantics = status_entry.get("merge_semantics")
+    skip_classes_taxonomy = taxonomy.get("skip_classes", {})
+    skip_classes_detail: list[dict[str, object]] = []
+    if isinstance(skip_classes_taxonomy, dict):
+        for skip_class, count in classification.skip_classes:
+            raw_entry = skip_classes_taxonomy.get(skip_class, {})
+            entry = raw_entry if isinstance(raw_entry, dict) else {}
+            label = entry.get("short_label")
+            class_definition = entry.get("definition")
+            skip_classes_detail.append(
+                {
+                    "id": skip_class,
+                    "count": count,
+                    "short_label": label if isinstance(label, str) else skip_class,
+                    "definition": (
+                        class_definition
+                        if isinstance(class_definition, str)
+                        else skip_class
+                    ),
+                }
+            )
 
     return {
         **classification.as_dict(),
+        "skip_classes_detail": skip_classes_detail,
         "classification_mode": taxonomy.get("classification_mode", "informational"),
         "merge_blocking_source": taxonomy.get(
             "merge_blocking_source", "ci_pass_fail_and_quality_gate"
@@ -406,6 +429,29 @@ def _staged_rollout_flags(test_matrix: dict[str, object]) -> tuple[str, ...]:
     return tuple(flags)
 
 
+def _build_skip_classes(
+    architecture_stats: ArchitectureTestStats,
+    *,
+    network_opt_in_required: bool,
+    live_api_gate_mode: str,
+    pilot_providers: list[str],
+    vcr_only_providers: list[str],
+) -> tuple[tuple[str, int], ...]:
+    """Return stable grouped skip/conditional-confidence buckets."""
+    classes: list[tuple[str, int]] = []
+    if architecture_stats.skipped > 0:
+        classes.append(("architecture_suite_skips", architecture_stats.skipped))
+    if network_opt_in_required:
+        classes.append(("live_network_opt_in_gate", 1))
+    if live_api_gate_mode and live_api_gate_mode != "always":
+        classes.append(("live_api_gate_mode_non_always", 1))
+    if pilot_providers:
+        classes.append(("pilot_provider_count", len(pilot_providers)))
+    if vcr_only_providers:
+        classes.append(("vcr_only_provider_count", len(vcr_only_providers)))
+    return tuple(classes)
+
+
 def _classify_test_health(
     architecture_stats: ArchitectureTestStats,
     test_matrix: dict[str, object],
@@ -439,6 +485,13 @@ def _classify_test_health(
             vcr_only_providers = _string_list(baseline.get("vcr_only_providers"))
 
     staged_flags = _staged_rollout_flags(test_matrix)
+    skip_classes = _build_skip_classes(
+        architecture_stats,
+        network_opt_in_required=network_opt_in_required,
+        live_api_gate_mode=live_api_gate_mode,
+        pilot_providers=pilot_providers,
+        vcr_only_providers=vcr_only_providers,
+    )
 
     reasons: list[str] = []
     if not suite_green:
@@ -455,6 +508,7 @@ def _classify_test_health(
             live_contract_enforced_provider_count=len(enforced_providers),
             live_contract_pilot_provider_count=len(pilot_providers),
             live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
 
@@ -490,6 +544,7 @@ def _classify_test_health(
             live_contract_enforced_provider_count=len(enforced_providers),
             live_contract_pilot_provider_count=len(pilot_providers),
             live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
 
@@ -506,6 +561,7 @@ def _classify_test_health(
             live_contract_enforced_provider_count=len(enforced_providers),
             live_contract_pilot_provider_count=len(pilot_providers),
             live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
 
@@ -521,6 +577,7 @@ def _classify_test_health(
         live_contract_enforced_provider_count=len(enforced_providers),
         live_contract_pilot_provider_count=len(pilot_providers),
         live_contract_vcr_only_provider_count=len(vcr_only_providers),
+        skip_classes=skip_classes,
         staged_rollout_flags=staged_flags,
     )
 
@@ -743,6 +800,18 @@ def main() -> int:
             ),
             f"- architecture_skipped: `{test_health.architecture_skip_count}`",
             (
+                "- test_health_skip_classes: `"
+                + (
+                    ", ".join(
+                        f"{item['short_label']}={item['count']}"
+                        for item in test_health_payload["skip_classes_detail"]
+                    )
+                    if test_health_payload["skip_classes_detail"]
+                    else "none"
+                )
+                + "`"
+            ),
+            (
                 "- staged_rollout_flags: `"
                 + (
                     ", ".join(test_health.staged_rollout_flags)
@@ -781,6 +850,7 @@ def main() -> int:
         f"test_health={test_health.status}; "
         f"test_health_semantics={test_health_payload['merge_semantics']}; "
         f"arch_skipped={test_health.architecture_skip_count}; "
+        f"skip_classes={len(test_health.skip_classes)}; "
         f"live_enforced={test_health.live_contract_enforced_provider_count}; "
         f"live_pilot={test_health.live_contract_pilot_provider_count}; "
         f"live_vcr_only={test_health.live_contract_vcr_only_provider_count}; "

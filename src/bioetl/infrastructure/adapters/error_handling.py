@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -11,6 +10,13 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.ports import ErrorClassifierPort, NoOpMetrics
 from bioetl.domain.types import ErrorType, JsonDict
+from bioetl.infrastructure.adapters._error_handling_support import (
+    AdapterErrorContext,
+    build_adapter_error_context,
+    emit_error_telemetry,
+    extract_retry_after,
+    safe_optional_str,
+)
 from bioetl.infrastructure.adapters.adapter_error_classifier import (
     AdapterErrorClassifier,
     ErrorCategory,
@@ -24,31 +30,6 @@ if TYPE_CHECKING:
     from httpx import Response
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
-
-
-_ERROR_CONTEXT_RESERVED_KEYS = frozenset(
-    {
-        "status_code",
-        "retry_count",
-        "circuit_breaker_state",
-        "retry_after",
-    }
-)
-
-
-@dataclass
-class AdapterErrorContext:
-    """Structured context carried through adapter error handling flow."""
-
-    provider: str
-    operation: str
-    status_code: int | None = None
-    retry_count: int = 0
-    circuit_breaker_state: str | None = None
-    error_type: ErrorType | None = None
-    error_category: ErrorCategory | None = None
-    retry_after: float | None = None
-    extra: JsonDict = field(default_factory=dict)  # Any: untyped API JSON record
 
 
 class ErrorService:
@@ -129,7 +110,7 @@ class ErrorService:
         error_category = self._resolve_error_category(
             error=error, status_code=status_code
         )
-        error_context = self._build_error_context(
+        error_context = build_adapter_error_context(
             provider=provider,
             operation=operation,
             context=context,
@@ -137,7 +118,9 @@ class ErrorService:
             error_category=error_category,
             status_code=status_code,
         )
-        self._emit_error_telemetry(
+        emit_error_telemetry(
+            logger=self._logger,
+            metrics=self._metrics,
             provider=provider,
             operation=operation,
             error=error,
@@ -158,72 +141,6 @@ class ErrorService:
         return self._adapter_classifier.classify(
             error=error,
             status_code=status_code,
-        )
-
-    def _build_error_context(
-        self,
-        *,
-        provider: str,
-        operation: str,
-        context: JsonDict,  # Any: untyped API JSON record
-        error_type: ErrorType,
-        error_category: ErrorCategory,
-        status_code: int | None,
-    ) -> AdapterErrorContext:
-        """Build strongly typed adapter error context payload."""
-        return AdapterErrorContext(
-            provider=provider,
-            operation=operation,
-            status_code=status_code,
-            retry_count=context.get("retry_count", 0),
-            circuit_breaker_state=context.get("circuit_breaker_state"),
-            error_type=error_type,
-            error_category=error_category,
-            retry_after=context.get("retry_after"),
-            extra={
-                k: v
-                for k, v in context.items()
-                if k not in _ERROR_CONTEXT_RESERVED_KEYS
-            },
-        )
-
-    def _emit_error_telemetry(
-        self,
-        *,
-        provider: str,
-        operation: str,
-        error: Exception,
-        error_type: ErrorType,
-        error_category: ErrorCategory,
-        error_context: AdapterErrorContext,
-        status_code: int | None,
-    ) -> None:
-        """Emit error log and taxonomy counter in unified format."""
-        self._logger.error(
-            "external_api_error",
-            provider=provider,
-            operation=operation,
-            error_category=error_category.value,
-            error_type=error_type.value,
-            is_critical=error_type.is_critical(),
-            is_recoverable=error_type.is_recoverable(),
-            status_code=status_code,
-            retry_count=error_context.retry_count,
-            circuit_breaker_state=error_context.circuit_breaker_state,
-            retry_after=error_context.retry_after,
-            error=str(error),
-            error_class=type(error).__name__,
-            **error_context.extra,
-        )
-        self._metrics.increment_counter(
-            "adapter_error_taxonomy_total",
-            1,
-            {
-                "provider": provider,
-                "operation": operation,
-                "error_category": error_category.value,
-                "error_type": error_type.value,
-            },
         )
 
     def should_retry(self, error: Exception) -> bool:
@@ -275,16 +192,7 @@ class ErrorService:
         Returns:
             Retry-After value in seconds, or None if not present.
         """
-        retry_after = response.headers.get("Retry-After")
-        if retry_after is None:
-            return None
-
-        try:
-            # Try parsing as integer seconds
-            return float(retry_after)
-        except ValueError:
-            # Could be HTTP-date format, return default
-            return 60.0
+        return extract_retry_after(response)
 
     def wrap_error(
         self,
@@ -346,18 +254,10 @@ class ErrorService:
             provider=provider,
             status_code=error_context.status_code,
             retry_after=error_context.retry_after,
-            entity=_safe_optional_str(context.get("entity")),
-            pipeline=_safe_optional_str(context.get("pipeline")),
+            entity=safe_optional_str(context.get("entity")),
+            pipeline=safe_optional_str(context.get("pipeline")),
             operation=operation,
         )
-
-
-def _safe_optional_str(value: object) -> str | None:
-    """Return a string value or None for non-string/blank values."""
-    if not isinstance(value, str):
-        return None
-    stripped = value.strip()
-    return stripped or None
 
 
 __all__ = [

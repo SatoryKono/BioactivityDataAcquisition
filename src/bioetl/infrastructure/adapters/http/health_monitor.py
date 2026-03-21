@@ -29,6 +29,15 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.http._health_monitor_support import (
+    emit_health_check_observability,
+    emit_provider_health_metric,
+    emit_unhealthy_alert,
+    get_adaptive_params_for_status,
+    record_error_transition,
+    record_health_check_transition,
+    record_success_transition,
+)
 from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
 
 if TYPE_CHECKING:
@@ -146,22 +155,7 @@ class ProviderHealthMonitor:
             Current HealthStatus after recording success.
         """
         state = self.get_state(provider)
-        state.consecutive_errors = 0
-
-        # Check if 5 min window passed BEFORE updating last_success
-        # This allows DEGRADED → HEALTHY transition if enough time has passed
-        should_recover_to_healthy = (
-            state.status == HealthStatus.DEGRADED and self._check_clear_window(state)
-        )
-
-        state.last_success = time.monotonic()
-
-        # Recovery: Unhealthy → Degraded after 1 success
-        if state.status == HealthStatus.UNHEALTHY:
-            state.status = HealthStatus.DEGRADED
-        elif should_recover_to_healthy:
-            state.status = HealthStatus.HEALTHY
-
+        record_success_transition(state, now=time.monotonic())
         self._emit_metric(state)
         return state.status
 
@@ -175,13 +169,7 @@ class ProviderHealthMonitor:
             Current HealthStatus after recording error.
         """
         state = self.get_state(provider)
-        state.consecutive_errors += 1
-
-        if state.consecutive_errors >= ProviderHealthState.UNHEALTHY_THRESHOLD:
-            state.status = HealthStatus.UNHEALTHY
-        elif state.consecutive_errors >= ProviderHealthState.DEGRADED_THRESHOLD:
-            state.status = HealthStatus.DEGRADED
-
+        record_error_transition(state)
         self._emit_metric(state)
         return state.status
 
@@ -200,21 +188,11 @@ class ProviderHealthMonitor:
             Current HealthStatus after applying transitions.
         """
         state = self.get_state(provider)
-        state.last_check = time.monotonic()
-
-        if status == HealthStatus.UNHEALTHY:
-            state.status = HealthStatus.UNHEALTHY
-            state.consecutive_errors = ProviderHealthState.UNHEALTHY_THRESHOLD
-        elif status == HealthStatus.HEALTHY:
-            # Recovery path
-            if state.status == HealthStatus.UNHEALTHY:
-                state.status = HealthStatus.DEGRADED
-            elif state.status == HealthStatus.DEGRADED:
-                state.status = HealthStatus.HEALTHY
-            state.consecutive_errors = 0
-            state.last_success = time.monotonic()
-        # DEGRADED status from probe: maintain current state
-
+        record_health_check_transition(
+            state,
+            status=status,
+            now=time.monotonic(),
+        )
         self._emit_metric(state)
         return state.status
 
@@ -232,26 +210,7 @@ class ProviderHealthMonitor:
             Tuple of (timeout_multiplier, batch_size_divisor).
         """
         state = self.get_state(provider)
-
-        if state.status == HealthStatus.UNHEALTHY:
-            return (4.0, 4)  # Aggressive throttling
-        if state.status == HealthStatus.DEGRADED:
-            return (2.0, 2)  # Timeout ×2, batch_size ÷2
-        return (1.0, 1)  # Normal operation
-
-    def _check_clear_window(self, state: ProviderHealthState) -> bool:
-        """Check if 5 min window has passed with no errors.
-
-        Args:
-            state: Provider health state.
-
-        Returns:
-            True if window passed and can transition to Healthy.
-        """
-        if state.last_success is None:
-            return False
-        elapsed = time.monotonic() - state.last_success
-        return elapsed >= ProviderHealthState.CLEAR_WINDOW_SECONDS
+        return get_adaptive_params_for_status(state.status)
 
     def _emit_metric(self, state: ProviderHealthState) -> None:
         """Emit provider_health_status metric.
@@ -259,11 +218,9 @@ class ProviderHealthMonitor:
         Args:
             state: Provider health state.
         """
-        value = state.status.to_metric_value()  # 0, 1, or 2
-        self.metrics.set_gauge(
-            "provider_health_status",
-            value,
-            labels={"provider": state.provider},
+        emit_provider_health_metric(
+            metrics=self.metrics,
+            state=state,
         )
 
     def get_all_states(self) -> Mapping[str, ProviderHealthState]:
@@ -292,50 +249,16 @@ class ProviderHealthMonitor:
             Current HealthStatus after applying transitions.
 
         """
-        # Record health check latency metric
-        self.metrics.observe_histogram(
-            "health_check_latency_ms",
-            result.latency_ms,
-            labels={"provider": result.provider},
+        emit_health_check_observability(
+            metrics=self.metrics,
+            result=result,
         )
-
-        # Record health check result metric
-        self.metrics.set_gauge(
-            "provider_health_status",
-            float(result.status.to_metric_value()),
-            labels={"provider": result.provider},
-        )
-
-        # Record success/failure counters
-        if result.status == HealthStatus.HEALTHY:
-            self.metrics.increment_counter(
-                "health_check_success_total",
-                1,
-                labels={"provider": result.provider},
-            )
-        else:
-            self.metrics.increment_counter(
-                "health_check_failures_total",
-                1,
-                labels={"provider": result.provider},
-            )
-
-        # Apply state transitions
         new_status = self.record_health_check_result(result.provider, result.status)
-
-        # P2 Alert for UNHEALTHY status
-        if new_status == HealthStatus.UNHEALTHY and logger:
-            logger.error(
-                "provider_unhealthy_alert",
-                provider=result.provider,
-                alert_priority="P2",
-                status=new_status.value,
-                consecutive_failures=result.consecutive_failures,
-                last_error=result.last_error,
-                endpoint=result.endpoint,
-                latency_ms=result.latency_ms,
-            )
-
+        emit_unhealthy_alert(
+            logger=logger,
+            result=result,
+            new_status=new_status,
+        )
         return new_status
 
     def get_adjusted_config(self, provider: str) -> HealthAdjustedConfig:

@@ -1,0 +1,73 @@
+# Compatibility Facade Review History
+
+This document stores historical review narratives that were previously mixed into
+the operational compatibility registry. The canonical operational policy and
+curated ledgers now live in
+[`../07-compatibility-facade-inventory.md`](../07-compatibility-facade-inventory.md).
+
+## RF-035 Retained Entrypoint Decision
+
+Decision for this cycle:
+
+- `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
+- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
+
+Measured evidence for `retain`:
+
+- PubMed canonical entrypoint is still part of active first-party code:
+  - `src/bioetl/infrastructure/adapters/pubmed/__init__.py`
+  - `src/bioetl/composition/providers/registration_biblio.py`
+- Semantic Scholar canonical entrypoint is still part of active first-party code:
+  - `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`
+- Legacy implementation-module references in `src/` are already effectively zero outside the retained entrypoints themselves:
+  - `bioetl.infrastructure.adapters.pubmed.pubmed_client` appears only inside
+    `src/bioetl/infrastructure/adapters/pubmed/client.py`
+  - `bioetl.infrastructure.adapters.semanticscholar.adapter` appears only inside
+    `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
+- Test-only legacy references remain intentional and limited to compatibility coverage:
+  - `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`
+  - `tests/architecture/test_adapter_contracts.py`
+
+Policy implications:
+
+- Do not start deprecation for these entrypoints in the current cycle.
+- New first-party code should use provider package roots; retained `client.py`
+  entrypoints exist for stability and dedicated compatibility coverage only.
+- New first-party code must not import the older implementation modules
+  `pubmed.pubmed_client` or `semanticscholar.adapter` directly.
+- Any future deprecation proposal must include a fresh usage inventory and an explicit review
+  of the retained public `create_pubmed_adapter` factory surface.
+
+## Retained Entrypoint Review Wave (2026-03-15)
+
+Review outcome for the remaining curated inventory rows:
+
+- `src/bioetl/composition/entrypoints.py`: `retain`
+  because active first-party interface code still uses it as the public seam while
+  `_pipeline_execution`, `_resource_management`, and `_services` remain confined to
+  `composition/` and dedicated entrypoint tests.
+- `src/bioetl/domain/composite/config.py`: `retain`
+  because application, composition, infrastructure, and tests depend on the root config
+  entrypoint while split `config_*` internals remain confined to `domain/composite/`
+  and the dedicated facade test.
+- `src/bioetl/domain/value_objects/activity_values.py`: `retain`
+  because domain/application code uses the public activity value-object entrypoint and
+  the split implementation modules remain confined to `domain/value_objects/`.
+- `src/bioetl/domain/value_objects/publication_field_groups.py`: `retain`
+  because public field-group types are consumed through the root entrypoint while
+  private `_publication_field_group_*` modules remain internal.
+- `src/bioetl/infrastructure/adapters/pubmed/client.py`: `retain`
+  because the package root and provider registration still use the canonical client
+  entrypoint while direct `client.py` imports are already confined to the package
+  root and dedicated compatibility coverage, and legacy `pubmed_client`
+  references stay confined to the retained entrypoint plus dedicated coverage.
+- `src/bioetl/infrastructure/adapters/semanticscholar/client.py`: `retain`
+  because the package root still uses the canonical client entrypoint, direct
+  `client.py` imports are already confined to the package root plus dedicated
+  compatibility coverage, and legacy `adapter` references remain confined to the
+  retained entrypoint plus dedicated coverage.
+
+Wave decision:
+
+- No retained-entrypoint row graduates to removal in the current cycle.
+- Next action is policy enforcement and re-review by `2026-09-30`, not deprecation.

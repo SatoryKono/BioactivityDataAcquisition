@@ -311,6 +311,18 @@
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
     },
+    "scripts/dev/run_mypy.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как локальный PowerShell launcher для mypy до отдельной консолидации dev wrappers."
+    },
+    "scripts/dev/run_mypy.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как локальный shell launcher для mypy до отдельной консолидации dev wrappers."
+    },
     "scripts/diagrams/check_class_method_render_integrity.py": {
       "owner": "@bioetl-architecture",
       "decision": "keep_manual",
@@ -772,6 +784,12 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Canonical CLI entrypoint for scripts.schema package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/migrations/active/backfill_vcr_metadata_sidecars.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual backfill entrypoint, пока workflow-level automated rollout для VCR metadata sidecars не включён."
     },
     "src/tools/apply_entity_naming_rename_plan.py": {
       "owner": "@bioetl-architecture",
