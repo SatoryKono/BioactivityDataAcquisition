@@ -118,6 +118,6 @@ class PipelineRunContext:
         return self.cached_bronze.enabled
 
     @property
-    def vacuum_enabled(self) -> bool | None:
-        """Check if vacuum is enabled (tri-state)."""
+    def vacuum_enabled_override(self) -> bool | None:
+        """Return the explicit vacuum override, if one was provided."""
         return self.vacuum.enabled

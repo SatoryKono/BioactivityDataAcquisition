@@ -31,16 +31,16 @@ __all__ = [
     "in_closed_range",
     "is_non_negative",
     "is_positive",
-    "is_valid_json",
-    "is_valid_json_array",
-    "is_valid_json_object",
+    "rows_are_valid_json",
+    "rows_are_valid_json_array",
+    "rows_are_valid_json_object",
     "max_str_length",
     "str_matches_pattern",
     "str_starts_with",
 ]
 
 
-def is_valid_json(series: pd.Series) -> pd.Series:
+def rows_are_valid_json(series: pd.Series) -> pd.Series:
     """Return a boolean Series for non-null values that are valid JSON.
 
     Args:
@@ -70,7 +70,7 @@ def is_valid_json(series: pd.Series) -> pd.Series:
     return series.apply(check)
 
 
-def is_valid_json_array(series: pd.Series) -> pd.Series:
+def rows_are_valid_json_array(series: pd.Series) -> pd.Series:
     """Return a boolean Series for non-null values that are valid JSON arrays.
 
     Args:
@@ -100,7 +100,7 @@ def is_valid_json_array(series: pd.Series) -> pd.Series:
     return series.apply(check)
 
 
-def is_valid_json_object(series: pd.Series) -> pd.Series:
+def rows_are_valid_json_object(series: pd.Series) -> pd.Series:
     """Return a boolean Series for non-null values that are valid JSON objects.
 
     Args:
@@ -131,9 +131,9 @@ def is_valid_json_object(series: pd.Series) -> pd.Series:
 
 
 # Pre-built checks for use in schema definitions
-JSON_CHECK = pa.Check(is_valid_json, name="valid_json")
-JSON_ARRAY_CHECK = pa.Check(is_valid_json_array, name="valid_json_array")
-JSON_OBJECT_CHECK = pa.Check(is_valid_json_object, name="valid_json_object")
+JSON_CHECK = pa.Check(rows_are_valid_json, name="valid_json")
+JSON_ARRAY_CHECK = pa.Check(rows_are_valid_json_array, name="valid_json_array")
+JSON_OBJECT_CHECK = pa.Check(rows_are_valid_json_object, name="valid_json_object")
 
 
 # =============================================================================

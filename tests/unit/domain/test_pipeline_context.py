@@ -290,4 +290,4 @@ class TestRunContextValidationAndProperties:
 
         assert ctx.has_input_filter is True
         assert ctx.has_cached_bronze is True
-        assert ctx.vacuum_enabled is True
+        assert ctx.vacuum_enabled_override is True

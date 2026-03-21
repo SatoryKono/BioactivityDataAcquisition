@@ -242,7 +242,7 @@ def _run_batch_with_policy(
 )
 @click.pass_context
 def run_all(
-    ctx: click.Context,
+    click_context: click.Context,
     source: str,
     run_type: str,
     limit: int | None,
@@ -254,7 +254,7 @@ def run_all(
     health_port: int,
 ) -> None:
     """Run all registered pipelines for one provider sequentially."""
-    registry = resolve_context_registry(ctx)
+    registry = resolve_context_registry(click_context)
     cli_input = build_run_all_command_input(
         source=source,
         run_type=run_type,

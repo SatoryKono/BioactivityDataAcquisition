@@ -56,8 +56,8 @@ __all__ = [
     "get_lock_service",
     "get_metrics_service",
     "get_pipeline_runner_service",
+    "get_quarantine_port",
     "get_quarantine_service",
-    "get_quarantine_store",
     "get_vacuum_service",
 ]
 
@@ -318,22 +318,19 @@ def get_adr_service() -> AdrServicePort:
     return bootstrap_adr_service()
 
 
-def get_quarantine_store(pipeline: str) -> QuarantinePort:
-    """Get a quarantine store (port) for direct quarantine operations.
+def get_quarantine_port() -> QuarantinePort:
+    """Get the shared quarantine port for direct quarantine operations.
 
     This provides direct access to the QuarantinePort for low-level
     quarantine operations. For most use cases, prefer get_quarantine_service()
     which provides a higher-level interface.
 
-    Args:
-        pipeline: Pipeline name (used for context, actual store is shared).
-
     Returns:
         QuarantinePort instance for quarantine operations.
 
     Example:
-        >>> store = get_quarantine_store("chembl_activity")
-        >>> records = await store.inspect("chembl_activity", limit=10)
+        >>> port = get_quarantine_port()
+        >>> records = await port.inspect("chembl_activity", limit=10)
     """
     _ensure_registrations()
     return bootstrap_quarantine_port()

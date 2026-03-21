@@ -80,7 +80,7 @@ class TestBuildContext:
         assert context.input_filter.column_name == "publication_id"
         assert context.input_filter.filter_field == "doi"
         assert context.input_filter.fallback_column == "pmid"
-        assert context.vacuum_enabled is True
+        assert context.vacuum_enabled_override is True
         assert context.vacuum.retention_days == 7
 
     def test_build_context_with_filter_ids_defaults_filter_field_to_doi(self) -> None:
@@ -117,6 +117,6 @@ class TestBuildContext:
 
         assert context.has_input_filter is False
         assert context.has_cached_bronze is False
-        assert context.vacuum_enabled is None
+        assert context.vacuum_enabled_override is None
         assert context.vacuum.retention_days == 7
         assert context.log_level == "INFO"

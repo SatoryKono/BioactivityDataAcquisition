@@ -42,16 +42,16 @@ class TestResolveContextRegistry:
 
     def test_returns_registry_from_context(self, mock_registry: MagicMock) -> None:
         """Test returns registry when context obj is a PipelineRegistry."""
-        ctx = MagicMock(spec=click.Context)
-        ctx.obj = mock_registry
-        result = resolve_context_registry(ctx)
+        click_context = MagicMock(spec=click.Context)
+        click_context.obj = mock_registry
+        result = resolve_context_registry(click_context)
         assert result is mock_registry
 
     def test_returns_none_when_context_obj_is_not_registry(self) -> None:
         """Test returns None when context obj is not a PipelineRegistry."""
-        ctx = MagicMock(spec=click.Context)
-        ctx.obj = "not a registry"
-        result = resolve_context_registry(ctx)
+        click_context = MagicMock(spec=click.Context)
+        click_context.obj = "not a registry"
+        result = resolve_context_registry(click_context)
         assert result is None
 
 

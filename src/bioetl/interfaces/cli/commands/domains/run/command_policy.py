@@ -284,12 +284,12 @@ def run_command_flow(
         exit_func=exit_func,
     )
     health_info_presenter(request)
-    result = execute_run_step(
+    run_result = execute_run_step(
         request=request,
         execute_run=execute_run,
     )
     finalize_run_step(
-        result=result,
+        run_result=run_result,
         result_finalizer=result_finalizer,
     )
 
@@ -342,13 +342,13 @@ def execute_run_step(
 
 def finalize_run_step(
     *,
-    result: RunResult,
+    run_result: RunResult,
     result_finalizer: ResultFinalizerCallable,
 ) -> None:
     """Finalize CLI execution for a completed run result.
 
     Args:
-        result: RunResult from the completed pipeline execution.
+        run_result: RunResult from the completed pipeline execution.
         result_finalizer: Callable that renders the result and terminates the CLI.
     """
-    result_finalizer(result)
+    result_finalizer(run_result)

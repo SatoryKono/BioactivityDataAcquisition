@@ -49,8 +49,8 @@ from bioetl.composition._services import (
     get_lock_service,
     get_metrics_service,
     get_pipeline_runner_service,
+    get_quarantine_port,
     get_quarantine_service,
-    get_quarantine_store,
     get_vacuum_service,
 )
 from bioetl.composition.bootstrap import (
@@ -86,8 +86,8 @@ __all__ = [
     "get_metrics_service",
     "get_pipeline_runner_service",
     "get_quarantine_manager",
+    "get_quarantine_port",
     "get_quarantine_service",
-    "get_quarantine_store",
     "get_vacuum_service",
     "inspect_quarantine",
     "list_checkpoints",

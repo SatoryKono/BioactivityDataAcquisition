@@ -23,6 +23,24 @@ from bioetl.infrastructure.adapters.crossref.client import (
 from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefResponseMapper as ClientCrossRefResponseMapper,
 )
+from bioetl.infrastructure.adapters.crossref.models import (
+    CrossRefMessage as FacadeCrossRefMessage,
+)
+from bioetl.infrastructure.adapters.crossref.models import (
+    CrossRefPublicationResponse as FacadeCrossRefPublicationResponse,
+)
+from bioetl.infrastructure.adapters.crossref.models import (
+    CrossRefPublicationsResponse as FacadeCrossRefPublicationsResponse,
+)
+from bioetl.infrastructure.adapters.crossref._response_models import (
+    CrossRefMessage as HelperCrossRefMessage,
+)
+from bioetl.infrastructure.adapters.crossref._response_models import (
+    CrossRefPublicationResponse as HelperCrossRefPublicationResponse,
+)
+from bioetl.infrastructure.adapters.crossref._response_models import (
+    CrossRefPublicationsResponse as HelperCrossRefPublicationsResponse,
+)
 
 
 @pytest.mark.unit
@@ -39,3 +57,11 @@ def test_client_reexports_new_decomposed_components() -> None:
     assert ClientCrossRefFetchFlow.__name__ == "CrossRefFetchFlow"
     assert ClientCrossRefQueryBuilder.__name__ == "CrossRefQueryBuilder"
     assert ClientCrossRefResponseMapper.__name__ == "CrossRefResponseMapper"
+
+
+@pytest.mark.unit
+def test_models_facade_reexports_response_wrappers() -> None:
+    """CrossRef models facade should preserve response-wrapper imports."""
+    assert FacadeCrossRefMessage is HelperCrossRefMessage
+    assert FacadeCrossRefPublicationsResponse is HelperCrossRefPublicationsResponse
+    assert FacadeCrossRefPublicationResponse is HelperCrossRefPublicationResponse

@@ -276,9 +276,55 @@ technical-debt roadmap, не потеряв важные предложения.
 - `3J-2` уже реализован:
   `fetch_paging_mixin.py` сохранён как import-stable facade, а
   filtered-pagination и dedup flow вынесены в `_fetch_paging_filtered.py`;
-- следующий implementation step для `Wave 3` теперь сужен до closeout/ratchet
-  для `chembl/fetch_paging_mixin.py` или к выбору следующего bounded adapter
-  hotspot.
+- следующим bounded cluster после `chembl/fetch_paging_mixin.py` выбран
+  `semanticscholar/fetch_adapter_mixin.py`, и cluster start зафиксирован в
+  `wave-3-semanticscholar-fetch-cluster-plan-2026-03-21.md`;
+- `3K-2` уже реализован:
+  `fetch_adapter_mixin.py` сохранён как import-stable facade, а search/page
+  flow вынесен в `_search_fetch_flow.py`;
+- следующим bounded cluster после `semanticscholar/fetch_adapter_mixin.py`
+  выбран `crossref/client.py`, и cluster start зафиксирован в
+  `wave-3-crossref-client-cluster-plan-2026-03-21.md`;
+- `3L-2` уже реализован:
+  `client.py` сохранён как canonical import-stable facade, а provider-specific
+  fallback-policy hooks вынесены в `_client_fallback_policy.py`;
+- следующим bounded cluster после `crossref/client.py` выбран
+  `chembl/entity_mapper.py`, и cluster start зафиксирован в
+  `wave-3-chembl-entity-mapper-cluster-plan-2026-03-21.md`;
+- `3M-2` уже реализован:
+  `entity_mapper.py` сохранён как public import-stable facade, а lookup/data
+  logic вынесена в `_entity_mapping_lookup.py`;
+- следующим bounded cluster после `chembl/entity_mapper.py` выбран
+  `pubchem/client.py`, и cluster start зафиксирован в
+  `wave-3-pubchem-client-cluster-plan-2026-03-21.md`;
+- `3N-2` уже реализован:
+  `client.py` сохранён как public import-stable facade, а fetch-routing surface
+  вынесен в `_client_fetch_surface.py`;
+- следующим bounded cluster после `pubchem/client.py` выбран
+  `pubmed/models.py`, и cluster start зафиксирован в
+  `wave-3-pubmed-models-cluster-plan-2026-03-21.md`;
+- `3O-2` уже реализован:
+  `models.py` сохранён как public import-stable facade, а ESearch DTO вынесены
+  в `_search_models.py`;
+- следующим bounded cluster после `pubmed/models.py` выбран
+  `crossref/models.py`, и cluster start зафиксирован в
+  `wave-3-crossref-models-cluster-plan-2026-03-21.md`;
+- `3P-2` уже реализован:
+  `models.py` сохранён как public import-stable facade, а response-wrapper DTO
+  вынесены в `_response_models.py`;
+- по текущему operational cutoff `~300+ LOC` provider-bounded adapter hotspots
+  внутри `Wave 3` закрыты, и следующий implementation step теперь сужен до
+  closeout/ratchet passes или к выбору более широкого shared seam;
+- closeout pass для новых `Wave 3` adapter facades уже зафиксирован в
+  `tests/architecture/test_wave3_adapter_facade_closeout.py`:
+  там удерживаются line budgets, обязательные helper imports и запрет на
+  re-absorption response/search DTO в model facades.
+- первым post-provider shared seam после этого выбран
+  `cached_bronze_data_source.py`, и cluster start зафиксирован в
+  `wave-3-cached-bronze-cluster-plan-2026-03-21.md`;
+- `3Q-2` уже реализован:
+  `cached_bronze_data_source.py` сохранён как public import-stable facade, а
+  list/path/count support logic вынесена в `_cached_bronze_support.py`.
 
 ### Wave 4. Complexity hotspot implementation
 

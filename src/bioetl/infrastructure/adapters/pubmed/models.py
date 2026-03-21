@@ -32,6 +32,10 @@ __all__ = [
 from pydantic import BaseModel, ConfigDict, Field
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.pubmed._search_models import (
+    PubMedSearchResponse,
+    PubMedSearchResult,
+)
 
 # === Basic Record Model (matches current xml_processor output) ===
 
@@ -253,45 +257,6 @@ class PubMedExtendedRecord(BaseModel):
     article_ids: list[PubMedArticleId] | None = Field(
         default_factory=list, description="All article identifiers"
     )
-
-
-# === ESearch Response Models ===
-
-
-class PubMedSearchResult(BaseModel):
-    """Result from PubMed ESearch endpoint."""
-
-    model_config = ConfigDict(extra="ignore", populate_by_name=True)
-
-    count: int | None = Field(default=None, description="Total count of results")
-    ret_max: int | None = Field(
-        default=None, alias="retmax", description="Maximum records to return"
-    )
-    ret_start: int | None = Field(
-        default=None, alias="retstart", description="Starting index"
-    )
-    id_list: list[str] = Field(
-        default_factory=list, alias="idlist", description="List of PMIDs"
-    )
-
-    # Web Environment for history server
-    web_env: str | None = Field(
-        default=None, alias="webenv", description="Web environment ID"
-    )
-    query_key: str | None = Field(
-        default=None, alias="querykey", description="Query key"
-    )
-
-
-class PubMedSearchResponse(BaseModel):
-    """Complete PubMed ESearch API response."""
-
-    model_config = ConfigDict(extra="ignore", populate_by_name=True)
-
-    esearchresult: PubMedSearchResult | None = Field(
-        default=None, description="Search result data"
-    )
-
 
 # === Record Type Mapping ===
 
