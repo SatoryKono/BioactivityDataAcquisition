@@ -11,9 +11,9 @@ from bioetl.application.composite.join_planner_helpers import parse_pipeline_nam
 _LOWER_ALPHA = "abcdefghijklmnopqrstuvwxyz"
 _LOWER_ALNUM = f"{_LOWER_ALPHA}0123456789"
 _IDENT = st.builds(
-    lambda head, tail: head + "".join(tail),
+    lambda head, tail: head + tail,
     st.sampled_from(tuple(_LOWER_ALPHA)),
-    st.lists(st.sampled_from(tuple(_LOWER_ALNUM)), min_size=0, max_size=7),
+    st.text(alphabet=_LOWER_ALNUM, min_size=0, max_size=7),
 )
 
 

@@ -26,66 +26,18 @@ from __future__ import annotations
 __all__ = ["ChemblEntityMapper"]
 
 
-from bioetl.domain.registry.publication import (
-    get_dedup_key_fields,
-    get_publication_mapping,
-    has_composite_key,
-    is_publication_entity,
-)
 from bioetl.infrastructure.adapters.chembl.constants import (
     CHEMBL_API_BASE,
 )
-
-# =============================================================================
-# Non-Publication Entity Mappings
-# =============================================================================
-# These are entities that are NOT publication-related.
-# Publication entities are managed in domain.registry.publication.
-
-_NON_PUBLICATION_ENTITY_MAPPING: dict[str, str] = {
-    "activity": "activity",
-    "assay": "assay",
-    "assay_parameters": "assay",
-    "compound": "molecule",
-    "molecule": "molecule",
-    "target": "target",
-    "target_component": "target_component",
-    "cell_line": "cell_line",
-    "subcellular_fraction": "assay",
-    "tissue": "tissue",
-    "compound_record": "compound_record",
-    "protein_class": "protein_classification",
-}
-
-# Plural forms for API response keys (ChEMBL uses irregular plurals)
-# Note: Publication plurals are provided by the registry.
-_NON_PUBLICATION_ENTITY_PLURAL: dict[str, str] = {
-    "activity": "activities",
-    "assay": "assays",
-    "molecule": "molecules",
-    "target": "targets",
-    "target_component": "target_components",
-    "cell_line": "cell_lines",
-    "tissue": "tissues",
-    "compound_record": "compound_records",
-    "protein_classification": "protein_classifications",
-}
-
-# Primary key field overrides by entity type
-# Note: Publication PK fields are provided by the registry.
-_NON_PUBLICATION_PK_FIELD_OVERRIDES: dict[str, str] = {
-    "assay": "assay_id",
-    "assay_parameters": "assay_param_id",
-    "molecule": "molecule_id",
-    "compound": "molecule_id",
-    "target": "target_id",
-    "target_component": "component_id",
-    "cell_line": "cell_id",
-    "subcellular_fraction": "assay_id",
-    "tissue": "tissue_id",
-    "compound_record": "record_id",
-    "protein_class": "protein_class_id",
-}
+from bioetl.infrastructure.adapters.chembl._entity_mapping_lookup import (
+    build_legacy_entity_mapping,
+    has_entity_composite_key,
+    is_known_entity_type,
+    resolve_dedup_key_fields,
+    resolve_plural_key,
+    resolve_primary_key_field,
+    resolve_resource_name,
+)
 
 
 class ChemblEntityMapper:
@@ -127,13 +79,7 @@ class ChemblEntityMapper:
             >>> ChemblEntityMapper.get_resource_url("publication")
             'https://www.ebi.ac.uk/chembl/api/data/document'
         """
-        # Check publication registry first (ADR-024)
-        pub_mapping = get_publication_mapping(entity_type)
-        if pub_mapping is not None:
-            return f"{CHEMBL_API_BASE}/{pub_mapping.api_resource}"
-
-        # Check non-publication entities
-        resource = _NON_PUBLICATION_ENTITY_MAPPING.get(entity_type)
+        resource = resolve_resource_name(entity_type)
         if resource is None:
             msg = f"Unknown entity type: {entity_type}"
             raise ValueError(msg)
@@ -178,14 +124,7 @@ class ChemblEntityMapper:
             >>> ChemblEntityMapper.get_plural_key("publication")
             'documents'
         """
-        # Check publication registry first (ADR-024)
-        pub_mapping = get_publication_mapping(entity_type)
-        if pub_mapping is not None:
-            return pub_mapping.plural_key
-
-        # Check non-publication entities
-        resource = _NON_PUBLICATION_ENTITY_MAPPING.get(entity_type, entity_type)
-        return _NON_PUBLICATION_ENTITY_PLURAL.get(resource, resource + "s")
+        return resolve_plural_key(entity_type)
 
     @staticmethod
     def get_primary_key_field(entity_type: str) -> str:
@@ -201,18 +140,7 @@ class ChemblEntityMapper:
             >>> ChemblEntityMapper.get_primary_key_field("publication")
             'document_chembl_id'
         """
-        # Check publication registry first (ADR-024)
-        pub_mapping = get_publication_mapping(entity_type)
-        if pub_mapping is not None:
-            return pub_mapping.primary_key_field
-
-        # Check non-publication entities
-        if entity_type in _NON_PUBLICATION_PK_FIELD_OVERRIDES:
-            return _NON_PUBLICATION_PK_FIELD_OVERRIDES[entity_type]
-
-        # Default: resource_id pattern
-        resource = _NON_PUBLICATION_ENTITY_MAPPING.get(entity_type, entity_type)
-        return f"{resource}_id"
+        return resolve_primary_key_field(entity_type)
 
     @staticmethod
     def get_dedup_key_fields(entity_type: str) -> tuple[str, ...]:
@@ -234,14 +162,7 @@ class ChemblEntityMapper:
             >>> ChemblEntityMapper.get_dedup_key_fields("activity")
             ('activity_id',)
         """
-        # Check publication registry first (ADR-024) - may have composite keys
-        pub_fields = get_dedup_key_fields(entity_type)
-        if pub_fields is not None:
-            return pub_fields
-
-        # Non-publication entities use single primary key
-        pk_field = ChemblEntityMapper.get_primary_key_field(entity_type)
-        return (pk_field,)
+        return resolve_dedup_key_fields(entity_type)
 
     @staticmethod
     def has_composite_key(entity_type: str) -> bool:
@@ -259,8 +180,7 @@ class ChemblEntityMapper:
             >>> ChemblEntityMapper.has_composite_key("activity")
             False
         """
-        # Check publication registry; non-publication entities always have single primary key
-        return has_composite_key(entity_type)
+        return has_entity_composite_key(entity_type)
 
     @staticmethod
     def get_resource_name(entity_type: str) -> str | None:
@@ -276,12 +196,7 @@ class ChemblEntityMapper:
             >>> ChemblEntityMapper.get_resource_name("publication")
             'document'
         """
-        # Check publication registry first (ADR-024)
-        pub_mapping = get_publication_mapping(entity_type)
-        if pub_mapping is not None:
-            return pub_mapping.api_resource
-
-        return _NON_PUBLICATION_ENTITY_MAPPING.get(entity_type)
+        return resolve_resource_name(entity_type)
 
     @staticmethod
     def is_known_entity(entity_type: str) -> bool:
@@ -299,10 +214,7 @@ class ChemblEntityMapper:
             >>> ChemblEntityMapper.is_known_entity("unknown")
             False
         """
-        return (
-            is_publication_entity(entity_type)
-            or entity_type in _NON_PUBLICATION_ENTITY_MAPPING
-        )
+        return is_known_entity_type(entity_type)
 
 
 # =============================================================================
@@ -310,13 +222,4 @@ class ChemblEntityMapper:
 # =============================================================================
 # Re-export for existing imports (deprecated, use domain.registry directly)
 
-ENTITY_MAPPING: dict[str, str] = {
-    **_NON_PUBLICATION_ENTITY_MAPPING,
-    # Publication mappings from registry (for backward compatibility)
-    "publication": "document",
-    "publication_similarity": "document_similarity",
-    "publication_term": "document",
-    "document": "document",
-    "document_similarity": "document_similarity",
-    "document_term": "document",
-}
+ENTITY_MAPPING: dict[str, str] = build_legacy_entity_mapping()

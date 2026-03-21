@@ -166,7 +166,7 @@ class CompositePipelineRunner(
         entire duration of the composite pipeline execution, preventing TTL
         expiration for long-running pipelines (>1 hour).
         """
-        result = await run_with_managed_lock(
+        lock_run_result = await run_with_managed_lock(
             lock_port=self._lock,
             lock_key=self._config.lock_key,
             owner_id=self._run_id,
@@ -176,7 +176,7 @@ class CompositePipelineRunner(
             run_while_locked=self._run_with_lock,
         )
         self._mark_finished(CompositePipelineState.COMPLETED)
-        return result
+        return lock_run_result
 
     async def run(self) -> CompositeResult:
         """Execute full composite pipeline under distributed lock.
@@ -222,7 +222,7 @@ class CompositePipelineRunner(
 
     async def _extract_enrichment_keys(self) -> pl.DataFrame:
         """Extract seed keys once the seed phase has completed."""
-        result = await extract_enrichment_keys(
+        enrichment_key_result = await extract_enrichment_keys(
             key_extractor=self._key_extractor,
             logger=self._logger,
             request=CompositeEnrichmentKeyContext(
@@ -231,18 +231,18 @@ class CompositePipelineRunner(
                 output_keys=tuple(self._config.seed.output_keys),
             ),
         )
-        return result.keys_df
+        return enrichment_key_result.keys_df
 
     async def _execute_locked_run_phases(
         self,
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, CompositeExecutionContext]:
         """Execute composite phases in the canonical lock-held order."""
-        result = await execute_locked_run_phases(
+        locked_phase_result = await execute_locked_run_phases(
             self,
             CompositeLockedExecutionContext(state=state),
         )
-        return result.state, result.execution_context
+        return locked_phase_result.state, locked_phase_result.execution_context
 
     async def _run_with_lock(self) -> CompositeResult:
         """Execute pipeline stages while lock is held."""

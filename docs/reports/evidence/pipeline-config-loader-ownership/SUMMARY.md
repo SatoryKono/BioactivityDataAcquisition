@@ -42,3 +42,7 @@ What is still missing is a later slice proving whether the remaining
 convenience methods should ultimately stay as a sanctioned shim or collapse into
 smaller explicit APIs. The current evidence is strong enough to reject
 re-centering the class, but not yet strong enough to justify deletion.
+
+## Risks
+
+- Formal risk tracking now lives in [05-risks/RISKS.yaml](./05-risks/RISKS.yaml).

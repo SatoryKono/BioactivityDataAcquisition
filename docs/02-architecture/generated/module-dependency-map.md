@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1226`
-- Internal import edges (raw): `4594`
+- Scanned modules: `1233`
+- Internal import edges (raw): `4612`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `245`
@@ -27,8 +27,8 @@ flowchart LR
     composition -->|247 OK| domain
     composition -->|230 OK| infrastructure
     domain -->|696 OK| domain
-    infrastructure -->|571 OK| domain
-    infrastructure -->|708 OK| infrastructure
+    infrastructure -->|576 OK| domain
+    infrastructure -->|721 OK| infrastructure
     interfaces -->|45 OK| application
     interfaces -->|38 OK| composition
     interfaces -->|35 OK| domain
@@ -46,8 +46,8 @@ flowchart LR
 | `composition` | `domain` | 247 | allowed |
 | `composition` | `infrastructure` | 230 | allowed |
 | `domain` | `domain` | 696 | allowed |
-| `infrastructure` | `domain` | 571 | allowed |
-| `infrastructure` | `infrastructure` | 708 | allowed |
+| `infrastructure` | `domain` | 576 | allowed |
+| `infrastructure` | `infrastructure` | 721 | allowed |
 | `interfaces` | `application` | 45 | allowed |
 | `interfaces` | `composition` | 38 | allowed |
 | `interfaces` | `domain` | 35 | allowed |
@@ -57,10 +57,10 @@ flowchart LR
 
 | From Group | To Group | Imports |
 |---|---|---:|
+| `infrastructure.adapters` | `domain.types` | 102 |
 | `application.composite` | `domain.composite` | 98 |
-| `infrastructure.adapters` | `domain.types` | 98 |
 | `composition.factories` | `application.core` | 96 |
-| `infrastructure.adapters` | `domain.ports` | 80 |
+| `infrastructure.adapters` | `domain.ports` | 81 |
 | `application.pipelines` | `domain.types` | 73 |
 | `composition.bootstrap` | `application.composite` | 61 |
 | `application.core` | `domain.types` | 59 |

@@ -24,18 +24,20 @@ from __future__ import annotations
 
 __all__ = ["PUBCHEM_HEALTH_ERRORS", "PubChemAdapter"]
 
-from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
 
 import pubchempy as pcp
 
 from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError, NetworkError
-from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
+from bioetl.infrastructure.adapters.pubchem._client_fetch_surface import (
+    _PubChemClientFetchMixin,
+)
 from bioetl.infrastructure.adapters.pubchem.client_model_mixin import (
     PubChemAdapterModelMixin,
 )
@@ -43,8 +45,6 @@ from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMa
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
-
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -63,7 +63,12 @@ PUBCHEM_HEALTH_ERRORS = (
 )
 
 
-class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdapter):
+class PubChemAdapter(
+    _PubChemClientFetchMixin,
+    PubChemAdapterModelMixin,
+    FilterableStubMixin,
+    BaseSyncAdapter,
+):
     """PubChem API adapter implementing DataSourcePort.
 
     Provides access to chemical compound data from PubChem database.
@@ -147,106 +152,6 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
         self._mapper = entity_mapper
         self._request_collector = request_collector
         self._strategies = fetch_strategies
-
-    async def _fetch_compound(
-        self, query: str | None, limit: int | None
-    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch compounds by query.
-
-        Args:
-            query: Compound name or search string; required, raises ValueError if None.
-            limit: Optional maximum number of compounds to yield.
-
-        Yields:
-            Raw compound records from the PubChem API.
-
-        Raises:
-            ValueError: If query is None or empty.
-        """
-        if not query:
-            raise ValueError("Query is required for compound fetch")
-        async for record in self._strategies.fetch_by_query(query, limit):
-            yield record
-
-    async def fetch(
-        self,
-        entity_type: str,
-        limit: int | None = None,
-        query: str | None = None,
-        filter_ids: list[str] | None = None,
-        filter_field: str | None = None,
-        offset: int | None = None,
-    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records from PubChem. Supports SMILES/CID filtering and name search.
-
-        Args:
-            entity_type: Entity type identifier.
-            limit: Maximum number of records to process.
-            query: Search query string.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-            offset: Offset.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        if filter_ids and filter_field:
-            async for record in self.fetch_filtered(
-                entity_type, filter_ids, filter_field, limit
-            ):
-                yield record
-            return
-
-        fetch_methods: dict[
-            str,
-            Callable[[], AsyncIterator[JsonDict]],  # Any: untyped API JSON record
-        ] = {  # Any: untyped API JSON record
-            "compound": lambda: self._fetch_compound(query, limit),
-            "substance": lambda: self._strategies.fetch_substances(query, limit),
-            "assay": lambda: self._strategies.fetch_assays(query, limit),
-        }
-
-        method = fetch_methods.get(entity_type)
-        if method is None:
-            raise ValueError(f"Unsupported entity type: {entity_type}")
-
-        async for record in method():
-            yield record
-
-    async def fetch_filtered(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch PubChem records by filter ID list. Implements FilterableDataSourcePort.
-
-        Args:
-            entity_type: Entity type identifier.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        if entity_type != "compound":
-            raise ValueError(
-                f"fetch_filtered only supports 'compound', got: {entity_type}"
-            )
-
-        if filter_field in ("smiles", "canonical_smiles"):
-            async for record in self._strategies.fetch_by_smiles(filter_ids, limit):
-                yield record
-        elif filter_field == "cid":
-            async for record in self._strategies.fetch_by_cids(filter_ids, limit):
-                yield record
-        elif filter_field in ("inchikey", "inchi_key"):
-            async for record in self._strategies.fetch_by_inchikey(filter_ids, limit):
-                yield record
-        else:
-            raise ValueError(f"Unsupported filter_field: {filter_field}")
 
     # fetch_multi_filtered and fetch_filtered_with_fallback are provided
     # by FilterableStubMixin (see class inheritance)

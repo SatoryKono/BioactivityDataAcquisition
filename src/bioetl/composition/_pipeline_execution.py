@@ -254,8 +254,10 @@ def create_pipeline_runner(
         >>> runner = create_pipeline_runner("chembl_activity", options)
         >>> await runner.run()
     """
-    ctx = build_pipeline_context(name, options)
-    return _require_execution_metrics_runner(bootstrap_pipeline_runner(ctx))
+    run_context = build_pipeline_context(name, options)
+    return _require_execution_metrics_runner(
+        bootstrap_pipeline_runner(run_context)
+    )
 
 
 async def run_pipeline(name: str, options: RunOptions) -> RunResult:

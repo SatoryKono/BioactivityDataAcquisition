@@ -86,11 +86,11 @@ async def _run_pipelines_batch(
 
     for pipeline in pipelines:
         try:
-            result = await _run_pipeline_async(service, pipeline, options)
+            pipeline_run_result = await _run_pipeline_async(service, pipeline, options)
             if record_pipeline_result(
                 batch_result=batch_result,
                 pipeline=pipeline,
-                result=result,
+                result=pipeline_run_result,
             ):
                 break
         except PipelineNotFoundError as exc:

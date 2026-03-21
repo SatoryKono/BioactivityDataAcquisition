@@ -44,23 +44,25 @@ if TYPE_CHECKING:
 
 
 def resolve_context_registry(
-    ctx: click.Context | None = None,
+    click_context: click.Context | None = None,
 ) -> PipelineRegistry | None:
     """Return the explicit registry carried by Click context, if any."""
-    if ctx is None:
-        ctx = click.get_current_context(silent=True)
-    if ctx is None or not isinstance(ctx.obj, PipelineRegistry):
+    if click_context is None:
+        click_context = click.get_current_context(silent=True)
+    if click_context is None or not isinstance(click_context.obj, PipelineRegistry):
         return None
-    return ctx.obj
+    return click_context.obj
 
 
 def validate_pipeline_name(
-    ctx: click.Context | None, _param: click.Parameter | None, value: str
+    click_context: click.Context | None,
+    _param: click.Parameter | None,
+    value: str,
 ) -> str:
     """Validate pipeline name against the registry at runtime.
 
     Args:
-        ctx: Click context; if ``ctx.obj`` is a ``PipelineRegistry``,
+        click_context: Click context; if ``click_context.obj`` is a ``PipelineRegistry``,
             it is used directly, otherwise falls back to a fresh CLI registry.
         _param: Click parameter (unused).
         value: Pipeline name to validate.
@@ -71,7 +73,7 @@ def validate_pipeline_name(
     Raises:
         click.BadParameter: If pipeline name is not in registry.
     """
-    registry = resolve_context_registry(ctx) or build_cli_registry()
+    registry = resolve_context_registry(click_context) or build_cli_registry()
     available = registry.list_pipelines()
     if value not in available:
         raise click.BadParameter(f"Unknown pipeline: {value}. Available: {available}")

@@ -468,16 +468,16 @@ class TestGetAdrService:
 
 
 # =============================================================================
-# Tests for get_quarantine_store
+# Tests for get_quarantine_port
 # =============================================================================
 
 
 @pytest.mark.unit
-class TestGetQuarantineStore:
-    """Tests for get_quarantine_store function."""
+class TestGetQuarantinePort:
+    """Tests for get_quarantine_port function."""
 
     def test_calls_ensure_registrations_and_bootstrap_quarantine_port(self) -> None:
-        """Test that get_quarantine_store calls _ensure_registrations and bootstrap_quarantine_port."""
+        """Test that get_quarantine_port calls _ensure_registrations and bootstrap_quarantine_port."""
         mock_port = MagicMock(name="QuarantinePort")
 
         with (
@@ -487,16 +487,16 @@ class TestGetQuarantineStore:
                 return_value=mock_port,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_quarantine_store
+            from bioetl.composition.entrypoints import get_quarantine_port
 
-            result = get_quarantine_store("chembl_activity")
+            result = get_quarantine_port()
 
         mock_ensure.assert_called_once()
         mock_bootstrap.assert_called_once()
         assert result is mock_port
 
-    def test_pipeline_param_is_accepted(self) -> None:
-        """Test that pipeline parameter is accepted (context only)."""
+    def test_returns_shared_port_without_pipeline_context(self) -> None:
+        """Test that the accessor no longer exposes a misleading pipeline parameter."""
         mock_port = MagicMock(name="QuarantinePort")
 
         with (
@@ -505,8 +505,7 @@ class TestGetQuarantineStore:
                 return_value=mock_port,
             ),
         ):
-            from bioetl.composition.entrypoints import get_quarantine_store
+            from bioetl.composition.entrypoints import get_quarantine_port
 
-            # Should not raise regardless of pipeline name
-            result = get_quarantine_store("any_pipeline")
+            result = get_quarantine_port()
             assert result is mock_port

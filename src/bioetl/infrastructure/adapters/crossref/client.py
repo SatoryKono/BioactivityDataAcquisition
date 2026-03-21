@@ -17,21 +17,15 @@ from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
 )
-from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    ExtractRecordIdPort,
-    NormalizeIdPort,
-)
-from bioetl.infrastructure.adapters.crossref._defaults import (
-    CROSSREF_DEFAULT_FALLBACK_CONFIG as _CROSSREF_DEFAULT_FALLBACK_CONFIG,
+from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
+    _CrossRefFallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
@@ -89,7 +83,7 @@ CROSSREF_HEALTH_ERRORS = (
 
 
 @dataclass
-class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
+class CrossRefAdapter(_CrossRefFallbackPolicyMixin, FallbackPolicyMixin, BaseHttpAdapter):
     """CrossRef adapter with thin-facade delegation to flow components."""
 
     http_client: UnifiedHTTPClient
@@ -154,29 +148,6 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             batch_size=self.batch_size,
             response_mapper=self._response_mapper,
         )
-
-    def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
-        """Return CrossRef-specific default fallback config."""
-        return _CROSSREF_DEFAULT_FALLBACK_CONFIG
-
-    def _get_normalize_id_hook(self) -> NormalizeIdPort:
-        """Return DOI normalization hook."""
-        return normalize_doi
-
-    def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
-        """Return hook extracting DOI from a CrossRef record."""
-        return lambda rec: str(rec.get("DOI", ""))
-
-    def _get_fallback_handler(
-        self, enabled: bool
-    ) -> CrossRefTitleFallbackHandler | None:
-        """Return title fallback handler when enabled."""
-        return self._fallback_handler if enabled else None
-
-    def _on_fallback_decorator_updated(self) -> None:
-        """Propagate new decorator to the fetch-flow component."""
-        if hasattr(self, "_fetch_flow"):
-            self._fetch_flow.fallback_decorator = self._fallback_decorator
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers with polite pool identification.

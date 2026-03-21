@@ -522,7 +522,7 @@ class TestFinalizeRunStep:
         finalizer = MagicMock()
 
         finalize_run_step(
-            result=result,
+            run_result=result,
             result_finalizer=finalizer,
         )
 
@@ -537,7 +537,7 @@ class TestFinalizeRunStep:
         finalizer = MagicMock()
 
         finalize_run_step(
-            result=result,
+            run_result=result,
             result_finalizer=finalizer,
         )
 
@@ -549,7 +549,7 @@ class TestFinalizeRunStep:
         finalizer = MagicMock()
 
         finalize_run_step(
-            result=result,
+            run_result=result,
             result_finalizer=finalizer,
         )
 

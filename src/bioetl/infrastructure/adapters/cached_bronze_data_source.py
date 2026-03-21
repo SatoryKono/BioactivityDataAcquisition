@@ -17,14 +17,21 @@ from __future__ import annotations
 
 __all__ = ["CachedBronzeDataSource"]
 
-from datetime import UTC, datetime
-from pathlib import Path
+from datetime import datetime
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-from bioetl.domain.exceptions import CachedBronzeEmptyError
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters._cached_bronze_support import (
+    count_batch_records,
+    iter_batch_records,
+    list_sorted_batches,
+    log_unsupported_fetch_params,
+    parse_bronze_date,
+    raise_if_empty_batches,
+    resolve_bronze_path,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -129,9 +136,7 @@ class CachedBronzeDataSource:
         Returns:
             Datetime with UTC timezone parsed from the date string, or None if date_str is None.
         """
-        if date_str is None:
-            return None
-        return datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
+        return parse_bronze_date(date_str)
 
     async def _list_batches_sorted(self) -> list[str]:
         """List batches with deterministic sorting (ADR-014).
@@ -147,33 +152,12 @@ class CachedBronzeDataSource:
         Returns:
             List of relative paths, sorted lexicographically.
         """
-        # Note: BronzeWriter with flat_structure=True expects provider/entity
-        # to already be in base_path, so we pass empty strings for those.
-        # The list_batches method constructs: base_path / provider / entity / date
-        # When flat_structure=True and base_path already includes provider/entity,
-        # we need to handle this differently.
-
-        # Check if reader has flat_structure enabled
-        flat_structure = getattr(self._reader, "_flat_structure", False)
-
-        if flat_structure:
-            # flat_structure=True: base_path already has provider/entity
-            # list_batches needs empty provider/entity to avoid duplication
-            batches = await self._reader.list_batches(
-                provider="",
-                entity="",
-                date=self._parse_date(self._bronze_date),
-            )
-        else:
-            # flat_structure=False: standard path construction
-            batches = await self._reader.list_batches(
-                provider=self._provider,
-                entity=self._entity_type,
-                date=self._parse_date(self._bronze_date),
-            )
-
-        # Sort for deterministic ordering (ADR-014)
-        return sorted(batches)
+        return await list_sorted_batches(
+            self._reader,
+            provider=self._provider,
+            entity_type=self._entity_type,
+            bronze_date=self._bronze_date,
+        )
 
     async def fetch(
         self,
@@ -201,7 +185,11 @@ class CachedBronzeDataSource:
             CachedBronzeEmptyError: If no batch files are found in Bronze storage.
         """
         _ = entity_type, filter_field, offset
-        self._log_unsupported_fetch_params(query=query, filter_ids=filter_ids)
+        log_unsupported_fetch_params(
+            self._logger,
+            query=query,
+            filter_ids=filter_ids,
+        )
         batches = await self._list_batches_sorted()
         self._logger.info(
             "cached_bronze_fetch_start",
@@ -209,10 +197,16 @@ class CachedBronzeDataSource:
             date_filter=self._bronze_date,
             limit=limit,
         )
-        self._raise_if_empty_batches(batches)
+        raise_if_empty_batches(
+            batches,
+            reader=self._reader,
+            provider=self._provider,
+            entity_type=self._entity_type,
+            bronze_date=self._bronze_date,
+        )
 
         count = 0
-        async for record in self._iter_batch_records(batches):
+        async for record in iter_batch_records(self._reader, self._logger, batches):
             yield record
             count += 1
             if limit is not None and count >= limit:
@@ -240,18 +234,11 @@ class CachedBronzeDataSource:
             query: Query string that was passed to fetch but is not supported.
             filter_ids: Filter ID list that was passed to fetch but is not supported.
         """
-        if query:
-            self._logger.warning(
-                "cached_bronze_query_ignored",
-                query=query,
-                reason="query parameter not supported for cached Bronze",
-            )
-        if filter_ids:
-            self._logger.warning(
-                "cached_bronze_filter_ignored",
-                filter_count=len(filter_ids),
-                reason="filter_ids not supported for cached Bronze",
-            )
+        log_unsupported_fetch_params(
+            self._logger,
+            query=query,
+            filter_ids=filter_ids,
+        )
 
     def _resolve_bronze_path(self) -> str:
         """Resolve effective Bronze path for empty-cache errors.
@@ -259,10 +246,11 @@ class CachedBronzeDataSource:
         Returns:
             Effective Bronze directory path string for the current provider and entity.
         """
-        bronze_path = str(self._reader.base_path)
-        if getattr(self._reader, "_flat_structure", False):
-            return bronze_path
-        return str(Path(bronze_path) / self._provider / self._entity_type)
+        return resolve_bronze_path(
+            self._reader,
+            provider=self._provider,
+            entity_type=self._entity_type,
+        )
 
     def _raise_if_empty_batches(self, batches: list[str]) -> None:
         """Raise domain error when no cached Bronze batches are available.
@@ -273,13 +261,12 @@ class CachedBronzeDataSource:
         Raises:
             CachedBronzeEmptyError: If the batches list is empty.
         """
-        if batches:
-            return
-        raise CachedBronzeEmptyError(
+        raise_if_empty_batches(
+            batches,
+            reader=self._reader,
             provider=self._provider,
             entity_type=self._entity_type,
-            bronze_path=self._resolve_bronze_path(),
-            date_filter=self._bronze_date,
+            bronze_date=self._bronze_date,
         )
 
     async def _iter_batch_records(
@@ -294,10 +281,8 @@ class CachedBronzeDataSource:
         Yields:
             Bronze records from each batch file in order.
         """
-        for batch_path in batches:
-            self._logger.debug("cached_bronze_reading_batch", batch_path=batch_path)
-            async for record in self._reader.read_bronze(batch_path):
-                yield record
+        async for record in iter_batch_records(self._reader, self._logger, batches):
+            yield record
 
     async def get_total_records(self) -> int:
         """Get total number of records across all cached batches.
@@ -309,16 +294,4 @@ class CachedBronzeDataSource:
             Total records.
         """
         batches = await self._list_batches_sorted()
-        total = 0
-
-        self._logger.info(
-            "Estimating total records in Bronze cache...", batch_count=len(batches)
-        )
-
-        for batch_path in batches:
-            # We use a simpler counting method if available, or just use the reader
-            async for _ in self._reader.read_bronze(batch_path):
-                total += 1
-
-        self._logger.info("Total records estimated", total=total)
-        return total
+        return await count_batch_records(self._reader, self._logger, batches)
