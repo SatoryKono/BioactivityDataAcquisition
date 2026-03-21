@@ -21,6 +21,12 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=False,
         help="Enable live API contract tests (equivalent to BIOETL_LIVE_API_TESTS=true).",
     )
+    parser.addoption(
+        "--pilot-soak",
+        action="store_true",
+        default=False,
+        help="Enable richer pilot-only live contract suites (equivalent to BIOETL_PILOT_SOAK_TESTS=true).",
+    )
 
 
 def pytest_cmdline_main(config):

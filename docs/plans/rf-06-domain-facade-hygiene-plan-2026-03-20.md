@@ -1,7 +1,7 @@
 # RF-06 Domain Facade Hygiene Plan
 
 **Date:** 2026-03-20
-**Status:** Proposed
+**Status:** Completed execution plan
 **Primary rationale:** improve `domain.ports` and `PipelineContext` architectural narrative without moving runtime ports out of `domain`
 **Normative constraint:** no port migration across layers
 

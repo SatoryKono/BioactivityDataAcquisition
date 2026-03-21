@@ -16,9 +16,12 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.types import BronzeRecord, JsonDict
+from bioetl.infrastructure.adapters.chembl._fetch_paging_filtered import (
+    _ChemblFetchPagingFilteredMixin,
+)
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Iterator
+    from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
@@ -45,7 +48,7 @@ CHEMBL_ADAPTER_ERRORS = (
 )
 
 
-class ChemblFetchPagingMixin:
+class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
     """Provides ChEMBL pagination and filtered-page iteration helpers."""
 
     # Host-class attributes (provided by ChemblAdapter.__init__)
@@ -125,218 +128,6 @@ class ChemblFetchPagingMixin:
             if not has_next:
                 break
             offset += len(records)
-
-    def _is_duplicate_composite(
-        self,
-        record: BronzeRecord,
-        pk_fields: tuple[str, ...],
-        seen_ids: set[str],
-        entity_type: str,
-        filter_field: str,
-    ) -> bool:
-        """Check composite-key duplicate, returning True if record should be skipped."""
-        composite_key = self._compute_composite_key(record, pk_fields)
-        if not composite_key or composite_key == "|".join([""] * len(pk_fields)):
-            return False
-        if composite_key not in seen_ids:
-            seen_ids.add(composite_key)
-            return False
-        self._logger.debug(
-            "skipping_duplicate_record",
-            entity_type=entity_type,
-            pk_fields=pk_fields,
-            composite_key=composite_key,
-            filter_field=filter_field,
-        )
-        self._adapter_metrics.record_dropped_duplicates(entity_type)
-        return True
-
-    def _is_duplicate_simple(
-        self,
-        record: BronzeRecord,
-        pk_field: str,
-        seen_ids: set[str],
-        entity_type: str,
-        filter_field: str,
-    ) -> bool:
-        """Check simple-key duplicate, returning True if record should be skipped."""
-        record_id = str(record.get(pk_field, ""))
-        if not record_id:
-            return False
-        if record_id not in seen_ids:
-            seen_ids.add(record_id)
-            return False
-        self._logger.debug(
-            "skipping_duplicate_record",
-            entity_type=entity_type,
-            pk_field=pk_field,
-            record_id=record_id,
-            filter_field=filter_field,
-        )
-        self._adapter_metrics.record_dropped_duplicates(entity_type)
-        return True
-
-    def _yield_deduplicated(
-        self,
-        records: list[BronzeRecord],
-        seen_ids: set[str],
-        pk_field: str,
-        entity_type: str,
-        filter_field: str,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> Iterator[BronzeRecord]:
-        """Yield records while tracking seen IDs for deduplication.
-
-        Args:
-            records: Raw records from a single API page.
-            seen_ids: Mutable set of already-yielded record identifiers;
-                updated in place as new records are emitted.
-            pk_field: Primary key field name for single-key deduplication.
-            entity_type: ChEMBL entity type; used for metrics and logging.
-            filter_field: Filter field name included in duplicate-skip log events.
-            pk_fields: Optional tuple of field names for composite-key deduplication;
-                when None or length 1, single-key logic is used.
-
-        Returns:
-            Iterator of unique BronzeRecord dicts not yet seen.
-        """
-        use_composite = pk_fields is not None and len(pk_fields) > 1
-
-        for record in records:
-            if use_composite:
-                assert pk_fields is not None
-                if self._is_duplicate_composite(
-                    record,
-                    pk_fields,
-                    seen_ids,
-                    entity_type,
-                    filter_field,
-                ):
-                    continue
-            elif self._is_duplicate_simple(
-                record,
-                pk_field,
-                seen_ids,
-                entity_type,
-                filter_field,
-            ):
-                continue
-            yield record
-
-    async def _paginate_filter_results(
-        self,
-        url: str,
-        id_batch: list[str],
-        filter_field: str,
-        entity_type: str,
-        pk_field: str,
-        seen_ids: set[str],
-        start_offset: int,
-        limit: int | None,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Continue pagination after first filtered page.
-
-        Args:
-            url: Full API endpoint URL to paginate.
-            id_batch: List of IDs already applied as the filter.
-            filter_field: API field name used for filtering.
-            entity_type: ChEMBL entity type (e.g., ``"activity"``).
-            pk_field: Primary key field for single-key deduplication.
-            seen_ids: Mutable set of already-yielded identifiers; shared across pages.
-            start_offset: Pagination offset to begin from (i.e., length of first page).
-            limit: Maximum total records already fetched, or None for no limit.
-            pk_fields: Optional composite-key tuple; None for single-key dedup.
-
-        Returns:
-            Async iterator of additional deduplicated BronzeRecord dicts.
-        """
-        offset = start_offset
-        while True:
-            if limit and offset >= limit:
-                break
-            params = self._build_params(offset, entity_type)
-            params.update(
-                self._build_filter_params(entity_type, filter_field, id_batch)
-            )
-            try:
-                records, has_next = await self._fetch_page(url, params, entity_type)
-            except CHEMBL_ADAPTER_ERRORS:
-                self._logger.warning(
-                    "chembl_pagination_interrupted",
-                    entity_type=entity_type,
-                    offset=offset,
-                    records_yielded=len(seen_ids),
-                )
-                return
-            if not records:
-                break
-            for record in self._yield_deduplicated(
-                records, seen_ids, pk_field, entity_type, filter_field, pk_fields
-            ):
-                yield record
-            if not has_next:
-                break
-            offset += len(records)
-
-    async def _fetch_with_filter(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records filtered by ID batch with client-side deduplication.
-
-        Args:
-            entity_type: ChEMBL entity type (e.g., ``"activity"``).
-            id_batch: List of IDs to include in the filter query.
-            filter_field: API field name to filter on.
-            limit: Maximum records to fetch, or None for no limit.
-
-        Returns:
-            Async iterator of deduplicated BronzeRecord dicts for the given batch.
-        """
-        url = self._mapper.get_resource_url(entity_type)
-        seen_ids: set[str] = set()
-        pk_field = self._get_api_pk_field(entity_type)
-        pk_fields = self._get_api_dedup_fields(entity_type)
-
-        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
-        skip_pagination = (
-            len(pk_fields) == 1
-            and pk_fields[0] == api_filter_field
-            and len(id_batch) <= self._page_size
-        )
-
-        params = self._build_params(0, entity_type)
-        if skip_pagination:
-            params.pop("limit", None)
-            params.pop("offset", None)
-        params.update(self._build_filter_params(entity_type, filter_field, id_batch))
-
-        records, has_next = await self._fetch_page(url, params, entity_type)
-        if not records:
-            return
-
-        for record in self._yield_deduplicated(
-            records, seen_ids, pk_field, entity_type, filter_field, pk_fields
-        ):
-            yield record
-
-        if has_next:
-            async for record in self._paginate_filter_results(
-                url,
-                id_batch,
-                filter_field,
-                entity_type,
-                pk_field,
-                seen_ids,
-                len(records),
-                limit,
-                pk_fields,
-            ):
-                yield record
 
 
 __all__ = ["CHEMBL_ADAPTER_ERRORS", "ChemblFetchPagingMixin"]
