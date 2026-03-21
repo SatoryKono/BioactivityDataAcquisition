@@ -258,8 +258,15 @@ technical-debt roadmap, не потеряв важные предложения.
 - `3G-2` уже реализован:
   `health_monitor.py` сохранён как import-stable facade, а transition и
   observability helpers вынесены в `_health_monitor_support.py`;
+- следующим bounded cluster после `health_monitor.py` выбран
+  `pubmed/adapter_filter_fetch_mixin.py`, и cluster start зафиксирован в
+  `wave-3-pubmed-filter-fetch-cluster-plan-2026-03-21.md`;
+- `3H-2` уже реализован:
+  `adapter_filter_fetch_mixin.py` сохранён как import-stable facade, а
+  filter/fallback/resume helpers вынесены в `_filter_fetch_support.py`;
 - следующий implementation step для `Wave 3` теперь сужен до closeout/ratchet
-  для `health_monitor.py` или к выбору следующего bounded adapter hotspot.
+  для `adapter_filter_fetch_mixin.py` или к выбору следующего bounded adapter
+  hotspot.
 
 ### Wave 4. Complexity hotspot implementation
 

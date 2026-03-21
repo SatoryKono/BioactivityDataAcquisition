@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+
 from bioetl.composition.bootstrap.runtime.composite_execution_support_builder import (
     build_execution_support_services,
 )
@@ -16,6 +21,8 @@ from bioetl.composition.bootstrap.runtime.composite_support_service_bundles impo
     MergeDependenciesBundle,
     RuntimeManagementServicesBundle,
 )
+
+_RUNTIME_CONFIG_FACADE: type[CompositeRuntimeConfig] | None = None
 
 __all__ = [
     "ExecutionSupportServicesBundle",

@@ -5,101 +5,30 @@ Implements FilterableDataSourcePort contract for filtered API access.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.pubmed._filter_fetch_support import (
+    PubMedAdapterFilterFetchHost,
+    apply_resume_offset,
+    fetch_filtered_records,
+    fetch_filtered_with_fallback_records,
+    fetch_from_filter_ids,
+    fetch_records,
+    resolve_pmids_for_fetch,
+    resolve_resume_offset,
+    validate_publication_entity,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
-
-
-async def _empty_async_iterator() -> AsyncIterator[BronzeRecord]:
-    """Return an empty async iterator matching BronzeRecord stream contract."""
-    if False:  # pragma: no cover
-        yield {}
-
-
-class _PubMedAdapterFilterFetchHost(Protocol):
-    """Structural host contract for PubMed adapter fetch/filter behavior."""
-
-    logger: LoggerPort
-    _logger: LoggerPort
-    _fallback_decorator: ComposableFallbackDecorator
-
-    def _yield_articles_from_pmids(
-        self,
-        pmids: list[str],
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Yield normalized article records from PMID values."""
-        ...
-
-    def fetch_filtered(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records by filter IDs."""
-        ...
-
-    def _fetch_from_filter_ids(
-        self,
-        *,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str | None,
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch from explicit filter IDs."""
-        ...
-
-    @staticmethod
-    def _validate_publication_entity(entity_type: str) -> None:
-        """Validate supported entity type."""
-        ...
-
-    def _resolve_resume_offset(
-        self,
-        *,
-        limit: int | None,
-        offset: int | None,
-    ) -> int | None:
-        """Resolve resume offset."""
-        ...
-
-    async def _resolve_pmids_for_fetch(
-        self,
-        *,
-        query: str | None,
-        limit: int | None,
-    ) -> list[str]:
-        """Resolve PMIDs for current fetch request."""
-        ...
-
-    def _apply_resume_offset(
-        self,
-        *,
-        pmids: list[str],
-        resume_offset: int,
-    ) -> list[str]:
-        """Apply resume offset to PMID list."""
-        ...
-
-    async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
-        """Resolve PMIDs through Entrez search endpoint."""
-        ...
 
 
 class PubMedAdapterFilterFetchMixin:
     """PubMed fetch/filter orchestration for FilterableDataSourcePort behavior."""
 
     async def fetch_filtered(
-        self: _PubMedAdapterFilterFetchHost,
+        self: PubMedAdapterFilterFetchHost,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -119,20 +48,17 @@ class PubMedAdapterFilterFetchMixin:
         Raises:
             ValueError: If entity_type is not "publication".
         """
-        if entity_type != "publication":
-            raise ValueError("PubMedAdapter only supports 'publication'")
-
-        if filter_field != "pmid":
-            self._logger.warning(
-                "unsupported_filter_field", field=filter_field, msg="Assuming PMIDs"
-            )
-
-        async for record in self._yield_articles_from_pmids(filter_ids, limit):
-            record["_lookup_method"] = "pmid"
+        async for record in fetch_filtered_records(
+            self,
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        ):
             yield record
 
     async def fetch_filtered_with_fallback(
-        self: _PubMedAdapterFilterFetchHost,
+        self: PubMedAdapterFilterFetchHost,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -154,33 +80,18 @@ class PubMedAdapterFilterFetchMixin:
         Raises:
             ValueError: If entity_type is not "publication".
         """
-        if entity_type != "publication":
-            raise ValueError("PubMedAdapter only supports 'publication'")
-
-        def _primary_records(
-            primary_ids: list[str],
-            request_limit: int | None,
-        ) -> AsyncIterator[BronzeRecord]:
-            if not primary_ids:
-                return _empty_async_iterator()
-            return self.fetch_filtered(
-                entity_type=entity_type,
-                filter_ids=primary_ids,
-                filter_field=filter_field,
-                limit=request_limit,
-            )
-
-        async for record in self._fallback_decorator.execute(
+        async for record in fetch_filtered_with_fallback_records(
+            self,
+            entity_type=entity_type,
             filter_ids=filter_ids,
-            fallback_mapping=fallback_mapping,
-            primary_record_fetcher=_primary_records,
-            limit=limit,
             filter_field=filter_field,
+            fallback_mapping=fallback_mapping,
+            limit=limit,
         ):
             yield record
 
     async def fetch(
-        self: _PubMedAdapterFilterFetchHost,
+        self: PubMedAdapterFilterFetchHost,
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
@@ -204,32 +115,19 @@ class PubMedAdapterFilterFetchMixin:
         Raises:
             ValueError: If entity_type is not "publication".
         """
-        if filter_ids:
-            async for record in self._fetch_from_filter_ids(
-                entity_type=entity_type,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                limit=limit,
-            ):
-                yield record
-            return
-
-        self._validate_publication_entity(entity_type)
-        resume_offset = self._resolve_resume_offset(limit=limit, offset=offset)
-        if resume_offset is None:
-            return
-
-        pmids = await self._resolve_pmids_for_fetch(query=query, limit=limit)
-        if not pmids:
-            return
-
-        pmids = self._apply_resume_offset(pmids=pmids, resume_offset=resume_offset)
-        remaining_limit = None if limit is None else max(0, limit - resume_offset)
-        async for record in self._yield_articles_from_pmids(pmids, remaining_limit):
+        async for record in fetch_records(
+            self,
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
+        ):
             yield record
 
     async def _fetch_from_filter_ids(
-        self: _PubMedAdapterFilterFetchHost,
+        self: PubMedAdapterFilterFetchHost,
         *,
         entity_type: str,
         filter_ids: list[str],
@@ -247,11 +145,11 @@ class PubMedAdapterFilterFetchMixin:
         Yields:
             BronzeRecord articles resolved from the filter IDs.
         """
-        effective_filter_field = filter_field or "pmid"
-        async for record in self.fetch_filtered(
+        async for record in fetch_from_filter_ids(
+            self,
             entity_type=entity_type,
             filter_ids=filter_ids,
-            filter_field=effective_filter_field,
+            filter_field=filter_field,
             limit=limit,
         ):
             yield record
@@ -266,11 +164,10 @@ class PubMedAdapterFilterFetchMixin:
         Raises:
             ValueError: If entity_type is not "publication".
         """
-        if entity_type != "publication":
-            raise ValueError("PubMedAdapter only supports 'publication'")
+        validate_publication_entity(entity_type)
 
     def _resolve_resume_offset(
-        self: _PubMedAdapterFilterFetchHost,
+        self: PubMedAdapterFilterFetchHost,
         *,
         limit: int | None,
         offset: int | None,
@@ -284,18 +181,10 @@ class PubMedAdapterFilterFetchMixin:
         Returns:
             Validated resume offset integer, or None if offset has already reached the limit.
         """
-        resume_offset = max(0, offset or 0)
-        if limit is not None and resume_offset >= limit:
-            self._logger.info(
-                "pubmed_resume_offset_reached_limit",
-                offset=resume_offset,
-                limit=limit,
-            )
-            return None
-        return resume_offset
+        return resolve_resume_offset(self, limit=limit, offset=offset)
 
     async def _resolve_pmids_for_fetch(
-        self: _PubMedAdapterFilterFetchHost,
+        self: PubMedAdapterFilterFetchHost,
         *,
         query: str | None,
         limit: int | None,
@@ -309,11 +198,10 @@ class PubMedAdapterFilterFetchMixin:
         Returns:
             List of PMID strings resolved from the search query or default term.
         """
-        search_term = query or "pharmacogenomics[Title/Abstract]"
-        return await self._get_pmids(search_term, limit or 10000)
+        return await resolve_pmids_for_fetch(self, query=query, limit=limit)
 
     def _apply_resume_offset(
-        self: _PubMedAdapterFilterFetchHost,
+        self: PubMedAdapterFilterFetchHost,
         *,
         pmids: list[str],
         resume_offset: int,
@@ -327,14 +215,11 @@ class PubMedAdapterFilterFetchMixin:
         Returns:
             PMID list with the first resume_offset entries removed.
         """
-        if resume_offset == 0:
-            return pmids
-        self._logger.info(
-            "pubmed_resume_skip_processed",
-            offset=resume_offset,
-            pmids_found=len(pmids),
+        return apply_resume_offset(
+            self,
+            pmids=pmids,
+            resume_offset=resume_offset,
         )
-        return pmids[resume_offset:]
 
 
 __all__ = ["PubMedAdapterFilterFetchMixin"]

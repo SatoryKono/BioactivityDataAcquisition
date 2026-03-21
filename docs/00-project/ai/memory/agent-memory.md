@@ -58,11 +58,15 @@
 | Package topology decisions | [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md) |
 | Governance signals baseline | [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md) |
 | Governance signals decisions | [../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md) |
+| Compatibility registry refactor evidence | [../../../reports/evidence/compatibility-registry-refactor/SUMMARY.md](../../../reports/evidence/compatibility-registry-refactor/SUMMARY.md) |
+| Compatibility registry refactor decisions | [../../../reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md](../../../reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md) |
 
 Короткая operational rule:
 - package count сам по себе не запускает structural wave;
 - hotspot calibration по умолчанию идёт на уровне package family, а не whole layer;
 - topology подсказывает, где смотреть; governance signals подсказывают, где действовать.
+- compatibility registry использует YAML SSOT + shared loader + generated snapshot как baseline;
+- freeze guards по умолчанию считаются отдельным import-discipline/removal-policy слоем и не должны автоматически мигрировать в shared loader.
 
 ### Быстрые команды
 

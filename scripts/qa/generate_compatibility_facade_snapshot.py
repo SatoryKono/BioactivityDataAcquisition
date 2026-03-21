@@ -68,6 +68,7 @@ def _render_measured_only_modules(registry: CompatibilityRegistry) -> list[str]:
     for row in registry.measured_only_modules:
         lines.append(
             f"- `{row.path}` — owner: `{row.owner}`, review: `{row.review_date}`, "
+            f"policy: `{row.new_code_policy}`, promote on: `{row.promotion_trigger}`, "
             f"reason: {row.reason}"
         )
     return lines

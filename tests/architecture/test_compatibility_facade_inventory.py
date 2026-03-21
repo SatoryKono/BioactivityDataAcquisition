@@ -102,6 +102,10 @@ def test_registry_yaml_has_expected_shape() -> None:
         assert row.owner
         assert row.reason
         assert date.fromisoformat(row.review_date).year >= 2026
+        assert row.new_code_policy in mod.ALLOWED_MEASURED_ONLY_NEW_CODE_POLICIES
+        assert (
+            row.promotion_trigger in mod.ALLOWED_MEASURED_ONLY_PROMOTION_TRIGGERS
+        )
 
 
 @pytest.mark.architecture
@@ -130,6 +134,10 @@ def test_inventory_doc_exists_with_required_sections() -> None:
     assert "## Measured Registry" not in text, (
         "Measured registry must live in the generated companion file, "
         "not in the manual operational doc."
+    )
+    assert "## Measured-Only Policy" in text, (
+        "Operational compatibility doc must state the measured-only policy "
+        "separately from the generated snapshot."
     )
 
 
