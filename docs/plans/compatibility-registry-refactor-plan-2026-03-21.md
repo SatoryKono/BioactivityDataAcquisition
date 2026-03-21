@@ -1,6 +1,6 @@
 # Compatibility Registry Refactor Plan
 
-*Status: active execution plan (status refreshed to current repo state)*
+*Status: completed execution plan*
 *Date: 2026-03-21*
 
 ## Basis
@@ -32,7 +32,7 @@ The repository has already completed a meaningful part of the originally propose
 - `tests/architecture/test_compatibility_facade_inventory.py` already validates YAML shape plus markdown-table sync
 - `scripts/ci/_compatibility_telemetry.py` and `tests/architecture/test_compatibility_telemetry_reporting.py` already derive counters from YAML
 
-So this plan is no longer a greenfield design. It is now a bounded alignment and completion plan for the remaining gaps.
+So this plan is no longer a greenfield design. It became a bounded alignment and completion plan, and that implementation work is now closed.
 
 ## Scope Rules
 
@@ -86,7 +86,7 @@ So this plan is no longer a greenfield design. It is now a bounded alignment and
 ### CR-02. Rewire Test And Telemetry Consumers To YAML
 
 - **Priority**: P0
-- **Status**: mostly completed
+- **Status**: completed
 - **Objective**: stop architecture tests and CI helpers from acting as second registries
 - **Target files**:
   - `tests/architecture/test_compatibility_facade_inventory.py`
@@ -102,14 +102,16 @@ So this plan is no longer a greenfield design. It is now a bounded alignment and
   - `test_compatibility_telemetry_reporting.py` already validates telemetry counters against YAML-derived registry state
   - `_compatibility_telemetry.py` already reads the canonical YAML
 - **Remaining focus**:
-  - verify whether `test_compatibility_freeze_guards.py` and any adjacent freeze/allowlist checks still duplicate registry intent outside the shared loader contract
-  - do not migrate freeze-guard allowlists wholesale; only extract the narrow subset that truly restates curated or measured-only registry semantics
-  - tighten schema validation only if needed, without reintroducing parallel constants
+  - no further mandatory extraction identified
+- **Closeout note**:
+  - `test_compatibility_freeze_guards.py` was calibrated against the current YAML/loader baseline
+  - the remaining freeze-guard allowlists are best treated as dedicated import-discipline and removal-policy checks, not as a second curated registry
+  - wholesale extraction from freeze guards into the shared loader is not justified at the current stage
 
 ### CR-03. Add Generated Snapshot Tooling
 
 - **Priority**: P1
-- **Status**: partially completed
+- **Status**: completed
 - **Objective**: replace manually maintained measured snapshot sections with `--check` / `--update` tooling
 - **Actual script**:
   - `scripts/qa/generate_compatibility_facade_snapshot.py`
@@ -129,13 +131,12 @@ So this plan is no longer a greenfield design. It is now a bounded alignment and
   - the generated companion file already exists at `docs/02-architecture/07-compatibility-facade-snapshot.md`
   - `--check` is already green in the current repository state
 - **Remaining focus**:
-  - keep plan and docs aligned to the real script name
-  - decide whether any additional wrapper/alias script is needed; do not create a second generator unless there is a real governance benefit
+  - no mandatory follow-up
 
 ### CR-04. Split Manual Governance From Generated Snapshot In Markdown
 
 - **Priority**: P1
-- **Status**: mostly completed
+- **Status**: completed
 - **Objective**: keep the inventory doc readable while making edit boundaries explicit
 - **Target files**:
   - `docs/02-architecture/07-compatibility-facade-inventory.md`
@@ -159,13 +160,12 @@ So this plan is no longer a greenfield design. It is now a bounded alignment and
   - the repository already chose the companion-file approach
   - the manual inventory doc links to the generated snapshot and explicitly says not to copy counters back by hand
 - **Remaining focus**:
-  - keep the operational doc free of measured snapshot regressions
-  - avoid reintroducing measured-registry sections into the manual doc
+  - keep the operational doc free of measured snapshot regressions as ordinary maintenance, not as an open refactor wave
 
 ### CR-05. Formalize Measured-Only Policy
 
 - **Priority**: P1
-- **Status**: mostly completed
+- **Status**: completed
 - **Objective**: make measured-only governance explicit instead of convention-only
 - **Target surfaces**:
   - `docs/02-architecture/07-compatibility-facade-inventory.md`
@@ -184,13 +184,12 @@ So this plan is no longer a greenfield design. It is now a bounded alignment and
   - the generated snapshot renders the measured-only policy fields
   - the operational inventory doc now states the measured-only policy explicitly
 - **Remaining focus**:
-  - decide later whether measured-only policy needs broader reuse outside the compatibility registry family
-  - keep future measured-only additions aligned with the YAML schema instead of prose-only exceptions
+  - future measured-only additions should continue to use the YAML schema instead of prose-only exceptions
 
 ### CR-06. Move Historical Review Narrative Out Of Operational Ledger
 
 - **Priority**: P2
-- **Status**: mostly completed
+- **Status**: completed
 - **Objective**: stop mixing operational registry data with dated review-wave prose
 - **Target surfaces**:
   - `docs/02-architecture/07-compatibility-facade-inventory.md`
@@ -201,8 +200,7 @@ So this plan is no longer a greenfield design. It is now a bounded alignment and
 - **Observed repo state**:
   - historical review narrative has already been moved to `docs/02-architecture/history/compatibility-facade-review-history.md`
 - **Remaining focus**:
-  - keep new review-wave prose out of the operational inventory doc
-  - treat the history doc as the only narrative sink for retained-entrypoint review history
+  - keep new review-wave prose out of the operational inventory doc as ordinary maintenance
 
 ## Verify Matrix
 
@@ -222,10 +220,7 @@ Additional generator checks:
 
 ## Recommended Order
 
-1. close the remaining `CR-02` consumer alignment, especially freeze-guard duplication checks
-2. complete `CR-05` measured-only policy formalization
-3. keep `CR-03` and `CR-04` green via generator/doc guardrails, not by introducing parallel tooling
-4. treat `CR-06` as completed baseline and prevent narrative regressions
+Implemented.
 
 ## Change Safety Notes
 
@@ -242,3 +237,23 @@ Additional generator checks:
 - `scripts/qa/generate_compatibility_facade_snapshot.py --check` / `--update` is available and deterministic
 - measured-only governance is explicit
 - historical review narrative is no longer embedded in the operational registry ledger
+
+## Implementation Closeout
+
+This plan is complete.
+
+Completed outcomes:
+
+- YAML SSOT is active through `configs/quality/compatibility_facade_inventory.yaml`
+- shared loader contract is active through `scripts/ci/_compatibility_registry.py`
+- telemetry and architecture tests already consume the shared registry contract
+- generated snapshot flow is active through `scripts/qa/generate_compatibility_facade_snapshot.py`
+- manual and generated compatibility docs are split into separate artifacts
+- measured-only governance is explicit in both YAML and operational documentation
+- historical review narrative is separated from the operational ledger
+- freeze guards were calibrated and intentionally left as a separate policy layer unless a future guard clearly duplicates registry-owned semantics
+
+Residual optional follow-up:
+
+- refresh older shard-level evidence wording if a cleaner post-implementation historical record is desired
+- bundle the compatibility-registry wave into a dedicated commit scope

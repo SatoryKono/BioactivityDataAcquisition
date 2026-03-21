@@ -1,6 +1,7 @@
 """PubChem fetch strategy facade.
 
 Thin compatibility facade (P1-5):
+- query/search flow moved to ``_fetch_strategy_search``
 - query building moved to ``query_builder``
 - response mapping moved to ``response_mapper``
 - execution flow moved to ``fetch_flow``
@@ -20,6 +21,9 @@ import pubchempy as pcp
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
+from bioetl.infrastructure.adapters.pubchem._fetch_strategy_search import (
+    _PubChemSearchFetchMixin,
+)
 from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlowService
 from bioetl.infrastructure.adapters.pubchem.policy_helper import (
     is_blank_value,
@@ -29,12 +33,9 @@ from bioetl.infrastructure.adapters.pubchem.policy_helper import (
     parse_valid_cids,
 )
 from bioetl.infrastructure.adapters.pubchem.query_builder import (
-    build_assay_endpoint,
     build_cid_batch_endpoint,
-    build_compound_name_endpoint,
     build_inchikey_endpoint,
     build_smiles_endpoint,
-    build_substance_name_endpoint,
 )
 from bioetl.infrastructure.adapters.pubchem.response_mapper import (
     PubChemResponseMapper,
@@ -51,71 +52,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
-
-
-class _PubChemSearchFetchMixin:
-    """Query-based PubChem fetch strategies (compound/substance/assay)."""
-
-    _fetch_flow: PubChemFetchFlowService
-    _response_mapper: PubChemResponseMapper
-
-    async def fetch_by_query(
-        self,
-        query: str,
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch compounds by query (name search)."""
-        compounds = await self._fetch_flow.execute(
-            endpoint=build_compound_name_endpoint(query),
-            pubchem_callable=pcp.get_compounds,
-            pubchem_args=(query, "name"),
-        )
-        for index, record in enumerate(self._response_mapper.map_compounds(compounds)):
-            if is_limit_reached(limit, index):
-                break
-            yield record
-
-    async def fetch_substances(
-        self,
-        query: str | None,
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch substances from PubChem."""
-        if not query:
-            raise ValueError("Query is required for substance search")
-
-        substances = await self._fetch_flow.execute(
-            endpoint=build_substance_name_endpoint(query),
-            pubchem_callable=pcp.get_substances,
-            pubchem_args=(query, "name"),
-        )
-        fetched = 0
-        for record in self._response_mapper.map_substances(substances):
-            if is_limit_reached(limit, fetched):
-                break
-            yield record
-            fetched += 1
-
-    async def fetch_assays(
-        self,
-        query: str | None,
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch assays from PubChem."""
-        if not query:
-            raise ValueError("Query is required for assay search")
-
-        assays = await self._fetch_flow.execute(
-            endpoint=build_assay_endpoint(query),
-            pubchem_callable=pcp.get_assays,
-            pubchem_args=(query,),
-        )
-        fetched = 0
-        for record in self._response_mapper.map_assays(assays):
-            if is_limit_reached(limit, fetched):
-                break
-            yield record
-            fetched += 1
 
 
 class PubChemFetchStrategies(_PubChemSearchFetchMixin):

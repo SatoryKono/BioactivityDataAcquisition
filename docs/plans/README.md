@@ -55,6 +55,7 @@ Plans in this folder must not override normative documents.
 - [wave-3-error-handling-cluster-plan-2026-03-21.md](wave-3-error-handling-cluster-plan-2026-03-21.md)
 - [wave-3-health-monitor-cluster-plan-2026-03-21.md](wave-3-health-monitor-cluster-plan-2026-03-21.md)
 - [wave-3-pubmed-filter-fetch-cluster-plan-2026-03-21.md](wave-3-pubmed-filter-fetch-cluster-plan-2026-03-21.md)
+- [wave-3-pubchem-fetch-strategies-cluster-plan-2026-03-21.md](wave-3-pubchem-fetch-strategies-cluster-plan-2026-03-21.md)
 - [rf-fs-004-execution-plan-2026-03-20.md](rf-fs-004-execution-plan-2026-03-20.md)
 - [rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md](rf-fs-005-wave-1-hotspot-execution-plan-2026-03-20.md)
 - [rf-fs-remaining-backlog-execution-plan-2026-03-20.md](rf-fs-remaining-backlog-execution-plan-2026-03-20.md)
