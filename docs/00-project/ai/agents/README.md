@@ -1,74 +1,48 @@
-# AI Agents Context
+# Claude Code Agents — BioETL
 
-*Статус: internal-published (Internal / Extended)*
+Agent registry after consolidation (2026-03-12).
+See `ORCHESTRATION.md` for workflow and write-zone rules.
 
-Этот каталог содержит документацию по агентам для разных рантаймов AI в BioETL.
+## BioETL Core (9 agents)
 
-## Canonical Sources
+| Agent | Model | Role |
+|-------|-------|------|
+| [py-audit-bot](py-audit-bot.md) | opus | Code/architecture audit, RULES.md compliance |
+| [py-plan-bot](py-plan-bot.md) | opus | Task planning, RF-* decomposition |
+| [py-test-bot](py-test-bot.md) | sonnet | Tests (baseline/final/retest), coverage |
+| [py-config-bot](py-config-bot.md) | sonnet | YAML configs (pipeline/DQ/filter) |
+| [py-debug-bot](py-debug-bot.md) | opus | RCA, bug fixes, regression debugging |
+| [py-doc-bot](py-doc-bot.md) | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams |
+| [py-test-swarm](py-test-swarm.md) | opus | Hierarchical testing (L1->L2->L3) |
+| [py-doc-swarm](py-doc-swarm.md) | opus | Hierarchical docs, drift detection |
+| [py-review-orchestrator](py-review-orchestrator.md) | opus | Code review (S1-S8 stages) |
 
-| Runtime | Canonical path | Notes |
-| --- | --- | --- |
-| Claude Code | `.claude/agents/` | Основной реестр профилей Claude |
-| Codex | `.codex/agents/` | Основной реестр профилей Codex |
-| Docs mirror | `docs/00-project/ai/agents/` | Публикуемый документационный слой, включая Codex mirror pages |
+## Generic Utilities (12 agents)
 
-При расхождении между runtime-реестрами (`.claude/agents/`, `.codex/agents/`) и docs приоритет у runtime-реестра.
-Для текущего Codex workflow статус `py-code-bot` определяется по `.codex/agents/ORCHESTRATION.md`: production-код пишет orchestrator, а `py-code-bot` трактуется как deprecated compatibility reference.
+| Agent | Model | Role |
+|-------|-------|------|
+| [code-reviewer](code-reviewer.md) | sonnet | General-purpose code review |
+| [debugger](debugger.md) | sonnet | Bug diagnosis, root cause analysis |
+| [refactoring-specialist](refactoring-specialist.md) | sonnet | Code refactoring |
+| [architect-reviewer](architect-reviewer.md) | sonnet | Architecture evaluation |
+| [test-automator](test-automator.md) | sonnet | Test framework automation |
+| [api-designer](api-designer.md) | sonnet | API design, OpenAPI specs |
+| [data-engineer](data-engineer.md) | sonnet | Data pipelines, ETL patterns |
+| [database-optimizer](database-optimizer.md) | sonnet | Query optimization, indexing |
+| [dependency-manager](dependency-manager.md) | sonnet | CVE audit, version conflicts |
+| [git-workflow-manager](git-workflow-manager.md) | sonnet | Git branching strategies |
+| [prompt-engineer](prompt-engineer.md) | sonnet | LLM prompt design and testing |
+| [scientific-literature-researcher](scientific-literature-researcher.md) | sonnet | Scientific paper search (BGPT MCP) |
 
-## Structure
+## Standard Workflow
 
-| Zone | Path | Purpose |
-| --- | --- | --- |
-| Guides | [guides/AGENT.md](guides/AGENT.md) | Инструкции для конкретных ассистентов |
-| Runtime docs | [runtime/agent-memory.md](runtime/agent-memory.md) | Канонические docs-артефакты агентных prompt/workflow |
-| Agent scripts | [scripts/diagrams/py-doc-bot-4.sh](scripts/diagrams/py-doc-bot-4.sh) | Оркестратор диаграммного агентного цикла |
-| Policy | [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md) | Политики именования и стандарты |
-
-## Canonical Documents
-
-| Document | File | Purpose |
-| --- | --- | --- |
-| Jules Guide | [guides/AGENT.md](guides/AGENT.md) | Основной инженерный гайд и workflow |
-| Claude Guide | [guides/CLAUDE.md](guides/CLAUDE.md) | Практики для Claude при работе с репозиторием |
-| Codex Guide | [guides/CODEX.md](guides/CODEX.md) | Инструкции Architecture Auditor + Implementation Engineer |
-| Gemini Guide | [guides/GEMINI.md](guides/GEMINI.md) | Профильный набор правил и ограничений для Gemini |
-| QA Orchestrator | [runtime/py-qa-orchestrator.md](runtime/py-qa-orchestrator.md) | Prompt для иерархического QA-оркестратора |
-| Diagram Docs Orchestrator | [runtime/py-diagram-docs-orchestrator.md](runtime/py-diagram-docs-orchestrator.md) | Оркестратор обновления/rerender диаграммных docx/pdf |
-| Agent Memory (quick) | [runtime/agent-memory.md](runtime/agent-memory.md) | Краткая оперативная память по проекту |
-| Team Orchestration | [agents/ORCHESTRATION.md](agents/ORCHESTRATION.md) | Публикуемое Codex docs mirror для `.codex/agents/ORCHESTRATION.md` |
-
-## Evidence Anchors
-
-Для структурных утверждений про repo layout, package topology и hotspot calibration сначала опирайся на актуальные evidence packs:
-
-- [Project File Structure Summary](../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [Project File Structure Decisions](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [Project Package Topology Summary](../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [Topology Synthesis](../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [Topology vs Governance Cross-Synthesis](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [Package Topology Decisions](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- [Governance Signals Summary](../../../reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
-
-## Policy & Audit Reports
-
-- [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md)
-- [policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
-- [policy/SPECIALIST_PROFILE_TEMPLATE.md](policy/SPECIALIST_PROFILE_TEMPLATE.md)
-- [policy/CONSOLIDATION_VALIDATION.md](policy/CONSOLIDATION_VALIDATION.md)
-
-## Navigation Entry Points
-
-- [Profiles Catalog](agents/README.md)
-- [Agent Orchestration Rules](policy/agent-orchestration-rules.md)
-- [Agent Naming Policy and Rename Plan (2026-03-08)](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md)
-- [Consolidation Validation](policy/CONSOLIDATION_VALIDATION.md)
-- [Agent Consolidation Matrix (2026-03-08)](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
-- [Collected Prompts Index](../prompts/COLLECTED_PROMPTS_INDEX.md)
-- [Shared Agent Memory](../memory/agent-memory.md)
-- [Codex Orchestration Mirror](agents/ORCHESTRATION.md)
-
-## Notes
-
-- `docs/00-project/RULES.md` остаётся canonical source RFC 2119 требований.
-- При конфликте инструкций приоритет: System/Developer/User > локальные инструкции агента.
+```
+1. py-audit-bot (baseline)
+2. py-plan-bot
+3. py-test-bot (baseline)
+4. [debug cycle if FAIL]
+5. code + py-config-bot (parallel)
+6. py-test-bot (final)
+7. py-doc-bot
+8. py-audit-bot (final)
+```

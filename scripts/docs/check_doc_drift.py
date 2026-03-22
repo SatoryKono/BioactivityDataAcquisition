@@ -9,7 +9,7 @@ exist in the codebase.  Catches common drift scenarios:
   3. Module paths moved but docs still point to old locations
   4. Provider/entity lists changed but reference docs are stale
   5. Factory/registry changes not reflected in composition docs
-  6. Active runtime docs mirrors drift from canonical `.codex/agents/` sources
+  6. Active runtime docs mirrors drift from canonical `.claude/agents/` sources
   7. Freshness/version markers in active docs disagree with canonical runtime docs
 
 Usage:
@@ -119,8 +119,8 @@ LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(
 RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     RuntimeMirrorRule(
         name="orchestration",
-        canonical=Path(".codex/agents/ORCHESTRATION.md"),
-        mirror=Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
+        canonical=Path(".claude/agents/ORCHESTRATION.md"),
+        mirror=Path("docs/00-project/ai/agents/ORCHESTRATION.md"),
         sections=(
             "## 1. Обзор",
             "## 2. Стандартный workflow задачи",
@@ -130,14 +130,14 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     ),
     RuntimeMirrorRule(
         name="py-audit-bot",
-        canonical=Path(".codex/agents/py-audit-bot.md"),
-        mirror=Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
+        canonical=Path(".claude/agents/py-audit-bot.md"),
+        mirror=Path("docs/00-project/ai/agents/py-audit-bot.md"),
         sections=("## Выходы",),
     ),
     RuntimeMirrorRule(
         name="py-config-bot",
-        canonical=Path(".codex/agents/py-config-bot.md"),
-        mirror=Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
+        canonical=Path(".claude/agents/py-config-bot.md"),
+        mirror=Path("docs/00-project/ai/agents/py-config-bot.md"),
         sections=("## Выходы", "## Обязательные правила", "## Иерархия конфигураций"),
     ),
 )

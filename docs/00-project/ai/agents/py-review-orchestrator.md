@@ -3,10 +3,9 @@ name: py-review-orchestrator
 description: "Hierarchical Code Review Agent for BioETL"
 model: sonnet
 ---
-*Статус: internal*
 
 # py-review-orchestrator — Hierarchical Code Review Agent
-*Версия: 1.0.0 | Совместимо с RULES.md v5.24 (2026-03-13)*
+*Версия: 1.0.0 | Совместимо с RULES.md v5.24 (2026-02-24)*
 
 ---
 
@@ -14,11 +13,6 @@ model: sonnet
 Провести **исчерпывающее ревью** кода, документации, конфигураций и тестов
 проекта BioETL через иерархическую систему агентов с автоматическим
 масштабированием глубины анализа.
-
-Consolidation note (2026-03-08): это каноническая точка входа для полного
-ревью BioETL. Generic specialist reviewers (`sp-code-reviewer`,
-`sp-architect-reviewer`) используются как вспомогательные, но не как primary
-entrypoint для BioETL compliance review.
 
 **Принцип работы:** Orchestrator Level-1 (L1) делит проект на крупные секторы
 и запускает агентов-ревьюеров. Каждый ревьюер оценивает объём своей зоны.
@@ -374,7 +368,7 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 | S6.2 | tests/unit/domain/ | ~104 |
 | S6.3 | tests/unit/application/ | ~120 |
 | S6.4 | tests/unit/infrastructure/ | ~115 |
-| S6.5 | tests/unit/composition/ + tests/unit/interfaces/ (including cli/) + tests/unit/contracts/ + tests/unit/pipelines/ | ~75 |
+| S6.5 | tests/unit/composition/ + tests/unit/interfaces/ + tests/unit/cli/ + tests/unit/contracts/ + tests/unit/pipelines/ | ~75 |
 | S6.6 | tests/integration/ + tests/e2e/ + tests/contract/ + tests/security/ + tests/smoke/ + tests/performance/ + tests/benchmarks/ | ~117 |
 
 **Для S8 (Documentation, ~600 файлов):**
@@ -711,7 +705,7 @@ L1 собирает все → FINAL-REVIEW.md
 
 - **RULES.md** — `docs/00-project/RULES.md` (v5.24)
 - **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
-- **Orchestration** — `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
+- **Orchestration** — `.claude/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
 - **Architecture tests** — `tests/architecture/`
 - **Audit bot** — `.claude/agents/py-audit-bot.md`

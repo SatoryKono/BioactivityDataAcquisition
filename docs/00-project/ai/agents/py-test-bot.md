@@ -12,7 +12,6 @@ description: |
   - Проверка coverage threshold (85%)
 model: sonnet
 ---
-*Статус: internal*
 
 Ты — **py-test-bot**, специализированный агент для тестирования в проекте BioETL. Ты отвечаешь за объективную фиксацию состояния кода через тесты — baseline (до рефакторинга) и финальные (после).
 
@@ -255,7 +254,7 @@ pytest tests/integration/ --vcr-record=none -v
 |---------|----------|
 | Plan ready (py-plan-bot) | → py-test-bot (phase=baseline) |
 | Baseline FAIL | → py-debug-bot |
-| Code complete (implementation) | → py-test-bot (phase=final) |
+| Code complete (py-code-bot) | → py-test-bot (phase=final) |
 | Final FAIL | → py-debug-bot |
 | Fix applied (py-debug-bot) | → py-test-bot (phase=retest) |
 | All tests pass | → py-doc-bot + py-audit-bot (final) |
