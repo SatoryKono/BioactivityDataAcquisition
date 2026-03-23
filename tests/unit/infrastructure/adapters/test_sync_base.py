@@ -13,6 +13,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
@@ -31,6 +32,7 @@ class StubSyncAdapter(BaseSyncAdapter):
         thread_pool: ThreadPoolExecutor,
         error_handler: Any | None = None,
         metrics: Any = None,
+        dependency_context: SyncAdapterDependencyContext | None = None,
         fail_probe: bool = False,
         probe_error: Exception | None = None,
         health_endpoint: str = "/health",
@@ -43,6 +45,7 @@ class StubSyncAdapter(BaseSyncAdapter):
             thread_pool=thread_pool,
             error_handler=error_handler or MagicMock(),
             metrics=metrics,
+            dependency_context=dependency_context,
             owns_thread_pool=owns_thread_pool,
         )
         self._fail_probe = fail_probe
@@ -127,6 +130,34 @@ class TestHealthCheckLogging:
         )
 
         assert adapter._error_handler is error_handler
+
+    def test_init_uses_dependency_context_over_named_args(
+        self,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
+        thread_pool: ThreadPoolExecutor,
+    ) -> None:
+        """Sync dependency context should be authoritative when supplied."""
+        dependency_context = SyncAdapterDependencyContext(
+            metrics=mock_metrics,
+            error_handler=MagicMock(name="context_error_handler"),
+            request_collector=MagicMock(name="request_collector"),
+        )
+
+        adapter = StubSyncAdapter(
+            logger=mock_logger,
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            thread_pool=thread_pool,
+            metrics=MagicMock(name="legacy_metrics"),
+            error_handler=MagicMock(name="legacy_error_handler"),
+            dependency_context=dependency_context,
+        )
+
+        assert adapter.metrics is mock_metrics
+        assert adapter._error_handler is dependency_context.error_handler
 
     async def test_health_check_logs_warning_on_exception(
         self,

@@ -16,9 +16,9 @@ from bioetl.application.core.preflight.medallion_validator import (
 from bioetl.application.core.preflight.service import PreflightService
 
 __all__ = [
-    "PreflightService",
     "HealthAggregator",
     "MedallionConfigValidator",
+    "PreflightService",
     "_HealthAggregator",
     "_MedallionConfigValidator",
 ]

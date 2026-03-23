@@ -20,9 +20,6 @@ from bioetl.infrastructure.adapters.crossref.client import (
     CROSSREF_API_BASE,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
@@ -35,6 +32,7 @@ from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapte
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 def _build_http_client(provider: str) -> UnifiedHTTPClient:
@@ -73,8 +71,10 @@ def pubmed_adapter(mock_logger: MagicMock) -> PubMedAdapter:
         email="bioetl-test@example.com",
         api_key=None,
         batch_size=100,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "pubmed",
+            logger=mock_logger,
+            include_fallback_service=True,
         ),
     )
 
@@ -86,8 +86,10 @@ def openalex_adapter(mock_logger: MagicMock) -> OpenAlexAdapter:
         logger=mock_logger,
         mailto="bioetl-test@example.com",
         batch_size=10,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "openalex",
+            logger=mock_logger,
+            include_fallback_service=True,
         ),
     )
 
@@ -98,8 +100,10 @@ def semanticscholar_adapter(mock_logger: MagicMock) -> SemanticScholarAdapter:
         http_client=_build_http_client("semanticscholar_external_verification"),
         logger=mock_logger,
         batch_size=10,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "semanticscholar",
+            logger=mock_logger,
+            include_fallback_service=True,
         ),
     )
 

@@ -12,7 +12,6 @@ import pytest
 
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
     create_default_error_handler,
 )
 from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -25,6 +24,7 @@ from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimi
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 @pytest.mark.unit
@@ -280,40 +280,37 @@ class TestUniProtAdapter:
         """Create a mock logger."""
         return MagicMock()
 
-    @pytest.fixture
-    def fallback_fetch_service(self):
-        """Create fallback fetch service for testing."""
-        return create_default_fallback_service(adapter_metrics=MagicMock())
-
-    def test_adapter_creation_without_api_key(
-        self, http_client, mock_logger, fallback_fetch_service
-    ):
+    def test_adapter_creation_without_api_key(self, http_client, mock_logger):
         """Test UniProt adapter without API key."""
         adapter = UniProtAdapter(
             http_client=http_client,
             logger=mock_logger,
-            fallback_fetch_service=fallback_fetch_service,
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
         )
 
         assert adapter.provider_name == "uniprot"
         assert adapter.api_key is None
 
-    def test_adapter_creation_with_api_key(
-        self, http_client, mock_logger, fallback_fetch_service
-    ):
+    def test_adapter_creation_with_api_key(self, http_client, mock_logger):
         """Test UniProt adapter with API key."""
         adapter = UniProtAdapter(
             http_client=http_client,
             logger=mock_logger,
             api_key="test_key",
-            fallback_fetch_service=fallback_fetch_service,
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
         )
 
         assert adapter.api_key == "test_key"
 
-    def test_adapter_with_custom_base_url(
-        self, http_client, mock_logger, fallback_fetch_service
-    ):
+    def test_adapter_with_custom_base_url(self, http_client, mock_logger):
         """Test UniProt adapter with custom base URL."""
         mock_http = MagicMock()
         custom_url = "https://custom.uniprot.org"
@@ -321,7 +318,11 @@ class TestUniProtAdapter:
             http_client=mock_http,
             logger=mock_logger,
             base_url=custom_url,
-            fallback_fetch_service=fallback_fetch_service,
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
         )
 
         assert adapter.base_url == custom_url

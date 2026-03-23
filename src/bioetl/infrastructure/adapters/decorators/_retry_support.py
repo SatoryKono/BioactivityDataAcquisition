@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import NoReturn
 
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
@@ -125,5 +126,35 @@ def build_retry_exhausted_error(
     return RetryExhaustedError(
         url=f"{provider_name}:{target}",
         attempts=max_attempts,
+        last_error=last_error,
+    )
+
+
+def raise_retry_exhausted(
+    *,
+    metrics: MetricsPort | None,
+    provider_name: str,
+    operation: str,
+    retries: int,
+    target: str,
+    max_attempts: int,
+    last_error: Exception | None,
+) -> NoReturn:
+    """Record exhaustion bookkeeping and raise the canonical retry error."""
+    record_retry_metrics(
+        metrics,
+        provider_name=provider_name,
+        operation=operation,
+        retries=retries,
+    )
+    record_exhaustion_metrics(
+        metrics,
+        provider_name=provider_name,
+        operation=operation,
+    )
+    raise build_retry_exhausted_error(
+        provider_name=provider_name,
+        target=target,
+        max_attempts=max_attempts,
         last_error=last_error,
     )

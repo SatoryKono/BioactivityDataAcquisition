@@ -6,13 +6,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 pytestmark = pytest.mark.unit
 
@@ -48,8 +46,10 @@ def adapter(
         logger=mock_logger,
         api_key="test-api-key",
         batch_size=10,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "semanticscholar",
+            logger=mock_logger,
+            include_fallback_service=True,
         ),
     )
 

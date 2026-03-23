@@ -13,9 +13,7 @@ import httpx
 import pytest
 
 from bioetl.domain.exceptions import ExternalServiceError
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 @pytest.fixture(autouse=True)
@@ -73,11 +71,6 @@ class TestUniProtAdapterErrorPaths:
         return MagicMock()
 
     @pytest.fixture
-    def fallback_fetch_service(self):
-        """Create fallback service for UniProt adapter tests."""
-        return create_default_fallback_service(adapter_metrics=MagicMock())
-
-    @pytest.fixture
     def mock_circuit_breaker(self):
         """Create a mock circuit breaker that raises an exception."""
         from bioetl.infrastructure.adapters.http.circuit_breaker import (
@@ -89,7 +82,7 @@ class TestUniProtAdapterErrorPaths:
         return cb
 
     async def test_fetch_proteins_logs_error_on_failure(
-        self, mock_http_client, mock_logger, fallback_fetch_service
+        self, mock_http_client, mock_logger
     ):
         """Test that _fetch_proteins logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
@@ -105,7 +98,11 @@ class TestUniProtAdapterErrorPaths:
             adapter = UniProtAdapter(
                 http_client=mock_http_client,
                 logger=mock_logger,
-                fallback_fetch_service=fallback_fetch_service,
+                **build_http_adapter_runtime_kwargs(
+                    "uniprot",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             results = [
@@ -125,7 +122,7 @@ class TestUniProtAdapterErrorPaths:
             )
 
     async def test_fetch_proteins_raises_in_strict_mode(
-        self, mock_http_client, mock_logger, fallback_fetch_service
+        self, mock_http_client, mock_logger
     ):
         """Test that _fetch_proteins raises exception in strict mode.
 
@@ -139,14 +136,18 @@ class TestUniProtAdapterErrorPaths:
             http_client=mock_http_client,
             logger=mock_logger,
             strict_error_handling=True,
-            fallback_fetch_service=fallback_fetch_service,
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
         )
 
         with pytest.raises(ExternalServiceError):
             _ = [r async for r in adapter._fetch_proteins(query="test", limit=100)]
 
     async def test_fetch_features_logs_error_on_failure(
-        self, mock_http_client, mock_logger, fallback_fetch_service
+        self, mock_http_client, mock_logger
     ):
         """Test that _fetch_features logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
@@ -166,7 +167,11 @@ class TestUniProtAdapterErrorPaths:
             adapter = UniProtAdapter(
                 http_client=mock_http_client,
                 logger=mock_logger,
-                fallback_fetch_service=fallback_fetch_service,
+                **build_http_adapter_runtime_kwargs(
+                    "uniprot",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             results = [r async for r in adapter._fetch_features("P12345", limit=10)]
@@ -184,7 +189,7 @@ class TestUniProtAdapterErrorPaths:
             )
 
     async def test_fetch_features_raises_in_strict_mode(
-        self, mock_http_client, mock_logger, fallback_fetch_service
+        self, mock_http_client, mock_logger
     ):
         """Test that _fetch_features raises exception in strict mode.
 
@@ -198,14 +203,18 @@ class TestUniProtAdapterErrorPaths:
             http_client=mock_http_client,
             logger=mock_logger,
             strict_error_handling=True,
-            fallback_fetch_service=fallback_fetch_service,
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
         )
 
         with pytest.raises(ExternalServiceError):
             _ = [r async for r in adapter._fetch_features("P12345", limit=10)]
 
     async def test_fetch_sequences_logs_error_on_failure(
-        self, mock_http_client, mock_logger, fallback_fetch_service
+        self, mock_http_client, mock_logger
     ):
         """Test that _fetch_sequences logs error when fetch fails."""
         from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
@@ -229,7 +238,11 @@ class TestUniProtAdapterErrorPaths:
             adapter = UniProtAdapter(
                 http_client=mock_http_client,
                 logger=mock_logger,
-                fallback_fetch_service=fallback_fetch_service,
+                **build_http_adapter_runtime_kwargs(
+                    "uniprot",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             results = [r async for r in adapter._fetch_sequences("gene:TP53", limit=10)]
@@ -247,7 +260,7 @@ class TestUniProtAdapterErrorPaths:
             )
 
     async def test_fetch_sequences_raises_in_strict_mode(
-        self, mock_http_client, mock_logger, fallback_fetch_service
+        self, mock_http_client, mock_logger
     ):
         """Test that _fetch_sequences raises exception in strict mode.
 
@@ -266,7 +279,11 @@ class TestUniProtAdapterErrorPaths:
             http_client=mock_http_client,
             logger=mock_logger,
             strict_error_handling=True,
-            fallback_fetch_service=fallback_fetch_service,
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
         )
 
         with pytest.raises(ExternalServiceError):

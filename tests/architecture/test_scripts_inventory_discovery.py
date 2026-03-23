@@ -56,8 +56,18 @@ def test_discover_refs_normalizes_windows_path_separators() -> None:
         root / "scripts" / "ops" / "codex.bat",
         root / "scripts" / "ops" / "start-wsl-proxy.bat",
     ]
+    original_iter_search_files = module._iter_search_files
+    docs_file = root / "docs" / "03-guides" / "development" / "codex-wsl2-setup.md"
 
-    refs = module._discover_refs(root, targets)
+    def _iter_only_codex_setup_docs(_: Path) -> list[Path]:
+        return [docs_file]
+
+    module._iter_search_files = _iter_only_codex_setup_docs
+    try:
+        refs = module._discover_refs(root, targets)
+    finally:
+        module._iter_search_files = original_iter_search_files
+
     codex_exec_key = "/".join(["scripts", "codex-exec.bat"])
     codex_key = "/".join(["scripts", "codex.bat"])
     proxy_key = "/".join(["scripts", "start-wsl-proxy.bat"])

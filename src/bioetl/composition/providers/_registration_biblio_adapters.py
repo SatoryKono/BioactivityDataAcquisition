@@ -61,6 +61,7 @@ def _build_pubmed_adapter_from_settings(
         api_key=api_key,
         batch_size=kwargs.get("batch_size", 200),
         metrics=metrics,
+        dependency_context=kwargs.get("dependency_context"),
         error_handler=kwargs.get("error_handler", helper_services.error_handler),
         adapter_metrics=kwargs.get(
             "adapter_metrics",
@@ -110,6 +111,7 @@ def _build_openalex_adapter_from_settings(
         mailto=mailto,
         batch_size=kwargs.get("batch_size", 50),
         metrics=metrics,
+        dependency_context=kwargs.get("dependency_context"),
         error_handler=kwargs.get("error_handler", helper_services.error_handler),
         adapter_metrics=kwargs.get(
             "adapter_metrics",

@@ -40,10 +40,9 @@ from bioetl.domain.exceptions import (
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.decorators._retry_support import (
-    build_retry_exhausted_error,
     calculate_and_wait_retry_delay,
     log_retry_attempt,
-    record_exhaustion_metrics,
+    raise_retry_exhausted,
     record_retry_metrics,
     retryable_exception_types,
 )
@@ -171,19 +170,11 @@ class RetryingDataSourceDecorator:
                 )
                 retries += 1
 
-        record_retry_metrics(
-            self._metrics,
+        raise_retry_exhausted(
+            metrics=self._metrics,
             provider_name=self.provider_name,
             operation="fetch",
             retries=retries,
-        )
-        record_exhaustion_metrics(
-            self._metrics,
-            provider_name=self.provider_name,
-            operation="fetch",
-        )
-        raise build_retry_exhausted_error(
-            provider_name=self.provider_name,
             target=entity_type,
             max_attempts=self._retry_config.max_attempts,
             last_error=last_error,
@@ -250,20 +241,11 @@ class RetryingDataSourceDecorator:
                 )
                 retries += 1
 
-        # All retries exhausted
-        record_retry_metrics(
-            self._metrics,
+        raise_retry_exhausted(
+            metrics=self._metrics,
             provider_name=self.provider_name,
             operation="health_check",
             retries=retries,
-        )
-        record_exhaustion_metrics(
-            self._metrics,
-            provider_name=self.provider_name,
-            operation="health_check",
-        )
-        raise build_retry_exhausted_error(
-            provider_name=self.provider_name,
             target="health_check",
             max_attempts=self._retry_config.max_attempts,
             last_error=last_error,

@@ -501,9 +501,7 @@ class TestPostrunServiceMetadata:
         mock_executor,
     ) -> None:
         """Final metadata phase should delegate to the dedicated metadata service."""
-        postrun_service._metadata_write_orchestrator.write_final_metadata_if_available = (
-            AsyncMock()
-        )
+        postrun_service._metadata_write_orchestrator.write_final_metadata_if_available = AsyncMock()
 
         await postrun_service._run_final_metadata_phase(mock_executor, dq_reports=None)
 

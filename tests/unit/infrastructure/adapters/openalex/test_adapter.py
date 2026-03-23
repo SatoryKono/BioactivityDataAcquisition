@@ -11,15 +11,16 @@ import pytest
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.adapters.openalex.client import _create_openalex_adapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.helpers.adapter_runtime import (
+    build_http_adapter_runtime_bundle,
+    build_http_adapter_runtime_kwargs,
+)
 
 
 @pytest.fixture
@@ -40,15 +41,9 @@ def logger() -> NoOpLogger:
 
 
 @pytest.fixture
-def fallback_fetch_service():
-    return create_default_fallback_service(adapter_metrics=MagicMock())
-
-
-@pytest.fixture
 def adapter(
     mock_http_client: MagicMock,
     logger: NoOpLogger,
-    fallback_fetch_service,
 ) -> OpenAlexAdapter:
     """Create an adapter instance for testing."""
     return OpenAlexAdapter(
@@ -56,7 +51,11 @@ def adapter(
         logger=logger,
         mailto="test@example.com",
         batch_size=10,
-        fallback_fetch_service=fallback_fetch_service,
+        **build_http_adapter_runtime_kwargs(
+            "openalex",
+            logger=logger,
+            include_fallback_service=True,
+        ),
     )
 
 
@@ -67,14 +66,17 @@ class TestOpenAlexAdapter:
         self,
         mock_http_client: MagicMock,
         logger: NoOpLogger,
-        fallback_fetch_service,
     ) -> None:
         """Should initialize adapter with required parameters."""
         adapter = OpenAlexAdapter(
             http_client=mock_http_client,
             logger=logger,
             mailto="test@example.com",
-            fallback_fetch_service=fallback_fetch_service,
+            **build_http_adapter_runtime_kwargs(
+                "openalex",
+                logger=logger,
+                include_fallback_service=True,
+            ),
         )
         assert adapter.provider_name == "openalex"
         assert adapter.mailto == "test@example.com"
@@ -88,6 +90,7 @@ class TestOpenAlexAdapter:
         metrics = MagicMock()
         adapter_metrics = AdapterMetricsRecorder(metrics, "openalex")
         request_collector = APIRequestCollector()
+        runtime_bundle = build_http_adapter_runtime_bundle("openalex", logger=logger)
 
         adapter = OpenAlexAdapter(
             http_client=mock_http_client,
@@ -97,9 +100,7 @@ class TestOpenAlexAdapter:
             error_handler=error_handler,
             adapter_metrics=adapter_metrics,
             request_collector=request_collector,
-            fallback_fetch_service=create_default_fallback_service(
-                adapter_metrics=adapter_metrics
-            ),
+            fallback_fetch_service=runtime_bundle.fallback_fetch_service,
         )
 
         assert adapter._http_client is mock_http_client
@@ -120,15 +121,17 @@ class TestOpenAlexAdapter:
         cursor_flow = MagicMock()
         fallback_handler = MagicMock()
         fallback_orchestrator = MagicMock()
-        fallback_fetch_service = create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        runtime_bundle = build_http_adapter_runtime_bundle(
+            "openalex",
+            logger=logger,
         )
 
         adapter = OpenAlexAdapter(
             http_client=mock_http_client,
             logger=logger,
             mailto="test@example.com",
-            fallback_fetch_service=fallback_fetch_service,
+            dependency_context=runtime_bundle.dependency_context,
+            fallback_fetch_service=runtime_bundle.fallback_fetch_service,
             openalex_query_executor=query_executor,
             openalex_response_mapper=response_mapper,
             openalex_cursor_flow=cursor_flow,
@@ -650,8 +653,10 @@ class TestCreateOpenAlexAdapter:
             settings=None,
             mailto="test@example.com",
             batch_size=25,
-            fallback_fetch_service=create_default_fallback_service(
-                adapter_metrics=MagicMock()
+            **build_http_adapter_runtime_kwargs(
+                "openalex",
+                logger=logger,
+                include_fallback_service=True,
             ),
         )
 
@@ -667,8 +672,10 @@ class TestCreateOpenAlexAdapter:
                 http_client=mock_http_client,
                 logger=logger,
                 settings=None,
-                fallback_fetch_service=create_default_fallback_service(
-                    adapter_metrics=MagicMock()
+                **build_http_adapter_runtime_kwargs(
+                    "openalex",
+                    logger=logger,
+                    include_fallback_service=True,
                 ),
             )
 
@@ -680,8 +687,10 @@ class TestCreateOpenAlexAdapter:
                 logger=logger,
                 settings=None,
                 mailto="test@example.com",
-                fallback_fetch_service=create_default_fallback_service(
-                    adapter_metrics=MagicMock()
+                **build_http_adapter_runtime_kwargs(
+                    "openalex",
+                    logger=logger,
+                    include_fallback_service=True,
                 ),
             )
 
@@ -693,7 +702,9 @@ class TestCreateOpenAlexAdapter:
                 logger=None,
                 settings=None,
                 mailto="test@example.com",
-                fallback_fetch_service=create_default_fallback_service(
-                    adapter_metrics=MagicMock()
+                **build_http_adapter_runtime_kwargs(
+                    "openalex",
+                    logger=NoOpLogger(),
+                    include_fallback_service=True,
                 ),
             )

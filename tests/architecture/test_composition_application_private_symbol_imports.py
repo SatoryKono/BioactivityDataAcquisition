@@ -74,7 +74,9 @@ def test_composition_avoids_private_application_symbol_imports(src_dir: Path) ->
                 module=node.module,
                 level=node.level,
             )
-            if not resolved_module or not resolved_module.startswith("bioetl.application."):
+            if not resolved_module or not resolved_module.startswith(
+                "bioetl.application."
+            ):
                 continue
             for alias in node.names:
                 if alias.name.startswith("_"):

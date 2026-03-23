@@ -10,13 +10,11 @@ from httpx import RequestError
 from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_bundle
 
 
 @pytest.fixture
@@ -52,14 +50,14 @@ def test_post_init_preserves_injected_crossref_runtime_collaborators(
     search_paginator = MagicMock()
     title_fallback_handler = MagicMock()
     fetch_flow = MagicMock()
+    runtime_bundle = build_http_adapter_runtime_bundle("crossref", logger=mock_logger)
 
     adapter = CrossRefAdapter(
         http_client=mock_http_client,
         logger=mock_logger,
         mailto="test@example.com",
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
-        ),
+        dependency_context=runtime_bundle.dependency_context,
+        fallback_fetch_service=runtime_bundle.fallback_fetch_service,
         query_builder=query_builder,
         response_mapper=response_mapper,
         batch_fetcher=batch_fetcher,

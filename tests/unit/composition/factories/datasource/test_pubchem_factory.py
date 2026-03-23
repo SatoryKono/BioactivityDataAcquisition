@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.datasource.pubchem import create_pubchem_adapter
+from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
 
 
 @pytest.mark.unit
@@ -34,6 +35,7 @@ class TestCreatePubChemAdapter:
         mock_thread_pool_cls: MagicMock,
     ) -> None:
         helper_bundle = MagicMock()
+        helper_bundle.metrics = MagicMock(name="metrics")
         helper_bundle.error_handler = MagicMock(name="error_handler")
         helper_bundle.request_collector = MagicMock(name="request_collector")
         mock_create_sync_helpers.return_value = helper_bundle
@@ -66,6 +68,19 @@ class TestCreatePubChemAdapter:
 
         adapter_kwargs = mock_pubchem_adapter_cls.call_args.kwargs
         assert adapter_kwargs["thread_pool"] is thread_pool
+        assert isinstance(
+            adapter_kwargs["dependency_context"],
+            SyncAdapterDependencyContext,
+        )
+        assert adapter_kwargs["dependency_context"].metrics is helper_bundle.metrics
+        assert (
+            adapter_kwargs["dependency_context"].error_handler
+            is helper_bundle.error_handler
+        )
+        assert (
+            adapter_kwargs["dependency_context"].request_collector
+            is helper_bundle.request_collector
+        )
         assert adapter_kwargs["error_handler"] is helper_bundle.error_handler
         assert adapter_kwargs["request_collector"] is helper_bundle.request_collector
         assert adapter_kwargs["entity_mapper"] is mapper
@@ -106,6 +121,7 @@ class TestCreatePubChemAdapter:
         mock_entity_mapper_cls.assert_not_called()
         mock_fetch_strategies_cls.assert_not_called()
         adapter_kwargs = mock_pubchem_adapter_cls.call_args.kwargs
+        assert adapter_kwargs["dependency_context"] is None
         assert adapter_kwargs["error_handler"] is explicit_error_handler
         assert adapter_kwargs["request_collector"] is explicit_request_collector
         assert adapter_kwargs["entity_mapper"] is explicit_entity_mapper

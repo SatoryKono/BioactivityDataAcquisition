@@ -67,7 +67,8 @@ _PIPELINE_FACTORY_EXPORTS = frozenset(
         "uniprot_protein_factory",
     }
 )
-
+# Compatibility alias retained for legacy imports; new code should use
+# DataSourceCreatorProtocol directly.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
 

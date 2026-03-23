@@ -20,13 +20,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 if TYPE_CHECKING:
     pass
@@ -35,11 +33,6 @@ if TYPE_CHECKING:
 CASSETTE_DIR = (
     Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "semanticscholar"
 )
-
-
-def _fallback_service() -> object:
-    """Create explicit fallback service for direct adapter constructors."""
-    return create_default_fallback_service(adapter_metrics=MagicMock())
 
 
 @pytest.fixture(scope="module")
@@ -81,7 +74,11 @@ def semanticscholar_adapter(
         http_client=http_client,
         logger=mock_logger,
         batch_size=100,
-        fallback_fetch_service=_fallback_service(),
+        **build_http_adapter_runtime_kwargs(
+            "semanticscholar",
+            logger=mock_logger,
+            include_fallback_service=True,
+        ),
     )
 
 
@@ -114,7 +111,11 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
             status = await adapter.health_check()
 
@@ -140,7 +141,11 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             records: list[dict[str, Any]] = []
@@ -171,7 +176,11 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             records: list[dict[str, Any]] = []
@@ -204,7 +213,11 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             records: list[dict[str, Any]] = []
@@ -243,7 +256,11 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             fallback_mapping = {
@@ -290,7 +307,11 @@ class TestSemanticScholarAdapterIntegration:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             # Title must match what VCR cassette returns for title validation
@@ -327,7 +348,11 @@ class TestSemanticScholarAdapterEdgeCases:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             with pytest.raises(ValueError, match=r"publication.*paper"):
@@ -357,7 +382,11 @@ class TestSemanticScholarAdapterEdgeCases:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             with respx.mock:
@@ -387,7 +416,11 @@ class TestSemanticScholarAdapterEdgeCases:
             adapter = SemanticScholarAdapter(
                 http_client=http_client,
                 logger=mock_logger,
-                fallback_fetch_service=_fallback_service(),
+                **build_http_adapter_runtime_kwargs(
+                    "semanticscholar",
+                    logger=mock_logger,
+                    include_fallback_service=True,
+                ),
             )
 
             records: list[dict[str, Any]] = []
@@ -424,7 +457,11 @@ class TestSemanticScholarAdapterRateLimiting:
             http_client=http_client,
             logger=mock_logger,
             batch_size=10,
-            fallback_fetch_service=_fallback_service(),
+            **build_http_adapter_runtime_kwargs(
+                "semanticscholar",
+                logger=mock_logger,
+                include_fallback_service=True,
+            ),
         )
 
         # Verify adapter is configured

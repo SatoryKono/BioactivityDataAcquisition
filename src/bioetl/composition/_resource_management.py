@@ -88,7 +88,7 @@ def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
         pipeline: Pipeline name (e.g., 'chembl_activity').
 
     Returns:
-        CheckpointManager instance for the pipeline.
+        CheckpointManagerService instance for the pipeline.
 
     Example:
         >>> manager = get_checkpoint_manager("chembl_activity")

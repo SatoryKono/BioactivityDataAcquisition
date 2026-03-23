@@ -45,6 +45,9 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        HttpAdapterDependencyContext,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 UNIPROT_BATCH_SIZE = 100
@@ -99,6 +102,7 @@ class UniProtAdapter(
         base_url: str = UNIPROT_API_BASE,
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
+        dependency_context: HttpAdapterDependencyContext | None = None,
         error_handler: ErrorHandlerPort | None = None,
         adapter_metrics: AdapterMetricsRecorder | None = None,
         request_collector: APIRequestCollector | None = None,
@@ -112,6 +116,8 @@ class UniProtAdapter(
             base_url: Base URL for the UniProt REST API.
             strict_error_handling: Whether to raise exceptions or log warnings on errors.
             metrics: Optional metrics port for recording adapter metrics.
+            dependency_context: Optional composition-owned dependency bundle for
+                runtime adapter collaborators.
             error_handler: Optional error handler for mapping exceptions to domain errors.
             adapter_metrics: Optional pre-built adapter metrics instance.
             request_collector: Optional pre-built request collector instance.
@@ -121,6 +127,7 @@ class UniProtAdapter(
             http_client,
             logger,
             metrics=metrics,
+            dependency_context=dependency_context,
             error_handler=error_handler,
             adapter_metrics=adapter_metrics,
             request_collector=request_collector,
@@ -264,6 +271,7 @@ def _create_uniprot_adapter(
         base_url=kwargs.get("base_url", UNIPROT_API_BASE),
         strict_error_handling=kwargs.get("strict_error_handling", False),
         metrics=kwargs.get("metrics"),
+        dependency_context=kwargs.get("dependency_context"),
         error_handler=kwargs.get("error_handler"),
         adapter_metrics=kwargs.get("adapter_metrics"),
         request_collector=kwargs.get("request_collector"),

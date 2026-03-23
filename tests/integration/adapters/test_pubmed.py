@@ -19,14 +19,12 @@ from httpx import Response
 # which looks for tests/fixtures/vcr/pubmed/ based on test filename
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
 from bioetl.infrastructure.config import get_settings  # Import get_settings
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 @pytest.fixture
@@ -58,8 +56,10 @@ def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
         logger=mock_logger,
         email="test@example.com",  # Use dummy email for tests
         api_key=None,  # Don't use API key for tests to avoid auth issues in replay or strict checks
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "pubmed",
+            logger=mock_logger,
+            include_fallback_service=True,
         ),
     )
 

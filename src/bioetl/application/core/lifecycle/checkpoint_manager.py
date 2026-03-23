@@ -123,6 +123,8 @@ class CheckpointManagerService:
         return await self._checkpoint.list_all()
 
 
+# Compatibility alias retained for legacy imports; new code should use
+# CheckpointManagerService directly.
 CheckpointManager = CheckpointManagerService
 
 __all__ = ["CheckpointManager", "CheckpointManagerService"]

@@ -8,15 +8,13 @@ import pytest
 
 from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
 from bioetl.domain.ports import FallbackPolicyPort
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 @pytest.fixture
@@ -33,13 +31,16 @@ def mock_http_client() -> MagicMock:
 
 @pytest.fixture
 def openalex_adapter(mock_http_client: MagicMock) -> OpenAlexAdapter:
+    logger = NoOpLogger()
     return OpenAlexAdapter(
         http_client=mock_http_client,
-        logger=NoOpLogger(),
+        logger=logger,
         mailto="test@example.com",
         batch_size=10,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "openalex",
+            logger=logger,
+            include_fallback_service=True,
         ),
     )
 
@@ -57,12 +58,15 @@ def crossref_adapter(mock_http_client: MagicMock) -> CrossRefAdapter:
 
 @pytest.fixture
 def pubmed_adapter(mock_http_client: MagicMock) -> PubMedAdapter:
+    logger = NoOpLogger()
     return PubMedAdapter(
         http_client=mock_http_client,
-        logger=NoOpLogger(),
+        logger=logger,
         email="test@example.com",
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "pubmed",
+            logger=logger,
+            include_fallback_service=True,
         ),
     )
 
@@ -71,24 +75,30 @@ def pubmed_adapter(mock_http_client: MagicMock) -> PubMedAdapter:
 def semanticscholar_adapter(
     mock_http_client: MagicMock,
 ) -> SemanticScholarAdapter:
+    logger = NoOpLogger()
     return SemanticScholarAdapter(
         http_client=mock_http_client,
-        logger=NoOpLogger(),
+        logger=logger,
         api_key="",
         batch_size=10,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "semanticscholar",
+            logger=logger,
+            include_fallback_service=True,
         ),
     )
 
 
 @pytest.fixture
 def uniprot_adapter(mock_http_client: MagicMock) -> UniProtAdapter:
+    logger = NoOpLogger()
     return UniProtAdapter(
         http_client=mock_http_client,
-        logger=NoOpLogger(),
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        logger=logger,
+        **build_http_adapter_runtime_kwargs(
+            "uniprot",
+            logger=logger,
+            include_fallback_service=True,
         ),
     )
 

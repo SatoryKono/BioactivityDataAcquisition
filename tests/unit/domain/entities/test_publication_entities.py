@@ -260,6 +260,8 @@ class TestPublicationInvariantHook:
         entity = HookValidatedPublication(**BASE_KWARGS, provider_key="pub-1")
         assert entity.provider_key == "pub-1"
 
-    def test_publication_subclass_invariants_raise_without_custom_post_init(self) -> None:
+    def test_publication_subclass_invariants_raise_without_custom_post_init(
+        self,
+    ) -> None:
         with pytest.raises(ValueError, match="provider_key is required"):
             HookValidatedPublication(**BASE_KWARGS, provider_key="")

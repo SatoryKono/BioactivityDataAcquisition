@@ -121,6 +121,7 @@ def create_crossref_adapter(
         mailto=mailto,
         batch_size=kwargs.get("batch_size", 50),
         metrics=metrics,
+        dependency_context=kwargs.get("dependency_context"),
         error_handler=error_handler,
         adapter_metrics=adapter_metrics,
         request_collector=request_collector,

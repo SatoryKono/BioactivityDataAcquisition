@@ -59,7 +59,6 @@ __all__ = [
     "CrossRefQueryBuilder",
     "CrossRefResponseMapper",
 ]
-
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
@@ -67,6 +66,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        HttpAdapterDependencyContext,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
@@ -96,6 +98,7 @@ class CrossRefAdapter(
     mailto: str
     batch_size: int = 50
     metrics: MetricsPort | None = None
+    dependency_context: HttpAdapterDependencyContext | None = None
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
@@ -124,6 +127,7 @@ class CrossRefAdapter(
             http_client=self.http_client,
             logger=self.logger,
             metrics=self.metrics,
+            dependency_context=self.dependency_context,
             error_handler=self.error_handler,
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,
@@ -247,19 +251,11 @@ class CrossRefAdapter(
         )
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Return fallback status used when probe execution fails.
-
-        Returns:
-            HealthStatus.UNHEALTHY as the safe default when health probe cannot execute.
-        """
+        """Return the safe default status when health probing fails."""
         return HealthStatus.UNHEALTHY
 
     def _get_health_endpoint(self) -> str:
-        """Return endpoint path used for CrossRef health checks.
-
-        Returns:
-            Endpoint path string used for health probe requests.
-        """
+        """Return the endpoint path used for CrossRef health checks."""
         return "/works"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:

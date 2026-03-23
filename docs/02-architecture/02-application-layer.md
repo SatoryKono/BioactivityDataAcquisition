@@ -70,6 +70,11 @@
 - **`BatchTracingManagerService`** (`batch_tracing.py`) — Tracing span management
 - **`HeartbeatTask`** (`lifecycle/heartbeat.py`) — Heartbeat мониторинг
 
+Канонические имена для новых imports и документации используют суффикс `Service`.
+Короткие имена `CheckpointManager` и `BatchMetricsRecorder` сохраняются только как
+compatibility aliases в defining modules и не считаются предпочтительным API для
+нового кода.
+
 **Data Sources:**
 
 - **`FilteredDataSource`** (`filtered_data_source.py`) — Filter wrapper для data sources

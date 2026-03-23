@@ -47,6 +47,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        HttpAdapterDependencyContext,
+    )
     from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
         FallbackFetchOrchestratorService,
     )
@@ -65,6 +68,7 @@ class ChemblAdapter(
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
     extraction_params: ExtractionParams | None = None
+    dependency_context: HttpAdapterDependencyContext | None = None
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
@@ -89,6 +93,7 @@ class ChemblAdapter(
             http_client=self.http_client,
             logger=self.logger,
             metrics=self.metrics,
+            dependency_context=self.dependency_context,
             error_handler=self.error_handler,
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,

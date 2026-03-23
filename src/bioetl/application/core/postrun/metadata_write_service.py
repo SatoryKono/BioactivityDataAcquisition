@@ -67,8 +67,7 @@ class PostrunMetadataWriteService:
     def _has_metadata_targets(self) -> bool:
         """Return whether the metadata pipeline has the required writers configured."""
         return (
-            self._metadata_coordinator is not None
-            and self._metadata_writer is not None
+            self._metadata_coordinator is not None and self._metadata_writer is not None
         )
 
     def _build_write_coroutines(
