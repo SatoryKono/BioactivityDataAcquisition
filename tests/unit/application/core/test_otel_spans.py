@@ -25,7 +25,11 @@ from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.ports import NoOpMetrics, NoOpTracing, TracingPort
+from bioetl.domain.ports import TracingPort
+from bioetl.domain.ports.noop import (
+    NoOpMetrics,
+    NoOpTracing,
+)
 from bioetl.domain.types import RunID, RunType
 
 
@@ -368,7 +372,8 @@ class TestPostrunServiceSpan:
         dq_report_orchestrator = MagicMock()
         dq_report_orchestrator.generate_reports = AsyncMock(return_value=None)
 
-        metadata_version_resolver = MagicMock()
+        metadata_write_orchestrator = MagicMock()
+        metadata_write_orchestrator.write_final_metadata_if_available = AsyncMock()
 
         compact_orchestrator = MagicMock()
         compact_orchestrator.run_if_needed = AsyncMock(
@@ -378,7 +383,7 @@ class TestPostrunServiceSpan:
         dependencies = PostrunDependencyContext(
             cleanup_orchestrator=cleanup_orchestrator,
             dq_report_orchestrator=dq_report_orchestrator,
-            metadata_version_resolver=metadata_version_resolver,
+            metadata_write_orchestrator=metadata_write_orchestrator,
             compact_orchestrator=compact_orchestrator,
         )
 

@@ -7,17 +7,19 @@ from typing import Protocol
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.core.base_transformer.contract_policy import (
-    _DefaultContractPolicy,
+    DefaultContractPolicy,
 )
 from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
     MetricsPort,
+    PiiHasherPort,
+    TracingPort,
+)
+from bioetl.domain.ports.noop import (
     NoOpMetrics,
     NoOpPiiHasher,
     NoOpTracing,
-    PiiHasherPort,
-    TracingPort,
 )
 from bioetl.domain.services import DataNormalizationService, IdentityService
 
@@ -88,8 +90,8 @@ def _load_contract_policy(
     """Load configured contract policy or degrade to the canonical fallback."""
 
     if entity_type is None or contract_policy_loader is None:
-        return _DefaultContractPolicy()
+        return DefaultContractPolicy()
     try:
         return contract_policy_loader(provider, entity_type)
     except ValueError:
-        return _DefaultContractPolicy()
+        return DefaultContractPolicy()

@@ -10,33 +10,14 @@ import importlib
 
 import pytest
 
-# bootstrap/runtime modules without dedicated unit coverage
-_BOOTSTRAP_RUNTIME_MODULES = [
-    "bioetl.composition.bootstrap.runtime.runtime_basics",
-    "bioetl.composition.bootstrap.runtime.pipeline",
-    "bioetl.composition.bootstrap.runtime.runner_assembly",
-    "bioetl.composition.bootstrap.runtime.observability_bundle",
-]
+# bootstrap/runtime modules still relying on smoke/import confidence
+_BOOTSTRAP_RUNTIME_MODULES: list[str] = []
 
-# factories/pipeline modules without dedicated unit coverage
-_FACTORY_PIPELINE_MODULES = [
-    "bioetl.composition.factories.pipeline.assembler",
-    "bioetl.composition.factories.pipeline.contract_validator",
-    "bioetl.composition.factories.pipeline._creation_wiring",
-    "bioetl.composition.factories.pipeline.factory_method_helpers",
-    "bioetl.composition.factories.pipeline.config_types",
-    "bioetl.composition.factories.pipeline.runner_assembly",
-    "bioetl.composition.factories.pipeline.transformer_dependencies",
-]
+# factories/pipeline modules still relying on smoke/import confidence
+_FACTORY_PIPELINE_MODULES: list[str] = []
 
-# factories/services modules without dedicated unit coverage
-_FACTORY_SERVICES_MODULES = [
-    "bioetl.composition.factories.services.builder",
-    "bioetl.composition.factories.services.common_service_wiring",
-    "bioetl.composition.factories.services.pipeline_builder",
-    "bioetl.composition.factories.services.pipeline_processing",
-    "bioetl.composition.factories.services.runtime_managers",
-]
+# factories/services modules still relying on smoke/import confidence
+_FACTORY_SERVICES_MODULES: list[str] = []
 
 # factories/storage modules without dedicated unit coverage
 _FACTORY_STORAGE_MODULES = [

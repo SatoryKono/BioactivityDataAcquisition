@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class _MedallionConfigValidator:
+class MedallionConfigValidator:
     """Validates Medallion architecture invariants and write-mode policies."""
 
     def __init__(
@@ -300,3 +300,9 @@ class _MedallionConfigValidator:
                 "Medallion config validation passed",
                 extra={"run_type": runtime.run_type.value},
             )
+
+
+# Backward-compatible alias kept for transitional imports.
+_MedallionConfigValidator = MedallionConfigValidator
+
+__all__ = ["MedallionConfigValidator", "_MedallionConfigValidator"]

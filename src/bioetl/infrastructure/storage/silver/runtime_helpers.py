@@ -10,10 +10,12 @@ from bioetl.domain.ports import (
     MetadataCoordinatorPort,
     MetadataWriterPort,
     MetricsPort,
-    NoOpMetadataWriter,
-    NoOpTracing,
     SilverValidatorPort,
     TracingPort,
+)
+from bioetl.domain.ports.noop import (
+    NoOpMetadataWriter,
+    NoOpTracing,
 )
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.infrastructure.export.csv_exporter import CsvExporter

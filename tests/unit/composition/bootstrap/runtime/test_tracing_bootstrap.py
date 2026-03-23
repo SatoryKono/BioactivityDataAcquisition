@@ -14,7 +14,8 @@ import pytest
 from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
     bootstrap_tracer_port,
 )
-from bioetl.domain.ports import NoOpTracing, TracingPort
+from bioetl.domain.ports import TracingPort
+from bioetl.domain.ports.noop import NoOpTracing
 
 
 def _make_settings(*, tracing_enabled: bool = False) -> SimpleNamespace:

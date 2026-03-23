@@ -90,7 +90,7 @@ class TestCreatePipelineWithServicesImpl:
     )
     @patch("bioetl.composition.factories.pipeline._creation_wiring.TransformerBuilder")
     @patch(
-        "bioetl.composition.factories.pipeline._creation_wiring.DomainConfigResolver"
+        "bioetl.composition.factories.pipeline._creation_wiring.resolve_domain_pipeline_config"
     )
     @patch("bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory")
     @patch("bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator")
@@ -98,7 +98,7 @@ class TestCreatePipelineWithServicesImpl:
         self,
         mock_meta_coord: MagicMock,
         mock_run_ctx_factory: MagicMock,
-        mock_domain_resolver: MagicMock,
+        mock_resolve_domain_pipeline_config: MagicMock,
         mock_transformer_builder: MagicMock,
         mock_silver_validator: MagicMock,
     ) -> None:
@@ -114,10 +114,7 @@ class TestCreatePipelineWithServicesImpl:
         run_ctx_instance.create.return_value = MagicMock()
         mock_run_ctx_factory.return_value = run_ctx_instance
 
-        # Setup domain config resolver chain
-        resolver_instance = MagicMock()
-        resolver_instance.resolve.return_value = MagicMock()
-        mock_domain_resolver.return_value = resolver_instance
+        mock_resolve_domain_pipeline_config.return_value = MagicMock()
 
         # Setup transformer builder chain
         builder_instance = MagicMock()

@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from bioetl.domain.ports import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetrics,
+    NoOpTracing,
+)
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client_context_mixin import (
     HTTPClientContextMixin,

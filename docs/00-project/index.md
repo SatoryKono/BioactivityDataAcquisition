@@ -15,6 +15,25 @@ Active guidance lives under `docs/00-05`. Materials in `docs/99-archive/`
 remain useful for traceability, but they are not normative for current project
 behavior.
 
+## Documentation Surface Types
+
+Use the repository docs with the following priority:
+
+- **Canonical active docs**: `docs/00-05`. These pages define current project
+  rules, architecture, guides, operations, and reference contracts.
+- **Internal-published docs**: planning, evidence, AI runtime guidance, and
+  other extended working materials. They are discoverable and useful, but they
+  do not override canonical active docs.
+- **Archive docs**: `docs/99-archive/`. Historical context only.
+
+Useful entry points for non-normative surfaces:
+
+- [Plans Directory](../plans/README.md) — active and retained planning artifacts
+- [Reports Index](../reports/index.md) — curated internal reports and evidence
+- [AI Documentation Surface](ai/README.md) — top-level map for agents, memory, prompts, and skills
+- [AI Agents Context](ai/agents/README.md) — runtime-specific agent guidance
+- [Skills Mirror](ai/skills/README.md) — published mirror for AI skills
+
 ## Project Mission
 
 To build a robust, scalable, and maintainable data pipeline for acquiring and processing bioactivity data from various public sources into a unified, analysis-ready format.

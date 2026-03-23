@@ -238,12 +238,9 @@ class PubMedPublicationEntity(PublicationEntityBase):
     # Override: Default source for PubMed
     _source: str = "pubmed"
 
-    def __post_init__(self) -> None:
-        """Post-initialization validation.
-
-        Validates that pmid is provided (required for PubMed publications).
-        """
-        super().__post_init__()
+    def _validate_invariants(self) -> None:
+        """Validate PubMed-specific publication invariants."""
+        super()._validate_invariants()
         if not self.pmid:
             raise ValueError("PubMed Publication PMID is required")
 

@@ -5,7 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetadataWriter,
+    NoOpTracing,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (

@@ -333,7 +333,7 @@ class TestIDMappingTransformer:
 
     def test_idmapping_transformer_accepts_pii_hasher(self):
         """IDMappingTransformer MUST accept pii_hasher parameter."""
-        from bioetl.domain.ports import NoOpPiiHasher
+        from bioetl.domain.ports.noop import NoOpPiiHasher
         from tests.helpers.transformer_dependencies import (
             build_test_transformer_dependencies,
         )

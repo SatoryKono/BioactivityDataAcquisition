@@ -13,6 +13,9 @@ from bioetl.application.core.postrun.dq_report_orchestrator import (
 from bioetl.application.core.postrun.metadata_version_resolver import (
     PostrunMetadataVersionResolver,
 )
+from bioetl.application.core.postrun.metadata_write_service import (
+    PostrunMetadataWriteService,
+)
 from bioetl.application.core.postrun.service import (
     PostrunDependencyContext,
     PostrunResult,
@@ -26,6 +29,7 @@ __all__ = [
     "PostrunDQReportService",
     "PostrunDependencyContext",
     "PostrunMetadataVersionResolver",
+    "PostrunMetadataWriteService",
     "PostrunResult",
     "PostrunService",
 ]

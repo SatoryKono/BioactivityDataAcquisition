@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_fallback_service,

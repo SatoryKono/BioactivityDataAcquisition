@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort, NoOpMetrics
+from bioetl.domain.ports import (
+    ErrorHandlerPort,
+    LoggerPort,
+    MetricsPort,
+)
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 from bioetl.infrastructure.adapters.common.api_request_collector import (

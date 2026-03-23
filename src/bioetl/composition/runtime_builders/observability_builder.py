@@ -8,9 +8,11 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
+    TracingPort,
+)
+from bioetl.domain.ports.noop import (
     NoOpMetrics,
     NoOpTracing,
-    TracingPort,
 )
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings

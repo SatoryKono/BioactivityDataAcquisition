@@ -5,6 +5,15 @@
 
 Сводный реестр локальных BioETL-skills.
 
+## Surface Model
+
+- **Canonical runtime source**: `.codex/skills/`
+- **Parallel/legacy runtime surface**: `.claude/skills/`, only where a
+  Claude-specific workflow is intentionally still supported
+- **Published mirror**: `docs/00-project/ai/skills/local/`
+- **Curated snapshot**: `docs/00-project/ai/skills/global/`
+- **Reference mirror**: `docs/00-project/ai/skills/_references/`
+
 ## Канонические Правила
 
 - `.codex/skills/` — канонический источник runtime skills для текущего Codex workflow.
@@ -119,3 +128,5 @@
 
 - `py-code-bot` не является частью preferred active orchestration: начиная с `ORCHESTRATION.md v4.0` production-код по умолчанию пишет orchestrator.
 - Если `py-code-bot` встречается в compatibility mirrors или старых workflow notes, трактуй его как deprecated compatibility profile, а не как рекомендуемый основной шаг.
+- При конфликте между runtime trees и docs mirrors приоритет у runtime source,
+  а не у published mirror или snapshot.

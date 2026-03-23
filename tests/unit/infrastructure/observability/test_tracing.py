@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.ports.noop import NoOpTracing
 
 
 class TestNoOpTracingReExport:
@@ -23,7 +23,7 @@ class TestNoOpTracingReExport:
 
     def test_noop_tracing_is_same(self) -> None:
         """NoOpTracing from tracing is same as direct import."""
-        from bioetl.domain.ports import NoOpTracing as Direct
+        from bioetl.domain.ports.noop import NoOpTracing as Direct
         from bioetl.infrastructure.observability.tracing import (
             NoOpTracing as ReExported,
         )

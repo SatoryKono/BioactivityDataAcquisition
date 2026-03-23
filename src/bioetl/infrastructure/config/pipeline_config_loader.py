@@ -23,7 +23,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_config_api import (
@@ -38,14 +37,6 @@ from bioetl.infrastructure.config.pipeline_dq_resolution import (
     resolve_pipeline_dq_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.infrastructure.schemas.pipeline_config_dq import (
-    ConditionalValidationConfig,
-    CrossFieldValidationConfig,
-    FieldValidationConfig,
-)
-from bioetl.infrastructure.schemas.pipeline_config_dq import (
-    DQYamlConfig as InlineDQConfig,
-)
 
 
 class PipelineConfigLoader:
@@ -133,65 +124,11 @@ class PipelineConfigLoader:
             dq_loader=self._dq_loader,
         )
 
-    def _has_inline_dq_overrides(self, yaml_config: PipelineYamlConfig) -> bool:
-        """Check if YAML config has non-default inline DQ overrides.
-
-        Args:
-            yaml_config: Pipeline YAML configuration.
-
-        Returns:
-            True if inline dq_overrides contains meaningful overrides.
-        """
-        return has_inline_dq_overrides(yaml_config)
-
-    def _normalize_inline_dq_overrides(
-        self,
-        dq_overrides: InlineDQConfig,
-    ) -> JsonDict:  # Any: dynamic YAML config values
-        """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
-        return normalize_inline_dq_overrides(dq_overrides)
-
-    def _field_validation_to_dict(
-        self,
-        fv: FieldValidationConfig,
-    ) -> JsonDict:  # Any: dynamic YAML config values
-        """Convert FieldValidationConfig to dict.
-
-        Args:
-            fv: FieldValidationConfig instance.
-
-        Returns:
-            Dict representation for YAML merge.
-        """
-        return field_validation_to_dict(fv)
-
-    def _cross_field_validation_to_dict(
-        self,
-        cfv: CrossFieldValidationConfig,
-    ) -> JsonDict:  # Any: dynamic YAML config values
-        """Convert CrossFieldValidationConfig to dict.
-
-        Args:
-            cfv: CrossFieldValidationConfig instance.
-
-        Returns:
-            Dict representation for YAML merge.
-        """
-        return cross_field_validation_to_dict(cfv)
-
-    def _conditional_validation_to_dict(
-        self,
-        cv: ConditionalValidationConfig,
-    ) -> JsonDict:  # Any: dynamic YAML config values
-        """Convert ConditionalValidationConfig to dict.
-
-        Args:
-            cv: ConditionalValidationConfig instance.
-
-        Returns:
-            Dict representation for YAML merge.
-        """
-        return conditional_validation_to_dict(cv)
+    _has_inline_dq_overrides = staticmethod(has_inline_dq_overrides)
+    _normalize_inline_dq_overrides = staticmethod(normalize_inline_dq_overrides)
+    _field_validation_to_dict = staticmethod(field_validation_to_dict)
+    _cross_field_validation_to_dict = staticmethod(cross_field_validation_to_dict)
+    _conditional_validation_to_dict = staticmethod(conditional_validation_to_dict)
 
     def clear_cache(self) -> None:
         """Clear all caches (DQ and filter loader caches).

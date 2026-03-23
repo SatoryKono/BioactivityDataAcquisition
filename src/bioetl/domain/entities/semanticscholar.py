@@ -100,12 +100,9 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # Override: Default source for SemanticScholar
     _source: str = "semanticscholar"
 
-    def __post_init__(self) -> None:
-        """Post-initialization validation.
-
-        Validates that paper_id is provided (required for Semantic Scholar publications).
-        """
-        super().__post_init__()
+    def _validate_invariants(self) -> None:
+        """Validate Semantic Scholar-specific publication invariants."""
+        super()._validate_invariants()
         if not self.paper_id:
             raise ValueError("Semantic Scholar Paper ID is required")
 

@@ -12,6 +12,7 @@ Tests cover:
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+import time
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -87,6 +88,8 @@ class MockCircuitBreaker:
         self._failure_count = failure_count
         self._call_count = 0
         self._reset_count = 0
+        self.recovery_timeout = 60.0
+        self._last_failure_time: float | None = None
 
     def get_state(self) -> CircuitBreakerState:
         return self._state
@@ -97,7 +100,14 @@ class MockCircuitBreaker:
     async def call(self, func: Any, *args: Any, **kwargs: Any) -> Any:
         self._call_count += 1
         if self._state == CircuitBreakerState.OPEN:
-            raise CircuitBreakerOpenError("test_provider", 60.0)
+            if self._last_failure_time is None:
+                raise CircuitBreakerOpenError("test_provider", self.recovery_timeout)
+            elapsed = time.monotonic() - self._last_failure_time
+            if elapsed < self.recovery_timeout:
+                raise CircuitBreakerOpenError(
+                    "test_provider", self.recovery_timeout - elapsed
+                )
+            self._state = CircuitBreakerState.HALF_OPEN
         return await func(*args, **kwargs)
 
     def reset(self) -> None:
@@ -108,6 +118,10 @@ class MockCircuitBreaker:
     def set_state(self, state: CircuitBreakerState) -> None:
         """Helper to set state for testing."""
         self._state = state
+        if state == CircuitBreakerState.OPEN:
+            self._last_failure_time = time.monotonic()
+        elif state == CircuitBreakerState.CLOSED:
+            self._last_failure_time = None
 
 
 @pytest.fixture
@@ -287,6 +301,28 @@ class TestCircuitBreakerDecoratorHealthCheck:
         assert result == HealthStatus.UNHEALTHY
         assert mock_data_source._health_check_call_count == 0
 
+    @pytest.mark.asyncio
+    async def test_health_check_probes_after_recovery_timeout_elapsed(
+        self,
+        mock_data_source: MockDataSource,
+        mock_circuit_breaker: MockCircuitBreaker,
+    ) -> None:
+        """Health check should stop short-circuiting once recovery timeout elapsed."""
+        mock_circuit_breaker.set_state(CircuitBreakerState.OPEN)
+        mock_circuit_breaker.recovery_timeout = 0.0
+        mock_circuit_breaker._last_failure_time = time.monotonic() - 1.0
+
+        decorator = CircuitBreakerDataSourceDecorator(
+            data_source=mock_data_source,
+            circuit_breaker=mock_circuit_breaker,
+        )
+
+        result = await decorator.health_check()
+
+        assert result == HealthStatus.HEALTHY
+        assert mock_data_source._health_check_call_count == 1
+        assert mock_circuit_breaker._call_count == 1
+
 
 class TestCircuitBreakerDecoratorStateAccess:
     """Test circuit breaker state access methods."""
@@ -408,8 +444,10 @@ class TestCircuitBreakerDecoratorRecoveryTimeout:
         mock_data_source: MockDataSource,
         mock_circuit_breaker: MockCircuitBreaker,
     ) -> None:
-        """retry_after should default to 60.0 when guard lacks recovery_timeout."""
+        """retry_after should default to 60.0 when guard lacks timeout metadata."""
         mock_circuit_breaker.set_state(CircuitBreakerState.OPEN)
+        delattr(mock_circuit_breaker, "recovery_timeout")
+        mock_circuit_breaker._last_failure_time = None
 
         decorator = CircuitBreakerDataSourceDecorator(
             data_source=mock_data_source,
@@ -421,3 +459,25 @@ class TestCircuitBreakerDecoratorRecoveryTimeout:
                 _ = [r async for r in decorator.fetch("activity")]
 
         assert exc_info.value.retry_after == 60.0
+
+    @pytest.mark.asyncio
+    async def test_fetch_allows_probe_after_recovery_timeout_elapsed(
+        self,
+        mock_data_source: MockDataSource,
+        mock_circuit_breaker: MockCircuitBreaker,
+    ) -> None:
+        """Fetch should stop failing fast once recovery timeout elapsed."""
+        mock_circuit_breaker.set_state(CircuitBreakerState.OPEN)
+        mock_circuit_breaker.recovery_timeout = 0.0
+        mock_circuit_breaker._last_failure_time = time.monotonic() - 1.0
+
+        decorator = CircuitBreakerDataSourceDecorator(
+            data_source=mock_data_source,
+            circuit_breaker=mock_circuit_breaker,
+        )
+
+        async with decorator:
+            records = [r async for r in decorator.fetch("activity")]
+
+        assert len(records) == 2
+        assert mock_data_source._fetch_call_count == 1

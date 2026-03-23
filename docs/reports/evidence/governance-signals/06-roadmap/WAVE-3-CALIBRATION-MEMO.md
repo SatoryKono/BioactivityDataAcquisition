@@ -15,8 +15,8 @@ The goal is intentionally narrow:
 - [`DECISIONS.yaml`](../04-decisions/DECISIONS.yaml)
 - [`EXECUTION-ROADMAP.md`](EXECUTION-ROADMAP.md)
 - `reports/quality/duplication-baseline.md`
-- [`RF-FS-002-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-002-baseline-2026-03-19.md)
-- [`RF-FS-001-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-001-baseline-2026-03-19.md)
+- `RF-FS-002-baseline-2026-03-19.md` (historical archive path no longer published; see `docs/99-archive/README.md`)
+- `RF-FS-001-baseline-2026-03-19.md` (historical archive path no longer published; see `docs/99-archive/README.md`)
 
 ## Calibration Rules
 
@@ -47,7 +47,7 @@ This is still the best reference model for what a named hotspot program should l
 **Recommendation:** add as the next named hotspot program in a future follow-up wave.
 
 **Why it ranks first**
-- It is already called out in [`RF-FS-002-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-002-baseline-2026-03-19.md) as one of the four hotspot packages and is described there as mixing planning, dependency/join logic, validation, preflight, and runner behavior.
+- It is already called out in `RF-FS-002-baseline-2026-03-19.md` (historical archive path no longer published; see `docs/99-archive/README.md`) as one of the four hotspot packages and is described there as mixing planning, dependency/join logic, validation, preflight, and runner behavior.
 - The raw file tail is concentrated enough to look like one seam rather than scattered provider noise. Current larger files include:
   - `runner_pkg/runner_support_mixin.py`
   - `dependency_joiner.py`
@@ -74,7 +74,7 @@ This is still the best reference model for what a named hotspot program should l
   - `factories/storage/_helpers.py`
   - `factories/services/pipeline_builder.py`
   - `factories/pipeline/runner_assembly.py`
-- Prior planning in [`RF-FS-001-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-001-baseline-2026-03-19.md) already identifies `pipeline_builder.py` as a composition hotspot that should be decomposed by actual seams, not just by line count.
+- Prior planning in `RF-FS-001-baseline-2026-03-19.md` (historical archive path no longer published; see `docs/99-archive/README.md`) already identifies `pipeline_builder.py` as a composition hotspot that should be decomposed by actual seams, not just by line count.
 
 **Why it does not rank first**
 - The current duplication baseline for `composition` is still visibly noisy around:

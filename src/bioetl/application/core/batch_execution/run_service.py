@@ -8,6 +8,10 @@ __all__ = ["BatchExecutionRunService"]
 from collections.abc import Awaitable
 from typing import Protocol
 
+from bioetl.application.core.batch_execution._contracts import (
+    BatchExecutionCountersSnapshot,
+    BatchExecutionMemoryState,
+)
 from bioetl.application.core.batch_execution.lifecycle import (
     BatchExecutionContext,
     BatchExecutionLifecycleContext,
@@ -15,23 +19,6 @@ from bioetl.application.core.batch_execution.lifecycle import (
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-
-
-class _BatchExecutionStateSnapshot(Protocol):
-    """Counter snapshot required to finalize one executor run."""
-
-    records_fetched: int
-    records_bronze: int
-    records_silver: int
-    records_gold: int
-    records_quarantined: int
-
-
-class _BatchMemoryExecutionState(Protocol):
-    """Memory sizing statistics used during execution finalization."""
-
-    batch_size_reductions: int
-    min_batch_size_used: int
 
 
 class _BatchExtractionLoopRunner(Protocol):
@@ -69,8 +56,8 @@ class BatchExecutionRunService:
         *,
         execution_context: BatchExecutionContext,
         run_loop: _BatchExtractionLoopRunner,
-        execution_state: _BatchExecutionStateSnapshot,
-        memory_state: _BatchMemoryExecutionState,
+        execution_state: BatchExecutionCountersSnapshot,
+        memory_state: BatchExecutionMemoryState,
     ) -> None:
         """Run the extraction loop and apply the correct finalization policy."""
         lifecycle_context = await self._execution_lifecycle.start_execution(
@@ -90,8 +77,8 @@ class BatchExecutionRunService:
         lifecycle_context: BatchExecutionLifecycleContext,
         execution_context: BatchExecutionContext,
         run_loop: _BatchExtractionLoopRunner,
-        execution_state: _BatchExecutionStateSnapshot,
-        memory_state: _BatchMemoryExecutionState,
+        execution_state: BatchExecutionCountersSnapshot,
+        memory_state: BatchExecutionMemoryState,
     ) -> None:
         """Finalize success, shutdown, and runtime failure using one policy."""
         try:

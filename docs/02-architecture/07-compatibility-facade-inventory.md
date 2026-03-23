@@ -62,6 +62,7 @@ Canonical commands for this cycle:
 Artifact-to-command policy:
 
 - dependency map markdown/JSON: generated only by `scripts/qa/generate_architecture_dependency_map.py`
+- dependency map markdown/JSON: layer-policy/topology snapshot only; hotspot, duplication, size, and churn pressure stay separate report-only signals and MUST NOT be inferred from zero layer violations alone
 - compatibility registry YAML: canonical SSOT for curated rows, measured-only allowlist, and tracked docstring prefixes
 - compatibility snapshot markdown: generated only by `scripts/qa/generate_compatibility_facade_snapshot.py`
 - compatibility inventory: curated operational doc guarded by `tests/architecture/test_compatibility_facade_inventory.py`

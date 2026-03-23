@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ast
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -130,3 +132,23 @@ class TestBootstrapPipelineRunner:
         bootstrap_pipeline_runner(MagicMock(), registry=registry)
 
         mock_ensure_providers_loaded.assert_called_once_with()
+
+
+def test_pipeline_bootstrap_uses_runtime_config_access_seam() -> None:
+    """Runtime bootstrap should route config loading through the local seam."""
+    source = Path("src/bioetl/composition/bootstrap/runtime/pipeline.py").read_text(
+        encoding="utf-8"
+    )
+    tree = ast.parse(source)
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert "bioetl.composition.runtime_builders.config_access" in imported_modules, (
+        "bootstrap runtime pipeline must use the runtime config_access seam."
+    )
+    assert "bioetl.infrastructure.config.pipeline_config_api" not in imported_modules, (
+        "bootstrap runtime pipeline must not import pipeline_config_api directly."
+    )

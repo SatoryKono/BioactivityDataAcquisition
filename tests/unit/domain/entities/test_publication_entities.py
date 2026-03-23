@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import pytest
+
+from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 BASE_KWARGS = {
     "entity_id": "pub:test:001",
@@ -14,6 +17,18 @@ BASE_KWARGS = {
     "ingestion_ts": datetime(2024, 1, 15, tzinfo=UTC),
     "_index": 0,
 }
+
+
+@dataclass(frozen=True, kw_only=True)
+class HookValidatedPublication(PublicationEntityBase):
+    """Test-only publication entity that uses the shared invariant hook."""
+
+    provider_key: str | None = None
+
+    def _validate_invariants(self) -> None:
+        super()._validate_invariants()
+        if not self.provider_key:
+            raise ValueError("provider_key is required")
 
 
 @pytest.mark.unit
@@ -235,3 +250,16 @@ class TestChemblPublication:
 
         with pytest.raises(ValueError, match="publication_id is required"):
             ChemblPublication(**BASE_KWARGS, publication_id="")
+
+
+@pytest.mark.unit
+class TestPublicationInvariantHook:
+    """PublicationEntityBase should participate in the centralized invariant chain."""
+
+    def test_publication_subclass_invariants_run_without_custom_post_init(self) -> None:
+        entity = HookValidatedPublication(**BASE_KWARGS, provider_key="pub-1")
+        assert entity.provider_key == "pub-1"
+
+    def test_publication_subclass_invariants_raise_without_custom_post_init(self) -> None:
+        with pytest.raises(ValueError, match="provider_key is required"):
+            HookValidatedPublication(**BASE_KWARGS, provider_key="")

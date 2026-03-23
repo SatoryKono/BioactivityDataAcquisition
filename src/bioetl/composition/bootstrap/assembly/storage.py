@@ -21,7 +21,10 @@ from bioetl.composition.factories.storage.resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
-from bioetl.domain.ports import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetrics,
+    NoOpTracing,
+)
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import get_settings

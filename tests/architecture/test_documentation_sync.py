@@ -6,23 +6,27 @@ from pathlib import Path
 
 import yaml
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DOCS_ROOT = PROJECT_ROOT / "docs"
+CONFIGS_ROOT = PROJECT_ROOT / "configs"
+ENTITIES_DIR = CONFIGS_ROOT / "entities"
 ACTIVE_DOC_EXCLUDED_PARTS = frozenset({"99-archive", "exports", "reports", "generated"})
 GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
 GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
     r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
 )
 CANONICAL_DOC_ROOTS = (
-    Path("docs/02-architecture"),
-    Path("docs/03-guides"),
-    Path("docs/04-reference"),
+    DOCS_ROOT / "02-architecture",
+    DOCS_ROOT / "03-guides",
+    DOCS_ROOT / "04-reference",
 )
 
 
 def _resolve_composite_config_dir() -> Path:
-    return Path("configs/composites")
+    return CONFIGS_ROOT / "composites"
 
 
-def _is_generated_docs_artifact(path: Path, docs_root: Path = Path("docs")) -> bool:
+def _is_generated_docs_artifact(path: Path, docs_root: Path = DOCS_ROOT) -> bool:
     """Return True for generated docs artifacts excluded from active sync checks."""
     rel_path = path.relative_to(docs_root).as_posix()
     rel_parts = Path(rel_path).parts
@@ -33,55 +37,55 @@ def _is_generated_docs_artifact(path: Path, docs_root: Path = Path("docs")) -> b
     return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
 
 
-def _iter_active_docs_markdown() -> list[Path]:
+def _iter_active_docs_markdown(docs_markdown_files: list[Path]) -> list[Path]:
     """Collect markdown docs included in active docs sync scope."""
-    docs_root = Path("docs")
     return sorted(
         path
-        for path in docs_root.rglob("*.md")
+        for path in docs_markdown_files
         if ACTIVE_DOC_EXCLUDED_PARTS.isdisjoint(path.parts)
-        and not _is_generated_docs_artifact(path, docs_root)
+        and not _is_generated_docs_artifact(path, DOCS_ROOT)
     )
 
 
-def _iter_generated_docs_markdown() -> list[Path]:
+def _iter_generated_docs_markdown(docs_markdown_files: list[Path]) -> list[Path]:
     """Collect generated markdown docs tracked by dedicated generated-docs gates."""
-    docs_root = Path("docs")
-    generated: list[Path] = []
-    for path in docs_root.rglob("*.md"):
-        if _is_generated_docs_artifact(path, docs_root):
-            generated.append(path)
-    return sorted(generated)
+    return sorted(
+        path
+        for path in docs_markdown_files
+        if _is_generated_docs_artifact(path, DOCS_ROOT)
+    )
 
 
-def _iter_report_docs_markdown() -> list[Path]:
+def _iter_report_docs_markdown(docs_markdown_files: list[Path]) -> list[Path]:
     """Collect dated/internal report docs excluded from active sync scope."""
-    reports_dir = Path("docs/reports")
+    reports_dir = DOCS_ROOT / "reports"
     if not reports_dir.exists():
         return []
-    return sorted(reports_dir.rglob("*.md"))
+    return sorted(path for path in docs_markdown_files if reports_dir in path.parents)
 
 
-def _iter_generated_zone_markdown() -> list[Path]:
+def _iter_generated_zone_markdown(docs_markdown_files: list[Path]) -> list[Path]:
     """Collect markdown from generated documentation zones."""
-    generated_dir = Path("docs/02-architecture/generated")
-    zone_docs = sorted(generated_dir.rglob("*.md")) if generated_dir.exists() else []
-    return sorted({*zone_docs, *_iter_generated_docs_markdown()})
+    generated_dir = DOCS_ROOT / "02-architecture" / "generated"
+    zone_docs = [
+        path
+        for path in docs_markdown_files
+        if generated_dir.exists() and generated_dir in path.parents
+    ]
+    return sorted({*zone_docs, *_iter_generated_docs_markdown(docs_markdown_files)})
 
 
-def _iter_canonical_docs_markdown() -> list[Path]:
+def _iter_canonical_docs_markdown(docs_markdown_files: list[Path]) -> list[Path]:
     """Collect canonical active docs under architecture/guides/reference roots."""
-    canonical: list[Path] = []
-    for root in CANONICAL_DOC_ROOTS:
-        if not root.exists():
-            continue
-        canonical.extend(
-            path
-            for path in root.rglob("*.md")
-            if ACTIVE_DOC_EXCLUDED_PARTS.isdisjoint(path.parts)
-            and not _is_generated_docs_artifact(path)
+    return sorted(
+        path
+        for path in docs_markdown_files
+        if any(
+            root == path.parent or root in path.parents for root in CANONICAL_DOC_ROOTS
         )
-    return sorted(canonical)
+        and ACTIVE_DOC_EXCLUDED_PARTS.isdisjoint(path.parts)
+        and not _is_generated_docs_artifact(path)
+    )
 
 
 def test_ports_count_matches_docs() -> None:
@@ -92,12 +96,12 @@ def test_ports_count_matches_docs() -> None:
     )
 
 
-def test_pipeline_count_matches_docs() -> None:
-    entities_dir = Path("configs/entities")
+def test_pipeline_count_matches_docs(config_yaml_files: list[Path]) -> None:
     composite_dir = _resolve_composite_config_dir()
     standard = [
         p
-        for p in entities_dir.rglob("*.yaml")
+        for p in config_yaml_files
+        if ENTITIES_DIR in p.parents
         if p.name not in {"_base.yaml", "_schema.json"}
     ]
     composite = list(composite_dir.glob("*.yaml"))
@@ -105,15 +109,19 @@ def test_pipeline_count_matches_docs() -> None:
     assert str(len(standard)) in text and str(len(composite)) in text
 
 
-def test_pipeline_ids_match_reference_index() -> None:
+def test_pipeline_ids_match_reference_index(
+    config_yaml_files: list[Path],
+    config_text_cache: dict[Path, str],
+) -> None:
     """Pipeline IDs in reference index must match config-defined IDs."""
-    entities_dir = Path("configs/entities")
     composite_dir = _resolve_composite_config_dir()
     provider_ids: list[str] = []
-    for path in sorted(entities_dir.rglob("*.yaml")):
+    for path in sorted(config_yaml_files):
+        if ENTITIES_DIR not in path.parents:
+            continue
         if path.name in {"_base.yaml", "_schema.json"}:
             continue
-        raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        raw = yaml.safe_load(config_text_cache[path]) or {}
         if not isinstance(raw, dict):
             continue
         pipeline = raw.get("pipeline")
@@ -125,7 +133,7 @@ def test_pipeline_ids_match_reference_index() -> None:
 
     composite_ids: list[str] = []
     for path in sorted(composite_dir.glob("*.yaml")):
-        text = path.read_text(encoding="utf-8")
+        text = config_text_cache.get(path, path.read_text(encoding="utf-8"))
         match = re.search(
             r"^\s*name:\s*(composite_[a-z0-9_]+)\s*$", text, flags=re.MULTILINE
         )
@@ -282,16 +290,25 @@ def test_mkdocs_nav_references_existing_markdown_files() -> None:
     )
 
 
-def test_no_legacy_repo_slug_in_active_docs_and_workflows() -> None:
+def test_no_legacy_repo_slug_in_active_docs_and_workflows(
+    docs_markdown_files: list[Path],
+    docs_text_cache: dict[Path, str],
+    workflow_text_cache: dict[Path, str],
+) -> None:
     """Active docs/workflows should reference the current repository slug."""
     legacy_slug = re.compile(r"SatoryKono/BioactivityDataAcquisition(?!2)")
     candidates = [Path("README.md")]
-    candidates.extend(_iter_active_docs_markdown())
-    candidates.extend(Path(".github/workflows").glob("*.yml"))
+    candidates.extend(_iter_active_docs_markdown(docs_markdown_files))
+    candidates.extend(workflow_text_cache)
 
     violations: list[str] = []
     for path in candidates:
-        text = path.read_text(encoding="utf-8")
+        if path == Path("README.md"):
+            text = path.read_text(encoding="utf-8")
+        elif path in workflow_text_cache:
+            text = workflow_text_cache[path]
+        else:
+            text = docs_text_cache[path]
         if legacy_slug.search(text):
             violations.append(path.as_posix())
 
@@ -301,15 +318,22 @@ def test_no_legacy_repo_slug_in_active_docs_and_workflows() -> None:
     )
 
 
-def test_no_legacy_contract_path_in_active_docs() -> None:
+def test_no_legacy_contract_path_in_active_docs(
+    docs_markdown_files: list[Path],
+    docs_text_cache: dict[Path, str],
+) -> None:
     """Active docs should use docs/04-reference/contracts/gold path."""
     legacy_path = "docs/contracts/gold/"
     candidates = [Path("README.md")]
-    candidates.extend(_iter_active_docs_markdown())
+    candidates.extend(_iter_active_docs_markdown(docs_markdown_files))
 
     violations: list[str] = []
     for path in candidates:
-        text = path.read_text(encoding="utf-8")
+        text = (
+            path.read_text(encoding="utf-8")
+            if path == Path("README.md")
+            else docs_text_cache[path]
+        )
         if legacy_path in text:
             violations.append(path.as_posix())
 
@@ -319,7 +343,11 @@ def test_no_legacy_contract_path_in_active_docs() -> None:
     )
 
 
-def test_no_legacy_kebab_pipeline_ids_in_active_docs() -> None:
+def test_no_legacy_kebab_pipeline_ids_in_active_docs(
+    docs_markdown_files: list[Path],
+    docs_text_cache: dict[Path, str],
+    workflow_text_cache: dict[Path, str],
+) -> None:
     """Active docs/workflows should use underscore pipeline IDs."""
     legacy_pipeline_ids = {
         "chembl-protein-class",
@@ -351,12 +379,17 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs() -> None:
     }
 
     candidates = [Path("README.md")]
-    candidates.extend(_iter_active_docs_markdown())
-    candidates.extend(Path(".github/workflows").glob("*.yml"))
+    candidates.extend(_iter_active_docs_markdown(docs_markdown_files))
+    candidates.extend(workflow_text_cache)
 
     violations: list[str] = []
     for path in candidates:
-        text = path.read_text(encoding="utf-8")
+        if path == Path("README.md"):
+            text = path.read_text(encoding="utf-8")
+        elif path in workflow_text_cache:
+            text = workflow_text_cache[path]
+        else:
+            text = docs_text_cache[path]
         if any(item in text for item in legacy_pipeline_ids):
             violations.append(path.as_posix())
 
@@ -366,10 +399,16 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs() -> None:
     )
 
 
-def test_generated_docs_artifacts_excluded_from_active_scope() -> None:
+def test_generated_docs_artifacts_excluded_from_active_scope(
+    docs_markdown_files: list[Path],
+) -> None:
     """Generated docs must be audited by dedicated gates, not active docs sync scope."""
-    active_paths = {path.as_posix() for path in _iter_active_docs_markdown()}
-    generated_paths = [path.as_posix() for path in _iter_generated_docs_markdown()]
+    active_paths = {
+        path.as_posix() for path in _iter_active_docs_markdown(docs_markdown_files)
+    }
+    generated_paths = [
+        path.as_posix() for path in _iter_generated_docs_markdown(docs_markdown_files)
+    ]
     overlap = sorted(set(generated_paths) & active_paths)
     assert not overlap, (
         "Generated docs leaked into active docs sync scope:\n"
@@ -377,20 +416,32 @@ def test_generated_docs_artifacts_excluded_from_active_scope() -> None:
     )
 
 
-def test_report_docs_excluded_from_active_scope() -> None:
+def test_report_docs_excluded_from_active_scope(
+    docs_markdown_files: list[Path],
+) -> None:
     """Dated/internal reports must not participate in canonical active-doc sync checks."""
-    active_paths = {path.as_posix() for path in _iter_active_docs_markdown()}
-    report_paths = {path.as_posix() for path in _iter_report_docs_markdown()}
+    active_paths = {
+        path.as_posix() for path in _iter_active_docs_markdown(docs_markdown_files)
+    }
+    report_paths = {
+        path.as_posix() for path in _iter_report_docs_markdown(docs_markdown_files)
+    }
     overlap = sorted(active_paths & report_paths)
     assert not overlap, "Report docs leaked into active docs sync scope:\n" + "\n".join(
         f"  - {item}" for item in overlap
     )
 
 
-def test_generated_zone_docs_excluded_from_active_scope() -> None:
+def test_generated_zone_docs_excluded_from_active_scope(
+    docs_markdown_files: list[Path],
+) -> None:
     """Generated documentation zones must not be treated as canonical active docs."""
-    active_paths = {path.as_posix() for path in _iter_active_docs_markdown()}
-    generated_zone_paths = {path.as_posix() for path in _iter_generated_zone_markdown()}
+    active_paths = {
+        path.as_posix() for path in _iter_active_docs_markdown(docs_markdown_files)
+    }
+    generated_zone_paths = {
+        path.as_posix() for path in _iter_generated_zone_markdown(docs_markdown_files)
+    }
     overlap = sorted(active_paths & generated_zone_paths)
     assert not overlap, (
         "Generated-zone docs leaked into active docs sync scope:\n"
@@ -398,9 +449,13 @@ def test_generated_zone_docs_excluded_from_active_scope() -> None:
     )
 
 
-def test_canonical_doc_roots_are_active_scope_only() -> None:
+def test_canonical_doc_roots_are_active_scope_only(
+    docs_markdown_files: list[Path],
+) -> None:
     """Canonical documentation roots should not resolve to reports/exports/generated zones."""
-    canonical_paths = {path.as_posix() for path in _iter_canonical_docs_markdown()}
+    canonical_paths = {
+        path.as_posix() for path in _iter_canonical_docs_markdown(docs_markdown_files)
+    }
     noncanonical_suffixes = (
         "docs/reports/",
         "docs/exports/",
@@ -417,25 +472,36 @@ def test_canonical_doc_roots_are_active_scope_only() -> None:
     )
 
 
-def test_generated_export_markdown_has_generation_marker() -> None:
+def test_generated_export_markdown_has_generation_marker(
+    docs_markdown_files: list[Path],
+    docs_text_cache: dict[Path, str],
+) -> None:
     """Generated merged docs in docs/exports must contain explicit generation marker."""
-    exports_dir = Path("docs/exports")
-    merged_docs = sorted(exports_dir.glob("*.merged.md"))
+    merged_docs = sorted(
+        path
+        for path in docs_markdown_files
+        if path.parent == DOCS_ROOT / "exports" and path.name.endswith(".merged.md")
+    )
     for path in merged_docs:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        lines = docs_text_cache[path].splitlines()
         head = "\n".join(lines[:30])
         assert re.search(r"^_Generated:\s+\d{4}-\d{2}-\d{2}_$", head, re.MULTILINE), (
             f"Missing generation marker in {path.as_posix()}"
         )
 
 
-def test_generated_export_report_names_are_timestamped() -> None:
+def test_generated_export_report_names_are_timestamped(
+    docs_markdown_files: list[Path],
+) -> None:
     """Generated docs export reports must follow timestamped naming convention."""
-    reports_dir = Path("docs/reports")
     bad_names = sorted(
         path.as_posix()
-        for path in reports_dir.glob("docs-export-report-*.md")
-        if GENERATED_DOCS_EXPORT_REPORT_RE.match(path.relative_to("docs").as_posix())
+        for path in docs_markdown_files
+        if path.parent == DOCS_ROOT / "reports"
+        and path.name.startswith("docs-export-report-")
+        and GENERATED_DOCS_EXPORT_REPORT_RE.match(
+            path.relative_to(DOCS_ROOT).as_posix()
+        )
         is None
     )
     assert not bad_names, (

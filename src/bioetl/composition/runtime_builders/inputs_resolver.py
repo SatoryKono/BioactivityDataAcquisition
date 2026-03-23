@@ -14,6 +14,9 @@ from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders.config_access import (
+    load_source_config,
+)
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     build_runtime_config as _build_runtime_config,
 )
@@ -30,7 +33,6 @@ from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     resolve_runtime_projection as _resolve_runtime_projection,
 )
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.context import (

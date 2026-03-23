@@ -526,7 +526,10 @@ class TestUnifiedHTTPClientObservability:
         self, mock_rate_limiter, mock_circuit_breaker
     ):
         """Test client uses NoOp implementations when observability not provided."""
-        from bioetl.domain.ports import NoOpMetrics, NoOpTracing
+        from bioetl.domain.ports.noop import (
+            NoOpMetrics,
+            NoOpTracing,
+        )
 
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
+import importlib.util
+import io
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -12,6 +14,20 @@ import pytest
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def _load_inventory_module():
+    root = _project_root()
+    module_path = root / "scripts" / "repo" / "check_scripts_inventory.py"
+    spec = importlib.util.spec_from_file_location(
+        "check_scripts_inventory_for_manifest_test", module_path
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
@@ -40,25 +56,21 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
 @pytest.mark.timeout(300)
 def test_scripts_inventory_manifest_drift_check_passes() -> None:
     """Committed manifest must match current scripts inventory."""
-    root = _project_root()
-    cmd = [
-        sys.executable,
-        "scripts/repo/check_scripts_inventory.py",
-        "--check",
-        "--manifest",
-        "configs/quality/scripts_inventory_manifest.json",
-    ]
-    result = subprocess.run(
-        cmd,
-        cwd=root,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    module = _load_inventory_module()
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+        rc = module.main(
+            [
+                "--check",
+                "--manifest",
+                "configs/quality/scripts_inventory_manifest.json",
+            ]
+        )
 
-    assert result.returncode == 0, (
+    assert rc == 0, (
         "Scripts inventory drift check failed.\n"
-        f"stdout:\n{result.stdout}\n"
-        f"stderr:\n{result.stderr}\n"
+        f"stdout:\n{stdout.getvalue()}\n"
+        f"stderr:\n{stderr.getvalue()}\n"
         "Run scripts/repo/check_scripts_inventory.py --update to refresh manifest."
     )

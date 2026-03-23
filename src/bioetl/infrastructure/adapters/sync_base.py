@@ -34,8 +34,8 @@ from bioetl.domain.ports import (
     ErrorHandlerPort,
     LoggerPort,
     MetricsPort,
-    NoOpMetrics,
 )
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
 if TYPE_CHECKING:

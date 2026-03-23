@@ -9,7 +9,10 @@ from uuid import UUID
 import pytest
 
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.domain.ports import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetrics,
+    NoOpTracing,
+)
 
 
 _FIXED_UUID = UUID("abcdef01-2345-6789-abcd-ef0123456789")

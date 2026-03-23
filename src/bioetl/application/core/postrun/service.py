@@ -5,12 +5,8 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.postrun._metadata_writes import (
-    build_final_metadata_write_coroutines,
-    get_run_statistics,
-)
 from bioetl.application.core.postrun._service_collaborators import (
     resolve_postrun_collaborators,
 )
@@ -33,8 +29,8 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.dq_report_orchestrator import (
         PostrunDQReportService,
     )
-    from bioetl.application.core.postrun.metadata_version_resolver import (
-        PostrunMetadataVersionResolver,
+    from bioetl.application.core.postrun.metadata_write_service import (
+        PostrunMetadataWriteService,
     )
     from bioetl.application.services.dq_report_service import (
         DQReportContext,
@@ -64,7 +60,7 @@ class PostrunDependencyContext:
 
     cleanup_orchestrator: PostrunCleanupService
     dq_report_orchestrator: PostrunDQReportService
-    metadata_version_resolver: PostrunMetadataVersionResolver
+    metadata_write_orchestrator: PostrunMetadataWriteService
     compact_orchestrator: PostrunCompactService
 
 
@@ -98,14 +94,10 @@ class PostrunService:
             context=context,
             legacy_kwargs=legacy_kwargs,
         )
-        self._storage = resolved_collaborators.storage
         self._metrics = resolved_collaborators.metrics
-        self._logger = resolved_collaborators.logger
-        self._metadata_coordinator = resolved_collaborators.metadata_coordinator
-        self._metadata_writer = resolved_collaborators.metadata_writer
         self._cleanup_orchestrator = dependencies.cleanup_orchestrator
         self._dq_report_orchestrator = dependencies.dq_report_orchestrator
-        self._metadata_version_resolver = dependencies.metadata_version_resolver
+        self._metadata_write_orchestrator = dependencies.metadata_write_orchestrator
         self._compact_orchestrator = dependencies.compact_orchestrator
         if tracer is None:
             raise TypeError(
@@ -202,7 +194,10 @@ class PostrunService:
         dq_reports: DQReportResult | None,
     ) -> None:
         """Persist final metadata when metadata collaborators are configured."""
-        await self._write_final_metadata_if_available(executor, dq_reports)
+        await self._metadata_write_orchestrator.write_final_metadata_if_available(
+            executor,
+            dq_reports,
+        )
 
     def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.
@@ -247,45 +242,6 @@ class PostrunService:
         """Generate DQ reports if enabled."""
         return await self._dq_report_orchestrator.generate_reports(context)
 
-    async def _write_final_metadata_if_available(
-        self,
-        executor: ExecutorMetricsPort,
-        dq_reports: DQReportResult | None,
-    ) -> None:
-        """Write final metadata only when metadata services are configured."""
-        if self._metadata_coordinator and self._metadata_writer:
-            await self._write_final_metadata(executor, dq_reports)
-
-    async def _write_final_metadata(
-        self,
-        executor: ExecutorMetricsPort,
-        dq_reports: DQReportResult | None,
-    ) -> None:
-        """Write final aggregated metadata for Silver and Gold layers."""
-        from datetime import UTC, datetime
-
-        if not self._metadata_coordinator or not self._metadata_writer:
-            return
-
-        import asyncio
-
-        stats = get_run_statistics(executor)
-        completed_at = datetime.now(UTC)
-        write_coros = build_final_metadata_write_coroutines(
-            metadata_coordinator=self._metadata_coordinator,
-            metadata_writer=self._metadata_writer,
-            storage=self._storage,
-            config=self._config,
-            runtime=self._runtime,
-            context=self._context,
-            stats=stats,
-            dq_reports=dq_reports,
-            completed_at=completed_at,
-            resolve_delta_version=self._resolve_delta_version,
-        )
-        if write_coros:
-            await asyncio.gather(*write_coros)
-
     def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
         """Collect batch metrics from executor."""
         total_records = max(1, executor.records_fetched)
@@ -299,15 +255,6 @@ class PostrunService:
             "silver_yield": executor.records_silver / total_records,
             "gold_yield": executor.records_gold / total_records,
         }
-
-    def _resolve_delta_version(
-        self, table_path: str, layer: Literal["silver", "gold"]
-    ) -> int | None:
-        """Resolve Delta table version with warning-mode fallback and allowlist."""
-        return self._metadata_version_resolver.resolve_delta_version(
-            table_path,
-            layer=layer,
-        )
 
 
 __all__ = [

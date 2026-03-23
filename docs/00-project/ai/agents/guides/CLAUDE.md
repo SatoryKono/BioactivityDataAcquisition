@@ -6,6 +6,11 @@
 
 *Синхронизировано с RULES.md v5.24 (2026-03-13) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.6.0*
 
+> **Runtime-specific note:** orchestration guidance for Claude lives in
+> `.claude/agents/ORCHESTRATION.md`. Codex keeps its own runtime-specific
+> source-of-truth in `.codex/agents/ORCHESTRATION.md`, so version skew between
+> those files is not automatically a docs defect.
+
 ----------------------------------------------------------------------
 
 ## TL;DR — Быстрый Старт

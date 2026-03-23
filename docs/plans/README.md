@@ -21,6 +21,15 @@ plans, and supporting architecture assessment snapshots.
 
 Plans in this folder must not override normative documents.
 
+## Publication Hygiene Note
+
+- This folder is intentionally **internal-published**, not canonical.
+- Plans may be linked from the docs site for discoverability, but they remain
+  working materials rather than normative guidance.
+- When a plan conflicts with active docs under `docs/00-05`, active docs win.
+- Historical or completed plans should move to `docs/99-archive/` rather than
+  accumulate as competing active surfaces.
+
 ## Maintenance Rules
 
 - Keep file names explicit and date-stamped when possible.
@@ -37,9 +46,12 @@ This is now the only active execution/backlog document in `docs/plans/`.
 
 ### Retained Operational Context
 
-- [onboarding-checklist-day-1-2026-03-20.md](onboarding-checklist-day-1-2026-03-20.md)
-- [project-briefing-capability-discovery-2026-03-20.md](project-briefing-capability-discovery-2026-03-20.md)
 - [architecture-review-and-refactor-plan-2026-03-21.md](architecture-review-and-refactor-plan-2026-03-21.md)
+
+Earlier operational context files such as
+`onboarding-checklist-day-1-2026-03-20.md` and
+`project-briefing-capability-discovery-2026-03-20.md` are no longer retained as
+published plan pages in this workspace snapshot.
 
 The architecture review plan was refreshed on `2026-03-23` with the current
 integral score, updated category table, and RF-style roadmap. It remains a
@@ -47,8 +59,11 @@ supporting assessment map, not a second active backlog.
 
 ### Retained Historical Context With Live Evidence References
 
-- [rf-07-provider-registry-migration-plan-2026-03-20.md](rf-07-provider-registry-migration-plan-2026-03-20.md)
-- [rf-07d-runtime-deferred-wave-plan-2026-03-20.md](rf-07d-runtime-deferred-wave-plan-2026-03-20.md)
+Historical RF-07 planning context is now retained through evidence packs and
+archive indexes rather than published plan pages:
+
+- `rf-07-provider-registry-migration-plan-2026-03-20.md`
+- `rf-07d-runtime-deferred-wave-plan-2026-03-20.md`
 
 These files are no longer active queues, but are still retained because
 evidence packs and historical runtime-ownership references point to them.

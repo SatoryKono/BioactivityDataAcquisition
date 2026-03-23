@@ -8,7 +8,8 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import (
     ExternalServiceError,
 )
-from bioetl.domain.ports import ErrorClassifierPort, NoOpMetrics
+from bioetl.domain.ports import ErrorClassifierPort
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import ErrorType, JsonDict
 from bioetl.infrastructure.adapters._error_handling_support import (
     AdapterErrorContext,

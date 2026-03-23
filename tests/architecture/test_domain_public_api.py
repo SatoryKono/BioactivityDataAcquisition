@@ -153,6 +153,35 @@ def test_domain_ports_facade_explicitly_exports_runtime_contracts() -> None:
     )
 
 
+def test_domain_ports_noop_exports_are_separate_public_subfacade() -> None:
+    """Verify operational no-op implementations live outside the main ports facade."""
+    from bioetl.domain import ports
+    from bioetl.domain.ports import noop
+
+    noop_exports = {
+        "NoOpAudit",
+        "NoOpDebug",
+        "NoOpMemoryMonitor",
+        "NoOpMetadataWriter",
+        "NoOpMetrics",
+        "NoOpPiiHasher",
+        "NoOpTracing",
+    }
+
+    ports_all = set(ports.__all__)
+    noop_all = set(noop.__all__)
+
+    assert not (noop_exports & ports_all), (
+        "Operational NoOp implementations must not be exported from "
+        f"bioetl.domain.ports facade: found {sorted(noop_exports & ports_all)}"
+    )
+    missing = noop_exports - noop_all
+    assert not missing, (
+        "Operational NoOp implementations must be exported from "
+        f"bioetl.domain.ports.noop: missing {sorted(missing)}"
+    )
+
+
 def test_pipeline_context_remains_normative_domain_execution_context() -> None:
     """Verify PipelineContext stays typed as a domain-level execution context.
 

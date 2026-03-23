@@ -66,6 +66,23 @@ class DomainConfigResolver:
         return self.domain_mapper(yaml_config, resolved_dq_config=resolved_dq)
 
 
+def resolve_domain_pipeline_config(
+    yaml_config: PipelineYamlConfig,
+    *,
+    configs_root: Path = Path("configs"),
+    relaxed_dq: bool = False,
+    loader_class: PipelineConfigDQResolverBuilder = PipelineConfigLoader,
+    domain_mapper: DomainConfigMapper = yaml_config_to_domain,
+) -> PipelineConfig:
+    """Resolve domain config from an already validated YAML pipeline config."""
+    resolver = DomainConfigResolver(
+        configs_root=configs_root,
+        loader_class=loader_class,
+        domain_mapper=domain_mapper,
+    )
+    return resolver.resolve(yaml_config, relaxed_dq=relaxed_dq)
+
+
 def load_domain_pipeline_config(
     pipeline_name: str,
     *,
@@ -77,12 +94,17 @@ def load_domain_pipeline_config(
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""
     yaml_config = yaml_loader(pipeline_name)
-    resolver = DomainConfigResolver(
+    return resolve_domain_pipeline_config(
+        yaml_config,
         configs_root=configs_root,
+        relaxed_dq=relaxed_dq,
         loader_class=loader_class,
         domain_mapper=domain_mapper,
     )
-    return resolver.resolve(yaml_config, relaxed_dq=relaxed_dq)
 
 
-__all__ = ["DomainConfigResolver", "load_domain_pipeline_config"]
+__all__ = [
+    "DomainConfigResolver",
+    "load_domain_pipeline_config",
+    "resolve_domain_pipeline_config",
+]

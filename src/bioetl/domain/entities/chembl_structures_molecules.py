@@ -64,10 +64,6 @@ class Molecule(BaseEntity):
     standard_inchi: str | None = None
     inchi_key: str | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if not self.molecule_id:
             raise ValueError("Molecule ChEMBL ID is required")
@@ -95,21 +91,21 @@ class ChemblPublicationSimilarity(BaseEntity):
     avg_tani: float | None = None
     max_tani: float | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if self.sim_id <= 0:
             raise ValueError(f"sim_id must be positive, got {self.sim_id}")
-        if self.doc_1 <= 0 or self.doc_2 <= 0:
-            raise ValueError("doc_1 and doc_2 must be positive")
-        if self.doc_1 == self.doc_2:
-            raise ValueError("Document cannot be similar to itself")
+        self._validate_similarity_documents()
         _validate_tanimoto(self.tid_tani, "tid_tani")
         _validate_tanimoto(self.mol_tani, "mol_tani")
         _validate_tanimoto(self.avg_tani, "avg_tani")
         _validate_tanimoto(self.max_tani, "max_tani")
+
+    def _validate_similarity_documents(self) -> None:
+        """Validate similarity endpoints for positivity and non-identity."""
+        if self.doc_1 <= 0 or self.doc_2 <= 0:
+            raise ValueError("doc_1 and doc_2 must be positive")
+        if self.doc_1 == self.doc_2:
+            raise ValueError("Document cannot be similar to itself")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -126,10 +122,6 @@ class ProteinClassification(BaseEntity):
     sort_order: int | None = None
     replaced_by: int | None = None
     downgraded: int | None = None
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
 
     def _validate_invariants(self) -> None:
         if self.protein_class_id < 1:

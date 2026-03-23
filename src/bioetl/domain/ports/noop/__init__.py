@@ -1,4 +1,4 @@
-"""No-op implementations facade for observability and utility ports."""
+"""Public sub-facade for operational no-op port implementations."""
 
 from __future__ import annotations
 

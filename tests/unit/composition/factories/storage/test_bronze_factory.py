@@ -9,7 +9,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.storage._bronze import create_bronze_writer
-from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetadataWriter,
+    NoOpTracing,
+)
 
 
 @pytest.mark.unit

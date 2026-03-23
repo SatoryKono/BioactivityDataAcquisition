@@ -5,9 +5,9 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
+from bioetl.application.core.preflight.health_aggregator import HealthAggregator
 from bioetl.application.core.preflight.medallion_validator import (
-    _MedallionConfigValidator,
+    MedallionConfigValidator,
 )
 from bioetl.domain.types import (
     ConfigValidationError,
@@ -32,8 +32,8 @@ class PreflightService:
         context: PipelineContext,
         logger: LoggerPort,
         metrics: MetricsPort,
-        health_aggregator: _HealthAggregator,
-        medallion_validator: _MedallionConfigValidator,
+        health_aggregator: HealthAggregator,
+        medallion_validator: MedallionConfigValidator,
     ) -> None:
         self._config = config
         self._context = context
@@ -253,4 +253,4 @@ class PreflightService:
         )
 
 
-__all__ = ["PreflightService", "_HealthAggregator", "_MedallionConfigValidator"]
+__all__ = ["PreflightService", "HealthAggregator", "MedallionConfigValidator"]

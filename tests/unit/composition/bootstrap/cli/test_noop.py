@@ -72,7 +72,7 @@ class TestCreateNoopMetrics:
 
     def test_metrics_is_noop_type(self) -> None:
         """CLI NoOp metrics should be a NoOpMetrics instance."""
-        from bioetl.domain.ports import NoOpMetrics
+        from bioetl.domain.ports.noop import NoOpMetrics
 
         result = create_noop_metrics()
 
@@ -105,7 +105,7 @@ class TestCreateNoopTracing:
 
     def test_tracing_is_noop_type(self) -> None:
         """Returned tracing should be NoOpTracing implementation."""
-        from bioetl.domain.ports import NoOpTracing
+        from bioetl.domain.ports.noop import NoOpTracing
 
         result = create_noop_tracing()
 

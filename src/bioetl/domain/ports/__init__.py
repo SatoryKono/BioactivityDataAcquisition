@@ -62,15 +62,6 @@ from bioetl.domain.ports.metadata import (
     SilverMetadataInput,
     SilverRef,
 )
-from bioetl.domain.ports.noop import (
-    NoOpAudit,
-    NoOpDebug,
-    NoOpMemoryMonitor,
-    NoOpMetadataWriter,
-    NoOpMetrics,
-    NoOpPiiHasher,
-    NoOpTracing,
-)
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
     ExecutorMetricsPort,
@@ -197,13 +188,6 @@ __all__ = [
     "MetricsExtractorPort",
     "MetricsPort",
     "MetricsServerPort",
-    "NoOpAudit",
-    "NoOpDebug",
-    "NoOpMemoryMonitor",
-    "NoOpMetadataWriter",
-    "NoOpMetrics",
-    "NoOpPiiHasher",
-    "NoOpTracing",
     "PiiHasherPort",
     "PipelineConfigLoaderPort",
     "PipelineDebugPort",

@@ -1,0 +1,53 @@
+# AI Documentation Surface
+
+*Статус: internal-published (Internal / Extended)*
+
+Этот каталог собирает AI-related documentation surfaces для BioETL:
+runtime-facing guides, published mirrors, prompts, skills, memory notes и
+supporting internal artifacts.
+
+## Surface Types
+
+- **Runtime source**: live orchestration, agent registries и runtime-specific
+  instructions живут в `.codex/agents/` и `.claude/agents/`.
+- **Published mirrors and guides**: `docs/00-project/ai/agents/` хранит
+  discoverable docs mirrors, guides и runtime-facing helper docs.
+- **Memory surface**: `docs/00-project/ai/memory/` хранит project memory entry
+  point и role-specific memory sheets.
+- **Prompts surface**: `docs/00-project/ai/prompts/` хранит working prompts,
+  collected prompts и prompt indexes.
+- **Skills surface**: `docs/00-project/ai/skills/` хранит published mirrors,
+  catalogs и reference mirrors для локальных/global skills.
+
+## Reading Priority
+
+При чтении AI docs используй такой приоритет:
+
+1. runtime source в `.codex/agents/` и `.claude/agents/`
+2. canonical governance docs:
+   - `docs/00-project/RULES.md`
+   - `docs/01-requirements/REQUIREMENTS.md`
+   - accepted ADRs in `docs/02-architecture/decisions/`
+3. internal-published AI docs under `docs/00-project/ai/`
+
+Если published AI docs расходятся с runtime source или canonical governance,
+приоритет у runtime source и canonical governance.
+
+## Main Entry Points
+
+- [AI Agents Context](agents/README.md) — runtime-specific agent guidance,
+  published mirrors, guides, policy notes
+- [AI Memory Surface](memory/README.md) — project memory entry point and
+  role-specific memory sheets
+- [AI Prompts Surface](prompts/README.md) — working prompts, historical prompt
+  collections, prompt indexes
+- [Skills Mirror](skills/README.md) — published mirrors, practical indexes and
+  skill references
+
+## Notes
+
+- This directory is intentionally **internal-published**, not a canonical
+  runtime registry.
+- Different runtimes may keep intentionally divergent orchestration docs.
+- Prompts, memory sheets and skill mirrors are support artifacts; they do not
+  redefine project rules by themselves.

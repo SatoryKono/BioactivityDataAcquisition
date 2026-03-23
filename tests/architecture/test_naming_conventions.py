@@ -113,6 +113,7 @@ def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
                     "Dependencies",
                     "Components",
                     "Collaborators",
+                    "Snapshot",
                 )
             ):
                 continue

@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-03-20T22:49:13
+- Generated: 2026-03-23T13:38:06
 - Diagram count: 19
 
 ## Table of Contents
@@ -29,7 +29,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 01-domain-ports — Class Diagram: Domain Port Protocols
+## 01-domain-ports
+
+**Class Diagram: Domain Port Protocols**
 
 ![01-domain-ports](../class-diagrams/svg/01-domain-ports.svg)
 
@@ -46,7 +48,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 01a-domain-ports-method-catalog — Class Diagram: Domain Port Method Catalog (L2)
+## 01a-domain-ports-method-catalog
+
+**Class Diagram: Domain Port Method Catalog (L2)**
 
 ![01a-domain-ports-method-catalog](../class-diagrams/svg/01a-domain-ports-method-catalog.svg)
 
@@ -63,7 +67,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 02-entities-aggregates — Class Diagram: Entities & Aggregates
+## 02-entities-aggregates
+
+**Class Diagram: Entities & Aggregates**
 
 ![02-entities-aggregates](../class-diagrams/svg/02-entities-aggregates.svg)
 
@@ -80,7 +86,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 03-value-objects — Class Diagram: Value Objects
+## 03-value-objects
+
+**Class Diagram: Value Objects**
 
 ![03-value-objects](../class-diagrams/svg/03-value-objects.svg)
 
@@ -97,7 +105,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 04-types-enums — Class Diagram: Types & Enums
+## 04-types-enums
+
+**Class Diagram: Types & Enums**
 
 ![04-types-enums](../class-diagrams/svg/04-types-enums.svg)
 
@@ -114,7 +124,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 05-exceptions — Class Diagram: Exception Hierarchy
+## 05-exceptions
+
+**Class Diagram: Exception Hierarchy**
 
 ![05-exceptions](../class-diagrams/svg/05-exceptions.svg)
 
@@ -131,7 +143,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 06-config-classes — Class Diagram: Configuration Classes
+## 06-config-classes
+
+**Class Diagram: Configuration Classes**
 
 ![06-config-classes](../class-diagrams/svg/06-config-classes.svg)
 
@@ -148,7 +162,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 07-application-core-services — Class Diagram: Application Core Services
+## 07-application-core-services
+
+**Class Diagram: Application Core Services**
 
 ![07-application-core-services](../class-diagrams/svg/07-application-core-services.svg)
 
@@ -165,7 +181,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 08-application-services — Class Diagram: Application Services
+## 08-application-services
+
+**Class Diagram: Application Services**
 
 ![08-application-services](../class-diagrams/svg/08-application-services.svg)
 
@@ -182,7 +200,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 08a-application-services-operation-catalog — Class Diagram: Application Service Operation Catalog (L2)
+## 08a-application-services-operation-catalog
+
+**Class Diagram: Application Service Operation Catalog (L2)**
 
 ![08a-application-services-operation-catalog](../class-diagrams/svg/08a-application-services-operation-catalog.svg)
 
@@ -199,7 +219,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 09-transformers — Class Diagram: Transformers
+## 09-transformers
+
+**Class Diagram: Transformers**
 
 ![09-transformers](../class-diagrams/svg/09-transformers.svg)
 
@@ -216,7 +238,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 10-adapters — Class Diagram: Infrastructure Adapters
+## 10-adapters
+
+**Class Diagram: Infrastructure Adapters**
 
 ![10-adapters](../class-diagrams/svg/10-adapters.svg)
 
@@ -233,7 +257,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 11-storage — Class Diagram: Storage Components
+## 11-storage
+
+**Class Diagram: Storage Components**
 
 ![11-storage](../class-diagrams/svg/11-storage.svg)
 
@@ -250,7 +276,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 12-composite-pipeline — Class Diagram: Composite Pipeline Components
+## 12-composite-pipeline
+
+**Class Diagram: Composite Pipeline Components**
 
 ![12-composite-pipeline](../class-diagrams/svg/12-composite-pipeline.svg)
 
@@ -267,7 +295,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 13-domain-services — Class Diagram: Domain Services
+## 13-domain-services
+
+**Class Diagram: Domain Services**
 
 ![13-domain-services](../class-diagrams/svg/13-domain-services.svg)
 
@@ -284,7 +314,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 14-observability — Class Diagram: Observability Components
+## 14-observability
+
+**Class Diagram: Observability Components**
 
 ![14-observability](../class-diagrams/svg/14-observability.svg)
 
@@ -301,7 +333,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 14a-observability-method-catalog — Class Diagram: Observability Method Catalog (L2)
+## 14a-observability-method-catalog
+
+**Class Diagram: Observability Method Catalog (L2)**
 
 ![14a-observability-method-catalog](../class-diagrams/svg/14a-observability-method-catalog.svg)
 
@@ -318,7 +352,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 15-extractors — Class Diagram: Field Extractors and Publication Blocks
+## 15-extractors
+
+**Class Diagram: Field Extractors and Publication Blocks**
 
 ![15-extractors](../class-diagrams/svg/15-extractors.svg)
 
@@ -335,7 +371,9 @@
 
 <div style="page-break-before: always;"></div>
 
-## 16-factories-bootstrap — Class Diagram: Factories & Bootstrap
+## 16-factories-bootstrap
+
+**Class Diagram: Factories & Bootstrap**
 
 ![16-factories-bootstrap](../class-diagrams/svg/16-factories-bootstrap.svg)
 

@@ -11,9 +11,9 @@ from bioetl.domain.ports import (
     CheckpointPort,
     LockPort,
     MetricsPort,
-    NoOpMetrics,
     QuarantinePort,
 )
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics

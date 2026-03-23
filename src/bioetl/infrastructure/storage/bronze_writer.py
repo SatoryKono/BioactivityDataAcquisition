@@ -130,12 +130,12 @@ class BronzeWriter(
             raise TypeError(f"Unexpected BronzeWriter options: {unexpected}")
 
         if tracing is None:
-            from bioetl.domain.ports import NoOpTracing
+            from bioetl.domain.ports.noop import NoOpTracing
 
             tracing = NoOpTracing()
 
         if metadata_writer is None:
-            from bioetl.domain.ports import NoOpMetadataWriter
+            from bioetl.domain.ports.noop import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
         services = runtime_services or BronzeWriterRuntimeServices(

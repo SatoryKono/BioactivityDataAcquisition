@@ -9,6 +9,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters.common._title_fallback_flow import (
+    get_fallback_title,
+    truncate_title,
+)
 from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
     titles_match,
@@ -204,7 +208,7 @@ async def test_search_by_title_checks_multiple_results(mock_logger):
     assert result["DOI"] == "10.1038/nature12373"
 
 
-def test_get_fallback_title(fallback_handler):
+def test_get_fallback_title():
     """Test getting fallback title from mapping."""
     mapping = {
         "10.1038/nature12373": "Crystal structure",
@@ -212,13 +216,11 @@ def test_get_fallback_title(fallback_handler):
     }
 
     # Direct match
-    title = fallback_handler._get_fallback_title(
-        "10.1038/nature12373", "10.1038/nature12373", mapping
-    )
+    title = get_fallback_title("10.1038/nature12373", "10.1038/nature12373", mapping)
     assert title == "Crystal structure"
 
     # Normalized DOI match
-    title = fallback_handler._get_fallback_title(
+    title = get_fallback_title(
         "10.1038/NATURE12373",  # Uppercase original
         "10.1038/nature12373",  # Lowercase normalized
         mapping,
@@ -226,19 +228,17 @@ def test_get_fallback_title(fallback_handler):
     assert title == "Crystal structure"
 
     # No match
-    title = fallback_handler._get_fallback_title(
-        "10.1234/unknown", "10.1234/unknown", mapping
-    )
+    title = get_fallback_title("10.1234/unknown", "10.1234/unknown", mapping)
     assert title is None
 
 
-def test_truncate_title(fallback_handler):
+def test_truncate_title():
     """Test title truncation for logging."""
     short_title = "Short title"
-    assert fallback_handler._truncate_title(short_title) == "Short title"
+    assert truncate_title(short_title) == "Short title"
 
     long_title = "A" * 100
-    truncated = fallback_handler._truncate_title(long_title, max_len=50)
+    truncated = truncate_title(long_title, max_len=50)
     assert len(truncated) == 53  # 50 + "..."
     assert truncated.endswith("...")
 

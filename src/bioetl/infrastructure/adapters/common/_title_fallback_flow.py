@@ -8,6 +8,20 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
 
 
+def get_fallback_title(
+    doi: str, normalized_doi: str | None, fallback_mapping: dict[str, str]
+) -> str | None:
+    """Return fallback title from the original or normalized identifier."""
+    if normalized_doi:
+        return fallback_mapping.get(doi) or fallback_mapping.get(normalized_doi)
+    return fallback_mapping.get(doi)
+
+
+def truncate_title(title: str, max_len: int = 50) -> str:
+    """Truncate a title for logging output."""
+    return title[:max_len] + "..." if len(title) > max_len else title
+
+
 async def iter_missing_doi_fallback_records(
     *,
     dois: list[str],

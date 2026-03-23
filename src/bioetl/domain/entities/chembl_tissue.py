@@ -38,10 +38,6 @@ class Tissue(BaseEntity):
     efo_id: str | None = None  # Experimental Factor Ontology
     uberon_id: str | None = None  # Uberon multi-species anatomy ontology
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if not self.tissue_id:
             raise ValueError("Tissue ChEMBL ID is required")

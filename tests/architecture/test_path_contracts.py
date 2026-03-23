@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 from unittest.mock import Mock
 
-from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter

@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters._cached_bronze_support import parse_bronze_date
 from bioetl.infrastructure.adapters.cached_bronze_data_source import (
     CachedBronzeDataSource,
 )
@@ -89,23 +90,26 @@ class TestCachedBronzeDataSourceBasics:
         await source.__aexit__(None, None, None)
         await source.aclose()
 
-    def test_parse_date(self, base_logger: MagicMock) -> None:
-        """Date parser should return UTC-aware datetime and support None."""
+    def test_parse_bronze_date_returns_utc_datetime_and_supports_none(
+        self,
+        base_logger: MagicMock,
+    ) -> None:
+        """Canonical helper should return UTC-aware datetime and support None."""
         reader = _FakeBronzeReader(
             base_path="/tmp/bronze",
             flat_structure=False,
             batches=[],
             records_by_batch={},
         )
-        source = CachedBronzeDataSource(
+        _ = CachedBronzeDataSource(
             bronze_reader=reader,
             provider="chembl",
             entity_type="activity",
             logger=base_logger,
         )
 
-        assert source._parse_date(None) is None
-        parsed = source._parse_date("2026-03-01")
+        assert parse_bronze_date(None) is None
+        parsed = parse_bronze_date("2026-03-01")
         assert parsed is not None
         assert parsed.tzinfo == UTC
         assert parsed.year == 2026

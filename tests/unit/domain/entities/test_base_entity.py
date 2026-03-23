@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import pytest
@@ -17,6 +18,17 @@ BASE_KWARGS = {
     "ingestion_ts": datetime(2024, 1, 1, tzinfo=UTC),
     "_index": 0,
 }
+
+
+@dataclass(frozen=True, kw_only=True)
+class HookValidatedEntity(BaseEntity):
+    """Test-only entity that relies on the centralized invariant hook."""
+
+    code: str
+
+    def _validate_invariants(self) -> None:
+        if not self.code:
+            raise ValueError("code is required")
 
 
 @pytest.mark.unit
@@ -74,3 +86,11 @@ class TestBaseEntity:
         e = BaseEntity(**BASE_KWARGS)
         with pytest.raises((AttributeError, TypeError)):
             e._dq_warn = True  # type: ignore[misc]
+
+    def test_subclass_invariants_run_without_custom_post_init(self) -> None:
+        entity = HookValidatedEntity(**BASE_KWARGS, code="ok")
+        assert entity.code == "ok"
+
+    def test_subclass_invariants_raise_without_custom_post_init(self) -> None:
+        with pytest.raises(ValueError, match="code is required"):
+            HookValidatedEntity(**BASE_KWARGS, code="")

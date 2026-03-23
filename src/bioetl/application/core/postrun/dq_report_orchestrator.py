@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.postrun._failure_policy import (
+    PostrunFailurePolicySpec,
+    apply_postrun_failure_policy,
+    is_strict_validation_enabled,
+)
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
@@ -24,6 +29,14 @@ if TYPE_CHECKING:
 class PostrunDQReportService:
     """Orchestrates optional DQ report generation with strict/warning mode."""
 
+    _FAILURE_POLICY = PostrunFailurePolicySpec(
+        event="dq_report_generation_failed",
+        strict_reason="dq_report_generation_failed_strict_mode",
+        strict_reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_STRICT",
+        warning_reason="dq_report_generation_failed_warning_mode",
+        warning_reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_WARNING",
+    )
+
     def __init__(
         self,
         *,
@@ -42,6 +55,10 @@ class PostrunDQReportService:
         self._silver_dq_config = silver_dq_config
         self._gold_dq_config = gold_dq_config
         self._warning_allowlist = warning_allowlist
+        self._handled_failures: tuple[type[BaseException], ...] = (
+            *warning_allowlist,
+            BioETLError,
+        )
 
     async def generate_reports(
         self,
@@ -83,67 +100,21 @@ class PostrunDQReportService:
                     gold_enabled=result.gold_enabled,
                 )
             return result
-        except self._warning_allowlist as error:
-            if self._is_strict_validation_enabled():
-                self._logger.error(
-                    "dq_report_generation_failed",
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    reason="dq_report_generation_failed_strict_mode",
-                    reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_STRICT",
-                    strict_mode=True,
-                )
+        except self._handled_failures as error:
+            should_raise = apply_postrun_failure_policy(
+                logger=self._logger,
+                runtime=self._runtime,
+                error=error,
+                spec=self._FAILURE_POLICY,
+                emit_warning_error_log=True,
+            )
+            if should_raise:
                 raise
-            self._logger.error(
-                "dq_report_generation_failed",
-                error=str(error),
-                error_type=type(error).__name__,
-                reason="dq_report_generation_failed_warning_mode",
-                reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_WARNING",
-                strict_mode=False,
-            )
-            self._logger.warning(
-                "dq_report_generation_failed",
-                error=str(error),
-                error_type=type(error).__name__,
-                reason="dq_report_generation_failed_warning_mode",
-                reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_WARNING",
-                strict_mode=False,
-            )
-            return None
-        except BioETLError as error:
-            if self._is_strict_validation_enabled():
-                self._logger.error(
-                    "dq_report_generation_failed",
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    reason="dq_report_generation_failed_strict_mode",
-                    reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_STRICT",
-                    strict_mode=True,
-                )
-                raise
-            self._logger.error(
-                "dq_report_generation_failed",
-                error=str(error),
-                error_type=type(error).__name__,
-                reason="dq_report_generation_failed_warning_mode",
-                reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_WARNING",
-                strict_mode=False,
-            )
-            self._logger.warning(
-                "dq_report_generation_failed",
-                error=str(error),
-                error_type=type(error).__name__,
-                reason="dq_report_generation_failed_warning_mode",
-                reason_code="POSTRUN_DQ_REPORT_GENERATION_FAILED_WARNING",
-                strict_mode=False,
-            )
             return None
 
     def _is_strict_validation_enabled(self) -> bool:
-        """Return True only when strict validation is explicitly enabled."""
-        value = getattr(self._runtime, "strict_validation", False)
-        return bool(value) if isinstance(value, bool) else False
+        """Compatibility wrapper around shared strict-mode evaluation."""
+        return is_strict_validation_enabled(self._runtime)
 
 
 __all__ = ["PostrunDQReportService"]

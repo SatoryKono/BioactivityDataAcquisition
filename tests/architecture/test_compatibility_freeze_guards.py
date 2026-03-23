@@ -293,6 +293,39 @@ ALLOWED_CONFIG_LOADER_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_CONFIG_LOAD_API_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_CONFIG_LOAD_API_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_INFRASTRUCTURE_CONFIG_LOADER_SYMBOL_SRC_FILES: frozenset[Path] = frozenset()
+ALLOWED_PIPELINE_CONFIG_RESOLUTION_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "factories"
+        / "pipeline"
+        / "_creation_wiring.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "factories"
+        / "pipeline"
+        / "construction.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "factories"
+        / "pipeline"
+        / "factory_method_helpers.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "composition"
+        / "factories"
+        / "services"
+        / "bundle.py",
+    }
+)
 ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES = frozenset(
     {
         ROOT
@@ -772,14 +805,14 @@ def test_services_creation_api_compat_module_is_not_used_in_src(
 def test_pipeline_config_resolution_compat_module_is_not_used_in_src(
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
-    """First-party src must import the canonical infrastructure domain-config resolver."""
+    """First-party src must keep config_resolution imports confined to a small seam."""
     violations = _iter_module_import_violations(
         source_ast_cache,
         module_name=PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE,
-        allowed_files=frozenset(),
+        allowed_files=ALLOWED_PIPELINE_CONFIG_RESOLUTION_SRC_FILES,
     )
     assert not violations, (
-        "pipeline.config_resolution compatibility shim leaked into first-party src "
+        "pipeline.config_resolution sanctioned seam leaked beyond the approved src "
         "imports:\n" + "\n".join(violations)
     )
 

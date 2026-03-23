@@ -33,24 +33,25 @@ _LINK_TARGET_RE = re.compile(r"\[[^\]]+\]\(([^)#?]+)(?:[#?][^)]+)?\)")
 _ARCHIVE_CONTEXT_MARKERS = ("archived", "historical", "legacy", "superseded")
 
 
-def _iter_canonical_markdown_files() -> list[Path]:
+def _iter_canonical_markdown_files(docs_markdown_files: list[Path]) -> list[Path]:
     """Collect canonical markdown docs audited for cross-reference integrity."""
-    docs: list[Path] = []
-    for root in CANONICAL_DOC_DIRS:
-        if not root.exists():
-            continue
-        docs.extend(
-            path for path in root.rglob("*.md") if "generated" not in path.parts
+    return sorted(
+        path
+        for path in docs_markdown_files
+        if any(
+            root == path.parent or root in path.parents for root in CANONICAL_DOC_DIRS
         )
-    return sorted(docs)
+        and "generated" not in path.parts
+    )
 
 
-def _iter_internal_doc_links(path: Path) -> list[tuple[int, str, Path]]:
+def _iter_internal_doc_links(
+    path: Path,
+    docs_text_cache: dict[Path, str],
+) -> list[tuple[int, str, Path]]:
     """Collect internal docs links with resolved absolute targets."""
     records: list[tuple[int, str, Path]] = []
-    for lineno, line in enumerate(
-        path.read_text(encoding="utf-8").splitlines(), start=1
-    ):
+    for lineno, line in enumerate(docs_text_cache[path].splitlines(), start=1):
         for match in _LINK_TARGET_RE.finditer(line):
             target = match.group(1).strip()
             if not target or re.match(r"^[a-z]+:", target, re.IGNORECASE):
@@ -77,13 +78,15 @@ class TestADRReferencesValid:
                 numbers.add(int(match.group(1)))
         return numbers
 
-    def test_code_adr_references_exist(self) -> None:
+    def test_code_adr_references_exist(
+        self,
+        source_content_cache: dict[Path, str],
+    ) -> None:
         """All ADR-NNN references in source code should have corresponding files."""
         existing = self._get_existing_adr_numbers()
         violations: list[str] = []
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_content_cache.items():
             for match in self._ADR_PATTERN.finditer(content):
                 adr_num = int(match.group(1))
                 if adr_num not in existing and adr_num > 0:
@@ -152,11 +155,17 @@ class TestGlossaryExists:
 class TestCanonicalDocCrossrefs:
     """Ensure canonical docs do not drift toward generated/report/archive artifacts."""
 
-    def test_canonical_docs_do_not_link_noncanonical_doc_zones(self) -> None:
+    def test_canonical_docs_do_not_link_noncanonical_doc_zones(
+        self,
+        docs_markdown_files: list[Path],
+        docs_text_cache: dict[Path, str],
+    ) -> None:
         """Canonical docs should not use reports/exports/generated docs as references."""
         violations: list[str] = []
-        for doc_path in _iter_canonical_markdown_files():
-            for lineno, target, resolved in _iter_internal_doc_links(doc_path):
+        for doc_path in _iter_canonical_markdown_files(docs_markdown_files):
+            for lineno, target, resolved in _iter_internal_doc_links(
+                doc_path, docs_text_cache
+            ):
                 if any(
                     resolved == zone or zone in resolved.parents
                     for zone in NONCANONICAL_DOC_DIRS
@@ -170,12 +179,18 @@ class TestCanonicalDocCrossrefs:
             "(reports/exports/generated):\n" + "\n".join(violations)
         )
 
-    def test_archive_links_in_canonical_docs_are_explicitly_marked(self) -> None:
+    def test_archive_links_in_canonical_docs_are_explicitly_marked(
+        self,
+        docs_markdown_files: list[Path],
+        docs_text_cache: dict[Path, str],
+    ) -> None:
         """Historical archive links from canonical docs must be marked as archived/historical."""
         violations: list[str] = []
-        for doc_path in _iter_canonical_markdown_files():
-            lines = doc_path.read_text(encoding="utf-8").splitlines()
-            for lineno, target, resolved in _iter_internal_doc_links(doc_path):
+        for doc_path in _iter_canonical_markdown_files(docs_markdown_files):
+            lines = docs_text_cache[doc_path].splitlines()
+            for lineno, target, resolved in _iter_internal_doc_links(
+                doc_path, docs_text_cache
+            ):
                 if not (resolved == ARCHIVE_DIR or ARCHIVE_DIR in resolved.parents):
                     continue
                 line = lines[lineno - 1].lower()
@@ -198,11 +213,19 @@ class TestCanonicalDocCrossrefs:
         assert "docs/03-guides" in text
         assert "docs/04-reference" in text
 
-    def test_generated_exports_declare_non_canonical_status(self) -> None:
+    def test_generated_exports_declare_non_canonical_status(
+        self,
+        docs_markdown_files: list[Path],
+        docs_text_cache: dict[Path, str],
+    ) -> None:
         """Merged export docs must declare themselves generated/non-canonical."""
         violations: list[str] = []
-        for path in sorted((DOCS_DIR / "exports").glob("*.merged.md")):
-            head = "\n".join(path.read_text(encoding="utf-8").splitlines()[:20]).lower()
+        for path in sorted(
+            p
+            for p in docs_markdown_files
+            if p.parent == DOCS_DIR / "exports" and p.name.endswith(".merged.md")
+        ):
+            head = "\n".join(docs_text_cache[path].splitlines()[:20]).lower()
             if "_generated:" not in head or "non-normative" not in head:
                 violations.append(path.relative_to(ROOT).as_posix())
 

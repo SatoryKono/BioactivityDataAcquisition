@@ -21,7 +21,7 @@ from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
 
 

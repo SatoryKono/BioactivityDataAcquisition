@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
@@ -19,8 +18,9 @@ from bioetl.composition.factories.pipeline.transformer_builder import (
 )
 from bioetl.composition.services.versioning import get_git_commit, get_pipeline_version
 from bioetl.infrastructure.config import load_pipeline_contract_policy
-from bioetl.infrastructure.config.domain_config_resolver import DomainConfigResolver
-from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
+from bioetl.infrastructure.config.domain_config_resolver import (
+    resolve_domain_pipeline_config,
+)
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -159,13 +159,10 @@ def _create_pipeline_with_services_impl(
         cached_bronze=inputs.cached_bronze,
         silver_validator=_create_silver_validator(inputs.pandera_silver_schema),
     )
-    domain_config = DomainConfigResolver(
-        configs_root=Path("configs"),
-        loader_class=PipelineConfigLoader,
-        domain_mapper=deps.yaml_config_to_domain,
-    ).resolve(
+    domain_config = resolve_domain_pipeline_config(
         yaml_config,
         relaxed_dq=inputs.settings.pipeline.relaxed_dq,
+        domain_mapper=deps.yaml_config_to_domain,
     )
     transformer = TransformerBuilder(
         provider=inputs.provider,

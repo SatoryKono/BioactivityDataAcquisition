@@ -62,10 +62,6 @@ class AssayParameters(BaseEntity):
     standard_units: str | None = None  # Standardized units
     standard_text_value: str | None = None  # Standardized text value
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         """Validate entity invariants."""
         # Integer fields: < 1 covers 0 and negatives

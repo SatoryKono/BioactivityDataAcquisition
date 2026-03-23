@@ -8,7 +8,10 @@ from bioetl.application.core.postrun.service import PostrunService
 from bioetl.composition.factories.pipeline.postrun_assembly import (
     build_postrun_dependency_context,
 )
-from bioetl.domain.ports import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetrics,
+    NoOpTracing,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -46,13 +49,14 @@ def build_test_postrun_service(
         dependencies=build_postrun_dependency_context(
             config=config,
             runtime=runtime,
+            context=context,
             storage=storage,
             logger_port=logger,
             dq_report_service=dq_report_service,
             bronze_dq_config=bronze_dq_config,
             silver_dq_config=silver_dq_config,
             gold_dq_config=gold_dq_config,
+            metadata_coordinator=metadata_coordinator,
+            metadata_writer=metadata_writer,
         ),
-        metadata_coordinator=metadata_coordinator,
-        metadata_writer=metadata_writer,
     )

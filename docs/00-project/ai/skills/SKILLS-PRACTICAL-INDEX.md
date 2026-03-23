@@ -8,6 +8,8 @@
 - `SKILLS-CATALOG.md` остаётся каноническим реестром локальных BioETL-skills
 - этот файл нужен как **операционная шпаргалка**
 - сюда включены как BioETL-skills, так и полезные global/system/knowledge skills, которые реально могут использоваться в работе
+- runtime source-of-truth остаётся в `.codex/skills/`, а этот индекс не должен
+  использоваться как authoring surface для изменения skill behavior
 
 Текущее правило orchestration: production-код в обычном Codex workflow пишет orchestrator напрямую. Если встречается `py-code-bot`, считай это legacy/compatibility reference, а не preferred active step.
 
