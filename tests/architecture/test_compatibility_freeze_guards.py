@@ -749,7 +749,10 @@ def test_config_load_api_module_is_confined_to_dedicated_tests(
 
 
 @pytest.mark.architecture
-@pytest.mark.parametrize("symbol", ("load_pipeline_config", "load_source_config"))
+@pytest.mark.parametrize(
+    "symbol",
+    ("load_pipeline_config", "load_composite_config", "load_source_config"),
+)
 def test_infrastructure_config_loader_symbols_are_confined_to_canonical_owner_imports_in_src(
     symbol: str,
     source_ast_cache: dict[Path, ast.Module],

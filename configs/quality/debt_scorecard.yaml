@@ -134,6 +134,66 @@ hotspot_budgets:
       file_size_limits: 1
       class_size: 1
       god_object: 1
+report_only_hotspot_families:
+  snapshot_date: '2026-03-23'
+  mode: report-only
+  artifact_policy:
+    duplication_command: "make qa-hotspot-report"
+    history_artifact: "reports/quality/hotspot-duplication-history.jsonl"
+    expected_direction: "downward"
+    ratchet_policy: "Observe one to two successful refactor waves before enabling any family-level ratchet."
+  families:
+    - name: "application_core"
+      owner: "@bioetl-architecture"
+      linked_rf: "RF-023"
+      expected_action: "Split helper-heavy orchestration seams and shrink internal fan-in before introducing any family-specific gate."
+      path_prefixes:
+        - "src/bioetl/application/core/"
+      metrics:
+        duplication_clusters: 21
+        files: 81
+        total_loc: 12259
+        files_ge_250_loc: 18
+        helper_function_ratio: 0.46
+        max_internal_fan_in: 22
+        max_internal_fan_in_module: "bioetl.application.core.base_transformer"
+      trend:
+        status: "baseline_opened"
+        next_action: "Compare against the next refactor wave and only ratchet after two non-regressing observations."
+    - name: "composition_bootstrap_runtime"
+      owner: "@bioetl-platform"
+      linked_rf: "RF-023"
+      expected_action: "Keep the zone report-only while watching for renewed duplication or file-growth during runtime/bootstrap changes."
+      path_prefixes:
+        - "src/bioetl/composition/bootstrap/runtime/"
+      metrics:
+        duplication_clusters: 1
+        files: 27
+        total_loc: 3196
+        files_ge_250_loc: 3
+        helper_function_ratio: 0.329
+        max_internal_fan_in: 5
+        max_internal_fan_in_module: "bioetl.composition.bootstrap.runtime.observability"
+      trend:
+        status: "watch"
+        next_action: "Hold as a baseline-only monitor and ratchet only if the next waves stay flat or improve."
+    - name: "composition_factories_pipeline"
+      owner: "@bioetl-platform"
+      linked_rf: "RF-023"
+      expected_action: "Use the baseline to prioritize small factory seam extractions instead of broad composition rewrites."
+      path_prefixes:
+        - "src/bioetl/composition/factories/pipeline/"
+      metrics:
+        duplication_clusters: 4
+        files: 20
+        total_loc: 2500
+        files_ge_250_loc: 3
+        helper_function_ratio: 0.469
+        max_internal_fan_in: 6
+        max_internal_fan_in_module: "bioetl.composition.factories.pipeline.registry"
+      trend:
+        status: "watch"
+        next_action: "Treat as a narrow backlog signal and wait for at least one successful cleanup wave before any ratchet."
 quarterly_targets:
   - quarter: "2026-Q1"
     max_total_exemptions: 10

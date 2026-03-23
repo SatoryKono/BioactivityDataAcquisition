@@ -28,7 +28,6 @@
 
 - `src/bioetl/application/composite/merger.py`
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
-- `src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/pipeline/config_resolution.py`
 - `src/bioetl/composition/factories/pipeline/configs.py`
@@ -44,7 +43,6 @@
 ## Measured-Only Allowlist
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py` — owner: `bioetl.application.pipelines.chembl`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export surface for ChEMBL pipeline marker classes.
-- `src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py` — owner: `bioetl.composition.bootstrap.runtime`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility seam for composite DQ config externalization helpers.
 - `src/bioetl/composition/factories/pipeline/config_resolution.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for pipeline domain-config resolution helpers.
 - `src/bioetl/composition/factories/pipeline/configs.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for the canonical pipeline registry manifest.
 - `src/bioetl/composition/factories/pipeline/creation_api.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for canonical pipeline creation wiring symbols.
@@ -56,7 +54,6 @@
 ### Discovered Docstring-Tracked Modules
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
-- `src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py`
 - `src/bioetl/composition/factories/pipeline/config_resolution.py`
 - `src/bioetl/composition/factories/pipeline/configs.py`
 - `src/bioetl/composition/factories/pipeline/creation_api.py`

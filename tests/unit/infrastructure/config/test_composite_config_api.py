@@ -9,6 +9,9 @@ import pytest
 import yaml
 
 from bioetl.domain.contracts import CompositePublicationGoldSchema
+from bioetl.infrastructure.config import (
+    load_composite_config as public_load_composite_config,
+)
 from bioetl.infrastructure.config.composite_config_api import (
     load_composite_config,
     resolve_composite_config_path,
@@ -125,3 +128,19 @@ def test_load_composite_config_merges_external_dq_with_inline_precedence(
     override = config.dq.enricher_overrides["crossref_publication"]
     assert override.soft_fail_threshold == 0.15
     assert override.hard_fail_threshold == 0.50
+
+
+@pytest.mark.unit
+def test_public_config_package_reexports_load_composite_config(
+    tmp_path: Path,
+) -> None:
+    composites_dir = tmp_path / "configs" / "composites"
+    _write_yaml(
+        composites_dir / "publication.yaml",
+        _build_composite_payload("composite_publication"),
+    )
+
+    config = public_load_composite_config("publication", config_dir=composites_dir)
+
+    assert public_load_composite_config is load_composite_config
+    assert config.name == "composite_publication"

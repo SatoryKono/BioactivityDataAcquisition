@@ -48,6 +48,13 @@ Filter defaults from `base/pipeline.yaml` section `filter_defaults` are
 merged into entity-level `silver_filters` / `gold_filters` by
 `normalize_pipeline_config_payload()`.
 
+### Composite Config (separate path)
+
+Composite pipeline config is loaded from `configs/composites/*.yaml` through
+`src/bioetl/infrastructure/config/composite_config_api.py`. External
+`dq_overrides.dq_config_file` payloads are merged there before schema
+validation; composition-facing modules keep only thin compatibility/access seams.
+
 ## Key Config Sections (entity YAML)
 
 | Section | Purpose |
@@ -72,6 +79,7 @@ Legacy file-reference keys follow explicit status rules:
 | File | Role |
 |------|------|
 | `src/bioetl/infrastructure/config/pipeline_config_api.py` | Canonical staged pipeline-config merge |
+| `src/bioetl/infrastructure/config/composite_config_api.py` | Canonical composite-config load + external DQ merge |
 | `src/bioetl/infrastructure/config_merge.py` | Deep merge utility |
 | `src/bioetl/infrastructure/config/contract_policy_loader.py` | Contract defaults |
 | `src/bioetl/infrastructure/config/dq_config_loader.py` | DQ hierarchy |
