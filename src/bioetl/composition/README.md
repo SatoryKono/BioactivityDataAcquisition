@@ -68,7 +68,6 @@ This is the most complex sub-package. It handles pipeline runtime assembly:
 | Module | Responsibility |
 |--------|---------------|
 | `assembly.py` | Pure functions: build RuntimeConfig, FilterConfig, ResolvedVacuumSettings |
-| `config_loader.py` | Load and merge YAML pipeline configs |
 | `pipeline.py` | Assemble BasePipeline subclass instances |
 | `runner.py` | Assemble PipelineRunner with all dependencies |
 | `runner_assembly.py` | RunnerAssembly helpers |
@@ -76,7 +75,6 @@ This is the most complex sub-package. It handles pipeline runtime assembly:
 | `composite.py` | Composite pipeline assembly |
 | `composite_bootstrap_builders.py` | Composite-specific builder helpers |
 | `composite_support_services_factory.py` | Support services for composite pipelines |
-| `composite_dq_loader.py` | DQ config loading for composites |
 | `composite_filter_extraction_service.py` | Filter extraction for composites |
 | `composite_support_helpers.py` | Utility helpers for composite support |
 | `composite_support_service_builders.py` | Service builders for composite support |

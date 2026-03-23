@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check qa-arch-fast qa-arch-full qa-types qa-debt
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check qa-arch-fast qa-arch-full qa-types qa-debt qa-hotspot-report
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -44,6 +44,10 @@ QUALITY_EXEMPTIONS_REGISTRY ?= configs/quality/architecture_metric_exemptions.ya
 QUALITY_EXEMPTIONS_SCORECARD ?= configs/quality/debt_scorecard.yaml
 QUALITY_REPORT_OUTPUT ?= reports/quality/ci-quality-metrics.local.json
 QUALITY_SUMMARY_OUT ?=
+HOTSPOT_DUPLICATION_TARGETS ?= src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline
+HOTSPOT_DUPLICATION_JSON ?= reports/quality/hotspot-duplication-baseline.json
+HOTSPOT_DUPLICATION_MD ?= reports/quality/hotspot-duplication-baseline.md
+HOTSPOT_DUPLICATION_HISTORY ?= reports/quality/hotspot-duplication-history.jsonl
 
 # Colors for output
 BLUE := \033[0;34m
@@ -445,6 +449,16 @@ qa-debt: ## Run canonical quality debt gate used by CI
 		--output "$(QUALITY_REPORT_OUTPUT)" $(if $(QUALITY_SUMMARY_OUT),\
 		--summary-out "$(QUALITY_SUMMARY_OUT)",)
 	@echo "$(GREEN)Canonical quality debt gate passed!$(NC)"
+
+qa-hotspot-report: ## Generate report-only hotspot family duplication baseline artifacts
+	@echo "$(BLUE)Generating report-only hotspot family baseline...$(NC)"
+	@mkdir -p reports/quality
+	$(PY_RUN) scripts/qa/report_duplication_baseline.py \
+		--targets $(HOTSPOT_DUPLICATION_TARGETS) \
+		--json-out "$(HOTSPOT_DUPLICATION_JSON)" \
+		--md-out "$(HOTSPOT_DUPLICATION_MD)" \
+		--history-jsonl "$(HOTSPOT_DUPLICATION_HISTORY)"
+	@echo "$(GREEN)Hotspot family report written to $(HOTSPOT_DUPLICATION_MD)$(NC)"
 
 complexity: ## Check cyclomatic complexity (max CC=10)
 	@echo "$(BLUE)Checking code complexity...$(NC)"

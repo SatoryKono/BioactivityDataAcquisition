@@ -86,7 +86,6 @@ Import the symbols below from their defining submodules rather than from the
 | `runtime.runner_assembly` | Runner assembly helpers |
 | `runtime.observability` | Observability stack setup |
 | `runtime.observability_bundle` | Bundles logger + metrics + tracing |
-| `runtime.config_loader` | Config loading orchestration |
 | `runtime.logger_bootstrap` | Logger initialization |
 | `runtime.metrics_bootstrap` | Metrics initialization |
 | `runtime.tracing_bootstrap` | Tracing initialization |
@@ -95,7 +94,6 @@ Import the symbols below from their defining submodules rather than from the
 | `runtime.classification_init` | Publication type classification loading |
 | `runtime.composite` | Composite pipeline bootstrap |
 | `runtime.composite_bootstrap_builders` | Composite pipeline builder helpers |
-| `runtime.composite_dq_loader` | Composite DQ config loading |
 | `runtime.composite_support_helpers` | Composite support service helpers |
 | `runtime.composite_infrastructure_context` | Typed container for shared composite infrastructure dependencies |
 

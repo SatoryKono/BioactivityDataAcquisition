@@ -10,10 +10,10 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 
 CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
-    "src/bioetl/composition/bootstrap/runtime/config_loader.py": (
-        25,
+    "src/bioetl/composition/bootstrap/runtime/_composite_config_runtime_compat.py": (
+        35,
         {
-            "bioetl.infrastructure.config.composite_config_api",
+            "bioetl.domain.composite.config",
         },
     ),
     "src/bioetl/composition/factories/pipeline/registry_manifest.py": (
@@ -53,10 +53,9 @@ CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
 }
 
 FORBIDDEN_IMPORT_PREFIXES: dict[str, tuple[str, ...]] = {
-    "src/bioetl/composition/bootstrap/runtime/config_loader.py": (
-        "bioetl.composition.bootstrap.runtime.composite_dq_loader",
+    "src/bioetl/composition/bootstrap/runtime/_composite_config_runtime_compat.py": (
+        "bioetl.composition",
         "bioetl.infrastructure.schemas.composite_config",
-        "pydantic",
         "yaml",
     ),
     "src/bioetl/composition/factories/pipeline/registry_manifest.py": (

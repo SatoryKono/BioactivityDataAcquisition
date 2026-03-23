@@ -7,6 +7,7 @@ Re-exports for backward compatibility:
 - get_settings: Get cached application settings
 - get_pipeline_config: Get pipeline config by name (domain object)
 - load_pipeline_config: Load pipeline YAML config (Pydantic model)
+- load_composite_config: Load composite YAML config (domain object)
 - load_source_config: Load source YAML config
 - yaml_config_to_domain: Convert YAML config to domain config
 
@@ -53,6 +54,12 @@ def __getattr__(name: str) -> type:
         )
 
         return load_pipeline_config  # type: ignore[return-value]
+    if name == "load_composite_config":
+        from bioetl.infrastructure.config.composite_config_api import (
+            load_composite_config,
+        )
+
+        return load_composite_config  # type: ignore[return-value]
     if name == "load_source_config":
         from bioetl.infrastructure.config.source_config_loader import (
             load_source_config,
@@ -74,6 +81,7 @@ __all__ = [
     "SourceYamlConfig",
     "get_pipeline_config",
     "get_settings",
+    "load_composite_config",
     "load_pipeline_config",
     "load_pipeline_contract_policy",
     "load_source_config",

@@ -62,7 +62,6 @@ composition/bootstrap/
 | --------------------------------------- | ------------------------------------------------- |
 | `composite.py`                          | Bootstrap `CompositePipelineRunner` (ADR-026)     |
 | `composite_bootstrap_builders.py`       | Builders для composite компонентов                |
-| `composite_dq_loader.py`               | Загрузка DQ конфигурации для composite            |
 | `composite_filter_extraction_service.py`| Bootstrap filter extraction для composite         |
 | `composite_support_helpers.py`          | Вспомогательные функции composite bootstrap       |
 | `composite_support_service_builders.py` | Builders для composite support services           |
