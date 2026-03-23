@@ -73,7 +73,7 @@ FACADE_RATCHETS: dict[str, tuple[int, set[str]]] = {
     ),
     "src/bioetl/infrastructure/adapters/crossref/models.py": (
         260,
-        {"bioetl.infrastructure.adapters.crossref._response_models"},
+        set(),
     ),
 }
 
