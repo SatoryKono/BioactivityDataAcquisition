@@ -2,6 +2,6 @@
 
 This document path is deprecated.
 
-Canonical file: [../agents/ORCHESTRATION.md](../agents/ORCHESTRATION.md)
+Canonical file: [../ORCHESTRATION.md](../ORCHESTRATION.md)
 
 Do not edit this alias directly.

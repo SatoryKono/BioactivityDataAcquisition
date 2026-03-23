@@ -80,7 +80,7 @@ If validation fails, prompt for missing information before proceeding.
 
 ### Step 3: Create Directory Structure
 
-Create the full ledger workspace. See [references/pillar-definitions.md](references/pillar-definitions.md) for pillar details.
+Create the full ledger workspace. See [../../references/pillar-definitions.md](../../references/pillar-definitions.md) for pillar details.
 
 ```bash
 mkdir -p ledger/{00-brief,01-pillars}
@@ -90,7 +90,7 @@ mkdir -p ledger/{03-synthesis,04-decisions,05-risks,06-prd,07-architecture,08-pl
 
 ### Step 4: Generate BRIEF.md
 
-Write the parsed brief to `00-brief/BRIEF.md` using the template in [references/brief-template.md](references/brief-template.md).
+Write the parsed brief to `00-brief/BRIEF.md` using the template in [../../references/brief-template.md](../../references/brief-template.md).
 
 **Critical constraints:**
 - Maximum 5 sentences for core description
@@ -101,7 +101,7 @@ Write the parsed brief to `00-brief/BRIEF.md` using the template in [references/
 
 Create `01-pillars/PILLARS.md` with:
 
-1. List of all 8 pillars (see [references/pillar-definitions.md](references/pillar-definitions.md))
+1. List of all 8 pillars (see [../../references/pillar-definitions.md](../../references/pillar-definitions.md))
 2. Priority ranking based on brief analysis
 3. Any pillar-specific scope notes
 
@@ -181,5 +181,5 @@ After successful initialization:
 
 ## References
 
-- [references/brief-template.md](references/brief-template.md) - BRIEF.md template
-- [references/pillar-definitions.md](references/pillar-definitions.md) - Pillar definitions and scope
+- [../../references/brief-template.md](../../references/brief-template.md) - BRIEF.md template
+- [../../references/pillar-definitions.md](../../references/pillar-definitions.md) - Pillar definitions and scope

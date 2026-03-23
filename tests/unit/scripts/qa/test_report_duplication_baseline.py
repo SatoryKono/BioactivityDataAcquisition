@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent.parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts.qa.report_duplication_baseline import _parse_pylint_duplicate_output
 from scripts.qa.report_duplication_baseline import _render_markdown

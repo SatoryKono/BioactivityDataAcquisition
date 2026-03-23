@@ -2,6 +2,6 @@
 
 This path is retained for backward compatibility.
 
-Canonical file: [../agents/ORCHESTRATION.md](../agents/ORCHESTRATION.md)
+Canonical file: [../ORCHESTRATION.md](../ORCHESTRATION.md)
 
 Do not edit this alias directly.
