@@ -130,15 +130,19 @@ class TestCreateCompositeRunner:
         """Support service attributes are forwarded to the runner_factory."""
         runner_factory = MagicMock(return_value=MagicMock())
         key_extractor = MagicMock()
+        dependency_coordinator = MagicMock()
+        dq_report_service = MagicMock()
+        quarantine_port = MagicMock()
+        fsm_state_helper = MagicMock()
         support_services = SimpleNamespace(
             key_extractor=key_extractor,
-            dependency_coordinator=MagicMock(),
+            dependency_coordinator=dependency_coordinator,
             coordinator=MagicMock(),
             merger=MagicMock(),
             checkpoint_manager=MagicMock(),
-            fsm_state_helper=MagicMock(),
-            dq_report_service=MagicMock(),
-            quarantine_port=MagicMock(),
+            fsm_state_helper=fsm_state_helper,
+            dq_report_service=dq_report_service,
+            quarantine_port=quarantine_port,
         )
 
         create_composite_runner(
@@ -156,6 +160,10 @@ class TestCreateCompositeRunner:
 
         call_kwargs = runner_factory.call_args[1]
         assert call_kwargs["key_extractor"] is key_extractor
+        assert call_kwargs["dependency_coordinator"] is dependency_coordinator
+        assert call_kwargs["fsm_state_helper"] is fsm_state_helper
+        assert call_kwargs["dq_report_service"] is dq_report_service
+        assert call_kwargs["quarantine_port"] is quarantine_port
 
 
 @pytest.mark.unit
@@ -223,4 +231,33 @@ class TestBootstrapCompositeRunner:
         )
 
         call_kwargs = create_runner.call_args[1]
+        assert call_kwargs["run_id"] == "effective-rid"
+
+    def test_passes_runtime_basics_into_support_services_builder(self) -> None:
+        """bootstrap_composite_runner should forward basics to support builder."""
+        settings = SimpleNamespace(name="settings")
+        logger = MagicMock()
+        storage = MagicMock()
+        lock = MagicMock()
+        bootstrap_basics = MagicMock(
+            return_value=("effective-rid", settings, logger, storage, lock)
+        )
+        build_support = MagicMock(return_value=SimpleNamespace())
+
+        bootstrap_composite_runner(
+            config=MagicMock(),
+            runtime=MagicMock(),
+            run_id=None,
+            bootstrap_runtime_basics_fn=bootstrap_basics,
+            build_runner_factories_fn=MagicMock(
+                return_value=(MagicMock(), MagicMock(), MagicMock())
+            ),
+            build_support_services_fn=build_support,
+            create_composite_runner_fn=MagicMock(return_value=MagicMock()),
+        )
+
+        call_kwargs = build_support.call_args[1]
+        assert call_kwargs["settings"] is settings
+        assert call_kwargs["logger"] is logger
+        assert call_kwargs["storage"] is storage
         assert call_kwargs["run_id"] == "effective-rid"

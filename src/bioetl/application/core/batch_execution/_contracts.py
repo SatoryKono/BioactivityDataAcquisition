@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol, TypeVar
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
+
+_BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
 
 class BatchExecutionCountersSnapshot(Protocol):
@@ -27,3 +32,32 @@ class BatchExecutionMemoryState(Protocol):
 
     batch_size_reductions: int
     min_batch_size_used: int
+
+
+class BatchResultBuilderPort(Protocol[_BatchResultT]):
+    """Callable result factory used to project cumulative batch counters."""
+
+    def __call__(
+        self,
+        *,
+        bronze_count: int,
+        silver_count: int,
+        gold_count: int,
+        quarantined_count: int,
+    ) -> _BatchResultT: ...
+
+
+class BatchExecutionStatePort(BatchExecutionStatisticsState, Protocol):
+    """Mutable executor state required to apply processed-batch outcomes."""
+
+    def _should_collect_dq_data(self) -> bool: ...
+
+    def _collect_dq_data(
+        self,
+        *,
+        records: list[BronzeRecord],
+        batch_id: BatchID,
+        bronze_result: object,
+        silver_records: list[BronzeRecord],
+        gold_records: list[GoldRecord],
+    ) -> None: ...

@@ -10,6 +10,9 @@ from pydantic import ValidationError
 
 from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.runtime._composite_config_runtime_compat import (
+    load_runtime_composite_config as _load_runtime_composite_config_impl,
+)
 from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
     bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
 )
@@ -115,15 +118,13 @@ def load_composite_config(name: str) -> CompositeConfig:
         FileNotFoundError: If no YAML config file exists for the given name.
         ValueError: If the YAML file fails Pydantic schema validation.
     """
-    config_path = _resolve_composite_config_path(name)
-    try:
-        return _load_composite_config_impl(
-            config_path.stem,
-            config_dir=config_path.parent,
-            validate_payload=validate_composite_config_payload,
-        )
-    except ValidationError as error:
-        raise ValueError(f"Invalid composite config '{name}': {error}") from error
+    return _load_runtime_composite_config_impl(
+        name,
+        resolve_config_path_fn=_resolve_composite_config_path,
+        load_config_fn=_load_composite_config_impl,
+        validate_payload=validate_composite_config_payload,
+        validation_error_cls=ValidationError,
+    )
 
 
 def _bootstrap_runtime_basics(

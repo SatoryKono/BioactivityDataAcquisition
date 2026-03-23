@@ -1,12 +1,20 @@
-"""Internal mixins for BatchProcessingService helpers."""
+"""Support service for BatchProcessingService execution choreography."""
 
 from __future__ import annotations
 
-import asyncio
-from typing import TYPE_CHECKING, Any
+__all__ = ["BatchProcessingSupportService"]
 
+import asyncio
+from collections.abc import Awaitable, Callable
+from datetime import datetime
+from typing import TYPE_CHECKING, TypeVar, cast
+
+from bioetl.application.core.batch_runtime_failure_policy import (
+    PIPELINE_EXECUTION_ERRORS,
+    SOURCE_METADATA_ERRORS,
+)
 from bioetl.application.core.batch_transformer import TransformResult
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord
 
 if TYPE_CHECKING:
@@ -16,57 +24,39 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.models.metadata import SourceMetadata
-    from bioetl.domain.ports import BatchIdGeneratorPort, LoggerPort
+    from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
-
-class _BatchProcessingServiceAttrs:
-    """Typed dependency surface for BatchProcessingService mixins."""
-
-    __slots__ = ()
-
-    _PIPELINE_EXECUTION_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-    )
-    _SOURCE_METADATA_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-        AttributeError,
-    )
-
-    _services: PipelineService
-    _context: PipelineContext
-    _config: RecordProcessorConfig
-    _logger: LoggerPort
-    _batch_metrics: BatchMetricsRecorderService
-    _transformer: BatchTransformer
-    _writer: BatchWriter
-    _tracing: BatchTracingManagerService
-    _batch_id_factory: BatchIdGeneratorPort
+_ResultT = TypeVar("_ResultT")
 
 
-class _BatchProcessingMetadataMixin(_BatchProcessingServiceAttrs):
-    """Source metadata retrieval/enrichment helpers."""
+class BatchProcessingSupportService:
+    """Encapsulates per-batch transform/write tracing choreography."""
 
-    __slots__ = ()
+    def __init__(
+        self,
+        *,
+        services: PipelineService,
+        logger: LoggerPort,
+        batch_metrics: BatchMetricsRecorderService,
+        transformer: BatchTransformer,
+        writer: BatchWriter,
+        tracing: BatchTracingManagerService,
+    ) -> None:
+        """Store shared collaborators for one batch-processing family slice."""
+        self._services = services
+        self._logger = logger
+        self._batch_metrics = batch_metrics
+        self._transformer = transformer
+        self._writer = writer
+        self._tracing = tracing
 
-    def _get_source_metadata(self, query_string: str | None) -> SourceMetadata | None:
+    def get_source_metadata(
+        self,
+        query_string: str | None,
+    ) -> SourceMetadata | None:
         """Get source metadata and enrich it with query string when available."""
-        from bioetl.domain.models.metadata import SourceMetadata
-
         source_metadata: SourceMetadata | None = None
         data_source = self._services.data_source
         get_metadata = getattr(data_source, "get_source_metadata", None)
@@ -75,7 +65,7 @@ class _BatchProcessingMetadataMixin(_BatchProcessingServiceAttrs):
                 result = get_metadata()
                 if isinstance(result, SourceMetadata):
                     source_metadata = result
-            except self._SOURCE_METADATA_ERRORS as metadata_error:
+            except SOURCE_METADATA_ERRORS as metadata_error:
                 self._logger.warning(
                     "Source metadata collection failed",
                     error_type=type(metadata_error).__name__,
@@ -93,17 +83,12 @@ class _BatchProcessingMetadataMixin(_BatchProcessingServiceAttrs):
 
         return source_metadata
 
-
-class _BatchProcessingExecutionMixin(_BatchProcessingServiceAttrs):
-    """Transform/write/span helper methods used by process_batch."""
-
-    __slots__ = ()
-
-    async def _write_bronze_layer(
+    async def write_bronze_layer(
         self,
+        *,
         records: list[BronzeRecord],
         batch_id: BatchID,
-        ingestion_ts: Any,  # Any: timestamp type from PipelineContext
+        ingestion_ts: datetime,
         source_metadata: SourceMetadata | None,
     ) -> object:
         """Write records to Bronze layer and track batch metrics."""
@@ -125,17 +110,18 @@ class _BatchProcessingExecutionMixin(_BatchProcessingServiceAttrs):
         self._batch_metrics.track_processed_records("bronze", len(records))
         return result
 
-    async def _transform_and_track_metrics(
+    async def transform_and_track_metrics(
         self,
+        *,
         records: list[BronzeRecord],
         batch_id: BatchID,
         start_index: int,
     ) -> TransformResult:
         """Execute transform stage and track per-layer record counts."""
         transform_result = await self._execute_transform_with_span(
-            records,
-            batch_id,
-            start_index,
+            records=records,
+            batch_id=batch_id,
+            start_index=start_index,
         )
         self._batch_metrics.track_processed_records(
             "quarantined",
@@ -151,15 +137,16 @@ class _BatchProcessingExecutionMixin(_BatchProcessingServiceAttrs):
         )
         return transform_result
 
-    async def _write_silver_gold_concurrent(
+    async def write_silver_gold_concurrent(
         self,
+        *,
         transform_result: TransformResult,
         batch_id: BatchID,
-        ingestion_ts: Any,  # Any: timestamp type from PipelineContext
+        ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,
     ) -> None:
         """Fire Silver and Gold writes concurrently to independent Delta tables."""
-        write_coros = []
+        write_coros: list[Awaitable[object]] = []
 
         if transform_result.silver_records:
             write_coros.append(
@@ -195,8 +182,9 @@ class _BatchProcessingExecutionMixin(_BatchProcessingServiceAttrs):
         if write_coros:
             await asyncio.gather(*write_coros)
 
-    def _finalize_batch_span(
+    def finalize_batch_span(
         self,
+        *,
         span: Span | None,
         records: list[BronzeRecord],
         transform_result: TransformResult,
@@ -211,21 +199,34 @@ class _BatchProcessingExecutionMixin(_BatchProcessingServiceAttrs):
         )
         self._tracing.end_span(span)
 
+    async def execute_with_pipeline_failure_policy(
+        self,
+        *,
+        span: Span | None,
+        work_coro: Awaitable[_ResultT],
+    ) -> _ResultT:
+        """Finish the batch span consistently across runtime failure cases."""
+        try:
+            return await work_coro
+        except PIPELINE_EXECUTION_ERRORS as error:
+            self._tracing.end_span(span, error)
+            raise
+
     async def _execute_with_span(
         self,
         name: str,
-        coro: Any,  # Any: Awaitable return type varies by storage layer
+        coro: Awaitable[object],
         batch_id: BatchID,
         count: int,
-        on_error: Any = None,  # Any: callback return type varies
-    ) -> Any:  # Any: return type depends on storage layer callback
-        """Execute coroutine wrapped with per-layer tracing span."""
+        on_error: Callable[[Exception], object] | None = None,
+    ) -> object:
+        """Execute a coroutine wrapped with a per-layer tracing span."""
         span = self._tracing.start_layer_span(name, batch_id, count)
         try:
             result = await coro
             self._tracing.end_span(span)
             return result
-        except self._PIPELINE_EXECUTION_ERRORS as error:
+        except PIPELINE_EXECUTION_ERRORS as error:
             self._tracing.end_span(span, error)
             if on_error:
                 on_error(error)
@@ -233,11 +234,12 @@ class _BatchProcessingExecutionMixin(_BatchProcessingServiceAttrs):
 
     async def _execute_transform_with_span(
         self,
+        *,
         records: list[BronzeRecord],
         batch_id: BatchID,
         start_index: int,
     ) -> TransformResult:
-        """Execute transform stage and attach output metrics to span."""
+        """Execute transform stage and attach output metrics to the span."""
         span = self._tracing.start_layer_span(
             "transform",
             batch_id,
@@ -258,6 +260,14 @@ class _BatchProcessingExecutionMixin(_BatchProcessingServiceAttrs):
             )
             self._tracing.end_span(span)
             return result
-        except self._PIPELINE_EXECUTION_ERRORS as error:
+        except PIPELINE_EXECUTION_ERRORS as error:
             self._tracing.end_span(span, error)
             raise
+
+    @staticmethod
+    def build_bronze_refs(
+        bronze_result: object,
+    ) -> list[BronzeWriteResult] | None:
+        """Normalize Bronze write output into writer-compatible references."""
+        typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
+        return [typed_bronze_result] if typed_bronze_result else None

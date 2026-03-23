@@ -84,6 +84,14 @@ def test_composite_runtime_signatures_stable() -> None:
 
 
 @pytest.mark.unit
+def test_composite_runtime_load_config_stays_on_helper_path() -> None:
+    """Composite runtime config loading should stay delegated to the helper seam."""
+    source = inspect.getsource(composite_runtime.load_composite_config)
+    assert "_load_runtime_composite_config_impl" in source
+    assert "_load_composite_config_impl(" not in source
+
+
+@pytest.mark.unit
 def test_composite_runtime_bootstrap_runner_stays_plan_based() -> None:
     """Public composite bootstrap should stay on the declarative plan path."""
     source = inspect.getsource(composite_runtime.bootstrap_composite_runner)

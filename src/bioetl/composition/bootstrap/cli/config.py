@@ -11,9 +11,11 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services import ConfigService
 from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.factories.pipeline.config_resolution import (
-    load_pipeline_config,
+from bioetl.infrastructure.config.converters import (
     yaml_config_to_domain,
+)
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config,
 )
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort

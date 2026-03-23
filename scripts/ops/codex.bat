@@ -15,7 +15,7 @@ if not defined REPO_WSL (
     exit /b 1
 )
 
-wsl -d %WSL_DISTRO% -- bash -lc "command -v codex >/dev/null 2>&1"
+wsl -d %WSL_DISTRO% -- bash -lc "command -v codex login --device-auth >/dev/null 2>&1"
 if errorlevel 1 (
     echo [codex-launch] Codex CLI not found in WSL Debian.
     echo [codex-launch] Install: npm install -g @openai/codex

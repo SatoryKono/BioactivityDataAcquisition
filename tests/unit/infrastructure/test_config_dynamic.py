@@ -545,6 +545,30 @@ def test_convention_based_sink_paths(setup_configs, tmp_path):
     assert config.sink["gold"].path == "data/output/gold/autoprov/autoent"
 
 
+def test_convention_based_table_names_use_provider_entity(setup_configs):
+    """Verify table-name defaults use provider.entity canonical notation."""
+    entities_dir = setup_configs
+
+    config_data = {
+        "pipeline_name": "autotable_entity",
+        "provider": "autotable",
+        "entity_type": "entity",
+        "business_primary_keys": ["id"],
+    }
+
+    _write_unified_entity_config(
+        entities_dir,
+        "autotable",
+        "entity",
+        config_data,
+    )
+
+    config = load_pipeline_config("autotable_entity")
+
+    assert config.silver_table == "autotable.entity"
+    assert config.gold_table == "autotable.entity"
+
+
 def test_explicit_paths_override_convention(setup_configs, tmp_path):
     """Verify explicitly specified paths override convention defaults."""
     entities_dir = setup_configs

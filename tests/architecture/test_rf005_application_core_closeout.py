@@ -10,6 +10,12 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 
 BATCH_EXECUTION_SHARED_CONTRACT_USERS: dict[str, set[str]] = {
+    "src/bioetl/application/core/batch_executor_helpers.py": {
+        "bioetl.application.core.batch_execution._contracts",
+    },
+    "src/bioetl/application/core/batch_executor_protocols.py": {
+        "bioetl.application.core.batch_execution._contracts",
+    },
     "src/bioetl/application/core/batch_execution/lifecycle.py": {
         "bioetl.application.core.batch_execution._contracts",
     },
@@ -18,6 +24,24 @@ BATCH_EXECUTION_SHARED_CONTRACT_USERS: dict[str, set[str]] = {
     },
     "src/bioetl/application/core/batch_execution/state_service.py": {
         "bioetl.application.core.batch_execution._contracts",
+    },
+}
+
+APPLICATION_CORE_SHARED_FAILURE_POLICY_USERS: dict[str, set[str]] = {
+    "src/bioetl/application/core/batch_executor.py": {
+        "bioetl.application.core.batch_runtime_failure_policy",
+    },
+    "src/bioetl/application/core/batch_execution/run_service.py": {
+        "bioetl.application.core.batch_runtime_failure_policy",
+    },
+    "src/bioetl/application/core/batch_processing_support.py": {
+        "bioetl.application.core.batch_runtime_failure_policy",
+    },
+}
+
+BATCH_PROCESSING_SUPPORT_USERS: dict[str, set[str]] = {
+    "src/bioetl/application/core/batch_processing_service.py": {
+        "bioetl.application.core.batch_processing_support",
     },
 }
 
@@ -73,5 +97,41 @@ def test_postrun_family_stays_routed_through_shared_failure_policy(
     missing_modules = required_modules - imported_modules
     assert not missing_modules, (
         f"{relative_path} no longer imports shared postrun failure policy:\n"
+        + "\n".join(sorted(missing_modules))
+    )
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize(
+    ("relative_path", "required_modules"),
+    list(APPLICATION_CORE_SHARED_FAILURE_POLICY_USERS.items()),
+)
+def test_application_core_slice_stays_routed_through_shared_failure_policy(
+    relative_path: str,
+    required_modules: set[str],
+) -> None:
+    """RF-005 bounded slice should keep runtime failure tuples centralized."""
+    imported_modules = _imported_modules(relative_path)
+    missing_modules = required_modules - imported_modules
+    assert not missing_modules, (
+        f"{relative_path} no longer imports shared application/core failure policy:\n"
+        + "\n".join(sorted(missing_modules))
+    )
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize(
+    ("relative_path", "required_modules"),
+    list(BATCH_PROCESSING_SUPPORT_USERS.items()),
+)
+def test_batch_processing_family_stays_routed_through_support_service(
+    relative_path: str,
+    required_modules: set[str],
+) -> None:
+    """RF-005 bounded slice should keep processing choreography centralized."""
+    imported_modules = _imported_modules(relative_path)
+    missing_modules = required_modules - imported_modules
+    assert not missing_modules, (
+        f"{relative_path} no longer imports shared batch-processing support module:\n"
         + "\n".join(sorted(missing_modules))
     )

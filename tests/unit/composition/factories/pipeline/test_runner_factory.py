@@ -128,6 +128,37 @@ class TestRunnerFactory:
 
         mock_pipelines.assert_called_once_with(registry=created_registry)
 
+    def test_ensure_registrations_skips_pipeline_registration_when_populated(self):
+        """Existing populated registries should not be re-registered."""
+        populated_registry = MagicMock()
+        populated_registry.list_pipelines.return_value = ["chembl_activity"]
+        mock_providers = MagicMock()
+        factory = RunnerFactory(
+            registry=populated_registry,
+            ensure_providers_loaded_fn=mock_providers,
+        )
+
+        with patch(
+            "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
+        ) as mock_pipelines:
+            factory._ensure_registrations()
+
+        mock_providers.assert_called_once()
+        mock_pipelines.assert_not_called()
+
+    def test_effective_registry_reuses_lazy_registry_instance(self):
+        """Lazy runtime registry should be created once and then reused."""
+        created_registry = PipelineRegistry()
+        registry_factory = MagicMock(return_value=created_registry)
+        factory = RunnerFactory(registry_factory=registry_factory)
+
+        first = factory._effective_registry
+        second = factory._effective_registry
+
+        assert first is created_registry
+        assert second is created_registry
+        registry_factory.assert_called_once()
+
 
 @pytest.mark.unit
 class TestRunnerFactoryCreate:
@@ -212,6 +243,33 @@ class TestRunnerFactoryCreate:
             factory.create(mock_context)
 
         mock_bootstrap.assert_called_once_with(mock_context, registry=created_registry)
+
+    def test_create_reuses_same_lazy_registry_across_multiple_calls(self, mock_context):
+        """Repeated create calls should reuse one lazy runtime registry instance."""
+        created_registry = PipelineRegistry()
+        registry_factory = MagicMock(return_value=created_registry)
+        mock_runner = _make_mock_runner()
+        factory = RunnerFactory(registry_factory=registry_factory)
+
+        with (
+            patch(
+                "bioetl.composition.factories.pipeline.runner.ensure_providers_loaded"
+            ),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.register_all_pipelines"
+            ),
+            patch(
+                "bioetl.composition.factories.pipeline.runner.build_pipeline_runner",
+                return_value=mock_runner,
+            ) as mock_bootstrap,
+        ):
+            factory.create(mock_context)
+            factory.create(mock_context)
+
+        registry_factory.assert_called_once()
+        assert mock_bootstrap.call_count == 2
+        for call in mock_bootstrap.call_args_list:
+            assert call.kwargs["registry"] is created_registry
 
     def test_create_rejects_runner_without_metrics_contract(self, mock_context):
         """Test create fails fast for runners missing execution metrics."""
@@ -406,6 +464,22 @@ class TestFactoryFunctions:
 
         assert isinstance(result, RunnerFactory)
         assert result._registry is custom_registry
+
+    def test_create_runner_factory_threads_runtime_dependencies(self):
+        """Factory helper should preserve injected runtime dependency seams."""
+        registry_factory = MagicMock(return_value=PipelineRegistry())
+        runner_builder = MagicMock()
+        ensure_providers_loaded_fn = MagicMock()
+
+        result = create_runner_factory(
+            registry_factory=registry_factory,
+            runner_builder=runner_builder,
+            ensure_providers_loaded_fn=ensure_providers_loaded_fn,
+        )
+
+        assert result._registry_factory is registry_factory
+        assert result._runner_builder is runner_builder
+        assert result._ensure_providers_loaded_fn is ensure_providers_loaded_fn
 
     def test_create_metrics_extractor_returns_extractor(self):
         """Test create_metrics_extractor returns a MetricsExtractor."""

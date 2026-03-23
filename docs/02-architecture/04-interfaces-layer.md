@@ -26,7 +26,7 @@
 
 | Команда         | Модуль                       | Описание                                |
 | --------------- | ---------------------------- | --------------------------------------- |
-| `run`           | `run.py`                     | Запуск одного пайплайна                 |
+| `run`           | `run.py`                     | Retained public seam; canonical implementation lives in `domains/run/command.py` |
 | `run-all`       | `run_all.py`                 | Запуск всех пайплайнов провайдера       |
 | `run-composite` | `run_composite.py`           | Запуск композитного пайплайна (ADR-026) |
 | `export`        | `export.py`                  | Экспорт данных из Gold                  |
@@ -88,9 +88,9 @@ Endpoints: `/health`, `/health/live`, `/health/ready`.
 **Расположение:** `src/bioetl/interfaces/orchestration/`
 
 `orchestration/` — модуль пуст. Signal handlers были удалены 2025-12-31.
-Graceful shutdown обрабатывается непосредственно в CLI командах:
+Graceful shutdown обрабатывается непосредственно в canonical domain command modules:
 
-- `interfaces/cli/commands/run.py`
+- `interfaces/cli/commands/domains/run/command.py`
 - `interfaces/cli/commands/run_all.py`
 - `interfaces/cli/commands/run_composite.py`
   Shutdown логика вынесена в `application/core/lifecycle/shutdown.py`.

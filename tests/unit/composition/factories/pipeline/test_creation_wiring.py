@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.composition.factories.pipeline._creation_wiring import (
     _PipelineCreationInputs,
+    _create_pipeline_with_services_impl,
     _create_silver_validator,
 )
 
@@ -153,3 +154,166 @@ class TestCreatePipelineWithServicesImpl:
 
         assert result is expected_pipeline
         pipeline_cls.create.assert_called_once()
+
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_wiring._create_silver_validator"
+    )
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.TransformerBuilder")
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_wiring.resolve_domain_pipeline_config"
+    )
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory")
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator")
+    def test_uses_explicit_config_and_forwards_optional_dependencies(
+        self,
+        mock_metadata_coordinator: MagicMock,
+        mock_run_context_factory: MagicMock,
+        mock_resolve_domain_pipeline_config: MagicMock,
+        mock_transformer_builder: MagicMock,
+        mock_create_silver_validator: MagicMock,
+    ) -> None:
+        """Explicit config path should avoid fallback loading and preserve wiring."""
+        run_context = MagicMock()
+        metadata_coordinator = MagicMock()
+        services = MagicMock()
+        domain_config = MagicMock()
+        transformer = MagicMock()
+        silver_validator = MagicMock()
+        explicit_config = MagicMock()
+        cached_bronze = MagicMock()
+        tracer = MagicMock()
+        dq_monitor = MagicMock()
+        metrics = MagicMock()
+        filter_config = MagicMock()
+        runtime = MagicMock()
+        logger = MagicMock()
+
+        mock_run_context_factory.return_value.create.return_value = run_context
+        mock_metadata_coordinator.return_value = metadata_coordinator
+        mock_resolve_domain_pipeline_config.return_value = domain_config
+        mock_create_silver_validator.return_value = silver_validator
+        mock_transformer_builder.return_value.build.return_value = transformer
+
+        pipeline_cls = MagicMock()
+        expected_pipeline = MagicMock()
+        pipeline_cls.create.return_value = expected_pipeline
+
+        deps = MagicMock()
+        settings = SimpleNamespace(pipeline=SimpleNamespace(relaxed_dq=True))
+        inputs = _PipelineCreationInputs(
+            pipeline_name="chembl_activity",
+            pipeline_class=pipeline_cls,
+            provider="chembl",
+            create_data_source_fn=MagicMock(),
+            transformer_class=MagicMock(),
+            run_id="run-42",
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            config=explicit_config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
+            pandera_silver_schema=MagicMock(),
+        )
+        build_services_fn = MagicMock(return_value=services)
+
+        result = _create_pipeline_with_services_impl(
+            inputs,
+            deps=deps,
+            extract_entity_type=lambda n: n.split("_")[-1] if "_" in n else None,
+            build_pipeline_services_fn=build_services_fn,
+        )
+
+        assert result is expected_pipeline
+        deps.load_pipeline_config.assert_not_called()
+        build_services_fn.assert_called_once_with(
+            pipeline_name="chembl_activity",
+            create_data_source_fn=inputs.create_data_source_fn,
+            settings=settings,
+            logger=logger,
+            config=explicit_config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metadata_coordinator=metadata_coordinator,
+            cached_bronze=cached_bronze,
+            silver_validator=silver_validator,
+        )
+        mock_resolve_domain_pipeline_config.assert_called_once_with(
+            explicit_config,
+            relaxed_dq=True,
+            domain_mapper=deps.yaml_config_to_domain,
+        )
+        pipeline_cls.create.assert_called_once()
+        create_kwargs = pipeline_cls.create.call_args.kwargs
+        assert create_kwargs["services"] is services
+        assert create_kwargs["config"] is domain_config
+        assert create_kwargs["transformer"] is transformer
+
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_wiring._create_silver_validator"
+    )
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.TransformerBuilder")
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_wiring.resolve_domain_pipeline_config"
+    )
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory")
+    @patch("bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator")
+    def test_loads_config_when_inputs_config_missing(
+        self,
+        mock_metadata_coordinator: MagicMock,
+        mock_run_context_factory: MagicMock,
+        mock_resolve_domain_pipeline_config: MagicMock,
+        mock_transformer_builder: MagicMock,
+        mock_create_silver_validator: MagicMock,
+    ) -> None:
+        """Missing config should trigger loader and thread loaded config onward."""
+        loaded_config = MagicMock()
+        services = MagicMock()
+        domain_config = MagicMock()
+        transformer = MagicMock()
+        metadata_coordinator = MagicMock()
+
+        deps = MagicMock()
+        deps.load_pipeline_config.return_value = loaded_config
+        settings = SimpleNamespace(pipeline=SimpleNamespace(relaxed_dq=False))
+        pipeline_cls = MagicMock()
+        pipeline_cls.create.return_value = MagicMock()
+
+        mock_run_context_factory.return_value.create.return_value = MagicMock()
+        mock_metadata_coordinator.return_value = metadata_coordinator
+        mock_resolve_domain_pipeline_config.return_value = domain_config
+        mock_create_silver_validator.return_value = None
+        mock_transformer_builder.return_value.build.return_value = transformer
+
+        inputs = _PipelineCreationInputs(
+            pipeline_name="chembl_activity",
+            pipeline_class=pipeline_cls,
+            provider="chembl",
+            create_data_source_fn=MagicMock(),
+            transformer_class=None,
+            run_id="run-7",
+            runtime=MagicMock(),
+            settings=settings,
+            logger=MagicMock(),
+        )
+        build_services_fn = MagicMock(return_value=services)
+
+        _create_pipeline_with_services_impl(
+            inputs,
+            deps=deps,
+            extract_entity_type=lambda n: n.split("_")[-1] if "_" in n else None,
+            build_pipeline_services_fn=build_services_fn,
+        )
+
+        deps.load_pipeline_config.assert_called_once_with("chembl_activity")
+        build_services_fn.assert_called_once()
+        assert build_services_fn.call_args.kwargs["config"] is loaded_config
+        mock_resolve_domain_pipeline_config.assert_called_once_with(
+            loaded_config,
+            relaxed_dq=False,
+            domain_mapper=deps.yaml_config_to_domain,
+        )

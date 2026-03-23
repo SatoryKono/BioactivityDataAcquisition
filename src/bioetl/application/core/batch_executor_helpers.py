@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, TypeVar
+from typing import TYPE_CHECKING, TypeVar
+
+from bioetl.application.core.batch_execution._contracts import (
+    BatchExecutionStatePort,
+    BatchResultBuilderPort,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_processing_contracts import (
@@ -50,46 +55,6 @@ class BatchProcessedOutcome:
     gold_records: list[GoldRecord]
 
 
-class _BatchExecutionStatePort(Protocol):
-    """Mutable executor state required to apply batch execution deltas."""
-
-    records_bronze: int
-    records_silver: int
-    records_gold: int
-    records_quarantined: int
-    records_filtered_out: int
-    _source_batch_ids: list[str]
-
-
-class _BatchProcessedOutcomePort(_BatchExecutionStatePort, Protocol):
-    """Executor state plus DQ hooks required to apply one processed outcome."""
-
-    def _should_collect_dq_data(self) -> bool: ...
-
-    def _collect_dq_data(
-        self,
-        *,
-        records: list[BronzeRecord],
-        batch_id: BatchID,
-        bronze_result: object,
-        silver_records: list[BronzeRecord],
-        gold_records: list[GoldRecord],
-    ) -> None: ...
-
-
-class _BatchResultBuilder(Protocol[_BatchResultT]):
-    """Callable result factory used to project cumulative batch counters."""
-
-    def __call__(
-        self,
-        *,
-        bronze_count: int,
-        silver_count: int,
-        gold_count: int,
-        quarantined_count: int,
-    ) -> _BatchResultT: ...
-
-
 def build_batch_execution_state_update(
     *,
     input_record_count: int,
@@ -127,7 +92,7 @@ def build_processed_batch_outcome(
 
 def apply_batch_execution_state_update(
     *,
-    state: _BatchExecutionStatePort,
+    state: BatchExecutionStatePort,
     state_update: BatchExecutionStateOutcome,
 ) -> None:
     """Apply one batch of counter deltas to executor-level state."""
@@ -141,7 +106,7 @@ def apply_batch_execution_state_update(
 
 def apply_processed_batch_outcome(
     *,
-    state: _BatchProcessedOutcomePort,
+    state: BatchExecutionStatePort,
     outcome: BatchProcessedOutcome,
 ) -> None:
     """Apply one processed-batch outcome to executor counters and DQ buffers."""
@@ -162,7 +127,7 @@ def apply_processed_batch_outcome(
 
 def build_batch_result_snapshot(
     *,
-    batch_result_type: _BatchResultBuilder[_BatchResultT],
+    batch_result_type: BatchResultBuilderPort[_BatchResultT],
     records_bronze: int,
     records_silver: int,
     records_gold: int,

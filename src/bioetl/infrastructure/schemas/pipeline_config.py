@@ -128,7 +128,7 @@ class PipelineYamlConfig(BaseModel):
     )
     silver_table: str = Field(
         default="",
-        description="Silver table name. Auto-computed as {provider}_{entity_type} if empty.",
+        description="Silver table name. Auto-computed as {provider}.{entity_type} if empty.",
     )
     gold_table: str | None = Field(default=None, min_length=1)
     silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)

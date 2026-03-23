@@ -1,7 +1,7 @@
-"""Public run CLI entrypoint backed by the canonical domain module."""
+"""Retained public run command seam over the canonical domain module."""
 
 from __future__ import annotations
 
-from bioetl.interfaces.cli.commands._compat import alias_module
+from bioetl.interfaces.cli.commands._compat import reexport_module
 
-alias_module(__name__, "bioetl.interfaces.cli.commands.domains.run.command")
+reexport_module(__name__, "bioetl.interfaces.cli.commands.domains.run.command")

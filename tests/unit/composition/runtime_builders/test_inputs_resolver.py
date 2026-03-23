@@ -67,6 +67,18 @@ def _make_yaml_config(**overrides: object) -> SimpleNamespace:
     return SimpleNamespace(**base)
 
 
+def _raise_value_error(_provider: str) -> object:
+    raise ValueError("invalid provider config")
+
+
+def _missing_pagination(_provider: str) -> object:
+    return SimpleNamespace()
+
+
+def _non_int_pagination(_provider: str) -> object:
+    return SimpleNamespace(pagination=SimpleNamespace(id_batch_size="50"))
+
+
 @pytest.mark.unit
 def test_prepare_runner_inputs_projects_probe_mode_and_sink_disabled_skip_gold() -> (
     None
@@ -105,3 +117,188 @@ def test_resolve_health_check_mode_defaults_to_strict_when_pipeline_mode_missing
     result = inputs_resolver.resolve_health_check_mode(settings=settings)
 
     assert result == "strict"
+
+
+@pytest.mark.unit
+def test_resolve_filter_batch_size_prefers_explicit_yaml_value() -> None:
+    calls: list[str] = []
+    yaml_config = _make_yaml_config(filter_batch_size=25)
+
+    result = inputs_resolver.resolve_filter_batch_size(
+        yaml_config,
+        load_source_config_fn=lambda provider: calls.append(provider),
+    )
+
+    assert result == 25
+    assert calls == []
+
+
+@pytest.mark.unit
+def test_resolve_filter_batch_size_falls_back_to_source_config_pagination() -> None:
+    calls: list[str] = []
+    yaml_config = _make_yaml_config()
+
+    result = inputs_resolver.resolve_filter_batch_size(
+        yaml_config,
+        load_source_config_fn=lambda provider: (
+            calls.append(provider)
+            or SimpleNamespace(pagination=SimpleNamespace(id_batch_size=40))
+        ),
+    )
+
+    assert result == 40
+    assert calls == ["chembl"]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "loader",
+    [_raise_value_error, _missing_pagination, _non_int_pagination],
+)
+def test_resolve_filter_batch_size_returns_none_on_loader_error_or_invalid_value(
+    loader: object,
+) -> None:
+    yaml_config = _make_yaml_config()
+
+    result = inputs_resolver.resolve_filter_batch_size(
+        yaml_config,
+        load_source_config_fn=loader,
+    )
+
+    assert result is None
+
+
+@pytest.mark.unit
+def test_adjust_batch_size_for_filter_mutates_yaml_and_logs_when_filter_is_active() -> (
+    None
+):
+    events: list[tuple[str, dict[str, object]]] = []
+    yaml_config = _make_yaml_config(batch_size=100, filter_batch_size=25)
+    observability = SimpleNamespace(
+        logger=SimpleNamespace(
+            info=lambda event, **kwargs: events.append((event, kwargs))
+        )
+    )
+
+    inputs_resolver.adjust_batch_size_for_filter(
+        yaml_config=yaml_config,
+        filter_config=SimpleNamespace(source_path="ids.csv"),
+        observability=observability,
+    )
+
+    assert yaml_config.batch_size == 25
+    assert events == [
+        (
+            "batch_size_auto_adjusted",
+            {
+                "original": 100,
+                "adjusted": 25,
+                "reason": "input_filter_active",
+            },
+        )
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("filter_config", "loader", "expected_batch_size"),
+    [
+        (
+            None,
+            lambda _provider: SimpleNamespace(
+                pagination=SimpleNamespace(id_batch_size=25)
+            ),
+            100,
+        ),
+        (
+            SimpleNamespace(source_path="ids.csv"),
+            _non_int_pagination,
+            100,
+        ),
+    ],
+)
+def test_adjust_batch_size_for_filter_noops_without_active_filter_or_resolved_size(
+    filter_config: object,
+    loader: object,
+    expected_batch_size: int,
+) -> None:
+    events: list[tuple[str, dict[str, object]]] = []
+    yaml_config = _make_yaml_config(batch_size=100)
+    observability = SimpleNamespace(
+        logger=SimpleNamespace(
+            info=lambda event, **kwargs: events.append((event, kwargs))
+        )
+    )
+
+    inputs_resolver.adjust_batch_size_for_filter(
+        yaml_config=yaml_config,
+        filter_config=filter_config,
+        observability=observability,
+        load_source_config_fn=loader,
+    )
+
+    assert yaml_config.batch_size == expected_batch_size
+    assert events == []
+
+
+@pytest.mark.unit
+def test_prepare_runner_inputs_adjusts_batch_size_from_source_config_when_filter_enabled() -> (
+    None
+):
+    events: list[tuple[str, dict[str, object]]] = []
+    logger = SimpleNamespace(
+        info=lambda event, **kwargs: events.append((event, kwargs)),
+    )
+    settings = SimpleNamespace(
+        test_mode=False,
+        pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
+    )
+    yaml_config = _make_yaml_config(batch_size=100)
+    filter_config = SimpleNamespace(
+        source_path="ids.csv",
+        column_name="chembl_id",
+        filter_field="chembl_id",
+    )
+
+    result = inputs_resolver.prepare_runner_inputs(
+        ctx=_make_context(
+            input_filter=SimpleNamespace(
+                enabled=True,
+                source_path="ids.csv",
+                column_name="chembl_id",
+                filter_field="chembl_id",
+                fallback_column=None,
+                filter_ids=(),
+                fallback_mapping=None,
+                multi_filter_ids=None,
+                valid_combinations=None,
+            )
+        ),
+        get_settings_fn=lambda: settings,
+        load_pipeline_config_fn=lambda _pipeline: yaml_config,
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(logger=logger),
+        assemble_vacuum_settings_fn=inputs_resolver.assemble_vacuum_settings,
+        assemble_runtime_config_fn=inputs_resolver.assemble_runtime_config,
+        assemble_filter_config_fn=lambda **_: filter_config,
+        assemble_cached_bronze_context_fn=inputs_resolver.assemble_cached_bronze_context,
+        load_source_config_fn=lambda _provider: SimpleNamespace(
+            pagination=SimpleNamespace(id_batch_size=25)
+        ),
+    )
+
+    assert result.yaml_config.batch_size == 25
+    assert [event for event, _payload in events] == [
+        "input_filter_enabled",
+        "batch_size_auto_adjusted",
+    ]
+    assert events[0][1] == {
+        "csv_path": "ids.csv",
+        "column": "chembl_id",
+        "filter_field": "chembl_id",
+        "source": "cli",
+    }
+    assert events[1][1] == {
+        "original": 100,
+        "adjusted": 25,
+        "reason": "input_filter_active",
+    }

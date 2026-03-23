@@ -42,6 +42,9 @@ PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE = (
     "bioetl.composition.factories.pipeline.config_resolution"
 )
 PIPELINE_CONFIGS_COMPAT_MODULE = "bioetl.composition.factories.pipeline.configs"
+PIPELINE_CREATION_API_COMPAT_MODULE = (
+    "bioetl.composition.factories.pipeline.creation_api"
+)
 PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
@@ -226,6 +229,17 @@ ALLOWED_SERVICES_CREATION_API_TEST_FILES = frozenset(
         ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
     }
 )
+ALLOWED_PIPELINE_CREATION_API_TEST_FILES = frozenset(
+    {
+        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
+        ROOT
+        / "tests"
+        / "unit"
+        / "composition"
+        / "factories"
+        / "test_factory_decoupling_contracts.py",
+    }
+)
 ALLOWED_PIPELINE_RUNNER_SERVICE_MODEL_IMPORT_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "application" / "services" / "__init__.py",
@@ -293,39 +307,7 @@ ALLOWED_CONFIG_LOADER_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_CONFIG_LOAD_API_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_CONFIG_LOAD_API_TEST_FILES: frozenset[Path] = frozenset()
 ALLOWED_INFRASTRUCTURE_CONFIG_LOADER_SYMBOL_SRC_FILES: frozenset[Path] = frozenset()
-ALLOWED_PIPELINE_CONFIG_RESOLUTION_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "factories"
-        / "pipeline"
-        / "_creation_wiring.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "factories"
-        / "pipeline"
-        / "construction.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "factories"
-        / "pipeline"
-        / "factory_method_helpers.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "composition"
-        / "factories"
-        / "services"
-        / "bundle.py",
-    }
-)
+ALLOWED_PIPELINE_CONFIG_RESOLUTION_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES = frozenset(
     {
         ROOT
@@ -861,6 +843,38 @@ def test_pipeline_configs_compat_module_is_confined_to_dedicated_tests(
     )
     assert not violations, (
         "pipeline.configs compatibility shim leaked beyond dedicated tests:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_pipeline_creation_api_compat_module_is_not_used_in_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src must import creation wiring from the canonical owner directly."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=PIPELINE_CREATION_API_COMPAT_MODULE,
+        allowed_files=frozenset(),
+    )
+    assert not violations, (
+        "pipeline.creation_api compatibility shim leaked into first-party src "
+        "imports:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_pipeline_creation_api_compat_module_is_confined_to_dedicated_tests(
+    test_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Tests must treat pipeline.creation_api as a dedicated compatibility seam."""
+    violations = _iter_module_import_violations(
+        test_ast_cache,
+        module_name=PIPELINE_CREATION_API_COMPAT_MODULE,
+        allowed_files=ALLOWED_PIPELINE_CREATION_API_TEST_FILES,
+    )
+    assert not violations, (
+        "pipeline.creation_api compatibility shim leaked beyond dedicated tests:\n"
         + "\n".join(violations)
     )
 

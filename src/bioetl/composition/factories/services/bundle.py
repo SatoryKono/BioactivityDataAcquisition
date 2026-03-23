@@ -10,13 +10,7 @@ from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.pipeline.config_resolution import (
-    load_pipeline_config as _load_pipeline_config_direct,
-)
-from bioetl.composition.factories.pipeline.config_resolution import (
-    yaml_config_to_domain as _yaml_config_to_domain_direct,
-)
-from bioetl.composition.factories.pipeline.creation_api import (
+from bioetl.composition.factories.pipeline._creation_wiring import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,
@@ -34,6 +28,12 @@ from bioetl.composition.factories.services.observability_api import (
 )
 from bioetl.composition.services.versioning import (
     compute_config_hash as _compute_config_hash_direct,
+)
+from bioetl.infrastructure.config.converters import (
+    yaml_config_to_domain as _yaml_config_to_domain_direct,
+)
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config as _load_pipeline_config_direct,
 )
 
 if TYPE_CHECKING:

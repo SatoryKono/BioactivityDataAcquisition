@@ -1,4 +1,8 @@
-"""Public pipeline creation wiring facade over private helpers."""
+"""Compatibility shim for canonical pipeline creation wiring symbols.
+
+Canonical owner:
+    bioetl.composition.factories.pipeline._creation_wiring
+"""
 
 from __future__ import annotations
 

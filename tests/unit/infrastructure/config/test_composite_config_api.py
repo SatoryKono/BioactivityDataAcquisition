@@ -1,0 +1,127 @@
+"""Unit tests for the canonical infrastructure composite config API."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+import pytest
+import yaml
+
+from bioetl.domain.contracts import CompositePublicationGoldSchema
+from bioetl.infrastructure.config.composite_config_api import (
+    load_composite_config,
+    resolve_composite_config_path,
+    resolve_composite_gold_schema,
+)
+
+
+def _build_composite_payload(name: str) -> dict[str, Any]:
+    return {
+        "schema_version": "2.0.0",
+        "composite": {
+            "name": name,
+            "version": "1.0.0",
+            "seed": {
+                "pipeline": "chembl_publication",
+                "output_keys": ["publication_id", "doi"],
+                "silver_table": "silver/chembl/publication",
+            },
+            "enrichers": [
+                {
+                    "pipeline": "crossref_publication",
+                    "join_keys": ["doi"],
+                    "silver_table": "silver/crossref/publication",
+                }
+            ],
+            "merge": {
+                "output": {
+                    "silver": "silver/composite/publication",
+                    "gold": "gold/composite/publication",
+                },
+                "sort_by": {
+                    "silver": ["entity_id", "publication_id"],
+                    "gold": ["entity_id", "publication_id"],
+                },
+            },
+        },
+    }
+
+
+def _write_yaml(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        yaml.safe_dump(payload, handle, sort_keys=False, allow_unicode=False)
+
+
+@pytest.mark.unit
+def test_resolve_composite_config_path_uses_config_dir() -> None:
+    config_dir = Path("configs/composites")
+
+    result = resolve_composite_config_path("publication", config_dir=config_dir)
+
+    assert result == config_dir / "publication.yaml"
+
+
+@pytest.mark.unit
+def test_resolve_composite_gold_schema_supports_prefixed_names() -> None:
+    assert (
+        resolve_composite_gold_schema("publication") is CompositePublicationGoldSchema
+    )
+    assert (
+        resolve_composite_gold_schema("composite_publication")
+        is CompositePublicationGoldSchema
+    )
+    assert resolve_composite_gold_schema("composite_unknown") is None
+
+
+@pytest.mark.unit
+def test_load_composite_config_merges_external_dq_with_inline_precedence(
+    tmp_path: Path,
+) -> None:
+    configs_root = tmp_path / "configs"
+    composites_dir = configs_root / "composites"
+    quality_file = (
+        configs_root / "quality" / "entities" / "composite" / "publication.yaml"
+    )
+
+    payload = _build_composite_payload("composite_publication")
+    composite_payload = payload["composite"]
+    assert isinstance(composite_payload, dict)
+    composite_payload["dq_overrides"] = {
+        "dq_config_file": "../quality/entities/composite/publication.yaml",
+        "soft_fail_threshold": 0.10,
+        "enricher_overrides": {
+            "crossref_publication": {
+                "hard_fail_threshold": 0.50,
+            }
+        },
+    }
+
+    _write_yaml(composites_dir / "publication.yaml", payload)
+    _write_yaml(
+        quality_file,
+        {
+            "dq_overrides": {
+                "soft_fail_threshold": 0.05,
+                "hard_fail_threshold": 0.25,
+                "required_fields": ["publication_id"],
+                "enricher_overrides": {
+                    "crossref_publication": {
+                        "soft_fail_threshold": 0.15,
+                        "hard_fail_threshold": 0.30,
+                    }
+                },
+            }
+        },
+    )
+
+    config = load_composite_config("publication", config_dir=composites_dir)
+
+    assert config.name == "composite_publication"
+    assert config.dq.soft_fail_threshold == 0.10
+    assert config.dq.hard_fail_threshold == 0.25
+    assert config.dq.required_fields == ("publication_id",)
+    override = config.dq.enricher_overrides["crossref_publication"]
+    assert override.soft_fail_threshold == 0.15
+    assert override.hard_fail_threshold == 0.50
