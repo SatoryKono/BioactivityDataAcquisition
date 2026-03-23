@@ -56,16 +56,16 @@
 
 | Topic | File |
 |-------|------|
-| File structure baseline | [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md) |
-| File structure decisions | [../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md) |
-| Package topology baseline | [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md) |
-| Package topology synthesis | [../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md](../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md) |
-| Topology vs governance cross-synthesis | [../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md) |
-| Package topology decisions | [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md) |
+| File structure baseline | [../../../reports/evidence/architecture-foundations/SUMMARY.md](../../../reports/evidence/architecture-foundations/SUMMARY.md) |
+| File structure decisions | [../../../reports/evidence/architecture-foundations/SUMMARY.md](../../../reports/evidence/architecture-foundations/SUMMARY.md) |
+| Package topology baseline | [../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../reports/evidence/dependency-hotspots/SUMMARY.md) |
+| Package topology synthesis | [../../../reports/evidence/dependency-hotspots/03-synthesis/SYN-dependency-hotspots.md](../../../reports/evidence/dependency-hotspots/03-synthesis/SYN-dependency-hotspots.md) |
+| Topology vs governance cross-synthesis | [../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../reports/evidence/dependency-hotspots/SUMMARY.md) |
+| Package topology decisions | [../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../reports/evidence/dependency-hotspots/SUMMARY.md) |
 | Governance signals baseline | [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md) |
-| Governance signals decisions | [../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md) |
-| Compatibility registry refactor evidence | [../../../reports/evidence/compatibility-registry-refactor/SUMMARY.md](../../../reports/evidence/compatibility-registry-refactor/SUMMARY.md) |
-| Compatibility registry refactor decisions | [../../../reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md](../../../reports/evidence/compatibility-registry-refactor/04-decisions/SUMMARY.md) |
+| Governance signals decisions | [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md) |
+| Compatibility registry refactor evidence | [../../../reports/evidence/provider-registry-runtime-ownership/SUMMARY.md](../../../reports/evidence/provider-registry-runtime-ownership/SUMMARY.md) |
+| Compatibility registry refactor decisions | [../../../reports/evidence/provider-registry-runtime-ownership/SUMMARY.md](../../../reports/evidence/provider-registry-runtime-ownership/SUMMARY.md) |
 
 Короткая operational rule:
 - package count сам по себе не запускает structural wave;

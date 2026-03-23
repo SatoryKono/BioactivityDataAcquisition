@@ -47,4 +47,4 @@ re-centering the class, but not yet strong enough to justify deletion.
 
 ## Риски
 
-- Formal risk tracking now lives in [05-risks/RISKS.yaml](./05-risks/RISKS.yaml).
+- Formal risk tracking now lives in 05-risks/RISKS.yaml.

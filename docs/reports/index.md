@@ -20,14 +20,12 @@ Canonical sources:
 ## Main Entry Points
 
 - [`README.md`](README.md) — short orientation note for the reports directory itself
-- [`evidence/INDEX.md`](evidence/INDEX.md) — curated evidence, synthesis, decisions, risks, and roadmaps
 - [`docs/plans/README.md`](../plans/README.md) — active planning artifacts
 - [`docs/99-archive/README.md`](../99-archive/README.md) — archive index for historical/superseded plans and baselines
 
 ## Reading Pattern
 
 - Start here if you need the current reports-surface map.
-- Jump to `evidence/INDEX.md` if you need research traceability or decision
   support artifacts.
 - Jump to `docs/plans/README.md` if you need active execution/backlog context.
 - Jump to `docs/99-archive/README.md` only for historical context.

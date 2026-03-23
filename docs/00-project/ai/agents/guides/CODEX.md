@@ -35,12 +35,12 @@
 
 Перед выводами о repo layout, package sprawl, hotspot families и reorg priority сверяйся с:
 
-1. [../../../../reports/evidence/project-file-structure/SUMMARY.md](../../../../reports/evidence/project-file-structure/SUMMARY.md),
-1. [../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md),
-1. [../../../../reports/evidence/project-package-topology/SUMMARY.md](../../../../reports/evidence/project-package-topology/SUMMARY.md),
-1. [../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md),
-1. [../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md),
-1. [../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md).
+1. [../../../../reports/evidence/architecture-foundations/SUMMARY.md](../../../../reports/evidence/architecture-foundations/SUMMARY.md),
+1. [../../../../reports/evidence/architecture-foundations/SUMMARY.md](../../../../reports/evidence/architecture-foundations/SUMMARY.md),
+1. [../../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../../reports/evidence/dependency-hotspots/SUMMARY.md),
+1. [../../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../../reports/evidence/dependency-hotspots/SUMMARY.md),
+1. [../../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../../reports/evidence/dependency-hotspots/SUMMARY.md),
+1. [../../../../reports/evidence/governance-signals/SUMMARY.md](../../../../reports/evidence/governance-signals/SUMMARY.md).
 
 Интерпретация по умолчанию:
 - package count alone is not a refactor trigger;

@@ -20,9 +20,9 @@
 
 When a failure appears structural rather than local, consult:
 
-- [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [../../../reports/evidence/architecture-foundations/SUMMARY.md](../../../reports/evidence/architecture-foundations/SUMMARY.md)
+- [../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../reports/evidence/dependency-hotspots/SUMMARY.md)
+- [../../../reports/evidence/dependency-hotspots/SUMMARY.md](../../../reports/evidence/dependency-hotspots/SUMMARY.md)
 - [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md)
 
 Default assumption: debug the concrete seam first; do not escalate to repo-wide restructuring unless the failure is supported by topology and governance evidence.
