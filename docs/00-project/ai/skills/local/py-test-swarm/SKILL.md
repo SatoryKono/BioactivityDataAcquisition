@@ -25,13 +25,13 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 4. Create artifact root: `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/` (LLM = caller).
 
 ## L1 Workflow
-1. Run Discovery baseline commands from [l1-playbook.md](references/l1-playbook.md).
+1. Run Discovery baseline commands from [l1-playbook.md](../../references/l1-playbook.md).
 2. Build `00-swarm-plan.md` with workload scores and parallel execution plan.
-3. Launch L2 agents with full task brief template from [l2-l3-task-brief.md](references/l2-l3-task-brief.md).
+3. Launch L2 agents with full task brief template from [l2-l3-task-brief.md](../../references/l2-l3-task-brief.md).
 4. Limit concurrent L2 agents to 4; run independent scopes in parallel.
 5. Collect all L2/L3 `report.md`, `metrics.json`, and telemetry JSONL.
-6. Build aggregated telemetry and flaky DB using [telemetry-and-flaky-db.md](references/telemetry-and-flaky-db.md).
-7. Produce `FINAL-REPORT.md` from [report-templates.md](references/report-templates.md).
+6. Build aggregated telemetry and flaky DB using [telemetry-and-flaky-db.md](../../references/telemetry-and-flaky-db.md).
+7. Produce `FINAL-REPORT.md` from [report-templates.md](../../references/report-templates.md).
 
 ## Decomposition Model
 Use three axes:
@@ -68,7 +68,7 @@ L2 and L3 must follow 6 phases:
 - Phase 4: telemetry/flakiness scan
 - Phase 5: reporting
 
-For L3 agents always prepend the mandatory leaf-agent instruction from [l2-l3-task-brief.md](references/l2-l3-task-brief.md).
+For L3 agents always prepend the mandatory leaf-agent instruction from [l2-l3-task-brief.md](../../references/l2-l3-task-brief.md).
 
 ## Artifact Contract
 Minimum required outputs:
@@ -114,7 +114,7 @@ Treat task as done only when:
 - unresolved assumptions are explicitly marked `Requires Manual Review`.
 
 ## References
-- L1 runbook and command sequence: [l1-playbook.md](references/l1-playbook.md)
-- L2/L3 task briefs and prompt templates: [l2-l3-task-brief.md](references/l2-l3-task-brief.md)
-- Report and metrics templates: [report-templates.md](references/report-templates.md)
-- Telemetry schema and flaky DB contract: [telemetry-and-flaky-db.md](references/telemetry-and-flaky-db.md)
+- L1 runbook and command sequence: [l1-playbook.md](../../references/l1-playbook.md)
+- L2/L3 task briefs and prompt templates: [l2-l3-task-brief.md](../../references/l2-l3-task-brief.md)
+- Report and metrics templates: [report-templates.md](../../references/report-templates.md)
+- Telemetry schema and flaky DB contract: [telemetry-and-flaky-db.md](../../references/telemetry-and-flaky-db.md)

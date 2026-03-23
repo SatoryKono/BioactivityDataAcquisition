@@ -62,7 +62,7 @@ Attack the draft for:
 - **Gaps**: Missing perspectives, incomplete coverage
 - **Sources**: Unsourced claims, single-source reliance
 
-Rate each issue 1-10 severity. See [references/critique-framework.md](references/critique-framework.md).
+Rate each issue 1-10 severity. See [references/critique-framework.md](../../references/critique-framework.md).
 
 ### Step 5: Targeted Research with Reflection
 
@@ -85,7 +85,7 @@ REFLECTION:
 - Multiple independent sub-questions exist
 - Different source types needed (academic vs news vs official)
 
-See [references/search-patterns.md](references/search-patterns.md) for query techniques.
+See [references/search-patterns.md](../../references/search-patterns.md) for query techniques.
 
 ### Step 6: Source Scoring and Contradiction Handling
 
@@ -116,7 +116,7 @@ DISPUTED: [Yes/No - conflicts with other sources?]
 4. Search for additional sources to break tie
 5. If unresolved, present both views with confidence levels
 
-See [references/source-evaluation.md](references/source-evaluation.md) for detailed guidance.
+See [references/source-evaluation.md](../../references/source-evaluation.md) for detailed guidance.
 
 ### Step 7: Refine Draft (Denoise)
 
@@ -167,7 +167,7 @@ If score drops between iterations: Focus critique on what regressed.
 [Numbered list with confidence indicators]
 ```
 
-See [references/report-templates.md](references/report-templates.md) for format variants.
+See [references/report-templates.md](../../references/report-templates.md) for format variants.
 
 ## Example
 
@@ -221,10 +221,10 @@ Iteration 3: Comp 9, Acc 8 → Done ✓
 
 ## References
 
-- [references/search-patterns.md](references/search-patterns.md) - Query techniques, parallel research
-- [references/critique-framework.md](references/critique-framework.md) - Red team methodology
-- [references/source-evaluation.md](references/source-evaluation.md) - Confidence scoring, contradictions
-- [references/report-templates.md](references/report-templates.md) - Output formats
+- [references/search-patterns.md](../../references/search-patterns.md) - Query techniques, parallel research
+- [references/critique-framework.md](../../references/critique-framework.md) - Red team methodology
+- [references/source-evaluation.md](../../references/source-evaluation.md) - Confidence scoring, contradictions
+- [references/report-templates.md](../../references/report-templates.md) - Output formats
 
 ## User Interaction
 

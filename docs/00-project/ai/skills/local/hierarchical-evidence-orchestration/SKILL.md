@@ -32,8 +32,8 @@ Read, in this order:
 2. `../../../docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 3. `../collecting-evidence/SKILL.md`
 4. `../synthesizing-pillars/SKILL.md`
-5. [references/orchestration-contract.md](references/orchestration-contract.md)
-6. [references/shard-task-briefs.md](references/shard-task-briefs.md)
+5. [references/orchestration-contract.md](../../references/orchestration-contract.md)
+6. [references/shard-task-briefs.md](../../references/shard-task-briefs.md)
 
 ## Input Contract
 
@@ -100,7 +100,7 @@ Write `ORCHESTRATION.md` in the parent topic pack with:
 - child output roots
 - mode (`collect`, `synthesize`, `full`)
 
-Use the template guidance in [references/orchestration-contract.md](references/orchestration-contract.md).
+Use the template guidance in [references/orchestration-contract.md](../../references/orchestration-contract.md).
 
 ### Step 3: Prepare Shard Packs
 
@@ -219,5 +219,5 @@ Treat the hierarchical wave as complete only when:
 
 ## References
 
-- Orchestration artifact and gate contract: [references/orchestration-contract.md](references/orchestration-contract.md)
-- Collector and synthesizer shard briefs: [references/shard-task-briefs.md](references/shard-task-briefs.md)
+- Orchestration artifact and gate contract: [references/orchestration-contract.md](../../references/orchestration-contract.md)
+- Collector and synthesizer shard briefs: [references/shard-task-briefs.md](../../references/shard-task-briefs.md)

@@ -122,7 +122,7 @@ Otherwise use generic Mermaid mode.
 
 ## Pattern Library
 
-Use [patterns.md](references/patterns.md) as a source for ready-to-adapt templates.
+Use [patterns.md](../../references/patterns.md) as a source for ready-to-adapt templates.
 Read only the relevant section for the selected diagram type.
 
 ## Prompt Handling

@@ -118,7 +118,7 @@ evidence: []
 
 ### Step 5: Generate Synthesis Document
 
-Write `03-synthesis/SYN-<pillar>.md` using template from [references/synthesis-template.md](references/synthesis-template.md).
+Write `03-synthesis/SYN-<pillar>.md` using template from [references/synthesis-template.md](../../references/synthesis-template.md).
 
 **Required sections:**
 1. Executive Summary (3-5 bullet points)
@@ -199,4 +199,4 @@ After synthesis:
 
 ## References
 
-- [references/synthesis-template.md](references/synthesis-template.md) - Document template
+- [references/synthesis-template.md](../../references/synthesis-template.md) - Document template
