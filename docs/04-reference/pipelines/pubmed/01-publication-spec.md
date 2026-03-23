@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/pubmed/publication.md](../../providers/pubmed/publication.md)
 > and
-> [../../../../configs/entities/pubmed/publication.yaml](../../../../configs/entities/pubmed/publication.yaml).
+> `configs/entities/pubmed/publication.yaml`.
 
 ## Current Canonical Contract Summary
 

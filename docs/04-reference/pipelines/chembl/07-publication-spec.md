@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/publication.md](../../providers/chembl/publication.md)
 > and
-> [../../../../configs/entities/chembl/publication.yaml](../../../../configs/entities/chembl/publication.yaml).
+> `configs/entities/chembl/publication.yaml`.
 
 ## Current Canonical Contract Summary
 

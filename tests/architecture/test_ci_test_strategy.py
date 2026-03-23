@@ -42,6 +42,12 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     assert "--max-worker-restart=0" in workflow, (
         "parallel CI jobs must fail fast on worker restart loops"
     )
+    assert "--junitxml=reports/test-telemetry/junit-fast.xml" in workflow, (
+        "test-fast job should emit JUnit telemetry for slow-test duration analysis"
+    )
+    assert "pattern: test-telemetry-*" in workflow, (
+        "duration telemetry job must download JUnit telemetry artifacts"
+    )
 
 
 def test_tests_workflow_splits_heavy_preflight_from_dependency_smoke() -> None:
@@ -55,4 +61,18 @@ def test_tests_workflow_splits_heavy_preflight_from_dependency_smoke() -> None:
     )
     assert "needs: governance-preflight" in workflow, (
         "quality-metrics-gate should depend on governance-preflight"
+    )
+
+
+def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
+    """Tests workflow should publish a stable slow-test telemetry artifact."""
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    assert "duration-telemetry:" in workflow, (
+        "tests workflow should include a dedicated duration-telemetry job"
+    )
+    assert "test-duration-telemetry" in workflow, (
+        "duration-telemetry job should upload a named telemetry artifact"
+    )
+    assert "slowest-tests.md" in workflow and "slowest-tests.json" in workflow, (
+        "duration telemetry output should include both markdown and JSON summaries"
     )

@@ -39,6 +39,14 @@ ORPHAN_EXCLUDED_PREFIXES = (
     "00-project/ai/",
     "99-archive/",
     "02-architecture/diagrams/governance/00-diagramming-policy.md",
+    "02-architecture/diagrams/architecture/svg/",
+    "02-architecture/diagrams/architecture/png/",
+    "02-architecture/diagrams/class-diagrams/svg/",
+    "02-architecture/diagrams/class-diagrams/png/",
+    "02-architecture/diagrams/foundation/svg/",
+    "02-architecture/diagrams/foundation/png/",
+    "02-architecture/diagrams/views/svg/",
+    "02-architecture/diagrams/views/png/",
 )
 KPI_EXCLUDED_PREFIXES = (
     "reports/",

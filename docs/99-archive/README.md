@@ -52,8 +52,8 @@ These documents are preserved for traceability and historical context.
 
 ### Audit
 
-- [audit/00-audit-baseline-2026-02-23.md](audit/00-audit-baseline-2026-02-23.md)
-- [audit/02-test-baseline-2026-02-23.md](audit/02-test-baseline-2026-02-23.md)
+- [`audit/README.md`](audit/README.md) — historical audit baseline index
+- `audit/02-test-baseline-2026-02-23.md` — historical path retained in audit notes
 
 ### Dashboards Legacy
 
@@ -85,7 +85,7 @@ These documents are preserved for traceability and historical context.
 
 ### Plans
 
-- [plans/optimize-config-deduplication.md](plans/optimize-config-deduplication.md)
+- `plans/optimize-config-deduplication.md` — historical path no longer retained as a published archive page
 - [plans/rf-fs-2026-03/README.md](plans/rf-fs-2026-03/README.md)
 
 ### Reports

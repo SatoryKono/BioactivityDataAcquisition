@@ -272,7 +272,7 @@ setup              Full developer environment setup (shell)
 install-deps       Install project dependencies
 run-tests          Run tests
 mock-metrics       Start mock metrics server
-test-changed       Run tests for changed files only (shell)
+test-changed       Run tests for changed files only
 setup-mcp          Setup Copilot/Codex MCP integration
 ```
 

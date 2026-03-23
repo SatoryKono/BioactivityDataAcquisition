@@ -71,6 +71,7 @@ jobs:
           uv-sync-args: ""
           enable-pytest-cache: "true"
           pytest-cache-prefix: "pytest-contracts"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/architecture/test_port_contracts.py', 'tests/architecture/test_adapter_contracts.py', 'tests/architecture/test_registry_contracts.py', 'tests/conftest.py', 'pyproject.toml') }}
 
       - name: Run Port Contract Tests
         run: |
@@ -109,6 +110,7 @@ jobs:
           uv-sync-args: ""
           enable-pytest-cache: "true"
           pytest-cache-prefix: "hypothesis-contracts"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/architecture/test_port_contracts_hypothesis.py', 'tests/conftest.py', 'pyproject.toml') }}
 
       - name: Run Hypothesis Contract Tests
         run: |
@@ -146,4 +148,3 @@ jobs:
             exit 1
           fi
           echo "::notice::All contract tests passed"
-

@@ -10,7 +10,6 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.dq_config_resolution import (
     build_dq_cache_key,
     map_dq_config,
-    merge_dq_config_hierarchy,
     run_dq_config_flow,
     validate_dq_config_payload,
 )
@@ -89,39 +88,6 @@ class DQConfigLoader:
         """
         return _load_entity_layer_impl(
             self._configs_root, provider, entity, self._load_yaml
-        )
-
-    def _merge_hierarchy(
-        self,
-        provider: str,
-        entity: str,
-        inline_overrides: (
-            JsonDict | None  # Any: YAML config has heterogeneous values
-        ),  # Any: YAML DQ config has heterogeneous values
-    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
-        """Build merged config from defaults → provider → entity → inline.
-
-        Args:
-            provider: Provider name (e.g., ``"chembl"``).
-            entity: Entity type name (e.g., ``"activity"``).
-            inline_overrides: Optional per-call overrides applied last in the
-                merge chain; None skips the inline layer.
-
-        Returns:
-            Deeply merged DQ configuration dictionary.
-
-        Raises:
-            FileNotFoundError: When the required defaults file does not exist.
-        """
-        return merge_dq_config_hierarchy(
-            provider,
-            entity,
-            inline_overrides=inline_overrides,
-            load_defaults_layer=self._load_defaults_layer,
-            load_provider_layer=self._load_provider_layer,
-            load_entity_layer=self._load_entity_layer,
-            deep_merge=self._deep_merge,
-            relaxed_dq=self._relaxed_dq,
         )
 
     def _load_defaults_layer(

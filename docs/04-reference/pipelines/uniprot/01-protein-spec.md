@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/uniprot/protein.md](../../providers/uniprot/protein.md)
 > and
-> [../../../../configs/entities/uniprot/protein.yaml](../../../../configs/entities/uniprot/protein.yaml).
+> `configs/entities/uniprot/protein.yaml`.
 
 ## Current Canonical Contract Summary
 

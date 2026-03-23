@@ -649,6 +649,7 @@ def test_architecture_test_p95_duration_tracked() -> None:
         pytest.skip("Architecture workflow not found")
 
     content = workflow.read_text(encoding="utf-8")
+    makefile = Path("Makefile")
 
     assert "architecture-fast-baseline" in content, (
         "Workflow must have architecture-fast-baseline job for fast profile"
@@ -665,7 +666,18 @@ def test_architecture_test_p95_duration_tracked() -> None:
     assert "pull_request:" not in content and "push:" not in content, (
         "Fast architecture pytest on PR/push should live only in tests.yml to avoid duplication"
     )
-    assert "not slow" in content, "Fast baseline must exclude @pytest.mark.slow tests"
+    assert "make qa-arch-fast" in content, (
+        "Fast baseline must delegate to the canonical qa-arch-fast target"
+    )
+    assert makefile.exists(), "Makefile must define the canonical qa-arch-fast target"
+
+    makefile_content = makefile.read_text(encoding="utf-8")
+    assert "qa-arch-fast:" in makefile_content, (
+        "Makefile must keep the qa-arch-fast target for architecture CI"
+    )
+    assert 'tests/architecture/ -m "not slow and not serial"' in makefile_content, (
+        "qa-arch-fast must exclude @pytest.mark.slow and @pytest.mark.serial tests"
+    )
 
 
 # ---------------------------------------------------------------------------

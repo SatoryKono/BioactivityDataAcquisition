@@ -81,6 +81,7 @@ Commands:
   cov           All tests with coverage report (fail-under=85%)
   quick         Unit + smoke (fast feedback loop)
   parallel      All tests via pytest-xdist (-n auto)
+  changed       Run tests related to files changed vs a base branch (default: main)
   marker <m>    Run tests by marker, e.g.: marker slow
   failed        Re-run only failed tests from last run
   file <path>   Run a specific test file
@@ -88,11 +89,19 @@ Commands:
 """
 
 
-def _run_pytest(label: str, pytest_args: list[str], extra: list[str]) -> int:
+def _run_pytest(
+    label: str,
+    pytest_args: list[str],
+    extra: list[str],
+    env_overrides: dict[str, str] | None = None,
+) -> int:
     cmd = [sys.executable, "-m", "pytest", *pytest_args, *extra]
     _print_info(f"Running: {label}")
     _print_info(f"Command: {' '.join(cmd)}")
-    completed = subprocess.run(cmd, cwd=_project_root(), check=False)
+    env = os.environ.copy()
+    if env_overrides is not None:
+        env.update(env_overrides)
+    completed = subprocess.run(cmd, cwd=_project_root(), env=env, check=False)
     if completed.returncode == 0:
         _print_ok(f"{label} passed")
         if label == "Tests + Coverage":
@@ -153,6 +162,112 @@ def _run_quick(extra: list[str]) -> int:
     return _run_pytest("Smoke Tests", ["tests/smoke/", "-x", "-q"], extra)
 
 
+def _git_changed_python_files(base_branch: str, prefix: str) -> list[str]:
+    result = subprocess.run(
+        ["git", "diff", "--name-only", f"{base_branch}...HEAD"],
+        cwd=_project_root(),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        _print_fail(
+            f"Could not diff against base branch '{base_branch}'. "
+            "Falling back to fast unit suite."
+        )
+        return []
+    return [
+        line
+        for line in result.stdout.splitlines()
+        if line.startswith(prefix) and line.endswith(".py")
+    ]
+
+
+def _build_changed_test_keyword_expression(changed_src: list[str]) -> str:
+    modules = sorted({Path(path).stem for path in changed_src})
+    return " or ".join(modules)
+
+
+def _run_changed(args: list[str]) -> int:
+    base_branch = "main"
+    extra = args
+    if args and not args[0].startswith("-"):
+        base_branch = args[0]
+        extra = args[1:]
+
+    env_overrides = {"HYPOTHESIS_PROFILE": "fast"}
+    fast_unit_fallback = [
+        "tests/unit/",
+        "-m",
+        "not slow and not serial",
+        "-n",
+        "auto",
+        "--dist",
+        "loadscope",
+        "-q",
+        "--tb=short",
+    ]
+
+    changed_src = _git_changed_python_files(base_branch, "src/bioetl")
+    changed_tests = _git_changed_python_files(base_branch, "tests/")
+
+    if not changed_src:
+        if not changed_tests:
+            _print_info(
+                f"No changed Python files found vs '{base_branch}'. "
+                "Running fast unit fallback."
+            )
+            return _run_pytest(
+                "Changed fallback: unit tests",
+                fast_unit_fallback,
+                extra,
+                env_overrides=env_overrides,
+            )
+
+        _print_info("Only test files changed. Running changed test files directly.")
+        return _run_pytest(
+            "Changed test files",
+            [*changed_tests, "-v", "--tb=short"],
+            extra,
+            env_overrides=env_overrides,
+        )
+
+    _print_info("Changed source files:")
+    for path in changed_src:
+        print(f"  {path}")
+
+    keyword_expression = _build_changed_test_keyword_expression(changed_src)
+    _print_info(f"Running tests matching: {keyword_expression}")
+    rc = _run_pytest(
+        "Changed-source keyword tests",
+        [
+            "tests/",
+            "-k",
+            keyword_expression,
+            "-n",
+            "auto",
+            "--dist",
+            "loadscope",
+            "-v",
+            "--tb=short",
+            "--ignore=tests/e2e/",
+            "--ignore=tests/benchmarks/",
+        ],
+        extra,
+        env_overrides=env_overrides,
+    )
+    if rc == 0:
+        return 0
+
+    _print_info("Keyword-selected changed tests failed or matched nothing.")
+    return _run_pytest(
+        "Changed fallback: unit tests",
+        fast_unit_fallback,
+        extra,
+        env_overrides=env_overrides,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in {"help", "--help", "-h"}:
@@ -170,6 +285,8 @@ def main(argv: list[str] | None = None) -> int:
         return _run_file(tail)
     if command == "quick":
         return _run_quick(tail)
+    if command == "changed":
+        return _run_changed(tail)
 
     spec = COMMANDS.get(command)
     if spec is None:

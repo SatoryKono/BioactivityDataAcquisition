@@ -4,6 +4,8 @@
 
 *Версия: 1.0.6 | Дата: 2026-03-20 | Синхронизировано с ORCHESTRATION.md v4.1, RULES.md v5.24*
 
+> **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md`.
+
 > **Назначение**: Полный контекст для быстрого онбординга новой AI-сессии в BioETL.
 > При старте новой сессии — попроси агент прочитать этот файл:
 > `Прочитай docs/00-project/ai/memory/agent-memory.md и следуй его инструкциям.`

@@ -37,3 +37,10 @@ def test_ps1_wrapper_delegates_to_backend() -> None:
     root = _project_root()
     content = (root / "scripts/dev/run_tests.ps1").read_text(encoding="utf-8")
     assert "scripts/dev/run_tests.py" in content
+
+
+def test_changed_wrapper_delegates_to_backend_changed_command() -> None:
+    """Legacy changed-tests wrapper must stay a thin facade over run_tests.py."""
+    root = _project_root()
+    content = (root / "scripts/dev/test_changed.sh").read_text(encoding="utf-8")
+    assert "scripts/dev/run_tests.py changed" in content

@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/assay-parameters.md](../../providers/chembl/assay-parameters.md)
 > and
-> [../../../../configs/entities/chembl/assay_parameters.yaml](../../../../configs/entities/chembl/assay_parameters.yaml).
+> `configs/entities/chembl/assay_parameters.yaml`.
 
 ## Current Canonical Contract Summary
 

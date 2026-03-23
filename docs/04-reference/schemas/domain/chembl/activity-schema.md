@@ -6,7 +6,7 @@ This page is retained as a historical schema artifact. It predates the current n
 
 Canonical sources:
 - [ChEMBL activity provider reference](../../../providers/chembl/activity.md)
-- [`configs/entities/chembl/activity.yaml`](../../../../../configs/entities/chembl/activity.yaml)
+- `configs/entities/chembl/activity.yaml`
 
 Current canonical summary:
 - The live contract uses snake_case field names and config-driven alias resolution.

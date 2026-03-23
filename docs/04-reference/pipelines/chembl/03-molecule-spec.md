@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/molecule.md](../../providers/chembl/molecule.md)
 > and
-> [../../../../configs/entities/chembl/molecule.yaml](../../../../configs/entities/chembl/molecule.yaml).
+> `configs/entities/chembl/molecule.yaml`.
 
 ## Current Canonical Contract Summary
 

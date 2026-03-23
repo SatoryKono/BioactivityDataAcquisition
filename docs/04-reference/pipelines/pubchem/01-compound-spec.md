@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/pubchem/compound.md](../../providers/pubchem/compound.md)
 > and
-> [../../../../configs/entities/pubchem/compound.yaml](../../../../configs/entities/pubchem/compound.yaml).
+> `configs/entities/pubchem/compound.yaml`.
 
 ## Current Canonical Contract Summary
 

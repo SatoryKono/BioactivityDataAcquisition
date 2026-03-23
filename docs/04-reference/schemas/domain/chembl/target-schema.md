@@ -3,7 +3,7 @@
 > **Status**: Historical deep schema note. Current canonical contract lives in
 > [../../../providers/chembl/target.md](../../../providers/chembl/target.md)
 > and
-> [../../../../../configs/entities/chembl/target.yaml](../../../../../configs/entities/chembl/target.yaml).
+> `configs/entities/chembl/target.yaml`.
 
 ## Current Canonical Contract Summary
 

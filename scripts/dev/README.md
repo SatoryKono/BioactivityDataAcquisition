@@ -32,7 +32,7 @@ python -m scripts.dev <command> [args...]
 | `install-deps` | `install_deps.py` | Auxiliary helper script, not a full project bootstrap |
 | `run-tests` | `run_tests.py` | Run tests |
 | `mock-metrics` | `metrics_mock_server.py` | Start mock metrics server |
-| `test-changed` | `test_changed.sh` | Run tests for changed files only (shell) |
+| `test-changed` | `run_tests.py changed` | Run tests for changed files only |
 | `setup-mcp` | `setup_copilot_codex_mcp.py` | Setup Copilot/Codex MCP integration |
 
 ## When to Use
@@ -45,7 +45,7 @@ python -m scripts.dev <command> [args...]
 | `install-deps` | Specialized helper for one auxiliary package; not for normal repo setup | Manual, rare maintenance task |
 | `run-tests` | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `cov` | Manual, during development |
 | `mock-metrics` | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data | Manual, during dashboard development |
-| `test-changed` | Quick feedback during development; runs tests only for files changed since last commit | Manual, during development |
+| `test-changed` | Quick feedback during development; canonical changed-file runner with fast unit fallback | Manual, during development |
 | `setup-mcp` | One-time AI tooling setup; configures Copilot/Codex MCP integration | Manual, initial setup |
 
 ## Other Files

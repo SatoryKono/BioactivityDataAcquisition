@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/subcellular-fraction.md](../../providers/chembl/subcellular-fraction.md)
 > and
-> [../../../../configs/entities/chembl/subcellular_fraction.yaml](../../../../configs/entities/chembl/subcellular_fraction.yaml).
+> `configs/entities/chembl/subcellular_fraction.yaml`.
 
 ## Current Canonical Contract Summary
 

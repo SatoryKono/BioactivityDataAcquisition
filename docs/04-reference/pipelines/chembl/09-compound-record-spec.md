@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/compound-record.md](../../providers/chembl/compound-record.md)
 > and
-> [../../../../configs/entities/chembl/compound_record.yaml](../../../../configs/entities/chembl/compound_record.yaml).
+> `configs/entities/chembl/compound_record.yaml`.
 
 ## Current Canonical Contract Summary
 

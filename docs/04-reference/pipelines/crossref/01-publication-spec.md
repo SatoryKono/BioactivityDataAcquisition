@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/crossref/publication.md](../../providers/crossref/publication.md)
 > and
-> [../../../../configs/entities/crossref/publication.yaml](../../../../configs/entities/crossref/publication.yaml).
+> `configs/entities/crossref/publication.yaml`.
 
 ## Current Canonical Contract Summary
 

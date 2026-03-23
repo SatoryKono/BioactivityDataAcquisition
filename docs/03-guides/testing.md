@@ -12,7 +12,7 @@
 
 Source of truth для тестовой governance:
 - [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)
-- [configs/quality/test_matrix.yaml](../../configs/quality/test_matrix.yaml)
+- `configs/quality/test_matrix.yaml`
 
 Текущее состояние rollout по ADR-042:
 - mutation testing в CI блокирует только `domain/` с порогом `70%`
@@ -25,8 +25,8 @@ Source of truth для тестовой governance:
 - monthly `contract-tests.yml` остаётся активным live-network workflow и должен запускать `tests/contract/` с `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и `--network`
 - минимальный live-contract baseline теперь полностью enforceable: `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` обязаны иметь live contract suites
 - для `semanticscholar` live governance теперь разделена:
-  - [test_semanticscholar_contract.py](../../tests/contract/test_semanticscholar_contract.py) содержит promotion-grade путь;
-  - [test_semanticscholar_contract_pilot.py](../../tests/contract/test_semanticscholar_contract_pilot.py) содержит richer pilot-soak проверки и требует `BIOETL_PILOT_SOAK_TESTS=true` или `--pilot-soak`
+  - `tests/contract/test_semanticscholar_contract.py` содержит promotion-grade путь;
+  - `tests/contract/test_semanticscholar_contract_pilot.py` содержит richer pilot-soak проверки и требует `BIOETL_PILOT_SOAK_TESTS=true` или `--pilot-soak`
 - текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний registry `tests/fixtures/contracts/{provider}/v{version}.json` остаётся future target из ADR-042
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
@@ -323,4 +323,9 @@ make test-deps-dev
 `.github/workflows/tests.yml`: короткий `smoke-check`, затем независимые
 `governance-preflight` и `config-schema-preflight`, после чего стартуют
 `test-fast` / `test-matrix`, а в финале `coverage-verify` объединяет coverage
-shard-ы и отдельно догоняет только `serial`-тесты.
+shard-ы и отдельно догоняет только `serial`-тесты. Pytest/Hypothesis cache
+при этом кэшируется не по всему `tests/**/*.py`, а по scoped fingerprint для
+конкретного workflow или test-family, чтобы локальные изменения не
+инвалидировали весь test-cache в CI. Отдельный `duration-telemetry` job
+собирает JUnit telemetry из быстрых lanes и публикует artifact со списком
+самых медленных тестов.

@@ -20,6 +20,10 @@ inputs:
     description: Cache key prefix for pytest cache (to differentiate cache scopes)
     required: false
     default: "pytest"
+  pytest-cache-fingerprint:
+    description: Optional precomputed fingerprint for pytest/hypothesis cache invalidation scope
+    required: false
+    default: ""
   uv-sync-args:
     description: "Additional args for uv sync (e.g. '--frozen'). Default: '--frozen'"
     required: false
@@ -65,6 +69,6 @@ runs:
         path: |
           .pytest_cache
           .hypothesis
-        key: ${{ inputs.pytest-cache-prefix }}-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('tests/**/*.py') }}
+        key: ${{ inputs.pytest-cache-prefix }}-${{ runner.os }}-py${{ inputs.python-version }}-${{ inputs.pytest-cache-fingerprint != '' && inputs.pytest-cache-fingerprint || hashFiles('tests/**/*.py') }}
         restore-keys: |
           ${{ inputs.pytest-cache-prefix }}-${{ runner.os }}-py${{ inputs.python-version }}-

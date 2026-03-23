@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/tissue.md](../../providers/chembl/tissue.md)
 > and
-> [../../../../configs/entities/chembl/tissue.yaml](../../../../configs/entities/chembl/tissue.yaml).
+> `configs/entities/chembl/tissue.yaml`.
 
 ## Current Canonical Contract Summary
 

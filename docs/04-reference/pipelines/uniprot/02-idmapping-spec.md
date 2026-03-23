@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/uniprot/idmapping.md](../../providers/uniprot/idmapping.md)
 > and
-> [../../../../configs/entities/uniprot/idmapping.yaml](../../../../configs/entities/uniprot/idmapping.yaml).
+> `configs/entities/uniprot/idmapping.yaml`.
 
 ## Current Canonical Contract Summary
 

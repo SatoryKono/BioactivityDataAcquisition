@@ -2,7 +2,7 @@
 
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/openalex/publication.md](../../providers/openalex/publication.md)
-> and [../../../../configs/entities/openalex/publication.yaml](../../../../configs/entities/openalex/publication.yaml).
+> and `configs/entities/openalex/publication.yaml`.
 
 ## Current Canonical Contract Summary
 

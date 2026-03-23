@@ -26,14 +26,14 @@ When diagram drift is detected, the first remediation target should usually be t
 
 These artifacts are intentionally outside primary nav but linked here for discoverability.
 
-- [architecture/svg/INDEX.md](architecture/svg/INDEX.md)
-- [architecture/png/INDEX.md](architecture/png/INDEX.md)
-- [class-diagrams/svg/INDEX.md](class-diagrams/svg/INDEX.md)
-- [class-diagrams/png/INDEX.md](class-diagrams/png/INDEX.md)
-- [foundation/svg/INDEX.md](foundation/svg/INDEX.md)
-- [foundation/png/INDEX.md](foundation/png/INDEX.md)
-- [views/svg/INDEX.md](views/svg/INDEX.md)
-- [views/png/INDEX.md](views/png/INDEX.md)
+- `architecture/svg/INDEX.md`
+- `architecture/png/INDEX.md`
+- `class-diagrams/svg/INDEX.md`
+- `class-diagrams/png/INDEX.md`
+- `foundation/svg/INDEX.md`
+- `foundation/png/INDEX.md`
+- `views/svg/INDEX.md`
+- `views/png/INDEX.md`
 - [bundles/architecture.bundle.md](bundles/architecture.bundle.md)
 - [bundles/class.bundle.md](bundles/class.bundle.md)
 - [descriptions/INDEX.md](descriptions/INDEX.md)

@@ -45,13 +45,13 @@ Freeze the prioritization baseline before code movement starts.
 - This is the single most concentrated dense-file package in the current snapshot.
 
 **Target files**
-- [crossref/batch.py](../../../../../src/bioetl/infrastructure/adapters/crossref/batch.py)
-- [client_retry_mixin.py](../../../../../src/bioetl/infrastructure/adapters/http/client_retry_mixin.py)
-- [health_check_mixin.py](../../../../../src/bioetl/infrastructure/adapters/health_check_mixin.py)
-- [fetch_resilience_mixin.py](../../../../../src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py)
-- [error_handling.py](../../../../../src/bioetl/infrastructure/adapters/error_handling.py)
-- [health_monitor.py](../../../../../src/bioetl/infrastructure/adapters/http/health_monitor.py)
-- [filter_fetch_adapter_mixin.py](../../../../../src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py)
+- `src/bioetl/infrastructure/adapters/crossref/batch.py`
+- `src/bioetl/infrastructure/adapters/http/client_retry_mixin.py`
+- `src/bioetl/infrastructure/adapters/health_check_mixin.py`
+- `src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py`
+- `src/bioetl/infrastructure/adapters/error_handling.py`
+- `src/bioetl/infrastructure/adapters/http/health_monitor.py`
+- `src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py`
 
 **Execution intent**
 - Split mixin-heavy modules by concern, not mechanically by line count.
@@ -72,11 +72,11 @@ Freeze the prioritization baseline before code movement starts.
 - User-facing orchestration logic still contains overlap hotspots and should not wait until the entire infrastructure backlog is done.
 
 **Target files**
-- [command.py](../../../../../src/bioetl/interfaces/cli/commands/domains/run/command.py)
-- [command_policy.py](../../../../../src/bioetl/interfaces/cli/commands/domains/run/command_policy.py)
-- [silver_statistics_helpers.py](../../../../../src/bioetl/application/services/dq/silver_statistics_helpers.py)
-- [date.py](../../../../../src/bioetl/application/pipelines/pubmed/extractors/date.py)
-- [_comment_facets.py](../../../../../src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py)
+- `src/bioetl/interfaces/cli/commands/domains/run/command.py`
+- `src/bioetl/interfaces/cli/commands/domains/run/command_policy.py`
+- `src/bioetl/application/services/dq/silver_statistics_helpers.py`
+- `src/bioetl/application/pipelines/pubmed/extractors/date.py`
+- `src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py`
 
 **Execution intent**
 - Decompose CLI run command modules by parsing/policy/presentation seams.
@@ -97,11 +97,11 @@ Freeze the prioritization baseline before code movement starts.
 - They still contribute to dense infrastructure maintenance burden.
 
 **Target files**
-- [io_delta_mixins.py](../../../../../src/bioetl/infrastructure/storage/gold/io_delta_mixins.py)
-- [base_delta_writer.py](../../../../../src/bioetl/infrastructure/storage/base_delta_writer.py)
-- [_base.py](../../../../../src/bioetl/infrastructure/config/_base.py)
-- [_governance_validation.py](../../../../../src/bioetl/infrastructure/quality/_governance_validation.py)
-- [silver_chembl_core.py](../../../../../src/bioetl/infrastructure/schemas/silver_chembl_core.py)
+- `src/bioetl/infrastructure/storage/gold/io_delta_mixins.py`
+- `src/bioetl/infrastructure/storage/base_delta_writer.py`
+- `src/bioetl/infrastructure/config/_base.py`
+- `src/bioetl/infrastructure/quality/_governance_validation.py`
+- `src/bioetl/infrastructure/schemas/silver_chembl_core.py`
 
 **Execution intent**
 - Separate I/O, policy, and assembly concerns in storage/config modules.
@@ -122,12 +122,12 @@ Freeze the prioritization baseline before code movement starts.
 - They are the best candidates for the second-wave inventory after overlap reduction starts.
 
 **Target files**
-- [silver_publications.py](../../../../../src/bioetl/infrastructure/schemas/silver_publications.py)
-- [_filtered_data_source_mixins.py](../../../../../src/bioetl/application/core/_filtered_data_source_mixins.py)
-- [configs.py](../../../../../src/bioetl/composition/factories/pipeline/configs.py)
-- [blocks.py](../../../../../src/bioetl/application/pipelines/pubmed/blocks.py)
-- [transformer_business_data_mixin.py](../../../../../src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py)
-- [runner.py](../../../../../src/bioetl/application/core/runner.py)
+- `src/bioetl/infrastructure/schemas/silver_publications.py`
+- `src/bioetl/application/core/_filtered_data_source_mixins.py`
+- `src/bioetl/composition/factories/pipeline/configs.py`
+- `src/bioetl/application/pipelines/pubmed/blocks.py`
+- `src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py`
+- `src/bioetl/application/core/runner.py`
 
 **Execution intent**
 - Review these modules for packed responsibilities, not just file size.

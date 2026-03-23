@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
-> [../../../../configs/composites/publication.yaml](../../../../configs/composites/publication.yaml).
+> `configs/composites/publication.yaml`.
 
 ## Current Canonical Contract Summary
 

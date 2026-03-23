@@ -4,7 +4,7 @@ This folder stores the superseded `RF-FS-*` baseline planning series that was
 previously kept under `docs/reports/`.
 
 These files are retained for historical traceability only. Active RF-FS
-execution plans live in [`docs/plans/`](../../../plans/).
+execution plans live in [`docs/plans/README.md`](../../../plans/README.md).
 
 ## Contents
 
