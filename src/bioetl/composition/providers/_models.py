@@ -62,4 +62,6 @@ class ProviderConfig:
     data_source_creator: DataSourceCreatorProtocol | None = None
 
 
+# Compatibility alias retained for legacy imports; new code should use
+# DataSourceCreatorProtocol directly.
 DataSourceCreatorPort = DataSourceCreatorProtocol

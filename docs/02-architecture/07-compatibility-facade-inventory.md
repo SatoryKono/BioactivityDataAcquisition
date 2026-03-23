@@ -11,6 +11,9 @@ Scope rules:
 
 - The inventory is curated, not exhaustive for every single deprecated symbol or alias.
 - Only module-level facades with architectural significance are listed here.
+- Symbol-level compatibility aliases inside otherwise canonical modules are governed in
+  code and targeted docs first; they stay outside this ledger unless they become a
+  sanctioned public seam that needs explicit facade governance.
 - New code must prefer the canonical target module named in the inventory row.
 
 ## Status Model

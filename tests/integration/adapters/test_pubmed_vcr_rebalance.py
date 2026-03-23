@@ -9,20 +9,17 @@ import os
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "pubmed"
 REBALANCE_CASES = tuple(f"case_{index:02d}" for index in range(1, 16))
@@ -65,13 +62,16 @@ async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
 @pytest_asyncio.fixture
 async def adapter(http_client: UnifiedHTTPClient) -> PubMedAdapter:
     """Create PubMed adapter used by rebalance tests."""
+    logger = NoOpLogger()
     return PubMedAdapter(
         http_client=http_client,
-        logger=NoOpLogger(),
+        logger=logger,
         email="bioetl-test@example.com",
         api_key=None,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "pubmed",
+            logger=logger,
+            include_fallback_service=True,
         ),
     )
 

@@ -13,6 +13,7 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
 )
 from bioetl.composition.source_config_access import load_source_config
 from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -35,6 +36,7 @@ class PubChemRuntimeDependencies:
     request_collector: APIRequestCollector
     entity_mapper: PubChemEntityMapper
     fetch_strategies: PubChemFetchStrategies
+    dependency_context: SyncAdapterDependencyContext | None = None
 
 
 def _resolve_rate_limit(provider: str) -> tuple[float, int]:
@@ -89,6 +91,7 @@ def _build_runtime_dependencies(
     fetch_strategies: PubChemFetchStrategies | None,
 ) -> PubChemRuntimeDependencies:
     """Build PubChem runtime collaborators at the composition edge."""
+    dependency_context: SyncAdapterDependencyContext | None = None
     if error_handler is None or request_collector is None:
         helper_services = AdapterHelpersFactory.create_sync_helpers(
             provider="pubchem",
@@ -97,6 +100,11 @@ def _build_runtime_dependencies(
         )
         error_handler = error_handler or helper_services.error_handler
         request_collector = request_collector or helper_services.request_collector
+        dependency_context = SyncAdapterDependencyContext(
+            metrics=helper_services.metrics,
+            error_handler=error_handler,
+            request_collector=request_collector,
+        )
 
     mapper = entity_mapper or PubChemEntityMapper()
     strategies = fetch_strategies or PubChemFetchStrategies(
@@ -113,6 +121,7 @@ def _build_runtime_dependencies(
         request_collector=request_collector,
         entity_mapper=mapper,
         fetch_strategies=strategies,
+        dependency_context=dependency_context,
     )
 
 
@@ -186,6 +195,7 @@ def create_pubchem_adapter(
         thread_pool=thread_pool,
         owns_thread_pool=True,
         strict_error_handling=strict_error_handling,
+        dependency_context=runtime_dependencies.dependency_context,
         error_handler=runtime_dependencies.error_handler,
         request_collector=runtime_dependencies.request_collector,
         entity_mapper=runtime_dependencies.entity_mapper,

@@ -64,6 +64,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        HttpAdapterDependencyContext,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
@@ -116,6 +119,7 @@ class OpenAlexAdapter(
     batch_size: int = 50
     metrics: MetricsPort | None = None
     title_search_cache_size: int = 256
+    dependency_context: HttpAdapterDependencyContext | None = None
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
@@ -144,6 +148,7 @@ class OpenAlexAdapter(
             http_client=self.http_client,
             logger=self.logger,
             metrics=self.metrics,
+            dependency_context=self.dependency_context,
             error_handler=self.error_handler,
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,
@@ -233,6 +238,7 @@ def _create_openalex_adapter(
         mailto=mailto,
         batch_size=kwargs.get("batch_size", 50),
         metrics=kwargs.get("metrics"),
+        dependency_context=kwargs.get("dependency_context"),
         error_handler=kwargs.get("error_handler"),
         adapter_metrics=kwargs.get("adapter_metrics"),
         request_collector=kwargs.get("request_collector"),

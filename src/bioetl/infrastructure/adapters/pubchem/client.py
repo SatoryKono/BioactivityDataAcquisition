@@ -46,6 +46,9 @@ from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        SyncAdapterDependencyContext,
+    )
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
@@ -112,9 +115,10 @@ class PubChemAdapter(
         thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
         *,
+        dependency_context: SyncAdapterDependencyContext | None = None,
         error_handler: ErrorHandlerPort,
         owns_thread_pool: bool = False,
-        request_collector: APIRequestCollector,
+        request_collector: APIRequestCollector | None,
         entity_mapper: PubChemEntityMapper,
         fetch_strategies: PubChemFetchStrategies,
     ) -> None:
@@ -128,6 +132,8 @@ class PubChemAdapter(
             circuit_breaker: Pre-configured circuit breaker.
             thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
+            dependency_context: Optional composition-owned dependency bundle for
+                sync adapter collaborators.
             error_handler: Pre-built error handler assembled by the composition
                 root.
             owns_thread_pool: Whether this adapter owns the injected thread pool
@@ -146,11 +152,19 @@ class PubChemAdapter(
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
             strict_error_handling=strict_error_handling,
+            dependency_context=dependency_context,
             error_handler=error_handler,
             owns_thread_pool=owns_thread_pool,
         )
         self._mapper = entity_mapper
-        self._request_collector = request_collector
+        request_collector_port = (
+            dependency_context.request_collector
+            if dependency_context is not None
+            else request_collector
+        )
+        if request_collector_port is None:
+            raise ValueError("PubChemAdapter requires request_collector")
+        self._request_collector = request_collector_port
         self._strategies = fetch_strategies
 
     # fetch_multi_filtered and fetch_filtered_with_fallback are provided

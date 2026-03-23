@@ -175,29 +175,19 @@ class CrossRefPublicationRecord(BaseModel):
     )
 
     # Relations
-    relation: JsonDict | None = (  # Any: untyped API JSON record
-        Field(  # Any: nested API JSON has heterogeneous values
-            default=None, description="Related works"
-        )
+    relation: JsonDict | None = Field(
+        default=None, description="Related works"
     )  # Any: nested Crossref JSON with provider-specific schema
-    update_to: (
-        list[JsonDict] | None  # Any: untyped API JSON record
-    ) = (  # Any: nested API JSON has heterogeneous values
-        Field(  # Any: nested Crossref JSON with provider-specific schema
-            default_factory=list,
-            alias="update-to",
-            description="Updates to other works",
-        )
-    )
-    updated_by: (
-        list[JsonDict] | None  # Any: untyped API JSON record
-    ) = (  # Any: nested API JSON has heterogeneous values
-        Field(  # Any: nested Crossref JSON with provider-specific schema
-            default_factory=list,
-            alias="updated-by",
-            description="Works updating this one",
-        )
-    )
+    update_to: list[JsonDict] | None = Field(
+        default_factory=list,
+        alias="update-to",
+        description="Updates to other works",
+    )  # Any: nested Crossref JSON with provider-specific schema
+    updated_by: list[JsonDict] | None = Field(
+        default_factory=list,
+        alias="updated-by",
+        description="Works updating this one",
+    )  # Any: nested Crossref JSON with provider-specific schema
 
     # References
     reference: list[CrossRefReference] | None = Field(
@@ -228,13 +218,11 @@ class CrossRefPublicationRecord(BaseModel):
     score: float | None = Field(default=None, description="Search relevance score")
 
     # Standards Bodies
-    standards_body: (
-        list[JsonDict] | None  # Any: untyped API JSON record
-    ) = (  # Any: nested API JSON has heterogeneous values
-        Field(  # Any: nested Crossref JSON with provider-specific schema
-            default_factory=list, alias="standards-body", description="Standards bodies"
-        )
-    )
+    standards_body: list[JsonDict] | None = Field(
+        default_factory=list,
+        alias="standards-body",
+        description="Standards bodies",
+    )  # Any: nested Crossref JSON with provider-specific schema
 
     # Update Policy
     update_policy: str | None = Field(
@@ -243,17 +231,18 @@ class CrossRefPublicationRecord(BaseModel):
 
 
 # === Record Type Mapping ===
-
 CROSSREF_RECORD_MODELS: dict[str, type[BaseModel]] = {
     "work": CrossRefPublicationRecord,
     "publication": CrossRefPublicationRecord,
 }
 
-# Load response wrappers only after CrossRefPublicationRecord exists so the
-# wrapper module can safely resolve the record class during import.
+# Load response wrappers only after CrossRefPublicationRecord exists.
 _response_models = importlib.import_module(
     "bioetl.infrastructure.adapters.crossref._response_models"
 )
 CrossRefMessage = _response_models.CrossRefMessage
 CrossRefPublicationResponse = _response_models.CrossRefPublicationResponse
 CrossRefPublicationsResponse = _response_models.CrossRefPublicationsResponse
+_record_namespace = {"CrossRefPublicationRecord": CrossRefPublicationRecord}
+CrossRefMessage.model_rebuild(_types_namespace=_record_namespace)
+CrossRefPublicationResponse.model_rebuild(_types_namespace=_record_namespace)

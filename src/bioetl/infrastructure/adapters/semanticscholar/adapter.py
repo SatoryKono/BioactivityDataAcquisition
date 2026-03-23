@@ -21,10 +21,11 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    DefaultFallbackExecution,
-    FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
-    resolve_fallback_policy,
+    FallbackPolicyMixin,
+)
+from bioetl.infrastructure.adapters.semanticscholar._client_fallback_policy import (
+    _SemanticScholarFallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.semanticscholar.batch_request_mixin import (
     SemanticScholarBatchRequestMixin,
@@ -48,6 +49,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        HttpAdapterDependencyContext,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 DEFAULT_FIELDS = (
@@ -67,18 +71,6 @@ SEMANTICSCHOLAR_HEALTH_ERRORS = (
     TypeError,
     RuntimeError,
     Exception,
-)
-
-_SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
-    supported_filter_field="doi",
-    unsupported_filter_event="unsupported_filter_field_for_fallback",
-    unsupported_filter_message=(
-        "SemanticScholar fallback only supports 'doi' filtering, skipping"
-    ),
-    skip_on_unsupported_filter_field=True,
-    primary_lookup_method="doi",
-    trim_primary_ids_to_limit=False,
-    fallback_operation="fetch_filtered_with_fallback",
 )
 
 
@@ -113,6 +105,8 @@ def _create_default_semanticscholar_title_fallback_handler(
 
 @dataclass
 class SemanticScholarAdapter(
+    _SemanticScholarFallbackPolicyMixin,
+    FallbackPolicyMixin,
     SemanticScholarHealthMetadataMixin,
     SemanticScholarFetchAdapterMixin,
     SemanticScholarBatchRequestMixin,
@@ -126,6 +120,7 @@ class SemanticScholarAdapter(
     batch_size: int = 100
     fields: str = DEFAULT_FIELDS
     metrics: MetricsPort | None = None
+    dependency_context: HttpAdapterDependencyContext | None = None
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
@@ -146,6 +141,7 @@ class SemanticScholarAdapter(
             http_client=self.http_client,
             logger=self.logger,
             metrics=self.metrics,
+            dependency_context=self.dependency_context,
             error_handler=self.error_handler,
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,
@@ -163,29 +159,6 @@ class SemanticScholarAdapter(
             )
         )
         self.configure_fallback_policy(None)
-
-    def configure_fallback_policy(self, policy: object | None) -> None:
-        """Configure fallback decorator behavior from provider YAML policy.
-
-        Args:
-            policy: Provider YAML fallback policy object, or None to use defaults.
-        """
-        enabled, config = resolve_fallback_policy(
-            policy,
-            defaults=_SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG,
-            default_enabled=True,
-        )
-        strategy = DefaultFallbackExecution(
-            normalize_id_hook=self._normalize_doi,
-            extract_record_id_hook=lambda rec: str(rec.get("doi", "")),
-            fallback_handler_hook=self._fallback_handler if enabled else None,
-        )
-        self._fallback_decorator = ComposableFallbackDecorator(
-            service=self._fallback_fetch_service,
-            strategy=strategy,
-            config=config,
-            logger=self._logger,
-        )
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers with optional API key.

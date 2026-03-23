@@ -45,6 +45,7 @@ from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProvide
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CircuitBreakerPort
+    from bioetl.infrastructure.adapters.common import HttpAdapterDependencyContext
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -87,6 +88,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
         *,
+        dependency_context: HttpAdapterDependencyContext | None = None,
         error_handler: ErrorHandlerPort | None = None,
         adapter_metrics: AdapterMetricsRecorder | None = None,
         request_collector: APIRequestCollector | None = None,
@@ -98,6 +100,10 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
             logger: LoggerPort instance for structured logging (required).
             metrics: MetricsPort instance for metrics collection (optional).
                     Defaults to NoOpMetrics if not provided.
+            dependency_context: Explicit composition-owned dependency bundle for
+                    runtime adapter collaborators. When provided, it is the
+                    authoritative source for metrics, error handling, request
+                    collection, and adapter metrics.
             error_handler: Pre-built error handler (optional, injected by
                     AdapterHelpersFactory). Falls back to inline ErrorService.
             adapter_metrics: Pre-built adapter metrics (optional, injected by
@@ -110,6 +116,14 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         self.http_client = http_client  # Public alias for IDMappingHealthMixin and other protocol mixins
         self._logger = logger
         self.logger = logger  # Public alias required by HealthCheckMixin
+        if dependency_context is not None:
+            self._metrics = dependency_context.metrics
+            self.metrics = dependency_context.metrics
+            self._error_handler = dependency_context.error_handler
+            self._adapter_metrics = dependency_context.adapter_metrics
+            self._request_collector = dependency_context.request_collector
+            return
+
         self._metrics = metrics if metrics is not None else NoOpMetrics()
         self.metrics = (
             self._metrics
@@ -122,8 +136,8 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         if adapter_metrics is not None and request_collector is not None:
             self._adapter_metrics = adapter_metrics
             self._request_collector = request_collector
-        else:
-            self._init_adapter_metrics()
+            return
+        self._init_adapter_metrics()
 
     def __getattr__(self, name: str) -> object:
         """Resolve private runtime aliases for dataclass-based adapters.

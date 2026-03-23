@@ -12,7 +12,7 @@ source:
             page_size: 1000
             id_batch_size: 20
             strategy: offset
-            max_url_length: 1000
+            max_url_length: 2000
         api_version: null
     circuit_breaker:
         failure_threshold: 5

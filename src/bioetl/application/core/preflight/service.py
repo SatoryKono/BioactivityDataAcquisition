@@ -23,6 +23,12 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
+# Backward-compatible aliases retained for legacy tests/import paths that still
+# resolve the helper classes via preflight.service.
+_HealthAggregator = HealthAggregator
+_MedallionConfigValidator = MedallionConfigValidator
+
+
 class PreflightService:
     """Validates infrastructure and configuration before pipeline execution."""
 
@@ -253,4 +259,10 @@ class PreflightService:
         )
 
 
-__all__ = ["PreflightService", "HealthAggregator", "MedallionConfigValidator"]
+__all__ = [
+    "HealthAggregator",
+    "MedallionConfigValidator",
+    "PreflightService",
+    "_HealthAggregator",
+    "_MedallionConfigValidator",
+]

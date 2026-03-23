@@ -40,6 +40,7 @@ from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProvide
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CircuitBreakerPort
+    from bioetl.infrastructure.adapters.common import SyncAdapterDependencyContext
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
@@ -90,6 +91,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
         *,
+        dependency_context: SyncAdapterDependencyContext | None = None,
         error_handler: ErrorHandlerPort,
         owns_thread_pool: bool = False,
     ) -> None:
@@ -104,6 +106,9 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
             metrics: MetricsPort instance for metrics collection.
+            dependency_context: Explicit composition-owned dependency bundle for
+                sync adapter runtime collaborators. When provided, its metrics
+                and error handler take precedence over legacy named arguments.
             error_handler: Pre-built error handler injected by the
                 composition root.
             owns_thread_pool: Whether this adapter owns the injected executor and
@@ -111,15 +116,27 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
                 ``False`` so externally managed executors are not closed implicitly.
 
         """
+        metrics_port = (
+            dependency_context.metrics
+            if dependency_context is not None
+            else metrics
+            if metrics is not None
+            else NoOpMetrics()
+        )
+        resolved_error_handler = (
+            dependency_context.error_handler
+            if dependency_context is not None
+            else error_handler
+        )
         self.logger = logger
         self._logger = logger  # Private alias required by HealthCheckMixin
-        self.metrics = metrics if metrics is not None else NoOpMetrics()
+        self.metrics = metrics_port
         self.rate_limiter = rate_limiter
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
         self._owns_thread_pool = owns_thread_pool
         self.strict_error_handling = strict_error_handling
-        self._error_handler = error_handler
+        self._error_handler = resolved_error_handler
 
         # Safety: owned executors are finalized if explicit close is missed.
         self._finalizer = (

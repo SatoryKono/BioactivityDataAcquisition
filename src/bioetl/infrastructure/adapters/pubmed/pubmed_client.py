@@ -20,12 +20,13 @@ from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    DefaultFallbackExecution,
-    FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
-    resolve_fallback_policy,
+    FallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
+from bioetl.infrastructure.adapters.pubmed._client_fallback_policy import (
+    _PubMedFallbackPolicyMixin,
+)
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
 from bioetl.infrastructure.adapters.pubmed._health import PubMedHealthMixin
 from bioetl.infrastructure.adapters.pubmed._search import PubMedSearchMixin
@@ -44,6 +45,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.common.dependency_context import (
+        HttpAdapterDependencyContext,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
@@ -70,19 +74,10 @@ def _create_default_pubmed_title_fallback_handler(
     return PubMedTitleFallbackHandler(logger=logger, search_fn=search_fn)
 
 
-_PUBMED_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
-    supported_filter_field=None,
-    unsupported_filter_event="unsupported_filter_field_for_fallback",
-    unsupported_filter_message="PubMed fallback accepts any field and resolves via PMID/title phases",
-    skip_on_unsupported_filter_field=False,
-    primary_lookup_method="pmid",
-    trim_primary_ids_to_limit=False,
-    fallback_operation="fetch_filtered_with_fallback",
-)
-
-
 @dataclass
 class PubMedAdapter(
+    _PubMedFallbackPolicyMixin,
+    FallbackPolicyMixin,
     NotSupportedMultiFilterMixin,
     PubMedAdapterFilterFetchMixin,
     PubMedFetchMixin,
@@ -105,6 +100,7 @@ class PubMedAdapter(
     api_key: str | None = None
     batch_size: int = 200
     metrics: MetricsPort | None = None
+    dependency_context: HttpAdapterDependencyContext | None = None
     error_handler: ErrorHandlerPort | None = None
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
@@ -125,6 +121,7 @@ class PubMedAdapter(
             http_client=self.http_client,
             logger=self.logger,
             metrics=self.metrics,
+            dependency_context=self.dependency_context,
             error_handler=self.error_handler,
             adapter_metrics=self.adapter_metrics,
             request_collector=self.request_collector,
@@ -140,25 +137,6 @@ class PubMedAdapter(
             )
         )
         self.configure_fallback_policy(None)
-
-    def configure_fallback_policy(self, policy: object | None) -> None:
-        """Configure fallback decorator behavior from provider YAML policy."""
-        enabled, config = resolve_fallback_policy(
-            policy,
-            defaults=_PUBMED_DEFAULT_FALLBACK_CONFIG,
-            default_enabled=True,
-        )
-        strategy = DefaultFallbackExecution(
-            normalize_id_hook=lambda value: value.lower().strip(),
-            extract_record_id_hook=lambda rec: str(rec.get("pmid", "")),
-            fallback_handler_hook=self._fallback_handler if enabled else None,
-        )
-        self._fallback_decorator = ComposableFallbackDecorator(
-            service=self._fallback_fetch_service,
-            strategy=strategy,
-            config=config,
-            logger=self._logger,
-        )
 
     async def fetch_as_models(
         self,
@@ -260,6 +238,7 @@ def _create_pubmed_adapter(
         api_key=api_key,
         batch_size=kwargs.get("batch_size", 200),
         metrics=kwargs.get("metrics"),
+        dependency_context=kwargs.get("dependency_context"),
         error_handler=kwargs.get("error_handler"),
         adapter_metrics=kwargs.get("adapter_metrics"),
         request_collector=kwargs.get("request_collector"),

@@ -153,6 +153,8 @@ class BatchMetricsRecorderService:
             )
 
 
+# Compatibility alias retained for legacy imports; new code should use
+# BatchMetricsRecorderService directly.
 BatchMetricsRecorder = BatchMetricsRecorderService
 
 __all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]

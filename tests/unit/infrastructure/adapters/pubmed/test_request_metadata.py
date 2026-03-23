@@ -6,10 +6,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 pytestmark = pytest.mark.unit
 
@@ -39,8 +37,10 @@ def adapter(mock_http_client: AsyncMock, mock_logger: MagicMock) -> PubMedAdapte
         logger=mock_logger,
         email="test@example.com",
         api_key=None,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "pubmed",
+            logger=mock_logger,
+            include_fallback_service=True,
         ),
     )
 

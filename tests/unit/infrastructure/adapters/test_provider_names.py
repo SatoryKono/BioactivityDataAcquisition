@@ -8,7 +8,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
     create_default_error_handler,
 )
 from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -19,6 +18,7 @@ from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimi
 from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 class TestAdapterProviderNames:
@@ -63,8 +63,10 @@ class TestAdapterProviderNames:
         adapter = UniProtAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
-            fallback_fetch_service=create_default_fallback_service(
-                adapter_metrics=MagicMock()
+            **build_http_adapter_runtime_kwargs(
+                "uniprot",
+                logger=mock_logger,
+                include_fallback_service=True,
             ),
         )
         assert adapter.provider_name == "uniprot"

@@ -11,7 +11,11 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common import (
+    FallbackFetchOrchestratorService,
+    HttpAdapterDependencyContext,
+    SyncAdapterDependencyContext,
+)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -28,10 +32,20 @@ __all__ = [
 class AdapterHelperServices:
     """Container with helper dependencies shared by HTTP adapters."""
 
+    metrics: MetricsPort
     error_handler: ErrorHandlerPort
     adapter_metrics: AdapterMetricsRecorder
     request_collector: APIRequestCollector
     fallback_fetch_service: FallbackFetchOrchestratorService
+
+    def build_dependency_context(self) -> HttpAdapterDependencyContext:
+        """Return explicit constructor context for HTTP adapter runtime deps."""
+        return HttpAdapterDependencyContext(
+            metrics=self.metrics,
+            error_handler=self.error_handler,
+            adapter_metrics=self.adapter_metrics,
+            request_collector=self.request_collector,
+        )
 
     def as_injection_kwargs(self) -> dict[str, object]:
         """Return kwargs payload for adapter constructor injection.
@@ -40,6 +54,7 @@ class AdapterHelperServices:
             Dict of kwargs for injecting adapter helpers into constructor.
         """
         return {
+            "dependency_context": self.build_dependency_context(),
             "error_handler": self.error_handler,
             "adapter_metrics": self.adapter_metrics,
             "request_collector": self.request_collector,
@@ -51,12 +66,22 @@ class AdapterHelperServices:
 class SyncAdapterHelperServices:
     """Container with helper dependencies shared by sync-backed adapters."""
 
+    metrics: MetricsPort
     error_handler: ErrorHandlerPort
     request_collector: APIRequestCollector
+
+    def build_dependency_context(self) -> SyncAdapterDependencyContext:
+        """Return explicit constructor context for sync adapter runtime deps."""
+        return SyncAdapterDependencyContext(
+            metrics=self.metrics,
+            error_handler=self.error_handler,
+            request_collector=self.request_collector,
+        )
 
     def as_injection_kwargs(self) -> dict[str, object]:
         """Return kwargs payload for sync adapter constructor injection."""
         return {
+            "dependency_context": self.build_dependency_context(),
             "error_handler": self.error_handler,
             "request_collector": self.request_collector,
         }
@@ -106,6 +131,7 @@ class AdapterHelpersFactory:
         error_handler = ErrorService(logger=logger, metrics=metrics_port)
         fallback_fetch_service = FallbackFetchOrchestratorService(adapter_metrics)
         return AdapterHelperServices(
+            metrics=metrics_port,
             error_handler=error_handler,
             adapter_metrics=adapter_metrics,
             request_collector=request_collector,
@@ -136,6 +162,7 @@ class AdapterHelpersFactory:
         request_collector = APIRequestCollector()
         error_handler = ErrorService(logger=logger, metrics=metrics_port)
         return SyncAdapterHelperServices(
+            metrics=metrics_port,
             error_handler=error_handler,
             request_collector=request_collector,
         )

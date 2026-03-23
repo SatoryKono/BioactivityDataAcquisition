@@ -7,10 +7,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 @pytest.fixture
@@ -30,16 +28,15 @@ def mock_logger():
 
 
 @pytest.fixture
-def fallback_fetch_service():
-    return create_default_fallback_service(adapter_metrics=MagicMock())
-
-
-@pytest.fixture
-def adapter(mock_http_client, mock_logger, fallback_fetch_service):
+def adapter(mock_http_client, mock_logger):
     return UniProtAdapter(
         http_client=mock_http_client,
         logger=mock_logger,
-        fallback_fetch_service=fallback_fetch_service,
+        **build_http_adapter_runtime_kwargs(
+            "uniprot",
+            logger=mock_logger,
+            include_fallback_service=True,
+        ),
     )
 
 
@@ -377,12 +374,15 @@ def test_build_params_parse_response_and_repr(adapter):
     assert adapter._parse_response(bad_response) == ([], None)
 
     assert "without API key" in repr(adapter)
+    logger = adapter.logger
     with_key = UniProtAdapter(
         http_client=adapter._http_client,
-        logger=adapter.logger,
+        logger=logger,
         api_key="secret",
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "uniprot",
+            logger=logger,
+            include_fallback_service=True,
         ),
     )
     assert "with API key" in repr(with_key)
@@ -392,12 +392,15 @@ def test_handle_fetch_error_paths(adapter):
     adapter._handle_fetch_error("protein", "q", cursor="c1", error=None)
     adapter.logger.error.assert_called()
 
+    logger = MagicMock()
     strict = UniProtAdapter(
         http_client=adapter._http_client,
-        logger=MagicMock(),
+        logger=logger,
         strict_error_handling=True,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "uniprot",
+            logger=logger,
+            include_fallback_service=True,
         ),
     )
     wrapped = RuntimeError("wrapped")

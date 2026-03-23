@@ -8,21 +8,18 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
 
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 # VCR cassette directory
 CASSETTE_DIR = (
@@ -66,14 +63,19 @@ async def http_client():
 @pytest_asyncio.fixture
 async def adapter(http_client: UnifiedHTTPClient):
     """Create OpenAlex adapter for integration tests."""
+    logger = NoOpLogger()
+    metrics = NoOpMetrics()
     return OpenAlexAdapter(
         http_client=http_client,
-        logger=NoOpLogger(),
+        logger=logger,
         mailto="bioetl-test@example.com",
         batch_size=10,
-        metrics=NoOpMetrics(),
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        metrics=metrics,
+        **build_http_adapter_runtime_kwargs(
+            "openalex",
+            logger=logger,
+            metrics=metrics,
+            include_fallback_service=True,
         ),
     )
 

@@ -42,7 +42,9 @@ class TestPostrunMetadataWriteService:
     """Tests for final metadata-write orchestration."""
 
     @pytest.mark.asyncio
-    async def test_write_final_metadata_if_available_skips_without_targets(self) -> None:
+    async def test_write_final_metadata_if_available_skips_without_targets(
+        self,
+    ) -> None:
         """Missing metadata ports should short-circuit the write flow."""
         storage = MagicMock()
         metadata_version_resolver = MagicMock()
@@ -62,7 +64,9 @@ class TestPostrunMetadataWriteService:
         metadata_version_resolver.resolve_delta_version.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_write_final_metadata_if_available_writes_silver_outputs(self) -> None:
+    async def test_write_final_metadata_if_available_writes_silver_outputs(
+        self,
+    ) -> None:
         """Configured metadata ports should execute the built write coroutines."""
         storage = MagicMock()
         storage.get_table_path = MagicMock(return_value="/tmp/test_silver")

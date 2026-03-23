@@ -9,15 +9,13 @@ import pytest
 import respx
 
 from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_fallback_service,
-)
 from bioetl.infrastructure.adapters.crossref.client import CROSSREF_API_BASE
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
 from bioetl.domain.resilience import RetryConfig
+from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
 def _build_retrying_http_client(provider: str) -> UnifiedHTTPClient:
@@ -115,8 +113,10 @@ async def test_pubmed_adapter_retries_rate_limit_response(
         email="bioetl-test@example.com",
         api_key=None,
         batch_size=100,
-        fallback_fetch_service=create_default_fallback_service(
-            adapter_metrics=MagicMock()
+        **build_http_adapter_runtime_kwargs(
+            "pubmed",
+            logger=mock_logger,
+            include_fallback_service=True,
         ),
     )
     call_count = 0

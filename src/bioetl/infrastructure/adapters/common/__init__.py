@@ -16,6 +16,10 @@ from bioetl.infrastructure.adapters.common.composable_fallback import (
     FallbackDecoratorConfig,
     resolve_fallback_policy,
 )
+from bioetl.infrastructure.adapters.common.dependency_context import (
+    HttpAdapterDependencyContext,
+    SyncAdapterDependencyContext,
+)
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     DefaultFallbackExecution,
     FallbackExecutionPort,
@@ -54,7 +58,9 @@ __all__ = [
     "FallbackFetchOrchestratorService",
     "FallbackFetchRequest",
     "FallbackPolicyMixin",
+    "HttpAdapterDependencyContext",
     "SourceMetadataCollectorProtocol",
+    "SyncAdapterDependencyContext",
     "clear_source_metadata_collector",
     "consume_source_metadata",
     "get_request_count",

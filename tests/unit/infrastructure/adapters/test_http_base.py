@@ -13,6 +13,7 @@ import pytest
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.common import HttpAdapterDependencyContext
 
 
 class StubHttpAdapter(BaseHttpAdapter):
@@ -25,6 +26,7 @@ class StubHttpAdapter(BaseHttpAdapter):
         http_client: Any,
         logger: Any,
         metrics: Any = None,
+        dependency_context: HttpAdapterDependencyContext | None = None,
         fail_probe: bool = False,
         probe_error: Exception | None = None,
         health_endpoint: str = "/health",
@@ -33,6 +35,7 @@ class StubHttpAdapter(BaseHttpAdapter):
             http_client=http_client,
             logger=logger,
             metrics=metrics,
+            dependency_context=dependency_context,
         )
         self._fail_probe = fail_probe
         self._probe_error = probe_error or Exception("Probe failed")
@@ -146,6 +149,45 @@ class TestHealthCheckLogging:
             provider="test_provider",
         )
         collector_factory.assert_called_once_with()
+
+    def test_init_uses_dependency_context_without_default_factories(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        """Dependency context should bypass inline helper construction."""
+        dependency_context = HttpAdapterDependencyContext(
+            metrics=mock_metrics,
+            error_handler=MagicMock(name="error_handler"),
+            adapter_metrics=MagicMock(name="adapter_metrics"),
+            request_collector=MagicMock(name="request_collector"),
+        )
+
+        with (
+            patch(
+                "bioetl.infrastructure.adapters.base.create_default_error_handler",
+            ) as error_factory,
+            patch(
+                "bioetl.infrastructure.adapters.base.create_default_adapter_metrics",
+            ) as metrics_factory,
+            patch(
+                "bioetl.infrastructure.adapters.base.create_default_request_collector",
+            ) as collector_factory,
+        ):
+            adapter = StubHttpAdapter(
+                http_client=mock_http_client,
+                logger=mock_logger,
+                dependency_context=dependency_context,
+            )
+
+        assert adapter.metrics is mock_metrics
+        assert adapter._error_handler is dependency_context.error_handler
+        assert adapter._adapter_metrics is dependency_context.adapter_metrics
+        assert adapter._request_collector is dependency_context.request_collector
+        error_factory.assert_not_called()
+        metrics_factory.assert_not_called()
+        collector_factory.assert_not_called()
 
     async def test_health_check_logs_warning_on_exception(
         self,

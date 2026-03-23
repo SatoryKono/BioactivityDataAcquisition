@@ -39,7 +39,8 @@ __all__ = [
     "get_default_provider_registry",
 ]
 
-# Backward-compatible alias kept during the RF-008 terminology cleanup.
+# Compatibility alias retained during the RF-008 terminology cleanup. New code
+# should use DataSourceCreatorProtocol directly.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
 
