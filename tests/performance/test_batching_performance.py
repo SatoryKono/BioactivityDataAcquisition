@@ -28,7 +28,7 @@ import pytest
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 

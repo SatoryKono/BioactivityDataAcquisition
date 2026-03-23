@@ -16,6 +16,9 @@ from bioetl.application.core.postrun.dq_report_orchestrator import (
 from bioetl.application.core.postrun.metadata_version_resolver import (
     PostrunMetadataVersionResolver,
 )
+from bioetl.application.core.postrun.metadata_write_service import (
+    PostrunMetadataWriteService,
+)
 from bioetl.application.core.postrun.service import (
     PostrunDependencyContext,
     PostrunService,
@@ -24,7 +27,9 @@ from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.services.common_service_wiring import resolve_tracer
+from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.ports import MetadataCoordinatorPort, MetadataWriterPort
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
@@ -58,14 +63,23 @@ def build_postrun_dependency_context(
     *,
     config: PipelineConfig,
     runtime: RuntimeConfig,
+    context: PipelineContext,
     storage: StorageMaintenancePort,
     logger_port: LoggerPort,
     dq_report_service: DQReportService | None = None,
     bronze_dq_config: BronzeDQConfigPort | None = None,
     silver_dq_config: SilverDQConfigPort | None = None,
     gold_dq_config: GoldDQConfigPort | None = None,
+    metadata_coordinator: MetadataCoordinatorPort | None = None,
+    metadata_writer: MetadataWriterPort | None = None,
 ) -> PostrunDependencyContext:
     """Build the shared postrun collaborator graph for production and tests."""
+    metadata_version_resolver = PostrunMetadataVersionResolver(
+        logger=logger_port,
+        runtime=runtime,
+        storage=storage,
+        warning_allowlist=_METADATA_VERSION_ALLOWLIST,
+    )
     return PostrunDependencyContext(
         cleanup_orchestrator=PostrunCleanupService(
             logger=logger_port,
@@ -80,11 +94,14 @@ def build_postrun_dependency_context(
             gold_dq_config=gold_dq_config,
             warning_allowlist=_POSTRUN_WARNING_ALLOWLIST,
         ),
-        metadata_version_resolver=PostrunMetadataVersionResolver(
-            logger=logger_port,
+        metadata_write_orchestrator=PostrunMetadataWriteService(
+            config=config,
             runtime=runtime,
+            context=context,
             storage=storage,
-            warning_allowlist=_METADATA_VERSION_ALLOWLIST,
+            metadata_coordinator=metadata_coordinator,
+            metadata_writer=metadata_writer,
+            metadata_version_resolver=metadata_version_resolver,
         ),
         compact_orchestrator=PostrunCompactService(
             config=config,
@@ -116,12 +133,15 @@ def build_postrun_service(
     dependencies = build_postrun_dependency_context(
         config=pipeline.config,
         runtime=pipeline.runtime,
+        context=pipeline.context,
         storage=pipeline.services.storage,
         logger_port=logger_port,
         dq_report_service=pipeline.services.dq_report_service,
         bronze_dq_config=dq_configs.bronze,
         silver_dq_config=dq_configs.silver,
         gold_dq_config=dq_configs.gold,
+        metadata_coordinator=pipeline.services.metadata_coordinator,
+        metadata_writer=pipeline.services.metadata_writer,
     )
     return PostrunService(
         config=pipeline.config,
@@ -134,6 +154,4 @@ def build_postrun_service(
         storage=pipeline.services.storage,
         metrics=pipeline.services.metrics,
         logger=logger_port,
-        metadata_coordinator=pipeline.services.metadata_coordinator,
-        metadata_writer=pipeline.services.metadata_writer,
     )

@@ -24,7 +24,7 @@ from bioetl.application.services.medallion_lifecycle import (
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
 
@@ -130,6 +130,7 @@ def mock_executor():
     executor.records_silver = 95
     executor.records_gold = 90
     executor.records_quarantined = 5
+    executor.get_dq_context = MagicMock(return_value=None)
     return executor
 
 
@@ -170,13 +171,33 @@ def mock_preflight_service():
 @pytest.fixture
 def mock_postrun_service():
     """Create a mock PostrunService (injected via DI)."""
+    from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
     from bioetl.application.core.postrun.service import (
         DQEvaluationStatus,
         DQResult,
+        PostrunResult,
         VacuumResult,
     )
 
     service = MagicMock(spec=PostrunService)
+    service.run = AsyncMock(
+        return_value=PostrunResult(
+            dq=DQResult(
+                error_rate=0.0,
+                status=DQEvaluationStatus.PASSED,
+                anomalies=(),
+                has_critical=False,
+                check_duration_ms=0.0,
+            ),
+            dq_reports=None,
+            vacuum=VacuumResult(
+                silver_files_removed=0,
+                gold_files_removed=0,
+                skipped=True,
+            ),
+            compaction=CompactionResult(status="skipped"),
+        )
+    )
     service.run_dq_checks = MagicMock(
         return_value=DQResult(
             error_rate=0.0,
@@ -630,6 +651,133 @@ class TestPipelineRunnerRun:
         mock_executor.execute.assert_called_once()
         call_kwargs = mock_executor.execute.call_args.kwargs
         assert call_kwargs["limit"] == 500
+
+    @pytest.mark.asyncio
+    async def test_run_uses_manual_start_offset_without_checkpoint_load(
+        self,
+        pipeline_config,
+        mock_services,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_preflight_service,
+        mock_postrun_service,
+        mock_lifecycle_service,
+        mock_observer,
+    ):
+        """Manual start_offset should bypass checkpoint loading and drive execute()."""
+        runtime_with_offset = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            limit=None,
+            start_offset=250,
+        )
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_with_offset,
+            services=mock_services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lock_manager=mock_lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_service=mock_lifecycle_service,
+            observer=mock_observer,
+            tracer=_NOOP_TRACER,
+        )
+
+        await runner.run()
+
+        mock_checkpoint_manager.load_checkpoint.assert_not_called()
+        mock_executor.execute.assert_called_once_with(
+            limit=None,
+            query=None,
+            offset=250,
+        )
+
+    @pytest.mark.asyncio
+    async def test_run_passes_executor_dq_context_to_postrun(
+        self,
+        runner,
+        mock_executor,
+        mock_postrun_service,
+    ):
+        """Runner should forward the executor's DQ context into postrun."""
+        dq_context = MagicMock(name="dq_context")
+        mock_executor.get_dq_context = MagicMock(return_value=dq_context)
+
+        await runner.run()
+
+        mock_postrun_service.run.assert_called_once_with(
+            executor=mock_executor,
+            dq_context=dq_context,
+        )
+
+    @pytest.mark.asyncio
+    async def test_resolve_execution_offset_prefers_manual_start_offset(
+        self,
+        pipeline_config,
+        mock_services,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_preflight_service,
+        mock_postrun_service,
+        mock_lifecycle_service,
+        mock_observer,
+    ):
+        """Manual offset is the highest-priority source for execution start."""
+        runtime_with_offset = RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            limit=None,
+            start_offset=75,
+        )
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_with_offset,
+            services=mock_services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lock_manager=mock_lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_service=mock_lifecycle_service,
+            observer=mock_observer,
+            tracer=_NOOP_TRACER,
+        )
+
+        offset = await runner._resolve_execution_offset()
+
+        assert offset == 75
+        mock_checkpoint_manager.load_checkpoint.assert_not_called()
+        mock_logger.info.assert_called_with("Using manual start offset", offset=75)
+
+    @pytest.mark.asyncio
+    async def test_resolve_execution_offset_uses_checkpoint_when_present(
+        self,
+        runner,
+        mock_checkpoint_manager,
+    ):
+        """Checkpoint metadata should drive resume offset when no override exists."""
+        mock_checkpoint_manager.load_checkpoint.return_value = {
+            "records_processed": 125,
+        }
+
+        offset = await runner._resolve_execution_offset()
+
+        assert offset == 125
+        mock_checkpoint_manager.load_checkpoint.assert_called_once()
 
 
 @pytest.mark.unit

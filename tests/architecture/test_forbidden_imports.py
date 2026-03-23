@@ -9,7 +9,8 @@ in appropriate layers:
 
 REQ-ARCH-APP-001: External orchestration frameworks must not be used in application layer.
 REQ-ARCH-OBS-001: Observability initialization only in composition root.
-REQ-ARCH-027: Ports must be imported from facade only.
+REQ-ARCH-027: Port protocols must be imported from the facade, with the
+sanctioned ``bioetl.domain.ports.noop`` sub-facade for operational null objects.
 RF-043: legacy_normalizers path is permanently forbidden.
 
 See CLAUDE.md §2.1 Matrix of Imports and §11 Anti-Patterns.
@@ -29,11 +30,15 @@ def _discover_internal_port_modules(src_dir: Path) -> list[str]:
     ports_dir = src_dir / "bioetl" / "domain" / "ports"
     if not ports_dir.exists():
         return []
+    sanctioned_public_modules = {"bioetl.domain.ports.noop"}
     return sorted(
         "bioetl.domain.ports."
         + ".".join(py_file.relative_to(ports_dir).with_suffix("").parts)
         for py_file in ports_dir.rglob("*.py")
         if py_file.stem != "__init__"
+        and "bioetl.domain.ports."
+        + ".".join(py_file.relative_to(ports_dir).with_suffix("").parts)
+        not in sanctioned_public_modules
     )
 
 
@@ -185,11 +190,11 @@ class TestPortImportFacade:
     """Tests ensuring ports are imported from the facade module."""
 
     def test_ports_imported_only_from_facade(self, src_dir: Path) -> None:
-        """All layers MUST import ports from facade, not internal modules.
+        """All layers MUST import contracts from sanctioned facades only.
 
-        REQ-ARCH-027: Ports are accessible only via bioetl.domain.ports,
-        not via bioetl.domain.ports.storage etc.
-        This provides a single entry point and simplifies navigation.
+        REQ-ARCH-027: Port protocols are accessible via ``bioetl.domain.ports``.
+        Operational null objects are accessible via ``bioetl.domain.ports.noop``.
+        Deeper internal modules remain forbidden to preserve clear public entry points.
         """
         # Discover internal port modules dynamically to avoid stale allowlists.
         # All modules under domain/ports (except __init__.py facade) are internal.
@@ -213,8 +218,9 @@ class TestPortImportFacade:
                         violations.append(f"{relative_path}: imports from {module}")
 
         assert not violations, (
-            "Ports must be imported only from facade bioetl.domain.ports.\n"
+            "Ports must be imported only from sanctioned facades.\n"
             "Correct: from bioetl.domain.ports import StoragePort\n"
+            "Correct: from bioetl.domain.ports.noop import NoOpMetrics\n"
             "Wrong: from bioetl.domain.ports.storage import StoragePort\n\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )

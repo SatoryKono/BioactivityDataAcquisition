@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.core.postrun._failure_policy import (
+    PostrunFailurePolicySpec,
+    apply_postrun_failure_policy,
+    is_strict_validation_enabled,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.ports import LoggerPort, StorageMaintenancePort
@@ -16,6 +22,14 @@ class PostrunMetadataVersionResolver:
     implementation, keeping the application layer free of infrastructure
     dependencies (ARCH-001).
     """
+
+    _FAILURE_POLICY = PostrunFailurePolicySpec(
+        event="delta_version_resolution_failed",
+        strict_reason="delta_version_resolution_failed_strict_mode",
+        strict_reason_code="POSTRUN_DELTA_VERSION_RESOLUTION_FAILED_STRICT",
+        warning_reason="delta_version_resolution_failed_warning_mode",
+        warning_reason_code="POSTRUN_DELTA_VERSION_RESOLUTION_FAILED_WARNING",
+    )
 
     def __init__(
         self,
@@ -46,33 +60,23 @@ class PostrunMetadataVersionResolver:
         try:
             return self._storage.get_table_version(table_path, layer=layer)
         except self._warning_allowlist as error:
-            if self._is_strict_validation_enabled():
-                self._logger.error(
-                    "delta_version_resolution_failed",
-                    layer=layer,
-                    table_path=table_path,
-                    error_type=type(error).__name__,
-                    error=str(error),
-                    reason="delta_version_resolution_failed_strict_mode",
-                    reason_code="POSTRUN_DELTA_VERSION_RESOLUTION_FAILED_STRICT",
-                    strict_mode=True,
-                )
-                raise
-            self._logger.warning(
-                "delta_version_resolution_failed",
-                layer=layer,
-                table_path=table_path,
-                error_type=type(error).__name__,
-                error=str(error),
-                reason="delta_version_resolution_failed_warning_mode",
-                reason_code="POSTRUN_DELTA_VERSION_RESOLUTION_FAILED_WARNING",
-                strict_mode=False,
+            should_raise = apply_postrun_failure_policy(
+                logger=self._logger,
+                runtime=self._runtime,
+                error=error,
+                spec=self._FAILURE_POLICY,
+                extra={
+                    "layer": layer,
+                    "table_path": table_path,
+                },
             )
+            if should_raise:
+                raise
             return None
 
     def _is_strict_validation_enabled(self) -> bool:
-        value = getattr(self._runtime, "strict_validation", False)
-        return bool(value) if isinstance(value, bool) else False
+        """Compatibility wrapper around shared strict-mode evaluation."""
+        return is_strict_validation_enabled(self._runtime)
 
 
 __all__ = ["PostrunMetadataVersionResolver"]

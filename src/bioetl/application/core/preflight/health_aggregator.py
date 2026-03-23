@@ -27,7 +27,7 @@ _HEALTH_CHECK_ERRORS = (
 )
 
 
-class _HealthAggregator:
+class HealthAggregator:
     """Aggregates health checks for critical infrastructure components."""
 
     METRIC_HEALTH_STATUS = "health_check_status"
@@ -301,3 +301,9 @@ class _HealthAggregator:
             f"Health check failed for: {', '.join(failed_components)}. "
             f"Details: {'; '.join(error_messages)}"
         )
+
+
+# Backward-compatible alias kept for transitional imports.
+_HealthAggregator = HealthAggregator
+
+__all__ = ["HealthAggregator", "_HealthAggregator"]

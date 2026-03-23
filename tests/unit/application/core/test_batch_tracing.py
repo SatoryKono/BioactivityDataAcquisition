@@ -9,7 +9,7 @@ from uuid import UUID
 import pytest
 
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
-from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import BatchID
 
 

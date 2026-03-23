@@ -21,7 +21,7 @@ from bioetl.application.pipelines.chembl import (
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.types import RunID, RunType
-from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetrics
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 

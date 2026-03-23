@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 
-from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,
     HISTOGRAMS,

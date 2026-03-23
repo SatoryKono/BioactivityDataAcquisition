@@ -5,7 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpTracing, TracingPort
+from bioetl.domain.ports import TracingPort
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.infrastructure.observability import OpenTelemetryTracer
 
 if TYPE_CHECKING:

@@ -17,7 +17,10 @@ from bioetl.composition.factories.pipeline.run_context_factory import (
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
-from bioetl.infrastructure.config.domain_config_resolver import DomainConfigResolver
+from bioetl.infrastructure.config.domain_config_resolver import (
+    DomainConfigResolver,
+    resolve_domain_pipeline_config,
+)
 
 # Architecture marker: the construction path ultimately instantiates
 # ``transformer_class(...)`` inside ``TransformerBuilder.build``.
@@ -29,4 +32,5 @@ __all__ = [
     "EntityTypeExtractor",
     "RunContextFactory",
     "TransformerBuilder",
+    "resolve_domain_pipeline_config",
 ]

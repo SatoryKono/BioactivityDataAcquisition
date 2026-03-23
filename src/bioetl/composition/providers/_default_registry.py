@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from bioetl.composition.providers._registry_protocols import (
         ProviderRegistrarProtocol,
     )
+    from bioetl.composition.providers.provider_registry import ProviderRegistry
 
 R = TypeVar("R")
 
@@ -46,6 +47,8 @@ class _SupportsProviderRegistryStore(_SupportsDefaultRegistry, Protocol):
 
 RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)
 ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistryStore)
+
+_default_provider_registry: ProviderRegistry | None = None
 
 
 class DefaultRegistryMethod(Generic[R]):
@@ -105,8 +108,14 @@ class ProvidersDescriptor(Generic[ProviderRegistryT]):
 
 def get_default_provider_registrar() -> ProviderRegistrarProtocol:
     """Return the sanctioned default-registry seam for provider registration."""
-    from bioetl.composition.providers.provider_registry import (
-        get_default_provider_registry,
-    )
-
     return get_default_provider_registry()
+
+
+def get_default_provider_registry() -> ProviderRegistry:
+    """Return the lazily-created default provider registry singleton."""
+    global _default_provider_registry
+    if _default_provider_registry is None:
+        from bioetl.composition.providers.provider_registry import ProviderRegistry
+
+        _default_provider_registry = ProviderRegistry()
+    return _default_provider_registry

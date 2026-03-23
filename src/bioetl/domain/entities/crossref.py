@@ -207,12 +207,9 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Override: Default source for CrossRef
     _source: str = "crossref"
 
-    def __post_init__(self) -> None:
-        """Post-initialization validation.
-
-        Validates that DOI is provided (required for CrossRef publications).
-        """
-        super().__post_init__()
+    def _validate_invariants(self) -> None:
+        """Validate CrossRef-specific publication invariants."""
+        super()._validate_invariants()
         if not self.doi:
             raise ValueError("CrossRef Publication DOI is required")
 

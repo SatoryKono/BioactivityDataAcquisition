@@ -49,7 +49,7 @@ class CommonServicePorts:
 def resolve_tracer(tracer: TracingPort | None) -> TracingPort:
     """Return the provided tracer or a NoOpTracing fallback."""
     if tracer is None:
-        from bioetl.domain.ports import NoOpTracing
+        from bioetl.domain.ports.noop import NoOpTracing
 
         return NoOpTracing()
     return tracer

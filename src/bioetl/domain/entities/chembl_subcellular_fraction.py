@@ -45,15 +45,19 @@ class SubcellularFraction(BaseEntity):
     # === Example Source Reference ===
     example_assay_id: str | None = None  # One assay using this fraction
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if not self.subcellular_fraction:
             raise ValueError("Subcellular fraction name is required")
+        self._validate_fraction_name()
+        self._validate_assay_count()
+
+    def _validate_fraction_name(self) -> None:
+        """Validate normalized fraction name content."""
         if not self.subcellular_fraction.strip():
             raise ValueError("Subcellular fraction cannot be empty or whitespace")
+
+    def _validate_assay_count(self) -> None:
+        """Validate aggregated assay count when it is available."""
         if self.assay_count is not None and self.assay_count < 0:
             raise ValueError(
                 f"assay_count must be non-negative, got {self.assay_count}"

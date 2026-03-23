@@ -7,7 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.domain.ports import MetricsPort, NoOpMetrics
+from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger

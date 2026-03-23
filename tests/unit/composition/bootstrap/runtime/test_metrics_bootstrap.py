@@ -15,7 +15,8 @@ from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
     bootstrap_metrics_port,
     maybe_start_metrics_server,
 )
-from bioetl.domain.ports import MetricsPort, NoOpMetrics
+from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports.noop import NoOpMetrics
 
 
 def _make_settings(

@@ -67,7 +67,7 @@ class PublicationEntityBase(BaseEntity):
     Note:
         - _source field is set by transformer via entity_to_silver_record() mapping
         - Subclasses MUST define their own primary identifier field (doi, openalex_id, paper_id, pmid)
-        - Subclasses MUST override __post_init__ to validate the primary key
+        - Subclasses MUST override _validate_invariants() to validate the primary key
     """
 
     # Identifiers (all nullable - subclasses define their required primary key)
@@ -128,14 +128,9 @@ class PublicationEntityBase(BaseEntity):
     # Data source identifier (system metadata field)
     _source: str = ""
 
-    def __post_init__(self) -> None:
-        """Validate base entity constraints.
-
-        Subclasses MUST call super().__post_init__() and then validate
-        their own primary key field.
-        """
-        super().__post_init__()
-        # Base class does not enforce primary key - subclasses do
+    def _validate_invariants(self) -> None:
+        """Publication entities share the BaseEntity invariant hook chain."""
+        super()._validate_invariants()
 
 
 __all__ = ["PublicationEntityBase"]

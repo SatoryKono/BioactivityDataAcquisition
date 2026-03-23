@@ -24,12 +24,17 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
-import httpx
-
-from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
+from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
-from bioetl.infrastructure.observability.circuit_breaker_mapping import (
-    CIRCUIT_BREAKER_STATE_VALUES,
+from bioetl.infrastructure.adapters.http._circuit_breaker_support import (
+    CALL_OPERATION_ERRORS,
+    decide_attempt_state,
+    emit_counter_metric,
+    emit_state_metric,
+    is_circuit_breaker_error,
+    record_failure,
+    record_success,
+    time_until_retry,
 )
 
 if TYPE_CHECKING:
@@ -40,15 +45,8 @@ if TYPE_CHECKING:
 P = ParamSpec("P")
 T = TypeVar("T")
 
-# Metric names as constants for consistency
 METRIC_CIRCUIT_BREAKER_STATE = "circuit_breaker_state"
 METRIC_CIRCUIT_BREAKER_TRIPS = "circuit_breaker_trips_total"
-CALL_OPERATION_ERRORS: tuple[type[Exception], ...] = (
-    BioETLError,
-    httpx.HTTPError,
-    OSError,
-    RuntimeError,
-)
 
 
 @dataclass
@@ -89,121 +87,24 @@ class CircuitBreakerGuard:
 
     def __post_init__(self) -> None:
         """Emit initial state metric after initialization."""
-        self._emit_state_metric()
+        emit_state_metric(
+            self.metrics,
+            provider=self.provider,
+            state=self._state,
+            metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+        )
 
     def get_state(self) -> CircuitBreakerState:
-        """Get current circuit breaker state.
-
-        Returns:
-            Current CircuitBreakerState enum value (CLOSED, OPEN, or HALF_OPEN).
-        """
+        """Return current circuit breaker state."""
         return self._state
 
     def get_failure_count(self) -> int:
-        """Get current failure count.
-
-        Returns:
-            Number of consecutive failures recorded since last successful request.
-        """
+        """Return current consecutive failure count."""
         return self._failure_count
 
     def get_trips_total(self) -> int:
-        """Get total number of times circuit has opened.
-
-        Returns:
-            Cumulative count of CLOSED-to-OPEN state transitions since initialization.
-        """
+        """Return cumulative OPEN transitions since initialization."""
         return self._trips_total
-
-    def _emit_state_metric(self) -> None:
-        """Emit current state as a gauge metric."""
-        if self.metrics is not None:
-            self.metrics.set_gauge(
-                METRIC_CIRCUIT_BREAKER_STATE,
-                CIRCUIT_BREAKER_STATE_VALUES[self._state],
-                {"adapter": self.provider},
-            )
-
-    def _emit_trip_metric(self) -> None:
-        """Emit circuit trip counter metric."""
-        if self.metrics is not None:
-            self.metrics.increment_counter(
-                METRIC_CIRCUIT_BREAKER_TRIPS,
-                1,
-                {"adapter": self.provider},
-            )
-
-    def _should_attempt(self) -> bool:
-        """Check if request should be attempted based on state.
-
-        Returns:
-            True if the circuit allows a request attempt, False if the circuit is open.
-        """
-        if self._state == CircuitBreakerState.CLOSED:
-            return True
-
-        if self._state == CircuitBreakerState.OPEN:
-            # Check if recovery timeout has passed
-            elapsed = time.monotonic() - self._last_failure_time
-            if elapsed >= self.recovery_timeout:
-                self._state = CircuitBreakerState.HALF_OPEN
-                self._emit_state_metric()
-                return True
-            return False
-
-        # HALF_OPEN: allow single probe request
-        return True
-
-    def _on_success(self) -> None:
-        """Handle successful request."""
-        self._failure_count = 0
-        if self.metrics is not None:
-            self.metrics.increment_counter(
-                "circuit_breaker_success_total",
-                1,
-                {"adapter": self.provider},
-            )
-        if self._state == CircuitBreakerState.HALF_OPEN:
-            self._state = CircuitBreakerState.CLOSED
-            self._emit_state_metric()
-
-    def _on_failure(self) -> None:
-        """Handle failed request."""
-        self._failure_count += 1
-        self._last_failure_time = time.monotonic()
-        if self.metrics is not None:
-            self.metrics.increment_counter(
-                "circuit_breaker_failure_total",
-                1,
-                {"adapter": self.provider},
-            )
-
-        if self._state == CircuitBreakerState.HALF_OPEN:
-            # Failed probe request, go back to OPEN
-            self._state = CircuitBreakerState.OPEN
-            self._trips_total += 1
-            self._emit_state_metric()
-            self._emit_trip_metric()
-        elif (
-            self._state == CircuitBreakerState.CLOSED
-            and self._failure_count >= self.failure_threshold
-        ):
-            # Threshold reached, open circuit
-            self._state = CircuitBreakerState.OPEN
-            self._trips_total += 1
-            self._emit_state_metric()
-            self._emit_trip_metric()
-
-    def _time_until_retry(self) -> float:
-        """Calculate time until next retry is allowed.
-
-        Returns:
-            Seconds until retry is permitted, or 0.0 if the circuit is not open.
-        """
-        if self._state != CircuitBreakerState.OPEN:
-            return 0.0
-        elapsed = time.monotonic() - self._last_failure_time
-        return max(0.0, self.recovery_timeout - elapsed)
 
     async def call(
         self,
@@ -232,19 +133,52 @@ class CircuitBreakerGuard:
 
         """
         async with self._lock:
-            if not self._should_attempt():
-                retry_after = self._time_until_retry()
-                raise CircuitBreakerOpenError(self.provider, retry_after)
+            now = time.monotonic()
+            should_attempt, self._state = decide_attempt_state(
+                state=self._state,
+                last_failure_time=self._last_failure_time,
+                recovery_timeout=self.recovery_timeout,
+                now=now,
+                metrics=self.metrics,
+                provider=self.provider,
+                state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+            )
+            if not should_attempt:
+                raise CircuitBreakerOpenError(
+                    self.provider,
+                    time_until_retry(
+                        state=self._state,
+                        last_failure_time=self._last_failure_time,
+                        recovery_timeout=self.recovery_timeout,
+                        now=now,
+                    ),
+                )
 
         try:
             result = await func(*args, **kwargs)
         except CALL_OPERATION_ERRORS:
             async with self._lock:
-                self._on_failure()
+                self._last_failure_time = time.monotonic()
+                self._state, self._failure_count, trips_delta = record_failure(
+                    state=self._state,
+                    failure_count=self._failure_count,
+                    failure_threshold=self.failure_threshold,
+                    metrics=self.metrics,
+                    provider=self.provider,
+                    state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+                    trip_metric_name=METRIC_CIRCUIT_BREAKER_TRIPS,
+                )
+                self._trips_total += trips_delta
             raise
         else:
             async with self._lock:
-                self._on_success()
+                self._failure_count = 0
+                self._state = record_success(
+                    state=self._state,
+                    metrics=self.metrics,
+                    provider=self.provider,
+                    state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+                )
             return result
 
     def reset(self) -> None:
@@ -252,38 +186,26 @@ class CircuitBreakerGuard:
         self._state = CircuitBreakerState.CLOSED
         self._failure_count = 0
         self._last_failure_time = 0.0
-        self._emit_state_metric()
+        emit_state_metric(
+            self.metrics,
+            provider=self.provider,
+            state=self._state,
+            metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+        )
 
     def force_open(self) -> None:
         """Manually force circuit breaker to OPEN state."""
         self._state = CircuitBreakerState.OPEN
         self._last_failure_time = time.monotonic()
         self._trips_total += 1
-        self._emit_state_metric()
-        self._emit_trip_metric()
-
-
-def is_circuit_breaker_error(exc: Exception) -> bool:
-    """Check if exception should trigger circuit breaker.
-
-    Only connection/timeout/read errors should trigger circuit breaker,
-    not business logic errors (4xx responses except 429).
-
-    Args:
-        exc: Exc.
-
-    Returns:
-        True if the condition is met, False otherwise.
-    """
-    if isinstance(
-        exc,
-        httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout | httpx.ReadError,
-    ):
-        return True
-
-    if isinstance(exc, httpx.HTTPStatusError):
-        # Only 5xx and 429 (rate limit) trigger circuit breaker
-        status_code: int = exc.response.status_code
-        return status_code >= 500 or status_code == 429
-
-    return False
+        emit_state_metric(
+            self.metrics,
+            provider=self.provider,
+            state=self._state,
+            metric_name=METRIC_CIRCUIT_BREAKER_STATE,
+        )
+        emit_counter_metric(
+            self.metrics,
+            provider=self.provider,
+            metric_name=METRIC_CIRCUIT_BREAKER_TRIPS,
+        )

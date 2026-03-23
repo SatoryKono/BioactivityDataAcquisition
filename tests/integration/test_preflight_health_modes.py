@@ -8,9 +8,9 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
+from bioetl.application.core.preflight.health_aggregator import HealthAggregator
 from bioetl.application.core.preflight.medallion_validator import (
-    _MedallionConfigValidator,
+    MedallionConfigValidator,
 )
 from bioetl.application.core.preflight.service import PreflightService
 from bioetl.domain.config import PipelineConfig, TableConfig
@@ -65,13 +65,13 @@ def _build_preflight_service(
         run_type=RunType.INCREMENTAL,
         logger=logger,
     )
-    health_aggregator = _HealthAggregator(
+    health_aggregator = HealthAggregator(
         metrics=metrics,
         logger=logger,
         pipeline_name=pipeline_name,
         health_check_mode=health_check_mode,
     )
-    medallion_validator = _MedallionConfigValidator(
+    medallion_validator = MedallionConfigValidator(
         config=config,
         logger=logger,
         write_mode_policy=WriteModePolicy(),

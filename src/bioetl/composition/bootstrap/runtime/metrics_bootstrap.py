@@ -5,7 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import MetricsPort, NoOpMetrics
+from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.observability import PrometheusMetrics, start_metrics_server
 
 if TYPE_CHECKING:

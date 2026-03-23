@@ -7,6 +7,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
+from bioetl.application.core.postrun.metadata_write_service import (
+    PostrunMetadataWriteService,
+)
 from bioetl.application.core.postrun.service import (
     PostrunResult,
     VacuumResult,
@@ -211,11 +214,10 @@ class TestPostrunServiceInit:
         assert service._context == mock_context
         assert service._dq_service == mock_dq_service
         assert service._lifecycle_service == mock_lifecycle_service
-        assert service._storage == mock_storage
         assert service._metrics == mock_metrics
-        assert service._logger == mock_logger
-        assert service._metadata_coordinator == mock_metadata_coordinator
-        assert service._metadata_writer == mock_metadata_writer
+        assert isinstance(
+            service._metadata_write_orchestrator, PostrunMetadataWriteService
+        )
 
 
 @pytest.mark.unit
@@ -484,10 +486,33 @@ class TestPostrunServiceMetadata:
         executor = MagicMock()
         executor.get_run_statistics = MagicMock(return_value={})
 
-        await service._write_final_metadata(executor, dq_reports=None)
+        await service._metadata_write_orchestrator.write_final_metadata_if_available(
+            executor,
+            dq_reports=None,
+        )
 
         mock_metadata_writer.write_silver_metadata.assert_awaited_once()
         mock_metadata_writer.write_gold_metadata.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_run_final_metadata_phase_delegates_to_metadata_write_service(
+        self,
+        postrun_service,
+        mock_executor,
+    ) -> None:
+        """Final metadata phase should delegate to the dedicated metadata service."""
+        postrun_service._metadata_write_orchestrator.write_final_metadata_if_available = (
+            AsyncMock()
+        )
+
+        await postrun_service._run_final_metadata_phase(mock_executor, dq_reports=None)
+
+        (
+            postrun_service._metadata_write_orchestrator.write_final_metadata_if_available.assert_awaited_once_with(
+                mock_executor,
+                None,
+            )
+        )
 
     def test_collect_batch_metrics_handles_zero_records(self, postrun_service):
         """Test batch metrics collection with zero records."""

@@ -223,6 +223,19 @@ class PipelineRunner:
         - Flushes tracer spans before shutdown
         - Handles tracer close errors without failing the pipeline
         """
+        self._log_start()
+
+        try:
+            with self._pipeline_span(), self._observer:
+                async with self._services, self._lock_manager:
+                    await self._run_managed_pipeline()
+
+                self._log_completion()
+        finally:
+            await self._postrun_service.cleanup(self._tracer)
+
+    def _log_start(self) -> None:
+        """Emit the pipeline start event."""
         self._logger.info(
             PipelineEvent.START,
             pipeline=self._config.pipeline_name,
@@ -230,59 +243,62 @@ class PipelineRunner:
             run_type=self._runtime.run_type.value,
         )
 
-        try:
-            with self._pipeline_span(), self._observer:
-                async with self._services, self._lock_manager:
-                    # Pre-flight: validate infrastructure
-                    await self._preflight_service.validate_infrastructure(
-                        self._services
-                    )
+    def _log_completion(self) -> None:
+        """Emit the pipeline completion event."""
+        self._logger.debug(
+            PipelineEvent.COMPLETE,
+            records_fetched=self._executor.records_fetched,
+        )
 
-                    # Lifecycle: prepare (clear based on run type policy)
-                    await self._lifecycle_service.prepare_for_run(
-                        config=self._config,
-                        runtime=self._runtime,
-                    )
+    async def _run_managed_pipeline(self) -> None:
+        """Run the validated pipeline lifecycle within managed contexts."""
+        await self._validate_infrastructure()
+        await self._prepare_medallion_layers()
+        await self._run_execution_cycle()
 
-                    # Execute pipeline (with manual offset or checkpoint-based resume)
-                    offset: int | None
-                    if self._runtime.start_offset is not None:
-                        offset = self._runtime.start_offset
-                        self._logger.info(
-                            "Using manual start offset",
-                            offset=offset,
-                        )
-                    else:
-                        checkpoint_meta = (
-                            await self._checkpoint_manager.load_checkpoint()
-                        )
-                        raw_offset: int | None = (
-                            checkpoint_meta.get("records_processed")
-                            if checkpoint_meta
-                            else None
-                        )
-                        offset = raw_offset
-                    await self._executor.execute(
-                        limit=self._runtime.limit,
-                        query=self._runtime.query,
-                        offset=offset,
-                    )
+    async def _run_execution_cycle(self) -> None:
+        """Execute extraction, postrun, and checkpoint finalization."""
+        offset = await self._resolve_execution_offset()
+        await self._execute_pipeline(offset=offset)
+        await self._run_postrun_phase()
+        await self._checkpoint_manager.delete_checkpoint()
 
-                    # Post-run: DQ checks, DQ reports, and VACUUM
-                    dq_context = self._executor.get_dq_context()
-                    await self._postrun_service.run(
-                        executor=self._executor,
-                        dq_context=dq_context,
-                    )
+    async def _resolve_execution_offset(self) -> int | None:
+        """Resolve the executor start offset from runtime overrides or checkpoint."""
+        if self._runtime.start_offset is not None:
+            self._logger.info(
+                "Using manual start offset",
+                offset=self._runtime.start_offset,
+            )
+            return self._runtime.start_offset
 
-                    await self._checkpoint_manager.delete_checkpoint()
+        checkpoint_meta = await self._checkpoint_manager.load_checkpoint()
+        return self._extract_checkpoint_offset(checkpoint_meta)
 
-                self._logger.debug(
-                    PipelineEvent.COMPLETE,
-                    records_fetched=self._executor.records_fetched,
-                )
-        finally:
-            await self._postrun_service.cleanup(self._tracer)
+    def _extract_checkpoint_offset(
+        self,
+        checkpoint_meta: dict[str, object] | None,
+    ) -> int | None:
+        """Extract the persisted record offset from checkpoint metadata."""
+        if checkpoint_meta is None:
+            return None
+        return cast("int | None", checkpoint_meta.get("records_processed"))
+
+    async def _execute_pipeline(self, *, offset: int | None) -> None:
+        """Execute the pipeline batch executor with resolved runtime inputs."""
+        await self._executor.execute(
+            limit=self._runtime.limit,
+            query=self._runtime.query,
+            offset=offset,
+        )
+
+    async def _run_postrun_phase(self) -> None:
+        """Run the postrun workflow using the executor's resolved DQ context."""
+        dq_context = self._executor.get_dq_context()
+        await self._postrun_service.run(
+            executor=self._executor,
+            dq_context=dq_context,
+        )
 
     # Backward-compatible private methods (delegate to services)
     async def _validate_infrastructure(self) -> None:

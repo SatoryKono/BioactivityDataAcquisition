@@ -700,7 +700,7 @@ def test_adapters_implement_protocols(src_dir: Path):
             LocalCheckpointAdapter,
         )
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
-        from bioetl.domain.ports import NoOpMetrics
+        from bioetl.domain.ports.noop import NoOpMetrics
         from bioetl.infrastructure.observability.prometheus_metrics import (
             PrometheusMetrics,
         )

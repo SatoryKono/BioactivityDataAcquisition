@@ -11,7 +11,7 @@ from bioetl.infrastructure.adapters.health_check_contract import HealthCheckCont
 
 def resolve_metrics(metrics: MetricsPort | None) -> MetricsPort:
     """Return metrics port, defaulting to NoOpMetrics when absent."""
-    from bioetl.domain.ports import NoOpMetrics
+    from bioetl.domain.ports.noop import NoOpMetrics
 
     return metrics if metrics is not None else NoOpMetrics()
 

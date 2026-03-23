@@ -15,7 +15,8 @@ External API entities (ChEMBL, PubChem, etc.) have many Optional fields because:
 3. Data quality varies across sources and time periods
 
 However, each entity MUST validate its domain-specific required fields
-in _validate_invariants() to maintain data integrity.
+in _validate_invariants() to maintain data integrity. BaseEntity.__post_init__()
+is the canonical entrypoint for this invariant hook.
 """
 
 from __future__ import annotations
@@ -73,10 +74,14 @@ class BaseEntity:
     _dq_error: bool = False  # Record has data quality errors
 
     def __post_init__(self) -> None:
-        """Validate required fields are present and non-empty."""
+        """Validate shared system fields, then run subclass invariants."""
         if not self.entity_id:
             raise ValueError("Entity ID cannot be empty")
         if not self.content_hash:
             raise ValueError("Content hash cannot be empty")
         if self._index < 0:
             raise ValueError("_index cannot be negative")
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        """Hook for subclass-specific domain invariants."""

@@ -106,6 +106,7 @@ LIFECYCLE_REGISTRY_DEFAULT: Final[str] = (
     "configs/quality/scripts_lifecycle_registry.json"
 )
 SCHEMA_VERSION: Final[str] = "1.0"
+MAX_SEARCH_FILE_BYTES: Final[int] = 512 * 1024
 
 
 @dataclass(frozen=True)
@@ -149,6 +150,11 @@ def _should_include_search_file(root: Path, file_path: Path) -> bool:
     if _is_skipped_rel_path(rel_path):
         return False
     if file_path.suffix.lower() in SKIP_FILE_EXTENSIONS:
+        return False
+    try:
+        if file_path.stat().st_size > MAX_SEARCH_FILE_BYTES:
+            return False
+    except OSError:
         return False
     return True
 

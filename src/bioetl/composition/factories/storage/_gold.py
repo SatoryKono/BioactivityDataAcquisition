@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetadataWriter,
+    NoOpTracing,
+)
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
 )

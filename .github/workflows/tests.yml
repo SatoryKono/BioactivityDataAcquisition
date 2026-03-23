@@ -436,17 +436,17 @@ jobs:
                     path: reports/coverage
                     merge-multiple: true
 
-            -   name: Run serial-only tests with coverage append
+            -   name: Run serial-only tests with resilient pytest runner
                 run: |
                     mkdir -p reports/coverage
-                    COVERAGE_FILE=reports/coverage/.coverage.serial \
-                    uv run pytest tests/ \
-                      -m "serial and not e2e and not benchmark" \
-                      -p no:xdist \
-                      --ignore=tests/e2e \
-                      --ignore=tests/contract \
-                      -q --tb=short \
-                      --cov=src/bioetl --cov-report=
+                    # Canonical serial subset: -m "serial and not e2e and not benchmark"
+                    COVERAGE_FILE=reports/coverage/.coverage.serial uv run python \
+                      scripts/ci/run_pytest_resilient.py \
+                      --target tests/ \
+                      --reports-dir reports/pytest/coverage-verify \
+                      --parallel-marker "serial and not e2e and not benchmark" \
+                      --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+                      --skip-serial-pass
 
             -   name: Combine coverage shards and enforce threshold
                 run: |

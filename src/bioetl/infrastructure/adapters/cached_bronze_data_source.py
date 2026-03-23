@@ -17,7 +17,6 @@ from __future__ import annotations
 
 __all__ = ["CachedBronzeDataSource"]
 
-from datetime import datetime
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
@@ -28,9 +27,7 @@ from bioetl.infrastructure.adapters._cached_bronze_support import (
     iter_batch_records,
     list_sorted_batches,
     log_unsupported_fetch_params,
-    parse_bronze_date,
     raise_if_empty_batches,
-    resolve_bronze_path,
 )
 
 if TYPE_CHECKING:
@@ -127,17 +124,6 @@ class CachedBronzeDataSource:
     async def aclose(self) -> None:
         """Close the data source (no-op for file-based source)."""
 
-    def _parse_date(self, date_str: str | None) -> datetime | None:
-        """Parse date string to datetime for list_batches filtering.
-
-        Args:
-            date_str: Date string in YYYY-MM-DD format, or None.
-
-        Returns:
-            Datetime with UTC timezone parsed from the date string, or None if date_str is None.
-        """
-        return parse_bronze_date(date_str)
-
     async def _list_batches_sorted(self) -> list[str]:
         """List batches with deterministic sorting (ADR-014).
 
@@ -221,68 +207,6 @@ class CachedBronzeDataSource:
             records_yielded=count,
             batches_processed=len(batches),
         )
-
-    def _log_unsupported_fetch_params(
-        self,
-        *,
-        query: str | None,
-        filter_ids: list[str] | None,
-    ) -> None:
-        """Log ignored fetch parameters for cached Bronze source.
-
-        Args:
-            query: Query string that was passed to fetch but is not supported.
-            filter_ids: Filter ID list that was passed to fetch but is not supported.
-        """
-        log_unsupported_fetch_params(
-            self._logger,
-            query=query,
-            filter_ids=filter_ids,
-        )
-
-    def _resolve_bronze_path(self) -> str:
-        """Resolve effective Bronze path for empty-cache errors.
-
-        Returns:
-            Effective Bronze directory path string for the current provider and entity.
-        """
-        return resolve_bronze_path(
-            self._reader,
-            provider=self._provider,
-            entity_type=self._entity_type,
-        )
-
-    def _raise_if_empty_batches(self, batches: list[str]) -> None:
-        """Raise domain error when no cached Bronze batches are available.
-
-        Args:
-            batches: List of batch paths to check; raises if empty.
-
-        Raises:
-            CachedBronzeEmptyError: If the batches list is empty.
-        """
-        raise_if_empty_batches(
-            batches,
-            reader=self._reader,
-            provider=self._provider,
-            entity_type=self._entity_type,
-            bronze_date=self._bronze_date,
-        )
-
-    async def _iter_batch_records(
-        self,
-        batches: list[str],
-    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Iterate records from sorted batch paths.
-
-        Args:
-            batches: Sorted list of relative batch file paths to read.
-
-        Yields:
-            Bronze records from each batch file in order.
-        """
-        async for record in iter_batch_records(self._reader, self._logger, batches):
-            yield record
 
     async def get_total_records(self) -> int:
         """Get total number of records across all cached batches.

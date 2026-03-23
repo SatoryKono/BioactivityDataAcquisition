@@ -103,3 +103,67 @@ def test_pipeline_builder_stays_guarded_service_facade() -> None:
         "pipeline_builder.py must remain a thin service facade "
         f"(current lines: {line_count}, max: 180)."
     )
+
+
+@pytest.mark.unit
+def test_creation_wiring_uses_canonical_domain_config_resolver_not_loader_class_directly() -> (
+    None
+):
+    """Pipeline creation wiring should use the canonical domain-config resolver."""
+    path = Path("src/bioetl/composition/factories/pipeline/_creation_wiring.py")
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert "bioetl.infrastructure.config.domain_config_resolver" in imported_modules, (
+        "Pipeline creation wiring must use the canonical domain_config_resolver."
+    )
+    assert (
+        "bioetl.infrastructure.config.pipeline_config_loader" not in imported_modules
+    ), "Pipeline creation wiring must not import PipelineConfigLoader directly."
+
+
+@pytest.mark.unit
+def test_service_bundle_uses_config_resolution_seam_for_pipeline_config_access() -> (
+    None
+):
+    """Service bundle should depend on the sanctioned config-resolution seam."""
+    path = Path("src/bioetl/composition/factories/services/bundle.py")
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert (
+        "bioetl.composition.factories.pipeline.config_resolution" in imported_modules
+    ), "Service bundle must use the config_resolution seam."
+    assert "bioetl.infrastructure.config.pipeline_config_api" not in imported_modules, (
+        "Service bundle must not import load_pipeline_config from infrastructure directly."
+    )
+
+
+@pytest.mark.unit
+def test_factory_method_helpers_use_config_resolution_seam() -> None:
+    """Factory helpers should load pipeline config through the sanctioned seam."""
+    path = Path("src/bioetl/composition/factories/pipeline/factory_method_helpers.py")
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert (
+        "bioetl.composition.factories.pipeline.config_resolution" in imported_modules
+    ), "Factory method helpers must use the config_resolution seam."
+    assert "bioetl.infrastructure.config.pipeline_config_api" not in imported_modules, (
+        "Factory method helpers must not import pipeline_config_api directly."
+    )

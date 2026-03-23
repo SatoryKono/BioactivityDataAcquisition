@@ -9,6 +9,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters.common._title_fallback_flow import (
+    get_fallback_title,
+    truncate_title,
+)
 from bioetl.infrastructure.adapters.openalex.fallback import (
     OpenAlexTitleFallbackHandler,
 )
@@ -39,64 +43,54 @@ def handler(
 
 
 class TestGetFallbackTitle:
-    """Tests for _get_fallback_title method."""
+    """Tests for canonical fallback-title helper."""
 
-    def test_get_title_with_original_id(
-        self, handler: OpenAlexTitleFallbackHandler
-    ) -> None:
+    def test_get_title_with_original_id(self) -> None:
         """Should return title from original DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
-        result = handler._get_fallback_title(
-            "10.1038/test", "10.1038/test", fallback_mapping
-        )
+        result = get_fallback_title("10.1038/test", "10.1038/test", fallback_mapping)
         assert result == "Test Title"
 
-    def test_get_title_with_normalized_doi(
-        self, handler: OpenAlexTitleFallbackHandler
-    ) -> None:
+    def test_get_title_with_normalized_doi(self) -> None:
         """Should fall back to normalized DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
-        result = handler._get_fallback_title(
+        result = get_fallback_title(
             "https://doi.org/10.1038/test", "10.1038/test", fallback_mapping
         )
         assert result == "Test Title"
 
-    def test_get_title_without_normalized_doi(
-        self, handler: OpenAlexTitleFallbackHandler
-    ) -> None:
+    def test_get_title_without_normalized_doi(self) -> None:
         """Should work when normalized DOI is None."""
         fallback_mapping = {"10.1038/test": "Test Title"}
-        result = handler._get_fallback_title("10.1038/test", None, fallback_mapping)
+        result = get_fallback_title("10.1038/test", None, fallback_mapping)
         assert result == "Test Title"
 
-    def test_get_title_not_found(self, handler: OpenAlexTitleFallbackHandler) -> None:
+    def test_get_title_not_found(self) -> None:
         """Should return None when title not in mapping."""
         fallback_mapping = {"other_doi": "Other Title"}
-        result = handler._get_fallback_title(
-            "10.1038/test", "10.1038/test", fallback_mapping
-        )
+        result = get_fallback_title("10.1038/test", "10.1038/test", fallback_mapping)
         assert result is None
 
 
 class TestTruncateTitle:
-    """Tests for _truncate_title method."""
+    """Tests for canonical title-truncation helper."""
 
-    def test_truncate_short_title(self, handler: OpenAlexTitleFallbackHandler) -> None:
+    def test_truncate_short_title(self) -> None:
         """Should not truncate short titles."""
-        result = handler._truncate_title("Short title", max_len=50)
+        result = truncate_title("Short title", max_len=50)
         assert result == "Short title"
 
-    def test_truncate_long_title(self, handler: OpenAlexTitleFallbackHandler) -> None:
+    def test_truncate_long_title(self) -> None:
         """Should truncate long titles with ellipsis."""
         long_title = "A" * 100
-        result = handler._truncate_title(long_title, max_len=50)
+        result = truncate_title(long_title, max_len=50)
         assert result == "A" * 50 + "..."
         assert len(result) == 53
 
-    def test_truncate_exact_length(self, handler: OpenAlexTitleFallbackHandler) -> None:
+    def test_truncate_exact_length(self) -> None:
         """Should not truncate titles at exact max length."""
         title = "A" * 50
-        result = handler._truncate_title(title, max_len=50)
+        result = truncate_title(title, max_len=50)
         assert result == title
         assert "..." not in result
 

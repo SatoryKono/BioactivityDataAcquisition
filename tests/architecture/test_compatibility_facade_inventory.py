@@ -162,6 +162,20 @@ def test_inventory_doc_declares_canonical_sync_commands() -> None:
 
 
 @pytest.mark.architecture
+def test_inventory_doc_declares_dependency_map_scope_boundary() -> None:
+    """Operational doc must explain what the dependency map does not measure."""
+    text = INVENTORY_DOC.read_text(encoding="utf-8")
+    assert "layer-policy/topology snapshot only" in text, (
+        "Compatibility facade inventory doc must describe the dependency-map "
+        "artifact as a layer-policy/topology snapshot."
+    )
+    assert "MUST NOT be inferred from zero layer violations alone" in text, (
+        "Operational sync guidance must keep hotspot/duplication pressure "
+        "separate from zero dependency-map violations."
+    )
+
+
+@pytest.mark.architecture
 def test_inventory_doc_tables_match_yaml_registry() -> None:
     """Manual curated ledger tables must match the YAML SSOT field-for-field."""
     mod = _load_registry_module()

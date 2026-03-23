@@ -6,7 +6,8 @@ concrete adapter that delegates to the OTel SDK.
 
 Design Decision (ADR-010, ADR-022):
     Local-Only Deployment does not require distributed tracing by default.
-    ``NoOpTracing`` (in ``domain/ports/noop.py``) is the zero-overhead default.
+    ``NoOpTracing`` (in ``domain/ports/noop/__init__.py``) is the zero-overhead
+    default.
     ``OpenTelemetryTracer`` activates when ``tracing_enabled=True`` and
     provides real span collection via OTLP or Console exporter.
 
@@ -30,7 +31,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.ports.noop import NoOpTracing
 
 # Store OTLP exporter class if available (for runtime use)
 # This avoids reassigning an imported type to None, which mypy strict rejects

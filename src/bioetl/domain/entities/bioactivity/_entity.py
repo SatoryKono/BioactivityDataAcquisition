@@ -112,10 +112,6 @@ class Bioactivity(BaseEntity):
     activity_properties: str | None = None
     toid: int | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         """Validate business invariants."""
         if not self.activity_id:

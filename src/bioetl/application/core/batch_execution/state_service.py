@@ -7,6 +7,9 @@ __all__ = ["BatchExecutionStateService"]
 
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
+from bioetl.application.core.batch_execution._contracts import (
+    BatchExecutionStatisticsState,
+)
 from bioetl.application.core.batch_executor_helpers import (
     apply_processed_batch_outcome,
     build_processed_batch_outcome,
@@ -58,18 +61,6 @@ class _BatchExecutionStatePort(Protocol):
     ) -> None: ...
 
 
-class _BatchExecutionStatisticsState(Protocol):
-    """Snapshot required to project public results and run statistics."""
-
-    records_fetched: int
-    records_bronze: int
-    records_silver: int
-    records_gold: int
-    records_quarantined: int
-    records_filtered_out: int
-    _source_batch_ids: list[str]
-
-
 class BatchExecutionStateService:
     """Pure service applying processed batch outcomes to executor state."""
 
@@ -100,7 +91,7 @@ class BatchExecutionStateService:
         batch_result_type: _BatchResultBuilder[_BatchResultT],
     ) -> _BatchResultT:
         """Project current cumulative counters into public batch result."""
-        typed_state = cast(_BatchExecutionStatisticsState, state)
+        typed_state = cast(BatchExecutionStatisticsState, state)
         return batch_result_type(
             bronze_count=typed_state.records_bronze,
             silver_count=typed_state.records_silver,
@@ -114,7 +105,7 @@ class BatchExecutionStateService:
         state: object,
     ) -> dict[str, int | list[str]]:
         """Project deterministic run statistics from current executor state."""
-        typed_state = cast(_BatchExecutionStatisticsState, state)
+        typed_state = cast(BatchExecutionStatisticsState, state)
         return build_run_statistics(
             records_fetched=typed_state.records_fetched,
             records_bronze=typed_state.records_bronze,

@@ -26,7 +26,7 @@ class TestResolveTracer:
 
     def test_returns_noop_when_none(self) -> None:
         """Returns NoOpTracing when tracer is None."""
-        from bioetl.domain.ports import NoOpTracing
+        from bioetl.domain.ports.noop import NoOpTracing
 
         result = resolve_tracer(None)
         assert isinstance(result, NoOpTracing)

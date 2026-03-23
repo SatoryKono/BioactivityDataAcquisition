@@ -1,10 +1,14 @@
 # Cross Synthesis: architecture-foundations
 
+Rebaseline note: this synthesis still matches the active repo baseline, and
+`RF-011` re-confirmed the green enforcement model through a fresh full verify
+pass plus regenerated dependency and compatibility artifacts.
+
 ## Executive Summary
 
 - The collected evidence supports a coherent three-level view of the architecture: a stable **layer model**, an explicit **pattern model**, and a green **enforcement model**. ([SYN-layers-and-boundaries.md](SYN-layers-and-boundaries.md), [SYN-architecture-patterns.md](SYN-architecture-patterns.md), [SYN-enforcement-guardrails.md](SYN-enforcement-guardrails.md))
 - The architectural center of gravity is `composition`: it is the practical hinge between the five-layer structure, the DI pattern, and the most important guardrails that keep the rest of the system clean. (EV-layers-composition-is-separate-di-root, EV-patterns-dependency-injection-lives-in-composition, EV-enforcement-bootstrap-and-composition-boundaries-pass)
-- BioETL’s strongest current state is that its architecture is both explicit and enforceable: Hexagonal + Medallion + DDD + DI are not only documented, but also reflected in a zero-violation dependency map and passing architecture suites. (EV-patterns-hexagonal-ports-and-adapters-is-explicit, EV-patterns-medallion-bronze-silver-gold-flow, EV-patterns-domain-driven-design-primitives, EV-enforcement-dependency-map-shows-zero-layer-violations)
+- BioETL’s strongest current state is that its architecture is both explicit and enforceable: Hexagonal + Medallion + DDD + DI are not only documented, but also reflected in a zero-violation dependency map, passing architecture suites, and a freshly refreshed verify baseline. (EV-patterns-hexagonal-ports-and-adapters-is-explicit, EV-patterns-medallion-bronze-silver-gold-flow, EV-patterns-domain-driven-design-primitives, EV-enforcement-dependency-map-shows-zero-layer-violations)
 - The main unresolved theme across pillars is not a broken baseline, but a policy-clarity gap around outer-layer seams, especially how strict the project really wants to be about interface-to-infrastructure coupling and which composition surfaces are the canonical public entrypoints. (EV-layers-interfaces-are-driving-adapters, EV-patterns-registry-and-factory-assembly-seams, EV-enforcement-import-matrix-is-docs-as-code)
 
 ## Integrated Insights

@@ -5,16 +5,30 @@
 
 This directory stores published documentation for BioETL AI skills across supported runtimes.
 
+## Surface Types
+
+- **Canonical runtime source**: live skill behavior and trigger contracts are
+  authored in runtime trees such as `.codex/skills/`.
+- **Published mirror**: `docs/00-project/ai/skills/local/` and related indexes
+  exist for discoverability and documentation stability.
+- **Snapshot**: `global/` stores curated copies of selected non-local skills.
+- **Reference mirror**: `_references/` stores read-only mirrored reference
+  bundles used by skills consistency tooling.
+
 ## Canonical Source
 
 - Canonical Codex runtime skill source: `.codex/skills/`
-- `docs/00-project/ai/skills/local/` is a published mirror layer and may retain compatibility entries for navigation
-- Edit runtime skill behavior in the runtime source first; do not treat `local/` as the primary authoring surface
+- `.claude/skills/` may remain as a parallel or legacy runtime surface for
+  Claude-specific workflows where such support is still intentionally retained
+- `docs/00-project/ai/skills/local/` is a published mirror layer and may retain
+  compatibility entries for navigation
+- Edit runtime skill behavior in the runtime source first; do not treat
+  `local/` as the primary authoring surface
 - When active docs and mirrors diverge, prefer current runtime orchestration guidance from `.codex/agents/ORCHESTRATION.md`
 
 ## Layout
 
-- `local/` — repo-local mirror from `.claude/skills/`
+- `local/` — published mirror for repository-local skills
 - `global/` — snapshot of selected global skills
 - `_references/` — reference bundles overlaid into local mirror
 - `SKILLS-CATALOG.md` — consolidated skill registry

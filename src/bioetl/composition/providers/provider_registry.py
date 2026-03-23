@@ -10,6 +10,8 @@ from bioetl.composition.providers._creation import ProviderCreator
 from bioetl.composition.providers._default_registry import (
     DefaultRegistryMethod,
     ProvidersDescriptor,
+    get_default_provider_registrar,
+    get_default_provider_registry,
 )
 from bioetl.composition.providers._models import (
     AdapterCreator,
@@ -205,22 +207,6 @@ class ProviderRegistry:
     def contains(self, key: str) -> bool:
         """Check if provider is registered (unified API)."""
         return self.is_registered(key)
-
-
-_default_provider_registry: ProviderRegistry | None = None
-
-
-def get_default_provider_registry() -> ProviderRegistry:
-    """Get the lazily created default global provider registry instance."""
-    global _default_provider_registry
-    if _default_provider_registry is None:
-        _default_provider_registry = ProviderRegistry()
-    return _default_provider_registry
-
-
-def get_default_provider_registrar() -> ProviderRegistry:
-    """Return the sanctioned default-registry seam for provider registration."""
-    return get_default_provider_registry()
 
 
 def register_default_provider_config(name: str, config: ProviderConfig) -> None:

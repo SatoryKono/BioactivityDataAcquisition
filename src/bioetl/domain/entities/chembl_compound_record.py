@@ -40,10 +40,6 @@ class CompoundRecord(BaseEntity):
     src_id: int
     src_compound_id: str | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         """Validate CompoundRecord invariants.
 

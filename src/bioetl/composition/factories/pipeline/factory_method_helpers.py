@@ -5,6 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypeVar, cast
 
+from bioetl.composition.factories.pipeline.config_resolution import (
+    load_pipeline_config,
+)
 from bioetl.composition.factories.pipeline.transformer_dependencies import (
     build_transformer_dependencies,
 )
@@ -13,7 +16,6 @@ from bioetl.composition.factories.services.bundle import (
     create_pipeline_with_services,
 )
 from bioetl.domain.services import IdentityService
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 if TYPE_CHECKING:
     import pyarrow as pa

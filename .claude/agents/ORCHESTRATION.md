@@ -2,6 +2,11 @@
 
 *Версия: 4.0 | Дата: 2026-03-04 | Supersedes v3.0 | Платформа: Claude Code CLI*
 
+> **Runtime-specific note:** этот файл описывает именно Claude Code runtime.
+> Для Codex source-of-truth orchestration используется отдельный файл
+> `.codex/agents/ORCHESTRATION.md`. Различия между ними не считаются
+> автоматическим documentation drift без отдельной policy-проверки.
+
 ## 1. Обзор
 
 Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).

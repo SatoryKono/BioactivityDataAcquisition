@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.domain import ports
+from bioetl.domain.ports import noop
 
 
 class TestPiiHasherPortContract:
@@ -54,14 +55,15 @@ class TestPiiHasherPortContract:
         )
 
     def test_noop_pii_hasher_exists(self) -> None:
-        """NoOpPiiHasher MUST exist for testing and backward compatibility."""
-        assert hasattr(ports, "NoOpPiiHasher"), (
-            "NoOpPiiHasher MUST be defined for testing and backward compatibility"
+        """NoOpPiiHasher MUST live in the dedicated noop sub-facade."""
+        assert hasattr(noop, "NoOpPiiHasher"), (
+            "NoOpPiiHasher MUST be defined in bioetl.domain.ports.noop "
+            "for testing and operational null-object usage"
         )
 
     def test_noop_pii_hasher_implements_port(self) -> None:
         """NoOpPiiHasher MUST implement PiiHasherPort."""
-        hasher = ports.NoOpPiiHasher()
+        hasher = noop.NoOpPiiHasher()
         assert isinstance(hasher, ports.PiiHasherPort), (
             "NoOpPiiHasher MUST implement PiiHasherPort"
         )

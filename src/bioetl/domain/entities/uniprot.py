@@ -62,11 +62,6 @@ class IDMappingResult(BaseEntity):
     # Multiple mappings (JSON array)
     all_mappings: str | None = None
 
-    def __post_init__(self) -> None:
-        """Validate required fields."""
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         """Validate domain-specific invariants."""
         if not self.target_id:
@@ -245,10 +240,6 @@ class UniprotTarget(BaseEntity):
     keyword_count: int | None = None
     publication_count: int | None = None
     isoform_count: int | None = None
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
 
     def _validate_invariants(self) -> None:
         if not self.accession:

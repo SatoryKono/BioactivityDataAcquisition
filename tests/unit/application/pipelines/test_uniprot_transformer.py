@@ -397,7 +397,7 @@ class TestUniProtProteinTransformer:
 
     def test_transformer_accepts_pii_hasher(self):
         """Transformer MUST accept pii_hasher parameter."""
-        from bioetl.domain.ports import NoOpPiiHasher
+        from bioetl.domain.ports.noop import NoOpPiiHasher
 
         hasher = NoOpPiiHasher()
         transformer = instantiate_test_transformer(
@@ -408,7 +408,7 @@ class TestUniProtProteinTransformer:
 
     def test_transformer_default_pii_hasher(self):
         """Transformer SHOULD default pii_hasher to NoOpPiiHasher."""
-        from bioetl.domain.ports import NoOpPiiHasher
+        from bioetl.domain.ports.noop import NoOpPiiHasher
 
         transformer = instantiate_test_transformer(UniProtProteinTransformer)
         assert isinstance(transformer._pii_hasher, NoOpPiiHasher)

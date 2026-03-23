@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
     "src/bioetl/composition/factories/pipeline/registry_manifest.py": (
-        40,
+        25,
         {
             "bioetl.composition.factories.pipeline._registry_manifest_chembl",
             "bioetl.composition.factories.pipeline._registry_manifest_non_chembl",
@@ -19,7 +19,7 @@ CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
         },
     ),
     "src/bioetl/infrastructure/config/dq_config_loader.py": (
-        285,
+        255,
         {
             "bioetl.infrastructure.config._dq_config_layers",
             "bioetl.infrastructure.config._dq_config_normalization",
@@ -29,7 +29,7 @@ CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
         },
     ),
     "src/bioetl/infrastructure/config/pipeline_config_loader.py": (
-        210,
+        145,
         {
             "bioetl.infrastructure.config.dq_config_loader",
             "bioetl.infrastructure.config.filter_config_loader",
@@ -158,3 +158,85 @@ def test_registry_manifest_stays_assembly_only_without_local_logic_defs() -> Non
         "registry_manifest.py should stay assembly-only and avoid local logic "
         "definitions:\n" + "\n".join(sorted(local_defs))
     )
+
+
+@pytest.mark.architecture
+def test_registry_manifest_imports_only_sanctioned_assembly_modules() -> None:
+    """The registry manifest must remain a pure assembly seam over prepared tuples."""
+    imported_modules = _imported_modules(
+        "src/bioetl/composition/factories/pipeline/registry_manifest.py"
+    )
+    unexpected_modules = imported_modules - {
+        "bioetl.composition.factories.pipeline._registry_manifest_chembl",
+        "bioetl.composition.factories.pipeline._registry_manifest_non_chembl",
+        "bioetl.composition.factories.pipeline.config_types",
+        "__future__",
+    }
+    assert not unexpected_modules, (
+        "registry_manifest.py should import only manifest tuple owners and "
+        "PipelineFactoryConfig:\n" + "\n".join(sorted(unexpected_modules))
+    )
+
+
+@pytest.mark.architecture
+def test_registry_manifest_avoids_loader_yaml_and_normalization_modules() -> None:
+    """The registry manifest must not absorb config loading or normalization work."""
+    imported_modules = _imported_modules(
+        "src/bioetl/composition/factories/pipeline/registry_manifest.py"
+    )
+    forbidden_prefixes = (
+        "bioetl.infrastructure.config",
+        "bioetl.infrastructure.config_load_api",
+        "bioetl.infrastructure.config_loader",
+        "bioetl.infrastructure.config_loader_filtering",
+        "bioetl.infrastructure.config_merge",
+        "yaml",
+        "ruamel",
+    )
+    violations = {
+        module_name
+        for module_name in imported_modules
+        if module_name.startswith(forbidden_prefixes)
+    }
+    assert not violations, (
+        "registry_manifest.py must stay assembly-only and avoid YAML/loading/"
+        "normalization imports:\n" + "\n".join(sorted(violations))
+    )
+
+
+@pytest.mark.architecture
+def test_runtime_inputs_resolver_uses_runtime_config_access_seam() -> None:
+    """Runtime input resolution should use the local config-access seam."""
+    imported_modules = _imported_modules(
+        "src/bioetl/composition/runtime_builders/inputs_resolver.py"
+    )
+    assert "bioetl.composition.runtime_builders.config_access" in imported_modules, (
+        "inputs_resolver.py must use the runtime config_access seam."
+    )
+    assert (
+        "bioetl.infrastructure.config.source_config_loader" not in imported_modules
+    ), "inputs_resolver.py must not import source_config_loader directly."
+
+
+@pytest.mark.architecture
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "src/bioetl/composition/factories/datasource/http_client.py",
+        "src/bioetl/composition/factories/datasource/pubchem.py",
+        "src/bioetl/composition/providers/_config_helpers.py",
+        "src/bioetl/composition/runtime_builders/config_access.py",
+    ],
+)
+def test_composition_source_config_consumers_use_composition_seam(
+    relative_path: str,
+) -> None:
+    """Composition source-config consumers should route through one local seam."""
+    imported_modules = _imported_modules(relative_path)
+    assert "bioetl.composition.source_config_access" in imported_modules, (
+        f"{relative_path} must route source-config access through the sanctioned "
+        "composition seam."
+    )
+    assert (
+        "bioetl.infrastructure.config.source_config_loader" not in imported_modules
+    ), f"{relative_path} must not import source_config_loader directly."

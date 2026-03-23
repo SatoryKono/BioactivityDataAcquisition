@@ -4,6 +4,11 @@
 Статус: active consolidated plan  
 Язык: русский
 
+> Этот документ — internal-published planning surface. Он описывает текущую
+> очередь исполнения и sequencing, но не заменяет canonical project guidance в
+> `docs/00-project/`, `docs/01-requirements/`, `docs/02-architecture/` и active
+> guides under `docs/03-guides/`.
+
 ## Назначение
 
 Этот документ заменяет россыпь dated execution plans, которые уже:
@@ -28,27 +33,35 @@
 - import/topology Wave 2 (`datasource/provider cluster`)
 - provider-bounded Wave 3 hotspot starts
 - Wave 4 retry-decorator cluster start
-- `P0` full final verify after the last waves (`green` on `2026-03-23`)
+- `P0` full final verify after the last waves (`green` on `2026-03-23`,
+  refreshed via `RF-011`)
+- `P1` config topology closeout (`green` on `2026-03-23`)
 
 Эти темы могут использоваться как historical context, но не как активная
 очередь работ.
 
 ## Текущий кодовый срез
 
-По текущему репозиторию главный остаточный pressure сидит в двух местах:
+По текущему репозиторию главный остаточный pressure теперь сидит в одном месте:
 
-1. `config topology / ownership`
-2. `shared adapter hotspots`
+1. `topology watchpoints / conservative follow-up`
 
-Текущий size snapshot для живых residual targets:
+Текущий size snapshot для закрытых/guarded shared adapter seams:
 
-- `src/bioetl/composition/factories/pipeline/registry_manifest.py` — `326` LOC
-- `src/bioetl/infrastructure/config/dq_config_loader.py` — `280` LOC
-- `src/bioetl/infrastructure/config/pipeline_config_loader.py` — `205` LOC
-- `src/bioetl/infrastructure/adapters/cached_bronze_data_source.py` — `297` LOC
-- `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py` — `296` LOC
-- `src/bioetl/infrastructure/adapters/common/base_title_fallback.py` — `295` LOC
-- `src/bioetl/infrastructure/adapters/http/circuit_breaker.py` — `289` LOC
+- `src/bioetl/infrastructure/adapters/cached_bronze_data_source.py` — `221` LOC
+- `src/bioetl/infrastructure/adapters/common/base_title_fallback.py` — `254` LOC
+
+Wave 4 guarded decorator facades после последних closeout slices:
+
+- `src/bioetl/infrastructure/adapters/decorators/retry.py` — `274` LOC
+- `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py` — `245` LOC
+- `src/bioetl/infrastructure/adapters/http/circuit_breaker.py` — `211` LOC
+
+Config-topology seams после `P1` closeout удерживаются как guarded surfaces:
+
+- `src/bioetl/composition/factories/pipeline/registry_manifest.py` — `21` LOC
+- `src/bioetl/infrastructure/config/dq_config_loader.py` — `246` LOC
+- `src/bioetl/infrastructure/config/pipeline_config_loader.py` — `142` LOC
 
 Дополнительно остаётся один сознательно сохранённый topology watchpoint:
 
@@ -59,29 +72,9 @@
 
 ## Активная очередь
 
-### P0. Полный финальный verify после последних волн
-
-Это не structural refactor, но это единственная обязательная операционная
-задача перед закрытием большой серии.
-
-Что сделать:
-
-1. прогнать `pytest tests -q`
-2. при необходимости локализовать и закрыть только live regressions
-3. после зелёного suite при желании собрать coverage snapshot
-
-Базовый verify bundle:
-
-- `./.venv/Scripts/python.exe -m pytest tests -q`
-- `./.venv/Scripts/ruff.exe check src tests`
-- `./.venv/Scripts/ruff.exe format --check src tests`
-- `./.venv/Scripts/python.exe -m mypy --strict src/bioetl`
-- `./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --check`
-- `./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --check`
-
 ### P1. Config topology closeout
 
-Это главный оставшийся structural track.
+Статус: completed on `2026-03-23`.
 
 Цель:
 
@@ -90,7 +83,7 @@
 - не допустить превращения `composition` в второй config-owner
 - удержать `registry_manifest.py` assembly-only поверхностью
 
-Приоритетные поверхности:
+Закрытые поверхности:
 
 - `src/bioetl/composition/factories/pipeline/registry_manifest.py`
 - `src/bioetl/infrastructure/config/pipeline_config_loader.py`
@@ -107,7 +100,7 @@
 4. удерживать ownership story через architecture ratchet в
    `tests/architecture/test_p1_config_topology_closeout.py`.
 
-Первый закрытый structural slice в этом track:
+Закрытые structural slices:
 
 - [2026-03-23] `dq_config_loader.py`: убран локальный `_merge_hierarchy`;
   canonical staged flow теперь удерживается только через
@@ -115,6 +108,9 @@
 - [2026-03-23] `registry_manifest.py`: giant declarative table вынесен в
   private provider-entry modules; canonical manifest остался thin assembly
   facade.
+- [2026-03-23] `pipeline_config_loader.py`: private DQ helper wrappers
+  схлопнуты в прямые `staticmethod` aliases поверх
+  `pipeline_dq_resolution.py`.
 
 Признак завершения:
 
@@ -122,26 +118,60 @@
 - `composition` не владеет config normalization logic;
 - targeted config tests и architecture guards остаются зелёными.
 
+Следующий active structural track теперь уже `P2`, а не продолжение `P1`.
+
 ### P2. Residual adapter hotspot reduction
 
-Все provider-bounded cluster starts уже реализованы как bounded slices. Теперь
-имеет смысл работать только по shared seams, и строго по одному кластеру за
-раз.
+Статус: completed on `2026-03-23`.
 
-Рекомендуемый порядок:
+Последний closeout slice:
 
-1. `src/bioetl/infrastructure/adapters/cached_bronze_data_source.py`
-2. `src/bioetl/infrastructure/adapters/common/base_title_fallback.py`
-3. `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py`
-4. `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`
+- [2026-03-23] `common/base_title_fallback.py`: repetitive `_event_*`
+  properties схлопнуты в compact property-factory pattern; helper-backed flow
+  по-прежнему удерживается в `common/_title_fallback_flow.py`, а seam
+  дополнительно закреплён через `tests/architecture/test_wave4_complexity_closeout.py`.
 
-Правила выполнения:
+Все provider-bounded cluster starts были закрыты как bounded slices. Shared
+adapter seams тоже доведены до helper-backed / guarded baseline, поэтому
+`P2` больше не является активной очередью.
 
-- брать только один hotspot за волну;
-- сначала проверять bounded test net;
-- держать package-root import surfaces стабильными;
-- после каждого slice обновлять dependency docs только если граф реально
-  изменился.
+Закрытые/guarded `P2` slices:
+
+- [2026-03-23] `cached_bronze_data_source.py`: private wrapper cruft убран;
+  canonical helper-layer удерживается через
+  `infrastructure/adapters/_cached_bronze_support.py`; unit tests переведены
+  на helper-level contract.
+- [2026-03-23] `base_title_fallback.py`: shared async flow и utility helpers
+  удерживаются через
+  `infrastructure/adapters/common/_title_fallback_flow.py`; private utility
+  seams больше не являются adapter-owned contract.
+- [2026-03-23] `RF-006` closeout: helper-level branch coverage добавлен для
+  `cached_bronze` и `title_fallback` flows, а `cached_bronze_data_source.py`
+  теперь дополнительно удерживается Wave 4 ratchet-guard'ом как helper-backed
+  facade.
+- [2026-03-23] `decorators/circuit_breaker.py`: state gate, failure logging,
+  manual reset и open-health helpers вынесены в
+  `decorators/_circuit_breaker_support.py`; Wave 4 ratchet добавлен в
+  `tests/architecture/test_wave4_complexity_closeout.py`.
+- [2026-03-23] `http/circuit_breaker.py`: state transition, metric emission,
+  retry-after math и error helpers вынесены в
+  `http/_circuit_breaker_support.py`; Wave 4 ratchet добавлен в
+  `tests/architecture/test_wave4_complexity_closeout.py`.
+- [2026-03-23] `RF-007` circuit breaker contract unify: shared typed
+  transition/state contract удерживается в
+  `infrastructure/adapters/_circuit_breaker_contract.py` (исторический private
+  seam, с тех пор promoted в current public path
+  `src/bioetl/infrastructure/adapters/circuit_breaker_contract.py`); обе
+  breaker реализации опираются на него через support modules, а
+  contract-backed ownership закреплён в
+  `tests/architecture/test_wave4_complexity_closeout.py`.
+
+Признак завершения:
+
+- shared adapter seams больше не требуют broad rewrite;
+- helper-backed surfaces удерживаются targeted tests и architecture ratchets;
+- следующий шаг после `P2` — не новая adapter wave, а conservative backlog
+  refresh / watchlist review.
 
 ### P3. Watchlist, а не активная миграция
 
@@ -156,6 +186,42 @@
 
 Для них сейчас правильный статус: `watchlist`.
 
+Первый conservative closeout slice:
+
+- [2026-03-23] `provider_registry.py` перестал владеть lazy default-singleton
+  state напрямую; default-registry ownership централизован в
+  `composition/providers/_default_registry.py`, а `provider_registry.py`
+  удерживается как import-stable facade над registry API.
+- [2026-03-23] `_default_registry.py` зафиксирован как final private compat
+  owner через targeted architecture guard: size budget, запрет на regrowth в
+  loading/creation hub и явное удержание lazy singleton seam.
+- [2026-03-23] `RF-009` closeout: baseline-aware no-growth ratchet добавлен
+  для raw call sites `get_default_provider_registry()` /
+  `get_default_provider_registrar()` и для private imports of
+  `composition/providers/_default_registry.py`; seam удерживается как
+  локальный watchpoint без новой registry migration wave.
+
+### RF-005. Application/Core duplication pressure
+
+Статус: first family slice completed on `2026-03-23`.
+
+Execution note:
+
+- report-only snapshot зафиксирован в
+  `reports/quality/rf005-application-core-duplication-snapshot-2026-03-23.md`
+- первым family выбран `application/core/batch_execution`
+- shared execution-state/memory contracts централизованы в
+  `application/core/batch_execution/_contracts.py`
+- `lifecycle.py`, `run_service.py` и `state_service.py` больше не держат
+  раздельные локальные копии этих contracts
+- regrowth guard удерживается через
+  `tests/architecture/test_rf005_application_core_closeout.py`
+- после зелёной проверки первого slice вторым bounded family выбран `postrun`
+- strict/warning failure policy для postrun теперь централизована в
+  `application/core/postrun/_failure_policy.py`, а
+  `dq_report_orchestrator.py` и `metadata_version_resolver.py`
+  больше не держат раздельные копии этого policy path
+
 ## Что не делать
 
 - не поднимать заново старые `rf-*`, `rf-fs-*`, `wave-3-*`, `wave-4-*`
@@ -166,9 +232,8 @@
 
 ## Рекомендуемый порядок
 
-1. `P1` — config topology closeout
-2. `P2` — один shared adapter hotspot
-3. затем новый snapshot backlog, а не автоматический переход к следующему
+1. `P3` — watchlist review только при появлении нового evidence
+2. затем новый snapshot backlog, а не автоматический переход к следующему
    старому dated plan
 
 ## Definition Of Done Для Папки `docs/plans`

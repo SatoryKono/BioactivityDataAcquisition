@@ -9,6 +9,11 @@ from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers import ensure_providers_loaded
+from bioetl.composition.runtime_builders.config_access import (
+    get_settings,
+    load_pipeline_config,
+    load_source_config,
+)
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
     assemble_cached_bronze_context,
@@ -24,9 +29,6 @@ from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
-from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
@@ -88,6 +90,7 @@ def build_pipeline_runner(
     register_all_pipelines_fn: Callable[..., None] = register_all_pipelines,
     get_settings_fn: Callable[[], Settings] = get_settings,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
+    load_source_config_fn: Callable[..., object] = load_source_config,
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
     assemble_vacuum_settings_fn: Callable[..., ResolvedVacuumSettings] | None = None,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
@@ -162,7 +165,7 @@ def build_pipeline_runner(
         assemble_runtime_config_fn=assemble_runtime_config_impl,
         assemble_filter_config_fn=assemble_filter_config_impl,
         assemble_cached_bronze_context_fn=assemble_cached_bronze_context_impl,
-        load_source_config_fn=load_source_config,
+        load_source_config_fn=load_source_config_fn,
     )
     return _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,

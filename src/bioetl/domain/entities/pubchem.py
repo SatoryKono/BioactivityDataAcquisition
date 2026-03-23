@@ -254,8 +254,7 @@ class PubchemMolecule(BaseEntity):
     z_steric_quadrupole_3d: float | None = None
     feature_count_3d: int | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
+    def _validate_invariants(self) -> None:
         if not self.molecule_id:
             raise ValueError("PubchemMolecule molecule_id is required")
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ast
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
@@ -289,6 +291,29 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
         is runner_builder.assemble_cached_bronze_context
     )
     assert kwargs["load_source_config_fn"] is runner_builder.load_source_config
+
+
+def test_runner_builder_uses_runtime_config_access_seam() -> None:
+    """runner_builder should route runtime config access through the local seam."""
+    source = Path(
+        "src/bioetl/composition/runtime_builders/runner_builder.py"
+    ).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+    assert "bioetl.composition.runtime_builders.config_access" in imported_modules, (
+        "runner_builder must use the runtime config_access seam."
+    )
+    assert "bioetl.infrastructure.config.pipeline_config_api" not in imported_modules, (
+        "runner_builder must not import pipeline_config_api directly."
+    )
+    assert (
+        "bioetl.infrastructure.config.source_config_loader" not in imported_modules
+    ), "runner_builder must not import source_config_loader directly."
 
 
 def test_runner_builder_does_not_expose_legacy_wrapper_patch_points() -> None:

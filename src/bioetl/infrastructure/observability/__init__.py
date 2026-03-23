@@ -15,7 +15,10 @@ with mandatory fields: ts, level, run_id, pipeline, stage.
 from __future__ import annotations
 
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import (
+    NoOpMetrics,
+    NoOpTracing,
+)
 from bioetl.infrastructure.observability.logging import StructlogLogger
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,

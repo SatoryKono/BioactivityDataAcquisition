@@ -19,8 +19,8 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.config import Settings
-from bioetl.domain.ports import NoOpMetrics
-from bioetl.domain.ports import NoOpTracing
+from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter

@@ -1,8 +1,17 @@
 # Agent Catalog — BioETL
 
-*Статус: internal-published | Synced with `.claude/agents/` (2026-03-12)*
+*Статус: internal-published | Runtime-facing mirror index (2026-03-23)*
 
-Consolidated agent registry. Runtime source of truth: `.claude/agents/`.
+Consolidated agent registry for published docs navigation.
+
+## Surface Note
+
+- This page is a **published mirror index**, not a canonical runtime registry.
+- Claude runtime source of truth remains under `.claude/agents/`.
+- Codex keeps its own runtime-specific orchestration and related agent context
+  under `.codex/agents/`.
+- Use this catalog for discoverability; verify live runtime behavior in the
+  relevant runtime tree before treating any profile note as authoritative.
 
 ## BioETL Core (9 agents)
 
@@ -37,4 +46,6 @@ Consolidated agent registry. Runtime source of truth: `.claude/agents/`.
 
 ## Orchestration Workflow
 
-See [ORCHESTRATION.md](ORCHESTRATION.md) for the standard 8-step workflow.
+See [ORCHESTRATION.md](ORCHESTRATION.md) for the published mirror of the
+standard workflow, then confirm runtime-specific behavior in the active runtime
+registry when exact execution semantics matter.

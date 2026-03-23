@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetadataWriter
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     build_silver_writer_runtime_services,

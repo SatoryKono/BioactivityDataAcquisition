@@ -4,6 +4,12 @@
 Статус: supporting assessment and refactor roadmap  
 Язык: русский
 
+> Этот документ — internal-published assessment surface. Он помогает
+> интерпретировать текущее архитектурное состояние и выбирать bounded refactor
+> waves, но не заменяет canonical project guidance в `docs/00-project/`,
+> `docs/01-requirements/`, `docs/02-architecture/` и active guides under
+> `docs/03-guides/`.
+
 ## Назначение
 
 Этот документ фиксирует актуальную архитектурную оценку проекта и
@@ -96,11 +102,11 @@ violation, а drift в generated governance artifacts.
 
 ## Ключевые проблемы
 
-1. **Governance freshness debt**
-   `scripts/qa/generate_architecture_dependency_map.py --check` сейчас падает,
-   поэтому generated dependency-map artifacts уже не полностью синхронны с
-   кодом. Это MUST-долг, потому что он бьёт по доверию к архитектурным
-   сигналам.
+1. **Governance freshness residuals**
+   Основной MUST-долг по generated artifacts уже снят через `RF-010` и
+   `RF-011`, но freshness discipline остаётся чувствительной зоной: dependency
+   map, compatibility snapshot и full verify baseline нужно удерживать как
+   operational guardrails после следующих implementation волн.
 
 2. **Config-topology pressure**
    Главный оставшийся structural track сосредоточен в
@@ -132,8 +138,8 @@ violation, а drift в generated governance artifacts.
 
 | RF | Приоритет | Зависит от | Риск |
 |---|---:|---|---|
-| RF-010 Dependency-Map Freshness | P0 | - | low |
-| RF-011 Full Verify + Coverage Snapshot | P0 | RF-010 | medium |
+| RF-010 Dependency-Map Freshness | completed | - | low |
+| RF-011 Full Verify + Coverage Snapshot | completed | RF-010 | medium |
 | RF-012 Config Topology Closeout | P1 | RF-010 | high |
 | RF-013 Registry Manifest Assembly-Only Guard | P1 | RF-012 | medium |
 | RF-014 Shared Adapter Hotspot 1 (cached bronze) | P2 | RF-011 | medium |
@@ -154,6 +160,8 @@ violation, а drift в generated governance artifacts.
 
 ### RF-010. Dependency-Map Freshness
 
+Статус: completed on `2026-03-23`.
+
 - **Цель:** убрать MUST-дрейф и вернуть доверие к governance artifacts.
 - **Конкретные правки:** обновить только generated файлы
   [module-dependency-map.md](../02-architecture/generated/module-dependency-map.md)
@@ -167,7 +175,16 @@ violation, а drift в generated governance artifacts.
 - **Definition of Done:** `generate_architecture_dependency_map.py --check`
   зелёный, related drift guards зелёные.
 
+Closeout:
+
+- dependency-map artifacts обновлены и повторно подтверждены `--check`;
+- generated docs больше не отстают от текущего import graph;
+- freshness дальше удерживается уже как operational ratchet, а не как active
+  refactor track.
+
 ### RF-011. Full Verify + Coverage Snapshot
+
+Статус: completed on `2026-03-23`.
 
 - **Цель:** получить текущий end-to-end confidence baseline после длинной серии
   refactor waves.
@@ -179,6 +196,17 @@ violation, а drift в generated governance artifacts.
 - **Минимизация рисков:** сначала секторные прогоны (`tests/architecture`,
   `tests/unit`), затем full suite.
 - **Definition of Done:** полный verify bundle зелёный.
+
+Closeout:
+
+- секторные verify-прогоны (`tests/architecture`, `tests/unit`) доведены до
+  стабильного зелёного состояния;
+- полный `pytest tests -q` повторно подтверждён после targeted stability fixes
+  в compatibility/governance и scripts-inventory scan;
+- `ruff`, `mypy`, dependency-map check и compatibility snapshot check
+  повторно подтверждены;
+- отдельный coverage artifact не понадобился для closeout, потому что целевой
+  confidence baseline уже подтверждён полным verify bundle.
 
 ### RF-012. Config Topology Closeout
 

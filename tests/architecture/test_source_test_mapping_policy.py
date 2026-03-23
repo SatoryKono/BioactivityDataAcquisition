@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
@@ -13,9 +12,8 @@ TEST_ROOT = ROOT / "tests" / "unit"
 INVENTORY_PATH = ROOT / "configs" / "quality" / "source_test_mapping_exceptions.yaml"
 
 
-def _load_inventory() -> dict[str, object]:
-    with INVENTORY_PATH.open(encoding="utf-8") as inventory_file:
-        payload = yaml.safe_load(inventory_file) or {}
+def _load_inventory(config_yaml_cache: dict[Path, object]) -> dict[str, object]:
+    payload = config_yaml_cache.get(INVENTORY_PATH) or {}
     assert isinstance(payload, dict), (
         "source_test_mapping_exceptions.yaml must be a mapping"
     )
@@ -42,8 +40,10 @@ def _expected_same_path_test(source_path: Path) -> Path:
 
 
 @pytest.mark.architecture
-def test_source_test_mapping_inventory_exists_and_has_shape() -> None:
-    payload = _load_inventory()
+def test_source_test_mapping_inventory_exists_and_has_shape(
+    config_yaml_cache: dict[Path, object],
+) -> None:
+    payload = _load_inventory(config_yaml_cache)
     assert payload.get("version"), "Missing version in source-test mapping inventory"
     assert payload.get("policy_scope") == "thin_packages"
 
@@ -62,8 +62,10 @@ def test_source_test_mapping_inventory_exists_and_has_shape() -> None:
 
 
 @pytest.mark.architecture
-def test_thin_package_modules_have_same_path_tests_or_documented_exemption() -> None:
-    payload = _load_inventory()
+def test_thin_package_modules_have_same_path_tests_or_documented_exemption(
+    config_yaml_cache: dict[Path, object],
+) -> None:
+    payload = _load_inventory(config_yaml_cache)
     exemptions = {
         str(row["source"]): row
         for row in payload.get("exemptions", [])
@@ -88,8 +90,10 @@ def test_thin_package_modules_have_same_path_tests_or_documented_exemption() -> 
 
 
 @pytest.mark.architecture
-def test_source_test_mapping_exemptions_reference_existing_files() -> None:
-    payload = _load_inventory()
+def test_source_test_mapping_exemptions_reference_existing_files(
+    config_yaml_cache: dict[Path, object],
+) -> None:
+    payload = _load_inventory(config_yaml_cache)
     thin_sources = {
         path.relative_to(ROOT).as_posix() for path in _iter_thin_package_modules()
     }

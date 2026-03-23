@@ -2,9 +2,13 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.6 | Дата: 2026-03-20 | Синхронизировано с ORCHESTRATION.md v4.1, RULES.md v5.24*
+*Версия: 1.0.6 | Дата: 2026-03-20 | Синхронизировано с Codex ORCHESTRATION.md v4.1, RULES.md v5.24*
 
-> **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md`.
+> **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md` и может оставаться на другой версии без automatic drift claim.
+
+> **Surface note:** этот файл является project memory entry point внутри
+> `docs/00-project/ai/memory/`; role-specific `memory-py-*.md` sheets дополняют
+> его, а не заменяют runtime source или canonical governance docs.
 
 > **Назначение**: Полный контекст для быстрого онбординга новой AI-сессии в BioETL.
 > При старте новой сессии — попроси агент прочитать этот файл:

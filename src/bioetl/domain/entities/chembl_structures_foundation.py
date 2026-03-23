@@ -19,11 +19,8 @@ class ChemblPublication(PublicationEntityBase):
     chembl_release: str | None = None
     creation_date: str | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
+        super()._validate_invariants()
         if not self.publication_id:
             raise ValueError("ChemblPublication publication_id is required")
 
@@ -38,10 +35,6 @@ class ChemblPublicationTerm(BaseEntity):
     mesh_id: str | None = None
     qualifier: str | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if not self.publication_id:
             raise ValueError("Document ChEMBL ID is required")
@@ -49,6 +42,10 @@ class ChemblPublicationTerm(BaseEntity):
             raise ValueError("Term text is required")
         if not self.term_type:
             raise ValueError("Term type is required")
+        self._validate_term_type()
+
+    def _validate_term_type(self) -> None:
+        """Validate controlled vocabulary membership for term_type."""
         valid_term_types = {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}
         if self.term_type not in valid_term_types:
             raise ValueError(
@@ -80,10 +77,6 @@ class Target(BaseEntity):
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if not self.target_id:
             raise ValueError("Target ChEMBL ID is required")
@@ -104,10 +97,6 @@ class TargetComponent(BaseEntity):
     protein_classifications: str | None = None
     protein_classification_id: int | None = None
     protein_classification_ids: list[int] | None = None
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
 
     def _validate_invariants(self) -> None:
         if not self.component_id:
@@ -130,15 +119,15 @@ class CellLine(BaseEntity):
     cl_lincs_id: str | None = None
     efo_id: str | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if not self.cell_id:
             raise ValueError("Cell ChEMBL ID is required")
         if not self.cell_name:
             raise ValueError("Cell name is required")
+        self._validate_taxonomy_id()
+
+    def _validate_taxonomy_id(self) -> None:
+        """Validate taxonomy id semantics when source organism is present."""
         if (
             self.cell_source_taxonomy_id is not None
             and self.cell_source_taxonomy_id < 1

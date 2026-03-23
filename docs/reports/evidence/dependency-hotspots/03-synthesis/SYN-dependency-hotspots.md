@@ -2,17 +2,17 @@
 
 ## Executive Summary
 
-- The current architecture is structurally disciplined at the layer-policy level: the generated dependency map reports `0` violations across `1195` scanned modules, so the main problem is not forbidden imports but concentration inside allowed seams. (EV-dependency-hotspots-module-map-zero-layer-violations)
+- The current architecture is structurally disciplined at the layer-policy level: the generated dependency map still reports `0` layer-policy violations on the refreshed baseline, so the main problem is not forbidden imports but concentration inside allowed seams. (EV-dependency-hotspots-module-map-zero-layer-violations)
 - Cross-layer pressure is concentrated around a relatively small set of allowed seams, especially `application.composite -> domain.composite`, `composition.factories -> application.core`, `composition.bootstrap -> application.composite`, and `interfaces.cli -> application.services`. (EV-dependency-hotspots-cross-layer-pressure-centers-on-composite-factories-cli)
-- The hotspot inventory is broad by size and narrow by LOC: `95` files exceed `10 KB`, but only `17` exceed `350 LOC`. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
-- The dense overlap tail is overwhelmingly infrastructure-heavy, with `src/bioetl/infrastructure/adapters` alone holding `7` of the `17` files that exceed both thresholds. (EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)
+- The hotspot inventory is broad by size and narrower by LOC: the current tree still has a meaningfully wider `>10 KB` tail than `>350 LOC` tail, so LOC-only triage would undercount dense modules. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
+- The overlap tail has shifted over time and should now be read as a moving concentration signal rather than a fixed package ranking snapshot. (EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)
 - Size-only hotspots matter materially: the single largest file, `silver_publications.py`, is `17131` bytes while still below the LOC cutoff, which means LOC-only programs would miss some of the densest maintenance surfaces. (EV-dependency-hotspots-largest-size-files-extend-beyond-loc-tail)
 
 ## Key Insights
 
 ### Insight 1: Import-discipline and maintainability pressure are separate concerns in the current codebase
 
-- Observation: The module dependency map is clean at the policy level, but still shows `248` cross-layer module-group edges and several high-volume allowed seams. (EV-dependency-hotspots-module-map-zero-layer-violations, EV-dependency-hotspots-cross-layer-pressure-centers-on-composite-factories-cli)
+- Observation: The module dependency map is clean at the policy level, but it still shows several high-volume allowed seams and concentrated cross-layer pressure. (EV-dependency-hotspots-module-map-zero-layer-violations, EV-dependency-hotspots-cross-layer-pressure-centers-on-composite-factories-cli)
 - Implication: The next refactoring wave should target structural concentration and navigation cost, not just illegal imports. A green layer-policy signal does not mean the graph is easy to evolve.
 - Confidence: 0.93
 - Evidence:
@@ -21,17 +21,17 @@
 
 ### Insight 2: The hotspot problem is a wide size tail, not only a small set of giant LOC offenders
 
-- Observation: `95` files exceed `10 KB`, while only `17` exceed `350 LOC`. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
+- Observation: the `>10 KB` tail remains materially broader than the `>350 LOC` tail on the current baseline. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
 - Implication: If backlog prioritization looks only at LOC, it will undercount the actual maintainability surface. The project has a broad layer of dense modules that are large enough to be difficult even when they stay under coarse line-count caps.
 - Confidence: 0.93
 - Evidence:
   - EV-dependency-hotspots-95-files-exceed-10kb
   - EV-dependency-hotspots-17-files-exceed-350-loc
 
-### Insight 3: The densest hotspot tail is strongly infrastructure-centric
+### Insight 3: The densest hotspot tail should be treated as a moving maintenance signal, not a permanent package verdict
 
-- Observation: `12` of the `17` files above `350 LOC` are in `infrastructure`, and `src/bioetl/infrastructure/adapters` contains `7` of the `17` overlap hotspots. (EV-dependency-hotspots-17-files-exceed-350-loc, EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)
-- Implication: The first decomposition wave should probably start in infrastructure, especially adapters and storage-adjacent mixins, because that is where the most concentrated large-file debt currently sits.
+- Observation: earlier scans concentrated the overlap tail in infrastructure adapters, while the refreshed summary layer already shows a more split picture across CLI, storage, schemas, config, quality, and application seams. (EV-dependency-hotspots-17-files-exceed-350-loc, EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)
+- Implication: prioritization should use current summary-layer interpretation plus fresh metrics, not historical package rankings from one scan.
 - Confidence: 0.92
 - Evidence:
   - EV-dependency-hotspots-17-files-exceed-350-loc
@@ -39,7 +39,7 @@
 
 ### Insight 4: Interfaces and selected application seams are still part of the hotspot core, not just spillover noise
 
-- Observation: The overlap set still contains `interfaces/cli` hotspots such as `command.py` and `command_policy.py`, plus application-side hotspots in `pubmed` extractors and DQ/statistics helpers. (EV-dependency-hotspots-17-files-exceed-350-loc, EV-dependency-hotspots-cross-layer-pressure-centers-on-composite-factories-cli)
+- Observation: the hotspot core still includes `interfaces/cli` and selected application/service seams, not just infrastructure-heavy modules. (EV-dependency-hotspots-17-files-exceed-350-loc, EV-dependency-hotspots-cross-layer-pressure-centers-on-composite-factories-cli)
 - Implication: A hotspot program limited to infrastructure would leave at least one meaningful pressure seam untouched: the CLI/service boundary and selected application pipeline helpers still need explicit treatment.
 - Confidence: 0.89
 - Evidence:
@@ -124,5 +124,5 @@
 ## Top Insights
 
 1. The project’s main structural issue is concentrated pressure inside allowed seams, not broken layer rules. (EV-dependency-hotspots-module-map-zero-layer-violations, EV-dependency-hotspots-cross-layer-pressure-centers-on-composite-factories-cli)
-2. The hotspot inventory is much broader by size (`95`) than by LOC (`17`), so LOC-only triage would miss a large share of dense modules. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
-3. The densest hotspot package today is `src/bioetl/infrastructure/adapters`, which should be a prime candidate for the first decomposition wave. (EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)
+2. The hotspot inventory is materially broader by size than by LOC, so LOC-only triage would miss a large share of dense modules. (EV-dependency-hotspots-95-files-exceed-10kb, EV-dependency-hotspots-17-files-exceed-350-loc)
+3. Hotspot prioritization should follow fresh summary-layer interpretation and current metrics rather than one historical package ranking snapshot. (EV-dependency-hotspots-infrastructure-adapters-dominates-overlap-tail)

@@ -14,6 +14,10 @@ __all__ = [
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.core.batch_execution._contracts import (
+    BatchExecutionCountersSnapshot,
+)
+
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
@@ -99,16 +103,6 @@ class _BatchTracingLifecyclePort(Protocol):
     def end_span_with_shutdown(self, span: Span | None) -> None: ...
 
 
-class _BatchExecutionStateSnapshot(Protocol):
-    """Counter snapshot required to finalize one executor run."""
-
-    records_fetched: int
-    records_bronze: int
-    records_silver: int
-    records_gold: int
-    records_quarantined: int
-
-
 def prepare_execution_context(
     *,
     limit: int | None,
@@ -152,7 +146,7 @@ class BatchExecutionLifecycleService:
 
     async def finalize_execution(
         self,
-        execution_state: _BatchExecutionStateSnapshot,
+        execution_state: BatchExecutionCountersSnapshot,
         lifecycle_context: BatchExecutionLifecycleContext,
         *,
         batch_size_reductions: int,
@@ -197,7 +191,7 @@ class BatchExecutionLifecycleService:
     @staticmethod
     def _build_finalization_context(
         *,
-        execution_state: _BatchExecutionStateSnapshot,
+        execution_state: BatchExecutionCountersSnapshot,
         lifecycle_context: BatchExecutionLifecycleContext,
         batch_size_reductions: int,
         min_batch_size_used: int,

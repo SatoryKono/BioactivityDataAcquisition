@@ -118,3 +118,17 @@ def test_dependency_map_generated_markdown_uses_canonical_generator_path() -> No
     assert "scripts/qa/generate_architecture_dependency_map.py" in markdown, (
         "Generated dependency-map markdown should point to the canonical generator"
     )
+
+
+def test_dependency_map_generated_markdown_declares_scope_boundary() -> None:
+    markdown = Path(
+        "docs/02-architecture/generated/module-dependency-map.md"
+    ).read_text(encoding="utf-8")
+    assert "layer-policy and coarse topology snapshot only" in markdown, (
+        "Generated dependency-map markdown must declare that it is a policy/"
+        "topology snapshot, not a general architecture health score."
+    )
+    assert "not a hotspot, duplication, size, or churn scorecard" in markdown, (
+        "Generated dependency-map markdown must keep the boundary between "
+        "blocking import-policy drift and separate hotspot metrics."
+    )

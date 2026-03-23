@@ -3,6 +3,10 @@
 **Создано объектов evidence:** 7
 **Gate Статус:** PASSED
 
+Примечание о rebaseline: hotspot interpretation still holds on the current
+tree, while the dependency-map side of the signal was re-confirmed as green
+during `RF-011`.
+
 ## Сводка evidence
 
 | ID | Claim Summary | Confidence |
@@ -18,7 +22,7 @@
 ## Ключевые выводы
 
 - The architecture remains import-disciplined, but the dependency map still shows concentrated cross-layer pressure around composite orchestration, composition wiring, and CLI-service seams.
-- The broad hotspot inventory is still a size problem first: 82 files exceed 10 KB, while only 10 files exceed 350 LOC.
+- The broad hotspot inventory is still a size problem first: the current summary baseline remains materially wider by `>10 KB` than by `>350 LOC`, even after the recent cleanup waves.
 - The overlap tail is no longer adapter-dominant; it now repeats most clearly in `src/bioetl/interfaces/cli/commands`, with the remaining tail spread across storage, schemas, config, quality, and application pipeline/service seams.
 - Size-only hotspots still matter: `silver_publications.py` remains above the byte threshold but below the LOC cutoff.
 

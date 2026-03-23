@@ -13,7 +13,8 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.domain.ports import NoOpPiiHasher, PiiHasherPort
+from bioetl.domain.ports import PiiHasherPort
+from bioetl.domain.ports.noop import NoOpPiiHasher
 from bioetl.infrastructure.security.pii_hasher import SaltConfig, Sha256PiiHasher
 
 

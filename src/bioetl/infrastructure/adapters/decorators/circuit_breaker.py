@@ -37,6 +37,14 @@ from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState, HealthStatus, JsonDict
+from bioetl.infrastructure.adapters.decorators._circuit_breaker_support import (
+    log_failure_recorded,
+    log_manual_reset,
+    raise_if_circuit_open,
+)
+from bioetl.infrastructure.adapters.decorators._circuit_breaker_support import (
+    unhealthy_status_if_circuit_open as unhealthy_status_for_open_circuit,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -111,41 +119,11 @@ class CircuitBreakerDataSourceDecorator:
         Raises:
             CircuitBreakerOpenError: If circuit is OPEN.
         """
-        state = self.circuit_breaker.get_state()
-        if state == CircuitBreakerState.OPEN:
-            if self.logger:
-                self.logger.warning(
-                    "circuit_breaker_rejecting",
-                    provider=self.provider_name,
-                    state=state.value,
-                    failure_count=self.circuit_breaker.get_failure_count(),
-                )
-            retry_after = float(getattr(self.circuit_breaker, "recovery_timeout", 60.0))
-            raise CircuitBreakerOpenError(
-                provider=self.provider_name,
-                retry_after=retry_after,
-            )
-
-    def _record_success(self) -> None:
-        """Record successful operation to circuit breaker."""
-        # The circuit_breaker.call() method handles success recording
-        # but since we're not using call(), we need to reset on success
-        # For now, the adapter-level circuit breaker handles this
-
-    def _record_failure(self, exc: Exception) -> None:
-        """Record failed operation to circuit breaker.
-
-        The actual failure recording is handled by circuit_breaker.call()
-        when used with fetch_with_cb_protection.
-        """
-        if self.logger:
-            self.logger.warning(
-                "circuit_breaker_failure_recorded",
-                provider=self.provider_name,
-                state=self.circuit_breaker.get_state().value,
-                failure_count=self.circuit_breaker.get_failure_count(),
-                error_type=type(exc).__name__,
-            )
+        raise_if_circuit_open(
+            circuit_breaker=self.circuit_breaker,
+            provider_name=self.provider_name,
+            logger=self.logger,
+        )
 
     async def fetch(
         self,
@@ -196,7 +174,7 @@ class CircuitBreakerDataSourceDecorator:
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Iterate protected fetch and record non-circuit errors."""
         try:
-            async for record in self._fetch_with_protection(
+            async for record in self.data_source.fetch(
                 entity_type=entity_type,
                 limit=limit,
                 query=query,
@@ -208,32 +186,13 @@ class CircuitBreakerDataSourceDecorator:
         except CircuitBreakerOpenError:
             raise
         except BioETLError as exc:
-            self._record_failure(exc)
+            log_failure_recorded(
+                self.logger,
+                circuit_breaker=self.circuit_breaker,
+                provider_name=self.provider_name,
+                error=exc,
+            )
             raise
-
-    async def _fetch_with_protection(
-        self,
-        entity_type: str,
-        limit: int | None,
-        query: str | None,
-        filter_ids: list[str] | None,
-        filter_field: str | None,
-        offset: int | None = None,
-    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Internal fetch implementation with circuit breaker protection.
-
-        The circuit breaker's call() method expects an awaitable function,
-        but fetch() is an async generator. This helper bridges the two.
-        """
-        async for record in self.data_source.fetch(
-            entity_type=entity_type,
-            limit=limit,
-            query=query,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            offset=offset,
-        ):
-            yield record
 
     async def health_check(self) -> HealthStatus:
         """Check health with circuit breaker protection.
@@ -243,17 +202,13 @@ class CircuitBreakerDataSourceDecorator:
         Returns:
             Health status from the wrapped data source or UNHEALTHY if circuit open.
         """
-        state = self.circuit_breaker.get_state()
-
-        # If circuit is open, report unhealthy without checking
-        if state == CircuitBreakerState.OPEN:
-            if self.logger:
-                self.logger.info(
-                    "health_check_skipped_circuit_open",
-                    provider=self.provider_name,
-                    failure_count=self.circuit_breaker.get_failure_count(),
-                )
-            return HealthStatus.UNHEALTHY
+        open_circuit_status = unhealthy_status_for_open_circuit(
+            circuit_breaker=self.circuit_breaker,
+            provider_name=self.provider_name,
+            logger=self.logger,
+        )
+        if open_circuit_status is not None:
+            return open_circuit_status
 
         try:
             result = await self.circuit_breaker.call(self.data_source.health_check)
@@ -289,8 +244,4 @@ class CircuitBreakerDataSourceDecorator:
         Use with caution - bypasses normal recovery logic.
         """
         self.circuit_breaker.reset()
-        if self.logger:
-            self.logger.info(
-                "circuit_breaker_manual_reset",
-                provider=self.provider_name,
-            )
+        log_manual_reset(self.logger, provider_name=self.provider_name)

@@ -35,3 +35,8 @@ class _DefaultContractPolicy:
             "_dq_warn",
         ]
     )
+
+
+DefaultContractPolicy = _DefaultContractPolicy
+
+__all__ = ["DefaultContractPolicy", "_DefaultContractPolicy"]

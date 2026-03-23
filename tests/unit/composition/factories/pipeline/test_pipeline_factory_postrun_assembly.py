@@ -12,6 +12,9 @@ from bioetl.application.core.postrun.compact_orchestrator import PostrunCompactS
 from bioetl.application.core.postrun.dq_report_orchestrator import (
     PostrunDQReportService,
 )
+from bioetl.application.core.postrun.metadata_write_service import (
+    PostrunMetadataWriteService,
+)
 from bioetl.application.core.postrun.metadata_version_resolver import (
     PostrunMetadataVersionResolver,
 )
@@ -116,8 +119,6 @@ class TestBuildPostrunService:
             logger=logger,
             dependencies=dependencies,
             tracer=ANY,
-            metadata_coordinator=pipeline.services.metadata_coordinator,
-            metadata_writer=pipeline.services.metadata_writer,
         )
 
     def test_build_postrun_service_passes_outer_wiring_to_dependencies(self) -> None:
@@ -156,12 +157,15 @@ class TestBuildPostrunService:
         mock_build_dependencies.assert_called_once_with(
             config=pipeline.config,
             runtime=pipeline.runtime,
+            context=pipeline.context,
             storage=pipeline.services.storage,
             logger_port=logger,
             dq_report_service=pipeline.services.dq_report_service,
             bronze_dq_config=bronze_config,
             silver_dq_config=silver_config,
             gold_dq_config=gold_config,
+            metadata_coordinator=pipeline.services.metadata_coordinator,
+            metadata_writer=pipeline.services.metadata_writer,
         )
         assert service is postrun_service
         mock_postrun_service_cls.assert_called_once()
@@ -179,9 +183,11 @@ class TestBuildPostrunDependencyContext:
         runtime = MagicMock()
         storage = MagicMock()
         logger = MagicMock()
+        context = MagicMock()
         cleanup = MagicMock(spec=PostrunCleanupService)
         dq_report = MagicMock(spec=PostrunDQReportService)
         metadata_version = MagicMock(spec=PostrunMetadataVersionResolver)
+        metadata_write = MagicMock(spec=PostrunMetadataWriteService)
         compact = MagicMock(spec=PostrunCompactService)
 
         with (
@@ -198,6 +204,10 @@ class TestBuildPostrunDependencyContext:
                 return_value=metadata_version,
             ),
             patch(
+                "bioetl.composition.factories.pipeline.postrun_assembly.PostrunMetadataWriteService",
+                return_value=metadata_write,
+            ),
+            patch(
                 "bioetl.composition.factories.pipeline.postrun_assembly.PostrunCompactService",
                 return_value=compact,
             ),
@@ -205,6 +215,7 @@ class TestBuildPostrunDependencyContext:
             dependencies = build_postrun_dependency_context(
                 config=config,
                 runtime=runtime,
+                context=context,
                 storage=storage,
                 logger_port=logger,
             )
@@ -212,19 +223,22 @@ class TestBuildPostrunDependencyContext:
         assert isinstance(dependencies, PostrunDependencyContext)
         assert dependencies.cleanup_orchestrator is cleanup
         assert dependencies.dq_report_orchestrator is dq_report
-        assert dependencies.metadata_version_resolver is metadata_version
+        assert dependencies.metadata_write_orchestrator is metadata_write
         assert dependencies.compact_orchestrator is compact
 
     def test_build_postrun_dependency_context_propagates_inputs(self) -> None:
         """The shared dependency builder should wire runtime, configs, and allowlists."""
         config = MagicMock()
         runtime = MagicMock()
+        context = MagicMock()
         storage = MagicMock()
         logger = MagicMock()
         dq_report_service = MagicMock()
         bronze_config = MagicMock()
         silver_config = MagicMock()
         gold_config = MagicMock()
+        metadata_coordinator = MagicMock()
+        metadata_writer = MagicMock()
         with (
             patch(
                 "bioetl.composition.factories.pipeline.postrun_assembly.PostrunCleanupService",
@@ -236,18 +250,24 @@ class TestBuildPostrunDependencyContext:
                 "bioetl.composition.factories.pipeline.postrun_assembly.PostrunMetadataVersionResolver",
             ) as mock_metadata_cls,
             patch(
+                "bioetl.composition.factories.pipeline.postrun_assembly.PostrunMetadataWriteService",
+            ) as mock_metadata_write_cls,
+            patch(
                 "bioetl.composition.factories.pipeline.postrun_assembly.PostrunCompactService",
             ) as mock_compact_cls,
         ):
             build_postrun_dependency_context(
                 config=config,
                 runtime=runtime,
+                context=context,
                 storage=storage,
                 logger_port=logger,
                 dq_report_service=dq_report_service,
                 bronze_dq_config=bronze_config,
                 silver_dq_config=silver_config,
                 gold_dq_config=gold_config,
+                metadata_coordinator=metadata_coordinator,
+                metadata_writer=metadata_writer,
             )
 
         cleanup_allowlist = mock_cleanup_cls.call_args.kwargs["warning_allowlist"]
@@ -273,6 +293,22 @@ class TestBuildPostrunDependencyContext:
         metadata_allowlist = mock_metadata_cls.call_args.kwargs["warning_allowlist"]
         assert OSError in metadata_allowlist
         assert BioETLError not in metadata_allowlist
+        assert mock_metadata_write_cls.call_args.kwargs["config"] is config
+        assert mock_metadata_write_cls.call_args.kwargs["runtime"] is runtime
+        assert mock_metadata_write_cls.call_args.kwargs["context"] is context
+        assert mock_metadata_write_cls.call_args.kwargs["storage"] is storage
+        assert (
+            mock_metadata_write_cls.call_args.kwargs["metadata_coordinator"]
+            is metadata_coordinator
+        )
+        assert (
+            mock_metadata_write_cls.call_args.kwargs["metadata_writer"]
+            is metadata_writer
+        )
+        assert (
+            mock_metadata_write_cls.call_args.kwargs["metadata_version_resolver"]
+            == mock_metadata_cls.return_value
+        )
         assert mock_compact_cls.call_args.kwargs["config"] is config
         assert mock_compact_cls.call_args.kwargs["storage"] is storage
         assert mock_compact_cls.call_args.kwargs["logger"] is logger

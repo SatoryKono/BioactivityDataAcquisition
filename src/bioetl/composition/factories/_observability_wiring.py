@@ -62,7 +62,7 @@ def _create_cached_bronze_data_source(
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
     """Create CachedBronzeDataSource for reading from Bronze cache."""
-    from bioetl.domain.ports import NoOpMetrics
+    from bioetl.domain.ports.noop import NoOpMetrics
     from bioetl.infrastructure.adapters import CachedBronzeDataSource
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 

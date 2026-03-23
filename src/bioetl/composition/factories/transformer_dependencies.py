@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.application.core.base_transformer.contract_policy import (
-    _DefaultContractPolicy,
+    DefaultContractPolicy,
 )
 from bioetl.application.core.base_transformer.types import (
     TransformerDependencyContext,
@@ -12,11 +12,13 @@ from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
     MetricsPort,
+    PiiHasherPort,
+    TracingPort,
+)
+from bioetl.domain.ports.noop import (
     NoOpMetrics,
     NoOpPiiHasher,
     NoOpTracing,
-    PiiHasherPort,
-    TracingPort,
 )
 from bioetl.domain.services import DataNormalizationService, IdentityService
 
@@ -46,6 +48,6 @@ def build_transformer_dependencies(
             else DataNormalizationService()
         ),
         contract_policy=(
-            contract_policy if contract_policy is not None else _DefaultContractPolicy()
+            contract_policy if contract_policy is not None else DefaultContractPolicy()
         ),
     )

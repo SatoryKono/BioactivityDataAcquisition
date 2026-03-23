@@ -9,9 +9,11 @@ import pytest
 from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
+    TracingPort,
+)
+from bioetl.domain.ports.noop import (
     NoOpMetrics,
     NoOpTracing,
-    TracingPort,
 )
 from bioetl.infrastructure.observability import tracing as tracing_module
 from bioetl.infrastructure.observability.logging import create_logger

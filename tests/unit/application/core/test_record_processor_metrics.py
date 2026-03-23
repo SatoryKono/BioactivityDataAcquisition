@@ -13,7 +13,8 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
-from bioetl.domain.ports import MetricsPort, NoOpTracing
+from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import BatchID, RunType, ValidationResult
 
 

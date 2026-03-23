@@ -91,10 +91,6 @@ class Assay(BaseEntity):
     assay_classifications: str | None = None  # JSON string of list
     assay_parameters: str | None = None  # JSON string of list
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        self._validate_invariants()
-
     def _validate_invariants(self) -> None:
         if not self.assay_id:
             raise ValueError("Assay ChEMBL ID is required")

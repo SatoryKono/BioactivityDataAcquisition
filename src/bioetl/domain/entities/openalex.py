@@ -69,12 +69,9 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Override: Default source for OpenAlex
     _source: str = "openalex"
 
-    def __post_init__(self) -> None:
-        """Post-initialization validation.
-
-        Validates that openalex_id is provided (required for OpenAlex publications).
-        """
-        super().__post_init__()
+    def _validate_invariants(self) -> None:
+        """Validate OpenAlex-specific publication invariants."""
+        super()._validate_invariants()
         if not self.openalex_id:
             raise ValueError("OpenAlex Publication ID is required")
 

@@ -3,7 +3,11 @@
 **Создано объектов evidence:** 15  
 **Gate Статус:** PASSED
 
-Revalidated against the current repository state on 2026-03-21.
+Revalidated against the current repository state on 2026-03-23.
+
+Примечание о rebaseline: after `RF-011`, the full verify baseline reconfirmed
+that the dependency-map checks, architecture suites, and related enforcement
+guardrails are green on the active tree.
 
 ## Сводка evidence
 
@@ -62,6 +66,7 @@ Total: 5/5 minimum ✓ GATE PASSED
 - The repository still has a clear five-layer model, and the most important distinction is that `composition` remains a separate DI/assembly root rather than being folded into `interfaces`.
 - The architectural style is not ambiguous: active docs repeatedly converge on Hexagonal Architecture, Medallion data flow, DDD-style domain modeling, and constructor-based DI.
 - The current baseline is not held together only by prose. The generated dependency map reports zero layer-policy violations, and targeted architecture suites for layer dependencies, bootstrap/composition boundaries, and interface/DI guardrails all pass locally.
+- The enforcement story is now fresher than in the initial pass: `RF-011` re-confirmed the same green baseline through a full verify refresh rather than a one-off architecture-only snapshot.
 
 ## Отмеченные противоречия
 

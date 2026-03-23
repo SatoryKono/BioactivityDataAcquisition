@@ -9,13 +9,15 @@ source tree.  A single session-scoped parse pass (~1.5 s) replaces
 from __future__ import annotations
 
 import ast
+import hashlib
 from pathlib import Path
 import pickle
 
 import pytest
+import yaml
 
 
-_CACHE_VERSION = 1
+_CACHE_VERSION = 2
 
 
 def _cache_dir(project_root: Path) -> Path:
@@ -34,6 +36,16 @@ def _path_signature(path: Path) -> tuple[int, int]:
     """Return a cheap file signature based on mtime and size."""
     stat = path.stat()
     return stat.st_mtime_ns, stat.st_size
+
+
+def _text_signature(text: str) -> tuple[int, str]:
+    """Return a content-derived signature for parse caches.
+
+    Using the text payload avoids stale AST/YAML reuse when a file's parsed
+    cache survives but the raw text cache was refreshed independently.
+    """
+    digest = hashlib.blake2b(text.encode("utf-8"), digest_size=16).hexdigest()
+    return len(text), digest
 
 
 def _load_pickle_cache(path: Path) -> dict[str, object]:
@@ -113,7 +125,7 @@ def _build_ast_cache(
 
     for path, content in text_cache.items():
         key = _cache_key(path)
-        signature = _path_signature(path)
+        signature = _text_signature(content)
         entry = cached_entries.get(key)
         if isinstance(entry, dict) and tuple(entry.get("sig", ())) == signature:
             tree = entry.get("ast")
@@ -130,6 +142,48 @@ def _build_ast_cache(
 
         result[path] = tree
         updated_entries[key] = {"sig": signature, "ast": tree}
+        changed = True
+
+    if changed or len(updated_entries) != len(cached_entries):
+        _write_pickle_cache(
+            cache_file,
+            {"version": _CACHE_VERSION, "entries": updated_entries},
+        )
+    return result
+
+
+def _build_yaml_cache(
+    text_cache: dict[Path, str],
+    cache_file: Path,
+) -> dict[Path, object]:
+    """Reuse parsed YAML payloads for unchanged files across pytest sessions."""
+    payload = _load_pickle_cache(cache_file)
+    cached_entries = payload.get("entries", {})
+    if not isinstance(cached_entries, dict):
+        cached_entries = {}
+
+    result: dict[Path, object] = {}
+    updated_entries: dict[str, object] = {}
+    changed = False
+
+    for path, text in text_cache.items():
+        key = _cache_key(path)
+        signature = _text_signature(text)
+        entry = cached_entries.get(key)
+        if isinstance(entry, dict) and tuple(entry.get("sig", ())) == signature:
+            if "yaml" in entry:
+                result[path] = entry["yaml"]
+                updated_entries[key] = entry
+                continue
+
+        try:
+            parsed = yaml.safe_load(text)
+        except yaml.YAMLError:
+            changed = True
+            continue
+
+        result[path] = parsed
+        updated_entries[key] = {"sig": signature, "yaml": parsed}
         changed = True
 
     if changed or len(updated_entries) != len(cached_entries):
@@ -206,3 +260,81 @@ def test_ast_cache(
     """Parsed AST of every test file."""
     cache_file = _cache_dir(project_root) / "test_ast_cache.pkl"
     return _build_ast_cache(test_content_cache, cache_file)
+
+
+# ---------------------------------------------------------------------------
+# Documentation / workflow / config text caches
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="session")
+def docs_markdown_files(project_root: Path) -> list[Path]:
+    """Sorted list of all markdown files under docs/."""
+    docs_root = project_root / "docs"
+    return sorted(p for p in docs_root.rglob("*.md") if "__pycache__" not in p.parts)
+
+
+@pytest.fixture(scope="session")
+def docs_text_cache(
+    project_root: Path,
+    docs_markdown_files: list[Path],
+) -> dict[Path, str]:
+    """Raw UTF-8 text of every docs markdown file."""
+    cache_file = _cache_dir(project_root) / "docs_text_cache.pkl"
+    return _build_text_cache(docs_markdown_files, cache_file)
+
+
+@pytest.fixture(scope="session")
+def workflow_yaml_files(project_root: Path) -> list[Path]:
+    """Sorted list of workflow YAML files under .github/workflows."""
+    workflows_root = project_root / ".github" / "workflows"
+    return sorted(workflows_root.glob("*.yml")) if workflows_root.exists() else []
+
+
+@pytest.fixture(scope="session")
+def workflow_text_cache(
+    project_root: Path,
+    workflow_yaml_files: list[Path],
+) -> dict[Path, str]:
+    """Raw UTF-8 text of every workflow YAML file."""
+    cache_file = _cache_dir(project_root) / "workflow_text_cache.pkl"
+    return _build_text_cache(workflow_yaml_files, cache_file)
+
+
+@pytest.fixture(scope="session")
+def workflow_yaml_cache(
+    project_root: Path,
+    workflow_text_cache: dict[Path, str],
+) -> dict[Path, object]:
+    """Parsed YAML payload of every workflow file."""
+    cache_file = _cache_dir(project_root) / "workflow_yaml_cache.pkl"
+    return _build_yaml_cache(workflow_text_cache, cache_file)
+
+
+@pytest.fixture(scope="session")
+def config_yaml_files(project_root: Path) -> list[Path]:
+    """Sorted list of YAML files under configs/."""
+    configs_root = project_root / "configs"
+    return sorted(
+        p for p in configs_root.rglob("*.yaml") if "__pycache__" not in p.parts
+    )
+
+
+@pytest.fixture(scope="session")
+def config_text_cache(
+    project_root: Path,
+    config_yaml_files: list[Path],
+) -> dict[Path, str]:
+    """Raw UTF-8 text of every config YAML file."""
+    cache_file = _cache_dir(project_root) / "config_text_cache.pkl"
+    return _build_text_cache(config_yaml_files, cache_file)
+
+
+@pytest.fixture(scope="session")
+def config_yaml_cache(
+    project_root: Path,
+    config_text_cache: dict[Path, str],
+) -> dict[Path, object]:
+    """Parsed YAML payload of every config file."""
+    cache_file = _cache_dir(project_root) / "config_yaml_cache.pkl"
+    return _build_yaml_cache(config_text_cache, cache_file)

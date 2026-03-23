@@ -21,9 +21,20 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common._title_fallback_flow import (
+    get_fallback_title,
     iter_missing_doi_fallback_records,
     iter_title_only_fallback_records,
+    truncate_title,
 )
+
+
+def _event_property(name: str) -> property:
+    """Build provider-scoped event-name property."""
+
+    def _getter(instance: BaseTitleFallbackHandler) -> str:
+        return instance._event_name(name)
+
+    return property(_getter)
 
 
 class BaseTitleFallbackHandler(ABC):
@@ -65,42 +76,19 @@ class BaseTitleFallbackHandler(ABC):
         self._logger = logger
         self._provider_prefix = provider_prefix
 
-    def _event_name(self, suffix: str, default: str) -> str:
-        """Return provider-scoped event name or default."""
+    def _event_name(self, name: str) -> str:
+        """Return provider-scoped event name or the base event name."""
         if self._provider_prefix:
-            return f"{self._provider_prefix}_{suffix}"
-        return default
+            return f"{self._provider_prefix}_{name}"
+        return name
 
-    @property
-    def _event_no_fallback_title(self) -> str:
-        return self._event_name("no_fallback_title", "no_fallback_title")
-
-    @property
-    def _event_fallback_attempt(self) -> str:
-        return self._event_name("title_fallback_attempt", "title_fallback_attempt")
-
-    @property
-    def _event_fallback_success(self) -> str:
-        return self._event_name("title_fallback_success", "title_fallback_success")
-
-    @property
-    def _event_fallback_not_found(self) -> str:
-        return self._event_name(
-            "title_fallback_not_found",
-            "title_fallback_not_found",
-        )
-
-    @property
-    def _event_title_only_attempt(self) -> str:
-        return self._event_name("title_only_attempt", "title_only_attempt")
-
-    @property
-    def _event_title_only_success(self) -> str:
-        return self._event_name("title_only_success", "title_only_success")
-
-    @property
-    def _event_title_only_not_found(self) -> str:
-        return self._event_name("title_only_not_found", "title_only_not_found")
+    _event_no_fallback_title = _event_property("no_fallback_title")
+    _event_fallback_attempt = _event_property("title_fallback_attempt")
+    _event_fallback_success = _event_property("title_fallback_success")
+    _event_fallback_not_found = _event_property("title_fallback_not_found")
+    _event_title_only_attempt = _event_property("title_only_attempt")
+    _event_title_only_success = _event_property("title_only_success")
+    _event_title_only_not_found = _event_property("title_only_not_found")
 
     @abstractmethod
     async def _search_by_title(
@@ -154,35 +142,6 @@ class BaseTitleFallbackHandler(ABC):
         result["_original_id"] = original_doi
         return result
 
-    def _get_fallback_title(
-        self, doi: str, normalized_doi: str | None, fallback_mapping: dict[str, str]
-    ) -> str | None:
-        """Get fallback title for a DOI from mapping.
-
-        Args:
-            doi: Original DOI string.
-            normalized_doi: Normalized DOI string (lowercase, without URL prefix).
-            fallback_mapping: Mapping from DOI to title.
-
-        Returns:
-            Title if found in mapping, None otherwise.
-        """
-        if normalized_doi:
-            return fallback_mapping.get(doi) or fallback_mapping.get(normalized_doi)
-        return fallback_mapping.get(doi)
-
-    def _truncate_title(self, title: str, max_len: int = 50) -> str:
-        """Truncate title for logging.
-
-        Args:
-            title: Title to truncate.
-            max_len: Maximum length before truncation.
-
-        Returns:
-            Truncated title with ellipsis if needed.
-        """
-        return title[:max_len] + "..." if len(title) > max_len else title
-
     async def process_missing_dois(
         self,
         dois: list[str],
@@ -218,8 +177,8 @@ class BaseTitleFallbackHandler(ABC):
             normalize_fn=normalize_fn,
             limit=limit,
             fetched=fetched,
-            get_fallback_title=self._get_fallback_title,
-            truncate_title=self._truncate_title,
+            get_fallback_title=get_fallback_title,
+            truncate_title=truncate_title,
             search_by_title=self._search_by_title,
             get_result_identifier=self._get_result_identifier,
             process_found_result=self._process_found_result,
@@ -283,7 +242,7 @@ class BaseTitleFallbackHandler(ABC):
             fallback_mapping=fallback_mapping,
             limit=limit,
             fetched=fetched,
-            truncate_title=self._truncate_title,
+            truncate_title=truncate_title,
             search_by_title=self._search_by_title,
             get_result_identifier=self._get_result_identifier,
             process_title_only_result=self._process_title_only_result,
