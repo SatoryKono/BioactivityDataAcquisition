@@ -2,30 +2,25 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 4.1 | Дата: 2026-03-10 | Supersedes v4.0 | Платформа: Codex CLI*
+*Версия: 4.0 | Дата: 2026-03-10 | Supersedes v3.0 | Платформа: Codex CLI*
 
 ## 1. Обзор
 
-Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).
 
-**Запуск логического профиля в Codex runtime:**
+**Запуск субагента:**
 ```
-spawn_agent(
-  agent_type="default",
-  message="Follow .codex/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/."
-)
+Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
 ```
-
-> Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`.
 
 | # | Субагент (`subagent_type`) | Model | Роль | Артефакт |
 |:-:|----------------------------|-------|------|----------|
-| I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `review_py-audit-bot_{YYYYMMDD}_{HHMM}_{phase}.md` |
-| II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `review_py-plan-bot_{YYYYMMDD}_{HHMM}.md` |
-| III | **py-test-bot** | sonnet | Тестирование | `review_py-test-bot_{YYYYMMDD}_{HHMM}.md` |
-| IV | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `review_py-config-bot_{YYYYMMDD}_{HHMM}.md` |
-| V | **py-debug-bot** | opus | Отладка падений | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md` |
-| VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md` |
+| I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `00-audit-baseline.md`, `07-audit-final.md` |
+| II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `01-plan-initial.md`, `03-plan-updated.md` |
+| III | **py-test-bot** | sonnet | Тестирование | `02-test-baseline.md`, `05-test-final.md` |
+| IV | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
+| V | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
+| VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `06-doc-update-log.md` |
 | VII | **py-test-swarm** | opus | Иерархическое тестирование (L1→L2→L3) | test reports |
 | VIII | **py-doc-swarm** | opus | Иерархическое документирование, drift detection | doc reports |
 | IX | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
@@ -46,8 +41,9 @@ spawn_agent(
 
 ### Определения субагентов
 
-Файлы: `.codex/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
+Файлы: `.claude/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
 
+---
 ## 1.1 Evidence Calibration
 
 Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:
@@ -78,20 +74,20 @@ Operational defaults:
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ① py-audit-bot (baseline)   │──→ review_py-audit-bot_{YYYYMMDD}_{HHMM}_baseline.md
+│  ① py-audit-bot (baseline)   │──→ 00-audit-baseline.md
 │  Аудит целевого фрагмента   │
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ② py-plan-bot (initial)     │──→ review_py-plan-bot_{YYYYMMDD}_{HHMM}.md
+│  ② py-plan-bot (initial)     │──→ 01-plan-initial.md
 │  Формирование плана RF-*    │
 │  (+консолидация с user plan)│
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ③ py-test-bot (baseline)    │──→ review_py-test-bot_{YYYYMMDD}_{HHMM}.md
+│  ③ py-test-bot (baseline)    │──→ 02-test-baseline.md
 │  Фиксация состояния тестов  │
 └─────────────┬───────────────┘
               │
@@ -103,13 +99,13 @@ Operational defaults:
 ┌─────────────┤    │
 │ py-debug-bot│    │
 │→ py-test-bot│    │
-│ (цикл)      │──→ review_py-debug-bot_{YYYYMMDD}_{HHMM}.md
+│ (цикл)      │──→ 04-refactoring-log.md (debug-секции)
 └──────┬──────┘    │
        │           │
        ▼           │
 ┌──────────────┐   │
 │ py-plan-bot  │   │
-│ (update)     │──→ review_py-plan-bot_{YYYYMMDD}_{HHMM}.md
+│ (update)     │──→ 03-plan-updated.md
 └──────┬───────┘   │
        │           │
        ◄───────────┘
@@ -118,16 +114,16 @@ Operational defaults:
 ┌─────────────────────────────────────────────────────┐
 │  ④ РЕАЛИЗАЦИЯ (параллельно по зонам ответственности) │
 │                                                       │
-│  orchestrator ─→ src/bioetl/ ──→ direct edits in scope │
+│  orchestrator ─→ src/bioetl/ ──→ 04-refactoring-log.md│
 │       │                                                │
 │       ├─ (entity scaffolding?) ──→ py-config-bot        │
 │       │                                                │
-│  py-config-bot → configs/  ──→ review_py-config-bot_{YYYYMMDD}_{HHMM}.md │
+│  py-config-bot → configs/  ──→ 04a-config-log.md       │
 └─────────────────────┬───────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────┐
-│  ⑤ py-test-bot (final)       │──→ review_py-test-bot_{YYYYMMDD}_{HHMM}.md
+│  ⑤ py-test-bot (final)       │──→ 05-test-final.md
 │  Финальный прогон тестов    │
 └─────────────┬───────────────┘
               │
@@ -146,13 +142,13 @@ Operational defaults:
        │
        ▼
 ┌─────────────────────────────┐
-│  ⑥ py-doc-bot                │──→ review_py-doc-bot_{YYYYMMDD}_{HHMM}.md
+│  ⑥ py-doc-bot                │──→ 06-doc-update-log.md
 │  Обновление docs/docstrings │
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ⑦ py-audit-bot (final)      │──→ review_py-audit-bot_{YYYYMMDD}_{HHMM}_final.md
+│  ⑦ py-audit-bot (final)      │──→ 07-audit-final.md
 │  Финальная верификация       │
 └─────────────────┬───────────┘
                   │
@@ -176,7 +172,6 @@ Operational defaults:
 ```
 
 ---
-
 ## 3. Матрица взаимодействий
 
 | Отправитель → | py-plan-bot | py-test-bot | py-config-bot | py-debug-bot | py-doc-bot | py-audit-bot |
@@ -211,20 +206,21 @@ py-config-bot (DQ migration)
 ## 4. Структура артефактов
 
 ```
-reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
+reports/plans/<task_id>/
+├── 00-audit-baseline.md      ← py-audit-bot (baseline)
+├── 01-plan-initial.md        ← py-plan-bot (initial)
+├── 02-test-baseline.md       ← py-test-bot (baseline)
+├── 03-plan-updated.md        ← py-plan-bot (update)          [опционально]
+├── 04-refactoring-log.md     ← orchestrator + py-debug-bot
+├── 04a-config-log.md         ← py-config-bot
+├── 05-test-final.md          ← py-test-bot (final)
+├── 06-doc-update-log.md      ← py-doc-bot
+└── 07-audit-final.md         ← py-audit-bot (final)
 ```
-
-Правило: любой агент/субагент формирует итоговый отчёт только по этому пути
-(LLM = вызывающая модель, agent = профиль/skill, `phase` — опциональный
-суффикс для baseline/final/targeted, если это закреплено в contract
-конкретного `py-*` профиля). Дополнительные артефакты (телеметрия, метрики,
-промежуточные планы) сохраняйте рядом в той же директории, но итоговый отчёт
-должен соответствовать шаблону
-`reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md`.
 
 Требования к каждому файлу (минимум):
 
-- Дата/время создания (UTC), LLM, agent
+- Дата/время создания
 - Scope (файлы/модули)
 - Команды верификации
 - Ссылки на `RF-*` / `DBG-*` / `AUD-*` / `DOC-*` / `CFG-*` идентификаторы
@@ -232,7 +228,6 @@ reports/{LLM}/review_{agent}_{YYYYMMDD}_{HHMM}[_{phase}].md
 - Статус: `done` / `in_progress` / `blocked` / `escalated`
 
 ---
-
 ## 5. Протоколы принятия решений
 
 ### 5.1. Когда пропустить шаг
@@ -461,14 +456,14 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 > этапы эволюции orchestration-модели и не переопределяют текущий runtime
 > `v4.x`.
 
-### v4.1 (2026-03-10)
+### v3.0 (2026-03-10)
 
 - **PLATFORM**: основной runtime зафиксирован как Codex CLI
 - **ADDED**: `.codex/agents/CODEX-RUNTIME.md` для маппинга logical profiles → native agent roles
 - **CHANGED**: source-of-truth ссылки переключены на `.codex/agents/`
 - **CHANGED**: примеры запуска адаптированы под `spawn_agent(...)`
 
-### v4.0 (2026-03-04)
+### v3.0 (2026-03-04)
 
 - **REMOVED**: `py-code-bot` — production code now written directly by orchestrator
 - **MERGED**: `py-diagram-bot` into `py-doc-bot` (diagrams are documentation artifacts)
@@ -490,7 +485,7 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 - **CHANGED**: §9a — Skill Activation Protocol → Инлайнированные знания
 - **NEW**: Ссылки на `.claude/agents/py-*.md` вместо `SUBAGENT.md`
 
-### v2.2 (2026-02-07)
+### v3.0 (2026-02-07)
 
 - **NEW**: §10 — MCP & Tools Integration (матрицы 7×7 для MCP-серверов и Platform Tools)
 - **NEW**: Секция `## MCP Tools` добавлена во все 7 SUBAGENT.md (сценарии, workflows, параметры)
@@ -499,14 +494,14 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 - **NEW**: §10.4 — 8 типовых MCP workflows (schema drift, golden data, contract testing, etc.)
 - **CHANGED**: §10 (Changelog) → §11 (ренумерация)
 
-### v2.1 (2026-02-07)
+### v3.0 (2026-02-07)
 
 - **NEW**: §9a — Skill Activation Protocol (маппинг 7 навыков на 7 субагентов)
 - **NEW**: Секция `## Skills` добавлена во все 7 SUBAGENT.md (primary + secondary skills с путями и триггерами)
 - **NEW**: Секция `## Rule References` добавлена во все 7 SUBAGENT.md ([RULES-§], [ADR-], [INV:], [GLOSS:])
 - **NEW**: §9a.3 — формат ссылок на правила с verification-командами
 
-### v2.0 (2026-02-07)
+### v3.0 (2026-02-07)
 
 - **NEW**: `py-code-bot` — написание production-кода (`src/bioetl/`), файловая зона `src/`
 - **NEW**: `py-config-bot` — управление конфигурациями (`configs/`), файловая зона `configs/`
@@ -520,6 +515,6 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 - **CHANGED**: Матрица взаимодействий расширена до 7×7
 - **CHANGED**: Счёт subagent-ов: 5 → 7
 
-### v1.0 (2026-02-07)
+### v3.0 (2026-02-07)
 
 - Initial release: py-audit-bot, py-plan-bot, py-test-bot, py-debug-bot, py-doc-bot

@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.6 | Дата: 2026-03-20 | Синхронизировано с Codex ORCHESTRATION.md v4.1, RULES.md v5.24*
+*Версия: 1.0.6 | Дата: 2026-03-20 | Синхронизировано с Codex ORCHESTRATION.md v4.0, RULES.md v5.24*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; Claude сохраняет отдельную runtime-specific copy в `.claude/agents/ORCHESTRATION.md` и может оставаться на другой версии без automatic drift claim.
 
