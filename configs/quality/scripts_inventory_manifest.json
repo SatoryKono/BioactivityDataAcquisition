@@ -1,19 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-22T22:28:29.264376+00:00",
+  "generated_at": "2026-03-21T17:11:12.737176+00:00",
   "summary": {
     "total_scripts": 196,
     "status_counts": {
       "active": 95,
       "legacy": 6,
-      "orphan": 84,
-      "unknown": 11
+      "orphan": 81,
+      "unknown": 14
     },
     "reference_group_coverage": {
       "build": 28,
       "ci": 39,
-      "docs": 53,
+      "docs": 63,
       "scripts": 41,
+      "skills": 3,
       "tests": 37
     }
   },
@@ -252,18 +253,104 @@
     {
       "path": "scripts/ci/_compatibility_registry.py",
       "type": "py",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 29,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py` already loads the YAML and exposes the shared registry contract"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 52,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 66,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 248,
+          "source_group": "docs",
+          "text": "- shared loader contract is active through `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/SUMMARY.md",
+          "line": 15,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-refactor/SUMMARY.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_registry.py` already acts as the shared loader contract."
+        }
+      ]
     },
     {
       "path": "scripts/ci/_compatibility_telemetry.py",
       "type": "py",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 16,
+      "references": [
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 33,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py` and `tests/architecture/test_compatibility_telemetry_reporting.py` already derive counters from YAML"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py`"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 95,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"tests/architecture/test_compatibility_telemetry_reporting.py; docs/02-architecture/07-compatibility-facade-inventory.md; scripts/ci/_compatibility_telemetry.py\""
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/ci/_compatibility_telemetry.py; docs/02-architecture/07-compatibility-facade-inventory.md\""
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
+          "line": 15,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes `measured_paths = inventory_paths | _iter_docstring_tracked_modules(...)`, so telemetry uses its own trac"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/03-synthesis/SYN-compatibility-registry-curated-ssot-drift.md",
+          "line": 36,
+          "source_group": "docs",
+          "text": "`scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes snapshot counts by combining inventory rows with an AST scan. The telemetry reporting test then re-parses t"
+        }
+      ]
     },
     {
       "path": "scripts/ci/apply-ci-optimizations-fixed.ps1",
@@ -334,10 +421,34 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
+          "line": 442,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/ci/quality_integral_gate.py \\"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-skip-conditioned-confidence-now-uses-canonical-buckets.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-50; scripts/ci/quality_integral_gate.py:340-790; tests/unit/scripts/ci/test_quality_integral_gate.py:1-220\""
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-test-health-taxonomy-is-machine-readable-and-non-blocking.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-31; scripts/ci/quality_integral_gate.py:340-786; tests/unit/scripts/ci/test_quality_integral_gate.py:13-170\""
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/RAW-coverage-governance-2026-03-21.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/ci/quality_integral_gate.py`"
+        },
+        {
+          "path": "makefile",
           "line": 442,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/ci/quality_integral_gate.py \\"
@@ -349,13 +460,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
           "line": 30,
           "source_group": "ci",
           "text": "uv run python scripts/ci/report_quality_debt_weekly.py \\"
+        },
+        {
+          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/EV-technical-debt-complexity-hotspots-policy-implies-further-burndown-to-zero.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"configs/quality/debt_scorecard.yaml:80-85; configs/quality/debt_scorecard.yaml:153-167; configs/quality/debt_scorecard.yaml:182-186; scripts/ci/report_quality_debt_weekly.py:91-125; scripts/ci/r"
+        },
+        {
+          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/RAW-complexity-hotspots-2026-03-20.md",
+          "line": 11,
+          "source_group": "docs",
+          "text": "- `scripts/ci/report_quality_debt_weekly.py`"
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
@@ -370,7 +493,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -385,10 +508,40 @@
           "text": "$(PY_RUN) scripts/ci/run_pytest_resilient.py"
         },
         {
-          "path": "tests/architecture/test_ci_test_strategy.py",
-          "line": 16,
-          "source_group": "tests",
-          "text": "assert \"scripts/ci/run_pytest_resilient.py\" in workflow, ("
+          "path": "docs/reports/evidence/project-test-health/06-backlog/BACKLOG-project-test-health-implementation-2026-03-20.md",
+          "line": 57,
+          "source_group": "docs",
+          "text": "- [`run_pytest_resilient.py`](../../../../../scripts/ci/run_pytest_resilient.py)"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/ORCHESTRATION.md",
+          "line": 25,
+          "source_group": "docs",
+          "text": "- `scripts/ci/run_pytest_resilient.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/failure-stability/02-evidence/failure-stability/EV-project-test-health-failure-stability-ci-uses-resilient-runner-for-worker-crash-fallback.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \".github/workflows/tests.yml:310-356; scripts/ci/run_pytest_resilient.py:1-24; scripts/ci/run_pytest_resilient.py:70-79\""
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/failure-stability/02-evidence/failure-stability/RAW-failure-stability-2026-03-20.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/ci/run_pytest_resilient.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/failure-stability/02-evidence/failure-stability/RAW-failure-stability-2026-03-20.md",
+          "line": 24,
+          "source_group": "docs",
+          "text": "- it uses `scripts/ci/run_pytest_resilient.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 94,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/ci/run_pytest_resilient.py"
         }
       ]
     },
@@ -428,7 +581,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -438,6 +591,12 @@
         },
         {
           "path": "Makefile",
+          "line": 338,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
+        },
+        {
+          "path": "makefile",
           "line": 338,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
@@ -455,7 +614,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -465,6 +624,12 @@
         },
         {
           "path": "Makefile",
+          "line": 339,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
+        },
+        {
+          "path": "makefile",
           "line": 339,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
@@ -997,8 +1162,26 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-tooling-and-validator-scope.yaml",
+          "line": 7,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/__main__.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 6,
+          "source_group": "docs",
+          "text": "- `scripts/diagrams/__main__.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": "- `scripts/diagrams/__main__.py` exposes lint, check, fix, render, and nightly commands for the diagram estate."
+        },
         {
           "path": "tests/architecture/test_diagram_description_index_contracts.py",
           "line": 75,
@@ -1102,7 +1285,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1139,6 +1322,18 @@
           "line": 115,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-svg-primary-contract-is-already-rationalized.yaml",
+          "line": 7,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/check_diagram_artifacts.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-svg-primary-contract.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/diagrams/check_diagram_artifacts.py; scripts/diagrams/README.md; docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md; .github/workflows/docs.yml\""
         }
       ]
     },
@@ -1203,9 +1398,17 @@
       "path": "scripts/diagrams/check_diagram_visual_smoke.py",
       "type": "py",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 96,
+          "source_group": "skills",
+          "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 47,
@@ -1255,7 +1458,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "Makefile",
@@ -1280,6 +1483,18 @@
           "line": 266,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 244,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/class.bundle.pdf"
+        },
+        {
+          "path": "makefile",
+          "line": 245,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/diagrams/bundles/foundation.bundle.pdf"
         }
       ]
     },
@@ -1288,7 +1503,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1343,10 +1558,23 @@
     {
       "path": "scripts/diagrams/diagram_paths.py",
       "type": "py",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-tooling-and-validator-scope.yaml",
+          "line": 9,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/diagram_paths.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 8,
+          "source_group": "docs",
+          "text": "- `scripts/diagrams/diagram_paths.py`"
+        }
+      ]
     },
     {
       "path": "scripts/diagrams/diagram_paths.sh",
@@ -1448,8 +1676,38 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/plans/documentation-drift-remediation-plan-2026-03-20.md",
+          "line": 108,
+          "source_group": "docs",
+          "text": "1. `./.venv/Scripts/python.exe scripts/diagrams/generate_all_bundles.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-bundles-embed-svg-and-fall-back-to-png.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/diagrams/generate_all_bundles.py; docs/02-architecture/diagrams/bundles/architecture.bundle.md; docs/02-architecture/diagrams/bundles/class.bundle.md; scripts/diagrams/README.md\""
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-bundles-now-render-svg-first.yaml",
+          "line": 6,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/generate_all_bundles.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagram-artifact-surface/diagram-publication-state/02-evidence/diagram-publication-state/EV-diagram-publication-state-svg-primary-bundle-contract.yaml",
+          "line": 6,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/generate_all_bundles.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/diagrams/generate_all_bundles.py`"
+        },
         {
           "path": "scripts/diagrams/generate_architecture_bundle.py",
           "line": 5,
@@ -1507,7 +1765,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
@@ -1520,6 +1778,12 @@
           "line": 263,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 236,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_docx.py"
         }
       ]
     },
@@ -1528,7 +1792,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
@@ -1541,6 +1805,12 @@
           "line": 262,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 232,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py"
         }
       ]
     },
@@ -1569,9 +1839,17 @@
       "path": "scripts/diagrams/lint_diagrams.py",
       "type": "py",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 28,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 31,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 92,
+          "source_group": "skills",
+          "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 60,
@@ -1611,12 +1889,6 @@
         {
           "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
           "line": 426,
-          "source_group": "docs",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint_diagrams.py\" \\"
-        },
-        {
-          "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
-          "line": 497,
           "source_group": "docs",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint_diagrams.py\" \\"
         }
@@ -1684,10 +1956,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "Makefile",
+          "line": 256,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/report_diagram_padding.py --top 30"
+        },
+        {
+          "path": "makefile",
           "line": 256,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/diagrams/report_diagram_padding.py --top 30"
@@ -1756,7 +2034,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
@@ -1769,6 +2047,12 @@
           "line": 264,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
+        },
+        {
+          "path": "makefile",
+          "line": 240,
+          "source_group": "build",
+          "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         }
       ]
     },
@@ -1831,7 +2115,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -1850,6 +2134,12 @@
           "line": 62,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
+        },
+        {
+          "path": "makefile",
+          "line": 210,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         }
       ]
     },
@@ -1866,7 +2156,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -1893,6 +2183,12 @@
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
         {
+          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-uniform-sizing-supports-class-diagram-maintenance.yaml",
+          "line": 6,
+          "source_group": "docs",
+          "text": "- scripts/diagrams/uniform_diagram_sizes.py"
+        },
+        {
           "path": "tests/architecture/test_uniform_diagram_group_width.py",
           "line": 12,
           "source_group": "tests",
@@ -1904,9 +2200,17 @@
       "path": "scripts/diagrams/validate_mermaid_syntax.sh",
       "type": "sh",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 14,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 18,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 93,
+          "source_group": "skills",
+          "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 146,
@@ -1948,12 +2252,6 @@
           "line": 93,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/README.md",
-          "line": 301,
-          "source_group": "docs",
-          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json"
         }
       ]
     },
@@ -1978,7 +2276,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -2035,10 +2333,22 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
+          "line": 540,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
+        },
+        {
+          "path": "docs/reports/evidence/project-test-health/06-backlog/BACKLOG-project-test-health-implementation-2026-03-20.md",
+          "line": 243,
+          "source_group": "docs",
+          "text": "- `uv run python scripts/docs/check_doc_drift.py --runtime-mirrors --freshness`"
+        },
+        {
+          "path": "makefile",
           "line": 540,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
@@ -2056,7 +2366,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 42,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -2113,10 +2423,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "Makefile",
+          "line": 535,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
+        },
+        {
+          "path": "makefile",
           "line": 535,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
@@ -2492,10 +2808,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
+          "line": 83,
+          "source_group": "build",
+          "text": "@bash scripts/ops/setup_plugins.sh"
+        },
+        {
+          "path": "makefile",
           "line": 83,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_plugins.sh"
@@ -2519,10 +2841,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "Makefile",
+          "line": 86,
+          "source_group": "build",
+          "text": "@bash scripts/ops/setup_skills.sh"
+        },
+        {
+          "path": "makefile",
           "line": 86,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_skills.sh"
@@ -2705,7 +3033,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 50,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -2762,7 +3090,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
@@ -2795,22 +3123,22 @@
           "text": "> Generated by `scripts/qa/generate_compatibility_facade_snapshot.py`. Do not edit manually."
         },
         {
-          "path": "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
-          "line": 79,
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 30,
           "source_group": "docs",
-          "text": "- `./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --check`"
+          "text": "- `scripts/qa/generate_compatibility_facade_snapshot.py` already provides `--check` / `--update` snapshot tooling"
         },
         {
-          "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 150,
-          "source_group": "tests",
-          "text": "\"./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --check\","
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 53,
+          "source_group": "docs",
+          "text": "- `scripts/qa/generate_compatibility_facade_snapshot.py`"
         },
         {
-          "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 151,
-          "source_group": "tests",
-          "text": "\"./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --update\","
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 117,
+          "source_group": "docs",
+          "text": "- `scripts/qa/generate_compatibility_facade_snapshot.py`"
         }
       ]
     },
@@ -3006,7 +3334,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -3049,6 +3377,12 @@
           "line": 259,
           "source_group": "docs",
           "text": "python3 scripts/repo/audit_root_cleanliness.py"
+        },
+        {
+          "path": "makefile",
+          "line": 340,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked"
         }
       ]
     },
@@ -3057,7 +3391,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -3067,6 +3401,18 @@
         },
         {
           "path": "Makefile",
+          "line": 565,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
+        },
+        {
+          "path": "docs/plans/compatibility-registry-refactor-plan-2026-03-21.md",
+          "line": 212,
+          "source_group": "docs",
+          "text": "4. `./.venv/Scripts/python.exe scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml`"
+        },
+        {
+          "path": "makefile",
           "line": 565,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
@@ -3090,7 +3436,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 18,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -3123,22 +3469,22 @@
           "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 65,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json`"
+          "path": "makefile",
+          "line": 545,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 67,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`"
+          "path": "makefile",
+          "line": 550,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
-          "path": "tests/architecture/test_quality_governance_workflow.py",
-          "line": 60,
-          "source_group": "tests",
-          "text": "assert \"scripts/repo/check_scripts_inventory.py\" in workflow"
+          "path": "makefile",
+          "line": 555,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md"
         }
       ]
     },
@@ -3174,7 +3520,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
@@ -3193,6 +3539,18 @@
           "line": 135,
           "source_group": "docs",
           "text": "| `make clean-preflight DRY_RUN=1` | Preview preflight-очистки через `scripts/repo/preflight_cleanup.sh` |"
+        },
+        {
+          "path": "makefile",
+          "line": 346,
+          "source_group": "build",
+          "text": "bash scripts/repo/preflight_cleanup.sh --dry-run; \\"
+        },
+        {
+          "path": "makefile",
+          "line": 348,
+          "source_group": "build",
+          "text": "bash scripts/repo/preflight_cleanup.sh; \\"
         }
       ]
     },
@@ -3314,7 +3672,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -3353,16 +3711,16 @@
           "text": "> кодовых контрактов скриптом `scripts/schema/generate_contracts.py`."
         },
         {
-          "path": "scripts/schema/generate_schema_artifacts.py",
-          "line": 172,
-          "source_group": "scripts",
-          "text": "[sys.executable, \"scripts/schema/generate_contracts.py\"],"
+          "path": "makefile",
+          "line": 579,
+          "source_group": "build",
+          "text": "uv run python scripts/schema/generate_contracts.py"
         },
         {
-          "path": "src/tools/scripts/generate_contracts.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "- scripts/schema/generate_contracts.py"
+          "path": "makefile",
+          "line": 581,
+          "source_group": "build",
+          "text": "$(VENV_PYTHON) scripts/schema/generate_contracts.py"
         }
       ]
     },
@@ -3401,7 +3759,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -3743,10 +4101,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "Makefile",
+          "line": 429,
+          "source_group": "build",
+          "text": "$(PY_RUN) src/tools/scripts/check_application_deps.py"
+        },
+        {
+          "path": "makefile",
           "line": 429,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_application_deps.py"
@@ -3758,7 +4122,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
@@ -3768,6 +4132,18 @@
         },
         {
           "path": "Makefile",
+          "line": 430,
+          "source_group": "build",
+          "text": "$(PY_RUN) src/tools/scripts/check_architecture.py"
+        },
+        {
+          "path": "makefile",
+          "line": 421,
+          "source_group": "build",
+          "text": "$(PY_RUN) src/tools/scripts/check_architecture.py"
+        },
+        {
+          "path": "makefile",
           "line": 430,
           "source_group": "build",
           "text": "$(PY_RUN) src/tools/scripts/check_architecture.py"

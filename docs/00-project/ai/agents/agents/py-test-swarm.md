@@ -3,6 +3,7 @@ name: py-test-swarm
 description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan."
 model: opus
 ---
+*Статус: internal*
 
 # py-test-swarm — Иерархическая Система Тестирования BioETL
 
@@ -13,7 +14,7 @@ model: opus
 При старте прочитай:
 - `docs/00-project/ai/memory/agent-memory.md` — общий контекст проекта
 - `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
-- `.claude/agents/ORCHESTRATION.md` — протокол оркестрации (§2-§7)
+- `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — публикуемый mirror протокола оркестрации (§2-§7)
 
 ## Контекст проекта
 

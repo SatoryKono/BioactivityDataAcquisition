@@ -71,6 +71,10 @@ FACADE_RATCHETS: dict[str, tuple[int, set[str]]] = {
         280,
         {"bioetl.infrastructure.adapters.pubmed._search_models"},
     ),
+    "src/bioetl/infrastructure/adapters/crossref/models.py": (
+        260,
+        {"bioetl.infrastructure.adapters.crossref._response_models"},
+    ),
 }
 
 MODEL_FACADE_FORBIDDEN_LOCAL_CLASSES: dict[str, set[str]] = {

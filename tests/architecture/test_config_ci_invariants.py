@@ -42,12 +42,6 @@ from bioetl.infrastructure.config.config_ci_contract import (
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
-import sys
-
-ROOT = Path(__file__).parent.parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
 from scripts.schema import check_config_invariants as invariant_script
 from scripts.schema.validate_pipeline_configs import _canonical_script
 
