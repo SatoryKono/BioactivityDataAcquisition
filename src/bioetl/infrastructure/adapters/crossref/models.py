@@ -29,9 +29,13 @@ from bioetl.infrastructure.adapters.crossref.models_shared import (
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.crossref._response_models import (
-        CrossRefMessage,
-        CrossRefPublicationResponse,
-        CrossRefPublicationsResponse,
+        CrossRefMessage as _CrossRefMessage,
+    )
+    from bioetl.infrastructure.adapters.crossref._response_models import (
+        CrossRefPublicationResponse as _CrossRefPublicationResponse,
+    )
+    from bioetl.infrastructure.adapters.crossref._response_models import (
+        CrossRefPublicationsResponse as _CrossRefPublicationsResponse,
     )
 
 __all__ = [
@@ -49,6 +53,10 @@ __all__ = [
     "CrossRefPublicationsResponse",
     "CrossRefReference",
 ]
+
+CrossRefMessage: type[_CrossRefMessage]
+CrossRefPublicationResponse: type[_CrossRefPublicationResponse]
+CrossRefPublicationsResponse: type[_CrossRefPublicationsResponse]
 
 # === Publication Record Model ===
 
