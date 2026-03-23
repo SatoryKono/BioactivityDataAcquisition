@@ -8,9 +8,9 @@
 - Curated inventory rows: `7`
 - Transition debt rows: `0`
 - Retained public entrypoints: `7`
-- Measured tracked modules: `12`
-- Measured-only modules outside curated inventory: `5`
-- Discovered docstring-tracked modules: `5`
+- Measured tracked modules: `14`
+- Measured-only modules outside curated inventory: `7`
+- Discovered docstring-tracked modules: `7`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 
@@ -28,9 +28,11 @@
 
 - `src/bioetl/application/composite/merger.py`
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
+- `src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/composition/factories/pipeline/config_resolution.py`
 - `src/bioetl/composition/factories/pipeline/configs.py`
+- `src/bioetl/composition/factories/pipeline/creation_api.py`
 - `src/bioetl/composition/factories/services/creation_api.py`
 - `src/bioetl/domain/composite/config.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
@@ -42,8 +44,10 @@
 ## Measured-Only Allowlist
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py` — owner: `bioetl.application.pipelines.chembl`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export surface for ChEMBL pipeline marker classes.
+- `src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py` — owner: `bioetl.composition.bootstrap.runtime`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility seam for composite DQ config externalization helpers.
 - `src/bioetl/composition/factories/pipeline/config_resolution.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for pipeline domain-config resolution helpers.
 - `src/bioetl/composition/factories/pipeline/configs.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for the canonical pipeline registry manifest.
+- `src/bioetl/composition/factories/pipeline/creation_api.py` — owner: `bioetl.composition.factories.pipeline`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for canonical pipeline creation wiring symbols.
 - `src/bioetl/composition/factories/services/creation_api.py` — owner: `bioetl.composition.factories.services`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for pipeline creation wiring symbols.
 - `src/bioetl/infrastructure/adapters/crossref/batch.py` — owner: `bioetl.infrastructure.adapters.crossref`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for CrossRef batch and pagination collaborators.
 
@@ -52,8 +56,10 @@
 ### Discovered Docstring-Tracked Modules
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
+- `src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py`
 - `src/bioetl/composition/factories/pipeline/config_resolution.py`
 - `src/bioetl/composition/factories/pipeline/configs.py`
+- `src/bioetl/composition/factories/pipeline/creation_api.py`
 - `src/bioetl/composition/factories/services/creation_api.py`
 - `src/bioetl/infrastructure/adapters/crossref/batch.py`
 

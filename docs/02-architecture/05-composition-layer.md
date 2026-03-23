@@ -98,7 +98,7 @@ composition/bootstrap/
 | Подпакет / Файл             | Ключевые компоненты                          | Назначение                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline/assembler.py`     | `GenericPipelineFactory`                     | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline/creation_api.py`  | `create_pipeline_factory()`, `assemble_runner()` | Узкий public surface для pipeline factory/runner assembly  |
+| `pipeline/creation_api.py`  | `_PipelineCreationInputs`, `_create_pipeline_with_services_impl` | Compatibility shim; canonical owner for these wiring contracts is `pipeline/_creation_wiring.py` |
 | `pipeline/registry.py`      | Реестр фабрик                                | Все зарегистрированные pipeline factories                      |
 | `pipeline/runner.py`        | `RunnerFactory`                              | Создание `PipelineRunner` с DI                                 |
 | `datasource/data_source_factory.py` | `DataSourceFactory`                 | Создает `DataSourcePort` для провайдера                        |
@@ -113,6 +113,7 @@ composition/bootstrap/
 
 Часть модулей в `composition/factories/`, `composition/services/` и `composition/runtime_builders/`
 сохраняет compatibility facade / shim роль ради стабильности import-paths во время рефакторинга.
+Новый first-party код должен предпочитать canonical owners напрямую, а не добавлять новые multi-hop imports через compat modules вроде `pipeline/config_resolution.py` или `pipeline/creation_api.py`.
 Курируемый список таких модулей, их status-модель и exit criteria ведутся в
 [Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
 

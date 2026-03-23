@@ -9,19 +9,21 @@ __all__ = [
 ]
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
-from bioetl.application.core.batch_processing_service_mixins import (
-    _BatchProcessingExecutionMixin,
-    _BatchProcessingMetadataMixin,
+from bioetl.application.core.batch_processing_support import (
+    BatchProcessingSupportService,
 )
 from bioetl.domain.ports import BatchIdGeneratorPort
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BatchID, BronzeRecord
+from bioetl.domain.models.metadata import SourceMetadata
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from opentelemetry.trace import Span
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
@@ -41,9 +43,7 @@ class BatchProcessingComponents:
     writer: BatchWriter
 
 
-class BatchProcessingService(
-    _BatchProcessingMetadataMixin, _BatchProcessingExecutionMixin
-):
+class BatchProcessingService:
     """Handles extract/transform/write processing for one ETL batch."""
 
     def __init__(
@@ -66,6 +66,14 @@ class BatchProcessingService(
         self._writer = components.writer
         self._tracing = tracing_manager
         self._batch_id_factory = batch_id_factory
+        self._support = BatchProcessingSupportService(
+            services=services,
+            logger=self._logger,
+            batch_metrics=self._batch_metrics,
+            transformer=self._transformer,
+            writer=self._writer,
+            tracing=self._tracing,
+        )
 
     async def extract_records(
         self,
@@ -111,34 +119,66 @@ class BatchProcessingService(
         source_metadata = self._get_source_metadata(query_string)
         span = self._tracing.start_batch_span(batch_id, len(records), start_index)
 
-        try:
-            bronze_result = await self._write_bronze_layer(
-                records,
-                batch_id,
-                ingestion_ts,
-                source_metadata,
-            )
-            transform_result = await self._transform_and_track_metrics(
-                records,
-                batch_id,
-                start_index,
-            )
-            await self._write_silver_gold_concurrent(
-                transform_result,
-                batch_id,
-                ingestion_ts,
-                [cast("BronzeWriteResult", bronze_result)] if bronze_result else None,
-            )
-            self._finalize_batch_span(span, records, transform_result)
+        return cast(
+            "BatchProcessingOutcome",
+            await self._support.execute_with_pipeline_failure_policy(
+                span=span,
+                work_coro=self._process_batch_work(
+                    records=records,
+                    batch_id=batch_id,
+                    start_index=start_index,
+                    ingestion_ts=ingestion_ts,
+                    source_metadata=source_metadata,
+                    span=span,
+                ),
+            ),
+        )
 
-            return BatchProcessingOutcome(
-                batch_id=batch_id,
-                bronze_result=cast("BronzeWriteResult | None", bronze_result),
-                silver_records=transform_result.silver_records,
-                gold_records=transform_result.gold_records,
-                quarantined_count=transform_result.quarantined_count,
-                filtered_out_count=transform_result.filtered_out_count,
-            )
-        except self._PIPELINE_EXECUTION_ERRORS as error:
-            self._tracing.end_span(span, error)
-            raise
+    def _get_source_metadata(
+        self,
+        query_string: str | None,
+    ) -> SourceMetadata | None:
+        """Delegate source metadata retrieval through the support service."""
+        return self._support.get_source_metadata(query_string)
+
+    async def _process_batch_work(
+        self,
+        *,
+        records: list[BronzeRecord],
+        batch_id: BatchID,
+        start_index: int,
+        ingestion_ts: datetime,
+        source_metadata: SourceMetadata | None,
+        span: Span | None,
+    ) -> BatchProcessingOutcome:
+        """Run the explicit Bronze/transform/Silver/Gold batch choreography."""
+        bronze_result = await self._support.write_bronze_layer(
+            records=records,
+            batch_id=batch_id,
+            ingestion_ts=ingestion_ts,
+            source_metadata=source_metadata,
+        )
+        transform_result = await self._support.transform_and_track_metrics(
+            records=records,
+            batch_id=batch_id,
+            start_index=start_index,
+        )
+        await self._support.write_silver_gold_concurrent(
+            transform_result=transform_result,
+            batch_id=batch_id,
+            ingestion_ts=ingestion_ts,
+            bronze_refs=self._support.build_bronze_refs(bronze_result),
+        )
+        self._support.finalize_batch_span(
+            span=span,
+            records=records,
+            transform_result=transform_result,
+        )
+        return BatchProcessingOutcome(
+            batch_id=batch_id,
+            bronze_result=cast("BronzeWriteResult | None", bronze_result),
+            silver_records=transform_result.silver_records,
+            gold_records=transform_result.gold_records,
+            quarantined_count=transform_result.quarantined_count,
+            filtered_out_count=transform_result.filtered_out_count,
+        )

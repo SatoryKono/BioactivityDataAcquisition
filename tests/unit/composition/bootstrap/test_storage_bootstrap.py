@@ -5,10 +5,13 @@ Tests the bootstrap functions for storage components used by CLI operations.
 
 from __future__ import annotations
 
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.storage import (
     _create_table_collector,
@@ -19,6 +22,16 @@ from bioetl.composition.bootstrap.cli.storage import (
 )
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition import PipelineRegistry
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+
+def _make_storage_settings(tmp_path: Path) -> SimpleNamespace:
+    """Create the minimal settings object required by storage bootstrap."""
+    return SimpleNamespace(
+        data_dir=str(tmp_path),
+        pipeline=SimpleNamespace(silver_resilience_enabled=False),
+    )
 
 
 @pytest.mark.unit
@@ -35,6 +48,63 @@ class TestBootstrapStorageAdapter:
         result = bootstrap_storage_adapter()
 
         assert isinstance(result, StorageAdapter)
+
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    def test_wires_output_paths_and_noop_loggers(
+        self,
+        mock_settings: MagicMock,
+        tmp_path: Path,
+    ) -> None:
+        """Bootstrap should wire writers to data/output with NoOp loggers."""
+        mock_settings.return_value = _make_storage_settings(tmp_path)
+
+        result = bootstrap_storage_adapter()
+        output_root = tmp_path / "output"
+
+        assert result.bronze.base_path == output_root / "bronze"
+        assert Path(result.silver.base_path) == output_root / "silver"
+        assert Path(result.gold.base_path) == output_root / "gold"
+        assert isinstance(result.bronze._logger, NoOpLogger)
+        assert isinstance(result.silver.logger, NoOpLogger)
+        assert isinstance(result.gold.logger, NoOpLogger)
+
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    def test_disables_csv_export_by_default(
+        self,
+        mock_settings: MagicMock,
+        tmp_path: Path,
+    ) -> None:
+        """Bootstrap should not wire CSV exporters unless explicitly enabled."""
+        mock_settings.return_value = _make_storage_settings(tmp_path)
+
+        result = bootstrap_storage_adapter()
+
+        assert result.silver.csv_exporter is None
+        assert result.gold.csv_exporter is None
+
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    def test_enables_csv_export_and_shares_composite_metadata_context(
+        self,
+        mock_settings: MagicMock,
+        tmp_path: Path,
+    ) -> None:
+        """CSV-enabled bootstrap should wire exporters and shared metadata context."""
+        mock_settings.return_value = _make_storage_settings(tmp_path)
+
+        result = bootstrap_storage_adapter(enable_csv_export=True)
+        output_root = tmp_path / "output"
+        metadata_coordinator = result.silver._metadata_coordinator
+
+        assert isinstance(result.silver.csv_exporter, CsvExporter)
+        assert isinstance(result.gold.csv_exporter, CsvExporter)
+        assert result.silver.csv_exporter.base_path == output_root / "silver"
+        assert result.gold.csv_exporter.base_path == output_root / "gold"
+        assert isinstance(metadata_coordinator, MetadataCoordinator)
+        assert metadata_coordinator is result.gold._metadata_coordinator
+        assert result.silver._metadata_writer is result.gold._metadata_writer
+        assert metadata_coordinator.run_context.pipeline_name == "composite"
+        assert metadata_coordinator.run_context.provider == "composite"
+        assert metadata_coordinator.run_context.entity == "merged"
 
 
 @pytest.mark.unit

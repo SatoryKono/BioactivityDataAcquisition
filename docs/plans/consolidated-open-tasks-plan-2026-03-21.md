@@ -203,7 +203,7 @@ adapter seams тоже доведены до helper-backed / guarded baseline, �
 
 ### RF-005. Application/Core duplication pressure
 
-Статус: first family slice completed on `2026-03-23`.
+Статус: bounded application/core slices completed on `2026-03-23`.
 
 Execution note:
 
@@ -221,6 +221,18 @@ Execution note:
   `application/core/postrun/_failure_policy.py`, а
   `dq_report_orchestrator.py` и `metadata_version_resolver.py`
   больше не держат раздельные копии этого policy path
+- следующим bounded slice выбран `application/core/batch_processing`
+- скрытая mixin-based state choreography убрана из
+  `application/core/batch_processing_service_mixins.py`
+  в явный support module
+  `application/core/batch_processing_support.py`
+- `BatchProcessingService` сохранил прежний публичный API, но orchestration
+  теперь читается через один helper/service seam вместо двух внутренних mixin
+- shared runtime failure policy для соседнего `application/core` family
+  централизована в `application/core/batch_runtime_failure_policy.py`
+- `batch_executor.py`, `batch_execution/run_service.py` и
+  `batch_processing_support.py` больше не держат локальные копии runtime
+  failure tuples
 
 ## Что не делать
 

@@ -86,7 +86,7 @@ def apply_convention_defaults(
     ]
     _apply_file_reference_defaults(config, provider, entity_type)
 
-    table_name = f"{provider}_{entity_type}"
+    table_name = f"{provider}.{entity_type}"
     config.setdefault("silver_table", table_name)
     config.setdefault("gold_table", table_name)
 

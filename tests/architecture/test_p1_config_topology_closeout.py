@@ -10,12 +10,25 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 
 CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
+    "src/bioetl/composition/bootstrap/runtime/config_loader.py": (
+        25,
+        {
+            "bioetl.infrastructure.config.composite_config_api",
+        },
+    ),
     "src/bioetl/composition/factories/pipeline/registry_manifest.py": (
         25,
         {
             "bioetl.composition.factories.pipeline._registry_manifest_chembl",
             "bioetl.composition.factories.pipeline._registry_manifest_non_chembl",
             "bioetl.composition.factories.pipeline.config_types",
+        },
+    ),
+    "src/bioetl/infrastructure/config/composite_config_api.py": (
+        115,
+        {
+            "bioetl.infrastructure.config._composite_dq_externalization",
+            "bioetl.infrastructure.schemas.composite_config",
         },
     ),
     "src/bioetl/infrastructure/config/dq_config_loader.py": (
@@ -40,9 +53,16 @@ CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
 }
 
 FORBIDDEN_IMPORT_PREFIXES: dict[str, tuple[str, ...]] = {
+    "src/bioetl/composition/bootstrap/runtime/config_loader.py": (
+        "bioetl.composition.bootstrap.runtime.composite_dq_loader",
+        "bioetl.infrastructure.schemas.composite_config",
+        "pydantic",
+        "yaml",
+    ),
     "src/bioetl/composition/factories/pipeline/registry_manifest.py": (
         "bioetl.infrastructure.config",
     ),
+    "src/bioetl/infrastructure/config/composite_config_api.py": ("bioetl.composition",),
     "src/bioetl/infrastructure/config/dq_config_loader.py": ("bioetl.composition",),
     "src/bioetl/infrastructure/config/pipeline_config_loader.py": (
         "bioetl.composition",

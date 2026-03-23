@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.composition.factories.pipeline.config_resolution import (
+from bioetl.infrastructure.config.pipeline_config_api import (
     load_pipeline_config,
 )
 from bioetl.composition.factories.pipeline.transformer_dependencies import (

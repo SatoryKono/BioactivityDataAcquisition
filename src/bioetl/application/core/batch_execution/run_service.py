@@ -12,12 +12,14 @@ from bioetl.application.core.batch_execution._contracts import (
     BatchExecutionCountersSnapshot,
     BatchExecutionMemoryState,
 )
+from bioetl.application.core.batch_runtime_failure_policy import (
+    PIPELINE_EXECUTION_ERRORS,
+)
 from bioetl.application.core.batch_execution.lifecycle import (
     BatchExecutionContext,
     BatchExecutionLifecycleContext,
     BatchExecutionLifecycleService,
 )
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
 
@@ -32,16 +34,6 @@ class _BatchExtractionLoopRunner(Protocol):
 
 class BatchExecutionRunService:
     """Coordinates one executor run across start, loop, and finalize paths."""
-
-    _PIPELINE_EXECUTION_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-    )
 
     def __init__(
         self,
@@ -92,7 +84,7 @@ class BatchExecutionRunService:
                 shutdown=True,
             )
             raise
-        except self._PIPELINE_EXECUTION_ERRORS as error:
+        except PIPELINE_EXECUTION_ERRORS as error:
             await self._execution_lifecycle.finalize_execution(
                 execution_state,
                 lifecycle_context,

@@ -13,6 +13,9 @@ from bioetl.application.core.batch_execution import (
     BatchExecutionRunService,
     prepare_execution_context,
 )
+from bioetl.application.core.batch_runtime_failure_policy import (
+    PIPELINE_EXECUTION_ERRORS,
+)
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_protocols import (
     BatchStateCommitPort,
@@ -30,7 +33,6 @@ from bioetl.application.core.lifecycle.batch_fsm import (
 from bioetl.domain.constants import (
     DEFAULT_CHECKPOINT_INTERVAL as _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL,
 )
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
@@ -61,17 +63,6 @@ class BatchResult:
     silver_count: int
     gold_count: int
     quarantined_count: int
-
-
-_BATCH_EXECUTOR_RUNTIME_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-    KeyError,
-    AttributeError,
-)
 
 
 class BatchExecutor(_BatchExecutorDQMixin):
@@ -230,7 +221,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
                     start_index=start_index,
                     query_string=self._query_string,
                 )
-            except _BATCH_EXECUTOR_RUNTIME_ERRORS:
+            except PIPELINE_EXECUTION_ERRORS:
                 self._fsm_state = self._fsm.advance(
                     self._fsm_state, BatchExecutionEvent.PROCESS_FAILED
                 ).new_state
@@ -248,7 +239,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
                         records=records,
                         outcome=outcome,
                     )
-                except _BATCH_EXECUTOR_RUNTIME_ERRORS:
+                except PIPELINE_EXECUTION_ERRORS:
                     self._fsm_state = self._fsm.advance(
                         self._fsm_state, BatchExecutionEvent.STATE_COMMIT_FAILED
                     ).new_state

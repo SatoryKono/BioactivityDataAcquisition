@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -104,6 +105,226 @@ class TestGenericPipelineFactory:
 
         result = factory.create_transformer()
         assert result is None
+
+    @patch("bioetl.composition.factories.pipeline.assembler.build_factory_services")
+    def test_build_services_forwards_filter_and_observability(
+        self,
+        mock_build_factory_services: MagicMock,
+    ) -> None:
+        """build_services should forward optional filter/tracing seams unchanged."""
+        expected_services = MagicMock()
+        mock_build_factory_services.return_value = expected_services
+        data_source_creator = MagicMock()
+        factory = GenericPipelineFactory(
+            pipeline_name="chembl_activity",
+            pipeline_class=MagicMock,
+            provider="chembl",
+            gold_schema=MagicMock(),
+            data_source_creator=data_source_creator,
+        )
+        settings = MagicMock()
+        logger = MagicMock()
+        config = MagicMock()
+        filter_config = MagicMock()
+        tracer = MagicMock()
+        dq_monitor = MagicMock()
+
+        result = factory.build_services(
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+        )
+
+        assert result is expected_services
+        mock_build_factory_services.assert_called_once_with(
+            pipeline_name="chembl_activity",
+            create_data_source_fn=data_source_creator,
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+        )
+
+    @patch(
+        "bioetl.composition.factories.pipeline.assembler.create_pipeline_instance_with_services"
+    )
+    def test_create_with_services_forwards_cached_bronze_and_metrics(
+        self,
+        mock_create_pipeline_with_services: MagicMock,
+    ) -> None:
+        """create_with_services should preserve optional runtime dependencies."""
+        expected_pipeline = MagicMock()
+        mock_create_pipeline_with_services.return_value = expected_pipeline
+        factory = GenericPipelineFactory(
+            pipeline_name="chembl_activity",
+            pipeline_class=MagicMock,
+            provider="chembl",
+            gold_schema=MagicMock(),
+            pandera_silver_schema=MagicMock(),
+            data_source_creator=MagicMock(),
+            transformer_class=MagicMock(),
+        )
+        run_id = "run-1"
+        runtime = MagicMock()
+        settings = MagicMock()
+        logger = MagicMock()
+        config = MagicMock()
+        filter_config = MagicMock()
+        tracer = MagicMock()
+        dq_monitor = MagicMock()
+        metrics = MagicMock()
+        cached_bronze = MagicMock()
+
+        result = factory.create_with_services(
+            run_id=run_id,
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
+        )
+
+        assert result is expected_pipeline
+        mock_create_pipeline_with_services.assert_called_once_with(
+            pipeline_name="chembl_activity",
+            pipeline_class=factory.pipeline_class,
+            provider="chembl",
+            create_data_source_fn=factory._create_data_source,
+            transformer_class=factory.transformer_class,
+            run_id=run_id,
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
+            pandera_silver_schema=factory.pandera_silver_schema,
+        )
+
+    @patch("bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config")
+    @patch("bioetl.composition.factories.pipeline.assembler.assemble_runner")
+    def test_create_runner_uses_explicit_config_and_observability_contract(
+        self,
+        mock_assemble_runner: MagicMock,
+        mock_load_pipeline_config: MagicMock,
+    ) -> None:
+        """create_runner should wire observability and preserve explicit config."""
+        pipeline = MagicMock()
+        runner = MagicMock()
+        mock_assemble_runner.return_value = runner
+        factory = GenericPipelineFactory(
+            pipeline_name="chembl_activity",
+            pipeline_class=MagicMock,
+            provider="chembl",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            data_source_creator=MagicMock(),
+        )
+        factory.create_with_services = MagicMock(return_value=pipeline)  # type: ignore[method-assign]
+        runtime = SimpleNamespace(strict_gold_validation=False)
+        settings = SimpleNamespace(env="dev", test_mode=False)
+        observability = SimpleNamespace(
+            logger=MagicMock(),
+            tracer=MagicMock(),
+            dq_monitor=MagicMock(),
+            metrics=MagicMock(),
+        )
+        config = MagicMock()
+        filter_config = MagicMock()
+        cached_bronze = MagicMock()
+
+        result = factory.create_runner(
+            run_id="run-1",
+            runtime=runtime,
+            settings=settings,
+            observability=observability,
+            filter_config=filter_config,
+            config=config,
+            cached_bronze=cached_bronze,
+        )
+
+        assert result is runner
+        mock_load_pipeline_config.assert_not_called()
+        factory.create_with_services.assert_called_once_with(
+            run_id="run-1",
+            runtime=runtime,
+            settings=settings,
+            logger=observability.logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=observability.tracer,
+            dq_monitor=observability.dq_monitor,
+            metrics=observability.metrics,
+            cached_bronze=cached_bronze,
+        )
+        mock_assemble_runner.assert_called_once_with(
+            pipeline=pipeline,
+            observability=observability,
+            silver_schema=factory.silver_schema,
+            gold_schema=factory.gold_schema,
+            strict_gold_validation=False,
+            yaml_config=config,
+        )
+
+    @patch("bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config")
+    @patch("bioetl.composition.factories.pipeline.assembler.assemble_runner")
+    def test_create_runner_forces_strict_gold_validation_in_prod(
+        self,
+        mock_assemble_runner: MagicMock,
+        mock_load_pipeline_config: MagicMock,
+    ) -> None:
+        """create_runner should force strict gold validation in prod."""
+        yaml_config = MagicMock()
+        pipeline = MagicMock()
+        mock_load_pipeline_config.return_value = yaml_config
+        mock_assemble_runner.return_value = MagicMock()
+        factory = GenericPipelineFactory(
+            pipeline_name="chembl_activity",
+            pipeline_class=MagicMock,
+            provider="chembl",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            data_source_creator=MagicMock(),
+        )
+        factory.create_with_services = MagicMock(return_value=pipeline)  # type: ignore[method-assign]
+        runtime = SimpleNamespace(strict_gold_validation=False)
+        settings = SimpleNamespace(env="prod", test_mode=False)
+        observability = SimpleNamespace(
+            logger=MagicMock(),
+            tracer=MagicMock(),
+            dq_monitor=MagicMock(),
+            metrics=MagicMock(),
+        )
+
+        factory.create_runner(
+            run_id="run-2",
+            runtime=runtime,
+            settings=settings,
+            observability=observability,
+        )
+
+        mock_load_pipeline_config.assert_called_once_with("chembl_activity")
+        factory.create_with_services.assert_called_once()
+        mock_assemble_runner.assert_called_once_with(
+            pipeline=pipeline,
+            observability=observability,
+            silver_schema=factory.silver_schema,
+            gold_schema=factory.gold_schema,
+            strict_gold_validation=True,
+            yaml_config=yaml_config,
+        )
 
 
 @pytest.mark.unit

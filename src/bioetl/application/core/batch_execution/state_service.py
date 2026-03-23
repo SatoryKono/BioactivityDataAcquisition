@@ -5,13 +5,16 @@ from __future__ import annotations
 __all__ = ["BatchExecutionStateService"]
 
 
-from typing import TYPE_CHECKING, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.application.core.batch_execution._contracts import (
+    BatchExecutionStatePort,
+    BatchResultBuilderPort,
     BatchExecutionStatisticsState,
 )
 from bioetl.application.core.batch_executor_helpers import (
     apply_processed_batch_outcome,
+    build_batch_result_snapshot,
     build_processed_batch_outcome,
     build_run_statistics,
 )
@@ -20,45 +23,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_processing_contracts import (
         BatchProcessingOutcome,
     )
-    from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
+    from bioetl.domain.types import BronzeRecord
 
 _BatchResultT = TypeVar("_BatchResultT", covariant=True)
-
-
-class _BatchResultBuilder(Protocol[_BatchResultT]):
-    """Callable result factory for executor batch-result projection."""
-
-    def __call__(
-        self,
-        *,
-        bronze_count: int,
-        silver_count: int,
-        gold_count: int,
-        quarantined_count: int,
-    ) -> _BatchResultT: ...
-
-
-class _BatchExecutionStatePort(Protocol):
-    """Mutable execution state required to apply processed-batch outcomes."""
-
-    records_bronze: int
-    records_silver: int
-    records_gold: int
-    records_quarantined: int
-    records_filtered_out: int
-    _source_batch_ids: list[str]
-
-    def _should_collect_dq_data(self) -> bool: ...
-
-    def _collect_dq_data(
-        self,
-        *,
-        records: list[BronzeRecord],
-        batch_id: BatchID,
-        bronze_result: object,
-        silver_records: list[BronzeRecord],
-        gold_records: list[GoldRecord],
-    ) -> None: ...
 
 
 class BatchExecutionStateService:
@@ -77,7 +44,7 @@ class BatchExecutionStateService:
     ) -> None:
         """Apply one successful batch outcome to executor-level state."""
         apply_processed_batch_outcome(
-            state=cast(_BatchExecutionStatePort, state),
+            state=cast(BatchExecutionStatePort, state),
             outcome=build_processed_batch_outcome(
                 records=records,
                 output=outcome,
@@ -88,15 +55,16 @@ class BatchExecutionStateService:
         self,
         *,
         state: object,
-        batch_result_type: _BatchResultBuilder[_BatchResultT],
+        batch_result_type: BatchResultBuilderPort[_BatchResultT],
     ) -> _BatchResultT:
         """Project current cumulative counters into public batch result."""
         typed_state = cast(BatchExecutionStatisticsState, state)
-        return batch_result_type(
-            bronze_count=typed_state.records_bronze,
-            silver_count=typed_state.records_silver,
-            gold_count=typed_state.records_gold,
-            quarantined_count=typed_state.records_quarantined,
+        return build_batch_result_snapshot(
+            batch_result_type=batch_result_type,
+            records_bronze=typed_state.records_bronze,
+            records_silver=typed_state.records_silver,
+            records_gold=typed_state.records_gold,
+            records_quarantined=typed_state.records_quarantined,
         )
 
     def build_run_statistics(
