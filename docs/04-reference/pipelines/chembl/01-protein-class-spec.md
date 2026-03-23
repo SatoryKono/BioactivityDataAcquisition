@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/protein-class.md](../../providers/chembl/protein-class.md)
 > and
-> [../../../../configs/entities/chembl/protein_class.yaml](../../../../configs/entities/chembl/protein_class.yaml).
+> `configs/entities/chembl/protein_class.yaml`.
 
 ## Current Canonical Contract Summary
 

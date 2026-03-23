@@ -3,7 +3,7 @@
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/cell-line.md](../../providers/chembl/cell-line.md)
 > and
-> [../../../../configs/entities/chembl/cell_line.yaml](../../../../configs/entities/chembl/cell_line.yaml).
+> `configs/entities/chembl/cell_line.yaml`.
 
 ## Current Canonical Contract Summary
 

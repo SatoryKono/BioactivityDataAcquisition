@@ -2,7 +2,7 @@
 
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/semanticscholar/publication.md](../../providers/semanticscholar/publication.md)
-> and [../../../../configs/entities/semanticscholar/publication.yaml](../../../../configs/entities/semanticscholar/publication.yaml).
+> and `configs/entities/semanticscholar/publication.yaml`.
 
 ## Current Canonical Contract Summary
 

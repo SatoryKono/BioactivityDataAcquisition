@@ -6,7 +6,7 @@ This document is kept only as archived design context. It predates the normalize
 
 Canonical sources:
 - [ChEMBL publication provider reference](../../providers/chembl/publication.md)
-- [`configs/entities/chembl/publication_similarity.yaml`](../../../../configs/entities/chembl/publication_similarity.yaml)
+- `configs/entities/chembl/publication_similarity.yaml`
 
 Current canonical summary:
 - Current config keys use snake_case, including `loading_strategy`.

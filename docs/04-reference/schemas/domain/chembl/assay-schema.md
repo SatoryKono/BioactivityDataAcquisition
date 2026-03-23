@@ -6,7 +6,7 @@ This page is kept as an archived schema note. It reflects a pre-normalization co
 
 Canonical sources:
 - [ChEMBL assay provider reference](../../../providers/chembl/assay.md)
-- [`configs/entities/chembl/assay.yaml`](../../../../../configs/entities/chembl/assay.yaml)
+- `configs/entities/chembl/assay.yaml`
 
 Current canonical summary:
 - Active configs and schema checks use snake_case names.

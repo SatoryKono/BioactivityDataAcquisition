@@ -6,7 +6,7 @@
 ## Current Canonical Sources
 
 - [Provider reference](../providers/semanticscholar/publication.md)
-- [Entity config](../../../configs/entities/semanticscholar/publication.yaml)
+- `configs/entities/semanticscholar/publication.yaml`
 - [Pipeline index](INDEX.md)
 
 ## Current Canonical Contract Summary

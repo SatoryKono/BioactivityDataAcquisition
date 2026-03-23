@@ -12,9 +12,10 @@ Commands:
     install-deps       Install project dependencies
     run-tests          Run tests (Python)
     mock-metrics       Start mock metrics server
-    test-changed       Run tests for changed files only (shell)
+    test-changed       Run tests for changed files only (Python backend)
     setup-mcp          Setup Copilot/Codex MCP integration
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -30,7 +31,6 @@ COMMANDS: dict[str, str] = {
 
 SHELL_COMMANDS: dict[str, str] = {
     "setup": "dev_setup.sh",
-    "test-changed": "test_changed.sh",
 }
 
 _DIR = Path(__file__).parent
@@ -63,6 +63,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if cmd in COMMANDS:
         return _run_script(COMMANDS[cmd], rest)
+
+    if cmd == "test-changed":
+        return _run_script("run_tests.py", ["changed", *rest])
 
     if cmd in SHELL_COMMANDS:
         return _run_shell(SHELL_COMMANDS[cmd], rest)

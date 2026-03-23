@@ -11,9 +11,9 @@ Canonical sources:
 
 ## Main Entry Points
 
-- [`evidence/`](evidence/) — curated evidence, synthesis, decisions, risks, and roadmaps
-- [`docs/plans/`](../plans/) — active planning artifacts
-- [`docs/99-archive/plans/`](../99-archive/plans/) — historical/superseded plans and baselines
+- [`evidence/INDEX.md`](evidence/INDEX.md) — curated evidence, synthesis, decisions, risks, and roadmaps
+- [`docs/plans/README.md`](../plans/README.md) — active planning artifacts
+- [`docs/99-archive/plans/README.md`](../99-archive/plans/README.md) — historical/superseded plans and baselines
 
 Use reports for situational evidence and derived outputs; always cross-check
 canonical docs before applying any changes.

@@ -39,6 +39,7 @@ jobs:
                 with:
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "arch-metrics"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/architecture/**/*.py', 'tests/conftest.py', 'Makefile', 'pyproject.toml') }}
 
             -   name: Run canonical fast architecture gate
                 run: |
@@ -61,6 +62,7 @@ jobs:
                     uv-extras: "dev tracing performance"
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "arch-metrics-nightly"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Cyclomatic complexity check
                 run: uv run radon cc src/bioetl --min C --show-closures

@@ -221,10 +221,12 @@ jobs:
                 with:
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "pytest-fast"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/architecture/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Run Fast Unit Tests (no slow markers)
                 run: |
                     mkdir -p reports/coverage
+                    mkdir -p reports/test-telemetry
                     # Quick feedback: run unit tests without slow markers
                     # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
                     HYPOTHESIS_PROFILE=fast \
@@ -233,6 +235,7 @@ jobs:
                       -m "not slow and not serial" \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
+                      --junitxml=reports/test-telemetry/junit-fast.xml \
                       --cov=src/bioetl --cov-report=
 
             -   name: Upload fast coverage data
@@ -242,6 +245,15 @@ jobs:
                     name: coverage-data-fast
                     path: reports/coverage/.coverage.fast
                     if-no-files-found: error
+                    retention-days: 7
+
+            -   name: Upload fast test telemetry
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-telemetry-fast
+                    path: reports/test-telemetry/junit-fast.xml
+                    if-no-files-found: warn
                     retention-days: 7
 
     # Full test matrix runs in parallel for comprehensive coverage
@@ -256,16 +268,22 @@ jobs:
                 test-group:
                     -   name: unit-domain
                         path: tests/unit/domain/
+                        cache_glob: tests/unit/domain/**/*.py
                     -   name: unit-application
                         path: tests/unit/application/
+                        cache_glob: tests/unit/application/**/*.py
                     -   name: unit-infrastructure
                         path: tests/unit/infrastructure/
+                        cache_glob: tests/unit/infrastructure/**/*.py
                     -   name: unit-other
                         path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/
+                        cache_glob: tests/unit/**/*.py
                     -   name: integration
                         path: tests/integration/
+                        cache_glob: tests/integration/**/*.py
                     -   name: security
                         path: tests/security/
+                        cache_glob: tests/security/**/*.py
 
         steps:
             -   name: Checkout code
@@ -277,16 +295,19 @@ jobs:
                     python-version: ${{ matrix.python-version }}
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}"
+                    pytest-cache-fingerprint: ${{ hashFiles(matrix.test-group.cache_glob, 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
                 run: |
                     mkdir -p reports/coverage
+                    mkdir -p reports/test-telemetry
                     if [ "${{ matrix.python-version }}" = "3.11" ]; then
                       COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }} \
                       uv run pytest ${{ matrix.test-group.path }} \
                         -m "not serial" \
                         -n auto --dist loadscope --max-worker-restart=0 \
                         -q --tb=short \
+                        --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
                         --cov=src/bioetl --cov-report=
                     else
                       uv run pytest ${{ matrix.test-group.path }} \
@@ -302,6 +323,15 @@ jobs:
                     name: coverage-data-${{ matrix.test-group.name }}
                     path: reports/coverage/.coverage.${{ matrix.test-group.name }}
                     if-no-files-found: error
+                    retention-days: 7
+
+            -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.11)
+                if: always() && matrix.python-version == '3.11'
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-telemetry-${{ matrix.test-group.name }}
+                    path: reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml
+                    if-no-files-found: warn
                     retention-days: 7
 
     performance-budgets:
@@ -397,6 +427,7 @@ jobs:
                 with:
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "pytest-coverage"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Download coverage shards
                 uses: actions/download-artifact@v4
@@ -430,3 +461,110 @@ jobs:
                     name: coverage-report
                     path: coverage.xml
                     retention-days: 30
+
+    duration-telemetry:
+        runs-on: ubuntu-latest
+        needs:
+            - test-fast
+            - test-matrix
+        timeout-minutes: 10
+
+        steps:
+            -   name: Set up Python 3.11
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
+
+            -   name: Download JUnit telemetry shards
+                uses: actions/download-artifact@v4
+                with:
+                    pattern: test-telemetry-*
+                    path: reports/test-telemetry/raw
+                    merge-multiple: true
+
+            -   name: Build slow-test duration summary
+                shell: bash
+                run: |
+                    mkdir -p reports/test-telemetry
+                    python - <<'PY'
+                    from __future__ import annotations
+
+                    import json
+                    import os
+                    import xml.etree.ElementTree as ET
+                    from pathlib import Path
+
+                    raw_dir = Path("reports/test-telemetry/raw")
+                    rows: list[dict[str, object]] = []
+                    for junit_path in sorted(raw_dir.rglob("*.xml")):
+                        root = ET.parse(junit_path).getroot()
+                        for testcase in root.iter("testcase"):
+                            case_name = testcase.attrib.get("name", "")
+                            class_name = testcase.attrib.get("classname", "")
+                            duration = float(testcase.attrib.get("time", "0") or 0.0)
+                            if duration <= 0:
+                                continue
+                            full_name = (
+                                f"{class_name}::{case_name}" if class_name else case_name
+                            )
+                            rows.append(
+                                {
+                                    "source": junit_path.name,
+                                    "test": full_name,
+                                    "duration_s": round(duration, 3),
+                                }
+                            )
+
+                    rows.sort(key=lambda row: row["duration_s"], reverse=True)
+                    top_rows = rows[:25]
+
+                    md_path = Path("reports/test-telemetry/slowest-tests.md")
+                    json_path = Path("reports/test-telemetry/slowest-tests.json")
+
+                    lines = [
+                        "# Slowest Tests",
+                        "",
+                        f"Collected test cases: `{len(rows)}`",
+                        "",
+                    ]
+                    if top_rows:
+                        lines.extend(
+                            [
+                                "| Rank | Duration (s) | Test | Source |",
+                                "|---:|---:|---|---|",
+                            ]
+                        )
+                        for idx, row in enumerate(top_rows, start=1):
+                            lines.append(
+                                f"| {idx} | {row['duration_s']:.3f} | `{row['test']}` | `{row['source']}` |"
+                            )
+                    else:
+                        lines.append("No JUnit test-case durations were collected.")
+
+                    markdown = "\n".join(lines) + "\n"
+                    md_path.write_text(markdown, encoding="utf-8")
+                    json_path.write_text(
+                        json.dumps(
+                            {"total_cases": len(rows), "top_slowest": top_rows},
+                            indent=2,
+                        )
+                        + "\n",
+                        encoding="utf-8",
+                    )
+
+                    summary_path = os.getenv("GITHUB_STEP_SUMMARY")
+                    if summary_path:
+                        with Path(summary_path).open("a", encoding="utf-8") as handle:
+                            handle.write(markdown)
+                    PY
+
+            -   name: Upload slow-test telemetry
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-duration-telemetry
+                    path: |
+                        reports/test-telemetry/slowest-tests.md
+                        reports/test-telemetry/slowest-tests.json
+                    if-no-files-found: warn
+                    retention-days: 14

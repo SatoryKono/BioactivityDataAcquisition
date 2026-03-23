@@ -24,10 +24,10 @@ This wave must **not**:
 
 These files remain outside the current safe migration boundary and are the only intended scope for RF-07D:
 
-- [`src/bioetl/composition/_pipeline_execution.py`](../../src/bioetl/composition/_pipeline_execution.py)
-- [`src/bioetl/composition/bootstrap/runtime/pipeline.py`](../../src/bioetl/composition/bootstrap/runtime/pipeline.py)
-- [`src/bioetl/composition/factories/pipeline/runner.py`](../../src/bioetl/composition/factories/pipeline/runner.py)
-- [`src/bioetl/composition/runtime_builders/runner_builder.py`](../../src/bioetl/composition/runtime_builders/runner_builder.py)
+- `src/bioetl/composition/_pipeline_execution.py`
+- `src/bioetl/composition/bootstrap/runtime/pipeline.py`
+- `src/bioetl/composition/factories/pipeline/runner.py`
+- `src/bioetl/composition/runtime_builders/runner_builder.py`
 
 ## 2. Evidence Baseline
 
@@ -53,9 +53,9 @@ That makes them higher-risk than the datasource and pipeline-factory slices alre
 
 The existing regression net around this area is already meaningful:
 
-- [`tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py`](../../tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py)
-- [`tests/unit/composition/factories/pipeline/test_runner_factory.py`](../../tests/unit/composition/factories/pipeline/test_runner_factory.py)
-- [`tests/unit/composition/runtime_builders/test_runner_builder.py`](../../tests/unit/composition/runtime_builders/test_runner_builder.py)
+- `tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py`
+- `tests/unit/composition/factories/pipeline/test_runner_factory.py`
+- `tests/unit/composition/runtime_builders/test_runner_builder.py`
 
 At the start of this wave, these tests encoded a real compatibility assumption:
 
@@ -89,10 +89,10 @@ The deferred runtime zone should be migrated in the following order:
 
 - create one small composition-local helper such as `ensure_runtime_provider_registry_ready(...)` or equivalent;
 - thread it through:
-  - [`_pipeline_execution.py`](../../src/bioetl/composition/_pipeline_execution.py)
-  - [`bootstrap/runtime/pipeline.py`](../../src/bioetl/composition/bootstrap/runtime/pipeline.py)
-  - [`factories/pipeline/runner.py`](../../src/bioetl/composition/factories/pipeline/runner.py)
-  - [`runtime_builders/runner_builder.py`](../../src/bioetl/composition/runtime_builders/runner_builder.py)
+  - `src/bioetl/composition/_pipeline_execution.py`
+  - `src/bioetl/composition/bootstrap/runtime/pipeline.py`
+  - `src/bioetl/composition/factories/pipeline/runner.py`
+  - `src/bioetl/composition/runtime_builders/runner_builder.py`
 
 **Non-goal**
 
@@ -106,9 +106,9 @@ The deferred runtime zone should be migrated in the following order:
 
 **Priority tests**
 
-- [`test_pipeline_bootstrap.py`](../../tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py)
-- [`test_runner_factory.py`](../../tests/unit/composition/factories/pipeline/test_runner_factory.py)
-- [`test_runner_builder.py`](../../tests/unit/composition/runtime_builders/test_runner_builder.py)
+- `tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py`
+- `tests/unit/composition/factories/pipeline/test_runner_factory.py`
+- `tests/unit/composition/runtime_builders/test_runner_builder.py`
 
 **Desired outcome**
 
@@ -147,16 +147,16 @@ This decision should happen only after the runtime seam is explicit and test-sta
 ### Completed
 
 - **RF-07D1** completed:
-  - [`_pipeline_execution.py`](../../src/bioetl/composition/_pipeline_execution.py) now uses `ensure_providers_loaded()`
-  - [`bootstrap/runtime/pipeline.py`](../../src/bioetl/composition/bootstrap/runtime/pipeline.py) now uses `ensure_providers_loaded()`
-  - [`factories/pipeline/runner.py`](../../src/bioetl/composition/factories/pipeline/runner.py) now injects the runtime bootstrap seam via `ensure_providers_loaded_fn`
-  - [`runtime_builders/runner_builder.py`](../../src/bioetl/composition/runtime_builders/runner_builder.py) now defaults to the named loader helper instead of raw class-level registry access
+  - `src/bioetl/composition/_pipeline_execution.py` now uses `ensure_providers_loaded()`
+  - `src/bioetl/composition/bootstrap/runtime/pipeline.py` now uses `ensure_providers_loaded()`
+  - `src/bioetl/composition/factories/pipeline/runner.py` now injects the runtime bootstrap seam via `ensure_providers_loaded_fn`
+  - `src/bioetl/composition/runtime_builders/runner_builder.py` now defaults to the named loader helper instead of raw class-level registry access
 
 - **RF-07D2** completed:
-  - [`test_pipeline_bootstrap.py`](../../tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py)
-  - [`test_runner_factory.py`](../../tests/unit/composition/factories/pipeline/test_runner_factory.py)
-  - [`test_runner_builder.py`](../../tests/unit/composition/runtime_builders/test_runner_builder.py)
-  - [`test_bootstrap_entrypoints.py`](../../tests/unit/composition/bootstrap/test_bootstrap_entrypoints.py)
+  - `tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py`
+  - `tests/unit/composition/factories/pipeline/test_runner_factory.py`
+  - `tests/unit/composition/runtime_builders/test_runner_builder.py`
+  - `tests/unit/composition/bootstrap/test_bootstrap_entrypoints.py`
 
 These tests now assert the named runtime bootstrap seam rather than raw `ProviderRegistry.ensure_loaded()` patch points.
 
@@ -169,10 +169,10 @@ These tests now assert the named runtime bootstrap seam rather than raw `Provide
 
 Run at minimum:
 
-- [`tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py`](../../tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py)
-- [`tests/unit/composition/factories/pipeline/test_runner_factory.py`](../../tests/unit/composition/factories/pipeline/test_runner_factory.py)
-- [`tests/unit/composition/runtime_builders/test_runner_builder.py`](../../tests/unit/composition/runtime_builders/test_runner_builder.py)
-- [`tests/architecture/test_layer_dependencies.py`](../../tests/architecture/test_layer_dependencies.py)
+- `tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py`
+- `tests/unit/composition/factories/pipeline/test_runner_factory.py`
+- `tests/unit/composition/runtime_builders/test_runner_builder.py`
+- `tests/architecture/test_layer_dependencies.py`
 
 If helper placement or imports move:
 

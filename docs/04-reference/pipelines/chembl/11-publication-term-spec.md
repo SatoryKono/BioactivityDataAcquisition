@@ -6,7 +6,7 @@ This page is preserved for historical analysis only. It describes an older contr
 
 Canonical sources:
 - [ChEMBL publication provider reference](../../providers/chembl/publication.md)
-- [`configs/entities/chembl/publication_term.yaml`](../../../../configs/entities/chembl/publication_term.yaml)
+- `configs/entities/chembl/publication_term.yaml`
 
 Current canonical summary:
 - The active config surface uses snake_case keys such as `loading_strategy`.

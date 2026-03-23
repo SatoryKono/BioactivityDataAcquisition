@@ -6,7 +6,7 @@ This document is retained as a legacy implementation note. It describes pre-norm
 
 Canonical sources:
 - [ChEMBL target component provider reference](../../providers/chembl/target-component.md)
-- [`configs/entities/chembl/target_component.yaml`](../../../../configs/entities/chembl/target_component.yaml)
+- `configs/entities/chembl/target_component.yaml`
 
 Current canonical summary:
 - Active configs and reference examples use snake_case names.

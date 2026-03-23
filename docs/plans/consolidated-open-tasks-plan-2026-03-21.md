@@ -28,6 +28,7 @@
 - import/topology Wave 2 (`datasource/provider cluster`)
 - provider-bounded Wave 3 hotspot starts
 - Wave 4 retry-decorator cluster start
+- `P0` full final verify after the last waves (`green` on `2026-03-23`)
 
 Эти темы могут использоваться как historical context, но не как активная
 очередь работ.
@@ -103,6 +104,17 @@
    `infrastructure/config`;
 3. не открывать новую broad migration в `domain/config`, если evidence не
    показывает реальный drift.
+4. удерживать ownership story через architecture ratchet в
+   `tests/architecture/test_p1_config_topology_closeout.py`.
+
+Первый закрытый structural slice в этом track:
+
+- [2026-03-23] `dq_config_loader.py`: убран локальный `_merge_hierarchy`;
+  canonical staged flow теперь удерживается только через
+  `dq_config_resolution.run_dq_config_flow(...)`.
+- [2026-03-23] `registry_manifest.py`: giant declarative table вынесен в
+  private provider-entry modules; canonical manifest остался thin assembly
+  facade.
 
 Признак завершения:
 
@@ -154,10 +166,9 @@
 
 ## Рекомендуемый порядок
 
-1. `P0` — полный verify
-2. `P1` — config topology closeout
-3. `P2` — один shared adapter hotspot
-4. затем новый snapshot backlog, а не автоматический переход к следующему
+1. `P1` — config topology closeout
+2. `P2` — один shared adapter hotspot
+3. затем новый snapshot backlog, а не автоматический переход к следующему
    старому dated plan
 
 ## Definition Of Done Для Папки `docs/plans`

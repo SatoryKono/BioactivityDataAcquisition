@@ -6,7 +6,7 @@ This page is retained for historical context only. It predates the current snake
 
 Canonical sources:
 - [ChEMBL target provider reference](../../providers/chembl/target.md)
-- [`configs/entities/chembl/target.yaml`](../../../../configs/entities/chembl/target.yaml)
+- `configs/entities/chembl/target.yaml`
 
 Current canonical summary:
 - Pipeline config and field names use snake_case.

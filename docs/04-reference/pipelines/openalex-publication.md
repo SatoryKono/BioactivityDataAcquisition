@@ -6,7 +6,7 @@
 ## Current Canonical Sources
 
 - [Provider reference](../providers/openalex/publication.md)
-- [Entity config](../../../configs/entities/openalex/publication.yaml)
+- `configs/entities/openalex/publication.yaml`
 - [Pipeline index](INDEX.md)
 
 ## Current Canonical Contract Summary
