@@ -43,7 +43,7 @@ env:
     QUALITY_EXEMPTIONS_SCORECARD: configs/quality/debt_scorecard.yaml
 
 jobs:
-    # Smoke check: verify dependencies are installed before running tests
+    # Minimal dependency smoke: keep test lanes unblocked by unrelated governance checks
     smoke-check:
         runs-on: ubuntu-latest
         timeout-minutes: 5
@@ -67,6 +67,36 @@ jobs:
                 run: python scripts/repo/check_version_consistency.py
 
             -   name: Install uv + cache + dependencies
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.11"
+
+            -   name: Smoke check (dependencies + core imports)
+                run: |
+                    mkdir -p reports/coverage
+                    COVERAGE_FILE=reports/coverage/.coverage.smoke \
+                    uv run pytest tests/smoke/ \
+                      -v --tb=short \
+                      --cov=src/bioetl --cov-report=
+
+            -   name: Upload smoke coverage data
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: coverage-data-smoke
+                    path: reports/coverage/.coverage.smoke
+                    if-no-files-found: error
+                    retention-days: 7
+
+    governance-preflight:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
                     python-version: "3.11"
@@ -118,6 +148,19 @@ jobs:
                       tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_infrastructure_complexity \
                       -q --tb=short
 
+    config-schema-preflight:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.11"
+
             -   name: Validate pipeline configs + schema links (blocking)
                 run: uv run python scripts/schema/validate_pipeline_configs.py
 
@@ -136,13 +179,10 @@ jobs:
             -   name: Validate docker-compose.monitoring.yml syntax
                 run: docker compose -f docker-compose.monitoring.yml config > /dev/null
 
-            -   name: Smoke check (dependencies + core imports)
-                run: uv run pytest tests/smoke/ -v --tb=short
-
     quality-metrics-gate:
         runs-on: ubuntu-latest
         timeout-minutes: 20
-        needs: smoke-check
+        needs: governance-preflight
 
         steps:
             -   name: Checkout code
@@ -170,7 +210,7 @@ jobs:
     test-fast:
         runs-on: ubuntu-latest
         timeout-minutes: 10
-        needs: smoke-check  # Only run if smoke check passes
+        needs: smoke-check  # Only minimal dependency smoke should gate fast tests
 
         steps:
             -   name: Checkout code
@@ -184,18 +224,31 @@ jobs:
 
             -   name: Run Fast Unit Tests (no slow markers)
                 run: |
+                    mkdir -p reports/coverage
                     # Quick feedback: run unit tests without slow markers
                     # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
-                    HYPOTHESIS_PROFILE=fast uv run pytest tests/unit/ tests/architecture/ \
+                    HYPOTHESIS_PROFILE=fast \
+                    COVERAGE_FILE=reports/coverage/.coverage.fast \
+                    uv run pytest tests/unit/ tests/architecture/ \
                       -m "not slow and not serial" \
                       -n auto --dist loadscope --max-worker-restart=0 \
-                      -q --tb=short
+                      -q --tb=short \
+                      --cov=src/bioetl --cov-report=
+
+            -   name: Upload fast coverage data
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: coverage-data-fast
+                    path: reports/coverage/.coverage.fast
+                    if-no-files-found: error
+                    retention-days: 7
 
     # Full test matrix runs in parallel for comprehensive coverage
     test-matrix:
         runs-on: ubuntu-latest
         timeout-minutes: 15
-        needs: smoke-check  # Allow matrix to run in parallel with fast tests for faster wall time
+        needs: smoke-check  # Allow matrix to start after minimal dependency smoke only
         strategy:
             fail-fast: false
             matrix:
@@ -227,10 +280,29 @@ jobs:
 
             -   name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
                 run: |
-                    uv run pytest ${{ matrix.test-group.path }} \
-                      -m "not serial" \
-                      -n auto --dist loadscope --max-worker-restart=0 \
-                      -q --tb=short
+                    mkdir -p reports/coverage
+                    if [ "${{ matrix.python-version }}" = "3.11" ]; then
+                      COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }} \
+                      uv run pytest ${{ matrix.test-group.path }} \
+                        -m "not serial" \
+                        -n auto --dist loadscope --max-worker-restart=0 \
+                        -q --tb=short \
+                        --cov=src/bioetl --cov-report=
+                    else
+                      uv run pytest ${{ matrix.test-group.path }} \
+                        -m "not serial" \
+                        -n auto --dist loadscope --max-worker-restart=0 \
+                        -q --tb=short
+                    fi
+
+            -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.11)
+                if: always() && matrix.python-version == '3.11'
+                uses: actions/upload-artifact@v4
+                with:
+                    name: coverage-data-${{ matrix.test-group.name }}
+                    path: reports/coverage/.coverage.${{ matrix.test-group.name }}
+                    if-no-files-found: error
+                    retention-days: 7
 
     performance-budgets:
         runs-on: ubuntu-latest
@@ -307,10 +379,13 @@ jobs:
                     if-no-files-found: warn
                     retention-days: 30
 
-    # Final coverage verification (runs full test suite with threshold)
+    # Final coverage verification (combine shard coverage + serial-only pass)
     coverage-verify:
         runs-on: ubuntu-latest
-        needs: test-matrix
+        needs:
+            - smoke-check
+            - test-fast
+            - test-matrix
         timeout-minutes: 20
 
         steps:
@@ -323,21 +398,30 @@ jobs:
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "pytest-coverage"
 
-            -   name: Run Full Tests with Coverage Threshold (resilient)
+            -   name: Download coverage shards
+                uses: actions/download-artifact@v4
+                with:
+                    pattern: coverage-data-*
+                    path: reports/coverage
+                    merge-multiple: true
+
+            -   name: Run serial-only tests with coverage append
                 run: |
-                    # Final coverage verification: 85% threshold (RULES.md §4.2)
-                    # Runs parallel first, then falls back to serial on xdist worker crashes.
-                    uv run python scripts/ci/run_pytest_resilient.py \
-                      --target tests/ \
-                      --reports-dir reports/pytest \
-                      --parallel-marker "not e2e and not benchmark and not serial" \
-                      --parallel-addopts "-q --tb=short --ignore=tests/e2e --ignore=tests/contract -n auto --dist loadscope --max-worker-restart=0 --cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85" \
-                      --fallback-addopts "-q --tb=short --ignore=tests/e2e --ignore=tests/contract -p no:xdist --cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85" \
-                      --serial-marker "serial and not e2e and not benchmark" \
-                      --serial-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract" \
-                      --parallel-timeout-seconds 900 \
-                      --fallback-timeout-seconds 1200 \
-                      --serial-timeout-seconds 1200
+                    mkdir -p reports/coverage
+                    COVERAGE_FILE=reports/coverage/.coverage.serial \
+                    uv run pytest tests/ \
+                      -m "serial and not e2e and not benchmark" \
+                      -p no:xdist \
+                      --ignore=tests/e2e \
+                      --ignore=tests/contract \
+                      -q --tb=short \
+                      --cov=src/bioetl --cov-report=
+
+            -   name: Combine coverage shards and enforce threshold
+                run: |
+                    uv run python -m coverage combine reports/coverage
+                    uv run python -m coverage report --show-missing --fail-under=85
+                    uv run python -m coverage xml -o coverage.xml
 
             -   name: Upload Coverage Report
                 uses: actions/upload-artifact@v4
@@ -346,11 +430,3 @@ jobs:
                     name: coverage-report
                     path: coverage.xml
                     retention-days: 30
-
-            -   name: Upload resilient pytest diagnostics
-                uses: actions/upload-artifact@v4
-                if: always()
-                with:
-                    name: pytest-resilient-diagnostics
-                    path: reports/pytest/
-                    if-no-files-found: warn

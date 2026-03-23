@@ -99,11 +99,13 @@ def _tree(relative_path: str) -> ast.Module:
 
 
 def _imported_modules(relative_path: str) -> set[str]:
-    return {
-        node.module
-        for node in ast.walk(_tree(relative_path))
-        if isinstance(node, ast.ImportFrom) and node.module is not None
-    }
+    imported_modules: set[str] = set()
+    for node in ast.walk(_tree(relative_path)):
+        if isinstance(node, ast.ImportFrom) and node.module is not None:
+            imported_modules.add(node.module)
+        if isinstance(node, ast.Import):
+            imported_modules.update(alias.name for alias in node.names)
+    return imported_modules
 
 
 def _top_level_class_names(relative_path: str) -> set[str]:
@@ -122,11 +124,12 @@ def _src_importers_of(module_name: str) -> set[str]:
         if relative_path == "src/bioetl/infrastructure/adapters/crossref/batch.py":
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        imported_modules = {
-            node.module
-            for node in ast.walk(tree)
-            if isinstance(node, ast.ImportFrom) and node.module is not None
-        }
+        imported_modules: set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module is not None:
+                imported_modules.add(node.module)
+            if isinstance(node, ast.Import):
+                imported_modules.update(alias.name for alias in node.names)
         if module_name in imported_modules:
             importers.add(relative_path)
     return importers

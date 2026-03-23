@@ -643,7 +643,7 @@ ARCH_TEST_P95_BUDGET_SECONDS = 30.0  # ratchet: p95 per-test duration
 
 
 def test_architecture_test_p95_duration_tracked() -> None:
-    """CI architecture workflow must have fast/nightly split with timeout enforcement."""
+    """Architecture workflow must keep manual fast + scheduled heavy split."""
     workflow = Path(".github/workflows/architecture.yml")
     if not workflow.exists():
         pytest.skip("Architecture workflow not found")
@@ -655,6 +655,15 @@ def test_architecture_test_p95_duration_tracked() -> None:
     )
     assert "architecture-heavy-nightly" in content, (
         "Workflow must have architecture-heavy-nightly job for full profile"
+    )
+    assert "workflow_dispatch" in content, (
+        "Architecture workflow must allow manual fast profile execution"
+    )
+    assert "schedule:" in content, (
+        "Architecture workflow must keep scheduled heavy profile execution"
+    )
+    assert "pull_request:" not in content and "push:" not in content, (
+        "Fast architecture pytest on PR/push should live only in tests.yml to avoid duplication"
     )
     assert "not slow" in content, "Fast baseline must exclude @pytest.mark.slow tests"
 

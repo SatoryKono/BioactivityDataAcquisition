@@ -395,6 +395,11 @@ def resolve_bundle_image_markdown(
     return f"*SVG/PNG не найдены: `{svg_rel}`, `{png_rel}`*\n"
 
 
+def explicit_anchor_html(anchor_id: str) -> str:
+    """Return stable explicit HTML anchor for bundle self-links."""
+    return f'<a id="{anchor_id}"></a>'
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate Markdown bundles for diagram collections."
@@ -456,6 +461,7 @@ def generate_bundle(
             lines.append("")
         first = False
 
+        lines.append(explicit_anchor_html(stem))
         lines.append(f"## {stem} — {title}\n")
         lines.append(resolve_bundle_image_markdown(collection_dir, stem, output_md))
 

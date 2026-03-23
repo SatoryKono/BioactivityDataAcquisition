@@ -91,9 +91,9 @@
 
 Приоритетные поверхности:
 
-- [registry_manifest.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/factories/pipeline/registry_manifest.py)
-- [pipeline_config_loader.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/config/pipeline_config_loader.py)
-- [dq_config_loader.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/config/dq_config_loader.py)
+- `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+- `src/bioetl/infrastructure/config/pipeline_config_loader.py`
+- `src/bioetl/infrastructure/config/dq_config_loader.py`
 
 Что делать:
 
@@ -118,10 +118,10 @@
 
 Рекомендуемый порядок:
 
-1. [cached_bronze_data_source.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/cached_bronze_data_source.py)
-2. [base_title_fallback.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/common/base_title_fallback.py)
-3. [decorators/circuit_breaker.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py)
-4. [http/circuit_breaker.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/adapters/http/circuit_breaker.py)
+1. `src/bioetl/infrastructure/adapters/cached_bronze_data_source.py`
+2. `src/bioetl/infrastructure/adapters/common/base_title_fallback.py`
+3. `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py`
+4. `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`
 
 Правила выполнения:
 
@@ -136,9 +136,9 @@
 Следующие темы пока не являются очередью исполнения:
 
 - class-level compatibility seam между
-  [provider_registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/provider_registry.py)
+  `src/bioetl/composition/providers/provider_registry.py`
   и
-  [_default_registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/composition/providers/_default_registry.py)
+  `src/bioetl/composition/providers/_default_registry.py`
 - дальнейшее физическое сокращение `png/` дерева диаграмм
 - broad dead-code cleanup без нового evidence pack
 

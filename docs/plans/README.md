@@ -1,9 +1,10 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-03-21*
+*Last updated: 2026-03-23*
 
-This directory contains implementation plans, corrective roadmaps, and migration plans.
+This directory contains implementation plans, corrective roadmaps, migration
+plans, and supporting architecture assessment snapshots.
 
 ## Scope
 
@@ -40,9 +41,9 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [project-briefing-capability-discovery-2026-03-20.md](project-briefing-capability-discovery-2026-03-20.md)
 - [architecture-review-and-refactor-plan-2026-03-21.md](architecture-review-and-refactor-plan-2026-03-21.md)
 
-The architecture review plan is a supporting assessment and refactor map.
-It is not a second active backlog and should be read together with the
-consolidated plan rather than instead of it.
+The architecture review plan was refreshed on `2026-03-23` with the current
+integral score, updated category table, and RF-style roadmap. It remains a
+supporting assessment map, not a second active backlog.
 
 ### Retained Historical Context With Live Evidence References
 

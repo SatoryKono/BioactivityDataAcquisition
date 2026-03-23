@@ -4,6 +4,7 @@
 
 > **Governance:** [ADR-040 — Diagram Governance and Layout Policy](../decisions/ADR-040-diagram-governance.md)
 > Colour scheme, linkStyle differentiation, view decomposition rules, CI validation — all defined in ADR-040.
+> Supplemental working policy for diagram publication/layout hygiene lives at `docs/02-architecture/diagrams/governance/00-diagramming-policy.md`.
 
 All diagrams are in [Mermaid](https://mermaid.js.org/) format.
 Canonical sources use `.mmd`; decomposed views use `.mermaid` in `views/`.

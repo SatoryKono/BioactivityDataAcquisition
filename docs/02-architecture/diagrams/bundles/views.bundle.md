@@ -1,6 +1,6 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-03-20T22:49:13
+- Generated: 2026-03-23T10:52:06
 - Diagram count: 162
 
 ## Table of Contents
@@ -45,6 +45,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="00-legend"></a>
 ## 00-legend — 00 Legend
 
 ![00-legend](../views/svg/00-legend.svg)
@@ -60,6 +61,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-full-system-component-dataflow"></a>
 ## 01-full-system-component-dataflow — 01 Full System Component
 
 ![01-full-system-component-dataflow](../views/svg/01-full-system-component-dataflow.svg)
@@ -75,6 +77,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-full-system-component-domain"></a>
 ## 01-full-system-component-domain — 01 Full System Component
 
 ![01-full-system-component-domain](../views/svg/01-full-system-component-domain.svg)
@@ -90,6 +93,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-full-system-component-full"></a>
 ## 01-full-system-component-full — Full System Component Diagram
 
 ![01-full-system-component-full](../views/svg/01-full-system-component-full.svg)
@@ -108,6 +112,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-full-system-component-infra"></a>
 ## 01-full-system-component-infra — 01 Full System Component
 
 ![01-full-system-component-infra](../views/svg/01-full-system-component-infra.svg)
@@ -123,6 +128,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-full-system-component-overview"></a>
 ## 01-full-system-component-overview — 01 Full System Component
 
 ![01-full-system-component-overview](../views/svg/01-full-system-component-overview.svg)
@@ -138,6 +144,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-high-level-dataflow"></a>
 ## 01-high-level-dataflow — 01 High Level
 
 ![01-high-level-dataflow](../views/svg/01-high-level-dataflow.svg)
@@ -153,6 +160,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-high-level-domain"></a>
 ## 01-high-level-domain — 01 High Level
 
 ![01-high-level-domain](../views/svg/01-high-level-domain.svg)
@@ -168,6 +176,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-high-level-full"></a>
 ## 01-high-level-full — High-Level System Architecture
 
 ![01-high-level-full](../views/svg/01-high-level-full.svg)
@@ -185,6 +194,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-high-level-infra"></a>
 ## 01-high-level-infra — 01 High Level
 
 ![01-high-level-infra](../views/svg/01-high-level-infra.svg)
@@ -200,6 +210,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-high-level-overview"></a>
 ## 01-high-level-overview — 01 High Level
 
 ![01-high-level-overview](../views/svg/01-high-level-overview.svg)
@@ -215,6 +226,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="02-medallion-dataflow"></a>
 ## 02-medallion-dataflow — 02 Medallion
 
 ![02-medallion-dataflow](../views/svg/02-medallion-dataflow.svg)
@@ -230,6 +242,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="02-medallion-domain"></a>
 ## 02-medallion-domain — 02 Medallion
 
 ![02-medallion-domain](../views/svg/02-medallion-domain.svg)
@@ -245,6 +258,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="02-medallion-full"></a>
 ## 02-medallion-full — Medallion Architecture Layers
 
 ![02-medallion-full](../views/svg/02-medallion-full.svg)
@@ -262,6 +276,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="02-medallion-infra"></a>
 ## 02-medallion-infra — 02 Medallion
 
 ![02-medallion-infra](../views/svg/02-medallion-infra.svg)
@@ -277,6 +292,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="02-medallion-overview"></a>
 ## 02-medallion-overview — 02 Medallion
 
 ![02-medallion-overview](../views/svg/02-medallion-overview.svg)
@@ -292,6 +308,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="03-medallion-data-flow-full"></a>
 ## 03-medallion-data-flow-full — 03 Medallion Data Flow
 
 ![03-medallion-data-flow-full](../views/svg/03-medallion-data-flow-full.svg)
@@ -307,6 +324,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="03-medallion-data-flow-overview"></a>
 ## 03-medallion-data-flow-overview — 03 Medallion Data Flow
 
 ![03-medallion-data-flow-overview](../views/svg/03-medallion-data-flow-overview.svg)
@@ -322,6 +340,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="04-domain-layer-class-diagram-dataflow"></a>
 ## 04-domain-layer-class-diagram-dataflow — 04 Domain Layer Class Diagram
 
 ![04-domain-layer-class-diagram-dataflow](../views/svg/04-domain-layer-class-diagram-dataflow.svg)
@@ -337,6 +356,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="04-domain-layer-class-diagram-domain"></a>
 ## 04-domain-layer-class-diagram-domain — 04 Domain Layer Class Diagram
 
 ![04-domain-layer-class-diagram-domain](../views/svg/04-domain-layer-class-diagram-domain.svg)
@@ -352,6 +372,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="04-domain-layer-class-diagram-full"></a>
 ## 04-domain-layer-class-diagram-full — Domain Layer Class Diagram
 
 ![04-domain-layer-class-diagram-full](../views/svg/04-domain-layer-class-diagram-full.svg)
@@ -369,6 +390,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="04-domain-layer-class-diagram-infra"></a>
 ## 04-domain-layer-class-diagram-infra — 04 Domain Layer Class Diagram
 
 ![04-domain-layer-class-diagram-infra](../views/svg/04-domain-layer-class-diagram-infra.svg)
@@ -384,6 +406,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="04-domain-layer-class-diagram-overview"></a>
 ## 04-domain-layer-class-diagram-overview — 04 Domain Layer Class Diagram
 
 ![04-domain-layer-class-diagram-overview](../views/svg/04-domain-layer-class-diagram-overview.svg)
@@ -399,6 +422,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-layers-interaction-dataflow"></a>
 ## 05-layers-interaction-dataflow — 05 Layers Interaction
 
 ![05-layers-interaction-dataflow](../views/svg/05-layers-interaction-dataflow.svg)
@@ -414,6 +438,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-layers-interaction-domain"></a>
 ## 05-layers-interaction-domain — 05 Layers Interaction
 
 ![05-layers-interaction-domain](../views/svg/05-layers-interaction-domain.svg)
@@ -429,6 +454,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-layers-interaction-full"></a>
 ## 05-layers-interaction-full — Layer Interaction — Hexagonal Architecture
 
 ![05-layers-interaction-full](../views/svg/05-layers-interaction-full.svg)
@@ -446,6 +472,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-layers-interaction-infra"></a>
 ## 05-layers-interaction-infra — 05 Layers Interaction
 
 ![05-layers-interaction-infra](../views/svg/05-layers-interaction-infra.svg)
@@ -461,6 +488,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-layers-interaction-overview"></a>
 ## 05-layers-interaction-overview — 05 Layers Interaction
 
 ![05-layers-interaction-overview](../views/svg/05-layers-interaction-overview.svg)
@@ -476,6 +504,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-pipeline-lifecycle-states-dataflow"></a>
 ## 05-pipeline-lifecycle-states-dataflow — 05 Pipeline Lifecycle States
 
 ![05-pipeline-lifecycle-states-dataflow](../views/svg/05-pipeline-lifecycle-states-dataflow.svg)
@@ -491,6 +520,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-pipeline-lifecycle-states-domain"></a>
 ## 05-pipeline-lifecycle-states-domain — 05 Pipeline Lifecycle States
 
 ![05-pipeline-lifecycle-states-domain](../views/svg/05-pipeline-lifecycle-states-domain.svg)
@@ -506,6 +536,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-pipeline-lifecycle-states-full"></a>
 ## 05-pipeline-lifecycle-states-full — Pipeline Lifecycle State Machine
 
 ![05-pipeline-lifecycle-states-full](../views/svg/05-pipeline-lifecycle-states-full.svg)
@@ -523,6 +554,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-pipeline-lifecycle-states-infra"></a>
 ## 05-pipeline-lifecycle-states-infra — 05 Pipeline Lifecycle States
 
 ![05-pipeline-lifecycle-states-infra](../views/svg/05-pipeline-lifecycle-states-infra.svg)
@@ -538,6 +570,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-pipeline-lifecycle-states-overview"></a>
 ## 05-pipeline-lifecycle-states-overview — 05 Pipeline Lifecycle States
 
 ![05-pipeline-lifecycle-states-overview](../views/svg/05-pipeline-lifecycle-states-overview.svg)
@@ -553,6 +586,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="06-application-layer-class-diagram-dataflow"></a>
 ## 06-application-layer-class-diagram-dataflow — 06 Application Layer Class Diagram
 
 ![06-application-layer-class-diagram-dataflow](../views/svg/06-application-layer-class-diagram-dataflow.svg)
@@ -568,6 +602,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="06-application-layer-class-diagram-domain"></a>
 ## 06-application-layer-class-diagram-domain — 06 Application Layer Class Diagram
 
 ![06-application-layer-class-diagram-domain](../views/svg/06-application-layer-class-diagram-domain.svg)
@@ -583,6 +618,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="06-application-layer-class-diagram-full"></a>
 ## 06-application-layer-class-diagram-full — Application Layer Class Diagram
 
 ![06-application-layer-class-diagram-full](../views/svg/06-application-layer-class-diagram-full.svg)
@@ -600,6 +636,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="06-application-layer-class-diagram-infra"></a>
 ## 06-application-layer-class-diagram-infra — 06 Application Layer Class Diagram
 
 ![06-application-layer-class-diagram-infra](../views/svg/06-application-layer-class-diagram-infra.svg)
@@ -615,6 +652,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="06-application-layer-class-diagram-overview"></a>
 ## 06-application-layer-class-diagram-overview — 06 Application Layer Class Diagram
 
 ![06-application-layer-class-diagram-overview](../views/svg/06-application-layer-class-diagram-overview.svg)
@@ -630,6 +668,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-circuit-breaker-states-dataflow"></a>
 ## 07-circuit-breaker-states-dataflow — 07 Circuit Breaker States
 
 ![07-circuit-breaker-states-dataflow](../views/svg/07-circuit-breaker-states-dataflow.svg)
@@ -645,6 +684,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-circuit-breaker-states-domain"></a>
 ## 07-circuit-breaker-states-domain — 07 Circuit Breaker States
 
 ![07-circuit-breaker-states-domain](../views/svg/07-circuit-breaker-states-domain.svg)
@@ -660,6 +700,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-circuit-breaker-states-full"></a>
 ## 07-circuit-breaker-states-full — Circuit Breaker State Machine
 
 ![07-circuit-breaker-states-full](../views/svg/07-circuit-breaker-states-full.svg)
@@ -677,6 +718,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-circuit-breaker-states-infra"></a>
 ## 07-circuit-breaker-states-infra — 07 Circuit Breaker States
 
 ![07-circuit-breaker-states-infra](../views/svg/07-circuit-breaker-states-infra.svg)
@@ -692,6 +734,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-circuit-breaker-states-overview"></a>
 ## 07-circuit-breaker-states-overview — 07 Circuit Breaker States
 
 ![07-circuit-breaker-states-overview](../views/svg/07-circuit-breaker-states-overview.svg)
@@ -707,6 +750,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-complete-etl-workflow-dataflow"></a>
 ## 08-complete-etl-workflow-dataflow — 08 Complete Etl Workflow
 
 ![08-complete-etl-workflow-dataflow](../views/svg/08-complete-etl-workflow-dataflow.svg)
@@ -722,6 +766,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-complete-etl-workflow-domain"></a>
 ## 08-complete-etl-workflow-domain — 08 Complete Etl Workflow
 
 ![08-complete-etl-workflow-domain](../views/svg/08-complete-etl-workflow-domain.svg)
@@ -737,6 +782,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-complete-etl-workflow-full"></a>
 ## 08-complete-etl-workflow-full — Complete ETL Workflow (6 Phases)
 
 ![08-complete-etl-workflow-full](../views/svg/08-complete-etl-workflow-full.svg)
@@ -754,6 +800,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-complete-etl-workflow-infra"></a>
 ## 08-complete-etl-workflow-infra — 08 Complete Etl Workflow
 
 ![08-complete-etl-workflow-infra](../views/svg/08-complete-etl-workflow-infra.svg)
@@ -769,6 +816,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-complete-etl-workflow-overview"></a>
 ## 08-complete-etl-workflow-overview — 08 Complete Etl Workflow
 
 ![08-complete-etl-workflow-overview](../views/svg/08-complete-etl-workflow-overview.svg)
@@ -784,6 +832,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-domain-ddd-dataflow"></a>
 ## 08-domain-ddd-dataflow — 08 Domain Ddd
 
 ![08-domain-ddd-dataflow](../views/svg/08-domain-ddd-dataflow.svg)
@@ -799,6 +848,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-domain-ddd-domain"></a>
 ## 08-domain-ddd-domain — 08 Domain Ddd
 
 ![08-domain-ddd-domain](../views/svg/08-domain-ddd-domain.svg)
@@ -814,6 +864,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-domain-ddd-full"></a>
 ## 08-domain-ddd-full — Domain Layer — DDD Components
 
 ![08-domain-ddd-full](../views/svg/08-domain-ddd-full.svg)
@@ -831,6 +882,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-domain-ddd-infra"></a>
 ## 08-domain-ddd-infra — 08 Domain Ddd
 
 ![08-domain-ddd-infra](../views/svg/08-domain-ddd-infra.svg)
@@ -846,6 +898,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-domain-ddd-overview"></a>
 ## 08-domain-ddd-overview — 08 Domain Ddd
 
 ![08-domain-ddd-overview](../views/svg/08-domain-ddd-overview.svg)
@@ -861,6 +914,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="10-infrastructure-layer-class-diagram-dataflow"></a>
 ## 10-infrastructure-layer-class-diagram-dataflow — 10 Infrastructure Layer Class Diagram
 
 ![10-infrastructure-layer-class-diagram-dataflow](../views/svg/10-infrastructure-layer-class-diagram-dataflow.svg)
@@ -876,6 +930,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="10-infrastructure-layer-class-diagram-domain"></a>
 ## 10-infrastructure-layer-class-diagram-domain — 10 Infrastructure Layer Class Diagram
 
 ![10-infrastructure-layer-class-diagram-domain](../views/svg/10-infrastructure-layer-class-diagram-domain.svg)
@@ -891,6 +946,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="10-infrastructure-layer-class-diagram-full"></a>
 ## 10-infrastructure-layer-class-diagram-full — Infrastructure Layer Class Diagram
 
 ![10-infrastructure-layer-class-diagram-full](../views/svg/10-infrastructure-layer-class-diagram-full.svg)
@@ -908,6 +964,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="10-infrastructure-layer-class-diagram-infra"></a>
 ## 10-infrastructure-layer-class-diagram-infra — 10 Infrastructure Layer Class Diagram
 
 ![10-infrastructure-layer-class-diagram-infra](../views/svg/10-infrastructure-layer-class-diagram-infra.svg)
@@ -923,6 +980,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="10-infrastructure-layer-class-diagram-overview"></a>
 ## 10-infrastructure-layer-class-diagram-overview — 10 Infrastructure Layer Class Diagram
 
 ![10-infrastructure-layer-class-diagram-overview](../views/svg/10-infrastructure-layer-class-diagram-overview.svg)
@@ -938,6 +996,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="12-local-deployment-architecture-dataflow"></a>
 ## 12-local-deployment-architecture-dataflow — 12 Local Deployment Architecture
 
 ![12-local-deployment-architecture-dataflow](../views/svg/12-local-deployment-architecture-dataflow.svg)
@@ -953,6 +1012,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="12-local-deployment-architecture-domain"></a>
 ## 12-local-deployment-architecture-domain — 12 Local Deployment Architecture
 
 ![12-local-deployment-architecture-domain](../views/svg/12-local-deployment-architecture-domain.svg)
@@ -968,6 +1028,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="12-local-deployment-architecture-full"></a>
 ## 12-local-deployment-architecture-full — Local Deployment Architecture
 
 ![12-local-deployment-architecture-full](../views/svg/12-local-deployment-architecture-full.svg)
@@ -985,6 +1046,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="12-local-deployment-architecture-infra"></a>
 ## 12-local-deployment-architecture-infra — 12 Local Deployment Architecture
 
 ![12-local-deployment-architecture-infra](../views/svg/12-local-deployment-architecture-infra.svg)
@@ -1000,6 +1062,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="12-local-deployment-architecture-overview"></a>
 ## 12-local-deployment-architecture-overview — 12 Local Deployment Architecture
 
 ![12-local-deployment-architecture-overview](../views/svg/12-local-deployment-architecture-overview.svg)
@@ -1015,6 +1078,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="13-port-protocol-contracts-full"></a>
 ## 13-port-protocol-contracts-full — 13 Port Protocol Contracts
 
 ![13-port-protocol-contracts-full](../views/svg/13-port-protocol-contracts-full.svg)
@@ -1030,6 +1094,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="13-port-protocol-contracts-overview"></a>
 ## 13-port-protocol-contracts-overview — 13 Port Protocol Contracts
 
 ![13-port-protocol-contracts-overview](../views/svg/13-port-protocol-contracts-overview.svg)
@@ -1045,6 +1110,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="14-provider-health-states-dataflow"></a>
 ## 14-provider-health-states-dataflow — 14 Provider Health States
 
 ![14-provider-health-states-dataflow](../views/svg/14-provider-health-states-dataflow.svg)
@@ -1060,6 +1126,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="14-provider-health-states-domain"></a>
 ## 14-provider-health-states-domain — 14 Provider Health States
 
 ![14-provider-health-states-domain](../views/svg/14-provider-health-states-domain.svg)
@@ -1075,6 +1142,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="14-provider-health-states-full"></a>
 ## 14-provider-health-states-full — Provider Health State Machine
 
 ![14-provider-health-states-full](../views/svg/14-provider-health-states-full.svg)
@@ -1092,6 +1160,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="14-provider-health-states-infra"></a>
 ## 14-provider-health-states-infra — 14 Provider Health States
 
 ![14-provider-health-states-infra](../views/svg/14-provider-health-states-infra.svg)
@@ -1107,6 +1176,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="14-provider-health-states-overview"></a>
 ## 14-provider-health-states-overview — 14 Provider Health States
 
 ![14-provider-health-states-overview](../views/svg/14-provider-health-states-overview.svg)
@@ -1122,6 +1192,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="15-dq-check-workflow-dataflow"></a>
 ## 15-dq-check-workflow-dataflow — 15 Dq Check Workflow
 
 ![15-dq-check-workflow-dataflow](../views/svg/15-dq-check-workflow-dataflow.svg)
@@ -1137,6 +1208,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="15-dq-check-workflow-domain"></a>
 ## 15-dq-check-workflow-domain — 15 Dq Check Workflow
 
 ![15-dq-check-workflow-domain](../views/svg/15-dq-check-workflow-domain.svg)
@@ -1152,6 +1224,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="15-dq-check-workflow-full"></a>
 ## 15-dq-check-workflow-full — Data Quality Check Workflow
 
 ![15-dq-check-workflow-full](../views/svg/15-dq-check-workflow-full.svg)
@@ -1169,6 +1242,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="15-dq-check-workflow-infra"></a>
 ## 15-dq-check-workflow-infra — 15 Dq Check Workflow
 
 ![15-dq-check-workflow-infra](../views/svg/15-dq-check-workflow-infra.svg)
@@ -1184,6 +1258,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="15-dq-check-workflow-overview"></a>
 ## 15-dq-check-workflow-overview — 15 Dq Check Workflow
 
 ![15-dq-check-workflow-overview](../views/svg/15-dq-check-workflow-overview.svg)
@@ -1199,6 +1274,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="16-transformer-hierarchy-full"></a>
 ## 16-transformer-hierarchy-full — 16 Transformer Hierarchy
 
 ![16-transformer-hierarchy-full](../views/svg/16-transformer-hierarchy-full.svg)
@@ -1214,6 +1290,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="16-transformer-hierarchy-overview"></a>
 ## 16-transformer-hierarchy-overview — 16 Transformer Hierarchy
 
 ![16-transformer-hierarchy-overview](../views/svg/16-transformer-hierarchy-overview.svg)
@@ -1229,6 +1306,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="21-activity-entity-data-flow-dataflow"></a>
 ## 21-activity-entity-data-flow-dataflow — 21 Activity Entity Data Flow
 
 ![21-activity-entity-data-flow-dataflow](../views/svg/21-activity-entity-data-flow-dataflow.svg)
@@ -1244,6 +1322,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="21-activity-entity-data-flow-domain"></a>
 ## 21-activity-entity-data-flow-domain — 21 Activity Entity Data Flow
 
 ![21-activity-entity-data-flow-domain](../views/svg/21-activity-entity-data-flow-domain.svg)
@@ -1259,6 +1338,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="21-activity-entity-data-flow-full"></a>
 ## 21-activity-entity-data-flow-full — Activity Entity Data Flow (Extract → Transform → Load)
 
 ![21-activity-entity-data-flow-full](../views/svg/21-activity-entity-data-flow-full.svg)
@@ -1276,6 +1356,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="21-activity-entity-data-flow-infra"></a>
 ## 21-activity-entity-data-flow-infra — 21 Activity Entity Data Flow
 
 ![21-activity-entity-data-flow-infra](../views/svg/21-activity-entity-data-flow-infra.svg)
@@ -1291,6 +1372,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="21-activity-entity-data-flow-overview"></a>
 ## 21-activity-entity-data-flow-overview — 21 Activity Entity Data Flow
 
 ![21-activity-entity-data-flow-overview](../views/svg/21-activity-entity-data-flow-overview.svg)
@@ -1306,6 +1388,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="26-hexagonal-ports-adapters-dataflow"></a>
 ## 26-hexagonal-ports-adapters-dataflow — 26 Hexagonal Ports Adapters
 
 ![26-hexagonal-ports-adapters-dataflow](../views/svg/26-hexagonal-ports-adapters-dataflow.svg)
@@ -1321,6 +1404,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="26-hexagonal-ports-adapters-domain"></a>
 ## 26-hexagonal-ports-adapters-domain — 26 Hexagonal Ports Adapters
 
 ![26-hexagonal-ports-adapters-domain](../views/svg/26-hexagonal-ports-adapters-domain.svg)
@@ -1336,6 +1420,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="26-hexagonal-ports-adapters-full"></a>
 ## 26-hexagonal-ports-adapters-full — Hexagonal Architecture — Ports and Adapters Overview
 
 ![26-hexagonal-ports-adapters-full](../views/svg/26-hexagonal-ports-adapters-full.svg)
@@ -1353,6 +1438,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="26-hexagonal-ports-adapters-infra"></a>
 ## 26-hexagonal-ports-adapters-infra — 26 Hexagonal Ports Adapters
 
 ![26-hexagonal-ports-adapters-infra](../views/svg/26-hexagonal-ports-adapters-infra.svg)
@@ -1368,6 +1454,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="26-hexagonal-ports-adapters-overview"></a>
 ## 26-hexagonal-ports-adapters-overview — 26 Hexagonal Ports Adapters
 
 ![26-hexagonal-ports-adapters-overview](../views/svg/26-hexagonal-ports-adapters-overview.svg)
@@ -1383,6 +1470,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="28-composition-root-di-graph-dataflow"></a>
 ## 28-composition-root-di-graph-dataflow — 28 Composition Root Di Graph
 
 ![28-composition-root-di-graph-dataflow](../views/svg/28-composition-root-di-graph-dataflow.svg)
@@ -1398,6 +1486,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="28-composition-root-di-graph-domain"></a>
 ## 28-composition-root-di-graph-domain — 28 Composition Root Di Graph
 
 ![28-composition-root-di-graph-domain](../views/svg/28-composition-root-di-graph-domain.svg)
@@ -1413,6 +1502,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="28-composition-root-di-graph-full"></a>
 ## 28-composition-root-di-graph-full — Composition Root Wiring — Full DI Graph
 
 ![28-composition-root-di-graph-full](../views/svg/28-composition-root-di-graph-full.svg)
@@ -1430,6 +1520,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="28-composition-root-di-graph-infra"></a>
 ## 28-composition-root-di-graph-infra — 28 Composition Root Di Graph
 
 ![28-composition-root-di-graph-infra](../views/svg/28-composition-root-di-graph-infra.svg)
@@ -1445,6 +1536,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="28-composition-root-di-graph-overview"></a>
 ## 28-composition-root-di-graph-overview — 28 Composition Root Di Graph
 
 ![28-composition-root-di-graph-overview](../views/svg/28-composition-root-di-graph-overview.svg)
@@ -1460,6 +1552,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="29-composite-pipeline-workflow-dataflow"></a>
 ## 29-composite-pipeline-workflow-dataflow — 29 Composite Pipeline Workflow
 
 ![29-composite-pipeline-workflow-dataflow](../views/svg/29-composite-pipeline-workflow-dataflow.svg)
@@ -1475,6 +1568,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="29-composite-pipeline-workflow-domain"></a>
 ## 29-composite-pipeline-workflow-domain — 29 Composite Pipeline Workflow
 
 ![29-composite-pipeline-workflow-domain](../views/svg/29-composite-pipeline-workflow-domain.svg)
@@ -1490,6 +1584,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="29-composite-pipeline-workflow-full"></a>
 ## 29-composite-pipeline-workflow-full — Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
 
 ![29-composite-pipeline-workflow-full](../views/svg/29-composite-pipeline-workflow-full.svg)
@@ -1507,6 +1602,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="29-composite-pipeline-workflow-infra"></a>
 ## 29-composite-pipeline-workflow-infra — 29 Composite Pipeline Workflow
 
 ![29-composite-pipeline-workflow-infra](../views/svg/29-composite-pipeline-workflow-infra.svg)
@@ -1522,6 +1618,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="29-composite-pipeline-workflow-overview"></a>
 ## 29-composite-pipeline-workflow-overview — 29 Composite Pipeline Workflow
 
 ![29-composite-pipeline-workflow-overview](../views/svg/29-composite-pipeline-workflow-overview.svg)
@@ -1537,6 +1634,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="30-port-adapter-mapping-dataflow"></a>
 ## 30-port-adapter-mapping-dataflow — 30 Port Adapter Mapping
 
 ![30-port-adapter-mapping-dataflow](../views/svg/30-port-adapter-mapping-dataflow.svg)
@@ -1552,6 +1650,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="30-port-adapter-mapping-domain"></a>
 ## 30-port-adapter-mapping-domain — 30 Port Adapter Mapping
 
 ![30-port-adapter-mapping-domain](../views/svg/30-port-adapter-mapping-domain.svg)
@@ -1567,6 +1666,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="30-port-adapter-mapping-full"></a>
 ## 30-port-adapter-mapping-full — Port-to-Adapter Mapping Table Diagram
 
 ![30-port-adapter-mapping-full](../views/svg/30-port-adapter-mapping-full.svg)
@@ -1584,6 +1684,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="30-port-adapter-mapping-infra"></a>
 ## 30-port-adapter-mapping-infra — 30 Port Adapter Mapping
 
 ![30-port-adapter-mapping-infra](../views/svg/30-port-adapter-mapping-infra.svg)
@@ -1599,6 +1700,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="30-port-adapter-mapping-overview"></a>
 ## 30-port-adapter-mapping-overview — 30 Port Adapter Mapping
 
 ![30-port-adapter-mapping-overview](../views/svg/30-port-adapter-mapping-overview.svg)
@@ -1614,6 +1716,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="31-pipeline-run-lifecycle-dataflow"></a>
 ## 31-pipeline-run-lifecycle-dataflow — 31 Pipeline Run Lifecycle
 
 ![31-pipeline-run-lifecycle-dataflow](../views/svg/31-pipeline-run-lifecycle-dataflow.svg)
@@ -1629,6 +1732,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="31-pipeline-run-lifecycle-domain"></a>
 ## 31-pipeline-run-lifecycle-domain — 31 Pipeline Run Lifecycle
 
 ![31-pipeline-run-lifecycle-domain](../views/svg/31-pipeline-run-lifecycle-domain.svg)
@@ -1644,6 +1748,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="31-pipeline-run-lifecycle-full"></a>
 ## 31-pipeline-run-lifecycle-full — Pipeline Run Lifecycle — From Config to Completion
 
 ![31-pipeline-run-lifecycle-full](../views/svg/31-pipeline-run-lifecycle-full.svg)
@@ -1661,6 +1766,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="31-pipeline-run-lifecycle-infra"></a>
 ## 31-pipeline-run-lifecycle-infra — 31 Pipeline Run Lifecycle
 
 ![31-pipeline-run-lifecycle-infra](../views/svg/31-pipeline-run-lifecycle-infra.svg)
@@ -1676,6 +1782,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="31-pipeline-run-lifecycle-overview"></a>
 ## 31-pipeline-run-lifecycle-overview — 31 Pipeline Run Lifecycle
 
 ![31-pipeline-run-lifecycle-overview](../views/svg/31-pipeline-run-lifecycle-overview.svg)
@@ -1691,6 +1798,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="32-single-record-journey-dataflow"></a>
 ## 32-single-record-journey-dataflow — 32 Single Record Journey
 
 ![32-single-record-journey-dataflow](../views/svg/32-single-record-journey-dataflow.svg)
@@ -1706,6 +1814,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="32-single-record-journey-domain"></a>
 ## 32-single-record-journey-domain — 32 Single Record Journey
 
 ![32-single-record-journey-domain](../views/svg/32-single-record-journey-domain.svg)
@@ -1721,6 +1830,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="32-single-record-journey-full"></a>
 ## 32-single-record-journey-full — Record Processing Pipeline — Single Record Journey
 
 ![32-single-record-journey-full](../views/svg/32-single-record-journey-full.svg)
@@ -1738,6 +1848,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="32-single-record-journey-infra"></a>
 ## 32-single-record-journey-infra — 32 Single Record Journey
 
 ![32-single-record-journey-infra](../views/svg/32-single-record-journey-infra.svg)
@@ -1753,6 +1864,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="32-single-record-journey-overview"></a>
 ## 32-single-record-journey-overview — 32 Single Record Journey
 
 ![32-single-record-journey-overview](../views/svg/32-single-record-journey-overview.svg)
@@ -1768,6 +1880,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="33-cli-run-interaction-dataflow"></a>
 ## 33-cli-run-interaction-dataflow — 33 Cli Run Interaction
 
 ![33-cli-run-interaction-dataflow](../views/svg/33-cli-run-interaction-dataflow.svg)
@@ -1783,6 +1896,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="33-cli-run-interaction-domain"></a>
 ## 33-cli-run-interaction-domain — 33 Cli Run Interaction
 
 ![33-cli-run-interaction-domain](../views/svg/33-cli-run-interaction-domain.svg)
@@ -1798,6 +1912,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="33-cli-run-interaction-full"></a>
 ## 33-cli-run-interaction-full — CLI Run Command → PipelineRunner Full Interaction
 
 ![33-cli-run-interaction-full](../views/svg/33-cli-run-interaction-full.svg)
@@ -1815,6 +1930,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="33-cli-run-interaction-infra"></a>
 ## 33-cli-run-interaction-infra — 33 Cli Run Interaction
 
 ![33-cli-run-interaction-infra](../views/svg/33-cli-run-interaction-infra.svg)
@@ -1830,6 +1946,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="33-cli-run-interaction-overview"></a>
 ## 33-cli-run-interaction-overview — 33 Cli Run Interaction
 
 ![33-cli-run-interaction-overview](../views/svg/33-cli-run-interaction-overview.svg)
@@ -1845,6 +1962,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="34-batch-processing-flow-dataflow"></a>
 ## 34-batch-processing-flow-dataflow — 34 Batch Processing Flow
 
 ![34-batch-processing-flow-dataflow](../views/svg/34-batch-processing-flow-dataflow.svg)
@@ -1860,6 +1978,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="34-batch-processing-flow-domain"></a>
 ## 34-batch-processing-flow-domain — 34 Batch Processing Flow
 
 ![34-batch-processing-flow-domain](../views/svg/34-batch-processing-flow-domain.svg)
@@ -1875,6 +1994,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="34-batch-processing-flow-full"></a>
 ## 34-batch-processing-flow-full — Batch Processing Flow — Extract to Write
 
 ![34-batch-processing-flow-full](../views/svg/34-batch-processing-flow-full.svg)
@@ -1892,6 +2012,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="34-batch-processing-flow-infra"></a>
 ## 34-batch-processing-flow-infra — 34 Batch Processing Flow
 
 ![34-batch-processing-flow-infra](../views/svg/34-batch-processing-flow-infra.svg)
@@ -1907,6 +2028,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="34-batch-processing-flow-overview"></a>
 ## 34-batch-processing-flow-overview — 34 Batch Processing Flow
 
 ![34-batch-processing-flow-overview](../views/svg/34-batch-processing-flow-overview.svg)
@@ -1922,6 +2044,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="35-bootstrap-sequence-dataflow"></a>
 ## 35-bootstrap-sequence-dataflow — 35 Bootstrap Sequence
 
 ![35-bootstrap-sequence-dataflow](../views/svg/35-bootstrap-sequence-dataflow.svg)
@@ -1937,6 +2060,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="35-bootstrap-sequence-domain"></a>
 ## 35-bootstrap-sequence-domain — 35 Bootstrap Sequence
 
 ![35-bootstrap-sequence-domain](../views/svg/35-bootstrap-sequence-domain.svg)
@@ -1952,6 +2076,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="35-bootstrap-sequence-full"></a>
 ## 35-bootstrap-sequence-full — Composition Layer Bootstrap Sequence
 
 ![35-bootstrap-sequence-full](../views/svg/35-bootstrap-sequence-full.svg)
@@ -1969,6 +2094,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="35-bootstrap-sequence-infra"></a>
 ## 35-bootstrap-sequence-infra — 35 Bootstrap Sequence
 
 ![35-bootstrap-sequence-infra](../views/svg/35-bootstrap-sequence-infra.svg)
@@ -1984,6 +2110,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="35-bootstrap-sequence-overview"></a>
 ## 35-bootstrap-sequence-overview — 35 Bootstrap Sequence
 
 ![35-bootstrap-sequence-overview](../views/svg/35-bootstrap-sequence-overview.svg)
@@ -1999,6 +2126,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="36-architecture-principles-mindmap-dataflow"></a>
 ## 36-architecture-principles-mindmap-dataflow — 36 Architecture Principles Mindmap
 
 ![36-architecture-principles-mindmap-dataflow](../views/svg/36-architecture-principles-mindmap-dataflow.svg)
@@ -2014,6 +2142,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="36-architecture-principles-mindmap-domain"></a>
 ## 36-architecture-principles-mindmap-domain — 36 Architecture Principles Mindmap
 
 ![36-architecture-principles-mindmap-domain](../views/svg/36-architecture-principles-mindmap-domain.svg)
@@ -2029,6 +2158,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="36-architecture-principles-mindmap-full"></a>
 ## 36-architecture-principles-mindmap-full — Architecture Principles Mind Map
 
 ![36-architecture-principles-mindmap-full](../views/svg/36-architecture-principles-mindmap-full.svg)
@@ -2046,6 +2176,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="36-architecture-principles-mindmap-infra"></a>
 ## 36-architecture-principles-mindmap-infra — 36 Architecture Principles Mindmap
 
 ![36-architecture-principles-mindmap-infra](../views/svg/36-architecture-principles-mindmap-infra.svg)
@@ -2061,6 +2192,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="36-architecture-principles-mindmap-overview"></a>
 ## 36-architecture-principles-mindmap-overview — 36 Architecture Principles Mindmap
 
 ![36-architecture-principles-mindmap-overview](../views/svg/36-architecture-principles-mindmap-overview.svg)
@@ -2076,6 +2208,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="39-medallion-invariants-dataflow"></a>
 ## 39-medallion-invariants-dataflow — 39 Medallion Invariants
 
 ![39-medallion-invariants-dataflow](../views/svg/39-medallion-invariants-dataflow.svg)
@@ -2091,6 +2224,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="39-medallion-invariants-domain"></a>
 ## 39-medallion-invariants-domain — 39 Medallion Invariants
 
 ![39-medallion-invariants-domain](../views/svg/39-medallion-invariants-domain.svg)
@@ -2106,6 +2240,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="39-medallion-invariants-full"></a>
 ## 39-medallion-invariants-full — Medallion Architecture Invariants (ARCH-007)
 
 ![39-medallion-invariants-full](../views/svg/39-medallion-invariants-full.svg)
@@ -2123,6 +2258,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="39-medallion-invariants-infra"></a>
 ## 39-medallion-invariants-infra — 39 Medallion Invariants
 
 ![39-medallion-invariants-infra](../views/svg/39-medallion-invariants-infra.svg)
@@ -2138,6 +2274,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="39-medallion-invariants-overview"></a>
 ## 39-medallion-invariants-overview — 39 Medallion Invariants
 
 ![39-medallion-invariants-overview](../views/svg/39-medallion-invariants-overview.svg)
@@ -2153,6 +2290,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="41-error-classification-tree-dataflow"></a>
 ## 41-error-classification-tree-dataflow — 41 Error Classification Tree
 
 ![41-error-classification-tree-dataflow](../views/svg/41-error-classification-tree-dataflow.svg)
@@ -2168,6 +2306,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="41-error-classification-tree-domain"></a>
 ## 41-error-classification-tree-domain — 41 Error Classification Tree
 
 ![41-error-classification-tree-domain](../views/svg/41-error-classification-tree-domain.svg)
@@ -2183,6 +2322,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="41-error-classification-tree-full"></a>
 ## 41-error-classification-tree-full — Error Classification Decision Tree — Full Logic
 
 ![41-error-classification-tree-full](../views/svg/41-error-classification-tree-full.svg)
@@ -2200,6 +2340,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="41-error-classification-tree-infra"></a>
 ## 41-error-classification-tree-infra — 41 Error Classification Tree
 
 ![41-error-classification-tree-infra](../views/svg/41-error-classification-tree-infra.svg)
@@ -2215,6 +2356,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="41-error-classification-tree-overview"></a>
 ## 41-error-classification-tree-overview — 41 Error Classification Tree
 
 ![41-error-classification-tree-overview](../views/svg/41-error-classification-tree-overview.svg)
@@ -2230,6 +2372,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="44-cross-provider-enrichment-dataflow"></a>
 ## 44-cross-provider-enrichment-dataflow — 44 Cross Provider Enrichment
 
 ![44-cross-provider-enrichment-dataflow](../views/svg/44-cross-provider-enrichment-dataflow.svg)
@@ -2245,6 +2388,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="44-cross-provider-enrichment-domain"></a>
 ## 44-cross-provider-enrichment-domain — 44 Cross Provider Enrichment
 
 ![44-cross-provider-enrichment-domain](../views/svg/44-cross-provider-enrichment-domain.svg)
@@ -2260,6 +2404,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="44-cross-provider-enrichment-full"></a>
 ## 44-cross-provider-enrichment-full — Cross-Provider Data Enrichment Flow — Publication
 
 ![44-cross-provider-enrichment-full](../views/svg/44-cross-provider-enrichment-full.svg)
@@ -2277,6 +2422,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="44-cross-provider-enrichment-infra"></a>
 ## 44-cross-provider-enrichment-infra — 44 Cross Provider Enrichment
 
 ![44-cross-provider-enrichment-infra](../views/svg/44-cross-provider-enrichment-infra.svg)
@@ -2292,6 +2438,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="44-cross-provider-enrichment-overview"></a>
 ## 44-cross-provider-enrichment-overview — 44 Cross Provider Enrichment
 
 ![44-cross-provider-enrichment-overview](../views/svg/44-cross-provider-enrichment-overview.svg)
@@ -2307,6 +2454,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="46-yaml-config-resolution-dataflow"></a>
 ## 46-yaml-config-resolution-dataflow — 46 Yaml Config Resolution
 
 ![46-yaml-config-resolution-dataflow](../views/svg/46-yaml-config-resolution-dataflow.svg)
@@ -2322,6 +2470,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="46-yaml-config-resolution-domain"></a>
 ## 46-yaml-config-resolution-domain — 46 Yaml Config Resolution
 
 ![46-yaml-config-resolution-domain](../views/svg/46-yaml-config-resolution-domain.svg)
@@ -2337,6 +2486,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="46-yaml-config-resolution-full"></a>
 ## 46-yaml-config-resolution-full — YAML Configuration Resolution Chain
 
 ![46-yaml-config-resolution-full](../views/svg/46-yaml-config-resolution-full.svg)
@@ -2354,6 +2504,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="46-yaml-config-resolution-infra"></a>
 ## 46-yaml-config-resolution-infra — 46 Yaml Config Resolution
 
 ![46-yaml-config-resolution-infra](../views/svg/46-yaml-config-resolution-infra.svg)
@@ -2369,6 +2520,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="46-yaml-config-resolution-overview"></a>
 ## 46-yaml-config-resolution-overview — 46 Yaml Config Resolution
 
 ![46-yaml-config-resolution-overview](../views/svg/46-yaml-config-resolution-overview.svg)
@@ -2384,6 +2536,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="48-composite-phase-lifecycle-dataflow"></a>
 ## 48-composite-phase-lifecycle-dataflow — 48 Composite Phase Lifecycle
 
 ![48-composite-phase-lifecycle-dataflow](../views/svg/48-composite-phase-lifecycle-dataflow.svg)
@@ -2399,6 +2552,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="48-composite-phase-lifecycle-domain"></a>
 ## 48-composite-phase-lifecycle-domain — 48 Composite Phase Lifecycle
 
 ![48-composite-phase-lifecycle-domain](../views/svg/48-composite-phase-lifecycle-domain.svg)
@@ -2414,6 +2568,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="48-composite-phase-lifecycle-full"></a>
 ## 48-composite-phase-lifecycle-full — Composite Pipeline Phase Lifecycle (FSM)
 
 ![48-composite-phase-lifecycle-full](../views/svg/48-composite-phase-lifecycle-full.svg)
@@ -2431,6 +2586,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="48-composite-phase-lifecycle-infra"></a>
 ## 48-composite-phase-lifecycle-infra — 48 Composite Phase Lifecycle
 
 ![48-composite-phase-lifecycle-infra](../views/svg/48-composite-phase-lifecycle-infra.svg)
@@ -2446,6 +2602,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="48-composite-phase-lifecycle-overview"></a>
 ## 48-composite-phase-lifecycle-overview — 48 Composite Phase Lifecycle
 
 ![48-composite-phase-lifecycle-overview](../views/svg/48-composite-phase-lifecycle-overview.svg)
@@ -2461,6 +2618,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="50-exception-hierarchy-dataflow"></a>
 ## 50-exception-hierarchy-dataflow — 50 Exception Hierarchy
 
 ![50-exception-hierarchy-dataflow](../views/svg/50-exception-hierarchy-dataflow.svg)
@@ -2476,6 +2634,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="50-exception-hierarchy-domain"></a>
 ## 50-exception-hierarchy-domain — 50 Exception Hierarchy
 
 ![50-exception-hierarchy-domain](../views/svg/50-exception-hierarchy-domain.svg)
@@ -2491,6 +2650,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="50-exception-hierarchy-full"></a>
 ## 50-exception-hierarchy-full — Exception Hierarchy — Full Tree
 
 ![50-exception-hierarchy-full](../views/svg/50-exception-hierarchy-full.svg)
@@ -2508,6 +2668,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="50-exception-hierarchy-infra"></a>
 ## 50-exception-hierarchy-infra — 50 Exception Hierarchy
 
 ![50-exception-hierarchy-infra](../views/svg/50-exception-hierarchy-infra.svg)
@@ -2523,6 +2684,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="50-exception-hierarchy-overview"></a>
 ## 50-exception-hierarchy-overview — 50 Exception Hierarchy
 
 ![50-exception-hierarchy-overview](../views/svg/50-exception-hierarchy-overview.svg)

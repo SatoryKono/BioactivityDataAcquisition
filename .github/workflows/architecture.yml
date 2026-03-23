@@ -4,24 +4,6 @@ permissions:
     contents: read
 
 on:
-    push:
-        branches: [ main ]
-        paths-ignore:
-            - 'docs/**'
-            - '*.md'
-            - '.ai/**'
-            - '.claude/**'
-            - '.github/workflows/**'
-            - 'LICENSE'
-    pull_request:
-        branches: [ main ]
-        paths-ignore:
-            - 'docs/**'
-            - '*.md'
-            - '.ai/**'
-            - '.claude/**'
-            - '.github/workflows/**'
-            - 'LICENSE'
     schedule:
         -   cron: "20 2 * * *"
     workflow_dispatch:
@@ -45,9 +27,8 @@ env:
 jobs:
     architecture-fast-baseline:
         if: >
-            github.event_name == 'push' ||
-            github.event_name == 'pull_request' ||
-            (github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy != 'true')
+            github.event_name == 'workflow_dispatch' &&
+            github.event.inputs.run_heavy != 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 10
         steps:
@@ -61,8 +42,8 @@ jobs:
 
             -   name: Run canonical fast architecture gate
                 run: |
-                    # Keep the fast baseline aligned with the ratchet contract:
-                    # pytest tests/architecture/ -m "not slow and not serial"
+                    # Manual fast profile. PR/push fast architecture coverage now
+                    # lives in tests.yml test-fast to avoid duplicate pytest work.
                     make qa-arch-fast
 
     architecture-heavy-nightly:

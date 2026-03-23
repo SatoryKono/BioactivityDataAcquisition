@@ -319,4 +319,8 @@ make test-deps-dev
 2. Убедитесь, что используете `uv run` или активировали виртуальное окружение.
 3. Проверьте статус инструментов через `make test-deps-dev`.
 
-В CI для этого используется не `make test`, а отдельный набор шагов в `.github/workflows/tests.yml`: `smoke-check`, quality gates и затем `test-fast` / `test-matrix` / `coverage-verify`.
+В CI для этого используется не `make test`, а отдельный набор шагов в
+`.github/workflows/tests.yml`: короткий `smoke-check`, затем независимые
+`governance-preflight` и `config-schema-preflight`, после чего стартуют
+`test-fast` / `test-matrix`, а в финале `coverage-verify` объединяет coverage
+shard-ы и отдельно догоняет только `serial`-тесты.

@@ -34,7 +34,7 @@ RF-07 must **not**:
 ### 1.1. What the current implementation already supports
 
 1. `ProviderRegistry` is already instance-scoped internally.
-   See [`provider_registry.py`](../../src/bioetl/composition/providers/provider_registry.py):
+   See `src/bioetl/composition/providers/provider_registry.py`:
    - `ProviderRegistry.__init__()` owns a local `ProviderStore`;
    - `create_provider_registry()` returns a fresh isolated instance;
    - `ensure_provider_registry_ready(registry)` already exists as a helper for explicit instances.
@@ -43,7 +43,7 @@ RF-07 must **not**:
    The registry methods are wrapped by `DefaultRegistryMethod`, and `ensure_loaded()` routes through `get_default_provider_registry()`.
 
 3. An explicit-registry path already exists in production composition code.
-   The strongest example is [`data_source_factory.py`](../../src/bioetl/composition/factories/datasource/data_source_factory.py):
+   The strongest example is `src/bioetl/composition/factories/datasource/data_source_factory.py`:
    - `get_data_source_creator(..., provider_registry=...)`
    - `DataSourceFactory.create(..., provider_registry=...)`
    - `_resolve_provider_registry(...)`
@@ -56,15 +56,15 @@ This is important because RF-07 does not need to invent a new model; it needs to
 
 Current production files still calling class-level `ProviderRegistry` methods directly:
 
-- [`src/bioetl/composition/_pipeline_execution.py`](../../src/bioetl/composition/_pipeline_execution.py)
+- `src/bioetl/composition/_pipeline_execution.py`
   - `ProviderRegistry.ensure_loaded()`
-- [`src/bioetl/composition/bootstrap/runtime/pipeline.py`](../../src/bioetl/composition/bootstrap/runtime/pipeline.py)
+- `src/bioetl/composition/bootstrap/runtime/pipeline.py`
   - `ProviderRegistry.ensure_loaded()`
-- [`src/bioetl/composition/factories/pipeline/runner.py`](../../src/bioetl/composition/factories/pipeline/runner.py)
+- `src/bioetl/composition/factories/pipeline/runner.py`
   - `ProviderRegistry.ensure_loaded()`
-- [`src/bioetl/composition/runtime_builders/runner_builder.py`](../../src/bioetl/composition/runtime_builders/runner_builder.py)
+- `src/bioetl/composition/runtime_builders/runner_builder.py`
   - default DI arg `ensure_providers_loaded_fn = ProviderRegistry.ensure_loaded`
-- [`src/bioetl/composition/factories/datasource/http_client.py`](../../src/bioetl/composition/factories/datasource/http_client.py)
+- `src/bioetl/composition/factories/datasource/http_client.py`
   - `ProviderRegistry.ensure_loaded()`
   - `ProviderRegistry.is_registered()`
   - `ProviderRegistry.list_providers()`
@@ -72,9 +72,9 @@ Current production files still calling class-level `ProviderRegistry` methods di
 
 #### B. Production code already prepared for explicit registry injection
 
-- [`src/bioetl/composition/factories/datasource/data_source_factory.py`](../../src/bioetl/composition/factories/datasource/data_source_factory.py)
+- `src/bioetl/composition/factories/datasource/data_source_factory.py`
   - `provider_registry: ProviderRegistry | None` is already accepted by public helpers/factories.
-- [`src/bioetl/composition/providers/registration.py`](../../src/bioetl/composition/providers/registration.py)
+- `src/bioetl/composition/providers/registration.py`
   - `register_all_providers(registry=...)` already supports explicit target registries.
 
 #### C. Compatibility-heavy test surface
@@ -82,14 +82,14 @@ Current production files still calling class-level `ProviderRegistry` methods di
 Tests exercise the class-level API broadly:
 
 - decorator/registration expectations in
-  [`test_decorators.py`](../../tests/unit/composition/providers/test_decorators.py)
+  `tests/unit/composition/providers/test_decorators.py`
   and
-  [`test_provider_registry.py`](../../tests/unit/composition/providers/test_provider_registry.py)
+  `tests/unit/composition/providers/test_provider_registry.py`
 - bootstrap/runtime mocks against `ProviderRegistry.ensure_loaded` in
-  [`test_runner_factory.py`](../../tests/unit/composition/factories/pipeline/test_runner_factory.py),
-  [`test_runner_builder.py`](../../tests/unit/composition/runtime_builders/test_runner_builder.py),
-  [`test_bootstrap_entrypoints.py`](../../tests/unit/composition/bootstrap/test_bootstrap_entrypoints.py),
-  [`test_pipeline_bootstrap.py`](../../tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py)
+  `tests/unit/composition/factories/pipeline/test_runner_factory.py`,
+  `tests/unit/composition/runtime_builders/test_runner_builder.py`,
+  `tests/unit/composition/bootstrap/test_bootstrap_entrypoints.py`,
+  `tests/unit/composition/bootstrap/runtime/test_pipeline_bootstrap.py`
 
 This confirms the migration blast radius is currently dominated by test and bootstrap conventions, not by business logic.
 
@@ -140,8 +140,8 @@ The evidence points to three practical conclusions:
 - datasource factory / HTTP client configuration chain
 
 **Preferred scope**
-- [`data_source_factory.py`](../../src/bioetl/composition/factories/datasource/data_source_factory.py)
-- [`http_client.py`](../../src/bioetl/composition/factories/datasource/http_client.py)
+- `src/bioetl/composition/factories/datasource/data_source_factory.py`
+- `src/bioetl/composition/factories/datasource/http_client.py`
 - only the minimum number of upstream callers needed to thread a registry instance through
 
 **Rationale**
@@ -182,10 +182,10 @@ This is intentionally narrower than a repo-wide ban.
 - **Type:** defer
 - **Risk:** medium-high
 - **Goal:** only after earlier slices land safely, consider reducing default-registry usage in:
-  - [`_pipeline_execution.py`](../../src/bioetl/composition/_pipeline_execution.py)
-  - [`bootstrap/runtime/pipeline.py`](../../src/bioetl/composition/bootstrap/runtime/pipeline.py)
-  - [`factories/pipeline/runner.py`](../../src/bioetl/composition/factories/pipeline/runner.py)
-  - [`runtime_builders/runner_builder.py`](../../src/bioetl/composition/runtime_builders/runner_builder.py)
+  - `src/bioetl/composition/_pipeline_execution.py`
+  - `src/bioetl/composition/bootstrap/runtime/pipeline.py`
+  - `src/bioetl/composition/factories/pipeline/runner.py`
+  - `src/bioetl/composition/runtime_builders/runner_builder.py`
 
 **Defer reason**
 - these paths are closer to bootstrap lifecycle semantics and test fixtures;
@@ -207,18 +207,18 @@ This is intentionally narrower than a repo-wide ban.
 - **RF-07A** completed via
   [`rf-07a-provider-registry-call-site-ledger-2026-03-20.md`](rf-07a-provider-registry-call-site-ledger-2026-03-20.md)
 - **RF-07B** first datasource slice completed:
-  - [`http_client.py`](../../src/bioetl/composition/factories/datasource/http_client.py) now supports explicit `provider_registry`
-  - [`_registration_contracts.py`](../../src/bioetl/composition/providers/_registration_contracts.py) now threads explicit registry into HTTP client creation as well as adapter creation
+  - `src/bioetl/composition/factories/datasource/http_client.py` now supports explicit `provider_registry`
+  - `src/bioetl/composition/providers/_registration_contracts.py` now threads explicit registry into HTTP client creation as well as adapter creation
 - **RF-07C** initial narrow ratchet completed:
-  - [`test_registry_contracts.py`](../../tests/architecture/test_registry_contracts.py) now prevents new class-level `ProviderRegistry.*` calls from reappearing in `composition/factories/datasource/`
+  - `tests/architecture/test_registry_contracts.py` now prevents new class-level `ProviderRegistry.*` calls from reappearing in `composition/factories/datasource/`
 - Adjacent factory seam expanded without entering bootstrap/runtime:
-  - [`assembler.py`](../../src/bioetl/composition/factories/pipeline/assembler.py) accepts explicit `provider_registry`
-  - [`contract_validator.py`](../../src/bioetl/composition/factories/pipeline/contract_validator.py) threads explicit registry into `get_data_source_creator(...)`
+  - `src/bioetl/composition/factories/pipeline/assembler.py` accepts explicit `provider_registry`
+  - `src/bioetl/composition/factories/pipeline/contract_validator.py` threads explicit registry into `get_data_source_creator(...)`
 - Provider-assembly simplification slices completed inside
-  [`registration.py`](../../src/bioetl/composition/providers/registration.py),
-  [`registration_bio.py`](../../src/bioetl/composition/providers/registration_bio.py),
-  [`registration_biblio.py`](../../src/bioetl/composition/providers/registration_biblio.py),
-  and [`_registration_contracts.py`](../../src/bioetl/composition/providers/_registration_contracts.py):
+  `src/bioetl/composition/providers/registration.py`,
+  `src/bioetl/composition/providers/registration_bio.py`,
+  `src/bioetl/composition/providers/registration_biblio.py`,
+  and `src/bioetl/composition/providers/_registration_contracts.py`:
   - canonical `ProviderAssemblySupport` resolution now goes through
     `resolve_provider_assembly_support(...)`
   - support-aware data-source creator binding now goes through
@@ -251,10 +251,10 @@ What remains intentionally outside this plan slice:
 
 ### Explicitly deferred
 
-- [`_pipeline_execution.py`](../../src/bioetl/composition/_pipeline_execution.py)
-- [`bootstrap/runtime/pipeline.py`](../../src/bioetl/composition/bootstrap/runtime/pipeline.py)
-- [`factories/pipeline/runner.py`](../../src/bioetl/composition/factories/pipeline/runner.py)
-- [`runtime_builders/runner_builder.py`](../../src/bioetl/composition/runtime_builders/runner_builder.py)
+- `src/bioetl/composition/_pipeline_execution.py`
+- `src/bioetl/composition/bootstrap/runtime/pipeline.py`
+- `src/bioetl/composition/factories/pipeline/runner.py`
+- `src/bioetl/composition/runtime_builders/runner_builder.py`
 
 These paths were intentionally deferred from the first RF-07 wave. They are now tracked by the dedicated runtime plan:
 
@@ -278,21 +278,21 @@ These paths were intentionally deferred from the first RF-07 wave. They are now 
 
 Run targeted tests around datasource/provider creation:
 
-- [`tests/unit/composition/factories/datasource/test_data_source_registry.py`](../../tests/unit/composition/factories/datasource/test_data_source_registry.py)
-- [`tests/unit/composition/factories/datasource/test_data_sources.py`](../../tests/unit/composition/factories/datasource/test_data_sources.py)
+- `tests/unit/composition/factories/datasource/test_data_source_registry.py`
+- `tests/unit/composition/factories/datasource/test_data_sources.py`
 - provider-registry unit slice in
-  [`tests/unit/composition/providers/test_provider_registry.py`](../../tests/unit/composition/providers/test_provider_registry.py)
+  `tests/unit/composition/providers/test_provider_registry.py`
 
 Add bootstrap safety slices if caller threading reaches them:
 
-- [`tests/unit/composition/factories/pipeline/test_runner_factory.py`](../../tests/unit/composition/factories/pipeline/test_runner_factory.py)
-- [`tests/unit/composition/runtime_builders/test_runner_builder.py`](../../tests/unit/composition/runtime_builders/test_runner_builder.py)
+- `tests/unit/composition/factories/pipeline/test_runner_factory.py`
+- `tests/unit/composition/runtime_builders/test_runner_builder.py`
 
 ### For RF-07C
 
 - targeted architecture test for the migrated subtree
 - existing architecture regression slices if imports or boundaries change:
-  - [`tests/architecture/test_layer_dependencies.py`](../../tests/architecture/test_layer_dependencies.py)
+  - `tests/architecture/test_layer_dependencies.py`
 
 ## 6. Main Risks And Controls
 
