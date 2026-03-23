@@ -28,15 +28,7 @@ from bioetl.infrastructure.adapters.crossref.models_shared import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.adapters.crossref._response_models import (
-        CrossRefMessage as _CrossRefMessage,
-    )
-    from bioetl.infrastructure.adapters.crossref._response_models import (
-        CrossRefPublicationResponse as _CrossRefPublicationResponse,
-    )
-    from bioetl.infrastructure.adapters.crossref._response_models import (
-        CrossRefPublicationsResponse as _CrossRefPublicationsResponse,
-    )
+    import bioetl.infrastructure.adapters.crossref._response_models as _crossref_response_models
 
 __all__ = [
     "CROSSREF_RECORD_MODELS",
@@ -54,13 +46,14 @@ __all__ = [
     "CrossRefReference",
 ]
 
-CrossRefMessage: type[_CrossRefMessage]
-CrossRefPublicationResponse: type[_CrossRefPublicationResponse]
-CrossRefPublicationsResponse: type[_CrossRefPublicationsResponse]
+CrossRefMessage: type[_crossref_response_models.CrossRefMessage]
+CrossRefPublicationResponse: type[_crossref_response_models.CrossRefPublicationResponse]
+CrossRefPublicationsResponse: type[
+    _crossref_response_models.CrossRefPublicationsResponse
+]
+
 
 # === Publication Record Model ===
-
-
 class CrossRefPublicationRecord(BaseModel):
     """Individual publication record from CrossRef API.
 

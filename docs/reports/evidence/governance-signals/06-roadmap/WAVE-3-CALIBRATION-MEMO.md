@@ -13,8 +13,8 @@ The goal is intentionally narrow:
 
 - [`SYN-governance-signals.md`](../03-synthesis/SYN-governance-signals.md)
 - [`DECISIONS.yaml`](../04-decisions/DECISIONS.yaml)
-- [`EXECUTION-ROADMAP.md`](./EXECUTION-ROADMAP.md)
-- [`duplication-baseline.md`](../../../../../reports/quality/duplication-baseline.md)
+- [`EXECUTION-ROADMAP.md`](EXECUTION-ROADMAP.md)
+- `reports/quality/duplication-baseline.md`
 - [`RF-FS-002-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-002-baseline-2026-03-19.md)
 - [`RF-FS-001-baseline-2026-03-19.md`](../../../../99-archive/plans/rf-fs-2026-03/RF-FS-001-baseline-2026-03-19.md)
 
@@ -34,7 +34,7 @@ Candidates were ranked against four questions:
 **Status:** keep as the current named hotspot program.
 
 This remains the cleanest existing program boundary:
-- it is already budgeted in [`debt_scorecard.yaml`](../../../../../configs/quality/debt_scorecard.yaml),
+- it is already budgeted in `configs/quality/debt_scorecard.yaml`,
 - it still appears in the raw large-file tail,
 - it was already called out in prior structural planning as a cognitively wide package that mixes lifecycle, batch execution, callbacks, tracing-adjacent helpers, and shared execution contracts.
 
@@ -141,7 +141,7 @@ and defer any `composition` expansion until after one more normalization/calibra
 
 If the user wants to operationalize Wave 3, the next change should be a small governance PR that:
 
-1. adds a second named hotspot program in [`debt_scorecard.yaml`](../../../../../configs/quality/debt_scorecard.yaml) for `src/bioetl/application/composite/`,
+1. adds a second named hotspot program in `configs/quality/debt_scorecard.yaml` for `src/bioetl/application/composite/`,
 2. keeps budgets intentionally narrow and symmetric with the existing `core_orchestration` style,
 3. does not add any new blocking duplication gate,
 4. leaves `composition/factories` in report-only observation mode.

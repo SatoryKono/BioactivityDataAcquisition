@@ -227,7 +227,9 @@ else:  # pragma: no cover
 2. Partial test runs in parallel CI — coverage is cumulative across all jobs
 3. Missing test dependencies — some tests skipped
 
-**Solution**: Run full test suite locally with same test group configuration as CI.
+**Solution**: Run the full suite locally only when needed; in CI coverage is now
+assembled from shard coverage plus a dedicated `serial` pass, rather than from
+one extra full rerun of almost the entire suite.
 
 ---
 
@@ -239,15 +241,18 @@ else:  # pragma: no cover
 
 ```yaml
 coverage-verify:
-  needs: [test-matrix]
+  needs: [smoke-check, test-fast, test-matrix]
   runs-on: ubuntu-latest
   steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - uses: actions/download-artifact@v4
       with:
-        python-version: "3.12"
-    - run: pip install pytest pytest-cov
-    - run: pytest --cov=src/bioetl --cov-fail-under=85 tests/
+        pattern: coverage-data-*
+        merge-multiple: true
+        path: reports/coverage
+    - run: pytest tests/ -m "serial and not e2e and not benchmark" -p no:xdist --cov=src/bioetl --cov-report=
+    - run: python -m coverage combine reports/coverage
+    - run: python -m coverage report --fail-under=85
+    - run: python -m coverage xml -o coverage.xml
 ```
 
 **Status Check**: Required for PR merge. If coverage drops below 85%, merge is blocked.

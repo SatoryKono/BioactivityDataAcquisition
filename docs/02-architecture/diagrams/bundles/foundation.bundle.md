@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-03-20T22:49:13
+- Generated: 2026-03-23T10:52:06
 - Diagram count: 55
 
 ## Table of Contents
@@ -65,6 +65,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-full-system-component"></a>
 ## 01-full-system-component — Full System Component Diagram
 
 ![01-full-system-component](../foundation/svg/01-full-system-component.svg)
@@ -83,6 +84,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="01-high-level"></a>
 ## 01-high-level — High-Level System Architecture
 
 ![01-high-level](../foundation/svg/01-high-level.svg)
@@ -100,6 +102,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="02-full-medallion-data-flow"></a>
 ## 02-full-medallion-data-flow — Full Medallion Data Flow with Lineage and DQ
 
 ![02-full-medallion-data-flow](../foundation/svg/02-full-medallion-data-flow.svg)
@@ -117,6 +120,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="03-pipeline-execution-happy-path"></a>
 ## 03-pipeline-execution-happy-path — Pipeline Execution — Happy Path
 
 ![03-pipeline-execution-happy-path](../foundation/svg/03-pipeline-execution-happy-path.svg)
@@ -134,6 +138,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="04-domain-layer-class-diagram"></a>
 ## 04-domain-layer-class-diagram — Domain Layer Class Diagram
 
 ![04-domain-layer-class-diagram](../foundation/svg/04-domain-layer-class-diagram.svg)
@@ -151,6 +156,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="04-error-flow"></a>
 ## 04-error-flow — Error Handling and Quarantine Flow
 
 ![04-error-flow](../foundation/svg/04-error-flow.svg)
@@ -168,6 +174,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-layers-interaction"></a>
 ## 05-layers-interaction — Layer Interaction — Hexagonal Architecture
 
 ![05-layers-interaction](../foundation/svg/05-layers-interaction.svg)
@@ -185,6 +192,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="05-pipeline-lifecycle-states"></a>
 ## 05-pipeline-lifecycle-states — Pipeline Lifecycle State Machine
 
 ![05-pipeline-lifecycle-states](../foundation/svg/05-pipeline-lifecycle-states.svg)
@@ -202,6 +210,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="06-application-layer-class-diagram"></a>
 ## 06-application-layer-class-diagram — Application Layer Class Diagram
 
 ![06-application-layer-class-diagram](../foundation/svg/06-application-layer-class-diagram.svg)
@@ -219,6 +228,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="06-pipeline-execution"></a>
 ## 06-pipeline-execution — Pipeline Execution Sequence (Full)
 
 ![06-pipeline-execution](../foundation/svg/06-pipeline-execution.svg)
@@ -236,6 +246,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-circuit-breaker-states"></a>
 ## 07-circuit-breaker-states — Circuit Breaker State Machine
 
 ![07-circuit-breaker-states](../foundation/svg/07-circuit-breaker-states.svg)
@@ -253,6 +264,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-medallion-flow"></a>
 ## 07-medallion-flow — Medallion Data Flow (Sources → Bronze → Silver → Gold)
 
 ![07-medallion-flow](../foundation/svg/07-medallion-flow.svg)
@@ -270,6 +282,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-complete-etl-workflow"></a>
 ## 08-complete-etl-workflow — Complete ETL Workflow (6 Phases)
 
 ![08-complete-etl-workflow](../foundation/svg/08-complete-etl-workflow.svg)
@@ -287,6 +300,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="08-domain-ddd"></a>
 ## 08-domain-ddd — Domain Layer — DDD Components
 
 ![08-domain-ddd](../foundation/svg/08-domain-ddd.svg)
@@ -304,6 +318,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="09-full-er-diagram"></a>
 ## 09-full-er-diagram — Entity-Relationship Diagram (All Providers)
 
 ![09-full-er-diagram](../foundation/svg/09-full-er-diagram.svg)
@@ -321,6 +336,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="10-infrastructure-layer-class-diagram"></a>
 ## 10-infrastructure-layer-class-diagram — Infrastructure Layer Class Diagram
 
 ![10-infrastructure-layer-class-diagram](../foundation/svg/10-infrastructure-layer-class-diagram.svg)
@@ -338,6 +354,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="11-lock-acquisition-sequence"></a>
 ## 11-lock-acquisition-sequence — Lock Acquisition Sequence (Two Workers)
 
 ![11-lock-acquisition-sequence](../foundation/svg/11-lock-acquisition-sequence.svg)
@@ -355,6 +372,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="12-local-deployment-architecture"></a>
 ## 12-local-deployment-architecture — Local Deployment Architecture
 
 ![12-local-deployment-architecture](../foundation/svg/12-local-deployment-architecture.svg)
@@ -372,6 +390,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="13-domain-models-relationship"></a>
 ## 13-domain-models-relationship — Domain Models Relationship Hierarchy
 
 ![13-domain-models-relationship](../foundation/svg/13-domain-models-relationship.svg)
@@ -389,6 +408,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="14-provider-health-states"></a>
 ## 14-provider-health-states — Provider Health State Machine
 
 ![14-provider-health-states](../foundation/svg/14-provider-health-states.svg)
@@ -406,6 +426,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="15-dq-check-workflow"></a>
 ## 15-dq-check-workflow — Data Quality Check Workflow
 
 ![15-dq-check-workflow](../foundation/svg/15-dq-check-workflow.svg)
@@ -423,6 +444,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="16-memory-lock-class"></a>
 ## 16-memory-lock-class — MemoryLock Class Diagram
 
 ![16-memory-lock-class](../foundation/svg/16-memory-lock-class.svg)
@@ -440,6 +462,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="17-pipeline-hierarchy"></a>
 ## 17-pipeline-hierarchy — Pipeline and Transformer Class Hierarchy
 
 ![17-pipeline-hierarchy](../foundation/svg/17-pipeline-hierarchy.svg)
@@ -457,6 +480,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="18-bronze-write-sequence"></a>
 ## 18-bronze-write-sequence — Bronze Write Sequence (JSONL + zstd)
 
 ![18-bronze-write-sequence](../foundation/svg/18-bronze-write-sequence.svg)
@@ -474,6 +498,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="19-delta-lake-write-sequence"></a>
 ## 19-delta-lake-write-sequence — Delta Lake Write Sequence (Silver Layer)
 
 ![19-delta-lake-write-sequence](../foundation/svg/19-delta-lake-write-sequence.svg)
@@ -491,6 +516,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="20-quarantine-record-states"></a>
 ## 20-quarantine-record-states — Quarantine Record State Machine
 
 ![20-quarantine-record-states](../foundation/svg/20-quarantine-record-states.svg)
@@ -508,6 +534,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="21-activity-entity-data-flow"></a>
 ## 21-activity-entity-data-flow — Activity Entity Data Flow (Extract → Transform → Load)
 
 ![21-activity-entity-data-flow](../foundation/svg/21-activity-entity-data-flow.svg)
@@ -525,6 +552,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="22-client-api-request-sequence"></a>
 ## 22-client-api-request-sequence — HTTP Client API Request Sequence
 
 ![22-client-api-request-sequence](../foundation/svg/22-client-api-request-sequence.svg)
@@ -542,6 +570,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="23-silver-writer-class"></a>
 ## 23-silver-writer-class — SilverWriter Class Diagram
 
 ![23-silver-writer-class](../foundation/svg/23-silver-writer-class.svg)
@@ -559,6 +588,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="24-hash-service-class"></a>
 ## 24-hash-service-class — ContentHashService Class Diagram
 
 ![24-hash-service-class](../foundation/svg/24-hash-service-class.svg)
@@ -576,6 +606,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="25-circuit-breaker-observer-class"></a>
 ## 25-circuit-breaker-observer-class — Circuit Breaker and Observer Classes
 
 ![25-circuit-breaker-observer-class](../foundation/svg/25-circuit-breaker-observer-class.svg)
@@ -593,6 +624,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="26-hexagonal-ports-adapters"></a>
 ## 26-hexagonal-ports-adapters — Hexagonal Architecture — Ports and Adapters Overview
 
 ![26-hexagonal-ports-adapters](../foundation/svg/26-hexagonal-ports-adapters.svg)
@@ -610,6 +642,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="27-import-matrix-enforcement"></a>
 ## 27-import-matrix-enforcement — Five-Layer Import Matrix Enforcement (ARCH-001)
 
 ![27-import-matrix-enforcement](../foundation/svg/27-import-matrix-enforcement.svg)
@@ -627,6 +660,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="28-composition-root-di-graph"></a>
 ## 28-composition-root-di-graph — Composition Root Wiring — Public APIs and Assembly
 
 ![28-composition-root-di-graph](../foundation/svg/28-composition-root-di-graph.svg)
@@ -644,6 +678,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="29-composite-pipeline-workflow"></a>
 ## 29-composite-pipeline-workflow — Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
 
 ![29-composite-pipeline-workflow](../foundation/svg/29-composite-pipeline-workflow.svg)
@@ -661,6 +696,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="30-port-adapter-mapping"></a>
 ## 30-port-adapter-mapping — Port-to-Adapter Mapping Table Diagram
 
 ![30-port-adapter-mapping](../foundation/svg/30-port-adapter-mapping.svg)
@@ -678,6 +714,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="31-pipeline-run-lifecycle"></a>
 ## 31-pipeline-run-lifecycle — Pipeline Run Lifecycle — From Config to Completion
 
 ![31-pipeline-run-lifecycle](../foundation/svg/31-pipeline-run-lifecycle.svg)
@@ -695,6 +732,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="32-single-record-journey"></a>
 ## 32-single-record-journey — Record Processing Pipeline — Single Record Journey
 
 ![32-single-record-journey](../foundation/svg/32-single-record-journey.svg)
@@ -712,6 +750,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="33-cli-run-interaction"></a>
 ## 33-cli-run-interaction — CLI Run Command → Current Execution Flow
 
 ![33-cli-run-interaction](../foundation/svg/33-cli-run-interaction.svg)
@@ -729,6 +768,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="34-batch-processing-flow"></a>
 ## 34-batch-processing-flow — Batch Processing Flow — Extract to Write
 
 ![34-batch-processing-flow](../foundation/svg/34-batch-processing-flow.svg)
@@ -746,6 +786,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="35-bootstrap-sequence"></a>
 ## 35-bootstrap-sequence — Composition Layer Bootstrap Sequence
 
 ![35-bootstrap-sequence](../foundation/svg/35-bootstrap-sequence.svg)
@@ -763,6 +804,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="36-architecture-principles-mindmap"></a>
 ## 36-architecture-principles-mindmap — Architecture Principles Mind Map
 
 ![36-architecture-principles-mindmap](../foundation/svg/36-architecture-principles-mindmap.svg)
@@ -780,6 +822,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="37-cli-entry-full-chain"></a>
 ## 37-cli-entry-full-chain — CLI Entry Point to Pipeline Execution Full Chain
 
 ![37-cli-entry-full-chain](../foundation/svg/37-cli-entry-full-chain.svg)
@@ -797,6 +840,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="38-runtime-assembly-sequence"></a>
 ## 38-runtime-assembly-sequence — Runtime Assembly Sequence — bootstrap/runtime/assembly.py
 
 ![38-runtime-assembly-sequence](../foundation/svg/38-runtime-assembly-sequence.svg)
@@ -814,6 +858,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="39-medallion-invariants"></a>
 ## 39-medallion-invariants — Medallion Architecture Invariants (ARCH-007)
 
 ![39-medallion-invariants](../foundation/svg/39-medallion-invariants.svg)
@@ -831,6 +876,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="40-application-core-collaboration"></a>
 ## 40-application-core-collaboration — Application Core Component Collaboration
 
 ![40-application-core-collaboration](../foundation/svg/40-application-core-collaboration.svg)
@@ -848,6 +894,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="41-error-classification-tree"></a>
 ## 41-error-classification-tree — Error Classification Decision Tree — Full Logic
 
 ![41-error-classification-tree](../foundation/svg/41-error-classification-tree.svg)
@@ -865,6 +912,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="42-pipeline-runner-class"></a>
 ## 42-pipeline-runner-class — PipelineRunner Internal Component Diagram
 
 ![42-pipeline-runner-class](../foundation/svg/42-pipeline-runner-class.svg)
@@ -882,6 +930,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="43-fan-out-fan-in-pattern"></a>
 ## 43-fan-out-fan-in-pattern — Fan-Out/Fan-In Pattern — Composite Pipeline Enrichment
 
 ![43-fan-out-fan-in-pattern](../foundation/svg/43-fan-out-fan-in-pattern.svg)
@@ -899,6 +948,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="44-cross-provider-enrichment"></a>
 ## 44-cross-provider-enrichment — Cross-Provider Data Enrichment Flow — Publication
 
 ![44-cross-provider-enrichment](../foundation/svg/44-cross-provider-enrichment.svg)
@@ -916,6 +966,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="46-yaml-config-resolution"></a>
 ## 46-yaml-config-resolution — YAML Configuration Resolution Chain
 
 ![46-yaml-config-resolution](../foundation/svg/46-yaml-config-resolution.svg)
@@ -933,6 +984,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="47-publication-merge-sources"></a>
 ## 47-publication-merge-sources — Publication Composite — Merge All Sources
 
 ![47-publication-merge-sources](../foundation/svg/47-publication-merge-sources.svg)
@@ -950,6 +1002,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="48-composite-phase-lifecycle"></a>
 ## 48-composite-phase-lifecycle — Composite Pipeline Phase Lifecycle (FSM)
 
 ![48-composite-phase-lifecycle](../foundation/svg/48-composite-phase-lifecycle.svg)
@@ -967,6 +1020,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="49-composite-runner-class"></a>
 ## 49-composite-runner-class — CompositePipelineRunner — Component Diagram
 
 ![49-composite-runner-class](../foundation/svg/49-composite-runner-class.svg)
@@ -984,6 +1038,7 @@
 
 <div style="page-break-before: always;"></div>
 
+<a id="50-exception-hierarchy"></a>
 ## 50-exception-hierarchy — Exception Hierarchy — Full Tree
 
 ![50-exception-hierarchy](../foundation/svg/50-exception-hierarchy.svg)

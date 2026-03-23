@@ -1,41 +1,43 @@
 # Architecture Review And Refactor Plan
 
-Дата: 2026-03-21  
-Статус: supporting execution plan  
+Дата: 2026-03-23  
+Статус: supporting assessment and refactor roadmap  
 Язык: русский
 
 ## Назначение
 
-Этот документ фиксирует полный архитектурный обзор проекта и приоритизированный
-план рефакторинга на основе текущего состояния кода, active evidence packs,
-архитектурных guardrails, `ruff`, `mypy --strict` и локальной валидации
-структурных seams.
+Этот документ фиксирует актуальную архитектурную оценку проекта и
+приоритизированный план рефакторинга на основе:
+
+- текущего состояния кода;
+- active evidence packs;
+- architecture tests и import guards;
+- локальной проверки governance artifacts;
+- актуального consolidated backlog.
 
 Это **не** второй competing backlog вместо
 [consolidated-open-tasks-plan-2026-03-21.md](./consolidated-open-tasks-plan-2026-03-21.md).
-Этот файл нужно использовать как архитектурную карту решений:
+Его нужно использовать как supporting assessment snapshot:
 
 - для оценки качества текущего состояния;
-- для выбора следующей refactor wave;
-- для обоснования bounded implementation slices;
-- для сравнения ожидаемого эффекта по интегральному баллу.
+- для выбора следующей bounded refactor wave;
+- для сравнения ожидаемого эффекта по интегральному баллу;
+- для связывания backlog-задач с архитектурными целями.
 
 ## Источники
 
-- [architecture-foundations/SUMMARY.md](../reports/evidence/architecture-foundations/SUMMARY.md)
-- [project-package-topology/SUMMARY.md](../reports/evidence/project-package-topology/SUMMARY.md)
+- [consolidated-open-tasks-plan-2026-03-21.md](./consolidated-open-tasks-plan-2026-03-21.md)
+- [module-dependency-map.md](../02-architecture/generated/module-dependency-map.md)
+- [07-compatibility-facade-inventory.md](../02-architecture/07-compatibility-facade-inventory.md)
+- [RULES.md](../00-project/RULES.md)
 - [project-import-governance/SUMMARY.md](../reports/evidence/project-import-governance/SUMMARY.md)
-- [project-naming-drift/SUMMARY.md](../reports/evidence/project-naming-drift/SUMMARY.md)
-- [project-documentation-drift/SUMMARY.md](../reports/evidence/project-documentation-drift/SUMMARY.md)
-- [project-test-health/SUMMARY.md](../reports/evidence/project-test-health/SUMMARY.md)
-- [technical-debt/SUMMARY.md](../reports/evidence/technical-debt/SUMMARY.md)
-- [dependency-hotspots/SUMMARY.md](../reports/evidence/dependency-hotspots/SUMMARY.md)
-- [refactor-backlog-calibration/SUMMARY.md](../reports/evidence/refactor-backlog-calibration/SUMMARY.md)
-- [project-evidence-rebaseline cross-synthesis](../reports/evidence/project-evidence-rebaseline/03-synthesis/CROSS-SYNTHESIS-project-evidence-rebaseline.md)
+- [project-package-topology/SUMMARY.md](../reports/evidence/project-package-topology/SUMMARY.md)
+- [project-file-structure/04-decisions/SUMMARY.md](../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [ADR-043-documentation-knowledge-management.md](../02-architecture/decisions/ADR-043-documentation-knowledge-management.md)
 
 ## Итоговая оценка
 
-Интегральный балл проекта: **7.16 / 10**
+Интегральный балл проекта: **7.83 / 10.00**
 
 Интерпретация:
 
@@ -43,279 +45,250 @@
 - `5.0–7.9` — удовлетворительно, требуется системный рефакторинг
 - `8.0–10.0` — хорошее состояние, точечные улучшения
 
-Текущий вывод: проект находится в **верхней части диапазона “удовлетворительно”**.
-Архитектура в целом сильная и реально enforced, но несколько локальных seams
-создают заметный drag на changeability, readability и governance clarity.
+Текущий вывод: проект находится в **верхней части диапазона
+“удовлетворительно”** и близок к переходу в категорию “хорошее состояние”.
+Архитектура сильная и реально enforced, а основной долг сейчас сидит не в
+массовых нарушениях слоёв, а в нескольких плотных seams, freshness generated
+artifacts и неполной behavioural coverage в части `composition`.
 
 ## Таблица оценки
 
-| Категория | Описание | Вес | Оценка (1–10) | Взвешенный балл |
+| Категория | Описание | Вес | Оценка (1-10) | Взвешенный балл |
 |---|---|---:|---:|---:|
-| Соблюдение слоёв | Import matrix, чистота `domain`, отсутствие недопустимых связей | 0.14 | 7.0 | 0.98 |
-| Hexagonal и DDD | Соответствие Ports & Adapters, Medallion, DDD primitives | 0.11 | 8.0 | 0.88 |
-| Границы модулей | Явность package boundaries, фасадов и dependency seams | 0.10 | 7.0 | 0.70 |
-| DI и composition | Constructor injection, composition root, отсутствие service locator | 0.10 | 8.0 | 0.80 |
-| Нейминг и semantic contracts | Ясность имён, naming families, facade semantics | 0.08 | 6.0 | 0.48 |
-| Конфигурация и governance | SSOT, compatibility inventories, policy vs derived surfaces | 0.12 | 5.0 | 0.60 |
-| Тестовая архитектура | Regression net, architecture tests, guardrails | 0.12 | 9.0 | 1.08 |
-| Документация и ADR | Согласованность active docs, ADR и кода | 0.08 | 8.5 | 0.68 |
-| Технический долг | Hotspots, duplication, broad assembly hubs, complexity | 0.09 | 6.0 | 0.54 |
-| Расширяемость | Простота добавления providers/entities и безопасного изменения seams | 0.06 | 7.0 | 0.42 |
+| Layer Boundaries | Соблюдение import-matrix, запреты межслойных импортов, private-import policy | 0.14 | 9 | 1.26 |
+| Hexagonal + DDD Fit | Соответствие Ports & Adapters, чистота `domain`, роль `application` как orchestration | 0.11 | 8 | 0.88 |
+| Dependency Injection | DI через `composition`, отсутствие service locator и hard-coded wiring | 0.08 | 8 | 0.64 |
+| Module Boundary Clarity | Ясность фасадов, ownership, читаемость границ модулей и seams | 0.10 | 7 | 0.70 |
+| Topology / Hotspots | SCC, плотные family seams, god-object pressure, change coupling | 0.08 | 7 | 0.56 |
+| Testing + Quality Governance | Architecture tests, CI-гейты, `mypy --strict`, `ruff`, coverage governance | 0.14 | 9 | 1.26 |
+| Docs + Governance Freshness | Актуальность ADR, architecture docs, generated artifacts, compatibility/doc governance | 0.10 | 7 | 0.70 |
+| Config Ownership Flow | Читаемость пути `configs -> infrastructure -> composition`, отсутствие смешения semantics/wiring | 0.09 | 7 | 0.63 |
+| Naming + Package Consistency | Единообразие суффиксов, package structure, фасады, import discipline | 0.08 | 8 | 0.64 |
+| Extensibility / Maintainability | Лёгкость расширения провайдерами и пайплайнами, локальность изменений | 0.08 | 7 | 0.56 |
 
-Итого: **7.16**
-
-## Краткая интерпретация по 4 критериям
+## Интерпретация по ключевым критериям
 
 ### 1. Соблюдение слоёв
 
 Слои `domain / application / infrastructure / composition / interfaces`
-в проекте реальны, а не декларативны. Импортные guardrails и architecture tests
-подтверждают, что import matrix в целом соблюдается. Основной риск — не broad
-layer violation, а graph fragility в отдельных composition/import seams.
+реальны, а не декларативны. Import-matrix поддерживается не только
+документацией, но и architecture tests. Главный риск здесь не broad layer
+violation, а drift в generated governance artifacts.
 
 ### 2. Соответствие Ports & Adapters и DDD
 
-Проект хорошо соответствует Hexagonal/DDD модели. Ports, adapters, composition
-root, provider registries и domain contracts читаются последовательно. Слабое
-место — compatibility layers, которые иногда размазывают границу между
-canonical contract и transitional public surface.
+Проект хорошо соответствует Hexagonal/DDD модели. Публичный фасад портов,
+тонкие CLI entrypoints и composition-root discipline читаются последовательно.
+Смягчающий фактор: `domain` несёт часть runtime-oriented contract surface, что
+является осознанным архитектурным компромиссом, а не дефектом.
 
 ### 3. Явность границ модулей и зависимостей
 
-На уровне package topology система выглядит зрелой, но часть public facades и
-assembly hubs остаются слишком широкими. Это не разрушает архитектуру, но
-делает reasoning о зависимостях дороже, чем должен быть.
+Границы package families в целом зрелые, но несколько плотных seams всё ещё
+повышают стоимость reasoning о зависимостях. Особенно это касается
+`infrastructure/config`, shared adapters и части `composition`.
 
 ### 4. Единообразие нейминга, структуры пакетов и файлов
 
-Первая naming wave уже сняла несколько сильных mismatches, но compatibility
-aliases, helper/factory vocabulary split и часть derivative docs всё ещё
-удерживают проект ниже хорошего уровня по семантической ясности.
+Нейминг и фасады в целом стабильны. Основная неоднозначность осталась не в
+базовой структуре, а в compatibility/watchlist seams и отдельных broad support
+модулях.
 
 ## Ключевые проблемы
 
-1. **CrossRef circular-import fragility**
-   Основной архитектурный риск сейчас сидит не в import-matrix violation, а в
-   циклической хрупкости вокруг CrossRef composition/import chain. Это import-time
-   risk, который способен тормозить и runtime, и дальнейшие refactor waves.
+1. **Governance freshness debt**
+   `scripts/qa/generate_architecture_dependency_map.py --check` сейчас падает,
+   поэтому generated dependency-map artifacts уже не полностью синхронны с
+   кодом. Это MUST-долг, потому что он бьёт по доверию к архитектурным
+   сигналам.
 
-2. **Governance leakage**
-   Compatibility aliases и derivative docs продолжают поддерживать старую
-   терминологию и размазывать canonical contract. Это особенно бьёт по
-   discoverability, onboarding и decision traceability.
+2. **Config-topology pressure**
+   Главный оставшийся structural track сосредоточен в
+   `src/bioetl/infrastructure/config/pipeline_config_loader.py`,
+   `src/bioetl/infrastructure/config/dq_config_loader.py`
+   и
+   `src/bioetl/composition/factories/pipeline/registry_manifest.py`.
 
-3. **Broad assembly hubs**
-   Registry/factory/pipeline assembly still carries too much orchestration in a
-   few large surfaces. Это повышает change fan-out и усложняет bounded changes.
+3. **Shared adapter hotspots**
+   Оставшийся maintenance pressure локализован в нескольких shared adapters:
+   `src/bioetl/infrastructure/adapters/cached_bronze_data_source.py`,
+   `src/bioetl/infrastructure/adapters/common/base_title_fallback.py`,
+   `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py`,
+   `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`.
 
-4. **Duplicated fallback/retry semantics**
-   Retry/fallback policy распределена по нескольким слоям и модулям. Это
-   создаёт риск расхождения поведения и затрудняет audit/maintenance.
+4. **Smoke-only confidence in parts of composition**
+   В части `composition` уверенность всё ещё держится на smoke/import coverage,
+   а не на достаточном числе targeted behaviour tests.
 
-5. **Residual semantic ambiguity**
-   First-wave naming cleanup помог, но объектные naming families, compatibility
-   aliases и часть фасадов всё ещё дают лишнюю неоднозначность.
+5. **ProviderRegistry compatibility seam**
+   Пара
+   `src/bioetl/composition/providers/provider_registry.py`
+   и
+   `src/bioetl/composition/providers/_default_registry.py`
+   остаётся осознанным watchlist seam. Это уже не кризисный SCC, но и не зона
+   для бесконтрольного роста.
+
+## RF-Style DAG
+
+| RF | Приоритет | Зависит от | Риск |
+|---|---:|---|---|
+| RF-010 Dependency-Map Freshness | P0 | - | low |
+| RF-011 Full Verify + Coverage Snapshot | P0 | RF-010 | medium |
+| RF-012 Config Topology Closeout | P1 | RF-010 | high |
+| RF-013 Registry Manifest Assembly-Only Guard | P1 | RF-012 | medium |
+| RF-014 Shared Adapter Hotspot 1 (cached bronze) | P2 | RF-011 | medium |
+| RF-015 Shared Adapter Hotspot 2 (title fallback) | P2 | RF-014 | medium |
+| RF-016 Shared Circuit Breaker Contract Unify | P2 | RF-015 | medium-high |
+| RF-017 Replace Smoke-Only Composition Coverage | P2.5 | RF-011 | medium |
+| RF-018 ProviderRegistry Compat Seam No-Growth Ratchet | P3 | RF-011 | low |
+
+## Протокол исполнения
+
+1. Каждый RF исполняется **последовательно**, чтобы не создавать конфликтов по
+   файлам и не смешивать несколько structural волн.
+2. После каждого RF запускаются **параллельно** только два независимых блока:
+   `targeted tests` и `docs/governance checks`.
+3. Любые primary/double-check аудиты запускаются **последовательно**.
 
 ## Приоритизированный план рефакторинга
 
-### RF-001. Убрать CrossRef import fragility
+### RF-010. Dependency-Map Freshness
 
-- Цель: сделать CrossRef bootstrapping import-safe и ацикличным.
-- Конкретные правки:
-  - сузить ответственность `crossref/__init__.py`;
-  - отделить response-model seams от composition bootstrap;
-  - убрать раннюю связность между composition entrypoints и adapter internals;
-  - удержать wiring внутри composition без import-time side effects.
-- Основные файлы:
-  - `src/bioetl/composition/entrypoints.py`
-  - `src/bioetl/composition/_pipeline_execution.py`
-  - `src/bioetl/composition/factories/datasource/crossref.py`
-  - `src/bioetl/infrastructure/adapters/crossref/__init__.py`
-  - `src/bioetl/infrastructure/adapters/crossref/models.py`
-  - `src/bioetl/infrastructure/adapters/crossref/_response_models.py`
-- Риски:
-  - поломка bootstrap/import paths;
-  - скрытые transitive imports;
-  - regressions в CLI/runtime entrypoints.
-- Минимизация:
-  - сначала добавить characterization tests;
-  - выполнять перенос в 2 шага: import hygiene, затем wiring hygiene;
-  - временные compatibility shims только при реальной необходимости.
-- Definition of Done:
-  - CrossRef composition path импортируется без circular import;
-  - architecture/import tests зелёные;
-  - runtime behavior не меняется.
+- **Цель:** убрать MUST-дрейф и вернуть доверие к governance artifacts.
+- **Конкретные правки:** обновить только generated файлы
+  [module-dependency-map.md](../02-architecture/generated/module-dependency-map.md)
+  и
+  [module-dependency-map.json](../02-architecture/generated/module-dependency-map.json)
+  через `scripts/qa/generate_architecture_dependency_map.py --update`.
+- **Риски:** можно “подкрасить” картину без понимания фактического изменения
+  графа.
+- **Минимизация рисков:** фиксировать это как generated refresh и не смешивать с
+  ручными doc edits.
+- **Definition of Done:** `generate_architecture_dependency_map.py --check`
+  зелёный, related drift guards зелёные.
 
-### RF-002. Закрыть governance leakage вокруг canonical и compatibility surfaces
+### RF-011. Full Verify + Coverage Snapshot
 
-- Цель: жёстко отделить canonical surfaces от compatibility-only surfaces.
-- Конкретные правки:
-  - классифицировать aliases как `canonical`, `compatibility`, `deprecated`;
-  - синхронизировать compatibility inventory, docs и exports;
-  - вычистить legacy naming из derivative docs, где это создаёт ложное current-state impression.
-- Основные файлы/зоны:
-  - compatibility inventories в `configs/quality/`
-  - active reference docs
-  - generated/exported docs
-  - фасады в `application/core` и related compatibility surfaces
-- Риски:
-  - случайно удалить нужный compatibility contract;
-  - ухудшить discoverability.
-- Минимизация:
-  - менять aliases только вместе с inventory/docs/tests;
-  - не удалять public alias без поиска imports и guardrail validation.
-- Definition of Done:
-  - canonical surfaces названы явно;
-  - compatibility aliases ограничены и задокументированы;
-  - derivative docs не маскируются под canonical truth.
+- **Цель:** получить текущий end-to-end confidence baseline после длинной серии
+  refactor waves.
+- **Конкретные правки:** прогнать `pytest tests -q`, собрать coverage snapshot
+  при необходимости, повторно подтвердить `ruff`, `mypy`, compatibility snapshot
+  и dependency-map checks.
+- **Риски:** long-running suite может открыть flaky или ordering-sensitive
+  tests.
+- **Минимизация рисков:** сначала секторные прогоны (`tests/architecture`,
+  `tests/unit`), затем full suite.
+- **Definition of Done:** полный verify bundle зелёный.
 
-### RF-003. Декомпозировать broad registry/factory/pipeline assembly hubs
+### RF-012. Config Topology Closeout
 
-- Цель: уменьшить change fan-out и улучшить локальную тестируемость.
-- Конкретные правки:
-  - разделить assembly flow на меньшие стадии;
-  - выделить отдельные responsibilities для registry resolution, datasource assembly,
-    transformer assembly, runner assembly;
-  - удержать одну orchestration facade при более узких внутренних модулях.
-- Основные файлы:
-  - `src/bioetl/composition/factories/pipeline/assembler.py`
-  - `src/bioetl/composition/factories/pipeline/runner.py`
-  - `src/bioetl/composition/providers/provider_registry.py`
-- Риски:
-  - over-fragmentation;
-  - потеря читаемости bootstrap order;
-  - случайный reorder provider registration logic.
-- Минимизация:
-  - сохранять public entrypoints стабильными;
-  - выносить только внутренние seams;
-  - покрыть registration/runner behavior characterization tests.
-- Definition of Done:
-  - широкие hubs стали уже и понятнее;
-  - onboarding нового provider/entity требует меньше touch points;
-  - public behavior не изменился.
+- **Цель:** сделать ownership читабельным как
+  `configs -> infrastructure/config (read/normalize/validate/map) -> composition`.
+- **Конкретные правки:** в
+  `src/bioetl/infrastructure/config/pipeline_config_loader.py`
+  и
+  `src/bioetl/infrastructure/config/dq_config_loader.py`
+  выделить внутренние стадии `reader`, `normalizer`, `validator`, `mapper`;
+  в
+  `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+  оставить только assembly/wiring.
+- **Риски:** высокий blast radius, потому что loaders затрагивают почти весь
+  runtime.
+- **Минимизация рисков:** идти slice-by-slice, сохранить стабильный внешний API
+  loader’ов, использовать golden fixtures и targeted pipeline smoke.
+- **Definition of Done:** config-related tests зелёные, `composition` не владеет
+  normalization logic, ownership story читается без дополнительных compat
+  исключений.
 
-### RF-004. Консолидировать fallback/retry behavior
+### RF-013. Registry Manifest Assembly-Only Guard
 
-- Цель: убрать дублирование resilience logic и сделать policy audit-friendly.
-- Конкретные правки:
-  - разделить transport retry, publication fallback и provider-specific override;
-  - выделить единый policy contract;
-  - убрать near-duplicate fallback logic из provider transformers.
-- Основные файлы:
-  - `src/bioetl/infrastructure/adapters/common/fallback_fetch_service.py`
-  - `src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py`
-  - `src/bioetl/infrastructure/adapters/http/_client_retry_policy.py`
-  - `src/bioetl/infrastructure/adapters/decorators/retry.py`
-  - `src/bioetl/application/pipelines/common/base_publication_transformer.py`
-- Риски:
-  - незаметный behavioral drift на edge cases;
-  - over-generalization общей policy.
-- Минимизация:
-  - golden-path и failure-path tests до/после;
-  - provider-specific overrides оставлять там, где они реально нужны.
-- Definition of Done:
-  - fallback/retry semantics определены в одном месте;
-  - адаптеры и transformers не дублируют policy code;
-  - regression tests подтверждают отсутствие поведения drift.
+- **Цель:** не дать
+  `src/bioetl/composition/factories/pipeline/registry_manifest.py`
+  стать вторым config-owner.
+- **Конкретные правки:** добавить architecture guard, запрещающий
+  `yaml`/config-normalization imports внутри manifest; добавить маленький
+  unit-test на то, что manifest only assembles.
+- **Риски:** guard может стать слишком жёстким.
+- **Минимизация рисков:** запрещать только IO/normalization, но не typed
+  contracts.
+- **Definition of Done:** новый guard зелёный, targeted tests зелёные.
 
-### RF-005. Провести вторую naming/governance wave
+### RF-014. Shared Adapter Hotspot 1: Cached Bronze
 
-- Цель: завершить semantic tightening без repo-wide rename campaign.
-- Конкретные правки:
-  - сузить object-family ambiguity;
-  - привести helper/factory vocabulary к более явным canonical правилам;
-  - не допускать роста compatibility-driven naming drift.
-- Основные темы:
-  - `Creator` vs `Factory`
-  - `Support` vs `Helper`
-  - `RunResult` families
-  - helper/facade names, не соответствующие текущей роли
-- Риски:
-  - churn без достаточной пользы;
-  - разбалансировка docs/imports.
-- Минимизация:
-  - только evidence-backed slices;
-  - только рядом с реальным code touch;
-  - не трогать compatibility names без выгоды для public clarity.
-- Definition of Done:
-  - canonical vocabulary читается стабильнее;
-  - remaining ambiguity ограничена осознанными compatibility seams;
-  - evidence и docs обновлены синхронно.
+- **Цель:** уменьшить coupling между cache policy, key-building и IO.
+- **Конкретные правки:** в
+  `src/bioetl/infrastructure/adapters/cached_bronze_data_source.py`
+  вынести decision logic в маленький pure helper, отдельно выделить cache-key
+  construction и policy seam.
+- **Риски:** можно незаметно изменить кэш-поведение.
+- **Минимизация рисков:** сначала unit-тесты на decision branches, затем
+  рефакторинг; при необходимости один integration/VCR test.
+- **Definition of Done:** behaviour не изменился, модуль стал уже по
+  ответственности, новые unit-тесты зелёные.
 
-## Рекомендуемый порядок выполнения
+### RF-015. Shared Adapter Hotspot 2: Title Fallback
 
-1. `RF-001` — сначала снять import fragility.
-2. `RF-002` — параллельно или сразу после `RF-001`, чтобы не тянуть stale governance.
-3. `RF-003` — после стабилизации CrossRef/import graph.
-4. `RF-004` — после сужения assembly hubs.
-5. `RF-005` — последней bounded wave.
+- **Цель:** сделать fallback behaviour расширяемым и менее плотным.
+- **Конкретные правки:** в
+  `src/bioetl/infrastructure/adapters/common/base_title_fallback.py`
+  выделить `TitleFallbackStrategy` как `Protocol` или маленький ABC, вынести
+  1-2 конкретные стратегии и оставить в основном модуле только оркестрацию.
+- **Риски:** переусложнение простого helper.
+- **Минимизация рисков:** выносить только реально повторяющиеся правила и не
+  дробить без выигрыша в читаемости.
+- **Definition of Done:** код стал проще читать, стратегии покрыты unit-тестами.
 
-## Verify Matrix
+### RF-016. Shared Circuit Breaker Contract Unify
 
-| Волна | Обязательная верификация | Цель проверки |
-|---|---|---|
-| `RF-001` | `pytest tests/architecture/test_interfaces_no_infrastructure.py -q` | Подтвердить снятие circular-import fragility и отсутствие новой layer leakage |
-| `RF-001` | `pytest tests/unit/composition -q` | Проверить composition wiring и bootstrap contracts |
-| `RF-001` | `python -m mypy --strict src/bioetl/composition src/bioetl/infrastructure/adapters/crossref` | Удержать типовую целостность import-sensitive seams |
-| `RF-002` | `pytest tests/architecture/test_compatibility_*.py -q` | Подтвердить согласованность canonical vs compatibility policy |
-| `RF-002` | `python scripts/qa/generate_compatibility_facade_snapshot.py --check` | Проверить SSOT/generated snapshot consistency |
-| `RF-002` | `python scripts/check_doc_links.py --configs` | Убедиться, что doc/governance cleanup не сломал active references |
-| `RF-003` | `pytest tests/unit/composition -q` | Зафиксировать поведение registry/factory/runner после декомпозиции |
-| `RF-003` | `pytest tests/architecture -q` | Проверить, что разбиение hubs не создало новых boundary regressions |
-| `RF-004` | `pytest tests/unit/infrastructure -q` | Проверить fallback/retry behavior на уровне адаптеров |
-| `RF-004` | `pytest tests/unit/application -q` | Подтвердить отсутствие drift в transformer/service behavior |
-| `RF-005` | `pytest tests/unit -q` | Убедиться, что naming cleanup не сломал runtime contracts |
-| `RF-005` | `ruff check src tests && ruff format --check src tests` | Удержать style/import hygiene после rename slices |
+- **Цель:** убрать скрытую дубликацию state/decision semantics.
+- **Конкретные правки:** вынести общий typed seam для breaker-state и transition
+  logic, который будет использоваться и в
+  `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py`,
+  и в
+  `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`.
+- **Риски:** регрессии в resiliency path.
+- **Минимизация рисков:** сначала стабилизировать unit-тесты на state
+  transitions, публичные API не менять.
+- **Definition of Done:** shared typed contract существует, дублирование
+  уменьшено, unit/integration tests зелёные.
 
-Базовый full-closeout bundle после каждой завершённой волны:
+### RF-017. Replace Smoke-Only Composition Coverage
 
-- `./.venv/Scripts/python.exe -m pytest tests/architecture -q`
-- `./.venv/Scripts/python.exe -m mypy --strict src/bioetl/`
-- `./.venv/Scripts/ruff.exe check src tests`
-- `./.venv/Scripts/ruff.exe format --check src tests`
+- **Цель:** перенести часть confidence с import-only smoke на поведенческие
+  unit-тесты.
+- **Конкретные правки:** взять 3-5 часто меняемых модулей из
+  `tests/smoke/test_smoke_composition.py`
+  и добавить unit-тесты формата “build returns expected port/bundle shape”,
+  “dependency injected”, “no import-time side effects”.
+- **Риски:** brittle wiring-tests.
+- **Минимизация рисков:** тестировать shape и contract, а не конкретные
+  реализации и не весь DI-graph.
+- **Definition of Done:** список модулей “без dedicated coverage” сокращён,
+  новые unit-тесты зелёные.
 
-## Метрики и тесты контроля регрессий
+### RF-018. ProviderRegistry Compat Seam No-Growth Ratchet
 
-| Категория | Контрольная метрика/тест | Ожидаемое улучшение |
-|---|---|---|
-| Соблюдение слоёв | `tests/architecture/test_layer_dependencies.py`, `test_forbidden_imports.py`, dependency map | 7.0 → 8.5 |
-| Hexagonal и DDD | audit по facade/port contracts, ADR alignment | 8.0 → 8.5 |
-| Границы модулей | cycle/import checks, import-safe composition entrypoints | 7.0 → 8.0 |
-| DI и composition | constructor-injection review, no service-locator grep, composition tests | 8.0 → 8.5 |
-| Нейминг | naming evidence refresh, grep on canonical vocabulary, facade review | 6.0 → 7.5 |
-| Конфигурация и governance | inventory sync checks, generated-doc drift checks, SSOT consumers | 5.0 → 8.0 |
-| Тестовая архитектура | architecture tests, provider smoke tests, regression suite | 9.0 → 9.0 |
-| Документация и ADR | docs sync, architecture-doc refresh checks | 8.5 → 8.8 |
-| Технический долг | hotspot counts, duplication scans, file-size and decomposition progress | 6.0 → 7.5 |
-| Расширяемость | touch-count per provider onboarding, assembly fan-out, seam count | 7.0 → 8.0 |
+- **Цель:** удержать compat seam как watchlist, не открывая новую миграцию.
+- **Конкретные правки:** добавить/сохранить guard против новых raw
+  `ProviderRegistry.*` call sites в `src`, кроме уже санкционированных seams.
+- **Риски:** почти отсутствуют, если guard baseline-aware.
+- **Минимизация рисков:** не менять runtime semantics.
+- **Definition of Done:** compat seam не растёт, tests фиксируют non-growth.
 
-## Прогнозируемый эффект
+## Метрики и ожидаемый рост балла
 
-Если реализовать `RF-001..RF-004` без regressions, ожидаемый интегральный балл
-проекта поднимется примерно до **8.27 / 10**.
+| Категория | Контрольные метрики и тесты | Целевой балл после ключевых шагов |
+|---|---|---:|
+| Layer Boundaries | `tests/architecture/test_forbidden_imports.py`, `tests/architecture/test_private_module_imports.py` | 9.0 |
+| Hexagonal + DDD Fit | `tests/architecture/test_domain_public_api.py`, отсутствие infra-imports в `domain/application` | 8.0 |
+| Dependency Injection | targeted review/grep на hard-coded constructors вне `composition`, composition tests | 8.0 |
+| Module Boundary Clarity | новые guards для `registry_manifest.py`, уменьшение responsibilities в config loaders | 8.0 |
+| Topology / Hotspots | bounded refactors в shared adapters, сохранение reduced-SCC state | 8.0 |
+| Testing + Quality Governance | `pytest tests -q`, новые unit-тесты вместо части smoke-only confidence | 9.5 |
+| Docs + Governance Freshness | `generate_architecture_dependency_map.py --check`, `generate_compatibility_facade_snapshot.py --check` | 8.0 |
+| Config Ownership Flow | focused tests на loaders, anti-leak guard для `composition` | 9.0 |
+| Naming + Package Consistency | `ruff`, `mypy`, architecture/doc guards без нового drift | 8.5 |
+| Extensibility / Maintainability | локализация shared adapter logic и более дешёвые изменения в `composition` | 8.0 |
 
-Это переведёт проект в зону:
-
-- **`8.0–10.0` — хорошее состояние, точечные улучшения**
-
-## Рекомендуемый порядок коммитов
-
-1. `RF-001a` — characterization/import-hygiene для CrossRef seams без изменения public behavior.
-2. `RF-001b` — фактическое сужение CrossRef bootstrap/import graph.
-3. `RF-002a` — compatibility inventory и canonical-surface alignment.
-4. `RF-002b` — derivative/generated docs relabeling и cleanup.
-5. `RF-003a` — разбиение registry/factory hubs на внутренние seams без смены фасадов.
-6. `RF-003b` — дополнительное сужение assembly responsibilities, если после первой волны всё ещё есть hotspot pressure.
-7. `RF-004` — fallback/retry consolidation после стабилизации composition shape.
-8. `RF-005` — naming/governance second wave последними bounded slices.
-
-Правило: один архитектурный мотив на commit. Не смешивать `RF-001` import fixes с `RF-002` doc/governance cleanup в одном changeset, даже если файлы формально пересекаются минимально.
-
-## Practical Notes
-
-- Этот план нужно читать как архитектурный refactor map, а не как замену
-  [consolidated-open-tasks-plan-2026-03-21.md](./consolidated-open-tasks-plan-2026-03-21.md).
-- Если текущий implementation priority остаётся на `config topology / ownership`
-  и `shared adapter hotspots`, то `RF-001` и `RF-004` лучше всего ложатся в уже
-  существующую открытую очередь, а `RF-002`, `RF-003`, `RF-005` могут служить
-  следующими bounded waves.
+Если реализовать `RF-010..RF-017`, реалистичный целевой интегральный балл:
+**8.4-8.8 / 10.0**.

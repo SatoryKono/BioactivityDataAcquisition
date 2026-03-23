@@ -926,8 +926,8 @@
 ## История Изменений
 
 - **1.8** (2026-03-13): Уточнён REQ-DOC-001: docs guardrails и generated-doc checks синхронизированы с текущей publication/navigation governance.
-- **1.7** (2026-03-02): Синхронизация с RULES.md v5.24. Обновлена REQ-DEP-001: mixed strategy (`pyproject.toml` ranges + `uv.lock`) вместо требования глобального `==` pinning.
-- **1.6** (2026-02-27): Синхронизация с RULES.md v5.24. Исправлена терминология требований (`health_check`, `from __future__ import annotations`, формат env vars `BIOETL_{PROVIDER}_{KEY}`).
+- **1.7** (2026-03-02): Pre-v5.24 dependency policy update. Обновлена REQ-DEP-001: mixed strategy (`pyproject.toml` ranges + `uv.lock`) вместо требования глобального `==` pinning.
+- **1.6** (2026-02-27): Pre-v5.24 terminology cleanup. Исправлена терминология требований (`health_check`, `from __future__ import annotations`, формат env vars `BIOETL_{PROVIDER}_{KEY}`).
 - **1.5** (2026-02-04): Local-Only sync. Удалены ссылки на S3/Redis. Синхронизировано с RULES.md v5.20.
 - **1.4** (2026-01-21): Пересчитана сводка требований (156 вместо 139). Исправлены категории и уровни. Синхронизировано с RULES.md v5.20.
 - **1.3** (2026-01-05): Синхронизировано с RULES.md v5.20.

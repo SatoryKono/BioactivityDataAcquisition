@@ -8610,11 +8610,11 @@ bioetl run --pipeline chembl_activity \
 
 ### TOP-50 Таблица
 
-*(Файл `top-50-diagrams.md` удалён как устаревший. См. [`diagrams/README.md`](../README.md) для актуального каталога.)*
+*(Файл `top-50-diagrams.md` удалён как устаревший. См. [`diagrams/README.md`](../../README.md) для актуального каталога.)*
 
 ### Mermaid Исходники
 
-Все `.mermaid` файлы находятся в [`docs/02-architecture/diagrams/`](../README.md).
+Все `.mermaid` файлы находятся в [`docs/02-architecture/diagrams/`](../../README.md).
 
 ### Рендеринг
 
@@ -25385,7 +25385,7 @@ _Generated: 2026-03-19T11:31:09+03:00_
 *Synced with RULES.md v5.24 (2026-03-13)*
 
 > **Canonical policy:** [`docs/02-architecture/diagrams/governance/policy.md`](policy.md) (POL-LLM-DIAGRAMS-001).
-> **Canonical diagrams:** [`docs/02-architecture/diagrams/`](../README.md).
+> **Canonical diagrams:** [`docs/02-architecture/diagrams/`](../../README.md).
 > This file is kept for historical reference. All new diagram work should follow the canonical policy.
 > **Historical note:** examples below are preserved for context; prefer canonical `.mmd` paths from `diagrams/`.
 
@@ -27820,7 +27820,7 @@ Parent-source truth stays in the canonical `.mmd` files under
 
 *Updated: 2026-03-19*
 
-> **Canonical root:** [docs/02-architecture/diagrams/](../README.md)
+> **Canonical root:** [docs/02-architecture/diagrams/](../../README.md)
 > **Policy:** [POL-LLM-DIAGRAMS-001](../governance/policy.md)
 > **ADR:** [ADR-040](../../decisions/ADR-040-diagram-governance.md)
 
@@ -27837,7 +27837,7 @@ Parent-source truth stays in the canonical `.mmd` files under
 
 ## Primary Entry Points
 
-- Architecture overview: [README.md](../README.md)
+- Architecture overview: [README.md](../../README.md)
 - View inventory: [diagram-views-inventory.md](diagram-views-inventory.md)
 - View decomposition plan: [diagram-views-plan.md](diagram-views-plan.md)
 - Workflow guide: [DIAGRAM-WORKFLOW-GUIDE.md](DIAGRAM-WORKFLOW-GUIDE.md)
@@ -33349,7 +33349,7 @@ def validate_thresholds(self) -> BaseDQThresholds:
     return self
 ```
 
-> **Примечание:** [base_schemas.py](../../../src/bioetl/infrastructure/schemas/base_schemas.py)
+> **Примечание:** [base_schemas.py](../../src/bioetl/infrastructure/schemas/base_schemas.py)
 > сейчас является facade-модулем над provider-split реализациями. Стабильные
 > импорты остаются на facade path, а не на внутренних split modules.
 
@@ -42368,11 +42368,11 @@ Hash policy фиксирует детерминированные правила
 
 # Pipeline Documentation Index
 
-> **Canonical pipeline catalog:** [README.md](README.md)
+> **Canonical pipeline catalog:** [README.md](../../README.md)
 >
 > This file is a redirect. The canonical pipeline index with all 26 pipelines
 > (21 provider + 5 composite), provider summary, and configuration references
-> lives in [README.md](README.md).
+> lives in [README.md](../../README.md).
 
 For publication-specific pipeline details, see the individual specs:
 
@@ -42579,7 +42579,7 @@ configs/
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/protein-class.md](../../providers/chembl/protein-class.md)
 > and
-> [../../../../configs/entities/chembl/protein_class.yaml](../../../../configs/entities/chembl/protein_class.yaml).
+> [../../../../configs/entities/chembl/protein_class.yaml](../../configs/entities/chembl/protein_class.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -42614,7 +42614,7 @@ configs/
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/cell-line.md](../../providers/chembl/cell-line.md)
 > and
-> [../../../../configs/entities/chembl/cell_line.yaml](../../../../configs/entities/chembl/cell_line.yaml).
+> [../../../../configs/entities/chembl/cell_line.yaml](../../configs/entities/chembl/cell_line.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -42651,7 +42651,7 @@ configs/
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/molecule.md](../../providers/chembl/molecule.md)
 > and
-> [../../../../configs/entities/chembl/molecule.yaml](../../../../configs/entities/chembl/molecule.yaml).
+> [../../../../configs/entities/chembl/molecule.yaml](../../configs/entities/chembl/molecule.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -42689,7 +42689,7 @@ This page is retained for historical context only. It predates the current snake
 
 Canonical sources:
 - [ChEMBL target provider reference](../../providers/chembl/target.md)
-- [`configs/entities/chembl/target.yaml`](../../../../configs/entities/chembl/target.yaml)
+- [`configs/entities/chembl/target.yaml`](../../configs/entities/chembl/target.yaml)
 
 Current canonical summary:
 - Pipeline config and field names use snake_case.
@@ -42872,7 +42872,7 @@ bioetl run --pipeline chembl_activity \
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/assay.md](../../providers/chembl/assay.md)
 > and
-> [../../../../configs/entities/chembl/assay.yaml](../../../../configs/entities/chembl/assay.yaml).
+> [../../../../configs/entities/chembl/assay.yaml](../../configs/entities/chembl/assay.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -42907,7 +42907,7 @@ bioetl run --pipeline chembl_activity \
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/publication.md](../../providers/chembl/publication.md)
 > and
-> [../../../../configs/entities/chembl/publication.yaml](../../../../configs/entities/chembl/publication.yaml).
+> [../../../../configs/entities/chembl/publication.yaml](../../configs/entities/chembl/publication.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -42942,7 +42942,7 @@ bioetl run --pipeline chembl_activity \
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/assay-parameters.md](../../providers/chembl/assay-parameters.md)
 > and
-> [../../../../configs/entities/chembl/assay_parameters.yaml](../../../../configs/entities/chembl/assay_parameters.yaml).
+> [../../../../configs/entities/chembl/assay_parameters.yaml](../../configs/entities/chembl/assay_parameters.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -42977,7 +42977,7 @@ bioetl run --pipeline chembl_activity \
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/compound-record.md](../../providers/chembl/compound-record.md)
 > and
-> [../../../../configs/entities/chembl/compound_record.yaml](../../../../configs/entities/chembl/compound_record.yaml).
+> [../../../../configs/entities/chembl/compound_record.yaml](../../configs/entities/chembl/compound_record.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43014,7 +43014,7 @@ This document is retained as a legacy implementation note. It describes pre-norm
 
 Canonical sources:
 - [ChEMBL target component provider reference](../../providers/chembl/target-component.md)
-- [`configs/entities/chembl/target_component.yaml`](../../../../configs/entities/chembl/target_component.yaml)
+- [`configs/entities/chembl/target_component.yaml`](../../configs/entities/chembl/target_component.yaml)
 
 Current canonical summary:
 - Active configs and reference examples use snake_case names.
@@ -43033,7 +43033,7 @@ This page is preserved for historical analysis only. It describes an older contr
 
 Canonical sources:
 - [ChEMBL publication provider reference](../../providers/chembl/publication.md)
-- [`configs/entities/chembl/publication_term.yaml`](../../../../configs/entities/chembl/publication_term.yaml)
+- [`configs/entities/chembl/publication_term.yaml`](../../configs/entities/chembl/publication_term.yaml)
 
 Current canonical summary:
 - The active config surface uses snake_case keys such as `loading_strategy`.
@@ -43052,7 +43052,7 @@ This document is kept only as archived design context. It predates the normalize
 
 Canonical sources:
 - [ChEMBL publication provider reference](../../providers/chembl/publication.md)
-- [`configs/entities/chembl/publication_similarity.yaml`](../../../../configs/entities/chembl/publication_similarity.yaml)
+- [`configs/entities/chembl/publication_similarity.yaml`](../../configs/entities/chembl/publication_similarity.yaml)
 
 Current canonical summary:
 - Current config keys use snake_case, including `loading_strategy`.
@@ -43068,7 +43068,7 @@ Current canonical summary:
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/subcellular-fraction.md](../../providers/chembl/subcellular-fraction.md)
 > and
-> [../../../../configs/entities/chembl/subcellular_fraction.yaml](../../../../configs/entities/chembl/subcellular_fraction.yaml).
+> [../../../../configs/entities/chembl/subcellular_fraction.yaml](../../configs/entities/chembl/subcellular_fraction.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43103,7 +43103,7 @@ Current canonical summary:
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/chembl/tissue.md](../../providers/chembl/tissue.md)
 > and
-> [../../../../configs/entities/chembl/tissue.yaml](../../../../configs/entities/chembl/tissue.yaml).
+> [../../../../configs/entities/chembl/tissue.yaml](../../configs/entities/chembl/tissue.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43348,7 +43348,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
-> [../../../../configs/composites/publication.yaml](../../../../configs/composites/publication.yaml).
+> [../../../../configs/composites/publication.yaml](../../configs/composites/publication.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43385,7 +43385,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
-> [../../../../configs/composites/molecule.yaml](../../../../configs/composites/molecule.yaml).
+> [../../../../configs/composites/molecule.yaml](../../configs/composites/molecule.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43422,7 +43422,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
-> [../../../../configs/composites/target.yaml](../../../../configs/composites/target.yaml).
+> [../../../../configs/composites/target.yaml](../../configs/composites/target.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43458,7 +43458,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
-> [../../../../configs/composites/activity.yaml](../../../../configs/composites/activity.yaml).
+> [../../../../configs/composites/activity.yaml](../../configs/composites/activity.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43497,7 +43497,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
-> [../../../../configs/composites/assay.yaml](../../../../configs/composites/assay.yaml).
+> [../../../../configs/composites/assay.yaml](../../configs/composites/assay.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43535,7 +43535,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/crossref/publication.md](../../providers/crossref/publication.md)
 > and
-> [../../../../configs/entities/crossref/publication.yaml](../../../../configs/entities/crossref/publication.yaml).
+> [../../../../configs/entities/crossref/publication.yaml](../../configs/entities/crossref/publication.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43569,7 +43569,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/openalex/publication.md](../../providers/openalex/publication.md)
-> and [../../../../configs/entities/openalex/publication.yaml](../../../../configs/entities/openalex/publication.yaml).
+> and [../../../../configs/entities/openalex/publication.yaml](../../configs/entities/openalex/publication.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43605,7 +43605,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 ## Current Canonical Sources
 
 - [Provider reference](../providers/openalex/publication.md)
-- [Entity config](../../../configs/entities/openalex/publication.yaml)
+- [Entity config](../../configs/entities/openalex/publication.yaml)
 - [Pipeline index](INDEX.md)
 
 ## Current Canonical Contract Summary
@@ -43640,7 +43640,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/pubchem/compound.md](../../providers/pubchem/compound.md)
 > and
-> [../../../../configs/entities/pubchem/compound.yaml](../../../../configs/entities/pubchem/compound.yaml).
+> [../../../../configs/entities/pubchem/compound.yaml](../../configs/entities/pubchem/compound.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43677,7 +43677,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/pubmed/publication.md](../../providers/pubmed/publication.md)
 > and
-> [../../../../configs/entities/pubmed/publication.yaml](../../../../configs/entities/pubmed/publication.yaml).
+> [../../../../configs/entities/pubmed/publication.yaml](../../configs/entities/pubmed/publication.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43711,7 +43711,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/semanticscholar/publication.md](../../providers/semanticscholar/publication.md)
-> and [../../../../configs/entities/semanticscholar/publication.yaml](../../../../configs/entities/semanticscholar/publication.yaml).
+> and [../../../../configs/entities/semanticscholar/publication.yaml](../../configs/entities/semanticscholar/publication.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43747,7 +43747,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 ## Current Canonical Sources
 
 - [Provider reference](../providers/semanticscholar/publication.md)
-- [Entity config](../../../configs/entities/semanticscholar/publication.yaml)
+- [Entity config](../../configs/entities/semanticscholar/publication.yaml)
 - [Pipeline index](INDEX.md)
 
 ## Current Canonical Contract Summary
@@ -43782,7 +43782,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/uniprot/protein.md](../../providers/uniprot/protein.md)
 > and
-> [../../../../configs/entities/uniprot/protein.yaml](../../../../configs/entities/uniprot/protein.yaml).
+> [../../../../configs/entities/uniprot/protein.yaml](../../configs/entities/uniprot/protein.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -43817,7 +43817,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 > **Status**: Historical deep spec. Current canonical contract lives in
 > [../../providers/uniprot/idmapping.md](../../providers/uniprot/idmapping.md)
 > and
-> [../../../../configs/entities/uniprot/idmapping.yaml](../../../../configs/entities/uniprot/idmapping.yaml).
+> [../../../../configs/entities/uniprot/idmapping.yaml](../../configs/entities/uniprot/idmapping.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -48465,7 +48465,7 @@ This page is retained as a historical schema artifact. It predates the current n
 
 Canonical sources:
 - [ChEMBL activity provider reference](../../../providers/chembl/activity.md)
-- [`configs/entities/chembl/activity.yaml`](../../../../../configs/entities/chembl/activity.yaml)
+- [`configs/entities/chembl/activity.yaml`](../../configs/entities/chembl/activity.yaml)
 
 Current canonical summary:
 - The live contract uses snake_case field names and config-driven alias resolution.
@@ -48484,7 +48484,7 @@ This page is kept as an archived schema note. It reflects a pre-normalization co
 
 Canonical sources:
 - [ChEMBL assay provider reference](../../../providers/chembl/assay.md)
-- [`configs/entities/chembl/assay.yaml`](../../../../../configs/entities/chembl/assay.yaml)
+- [`configs/entities/chembl/assay.yaml`](../../configs/entities/chembl/assay.yaml)
 
 Current canonical summary:
 - Active configs and schema checks use snake_case names.
@@ -48841,7 +48841,7 @@ def -validate-invariants(self) -> None:
 > **Status**: Historical deep schema note. Current canonical contract lives in
 > [../../../providers/chembl/target.md](../../../providers/chembl/target.md)
 > and
-> [../../../../../configs/entities/chembl/target.yaml](../../../../../configs/entities/chembl/target.yaml).
+> [../../../../../configs/entities/chembl/target.yaml](../../configs/entities/chembl/target.yaml).
 
 ## Current Canonical Contract Summary
 
@@ -49318,7 +49318,7 @@ Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
 > This Kubernetes guide is provided for **advanced/experimental use only** and is
 > not the recommended deployment strategy.
 > It is outside standard operational support runbooks and release flow.
-> Placement note: this page lives under [Deployment & Tooling Extras](README.md),
+> Placement note: this page lives under [Deployment & Tooling Extras](../../README.md),
 > not under the standard operations/runbook path.
 
 ## Overview
@@ -49812,7 +49812,7 @@ resources:
 > This Kubernetes material is provided for **advanced/experimental use only** and is
 > not the recommended deployment strategy.
 > It is outside standard operational support runbooks and release flow.
-> Placement note: this page lives under [Deployment & Tooling Extras](README.md),
+> Placement note: this page lives under [Deployment & Tooling Extras](../../README.md),
 > not under the standard operations/runbook path.
 
 ## Files Generated

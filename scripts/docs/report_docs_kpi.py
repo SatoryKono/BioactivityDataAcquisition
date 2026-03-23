@@ -38,6 +38,14 @@ GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
 ORPHAN_EXCLUDED_PREFIXES = (
     "00-project/ai/",
     "99-archive/",
+    "02-architecture/diagrams/governance/00-diagramming-policy.md",
+)
+KPI_EXCLUDED_PREFIXES = (
+    "reports/",
+    "00-project/ai/",
+)
+KPI_INCLUDED_PREFIXES = (
+    "00-project/ai/skills/global/.system/",
 )
 
 DEFAULT_TARGET_NOT_IN_NAV = 120
@@ -105,7 +113,15 @@ def _load_baseline_count(baseline_file: Path) -> tuple[int, bool]:
         for line in lines
         if line.strip() and not line.lstrip().startswith("#")
     ]
+    entries = [entry for entry in entries if _should_track_kpi_not_in_nav(entry)]
     return len(entries), True
+
+
+def _should_track_kpi_not_in_nav(rel_path: str) -> bool:
+    """Return True when a non-nav doc should count toward KPI backlog."""
+    if rel_path.startswith(KPI_INCLUDED_PREFIXES):
+        return True
+    return not rel_path.startswith(KPI_EXCLUDED_PREFIXES)
 
 
 def _collect_orphans(all_docs: list[Path], not_in_nav: set[str]) -> list[str]:
@@ -183,7 +199,11 @@ def compute_metrics(
     nav_docs = _load_nav_docs()
 
     all_rel_paths = [path.relative_to(DOCS_DIR).as_posix() for path in all_docs]
-    not_in_nav = sorted(path for path in all_rel_paths if path not in nav_docs)
+    not_in_nav = sorted(
+        path
+        for path in all_rel_paths
+        if path not in nav_docs and _should_track_kpi_not_in_nav(path)
+    )
     not_in_nav_set = set(not_in_nav)
 
     orphans = _collect_orphans(all_docs, not_in_nav_set)

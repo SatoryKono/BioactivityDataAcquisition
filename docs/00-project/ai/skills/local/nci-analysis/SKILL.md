@@ -25,8 +25,8 @@ Use TodoWrite to track these mandatory steps:
 
 ### For Text Content
 1. Read the content provided by user
-2. Apply 20-category analysis (see [references/categories.md](references/categories.md))
-3. Calculate composite factors and overall score (see [references/scoring.md](references/scoring.md))
+2. Apply 20-category analysis (see `references/categories.md`)
+3. Calculate composite factors and overall score (see `references/scoring.md`)
 4. **Check deep research triggers** - if score > 40 or key categories elevated, verify claims
 5. Generate dual perspectives
 6. Output report in requested format
@@ -85,7 +85,7 @@ Evidence: [Specific quotes/patterns from content]
 Confidence: [LOW/MED/HIGH]
 ```
 
-See [references/categories.md](references/categories.md) for detailed category definitions and scoring criteria.
+See `references/categories.md` for detailed category definitions and scoring criteria.
 
 **Detection signals to look for:**
 
@@ -100,7 +100,7 @@ See [references/categories.md](references/categories.md) for detailed category d
 
 ### Step 3: Calculate Composite Factors
 
-See [references/scoring.md](references/scoring.md) for weights.
+See `references/scoring.md` for weights.
 
 ```
 COMPOSITE FACTORS:
@@ -317,7 +317,7 @@ See `../deep-research/references/critique-framework.md` for resolution protocol.
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for historical case studies including:
+See `references/examples.md` for historical case studies including:
 - Nayirah Testimony (1990) - Score: 88
 - Tobacco Industry Campaign - Score: 82
 - Modern examples with full category breakdowns
@@ -339,11 +339,11 @@ See [references/examples.md](references/examples.md) for historical case studies
 
 ## References
 
-- [references/categories.md](references/categories.md) - All 20 category definitions with detection signals
-- [references/scoring.md](references/scoring.md) - Scoring methodology, weights, and quantitative formulas
-- [references/examples.md](references/examples.md) - Historical case studies for calibration
-- [references/vocabulary.md](references/vocabulary.md) - Detection vocabulary lists
-- [references/guidance.md](references/guidance.md) - Actionable tips per factor
+- `references/categories.md` - All 20 category definitions with detection signals
+- `references/scoring.md` - Scoring methodology, weights, and quantitative formulas
+- `references/examples.md` - Historical case studies for calibration
+- `references/vocabulary.md` - Detection vocabulary lists
+- `references/guidance.md` - Actionable tips per factor
 
 ## User Interaction
 
