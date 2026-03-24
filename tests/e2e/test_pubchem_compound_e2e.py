@@ -18,6 +18,8 @@ from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
+    assert_run_ledger_has_events,
+    assert_run_manifest_exists,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
@@ -52,6 +54,19 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
     # Act
     runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
+
+    # Assert - Control-plane artifacts
+    manifest_payload = assert_run_manifest_exists(e2e_data_dir, ctx.run_id)
+    assert manifest_payload["pipeline_name"] == "pubchem_compound"
+    ledger_entries = assert_run_ledger_has_events(
+        e2e_data_dir,
+        ctx.run_id,
+        expected_events=("manifest_created", "run_started", "run_finished"),
+    )
+    assert all(
+        entry.get("manifest_id") == manifest_payload["manifest_id"]
+        for entry in ledger_entries
+    )
 
     # Assert - Bronze layer
     bronze_files = assert_bronze_files_exist(e2e_data_dir, "pubchem", "compound")

@@ -33,9 +33,9 @@ class TestAllPortsRuntimeCheckable:
     """Every port protocol MUST be @runtime_checkable (TYPE-004)."""
 
     def test_port_count_is_71(self) -> None:
-        """Sanity check: we expect exactly 71 port protocols."""
-        assert len(ALL_PORT_NAMES) == 71, (
-            f"Expected 71 ports, found {len(ALL_PORT_NAMES)}. "
+        """Sanity check: we expect exactly 73 port protocols."""
+        assert len(ALL_PORT_NAMES) == 73, (
+            f"Expected 73 ports, found {len(ALL_PORT_NAMES)}. "
             f"If you added/removed a port, update this test. "
             f"Current ports: {ALL_PORT_NAMES}"
         )

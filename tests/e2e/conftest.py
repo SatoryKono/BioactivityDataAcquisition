@@ -14,6 +14,7 @@ E2E тесты используют локальное файловое хран
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 from collections.abc import Generator
 from dataclasses import replace
@@ -443,6 +444,60 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
         f"  - Standard: {bronze_path}\n"
         f"  - Flat: {flat_path}"
     )
+
+
+def assert_run_manifest_exists(data_dir: Path, run_id: RunID) -> dict[str, Any]:
+    """Assert that one control-plane manifest exists for the given run."""
+    manifest_base = data_dir / "output" / "control" / "run_manifest"
+    run_index_path = manifest_base / "_by_run_id" / f"{run_id}.txt"
+    assert run_index_path.exists(), f"Run-manifest index missing for run_id={run_id}"
+
+    manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+    assert manifest_id, f"Run-manifest index empty for run_id={run_id}"
+
+    manifest_path = manifest_base / f"{manifest_id}.json"
+    assert manifest_path.exists(), f"Run-manifest payload missing: {manifest_path}"
+
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict), "Run-manifest payload must be a JSON object"
+    assert payload.get("run_id") == str(run_id)
+    assert payload.get("manifest_id") == manifest_id
+    assert payload.get("execution_fingerprint")
+    return payload
+
+
+def assert_run_ledger_has_events(
+    data_dir: Path,
+    run_id: RunID,
+    expected_events: tuple[str, ...],
+) -> list[dict[str, Any]]:
+    """Assert that one control-plane ledger exists and contains expected events."""
+    ledger_base = data_dir / "output" / "control" / "run_ledger"
+    run_index_path = ledger_base / "_by_run_id" / f"{run_id}.txt"
+    assert run_index_path.exists(), f"Run-ledger index missing for run_id={run_id}"
+
+    manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+    assert manifest_id, f"Run-ledger index empty for run_id={run_id}"
+
+    ledger_path = ledger_base / f"{manifest_id}.jsonl"
+    assert ledger_path.exists(), f"Run-ledger payload missing: {ledger_path}"
+
+    entries = [
+        json.loads(line)
+        for line in ledger_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert entries, f"Run-ledger is empty: {ledger_path}"
+
+    observed_event_types = {
+        str(entry.get("event_type")) for entry in entries if isinstance(entry, dict)
+    }
+    missing = sorted(set(expected_events) - observed_event_types)
+    assert not missing, (
+        f"Run-ledger missing expected events for run_id={run_id}: {missing}; "
+        f"observed={sorted(observed_event_types)}"
+    )
+    return entries
 
 
 def _build_table_name_variants(table_name: str) -> list[str]:

@@ -5,6 +5,8 @@ Defines protocols for pipeline runner creation and execution.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
+
 from bioetl.domain.ports.config import PipelineYamlConfigPort, SettingsPort
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
@@ -12,7 +14,6 @@ from bioetl.domain.ports.observability import (
     MetricsPort,
     TracingPort,
 )
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
@@ -21,9 +22,9 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
 __all__ = [
-    "ExecutionObservabilityPort",
     "ExecutionMetricsReadablePort",
     "ExecutionMetricsRunnerPort",
+    "ExecutionObservabilityPort",
     "MetricsExtractorPort",
     "PipelineFactoryPort",
     "RunnablePort",
@@ -185,6 +186,7 @@ class PipelineFactoryPort(Protocol):
         runtime: RuntimeConfig,
         settings: SettingsPort,
         logger: LoggerPort,
+        manifest_id: str | None = None,
         config: PipelineYamlConfigPort | None = ...,
         filter_config: InputFilterConfig | None = ...,
         tracer: TracingPort | None = ...,
@@ -199,6 +201,7 @@ class PipelineFactoryPort(Protocol):
             runtime: Runtime configuration.
             settings: Domain-facing execution settings contract.
             logger: Structured logging port for pipeline assembly signals.
+            manifest_id: Optional immutable run-manifest identifier.
             config: Optional pipeline-definition contract for explicit wiring.
             filter_config: Optional input-filter contract for record selection.
             tracer: Optional tracing port for execution spans.
@@ -217,6 +220,7 @@ class PipelineFactoryPort(Protocol):
         runtime: RuntimeConfig,
         settings: SettingsPort,
         observability: ExecutionObservabilityPort,
+        manifest_id: str | None = None,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfigPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
@@ -228,6 +232,7 @@ class PipelineFactoryPort(Protocol):
             runtime: Runtime configuration.
             settings: Domain-facing execution settings contract.
             observability: Domain-facing observability context for runner wiring.
+            manifest_id: Optional immutable run-manifest identifier.
             filter_config: Optional input-filter contract for record selection.
             config: Optional pipeline-definition contract for explicit wiring.
             cached_bronze: Optional cached Bronze execution context.

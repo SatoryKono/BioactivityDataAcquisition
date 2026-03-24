@@ -18,7 +18,7 @@ import from the specific sub-facades for most symbols:
 
 from __future__ import annotations
 
-from bioetl.domain import composite, constants, contracts, version  # noqa: F401
+from bioetl.domain import composite, constants, contracts, control_plane, version  # noqa: F401
 
 # Subpackage registrations (make them importable as bioetl.domain.<name>)
 from bioetl.domain import context_cached_bronze
@@ -38,6 +38,7 @@ from bioetl.domain.version import get_version
 __all__ = [
     "PipelineEvent",
     "composite",
+    "control_plane",
     "context_cached_bronze",
     "context_filtering",
     "get_version",

@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
@@ -13,6 +14,11 @@ from bioetl.composition.runtime_builders.config_access import (
     get_settings,
     load_pipeline_config,
     load_source_config,
+)
+from bioetl.composition.runtime_builders.control_plane import (
+    attach_control_plane_collaborators,
+    attach_manifest_id,
+    create_run_manifest,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
@@ -37,7 +43,11 @@ if TYPE_CHECKING:
         PipelineRunContext,
     )
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import PipelineFactoryPort
+    from bioetl.domain.ports import (
+        ExecutionObservabilityPort,
+        PipelineFactoryPort,
+        SettingsPort,
+    )
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
         PipelineYamlConfig,
@@ -45,6 +55,17 @@ if TYPE_CHECKING:
 
 
 __all__ = ["build_pipeline_runner"]
+
+
+def _resolve_control_plane_flags(settings: object) -> tuple[bool, bool]:
+    """Resolve control-plane feature flags with backwards-compatible defaults."""
+    pipeline_settings = getattr(settings, "pipeline", None)
+    control_plane = getattr(pipeline_settings, "control_plane", None)
+    manifest_enabled = bool(getattr(control_plane, "run_manifest_enabled", True))
+    ledger_enabled = bool(getattr(control_plane, "run_ledger_enabled", True))
+    if not manifest_enabled:
+        return False, False
+    return True, ledger_enabled
 
 
 def _initialize_registry(
@@ -72,8 +93,12 @@ def _create_runner_from_factory(
         factory.create_runner(
             run_id=ctx.run_id,
             runtime=inputs.runtime_config,
-            settings=inputs.settings,
-            observability=inputs.observability,
+            settings=cast("SettingsPort", inputs.settings),
+            observability=cast(
+                "ExecutionObservabilityPort",
+                inputs.observability,
+            ),
+            manifest_id=getattr(ctx, "manifest_id", None),
             filter_config=inputs.filter_config,
             config=inputs.yaml_config,
             cached_bronze=inputs.cached_bronze,
@@ -167,8 +192,20 @@ def build_pipeline_runner(
         assemble_cached_bronze_context_fn=assemble_cached_bronze_context_impl,
         load_source_config_fn=load_source_config_fn,
     )
-    return _create_runner_from_factory(
+    manifest_enabled, ledger_enabled = _resolve_control_plane_flags(inputs.settings)
+    run_ledger_service: RunLedgerService | None = None
+    if manifest_enabled:
+        manifest_id, run_ledger_service = create_run_manifest(
+            ctx=ctx,
+            inputs=inputs,
+            ledger_enabled=ledger_enabled,
+        )
+        ctx = attach_manifest_id(ctx, manifest_id)
+    runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,
         ctx=ctx,
         inputs=inputs,
     )
+    if run_ledger_service is not None:
+        attach_control_plane_collaborators(runner, run_ledger_service)
+    return runner

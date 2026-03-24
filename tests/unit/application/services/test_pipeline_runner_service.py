@@ -46,6 +46,7 @@ def mock_runner():
     runner.run = AsyncMock()
     runner.shutdown_signal = None
     runner.run_id = str(uuid4())
+    runner.manifest_id = "manifest-123"
     runner.execution_metrics = {
         "records_fetched": 100,
         "records_bronze": 95,
@@ -281,6 +282,7 @@ class TestPipelineRunnerServiceRun:
 
         assert result.status == PipelineRunResult.SUCCESS
         assert result.pipeline_name == "test_pipeline"
+        assert result.manifest_id == "manifest-123"
         assert result.records_fetched == 100
         assert result.records_silver == 90
         mock_runner_factory.contains.assert_called_with("test_pipeline")

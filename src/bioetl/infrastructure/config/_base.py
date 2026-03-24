@@ -22,7 +22,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import SecretStr, model_validator
 from pydantic.fields import Field
 from pydantic_settings import (
     BaseSettings,
@@ -132,6 +132,27 @@ class PipelineSettings(BaseSettings):
 
     model_config = SettingsConfigDict(frozen=True)
 
+    class ControlPlaneSettings(BaseSettings):
+        """Feature flags for run manifest and ledger control-plane behavior."""
+
+        model_config = SettingsConfigDict(frozen=True)
+
+        run_manifest_enabled: bool = Field(default=True)
+        """When True, create immutable run manifests before execution starts."""
+
+        run_ledger_enabled: bool = Field(default=True)
+        """When True, append run-ledger events for lifecycle and lineage."""
+
+        @model_validator(mode="after")
+        def _validate_ledger_dependency(self) -> PipelineSettings.ControlPlaneSettings:
+            """Ledger requires manifest creation because it is keyed by manifest_id."""
+            if self.run_ledger_enabled and not self.run_manifest_enabled:
+                raise ValueError(
+                    "pipeline.control_plane.run_ledger_enabled requires "
+                    "pipeline.control_plane.run_manifest_enabled"
+                )
+            return self
+
     class AtomicReplaceRetrySettings(BaseSettings):
         """Atomic ``Path.replace`` retry policy for metadata sidecars."""
 
@@ -207,6 +228,9 @@ class PipelineSettings(BaseSettings):
 
     health_check_mode: Literal["strict", "probe"] = Field(default="strict")
     """Preflight health-check gate mode: strict blocks on UNHEALTHY, probe degrades."""
+
+    control_plane: ControlPlaneSettings = Field(default_factory=ControlPlaneSettings)
+    """Feature flags controlling RunManifest and RunLedger rollout behavior."""
 
 
 class Settings(BaseSettings):

@@ -22,6 +22,7 @@ from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,
 )
+from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.ports.noop import NoOpTracing
@@ -594,6 +595,59 @@ class TestPipelineRunnerRun:
         # Lock manager should be used as async context manager
         runner._lock_manager.__aenter__.assert_called_once()
         runner._lock_manager.__aexit__.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_run_records_run_ledger_success(self, runner) -> None:
+        """Successful runs should append started and finished ledger events."""
+        ledger_service = MagicMock(spec=RunLedgerService)
+        runner.attach_run_ledger_service(ledger_service)
+
+        await runner.run()
+
+        ledger_service.record_run_started.assert_called_once_with()
+        assert ledger_service.record_stage_completed.call_count == 5
+        ledger_service.record_run_finished.assert_called_once_with(
+            metrics_snapshot=runner.execution_metrics
+        )
+        ledger_service.record_run_failed.assert_not_called()
+        ledger_service.record_run_shutdown.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_run_records_run_ledger_failure(self, runner, mock_executor) -> None:
+        """Failed runs should append run_failed with metrics and error type."""
+        ledger_service = MagicMock(spec=RunLedgerService)
+        runner.attach_run_ledger_service(ledger_service)
+        mock_executor.execute.side_effect = RuntimeError("boom")
+
+        with pytest.raises(RuntimeError, match="boom"):
+            await runner.run()
+
+        ledger_service.record_run_started.assert_called_once_with()
+        assert ledger_service.record_stage_completed.call_count == 2
+        ledger_service.record_run_failed.assert_called_once_with(
+            message="boom",
+            error_type="RuntimeError",
+            metrics_snapshot=runner.execution_metrics,
+        )
+        ledger_service.record_run_finished.assert_not_called()
+        ledger_service.record_run_shutdown.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_run_records_run_ledger_shutdown(self, runner, mock_executor) -> None:
+        """Shutdown runs should append shutdown event even when observer suppresses."""
+        ledger_service = MagicMock(spec=RunLedgerService)
+        runner.attach_run_ledger_service(ledger_service)
+        mock_executor.execute.side_effect = PipelineShutdownError("Shutdown")
+
+        await runner.run()
+
+        ledger_service.record_run_started.assert_called_once_with()
+        assert ledger_service.record_stage_completed.call_count == 2
+        ledger_service.record_run_shutdown.assert_called_once_with(
+            metrics_snapshot=runner.execution_metrics
+        )
+        ledger_service.record_run_finished.assert_not_called()
+        ledger_service.record_run_failed.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_run_calls_executor(

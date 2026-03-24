@@ -6,6 +6,7 @@ import ast
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
+import json
 from uuid import uuid4
 
 import pytest
@@ -15,13 +16,34 @@ from bioetl.composition.runtime_builders import observability_builder
 from bioetl.composition.runtime_builders import runner_builder
 
 
+class _FakeRunner:
+    def __init__(self) -> None:
+        self.attached_run_ledger_service: object | None = None
+        self.services = SimpleNamespace(metadata_writer=None, storage=None)
+
+    def attach_run_ledger_service(self, service: object) -> None:
+        self.attached_run_ledger_service = service
+
+    def __eq__(self, other: object) -> bool:
+        return other == "runner-instance" or other is self
+
+
 class _FakeFactory:
     def __init__(self) -> None:
         self.kwargs: dict[str, object] | None = None
+        self.runner = _FakeRunner()
 
     def create_runner(self, **kwargs: object) -> object:
         self.kwargs = kwargs
-        return "runner-instance"
+        return self.runner
+
+
+class _RecorderAwareMetadataWriter:
+    def __init__(self) -> None:
+        self.recorder = None
+
+    def attach_artifact_recorder(self, recorder) -> None:
+        self.recorder = recorder
 
 
 class _FakeRegistry:
@@ -131,6 +153,7 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
         "input_filter_enabled",
         "cached_bronze_mode_enabled",
     ]
+    assert isinstance(fake_factory.kwargs["manifest_id"], str)
 
 
 def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
@@ -291,6 +314,294 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
         is runner_builder.assemble_cached_bronze_context
     )
     assert kwargs["load_source_config_fn"] is runner_builder.load_source_config
+
+
+def test_build_pipeline_runner_persists_manifest_before_factory_create(
+    tmp_path: Path,
+) -> None:
+    """Builder should persist a manifest and pass manifest_id to the factory."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query="assay_type=B",
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    result = runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(heartbeat_interval=30),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None),
+        ),
+        assemble_vacuum_settings_fn=lambda **_: "vacuum",
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+            run_type="incremental",
+            limit=25,
+        ),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert result == "runner-instance"
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    )
+    assert manifest_path.exists()
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert payload["manifest_id"] == manifest_id
+    assert payload["pipeline_name"] == "chembl_activity"
+    assert fake_factory.runner.attached_run_ledger_service is not None
+
+    ledger_path = (
+        tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
+    )
+    assert ledger_path.exists()
+    ledger_payload = json.loads(ledger_path.read_text(encoding="utf-8").splitlines()[0])
+    assert ledger_payload["manifest_id"] == manifest_id
+    assert ledger_payload["event_type"] == "manifest_created"
+
+
+def test_build_pipeline_runner_skips_control_plane_when_manifest_disabled(
+    tmp_path: Path,
+) -> None:
+    """Builder should skip manifest+ledger artifacts when control plane is disabled."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(
+                heartbeat_interval=30,
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=False,
+                    run_ledger_enabled=False,
+                ),
+            ),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=None,
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None),
+        ),
+        assemble_vacuum_settings_fn=lambda **_: None,
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert isinstance(fake_factory.kwargs, dict)
+    assert fake_factory.kwargs["manifest_id"] is None
+    assert fake_factory.runner.attached_run_ledger_service is None
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
+def test_build_pipeline_runner_can_disable_ledger_while_keeping_manifest(
+    tmp_path: Path,
+) -> None:
+    """Manifest should still persist when ledger rollout is explicitly disabled."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(
+                heartbeat_interval=30,
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=False,
+                ),
+            ),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=None,
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None),
+        ),
+        assemble_vacuum_settings_fn=lambda **_: None,
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+    assert fake_factory.runner.attached_run_ledger_service is None
+    assert (
+        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    ).exists()
+    assert not (
+        tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
+    ).exists()
+
+
+def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
+    tmp_path: Path,
+) -> None:
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    top_writer = _RecorderAwareMetadataWriter()
+    bronze_writer = _RecorderAwareMetadataWriter()
+    silver_writer = _RecorderAwareMetadataWriter()
+    gold_writer = _RecorderAwareMetadataWriter()
+    fake_factory.runner.services = SimpleNamespace(
+        metadata_writer=top_writer,
+        storage=SimpleNamespace(
+            bronze=SimpleNamespace(_metadata_writer=bronze_writer),
+            silver=SimpleNamespace(_metadata_writer=silver_writer),
+            gold=SimpleNamespace(_metadata_writer=gold_writer),
+        ),
+    )
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(heartbeat_interval=30),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=None,
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None),
+        ),
+        assemble_vacuum_settings_fn=lambda **_: None,
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    for writer in (top_writer, bronze_writer, silver_writer, gold_writer):
+        assert writer.recorder is not None
+
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+    silver_writer.recorder(
+        "silver",
+        "/tmp/output/silver/chembl/activity",
+        {"metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml"},
+    )
+    ledger_path = (
+        tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
+    )
+    lines = ledger_path.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2
+    ledger_payload = json.loads(lines[1])
+    assert ledger_payload["event_type"] == "artifact_published"
+    assert ledger_payload["stage"] == "silver"
 
 
 def test_runner_builder_uses_runtime_config_access_seam() -> None:

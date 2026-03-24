@@ -209,6 +209,7 @@ def create_factory_runner(
     runtime: RuntimeConfig,
     settings: Settings,
     observability: ObservabilityBundle,
+    manifest_id: str | None = None,
     create_with_services_fn: Callable[..., TPipeline],
     assemble_runner_fn: Callable[..., PipelineRunner],
     filter_config: InputFilterConfig | None = None,
@@ -217,18 +218,21 @@ def create_factory_runner(
 ) -> PipelineRunner:
     """Create and assemble a fully configured PipelineRunner instance."""
     yaml_config = config or load_pipeline_config(pipeline_name)
-    pipeline = create_with_services_fn(
-        run_id=run_id,
-        runtime=runtime,
-        settings=settings,
-        logger=observability.logger,
-        config=yaml_config,
-        filter_config=filter_config,
-        tracer=observability.tracer,
-        dq_monitor=observability.dq_monitor,
-        metrics=observability.metrics,
-        cached_bronze=cached_bronze,
-    )
+    create_with_services_kwargs: dict[str, object] = {
+        "run_id": run_id,
+        "runtime": runtime,
+        "settings": settings,
+        "logger": observability.logger,
+        "config": yaml_config,
+        "filter_config": filter_config,
+        "tracer": observability.tracer,
+        "dq_monitor": observability.dq_monitor,
+        "metrics": observability.metrics,
+        "cached_bronze": cached_bronze,
+    }
+    if manifest_id is not None:
+        create_with_services_kwargs["manifest_id"] = manifest_id
+    pipeline = create_with_services_fn(**create_with_services_kwargs)
     return assemble_runner_fn(
         pipeline=pipeline,
         observability=observability,

@@ -29,6 +29,7 @@
 | `run`           | `run.py`                     | Retained public seam; canonical implementation lives in `domains/run/command.py` |
 | `run-all`       | `run_all.py`                 | Retained public seam; canonical implementation lives in `domains/run_all/command.py` |
 | `run-composite` | `run_composite.py`           | Retained public seam; canonical implementation lives in `domains/composite/command.py` |
+| `run-manifest`  | `run_manifest.py`            | Inspect immutable manifest payloads and append-only ledger history |
 | `export`        | `export.py`                  | Экспорт данных из Gold                  |
 | `quarantine`    | `quarantine.py`              | Retained public seam; canonical implementation lives in `domains/quarantine/command.py` |
 | `health`        | `health.py`                  | Retained public seam; canonical implementation lives in `domains/health/command.py` |
@@ -79,7 +80,11 @@ python -m bioetl run-composite --composite publication
 python -m bioetl health --provider chembl
 ```
 
-`interfaces/cli/main.py` парсит аргументы и вызывает composition runtime bootstrap (`bootstrap_pipeline_runner`, `bootstrap_composite_runner`) для запуска исполнения. Каноническая точка входа CLI — `src/bioetl/interfaces/cli/main.py`.
+`interfaces/cli/main.py` регистрирует `run`, `run-all`, `run-composite`,
+`run-manifest` и остальные command groups. Для запуска исполнения он делегирует
+в composition runtime bootstrap (`bootstrap_pipeline_runner`,
+`bootstrap_composite_runner`), а для inspection-only control-plane операций
+использует `get_run_manifest_service()` через composition service API.
 
 ### 2.2. `http/` — HTTP Health Server
 
@@ -134,6 +139,7 @@ Graceful shutdown обрабатывается непосредственно в
 | ---------------------------------------------------------- | ----------------------------------- |
 | [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy          |
 | [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline — расширения CLI |
+| [ADR-044](decisions/ADR-044-run-manifest-ledger-control-plane.md) | Control-plane inspection CLI |
 
 ### Смежные Разделы Документации
 

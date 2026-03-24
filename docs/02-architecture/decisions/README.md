@@ -49,6 +49,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-041](ADR-041-naming-policy-skills-agents.md)       | Naming Policy for Skills, Agents, Commands | Accepted           | Architecture    | 2026-03-04 |
 | [ADR-042](ADR-042-testing-strategy-matrix.md)           | Testing Strategy Matrix & Fixture Gov.     | Accepted           | Testing         | 2026-03-09 |
 | [ADR-043](ADR-043-documentation-knowledge-management.md)| Documentation & Knowledge Management       | Accepted           | Documentation   | 2026-03-09 |
+| [ADR-044](ADR-044-run-manifest-ledger-control-plane.md) | Run Manifest & Ledger Control Plane        | Accepted           | Reproducibility | 2026-03-24 |
 
 ## ADRs by Category
 
@@ -202,7 +203,7 @@ This directory contains Architecture Decision Records documenting significant ar
                                 └───────────┘
 ```
 
-### ADR-024..043 Relationships
+### ADR-024..044 Relationships
 
 ```
                     ┌─────────────────────────────────────────┐
@@ -273,6 +274,9 @@ This directory contains Architecture Decision Records documenting significant ar
                                                                 │Doc & KM   │
                                                                 └───────────┘
 ```
+
+ADR-044 extends the lifecycle and metadata line by introducing a dedicated
+control-plane layer for immutable run manifests and append-only run ledgers.
 
 ## Writing New ADRs
 

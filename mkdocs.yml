@@ -165,6 +165,7 @@ nav:
                     -   "ADR-041 Naming Policy Skills Agents": 02-architecture/decisions/ADR-041-naming-policy-skills-agents.md
                     -   "ADR-042 Testing Strategy Matrix": 02-architecture/decisions/ADR-042-testing-strategy-matrix.md
                     -   "ADR-043 Documentation Knowledge Management": 02-architecture/decisions/ADR-043-documentation-knowledge-management.md
+                    -   "ADR-044 Run Manifest and Run Ledger": 02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Getting Started": 03-guides/getting-started.md
@@ -264,6 +265,7 @@ nav:
     -   "Data Contracts":
             -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
             -   "Observability Metrics": 04-reference/contracts/observability.md
+            -   "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
     -   Reference:
             -   CLI: 04-reference/cli.md
             -   API:
@@ -313,6 +315,7 @@ nav:
                     -   "Quarantine Management": 05-operations/runbooks/quarantine-management.md
                     -   "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
                     -   "Observability Checklist": 05-operations/runbooks/observability-checklist.md
+                    -   "Run Manifest Inspection": 05-operations/runbooks/run-manifest-inspection.md
                     -   "Scaling": 05-operations/runbooks/scaling.md
                     -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
             -   "Historical Release Checklist (v5.9)": 05-operations/release-checklist.md

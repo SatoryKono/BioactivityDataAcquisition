@@ -35,7 +35,8 @@ composition/bootstrap/
 │   ├── noop.py          # NoOp implementations для CLI
 │   ├── storage.py       # Storage CLI bootstrap
 │   ├── checkpoint.py    # Checkpoint CLI bootstrap
-│   └── adr.py           # ADR-related CLI bootstrap
+│   ├── adr.py           # ADR-related CLI bootstrap
+│   └── run_manifest.py  # Run-manifest inspection bootstrap
 └── runtime/             # Runtime assembly
 ```
 
@@ -154,7 +155,12 @@ import paths.
 | ------------------ | ------------------------------------------------------- | ---------------------------------------------------- |
 | `providers/`       | `provider_registry.py`, `loader.py`, `registration.py`, `_default_registry.py`, `_loading.py`, `_registration_contracts.py` | Реестр провайдеров, canonical loader lifecycle и leaf registration/loading contracts |
 | `services/`        | `__init__.py`, `versioning.py` | Тонкий re-export layer для `MetadataCoordinator` и versioning utilities |
-| `runtime_builders/`| `runner_builder.py`, `observability_builder.py`, `inputs_resolver.py` | Builders для runtime assembly                        |
+| `runtime_builders/`| `runner_builder.py`, `control_plane.py`, `observability_builder.py`, `inputs_resolver.py` | Builders для runtime assembly, включая manifest/ledger attachment |
+
+`runtime_builders/control_plane.py` собирает control-plane collaborators вокруг
+runtime bootstrap: создаёт immutable manifest до assembly runner, при наличии
+ledger связывает `PipelineRunner` и metadata writers с append-only lifecycle /
+artifact events и прокидывает `manifest_id` в execution context.
 
 ### 2.3. ProviderRegistry и канонический data-source creator path
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 __all__ = ["METADATA_FILENAME", "MetadataWriter"]
 
 import asyncio
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -39,6 +40,7 @@ if TYPE_CHECKING:
 
 
 _get_metadata_filename = _operations._get_metadata_filename
+ArtifactPublicationRecorder = Callable[[str, str, dict[str, object] | None], object]
 
 
 async def _execute_atomic_metadata_write(
@@ -139,9 +141,17 @@ class MetadataWriter:
         """Initialize metadata writer (logger is mandatory per DI rules)."""
         self._logger = logger
         self._metrics = metrics
+        self._artifact_recorder: ArtifactPublicationRecorder | None = None
         self._atomic_replace_retry_policy = (
             atomic_replace_retry_policy or DEFAULT_ATOMIC_REPLACE_RETRY_POLICY
         )
+
+    def attach_artifact_recorder(
+        self,
+        recorder: ArtifactPublicationRecorder | None,
+    ) -> None:
+        """Attach an optional callback for control-plane artifact publication."""
+        self._artifact_recorder = recorder
 
     def _build_metadata_write_request(
         self,
@@ -177,7 +187,7 @@ class MetadataWriter:
         entity: str | None = None,
     ) -> str:
         """Build and execute one normalized metadata write request."""
-        return await self._write_metadata(
+        metadata_path = await self._write_metadata(
             self._build_metadata_write_request(
                 base_path=base_path,
                 metadata=metadata,
@@ -188,6 +198,35 @@ class MetadataWriter:
                 entity=entity,
             )
         )
+        self._record_artifact_publication(
+            layer=layer,
+            base_path=base_path,
+            metadata_path=metadata_path,
+            metadata=metadata,
+        )
+        return metadata_path
+
+    def _record_artifact_publication(
+        self,
+        *,
+        layer: str,
+        base_path: str | Path,
+        metadata_path: str,
+        metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+    ) -> None:
+        """Emit optional control-plane artifact publication callback."""
+        if self._artifact_recorder is None:
+            return
+        details: dict[str, object] = {
+            "artifact_kind": "layer_output",
+            "metadata_path": metadata_path,
+            "record_count": int(metadata.output.record_count),
+            "total_bytes": int(metadata.output.total_bytes),
+            "pipeline_name": metadata.pipeline.name,
+            "provider": metadata.pipeline.provider,
+            "entity": metadata.pipeline.entity,
+        }
+        self._artifact_recorder(layer, str(Path(base_path).resolve()), details)
 
     async def write_bronze_metadata(
         self,

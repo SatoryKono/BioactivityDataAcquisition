@@ -20,6 +20,7 @@ ______________________________________________________________________
 - **Resilience**: Built-in circuit breakers, exponential backoff retries, and dead-letter queues (Quarantine).
 - **Local-First Design**: In-memory locking, local file storage -- no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
 - **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
+- **Run Control Plane**: Immutable run manifests and append-only ledgers for provenance, replay analysis, and artifact linkage ([ADR-044](docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)).
 - **Observability by Design**: Metrics, tracing, and logging ports ([ADR-017](docs/02-architecture/decisions/ADR-017-observability-architecture.md)).
 - **Unified HTTP Client**: Standardized rate limiting, retry, and telemetry ([ADR-032](docs/02-architecture/decisions/ADR-032-unified-http-client.md)).
 - **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
@@ -66,7 +67,8 @@ The domain layer implements Domain-Driven Design patterns:
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------ |
 | **ChEMBL**           | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity, Subcellular Fraction, Tissue | Production | 3 req/sec    |
 | **PubChem**          | Compound                                                                                                                                 | Production | 5 req/sec    |
-| **UniProt**          | Protein, ID Mapping                                                                                                                      | Production | 10 req/sec (100 req/sec with API key) |
+| **UniProt**          | Protein                                                                                                                                  | Production | 10 req/sec (100 req/sec with API key) |
+| **UniProt ID Mapping** | ID Mapping                                                                                                                             | Production | Local job / no external rate limit |
 | **PubMed**           | Publication                                                                                                                              | Production | 3 req/sec    |
 | **CrossRef**         | Publication                                                                                                                              | Production | Polite pool  |
 | **OpenAlex**         | Publication                                                                                                                              | Production | ~10 req/sec  |
@@ -77,12 +79,13 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                  | Description                                 |
 | --------------------------------------------------------- | ------------------------------------------- |
 | [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 43 ADRs explaining design choices           |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 44 ADRs explaining design choices           |
 | [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
 | [RULES.md](docs/00-project/RULES.md)                      | Canonical active governance and requirements |
 | [Project Map](docs/00-project/00-map.md)                  | Primary navigator for active project docs   |
 | [Tools Hub](docs/00-project/TOOLS.md)                     | Current tool entry points and placement rules |
 | [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
+| [Run Manifest Contract](docs/04-reference/contracts/run-manifest-ledger.md) | Published control-plane manifest and ledger schema |
 | [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
 | [Archive Index](docs/99-archive/README.md)                | Historical context only; not normative      |
 

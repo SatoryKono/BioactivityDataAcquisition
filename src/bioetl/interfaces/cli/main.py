@@ -21,6 +21,7 @@ from bioetl.interfaces.cli.commands.quarantine import quarantine
 from bioetl.interfaces.cli.commands.run import run
 from bioetl.interfaces.cli.commands.run_all import run_all
 from bioetl.interfaces.cli.commands.run_composite import run_composite
+from bioetl.interfaces.cli.commands.run_manifest import run_manifest
 from bioetl.interfaces.cli.registry_helpers import (
     _build_registered_registry,
     build_cli_registry,
@@ -60,6 +61,7 @@ def cli(ctx: click.Context) -> None:
 cli.add_command(run)
 cli.add_command(run_all)
 cli.add_command(run_composite)
+cli.add_command(run_manifest)
 cli.add_command(adr)
 cli.add_command(export_command, name="export")
 cli.add_command(quarantine)

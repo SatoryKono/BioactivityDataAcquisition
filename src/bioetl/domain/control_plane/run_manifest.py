@@ -1,0 +1,162 @@
+"""Control-plane run manifest models."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, is_dataclass
+from datetime import datetime
+from enum import Enum
+from uuid import UUID
+
+from bioetl.domain.types import RunID, RunType
+
+__all__ = [
+    "RunArtifactRef",
+    "RunCodeProvenance",
+    "RunManifest",
+    "RunSourceRef",
+]
+
+
+def _normalize_mapping(value: dict[object, object]) -> dict[str, object]:
+    """Normalize nested mappings into JSON-serializable primitives."""
+    return {str(key): _normalize_serializable(item) for key, item in value.items()}
+
+
+def _normalize_scalar(value: object) -> object:
+    """Normalize scalar values into JSON-serializable primitives."""
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, Enum):
+        return str(value.value)
+    if isinstance(value, UUID):
+        return str(value)
+    return value
+
+
+def _normalize_serializable(value: object) -> object:
+    """Normalize nested values into JSON-serializable primitives."""
+    if is_dataclass(value):
+        return _normalize_mapping(asdict(value))
+    if isinstance(value, dict):
+        return _normalize_mapping(value)
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [_normalize_serializable(item) for item in value]
+    return _normalize_scalar(value)
+
+
+@dataclass(frozen=True, slots=True)
+class RunSourceRef:
+    """Canonical source reference captured in a run manifest."""
+
+    provider: str
+    entity: str
+    pipeline_name: str
+    query: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RunArtifactRef:
+    """Planned artifact location captured in a run manifest."""
+
+    layer: str
+    path: str
+
+
+@dataclass(frozen=True, slots=True)
+class RunCodeProvenance:
+    """Code/config provenance fields required for reproducibility."""
+
+    pipeline_version: str | None = None
+    git_commit: str | None = None
+    config_hash: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RunManifest:
+    """Immutable control-plane snapshot describing one launched run."""
+
+    manifest_id: str
+    execution_fingerprint: str
+    schema_version: str
+    created_at: datetime
+    run_id: RunID
+    run_type: RunType
+    pipeline_name: str
+    provider: str
+    entity: str
+    launch_context: dict[str, object]
+    runtime_config: dict[str, object]
+    resolved_config: dict[str, object]
+    code_provenance: RunCodeProvenance
+    source_refs: tuple[RunSourceRef, ...] = ()
+    planned_artifacts: tuple[RunArtifactRef, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a JSON-serializable manifest payload."""
+        return {
+            key: _normalize_serializable(value) for key, value in asdict(self).items()
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object]) -> RunManifest:
+        """Hydrate a manifest from serialized JSON payload."""
+        return cls(
+            manifest_id=str(payload["manifest_id"]),
+            execution_fingerprint=str(payload["execution_fingerprint"]),
+            schema_version=str(payload["schema_version"]),
+            created_at=datetime.fromisoformat(str(payload["created_at"])),
+            run_id=RunID(UUID(str(payload["run_id"]))),
+            run_type=RunType(str(payload["run_type"])),
+            pipeline_name=str(payload["pipeline_name"]),
+            provider=str(payload["provider"]),
+            entity=str(payload["entity"]),
+            launch_context=dict(payload.get("launch_context", {})),
+            runtime_config=dict(payload.get("runtime_config", {})),
+            resolved_config=dict(payload.get("resolved_config", {})),
+            code_provenance=_load_code_provenance(payload.get("code_provenance")),
+            source_refs=_load_source_refs(payload.get("source_refs")),
+            planned_artifacts=_load_artifacts(payload.get("planned_artifacts")),
+        )
+
+
+def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
+    """Extract an optional string field from a serialized mapping."""
+    value = payload.get(key)
+    return None if value is None else str(value)
+
+
+def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
+    """Deserialize code provenance payload safely."""
+    payload = raw_code if isinstance(raw_code, dict) else {}
+    return RunCodeProvenance(
+        pipeline_version=_load_optional_str(payload, "pipeline_version"),
+        git_commit=_load_optional_str(payload, "git_commit"),
+        config_hash=_load_optional_str(payload, "config_hash"),
+    )
+
+
+def _load_source_refs(raw_sources: object) -> tuple[RunSourceRef, ...]:
+    """Deserialize source references from serialized payload."""
+    if not isinstance(raw_sources, list):
+        return ()
+    return tuple(
+        RunSourceRef(
+            provider=str(item["provider"]),
+            entity=str(item["entity"]),
+            pipeline_name=str(item["pipeline_name"]),
+            query=(None if item.get("query") is None else str(item["query"])),
+        )
+        for item in raw_sources
+        if isinstance(item, dict)
+    )
+
+
+def _load_artifacts(raw_artifacts: object) -> tuple[RunArtifactRef, ...]:
+    """Deserialize planned artifact references from serialized payload."""
+    if not isinstance(raw_artifacts, list):
+        return ()
+    return tuple(
+        RunArtifactRef(layer=str(item["layer"]), path=str(item["path"]))
+        for item in raw_artifacts
+        if isinstance(item, dict)
+    )

@@ -233,6 +233,7 @@ def create_pipeline_with_services(
     runtime: RuntimeConfig,
     settings: Settings,
     logger: LoggerPort,
+    manifest_id: str | None = None,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,
@@ -254,6 +255,7 @@ def create_pipeline_with_services(
         runtime: Runtime configuration (run type, limits, vacuum settings).
         settings: Application settings for infrastructure wiring.
         logger: LoggerPort for structured logging.
+        manifest_id: Optional immutable run-manifest identifier.
         config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
         filter_config: Optional input filter configuration; disables filtering if None.
         tracer: Optional TracingPort for distributed tracing.
@@ -281,6 +283,7 @@ def create_pipeline_with_services(
                 runtime=runtime,
                 settings=settings,
                 logger=logger,
+                manifest_id=manifest_id,
                 config=config,
                 filter_config=filter_config,
                 tracer=tracer,

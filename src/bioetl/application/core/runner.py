@@ -25,6 +25,7 @@ from bioetl.application.core._span_helpers import (
     build_pipeline_span_attributes,
     start_current_span,
 )
+from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 from bioetl.domain.events import PipelineEvent
 
 if TYPE_CHECKING:
@@ -44,9 +45,22 @@ if TYPE_CHECKING:
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
+    from bioetl.application.services.run_ledger_service import RunLedgerService
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
+
+
+_RUN_FAILURE_EXCEPTIONS = (
+    AssertionError,
+    AttributeError,
+    KeyError,
+    LookupError,
+    OSError,
+    RuntimeError,
+    TypeError,
+    ValueError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -168,6 +182,7 @@ class PipelineRunner:
         self._postrun_service = dependencies.postrun
         self._lifecycle_service = dependencies.lifecycle_service
         self._observer = dependencies.observer
+        self._run_ledger_service: RunLedgerService | None = None
 
     @property
     def logger(self) -> LoggerPort:
@@ -185,9 +200,18 @@ class PipelineRunner:
         return str(self._context.run_id)
 
     @property
+    def manifest_id(self) -> str | None:
+        """Control-plane manifest identifier linked to this run."""
+        return self._context.manifest_id
+
+    @property
     def services(self) -> PipelineService:
         """Access injected services."""
         return self._services
+
+    def attach_run_ledger_service(self, service: RunLedgerService) -> None:
+        """Attach a control-plane run-ledger collaborator from composition."""
+        self._run_ledger_service = service
 
     @property
     def execution_metrics(self) -> dict[str, int]:
@@ -224,13 +248,30 @@ class PipelineRunner:
         - Handles tracer close errors without failing the pipeline
         """
         self._log_start()
+        self._record_run_started()
+        shutdown_recorded = False
 
         try:
-            with self._pipeline_span(), self._observer:
-                async with self._services, self._lock_manager:
-                    await self._run_managed_pipeline()
-
+            with self._pipeline_span():
+                with self._observer:
+                    try:
+                        async with self._services, self._lock_manager:
+                            await self._run_managed_pipeline()
+                    except PipelineShutdownError:
+                        self._record_run_shutdown()
+                        shutdown_recorded = True
+                        raise
+        except PipelineShutdownError:
+            if not shutdown_recorded:
+                self._record_run_shutdown()
+            raise
+        except _RUN_FAILURE_EXCEPTIONS as exc:
+            self._record_run_failed(exc)
+            raise
+        else:
+            if not shutdown_recorded:
                 self._log_completion()
+                self._record_run_finished()
         finally:
             await self._postrun_service.cleanup(self._tracer)
 
@@ -250,18 +291,64 @@ class PipelineRunner:
             records_fetched=self._executor.records_fetched,
         )
 
+    def _record_run_started(self) -> None:
+        """Append run_started ledger entry when control-plane ledger is attached."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_run_started()
+
+    def _record_stage_completed(self, stage: str) -> None:
+        """Append stage_completed ledger entry."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_stage_completed(
+            stage=stage,
+            metrics_snapshot=self.execution_metrics,
+        )
+
+    def _record_run_finished(self) -> None:
+        """Append successful completion ledger entry."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_run_finished(
+            metrics_snapshot=self.execution_metrics,
+        )
+
+    def _record_run_shutdown(self) -> None:
+        """Append graceful shutdown ledger entry."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_run_shutdown(
+            metrics_snapshot=self.execution_metrics,
+        )
+
+    def _record_run_failed(self, exc: Exception) -> None:
+        """Append failed completion ledger entry."""
+        if self._run_ledger_service is None:
+            return
+        self._run_ledger_service.record_run_failed(
+            message=str(exc),
+            error_type=type(exc).__name__,
+            metrics_snapshot=self.execution_metrics,
+        )
+
     async def _run_managed_pipeline(self) -> None:
         """Run the validated pipeline lifecycle within managed contexts."""
         await self._validate_infrastructure()
+        self._record_stage_completed("preflight")
         await self._prepare_medallion_layers()
+        self._record_stage_completed("prepare_medallion_layers")
         await self._run_execution_cycle()
 
     async def _run_execution_cycle(self) -> None:
         """Execute extraction, postrun, and checkpoint finalization."""
         offset = await self._resolve_execution_offset()
         await self._execute_pipeline(offset=offset)
+        self._record_stage_completed("execute_pipeline")
         await self._run_postrun_phase()
+        self._record_stage_completed("postrun")
         await self._checkpoint_manager.delete_checkpoint()
+        self._record_stage_completed("checkpoint_finalize")
 
     async def _resolve_execution_offset(self) -> int | None:
         """Resolve the executor start offset from runtime overrides or checkpoint."""
