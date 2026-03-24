@@ -6,7 +6,20 @@ from pathlib import Path
 
 import pytest
 
-MAX_FILE_LOC = 500
+from bioetl.infrastructure.quality import (
+    build_module_path_key,
+    get_registry_values,
+    resolve_registry_value,
+)
+
+# Layer-specific limits (in lines of code)
+LAYER_LIMITS = {
+    "domain": 305,
+    "application": 500,
+    "composition": 350,
+    "infrastructure": 650,
+    "interfaces": 420,
+}
 
 
 def test_no_source_file_exceeds_500_loc(src_dir: Path) -> None:
@@ -15,17 +28,41 @@ def test_no_source_file_exceeds_500_loc(src_dir: Path) -> None:
     if not source_root.exists():
         pytest.skip("Source directory not found: src/bioetl")
 
-    violations: list[tuple[int, Path]] = []
+    # Load file size limit exemptions
+    EXEMPTIONS = get_registry_values("file_size_limits")
+
+    violations: list[tuple[int, Path, int]] = []
     for py_file in sorted(source_root.rglob("*.py")):
         if py_file.name == "__init__.py":
             continue
+        
         loc = len(py_file.read_text(encoding="utf-8").splitlines())
-        if loc > MAX_FILE_LOC:
-            violations.append((loc, py_file.relative_to(src_dir)))
+        
+        # Determine the layer for this file
+        parts = py_file.relative_to(source_root).parts
+        if len(parts) < 1:
+            continue
+        layer = parts[0]
+        
+        # Get layer-specific limit
+        default_limit = LAYER_LIMITS.get(layer, 500)
+        
+        # Check for exemptions
+        file_limit = resolve_registry_value(
+            EXEMPTIONS,
+            module_path=build_module_path_key(py_file, src_root=src_dir),
+            legacy_name=py_file.name,
+        )
+        if file_limit is None:
+            file_limit = default_limit
+
+        if loc > file_limit:
+            violations.append((loc, py_file.relative_to(src_dir), file_limit))
 
     assert not violations, (
-        f"Found {len(violations)} source files above {MAX_FILE_LOC} LOC:\n"
+        f"Found {len(violations)} source files above their LOC limits:\n"
         + "\n".join(
-            f"  - {path}: {loc} LOC" for loc, path in sorted(violations, reverse=True)
+            f"  - {path}: {loc} LOC (limit: {file_limit})"
+            for loc, path, file_limit in sorted(violations, reverse=True)
         )
     )

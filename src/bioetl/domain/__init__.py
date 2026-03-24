@@ -23,6 +23,7 @@ from bioetl.domain import composite, constants, contracts, control_plane, versio
 # Subpackage registrations (make them importable as bioetl.domain.<name>)
 from bioetl.domain import context_cached_bronze
 from bioetl.domain import context_filtering
+from bioetl.domain import lineage
 from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import normalization_authors
 from bioetl.domain import normalization_dates
@@ -42,6 +43,7 @@ __all__ = [
     "context_cached_bronze",
     "context_filtering",
     "get_version",
+    "lineage",
     "normalization_authors",
     "normalization_dates",
     "normalization_pages",
