@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.postrun._failure_policy import (
     PostrunFailureHandlingMixin,
     PostrunFailurePolicySpec,
+    apply_postrun_failure_policy_or_raise,
 )
 from bioetl.domain.exceptions import BioETLError
 
@@ -100,8 +101,11 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
                 )
             return result
         except self._handled_failures as error:
-            self._handle_allowlisted_failure(
-                error,
+            apply_postrun_failure_policy_or_raise(
+                logger=self._logger,
+                runtime=self._runtime,
+                error=error,
+                spec=self._FAILURE_POLICY,
                 emit_warning_error_log=True,
             )
             return None

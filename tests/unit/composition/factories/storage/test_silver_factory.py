@@ -68,6 +68,7 @@ class TestCreateSilverWriter:
         assert not isinstance(
             call_kwargs["runtime_services"].metadata_writer, NoOpMetadataWriter
         )
+        assert call_kwargs["runtime_services"].lineage_store is not None
 
     def test_uses_provided_tracing(self) -> None:
         """Uses provided TracingPort instead of NoOpTracing."""

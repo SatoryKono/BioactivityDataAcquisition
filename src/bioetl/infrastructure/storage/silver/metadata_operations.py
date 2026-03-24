@@ -10,9 +10,11 @@ from typing import Protocol
 
 from deltalake import DeltaTable
 
+from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
+    LineageStorePort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
     SilverMetadataInput,
@@ -21,6 +23,10 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.lineage_persistence import (
+    persist_lineage_fragment_if_present,
+    resolve_metadata_and_lineage_fragment,
+)
 from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
 __all__ = [
@@ -74,6 +80,7 @@ class _PreparedSilverMetadataWriteOperation:
     provider_name: str
     entity_name: str
     metadata: SilverMetadata
+    lineage_fragment: LineageGraphFragment | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,6 +105,7 @@ class _SilverMetadataWriteHostProtocol(Protocol):
     """Typed host contract for Silver metadata sidecar stages."""
 
     _metadata_coordinator: MetadataCoordinatorPort | None
+    _lineage_store: LineageStorePort | None
     _metadata_writer: MetadataWriterPort
     _flat_structure: bool
     _transform_version: str | None
@@ -188,12 +196,21 @@ async def _prepare_silver_metadata_write(
         started_at=request.started_at,
         completed_at=request.completed_at,
     )
-    metadata = host._metadata_coordinator.create_silver_metadata(silver_input)
+    metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
+        coordinator=host._metadata_coordinator,
+        bundle_factory_name="create_silver_metadata_bundle",
+        coordinator_factory_name="create_silver_metadata",
+        input_data=silver_input,
+        fallback_factory=lambda: host._metadata_coordinator.create_silver_metadata(
+            silver_input
+        ),
+    )
     return _PreparedSilverMetadataWriteOperation(
         request=request,
         provider_name=context.provider_name,
         entity_name=context.entity_name,
         metadata=metadata,
+        lineage_fragment=lineage_fragment,
     )
 
 
@@ -241,6 +258,10 @@ async def _execute_prepared_silver_metadata_write_operation(
         table_name=prepared.request.table_name,
         provider_name=prepared.provider_name,
         entity_name=prepared.entity_name,
+    )
+    await persist_lineage_fragment_if_present(
+        lineage_store=getattr(host, "_lineage_store", None),
+        lineage_fragment=prepared.lineage_fragment,
     )
 
 

@@ -124,17 +124,18 @@ def _create_adapter_for_provider(
 
 def create_provider_assembly_support(
     *,
-    provider_registry: ProviderRegistry | None = None,
+    provider_registry: object | None = None,
 ) -> ProviderAssemblySupport:
     """Build the default injected support bundle for provider registration."""
+    resolved_registry = _resolve_provider_registry_candidate(provider_registry)
     return ProviderAssemblySupport(
         create_http_client=partial(
             _create_http_client_for_provider,
-            provider_registry=provider_registry,
+            provider_registry=resolved_registry,
         ),
         create_adapter=partial(
             _create_adapter_for_provider,
-            provider_registry=provider_registry,
+            provider_registry=resolved_registry,
         ),
     )
 
@@ -142,13 +143,33 @@ def create_provider_assembly_support(
 def resolve_provider_assembly_support(
     assembly_support: ProviderAssemblySupport | None,
     *,
-    provider_registry: ProviderRegistry | None = None,
+    provider_registry: object | None = None,
 ) -> ProviderAssemblySupport:
     """Return the injected support bundle or build the canonical default one."""
     if assembly_support is not None:
         return assembly_support
 
     return create_provider_assembly_support(provider_registry=provider_registry)
+
+
+def _resolve_provider_registry_candidate(
+    provider_registry: object | None,
+) -> ProviderRegistry | None:
+    """Return registry candidate only when it exposes full registry surface."""
+    required_methods = (
+        "get_http_config",
+        "create_data_source",
+        "build_data_source_creator",
+        "is_registered",
+        "list_providers",
+    )
+    if provider_registry is None:
+        return None
+    if not all(
+        hasattr(provider_registry, method_name) for method_name in required_methods
+    ):
+        return None
+    return cast("ProviderRegistry", provider_registry)
 
 
 def bind_provider_data_source_creator(

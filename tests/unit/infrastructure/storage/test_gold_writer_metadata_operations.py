@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.infrastructure.storage.gold.metadata_operations import (
     _GoldMergedMetadataWriteRequest,
     _GoldMetadataWriteRequest,
@@ -103,6 +106,51 @@ class TestPrepareGoldMetadataWrite:
         assert prepared.metadata is metadata
         mock_build.assert_called_once()
 
+    def test_uses_bundle_when_concrete_coordinator_supports_lineage(self) -> None:
+        """Concrete coordinators with bundle seam should surface lineage fragments."""
+
+        class _Coordinator:
+            def create_gold_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=fragment,
+                )
+
+            def create_gold_metadata(self, input_data: object) -> object:
+                _ = input_data
+                return metadata
+
+        metadata = MagicMock()
+        fragment = LineageGraphFragment(
+            fragment_id="gold:fragment-1",
+            created_at=datetime.now(UTC),
+        )
+        host = MagicMock()
+        host._metadata_coordinator = _Coordinator()
+        host._transform_version = "1.0.0"
+        host._transform_steps = ("normalize",)
+
+        from bioetl.domain.medallion import GoldWriteMode
+
+        request = _GoldMetadataWriteRequest(
+            table_path="/tmp/gold/chembl_compound",
+            table_name="chembl_compound",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+        )
+
+        prepared = _prepare_gold_metadata_write(host, request)
+
+        assert prepared.metadata is metadata
+        assert prepared.lineage_fragment == fragment
+
 
 @pytest.mark.unit
 class TestPersistGoldMetadataWrite:
@@ -133,6 +181,40 @@ class TestPersistGoldMetadataWrite:
         )
         await _persist_gold_metadata_write(host, prepared)
         host._write_gold_metadata_file.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_persists_lineage_fragment_when_store_is_configured(self) -> None:
+        """Prepared lineage fragments should be written after metadata handoff."""
+        host = AsyncMock()
+        host._lineage_store = MagicMock()
+        metadata = MagicMock()
+        fragment = LineageGraphFragment(
+            fragment_id="gold:fragment-2",
+            created_at=datetime.now(UTC),
+        )
+
+        from bioetl.domain.medallion import GoldWriteMode
+
+        request = _GoldMetadataWriteRequest(
+            table_path="/tmp/gold/chembl_compound",
+            table_name="chembl_compound",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+        )
+        prepared = _PreparedGoldMetadataWrite(
+            request=request,
+            provider_name="chembl",
+            entity_name="compound",
+            metadata=metadata,
+            lineage_fragment=fragment,
+        )
+
+        await _persist_gold_metadata_write(host, prepared)
+
+        host._lineage_store.save.assert_called_once_with(fragment)
 
 
 @pytest.mark.unit

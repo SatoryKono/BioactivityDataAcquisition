@@ -188,6 +188,11 @@ class PipelineService:
 
 Содержит компоненты для **композитных пайплайнов** — оркестрации нескольких пайплайнов для обогащения данных из разных источников. Основные классы — `CompositePipelineRunner` (оркестратор seed→enrich→merge) и `EnrichmentCoordinatorService` (параллельный fan-out enrichers).
 
+Текущая composite-specific DQ/cross-validation semantics:
+- `EnrichmentCrossValidator` валидирует enricher-поля относительно seed-данных до merge closeout;
+- при `ENRICHER_ERROR` он nullify-ит enricher-prefixed columns и добавляет `_cv_*` metadata columns;
+- эта семантика сейчас формализована как composite runtime behavior, а не как полностью унифицированный rule-provenance contract для всех DQ путей.
+
 **Ключевые компоненты:**
 
 | Файл/Пакет              | Компонент                       | Назначение                                                |

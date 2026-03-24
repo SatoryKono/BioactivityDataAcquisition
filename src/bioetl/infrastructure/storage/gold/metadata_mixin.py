@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from bioetl.domain.models.metadata import GoldMetadata
     from bioetl.domain.ports import (
         AuditPort,
+        LineageStorePort,
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
@@ -48,6 +49,7 @@ class GoldWriterMetadataMixin:
     logger: LoggerPort
     _audit: AuditPort | None
     _metadata_coordinator: MetadataCoordinatorPort | None
+    _lineage_store: LineageStorePort | None
     _metadata_writer: MetadataWriterPort
     _flat_structure: bool
     _transform_version: str | None

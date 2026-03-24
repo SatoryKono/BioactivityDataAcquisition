@@ -284,7 +284,7 @@ DQ правила загружаются в порядке приоритета 
 1. `configs/base/quality.yaml` — глобальные defaults
 1. `configs/providers/{provider}.yaml` — provider-specific
 1. `configs/entities/{provider}/{entity}.yaml` — entity-specific
-1. Inline `dq-overrides` в pipeline конфиге — финальные переопределения
+1. Inline `dq_overrides` в pipeline конфиге — финальные переопределения
 
 > **Примечание:** Поле `dq_config_file` в pipeline YAML вычисляется конвенционно
 > (ADR-029) и **не требует** явного указания. `DQConfigLoader` всегда загружает

@@ -16,6 +16,7 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     AuditPort,
+    LineageStorePort,
     LoggerPort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
@@ -48,6 +49,7 @@ class SilverWriterMetadataMixin:
     logger: LoggerPort
     _audit: AuditPort | None
     _metadata_coordinator: MetadataCoordinatorPort | None
+    _lineage_store: LineageStorePort | None
     _metadata_writer: MetadataWriterPort
     _flat_structure: bool
     _transform_version: str | None

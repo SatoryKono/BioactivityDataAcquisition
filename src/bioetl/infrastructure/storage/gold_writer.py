@@ -15,6 +15,7 @@ from deltalake.exceptions import TableNotFoundError  # noqa: F401
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import (
     AuditPort,
+    LineageStorePort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
     TracingPort,
@@ -130,6 +131,10 @@ class GoldWriter(
             "MetadataCoordinatorPort | None",
             legacy_kwargs.pop("metadata_coordinator", None),
         )
+        lineage_store = cast(
+            "LineageStorePort | None",
+            legacy_kwargs.pop("lineage_store", None),
+        )
         if legacy_kwargs:
             unexpected = ", ".join(sorted(legacy_kwargs))
             raise TypeError(f"Unexpected GoldWriter options: {unexpected}")
@@ -141,12 +146,14 @@ class GoldWriter(
             audit=audit,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
         )
         self.csv_exporter = services.csv_exporter
         self._audit = services.audit
         self._tracing = services.tracing
         self._metadata_writer = services.metadata_writer
         self._metadata_coordinator = services.metadata_coordinator
+        self._lineage_store = services.lineage_store
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 

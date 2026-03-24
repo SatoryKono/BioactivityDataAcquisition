@@ -7,10 +7,10 @@
 This runbook describes how to handle pipeline failures due to high Data Quality (DQ) error rates.
 
 ## Symptoms
-- Pipeline fails with `DataQualityError`.
-- Logs show "Batch failed DQ check".
-- `dq-validation-score` drops below threshold.
-- `errors-total{type="data-quality"}` metric spikes.
+- Pipeline fails with `DataQualityThresholdError` / `DataQualityError`.
+- Logs show hard-threshold failure or soft-threshold warning messages from transform/postrun stages.
+- Quarantine volume spikes for one pipeline.
+- Generated DQ report or metadata sidecar points to the affected run artifacts.
 
 ## Thresholds
 - **Soft Fail**: > 5% errors (Warning).
@@ -19,7 +19,7 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
 ## Diagnosis Steps
 1. **Inspect Quarantine**:
    ```bash
-   make quarantine-inspect PIPELINE=...
+   bioetl quarantine inspect --pipeline <pipeline-name> --limit 20
    ```
 2. **Analyze Error Types**:
    - `SCHEMA-VIOLATION`: Source data doesn't match expected schema.
@@ -31,23 +31,24 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
    - Contact data provider.
    - Wait for provider to fix data.
 2. **If Schema is Outdated**:
-   - Update Pydantic models in `src/bioetl/domain/entities/`.
-   - Update Pandera schemas in `src/bioetl/infrastructure/schemas/`.
+   - Update source-aligned contract/schema code in `src/bioetl/domain/contracts/gold/` or related validation/config modules.
+   - Update Pandera-based validation surfaces used by the pipeline.
    - Deploy new version.
 3. **If Threshold is Too Strict**:
    - Temporarily increase threshold in `configs/entities/{provider}/{entity}.yaml`:
      ```yaml
-     dq-overrides:
-       hard-fail-threshold: 0.30  # Increase to 30%
+     pipeline:
+       dq_overrides:
+         hard_fail_threshold: 0.30  # Increase to 30%
      ```
    - **Warning**: This degrades data quality in Silver/Gold.
 
 ## Quarantine Management
 - **Replay**: After fixing the parser/schema, replay quarantined records:
   ```bash
-  make quarantine-replay PIPELINE=...
+  bioetl quarantine replay --pipeline <pipeline-name>
   ```
 - **Purge**: If data is garbage, purge quarantine:
   ```bash
-  make quarantine-purge PIPELINE=...
+  bioetl quarantine purge --pipeline <pipeline-name> --older-than-days 30
   ```

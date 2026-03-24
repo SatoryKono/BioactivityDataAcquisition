@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports.noop import NoOpMetadataWriter
+from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     build_silver_writer_runtime_services,
@@ -69,6 +70,11 @@ def create_silver_writer(
         Configured SilverWriter instance for the Silver storage layer.
     """
     save_metadata = config.save_metadata if config else False
+    lineage_store = (
+        FileLineageStore(base_path=base_path.parent / "control" / "lineage")
+        if save_metadata
+        else None
+    )
     metadata_writer = (
         MetadataWriter(
             logger=logger,
@@ -87,6 +93,7 @@ def create_silver_writer(
         silver_validator=silver_validator,
         metadata_writer=metadata_writer,
         metadata_coordinator=metadata_coordinator,
+        lineage_store=lineage_store,
         dq_calculator=None,
         merge_resilience_policy=merge_resilience_policy,
     )

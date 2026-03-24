@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
+    LineageStorePort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
     MetricsPort,
@@ -38,6 +39,7 @@ class SilverWriterRuntimeServices:
     silver_validator: SilverValidatorPort
     metadata_writer: MetadataWriterPort
     metadata_coordinator: MetadataCoordinatorPort | None
+    lineage_store: LineageStorePort | None
     dq_calculator: DQMetricsCalculator
     merge_resilience_policy: SilverMergeResiliencePolicy
 
@@ -79,6 +81,7 @@ def build_silver_writer_runtime_services(
     silver_validator: SilverValidatorPort | None,
     metadata_writer: MetadataWriterPort | None,
     metadata_coordinator: MetadataCoordinatorPort | None,
+    lineage_store: LineageStorePort | None,
     dq_calculator: DQMetricsCalculator | None,
     merge_resilience_policy: SilverMergeResiliencePolicy | None,
 ) -> SilverWriterRuntimeServices:
@@ -107,6 +110,7 @@ def build_silver_writer_runtime_services(
         silver_validator=resolved_silver_validator,
         metadata_writer=resolved_metadata_writer,
         metadata_coordinator=metadata_coordinator,
+        lineage_store=lineage_store,
         dq_calculator=resolved_dq_calculator,
         merge_resilience_policy=resolved_merge_resilience_policy,
     )
