@@ -6,6 +6,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.domain.lineage import LineageGraphFragment
+
 pytestmark = pytest.mark.unit
 
 
@@ -574,6 +577,55 @@ class TestSilverWriterLineage:
             provider_name="chembl",
             entity_name="activity",
         )
+
+    @pytest.mark.asyncio
+    async def test_write_silver_metadata_persists_lineage_fragment(
+        self, noop_logger, valid_records
+    ):
+        """Concrete bundle-aware coordinators should materialize lineage fragments."""
+        from bioetl.infrastructure.storage.silver_writer import (
+            SilverWriteMode,
+            SilverWriter,
+        )
+
+        metadata = MagicMock()
+        fragment = LineageGraphFragment(fragment_id="silver:fragment-1")
+
+        class _Coordinator:
+            def create_silver_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=fragment,
+                )
+
+            def create_silver_metadata(self, input_data: object) -> object:
+                _ = input_data
+                return metadata
+
+        lineage_store = MagicMock()
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=noop_logger,
+            metadata_writer=MagicMock(),
+            metadata_coordinator=_Coordinator(),
+            lineage_store=lineage_store,
+        )
+        writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
+
+        await writer._write_silver_metadata(
+            table_path="/tmp/silver/chembl/activity",
+            table_name="chembl.activity",
+            records=valid_records,
+            primary_keys=["entity_id"],
+            mode=SilverWriteMode.MERGE,
+            version_after=7,
+        )
+
+        lineage_store.save.assert_called_once_with(fragment)
 
     @pytest.mark.asyncio
     async def test_write_silver_merged_metadata_resolves_provider_entity(

@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from bioetl.domain.config import KeyNullabilityRule
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LineageStorePort, LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
@@ -134,6 +134,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             "MetadataCoordinatorPort | None",
             legacy_kwargs.pop("metadata_coordinator", None),
         )
+        lineage_store = cast(
+            "LineageStorePort | None",
+            legacy_kwargs.pop("lineage_store", None),
+        )
         dq_calculator = cast(
             "DQMetricsCalculator | None",
             legacy_kwargs.pop("dq_calculator", None),
@@ -156,6 +160,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             silver_validator=silver_validator,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
             dq_calculator=dq_calculator,
             merge_resilience_policy=merge_resilience_policy,
         )
@@ -167,6 +172,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self._silver_validator = services.silver_validator
         self._metadata_writer = services.metadata_writer
         self._metadata_coordinator = services.metadata_coordinator
+        self._lineage_store = services.lineage_store
         self._dq_calculator = services.dq_calculator
         self._merge_resilience_policy = services.merge_resilience_policy
         self._transform_version = transform_version

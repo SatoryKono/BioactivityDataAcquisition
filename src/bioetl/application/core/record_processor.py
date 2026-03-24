@@ -25,6 +25,7 @@ from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERROR
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+    from bioetl.application.core._span_helpers import _ClosableSpan
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_transformer import (
         BatchTransformer,
@@ -236,4 +237,4 @@ class RecordProcessor:
 
     def _end_span(self, span: Span | None, error: Exception | None = None) -> None:
         """End a tracing span."""
-        close_span(span, error)
+        close_span(cast("_ClosableSpan | None", span), error)

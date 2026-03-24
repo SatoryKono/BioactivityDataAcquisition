@@ -16,11 +16,15 @@ from bioetl.infrastructure.storage.bronze.reporting_helpers import (
     BronzeAuditWriteRequest,
     build_bronze_audit_entry,
 )
+from bioetl.infrastructure.storage.lineage_persistence import (
+    persist_lineage_fragment_if_present,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
     from bioetl.domain.ports import (
         AuditPort,
+        LineageStorePort,
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
@@ -30,6 +34,7 @@ if TYPE_CHECKING:
         _audit: AuditPort | None
         _metadata_writer: MetadataWriterPort
         _metadata_coordinator: MetadataCoordinatorPort | None
+        _lineage_store: LineageStorePort | None
         _flat_structure: bool
         base_path: Path
         logger: LoggerPort
@@ -129,6 +134,10 @@ class BronzeWriterSideEffectsMixin:
             metadata=prepared.metadata,
             provider=provider,
             entity=entity,
+        )
+        await persist_lineage_fragment_if_present(
+            lineage_store=getattr(host, "_lineage_store", None),
+            lineage_fragment=prepared.lineage_fragment,
         )
         host.logger.debug(
             "bronze_metadata_written",

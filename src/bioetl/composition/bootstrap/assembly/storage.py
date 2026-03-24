@@ -28,6 +28,7 @@ from bioetl.domain.ports.noop import (
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -79,6 +80,7 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
         atomic_replace_retry_policy=atomic_retry_policy,
         metrics=noop_metrics,
     )
+    lineage_store = FileLineageStore(base_path=output_dir / "control" / "lineage")
     run_context = RunContext(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
@@ -118,6 +120,7 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
             csv_exporter=silver_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
             merge_resilience_policy=merge_resilience_policy,
         ),
         gold_writer=GoldWriter(
@@ -127,5 +130,6 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
             csv_exporter=gold_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
         ),
     )

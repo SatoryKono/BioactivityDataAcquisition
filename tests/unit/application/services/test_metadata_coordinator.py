@@ -11,6 +11,8 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.domain.lineage import LineageEdgeType, LineageNodeType
 from bioetl.domain.medallion import GoldWriteMode, Layer, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
@@ -30,6 +32,7 @@ from bioetl.domain.ports import (
     SilverRef,
 )
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
 
 
@@ -1045,6 +1048,216 @@ class TestConsistencyAcrossLayers:
 
         # Environment should be the same cached object
         assert bronze.environment is silver.environment is gold.environment
+
+
+class TestLineageFragments:
+    """Tests for canonical lineage fragment assembly."""
+
+    class _FakeGoldSchema:
+        class Config:
+            version = "7.0"
+            strict = True
+
+        @staticmethod
+        def to_schema() -> object:
+            class _Column:
+                dtype = "string"
+                nullable = False
+
+            class _Schema:
+                columns = {"compound_id": _Column()}
+
+            return _Schema()
+
+    def test_bronze_fragment_links_source_request_run_and_batch(self) -> None:
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+            manifest_id="manifest-001",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=50,
+            compressed_size=1024,
+            output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            source_metadata=SourceMetadata(
+                type="api",
+                url="https://www.ebi.ac.uk/chembl/api/data/activity",
+                query_string="assay_type=B",
+                api_version="v33",
+            ),
+        )
+
+        fragment = coordinator.build_bronze_lineage_fragment(input_data)
+
+        node_types = {node.node_type for node in fragment.nodes}
+        assert fragment.fragment_id.startswith("bronze:")
+        assert fragment.manifest_id == "manifest-001"
+        assert LineageNodeType.MANIFEST in node_types
+        assert LineageNodeType.RUN in node_types
+        assert LineageNodeType.SOURCE_SYSTEM in node_types
+        assert LineageNodeType.SOURCE_REQUEST in node_types
+        assert LineageNodeType.BRONZE_BATCH in node_types
+        assert any(edge.edge_type == LineageEdgeType.PRODUCED_BY for edge in fragment.edges)
+        assert any(edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges)
+
+    def test_silver_fragment_uses_bronze_refs_and_transform_chain(self) -> None:
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+            transform_version="2.1.0",
+            transform_steps=("normalize", "validate"),
+        )
+        coordinator = MetadataCoordinator(context)
+        bronze_ref = BronzeWriteResult(
+            batch_id=BatchID(uuid4()),
+            relative_path="chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            absolute_path="/data/output/bronze/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            record_count=25,
+            compressed_size=100,
+            uncompressed_size=300,
+            checksum_blake2="abc123",
+        )
+        input_data = SilverMetadataInput(
+            table_path="/data/output/silver/chembl/activity",
+            records=[{"id": 1, "_source_batch_id": str(bronze_ref.batch_id)}],
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            bronze_refs=[bronze_ref],
+            version_after=7,
+        )
+
+        fragment = coordinator.build_silver_lineage_fragment(input_data)
+
+        dataset_nodes = [
+            node for node in fragment.nodes if node.node_type == LineageNodeType.DATASET
+        ]
+        transform_nodes = [
+            node
+            for node in fragment.nodes
+            if node.node_type == LineageNodeType.TRANSFORM
+        ]
+        assert fragment.fragment_id.startswith("silver:")
+        assert len(dataset_nodes) == 1
+        assert dataset_nodes[0].node_id == "silver:chembl.activity@7"
+        assert len(transform_nodes) == 2
+        assert any(
+            edge.edge_type == LineageEdgeType.DERIVED_FROM
+            and edge.target.node_type == LineageNodeType.BRONZE_BATCH
+            for edge in fragment.edges
+        )
+        assert any(
+            edge.edge_type == LineageEdgeType.PRODUCED_BY
+            and edge.target.node_type == LineageNodeType.TRANSFORM
+            for edge in fragment.edges
+        )
+
+    def test_gold_fragment_links_silver_refs_schema_and_transforms(self) -> None:
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.REBUILD,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+            transform_version="3.0.0",
+            transform_steps=("merge", "rank"),
+            manifest_id="manifest-002",
+        )
+        coordinator = MetadataCoordinator(context)
+        silver_ref = SilverRef(
+            table_name="chembl.activity",
+            table_path="/data/output/silver/chembl/activity",
+            delta_version=9,
+        )
+        input_data = GoldMetadataInput(
+            table_path="/data/output/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=[silver_ref],
+            gold_schema=self._FakeGoldSchema,
+        )
+
+        fragment = coordinator.build_gold_lineage_fragment(input_data)
+
+        node_types = {node.node_type for node in fragment.nodes}
+        assert fragment.fragment_id.startswith("gold:")
+        assert LineageNodeType.DATASET in node_types
+        assert LineageNodeType.SCHEMA in node_types
+        assert LineageNodeType.TRANSFORM in node_types
+        assert LineageNodeType.MANIFEST in node_types
+        assert any(
+            edge.edge_type == LineageEdgeType.DERIVED_FROM
+            and edge.target.node_id == "silver:chembl.activity@9"
+            for edge in fragment.edges
+        )
+        assert any(
+            edge.edge_type == LineageEdgeType.USED_SCHEMA
+            and edge.target.node_type == LineageNodeType.SCHEMA
+            for edge in fragment.edges
+        )
+        assert any(edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges)
+
+    def test_silver_metadata_bundle_keeps_metadata_and_fragment_aligned(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        input_data = SilverMetadataInput(
+            table_path="/data/output/silver/chembl/activity",
+            records=[{"id": 1, "_source_batch_id": "batch-001"}],
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            version_after=4,
+            transform_steps=("normalize", "validate"),
+        )
+
+        bundle = coordinator.create_silver_metadata_bundle(input_data)
+
+        assert isinstance(bundle, MetadataLineageBundle)
+        assert bundle.metadata.lineage.source_batch_ids == ["batch-001"]
+        assert bundle.metadata.lineage.transform_steps == ["normalize", "validate"]
+        assert any(
+            node.node_id == "silver:chembl.activity@4"
+            for node in bundle.lineage_fragment.nodes
+        )
+        assert bundle.lineage_fragment.run_id == str(coordinator.run_context.run_id)
+
+    def test_gold_metadata_bundle_keeps_schema_and_upstream_refs_aligned(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        input_data = GoldMetadataInput(
+            table_path="/data/output/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=[
+                SilverRef(
+                    table_name="chembl.activity",
+                    table_path="/data/output/silver/chembl/activity",
+                    delta_version=12,
+                )
+            ],
+            transform_steps=("merge",),
+            gold_schema=self._FakeGoldSchema,
+        )
+
+        bundle = coordinator.create_gold_metadata_bundle(input_data)
+
+        assert isinstance(bundle, MetadataLineageBundle)
+        assert bundle.metadata.lineage.source_tables == {"chembl.activity": 12}
+        assert bundle.metadata.lineage.transform_steps == ["merge"]
+        assert any(
+            edge.edge_type == LineageEdgeType.USED_SCHEMA
+            for edge in bundle.lineage_fragment.edges
+        )
 
 
 class TestGovernanceMetadata:

@@ -52,6 +52,11 @@ Gold-слой содержит **бизнес-готовые данные** с:
 | **Idempotency** | Повторный запуск даёт идентичный результат |
 | **Traceability** | Каждая запись содержит `_run_id`, `content_hash` |
 
+Текущее уточнение по traceability:
+- strict Gold validation обеспечивается Pandera-based Gold validator-ами с `strict=True` по умолчанию;
+- Gold sidecars сохраняют `dq_report_path` и schema metadata (`contract_path`, `version`, `validation`);
+- единый contract-driven DQ provenance c глобальными `contract_version` и `rule_id` для всех DQ artefacts пока не является завершённым runtime contract и не должен предполагаться downstream tooling.
+
 ---
 
 ## Архитектура Gold-слоя

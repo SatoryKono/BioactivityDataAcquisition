@@ -19,16 +19,17 @@ Configuration:
 
 ```yaml
 # configs/entities/chembl/activity.yaml
-dq:
-  soft-fail-threshold: 0.05  # 5%
-  hard-fail-threshold: 0.20  # 20%
+quality:
+  thresholds:
+    soft_fail: 0.05  # 5%
+    hard_fail: 0.20  # 20%
 ```
 
 ## Symptoms
 
 - Pipeline exits with code 83 (DATA-QUALITY-ERROR, DQ hard threshold)
-- Log messages: `dq-soft-threshold-exceeded`
-- Prometheus metric: `bioetl-dq-soft-threshold-exceeded-total`
+- Log messages: `DQ Soft Threshold exceeded`
+- Prometheus metric: `bioetl_dq_soft_threshold_exceeded`
 - Records in quarantine directory
 
 ## Investigation Steps
@@ -43,10 +44,10 @@ grep "dq-check\|dq-threshold" logs/bioetl.log | tail -20
 
 Key log fields:
 
-- `dq-error-rate`: Percentage of failed records
-- `dq-errors-total`: Absolute count
-- `dq-records-processed`: Total records in batch
-- `validation-errors`: Types of failures
+- `error_rate`: Percentage of quarantined records in the evaluated batch
+- `quarantined_count`: Absolute count
+- `total_count`: Total records in batch
+- `pipeline`: Pipeline name tied to the warning/failure
 
 ### Step 2: Examine Quarantine Records
 
@@ -85,7 +86,7 @@ Common DQ error categories:
 | Type mismatch   | String in numeric field  | High     |
 | Encoding issues | Invalid UTF-8            | Low      |
 
-```python
+```bash
 # CLI dashboard
 # (includes by_error_code/by_status and oldest/newest timestamps)
 bioetl quarantine stats --pipeline chembl_activity
@@ -122,13 +123,13 @@ dt = DeltaTable("data/output/silver/chembl/activity")
 df = pl.scan-delta(str(dt)).collect()
 
 # Count records by run_id
-run-stats = df.group-by("_run_id").agg(
+run_stats = df.group_by("_run_id").agg(
     [
-        pl.count().alias("records"),
+        pl.len().alias("records"),
         pl.col("_dq_passed").sum().alias("passed"),
     ]
 )
-print(run-stats)
+print(run_stats)
 ```
 
 ## Resolution Procedures
@@ -142,26 +143,30 @@ import json
 from pathlib import Path
 
 
-def reprocess-quarantine(quarantine-dir: str, output-file: str):
+def reprocess_quarantine(quarantine_dir: str, output_file: str) -> None:
     """Extract and fix quarantined records."""
-    fixed-records = []
+    fixed_records = []
 
-    for f in Path(quarantine-dir).glob("*.jsonl"):
+    for f in Path(quarantine_dir).glob("*.jsonl"):
         for line in f.read-text().splitlines():
             record = json.loads(line)
-            original = record["original-record"]
+            original = record.get("payload", {})
 
             # Apply fixes based on error type
-            if record["error-type"] == "encoding-error":
+            if record.get("error_code") == "ENCODING_ERROR":
                 # Fix encoding
-                original["field"] = original["field"].encode("utf-8", "ignore").decode()
-                fixed-records.append(original)
+                field_value = original.get("field")
+                if isinstance(field_value, str):
+                    original["field"] = field_value.encode(
+                        "utf-8", "ignore"
+                    ).decode()
+                fixed_records.append(original)
 
-    with open(output-file, "w") as f:
-        for record in fixed-records:
+    with open(output_file, "w", encoding="utf-8") as f:
+        for record in fixed_records:
             f.write(json.dumps(record) + "\n")
 
-    print(f"Fixed {len(fixed-records)} records")
+    print(f"Fixed {len(fixed_records)} records")
 ```
 
 ### Option 2: Adjust Thresholds
@@ -170,9 +175,10 @@ If DQ issues are expected (e.g., known data quality in source):
 
 ```yaml
 # Temporarily relax thresholds
-dq:
-  soft-fail-threshold: 0.10  # 10%
-  hard-fail-threshold: 0.30  # 30%
+pipeline:
+  dq_overrides:
+    soft_fail_threshold: 0.10  # 10%
+    hard_fail_threshold: 0.30  # 30%
 ```
 
 **Warning**: Document why thresholds were changed!
@@ -255,6 +261,12 @@ Key Prometheus metrics:
 - `bioetl-dq-records-failed-total{provider, entity}`
 - `bioetl-dq-soft-threshold-exceeded-total{provider, entity}`
 - `bioetl-dq-check-duration-ms{provider, entity}`
+
+## Provenance Notes
+
+- Silver metadata may include `dq_summary.rule_provenance` when the pipeline passes `dq_rule_provenance` into metadata assembly.
+- Gold metadata carries `dq_report_path` and schema contract metadata, but does not yet have a separate Gold-only `dq_rule_provenance` field.
+- Current DQ runtime is threshold-driven first; a fully contract-bound `contract_version -> rule_id -> disposition` chain is not yet a repo-wide invariant.
 
 ## Escalation
 

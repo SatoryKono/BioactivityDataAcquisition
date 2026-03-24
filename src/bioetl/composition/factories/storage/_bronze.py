@@ -9,6 +9,7 @@ from bioetl.domain.ports.noop import (
     NoOpMetadataWriter,
     NoOpTracing,
 )
+from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriterRuntimeServices
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
@@ -47,6 +48,11 @@ def create_bronze_writer(
     """
     save_json = config.save_json if config else False
     save_metadata = config.save_metadata if config else False
+    lineage_store = (
+        FileLineageStore(base_path=base_path.parent / "control" / "lineage")
+        if save_metadata
+        else None
+    )
     metadata_writer = (
         MetadataWriter(logger=logger) if save_metadata else NoOpMetadataWriter()
     )
@@ -63,6 +69,7 @@ def create_bronze_writer(
             metadata_writer=metadata_writer,
             save_metadata=save_metadata,
             metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
         ),
         flat_structure=flat_structure,
     )

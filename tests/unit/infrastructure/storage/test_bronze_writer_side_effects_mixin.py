@@ -8,6 +8,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze.side_effects_mixin import (
@@ -23,6 +25,7 @@ class _Host(BronzeWriterSideEffectsMixin):
         self._audit: AsyncMock | None = AsyncMock()
         self._metadata_writer = AsyncMock()
         self._metadata_coordinator = None
+        self._lineage_store = None
         self._flat_structure = False
         self.base_path = tmp_path
 
@@ -109,3 +112,47 @@ class TestBronzeWriterSideEffectsMixin:
         assert result.record_count == 10
         span.set_attribute.assert_any_call("record_count", 10)
         span.set_attribute.assert_any_call("compressed_size", 250)
+
+    @pytest.mark.asyncio
+    async def test_maybe_write_bronze_metadata_persists_lineage_fragment(
+        self, tmp_path: Path
+    ) -> None:
+        """Bundle-aware Bronze coordinator should persist lineage fragments."""
+
+        class _Coordinator:
+            def create_bronze_metadata_bundle(
+                self,
+                input_data: object,
+            ) -> MetadataLineageBundle:
+                _ = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=fragment,
+                )
+
+            def create_bronze_metadata(self, input_data: object) -> object:
+                _ = input_data
+                return metadata
+
+        host = _Host(tmp_path)
+        metadata = MagicMock()
+        fragment = LineageGraphFragment(fragment_id="bronze:fragment-1")
+        host._metadata_coordinator = _Coordinator()
+        host._lineage_store = MagicMock()
+
+        await host._maybe_write_bronze_metadata(
+            run_id=RunID("run-1"),
+            run_type=RunType.INCREMENTAL,
+            provider="chembl",
+            entity="activity",
+            batch_id=BatchID("batch-1"),
+            record_count=2,
+            compressed_size=128,
+            relative_path="chembl/activity/file.jsonl.zst",
+            ingestion_ts=datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC),
+            duration=1.5,
+            source_metadata=None,
+        )
+
+        host._metadata_writer.write_bronze_metadata.assert_awaited_once()
+        host._lineage_store.save.assert_called_once_with(fragment)

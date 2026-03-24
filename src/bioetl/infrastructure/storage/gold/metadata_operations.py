@@ -6,11 +6,18 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_merged_metadata_input,
+    build_gold_metadata_input,
     build_gold_metadata_payload,
+)
+from bioetl.infrastructure.storage.lineage_persistence import (
+    persist_lineage_fragment_if_present,
+    resolve_metadata_and_lineage_fragment,
 )
 
 if TYPE_CHECKING:
@@ -71,12 +78,14 @@ class _PreparedGoldMetadataWrite:
     provider_name: str
     entity_name: str
     metadata: GoldMetadata
+    lineage_fragment: LineageGraphFragment | None = None
 
 
 class _GoldMetadataWriteHostProtocol(Protocol):
     """Typed host contract for standard Gold metadata preparation."""
 
     _metadata_coordinator: MetadataCoordinatorPort | None
+    _lineage_store: LineageStorePort | None
     _transform_version: str | None
     _transform_steps: tuple[str, ...]
 
@@ -122,25 +131,44 @@ def _prepare_gold_metadata_write(
     from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
     provider_name, entity_name = _parse_table_name(request.table_name)
-    metadata = build_gold_metadata_payload(
-        coordinator=host._metadata_coordinator,
+    gold_input = build_gold_metadata_input(
         table_path=request.table_path,
         table_name=request.table_name,
         records=request.records,
         mode=request.mode,
         scd_config=request.scd_config,
-        ingestion_ts=request.ingestion_ts,
-        run_id=request.run_id,
+        completed_at=request.ingestion_ts,
         silver_refs=request.silver_refs,
         gold_schema=request.gold_schema,
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,
+    )
+    metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
+        coordinator=host._metadata_coordinator,
+        bundle_factory_name="create_gold_metadata_bundle",
+        coordinator_factory_name="create_gold_metadata",
+        input_data=gold_input,
+        fallback_factory=lambda: build_gold_metadata_payload(
+            coordinator=None,
+            table_path=request.table_path,
+            table_name=request.table_name,
+            records=request.records,
+            mode=request.mode,
+            scd_config=request.scd_config,
+            ingestion_ts=request.ingestion_ts,
+            run_id=request.run_id,
+            silver_refs=request.silver_refs,
+            gold_schema=request.gold_schema,
+            transform_version=host._transform_version,
+            transform_steps=host._transform_steps,
+        ),
     )
     return _PreparedGoldMetadataWrite(
         request=request,
         provider_name=provider_name,
         entity_name=entity_name,
         metadata=metadata,
+        lineage_fragment=lineage_fragment,
     )
 
 
@@ -156,6 +184,10 @@ async def _persist_gold_metadata_write(
         provider_name=prepared.provider_name,
         entity_name=prepared.entity_name,
     )
+    await persist_lineage_fragment_if_present(
+        lineage_store=getattr(host, "_lineage_store", None),
+        lineage_fragment=prepared.lineage_fragment,
+    )
 
 
 def _prepare_gold_merged_metadata_write(
@@ -167,21 +199,29 @@ def _prepare_gold_merged_metadata_write(
 
     provider_name, entity_name = _parse_table_name(request.table_name)
     assert host._metadata_coordinator is not None
-    metadata = host._metadata_coordinator.create_gold_metadata(
-        build_gold_merged_metadata_input(
-            table_path=request.table_path,
-            table_name=request.table_name,
-            records=request.records,
-            schema=request.schema,
-            transform_version=host._transform_version,
-            transform_steps=host._transform_steps,
-        )
+    gold_input = build_gold_merged_metadata_input(
+        table_path=request.table_path,
+        table_name=request.table_name,
+        records=request.records,
+        schema=request.schema,
+        transform_version=host._transform_version,
+        transform_steps=host._transform_steps,
+    )
+    metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
+        coordinator=host._metadata_coordinator,
+        bundle_factory_name="create_gold_metadata_bundle",
+        coordinator_factory_name="create_gold_metadata",
+        input_data=gold_input,
+        fallback_factory=lambda: host._metadata_coordinator.create_gold_metadata(
+            gold_input
+        ),
     )
     return _PreparedGoldMetadataWrite(
         request=request,
         provider_name=provider_name,
         entity_name=entity_name,
         metadata=metadata,
+        lineage_fragment=lineage_fragment,
     )
 
 

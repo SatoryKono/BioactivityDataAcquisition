@@ -13,6 +13,7 @@ from bioetl.domain.ports.noop import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
+        LineageStorePort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
         TracingPort,
@@ -29,6 +30,7 @@ class GoldWriterRuntimeServices:
     audit: AuditPort | None
     metadata_writer: MetadataWriterPort
     metadata_coordinator: MetadataCoordinatorPort | None
+    lineage_store: LineageStorePort | None
 
 
 def build_gold_writer_runtime_services(
@@ -38,6 +40,7 @@ def build_gold_writer_runtime_services(
     audit: AuditPort | None,
     metadata_writer: MetadataWriterPort | None,
     metadata_coordinator: MetadataCoordinatorPort | None,
+    lineage_store: LineageStorePort | None,
 ) -> GoldWriterRuntimeServices:
     """Build grouped runtime collaborators while preserving default resolution."""
     return GoldWriterRuntimeServices(
@@ -46,4 +49,5 @@ def build_gold_writer_runtime_services(
         audit=audit,
         metadata_writer=metadata_writer or NoOpMetadataWriter(),
         metadata_coordinator=metadata_coordinator,
+        lineage_store=lineage_store,
     )

@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import (
         AuditPort,
+        LineageStorePort,
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
@@ -75,6 +76,7 @@ class BronzeWriterRuntimeServices:
     metadata_writer: MetadataWriterPort
     save_metadata: bool
     metadata_coordinator: MetadataCoordinatorPort | None
+    lineage_store: LineageStorePort | None = None
 
 
 class BronzeWriter(
@@ -125,6 +127,10 @@ class BronzeWriter(
             "MetadataCoordinatorPort | None",
             legacy_kwargs.pop("metadata_coordinator", None),
         )
+        lineage_store = cast(
+            "LineageStorePort | None",
+            legacy_kwargs.pop("lineage_store", None),
+        )
         if legacy_kwargs:
             unexpected = ", ".join(sorted(legacy_kwargs))
             raise TypeError(f"Unexpected BronzeWriter options: {unexpected}")
@@ -144,6 +150,7 @@ class BronzeWriter(
             metadata_writer=metadata_writer,
             save_metadata=bool(save_metadata),
             metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
         )
 
         self.base_path = Path(base_path)
@@ -158,6 +165,7 @@ class BronzeWriter(
         self._metadata_writer = services.metadata_writer
         self._save_metadata = services.save_metadata
         self._metadata_coordinator = services.metadata_coordinator
+        self._lineage_store = services.lineage_store
         self._flat_structure = flat_structure
 
     async def write_bronze(

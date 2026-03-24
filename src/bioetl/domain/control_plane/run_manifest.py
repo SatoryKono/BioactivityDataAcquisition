@@ -35,16 +35,32 @@ def _normalize_scalar(value: object) -> object:
     return value
 
 
-def _normalize_serializable(value: object) -> object:
-    """Normalize nested values into JSON-serializable primitives."""
-    if is_dataclass(value) and not isinstance(value, type):
-        return _normalize_mapping(
-            cast("Mapping[object, object]", asdict(cast("Any", value)))
-        )
+def _normalize_dataclass_value(value: object) -> dict[str, object] | None:
+    """Normalize dataclass instances when present."""
+    if not is_dataclass(value) or isinstance(value, type):
+        return None
+    return _normalize_mapping(
+        cast("Mapping[object, object]", asdict(cast("Any", value)))
+    )
+
+
+def _normalize_collection_value(value: object) -> object | None:
+    """Normalize collection-like values into JSON-friendly shapes."""
     if isinstance(value, dict):
         return _normalize_mapping(value)
     if isinstance(value, (list, tuple, set, frozenset)):
         return [_normalize_serializable(item) for item in value]
+    return None
+
+
+def _normalize_serializable(value: object) -> object:
+    """Normalize nested values into JSON-serializable primitives."""
+    dataclass_value = _normalize_dataclass_value(value)
+    if dataclass_value is not None:
+        return dataclass_value
+    collection_value = _normalize_collection_value(value)
+    if collection_value is not None:
+        return collection_value
     return _normalize_scalar(value)
 
 

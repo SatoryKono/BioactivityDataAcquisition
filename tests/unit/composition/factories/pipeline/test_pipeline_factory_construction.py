@@ -23,7 +23,13 @@ from bioetl.infrastructure.config.domain_config_resolver import (
 
 @pytest.mark.unit
 def test_run_context_factory_creates_expected_context() -> None:
-    yaml_config = SimpleNamespace(content_hash=SimpleNamespace(include=[], exclude=[]))
+    yaml_config = SimpleNamespace(
+        content_hash=SimpleNamespace(include=[], exclude=[]),
+        transform=SimpleNamespace(
+            version="2.4.0",
+            steps=["normalize", "validate", "hash"],
+        ),
+    )
     runtime = SimpleNamespace(run_type=RunType.INCREMENTAL)
     factory = RunContextFactory(
         pipeline_name="chembl_activity",
@@ -43,6 +49,8 @@ def test_run_context_factory_creates_expected_context() -> None:
     assert context.provider == "chembl"
     assert context.entity == "activity"
     assert context.pipeline_name == "chembl_activity"
+    assert context.transform_version == "2.4.0"
+    assert context.transform_steps == ("normalize", "validate", "hash")
     assert context.pipeline_version == "1.2.3"
     assert context.git_commit == "abc1234"
     assert context.config_hash == "deadbeef"

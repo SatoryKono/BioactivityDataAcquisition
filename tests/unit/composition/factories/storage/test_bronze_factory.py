@@ -63,6 +63,7 @@ class TestCreateBronzeWriter:
         call_kwargs = writer_cls.call_args[1]
         assert call_kwargs["save_json"] is True
         assert call_kwargs["runtime_services"].save_metadata is True
+        assert call_kwargs["runtime_services"].lineage_store is not None
 
     def test_uses_provided_tracing(self) -> None:
         """Uses provided TracingPort instead of NoOpTracing."""

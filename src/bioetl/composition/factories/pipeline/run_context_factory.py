@@ -23,6 +23,20 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+def _get_transform_version(yaml_config: PipelineYamlConfig) -> str | None:
+    """Extract transform version from resolved pipeline YAML config."""
+    transform = getattr(yaml_config, "transform", None)
+    version = getattr(transform, "version", None)
+    return str(version) if version is not None else None
+
+
+def _get_transform_steps(yaml_config: PipelineYamlConfig) -> tuple[str, ...]:
+    """Extract transform steps from resolved pipeline YAML config."""
+    transform = getattr(yaml_config, "transform", None)
+    steps = getattr(transform, "steps", ())
+    return tuple(str(step) for step in (steps or ()))
+
+
 @dataclass(frozen=True, slots=True)
 class RunContextFactory:
     """Build ``RunContext`` for metadata coordinator wiring."""
@@ -33,6 +47,12 @@ class RunContextFactory:
     pipeline_version_getter: Callable[[PipelineYamlConfig], str] = get_pipeline_version
     git_commit_getter: Callable[[], str | None] = get_git_commit
     config_hash_getter: Callable[[PipelineYamlConfig], str] = compute_config_hash
+    transform_version_getter: Callable[[PipelineYamlConfig], str | None] = (
+        _get_transform_version
+    )
+    transform_steps_getter: Callable[[PipelineYamlConfig], tuple[str, ...]] = (
+        _get_transform_steps
+    )
 
     def create(
         self,
@@ -50,6 +70,8 @@ class RunContextFactory:
             started_at=datetime.now(UTC),
             provider=self.provider,
             entity=entity,
+            transform_version=self.transform_version_getter(yaml_config),
+            transform_steps=self.transform_steps_getter(yaml_config),
             pipeline_version=self.pipeline_version_getter(yaml_config),
             git_commit=self.git_commit_getter(),
             config_hash=self.config_hash_getter(yaml_config),

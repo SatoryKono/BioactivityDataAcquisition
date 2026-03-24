@@ -9,6 +9,7 @@ from bioetl.domain.ports.noop import (
     NoOpMetadataWriter,
     NoOpTracing,
 )
+from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
 )
@@ -53,6 +54,11 @@ def create_gold_writer(
         Configured GoldWriter instance for the Gold storage layer.
     """
     save_metadata = config.save_metadata if config else False
+    lineage_store = (
+        FileLineageStore(base_path=base_path.parent / "control" / "lineage")
+        if save_metadata
+        else None
+    )
     metadata_writer = (
         MetadataWriter(logger=logger) if save_metadata else NoOpMetadataWriter()
     )
@@ -68,6 +74,7 @@ def create_gold_writer(
             audit=None,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
         ),
         # Keep legacy kwarg for constructor-call compatibility in tests and shims.
         csv_exporter=csv_exporter,

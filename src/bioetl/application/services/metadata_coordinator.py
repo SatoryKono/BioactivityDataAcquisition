@@ -28,6 +28,13 @@ from bioetl.application.services.metadata_assemblers import (
     GoldMetadataAssembler,
     SilverMetadataAssembler,
 )
+from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.application.services.metadata_lineage_fragments import (
+    build_bronze_lineage_fragment,
+    build_gold_lineage_fragment,
+    build_silver_lineage_fragment,
+)
+from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
@@ -229,6 +236,26 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             governance=input_data.governance,
         )
 
+    def build_bronze_lineage_fragment(
+        self,
+        input_data: BronzeMetadataInput,
+    ) -> LineageGraphFragment:
+        """Build canonical Bronze lineage fragment without changing sidecar API."""
+        return build_bronze_lineage_fragment(
+            run_context=self._context,
+            input_data=input_data,
+        )
+
+    def create_bronze_metadata_bundle(
+        self,
+        input_data: BronzeMetadataInput,
+    ) -> MetadataLineageBundle[BronzeMetadata]:
+        """Create Bronze sidecar metadata bundled with canonical lineage fragment."""
+        return MetadataLineageBundle(
+            metadata=self.create_bronze_metadata(input_data),
+            lineage_fragment=self.build_bronze_lineage_fragment(input_data),
+        )
+
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
         """Create Silver layer metadata.
 
@@ -243,6 +270,28 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             raise ValueError("Cannot create Silver metadata without records")
         return self._silver_assembler.assemble(input_data)
 
+    def build_silver_lineage_fragment(
+        self,
+        input_data: SilverMetadataInput,
+    ) -> LineageGraphFragment:
+        """Build canonical Silver lineage fragment without changing sidecar API."""
+        if not input_data.records and input_data.total_records is None:
+            raise ValueError("Cannot create Silver metadata without records")
+        return build_silver_lineage_fragment(
+            run_context=self._context,
+            input_data=input_data,
+        )
+
+    def create_silver_metadata_bundle(
+        self,
+        input_data: SilverMetadataInput,
+    ) -> MetadataLineageBundle[SilverMetadata]:
+        """Create Silver sidecar metadata bundled with canonical lineage fragment."""
+        return MetadataLineageBundle(
+            metadata=self.create_silver_metadata(input_data),
+            lineage_fragment=self.build_silver_lineage_fragment(input_data),
+        )
+
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
         """Create Gold layer metadata.
 
@@ -256,6 +305,28 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         if not input_data.records and input_data.total_records is None:
             raise ValueError("Cannot create Gold metadata without records")
         return self._gold_assembler.assemble(input_data)
+
+    def build_gold_lineage_fragment(
+        self,
+        input_data: GoldMetadataInput,
+    ) -> LineageGraphFragment:
+        """Build canonical Gold lineage fragment without changing sidecar API."""
+        if not input_data.records and input_data.total_records is None:
+            raise ValueError("Cannot create Gold metadata without records")
+        return build_gold_lineage_fragment(
+            run_context=self._context,
+            input_data=input_data,
+        )
+
+    def create_gold_metadata_bundle(
+        self,
+        input_data: GoldMetadataInput,
+    ) -> MetadataLineageBundle[GoldMetadata]:
+        """Create Gold sidecar metadata bundled with canonical lineage fragment."""
+        return MetadataLineageBundle(
+            metadata=self.create_gold_metadata(input_data),
+            lineage_fragment=self.build_gold_lineage_fragment(input_data),
+        )
 
     @classmethod
     def reset_environment_cache(cls) -> None:

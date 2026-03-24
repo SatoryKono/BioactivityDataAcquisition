@@ -62,8 +62,10 @@ if TYPE_CHECKING:
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
 
+
 def _extract_entity_type(pipeline_name: str) -> str | None:
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+
 
 class GenericPipelineFactory(Generic[TPipeline]):
     """Configurable factory for creating pipeline instances."""
@@ -189,7 +191,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
-        """Create pipeline instance with wired services and optional transformer."""
         return cast(
             TPipeline,
             create_pipeline_instance_with_services(
@@ -221,7 +222,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
-        """Create and assemble a fully configured PipelineRunner instance."""
         return create_factory_runner(
             pipeline_name=self.pipeline_name,
             silver_schema=self.silver_schema,
@@ -237,6 +237,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             config=config,
             cached_bronze=cached_bronze,
         )
+
 
 def create_pipeline_factory(
     pipeline_name: str,

@@ -37,7 +37,11 @@ from bioetl.domain.ports.config import (
     SettingsLoaderPort,
     SettingsPort,
 )
-from bioetl.domain.ports.control_plane import RunLedgerPort, RunManifestPort
+from bioetl.domain.ports.control_plane import (
+    LineageStorePort,
+    RunLedgerPort,
+    RunManifestPort,
+)
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
     DataSourceFactoryPort,
@@ -180,6 +184,7 @@ __all__ = [
     "IDMappingSourceReaderPort",
     "InputFilterPort",
     "JsonEncoderPort",
+    "LineageStorePort",
     "LockPort",
     "LoggerPort",
     "MemoryMonitorPort",

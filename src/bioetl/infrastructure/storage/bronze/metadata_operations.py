@@ -18,6 +18,7 @@ from bioetl.infrastructure.storage.bronze.reporting_helpers import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.lineage import LineageGraphFragment
     from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
     from bioetl.domain.ports import MetadataCoordinatorPort
 
@@ -51,6 +52,7 @@ class PreparedBronzeMetadataWrite:
 
     metadata_base_path: Path
     metadata: BronzeMetadata
+    lineage_fragment: LineageGraphFragment | None = None
 
 
 class _BronzeMetadataWriteHostProtocol(Protocol):
@@ -122,6 +124,26 @@ def prepare_bronze_metadata_write(
             source_metadata=request.source_metadata,
         )
     )
+    create_bundle = (
+        getattr(host._metadata_coordinator, "create_bronze_metadata_bundle", None)
+        if (
+            "create_bronze_metadata_bundle" in vars(host._metadata_coordinator)
+            or getattr(
+                type(host._metadata_coordinator),
+                "create_bronze_metadata_bundle",
+                None,
+            )
+            is not None
+        )
+        else None
+    )
+    if callable(create_bundle):
+        bundle = create_bundle(bronze_input)
+        return PreparedBronzeMetadataWrite(
+            metadata_base_path=metadata_base_path,
+            metadata=bundle.metadata,
+            lineage_fragment=bundle.lineage_fragment,
+        )
     metadata = host._metadata_coordinator.create_bronze_metadata(bronze_input)
     return PreparedBronzeMetadataWrite(
         metadata_base_path=metadata_base_path,
