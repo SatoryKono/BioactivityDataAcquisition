@@ -82,6 +82,15 @@ SKIP_DIRS = frozenset(
     }
 )
 
+SKIP_DIRS_FOR_LINKS = frozenset(
+    {
+        "ai",
+        "plans",
+        "reports",
+        "evidence",
+    }
+)
+
 # Regex to match markdown relative links: [text](path) — excludes http(s)
 MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
@@ -308,9 +317,9 @@ def _load_nav_docs() -> list[Path]:
 def _collect_link_scan_files(root: Path) -> list[Path]:
     """Collect files for link checks: active tree + all existing nav docs."""
     tree_docs = {
-        path.resolve() for path in root.rglob("*.md") if not _should_skip(path)
+        path.resolve() for path in root.rglob("*.md") if not _should_skip(path) and not any(p in path.parts for p in SKIP_DIRS_FOR_LINKS)
     }
-    nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists()}
+    nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists() and not any(p in path.parts for p in SKIP_DIRS_FOR_LINKS)}
     return sorted(tree_docs | nav_docs)
 
 
@@ -321,7 +330,7 @@ def check_missing_nav_docs() -> list[Path]:
 
 def check_nav_link_coverage(root: Path) -> list[Path]:
     """Return nav docs that are unexpectedly outside link check scope."""
-    nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists()}
+    nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists() and not any(p in path.parts for p in SKIP_DIRS_FOR_LINKS)}
     scan_scope = set(_collect_link_scan_files(root))
     return sorted(nav_docs - scan_scope)
 
