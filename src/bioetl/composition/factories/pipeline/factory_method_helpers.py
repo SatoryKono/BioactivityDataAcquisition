@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
@@ -171,32 +171,29 @@ def create_pipeline_instance_with_services(
     *,
     factory_context: _PipelineFactoryContext,
     request: _CreatePipelineWithServicesRequest,
-) -> TPipeline:
+) -> BasePipeline:
     """Create pipeline instance with wired services and optional transformer."""
     if factory_context.pipeline_class is None or factory_context.provider is None:
         raise AssertionError(
             "factory_context must include pipeline_class and provider for pipeline creation"
         )
-    return cast(
-        TPipeline,
-        create_pipeline_with_services(
-            pipeline_name=factory_context.pipeline_name,
-            pipeline_class=factory_context.pipeline_class,
-            provider=factory_context.provider,
-            create_data_source_fn=factory_context.create_data_source_fn,
-            transformer_class=factory_context.transformer_class,
-            pandera_silver_schema=factory_context.pandera_silver_schema,
-            run_id=request.run_id,
-            runtime=request.runtime,
-            settings=request.settings,
-            logger=request.logger,
-            config=request.config,
-            filter_config=request.filter_config,
-            tracer=request.tracer,
-            dq_monitor=request.dq_monitor,
-            metrics=request.metrics,
-            cached_bronze=request.cached_bronze,
-        ),
+    return create_pipeline_with_services(
+        pipeline_name=factory_context.pipeline_name,
+        pipeline_class=factory_context.pipeline_class,
+        provider=factory_context.provider,
+        create_data_source_fn=factory_context.create_data_source_fn,
+        transformer_class=factory_context.transformer_class,
+        pandera_silver_schema=factory_context.pandera_silver_schema,
+        run_id=request.run_id,
+        runtime=request.runtime,
+        settings=request.settings,
+        logger=request.logger,
+        config=request.config,
+        filter_config=cast("InputFilterConfig | None", request.filter_config),
+        tracer=request.tracer,
+        dq_monitor=request.dq_monitor,
+        metrics=request.metrics,
+        cached_bronze=cast("CachedBronzeContext | None", request.cached_bronze),
     )
 
 
@@ -232,7 +229,9 @@ def create_factory_runner(
     }
     if manifest_id is not None:
         create_with_services_kwargs["manifest_id"] = manifest_id
-    pipeline = create_with_services_fn(**create_with_services_kwargs)
+    pipeline = create_with_services_fn(
+        **cast("dict[str, Any]", create_with_services_kwargs)
+    )
     return assemble_runner_fn(
         pipeline=pipeline,
         observability=observability,

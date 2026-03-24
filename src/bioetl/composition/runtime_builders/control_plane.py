@@ -102,13 +102,14 @@ def _build_launch_context_snapshot(ctx: PipelineRunContext) -> dict[str, object]
     """Capture launch-time options that materially affect execution semantics."""
     execution_context = getattr(ctx, "execution_context", "isolated")
     run_type = getattr(ctx, "run_type", "incremental")
+    pipeline_name = getattr(ctx, "pipeline_name", "unknown")
     execution_context_value = (
         execution_context.value
         if isinstance(execution_context, Enum)
         else str(execution_context)
     )
     return {
-        "pipeline_name": ctx.pipeline_name,
+        "pipeline_name": str(pipeline_name),
         "run_type": run_type.value if isinstance(run_type, Enum) else str(run_type),
         "resume": getattr(ctx, "resume", False),
         "dry_run": getattr(ctx, "dry_run", False),
@@ -121,9 +122,7 @@ def _build_launch_context_snapshot(ctx: PipelineRunContext) -> dict[str, object]
         "execution_context": execution_context_value,
         "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
         "input_filter": _to_serializable_mapping(getattr(ctx, "input_filter", None)),
-        "cached_bronze": _to_serializable_mapping(
-            getattr(ctx, "cached_bronze", None)
-        ),
+        "cached_bronze": _to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
     }
 
 
@@ -136,9 +135,15 @@ def _build_planned_artifacts(
     """Capture planned layer roots for the manifest control-plane snapshot."""
     output_root = Path(getattr(settings, "data_dir", "data")) / "output"
     return (
-        RunArtifactRef(layer="bronze", path=str(output_root / "bronze" / provider / entity)),
-        RunArtifactRef(layer="silver", path=str(output_root / "silver" / provider / entity)),
-        RunArtifactRef(layer="gold", path=str(output_root / "gold" / provider / entity)),
+        RunArtifactRef(
+            layer="bronze", path=str(output_root / "bronze" / provider / entity)
+        ),
+        RunArtifactRef(
+            layer="silver", path=str(output_root / "silver" / provider / entity)
+        ),
+        RunArtifactRef(
+            layer="gold", path=str(output_root / "gold" / provider / entity)
+        ),
     )
 
 
@@ -210,7 +215,7 @@ def attach_manifest_id(ctx: PipelineRunContext, manifest_id: str) -> PipelineRun
     if is_dataclass(ctx):
         return replace(ctx, manifest_id=manifest_id)
     if hasattr(ctx, "__dict__"):
-        ctx.manifest_id = manifest_id  # type: ignore[attr-defined]
+        setattr(ctx, "manifest_id", manifest_id)
         return ctx
     raise TypeError("PipelineRunContext must support manifest_id attachment")
 
