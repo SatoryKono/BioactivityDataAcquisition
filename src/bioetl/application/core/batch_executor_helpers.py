@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypeVar
 
-from bioetl.application.core.batch_execution._contracts import (
+from bioetl.application.core.batch_execution.contracts import (
     BatchExecutionStatePort,
     BatchResultBuilderPort,
 )

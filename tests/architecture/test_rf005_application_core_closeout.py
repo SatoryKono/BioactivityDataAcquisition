@@ -11,10 +11,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 BATCH_EXECUTION_SHARED_CONTRACT_USERS: dict[str, set[str]] = {
     "src/bioetl/application/core/batch_executor_helpers.py": {
-        "bioetl.application.core.batch_execution._contracts",
+        "bioetl.application.core.batch_execution.contracts",
     },
     "src/bioetl/application/core/batch_executor_protocols.py": {
-        "bioetl.application.core.batch_execution._contracts",
+        "bioetl.application.core.batch_execution.contracts",
     },
     "src/bioetl/application/core/batch_execution/lifecycle.py": {
         "bioetl.application.core.batch_execution._contracts",

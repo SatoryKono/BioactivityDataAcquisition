@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "archive_command",
+    "get_lifecycle_service",
 ]
 
 

@@ -18,8 +18,9 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._span_helpers import close_span
 from bioetl.application.core.batch_executor import BatchResult
-from bioetl.domain.exceptions import BioETLError
+from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -37,13 +38,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 
-_PROCESSING_SPAN_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_PROCESSING_SPAN_ERRORS = OPERATION_ERRORS
 
 
 class RecordProcessor:
@@ -241,9 +236,4 @@ class RecordProcessor:
 
     def _end_span(self, span: Span | None, error: Exception | None = None) -> None:
         """End a tracing span."""
-        if not span:
-            return
-        if error:
-            span.set_attribute("error", True)
-            span.record_exception(error)
-        span.__exit__(None, None, None)
+        close_span(span, error)

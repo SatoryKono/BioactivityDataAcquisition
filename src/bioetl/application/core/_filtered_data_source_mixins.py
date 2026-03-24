@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self, cast
 
+from bioetl.application.core._data_source_mixins import (
+    _yield_plain_wrapped_fetch_records,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -293,7 +296,25 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         ):
             yield record
 
-    async def fetch(
+    def _fetch_without_internal_filters(
+        self,
+        entity_type: str,
+        limit: int | None,
+        query: str | None,
+        offset: int | None,
+    ) -> AsyncIterator[
+        JsonDict  # Any: filter record values vary (str|int|float|list)
+    ]:  # Any: filter record values vary (str|int|float|list)
+        """Delegate plain unfiltered fetches to the wrapped adapter."""
+        return _yield_plain_wrapped_fetch_records(
+            self._data_source,
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            offset=offset,
+        )
+
+    def fetch(
         self,
         entity_type: str,
         limit: int | None = None,
@@ -317,22 +338,17 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         _ = filter_ids, filter_field
 
         if self._filter_config.enabled and self._multi_filter_ids:
-            async for record in self._fetch_multi_column(entity_type, limit):
-                yield record
-            return
+            return self._fetch_multi_column(entity_type, limit)
 
         if self._filter_config.enabled and self._filter_ids:
-            async for record in self._fetch_single_column(entity_type, limit):
-                yield record
-            return
+            return self._fetch_single_column(entity_type, limit)
 
-        async for record in self._data_source.fetch(
-            entity_type=entity_type,
-            limit=limit,
-            query=query,
-            offset=offset,
-        ):
-            yield record
+        return self._fetch_without_internal_filters(
+            entity_type,
+            limit,
+            query,
+            offset,
+        )
 
     async def health_check(self) -> HealthStatus:
         """Delegate health check to wrapped adapter."""

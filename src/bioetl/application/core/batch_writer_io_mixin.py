@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING
 
 import orjson
 
-from bioetl.domain.exceptions import BioETLError, SchemaViolationError
+from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
@@ -16,13 +17,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
-_WRITE_SPAN_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_WRITE_SPAN_ERRORS = OPERATION_ERRORS
 
 
 class BatchWriterIOMixin:

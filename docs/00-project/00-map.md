@@ -1,13 +1,14 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.24 | Last updated: 2026-03-20*
+*Synced with RULES.md v5.24 | Last updated: 2026-03-24*
 
-> **Documentation Update:** 2026-03-19
+> **Documentation Update:** 2026-03-24
 > - Compatibility inventory synced with the current measured CLI shim registry
 > - Source-code map updated for the storage subpackage decomposition (`bronze/`, `silver/`, `gold/`, `metadata/`, `delta/`, `support/`)
 > - Snapshot-style file/test counts removed from active navigation blocks to reduce drift
 > - Active entry points clarified: `RULES.md`, `TOOLS.md`, and canonical layer docs in `docs/02-architecture/`
 > - 2026-03-20: stale config-loader entry updated to current composition/runtime and infrastructure config seams
+> - 2026-03-24: composition/domain references synced with RF-021 config ownership and RF-022 runtime port contracts
 
 ## Quick Links
 
@@ -462,7 +463,7 @@ graph TD
 | `configs/entities/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
 | `src/bioetl/composition/bootstrap_contexts.py`     | Composition root          |
-| `src/bioetl/composition/bootstrap/runtime/config_loader.py` | Runtime bootstrap config loading |
+| `src/bioetl/infrastructure/config/composite_config_api.py` | Canonical composite-config loading seam |
 | `src/bioetl/infrastructure/config/`               | Infrastructure config loaders and normalization package |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
 | `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json` | Gold data contracts |
@@ -492,7 +493,7 @@ graph TD
 | RULES.md                 | 2026-03-13   | v5.24 (Latest)               |
 | REQUIREMENTS.md          | 2026-03-13   | v1.8 (docs governance sync)  |
 | glossary.md              | 2026-03-08   | v2.7 (Ubiquitous Language)   |
-| 00-map.md                | 2026-03-19   | v8.2 Active navigator synced |
+| 00-map.md                | 2026-03-24   | v8.3 Active navigator synced |
 | rules-summary.md         | 2026-03-13   | v5.24 Synced                 |
 | TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |
 | 03-guides/               | 2026-03-19   | Active guides index          |
@@ -505,4 +506,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-03-19. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*
+*Last updated: 2026-03-24. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*

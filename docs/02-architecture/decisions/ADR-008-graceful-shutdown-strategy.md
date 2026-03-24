@@ -1,10 +1,14 @@
 > **Superseded:** Signal handlers удалены 2025-12-31.
-> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/lifecycle/shutdown.py.
+> Graceful shutdown обрабатывается в canonical CLI domain command modules
+> (`interfaces/cli/commands/domains/run/command.py`,
+> `interfaces/cli/commands/domains/run_all/command.py`,
+> `interfaces/cli/commands/domains/composite/command.py`)
+> и `application/core/lifecycle/shutdown.py`.
 > orchestration/ модуль пуст.
 
 # ADR-008: Graceful Shutdown Strategy
 
-**Status:** Superseded (signal handlers removed; shutdown handled in CLI and application/core/lifecycle/shutdown.py)
+**Status:** Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)
 **Date:** 2025-12-22
 **Last Updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
@@ -13,7 +17,7 @@
 
 ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding distributed locks. An abrupt shutdown (kill -9, OOM, etc.) can leave the system in an inconsistent state: orphaned locks, missing checkpoints, partially written batches. A coordinated shutdown mechanism was needed to ensure data integrity.
 
-> **Update 2025-12-31:** Signal handlers in `interfaces/orchestration/signals.py` were removed. Shutdown is now handled at CLI level via `KeyboardInterrupt` (in `interfaces/cli/run.py` and `run_all.py`). See `application/core/lifecycle/shutdown.py` for `ShutdownSignal`. The architecture diagram and implementation details below reflect the original design; the interfaces-layer signal handler box is no longer present.
+> **Update 2025-12-31:** Signal handlers in `interfaces/orchestration/signals.py` were removed. Shutdown is now handled at CLI level via `KeyboardInterrupt` in the canonical domain command modules `interfaces/cli/commands/domains/run/command.py`, `interfaces/cli/commands/domains/run_all/command.py`, and `interfaces/cli/commands/domains/composite/command.py`. Retained public seams `interfaces/cli/commands/run.py`, `run_all.py`, and `run_composite.py` remain import-stable entrypoints, but they no longer own the canonical shutdown flow. See `application/core/lifecycle/shutdown.py` for `ShutdownSignal`. The architecture diagram and implementation details below reflect the original design; the interfaces-layer signal handler box is no longer present.
 
 ## The Decision
 

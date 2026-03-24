@@ -20,12 +20,14 @@ class MockDataSource:
 
     def __init__(self, assays: list[dict] | None = None):
         self._assays = assays or []
+        self.fetch_calls: list[dict[str, object]] = []
         self.__aenter__ = AsyncMock(return_value=self)
         self.__aexit__ = AsyncMock(return_value=None)
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
         self.aclose = AsyncMock()
 
     async def fetch(self, entity_type: str, **kwargs):
+        self.fetch_calls.append({"entity_type": entity_type, **kwargs})
         for assay in self._assays:
             yield assay
 
@@ -240,6 +242,17 @@ class TestSubcellularFractionDataSourceFetch:
 
         assert len(records) == 1
         assert records[0]["assay_id"] == "CHEMBL1000"
+
+    @pytest.mark.asyncio
+    async def test_fetch_other_entity_forwards_offset(self) -> None:
+        source = MockDataSource(assays=[ASSAY_WITH_FRACTION])
+        wrapper = SubcellularFractionDataSource(data_source=source)
+
+        async for _ in wrapper.fetch("assay", offset=12):
+            pass
+
+        assert source.fetch_calls[-1]["entity_type"] == "assay"
+        assert source.fetch_calls[-1]["offset"] == 12
 
     @pytest.mark.asyncio
     async def test_fetch_skips_none_fractions(self) -> None:
@@ -630,6 +643,58 @@ class TestSubcellularFractionFilterable:
             records.append(record)
 
         assert len(records) == 1
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_keeps_upstream_limit_unbounded(
+        self,
+    ) -> None:
+        class _RecordingFilterableDataSource(MockFilterableDataSource):
+            def __init__(self, assays: list[dict] | None = None):
+                super().__init__(assays)
+                self.fallback_calls: list[dict[str, object]] = []
+
+            async def fetch_filtered_with_fallback(
+                self,
+                entity_type: str,
+                filter_ids: list[str],
+                filter_field: str,
+                fallback_mapping: dict[str, str],
+                limit: int | None = None,
+            ):
+                self.fallback_calls.append(
+                    {
+                        "entity_type": entity_type,
+                        "filter_ids": filter_ids,
+                        "filter_field": filter_field,
+                        "fallback_mapping": fallback_mapping,
+                        "limit": limit,
+                    }
+                )
+                async for assay in super().fetch_filtered_with_fallback(
+                    entity_type=entity_type,
+                    filter_ids=filter_ids,
+                    filter_field=filter_field,
+                    fallback_mapping=fallback_mapping,
+                    limit=limit,
+                ):
+                    yield assay
+
+        source = _RecordingFilterableDataSource(
+            assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2]
+        )
+        wrapper = SubcellularFractionDataSource(data_source=source)
+
+        async for _ in wrapper.fetch_filtered_with_fallback(
+            entity_type="subcellular_fraction",
+            filter_ids=["CHEMBL1000"],
+            filter_field="assay_id",
+            fallback_mapping={"CHEMBL1000": "Test"},
+            limit=1,
+        ):
+            pass
+
+        assert source.fallback_calls[-1]["entity_type"] == "assay"
+        assert source.fallback_calls[-1]["limit"] is None
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_fallback_raises_for_non_filterable(self) -> None:

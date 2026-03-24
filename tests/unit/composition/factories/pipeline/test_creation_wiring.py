@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.composition.factories.pipeline._creation_wiring import (
     _PipelineCreationInputs,
+    _PipelineCreationRequest,
     _create_pipeline_with_services_impl,
     _create_silver_validator,
 )
@@ -26,10 +27,12 @@ class TestPipelineCreationInputs:
             provider="chembl",
             create_data_source_fn=MagicMock(),
             transformer_class=None,
-            run_id="run-1",
-            runtime=SimpleNamespace(),
-            settings=SimpleNamespace(),
-            logger=MagicMock(),
+            request=_PipelineCreationRequest(
+                run_id="run-1",
+                runtime=SimpleNamespace(),
+                settings=SimpleNamespace(),
+                logger=MagicMock(),
+            ),
         )
 
         assert inputs.pipeline_name == "test"
@@ -44,18 +47,20 @@ class TestPipelineCreationInputs:
             provider="pr",
             create_data_source_fn=MagicMock(),
             transformer_class=None,
-            run_id="r",
-            runtime=SimpleNamespace(),
-            settings=SimpleNamespace(),
-            logger=MagicMock(),
+            request=_PipelineCreationRequest(
+                run_id="r",
+                runtime=SimpleNamespace(),
+                settings=SimpleNamespace(),
+                logger=MagicMock(),
+            ),
         )
 
-        assert inputs.config is None
-        assert inputs.filter_config is None
-        assert inputs.tracer is None
-        assert inputs.dq_monitor is None
-        assert inputs.metrics is None
-        assert inputs.cached_bronze is None
+        assert inputs.request.config is None
+        assert inputs.request.filter_config is None
+        assert inputs.request.tracer is None
+        assert inputs.request.dq_monitor is None
+        assert inputs.request.metrics is None
+        assert inputs.request.cached_bronze is None
         assert inputs.pandera_silver_schema is None
 
 
@@ -137,10 +142,12 @@ class TestCreatePipelineWithServicesImpl:
             provider="chembl",
             create_data_source_fn=MagicMock(),
             transformer_class=None,
-            run_id="run-1",
-            runtime=MagicMock(),
-            settings=settings,
-            logger=MagicMock(),
+            request=_PipelineCreationRequest(
+                run_id="run-1",
+                runtime=MagicMock(),
+                settings=settings,
+                logger=MagicMock(),
+            ),
         )
 
         build_services_fn = MagicMock(return_value=MagicMock())
@@ -206,16 +213,18 @@ class TestCreatePipelineWithServicesImpl:
             provider="chembl",
             create_data_source_fn=MagicMock(),
             transformer_class=MagicMock(),
-            run_id="run-42",
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            config=explicit_config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metrics=metrics,
-            cached_bronze=cached_bronze,
+            request=_PipelineCreationRequest(
+                run_id="run-42",
+                runtime=runtime,
+                settings=settings,
+                logger=logger,
+                config=explicit_config,
+                filter_config=filter_config,
+                tracer=tracer,
+                dq_monitor=dq_monitor,
+                metrics=metrics,
+                cached_bronze=cached_bronze,
+            ),
             pandera_silver_schema=MagicMock(),
         )
         build_services_fn = MagicMock(return_value=services)
@@ -295,10 +304,12 @@ class TestCreatePipelineWithServicesImpl:
             provider="chembl",
             create_data_source_fn=MagicMock(),
             transformer_class=None,
-            run_id="run-7",
-            runtime=MagicMock(),
-            settings=settings,
-            logger=MagicMock(),
+            request=_PipelineCreationRequest(
+                run_id="run-7",
+                runtime=MagicMock(),
+                settings=settings,
+                logger=MagicMock(),
+            ),
         )
         build_services_fn = MagicMock(return_value=services)
 

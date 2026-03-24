@@ -3,25 +3,25 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.batch_processing_service import (
     BatchProcessingComponents,
     BatchProcessingService,
+)
+from bioetl.application.core.batch_processing_support import (
+    BatchProcessingSupportService,
 )
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.protocols import GoldFilterCallback
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.domain.error_classifier import ErrorClassifier
-
-if TYPE_CHECKING:
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.domain.ports import (
-        BatchIdGeneratorPort,
-        GoldValidatorPort,
-        TracingPort,
-    )
+from bioetl.domain.ports import (
+    BatchIdGeneratorPort,
+    GoldValidatorPort,
+    TracingPort,
+)
 
 
 def build_components_and_processing_service(
@@ -76,5 +76,13 @@ def build_components_and_processing_service(
         components=components,
         tracing_manager=tracing_manager,
         batch_id_factory=batch_id_factory,
+        support_service=BatchProcessingSupportService(
+            services=pipeline.services,
+            logger=pipeline.context.logger,
+            batch_metrics=components.batch_metrics,
+            transformer=components.transformer,
+            writer=components.writer,
+            tracing=tracing_manager,
+        ),
     )
     return components, batch_processing_service

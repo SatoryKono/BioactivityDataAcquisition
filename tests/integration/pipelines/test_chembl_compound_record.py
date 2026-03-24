@@ -76,7 +76,10 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
 
         # Verify Silver Delta Table
         silver_table_name = runner._pipeline.config.effective_silver_table
-        silver_table_path = f"{self.silver_path}/{silver_table_name}"
+        silver_table_path = self.resolve_delta_table_path(
+            self.silver_path,
+            silver_table_name,
+        )
 
         dt_silver = DeltaTable(silver_table_path)
         silver_df = dt_silver.to_pyarrow_table()
@@ -101,7 +104,10 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
                 f"{runner._pipeline.config.entity_type}"
             )
 
-        gold_table_path = f"{self.gold_path}/{gold_table_name.replace('.', '/')}"
+        gold_table_path = self.resolve_delta_table_path(
+            self.gold_path,
+            gold_table_name,
+        )
 
         dt_gold = DeltaTable(gold_table_path)
         gold_df = dt_gold.to_pyarrow_table()

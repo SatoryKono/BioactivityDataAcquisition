@@ -6,7 +6,8 @@ import asyncio
 import time
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.domain.exceptions import BioETLError, InfrastructureError
+from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
@@ -18,13 +19,7 @@ if TYPE_CHECKING:
         MetricsPort,
     )
 
-_HEALTH_CHECK_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_HEALTH_CHECK_ERRORS = OPERATION_ERRORS
 
 
 class HealthAggregator:

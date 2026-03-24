@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core._data_source_mixins import (
+    _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
 )
 from bioetl.domain.ports import FilterableDataSourcePort
@@ -14,7 +15,10 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
 
-class PublicationTermFilteringMixin(_FilterableTargetDelegationMixin):
+class PublicationTermFilteringMixin(
+    _FallbackFilterableTargetFetchMixin,
+    _FilterableTargetDelegationMixin,
+):
     """FilterableDataSourcePort-compatible delegation for term extraction wrapper."""
 
     async def _fetch_target_filtered_records(
@@ -48,24 +52,17 @@ class PublicationTermFilteringMixin(_FilterableTargetDelegationMixin):
         ):
             yield record
 
-    async def _fetch_target_filtered_with_fallback_records(
+    def _resolve_target_fallback_upstream_limit(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-        filterable: FilterableDataSourcePort,
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
         limit: int | None = None,
+    ) -> int | None:
+        """Scale upstream publication fetches to account for term expansion."""
+        return limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
+
+    def _yield_target_records_from_fallback_source_records(
+        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        source_records: AsyncIterator[object],
+        limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield publication-term records from fallback-enabled publications."""
-        publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
-        async for record in self._yield_terms_from_publications(
-            filterable.fetch_filtered_with_fallback(
-                entity_type=self.SOURCE_ENTITY_TYPE,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                fallback_mapping=fallback_mapping,
-                limit=publication_limit,
-            ),
-            limit,
-        ):
-            yield record
+        """Transform fallback-fetched publications into publication-term records."""
+        return self._yield_terms_from_publications(source_records, limit)

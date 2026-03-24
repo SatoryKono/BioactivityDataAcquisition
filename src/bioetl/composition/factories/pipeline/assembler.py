@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from bioetl.application.core.runner import PipelineRunner
@@ -14,6 +13,9 @@ from bioetl.composition.factories.dq.context_resolver import (
     extract_dq_configs as _extract_dq_configs,
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    _BuildFactoryServicesRequest,
+    _CreatePipelineWithServicesRequest,
+    _PipelineFactoryContext,
     build_factory_services,
     create_factory_data_source,
     create_factory_runner,
@@ -35,7 +37,6 @@ if TYPE_CHECKING:
         TransformerDependencyContext,
     )
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.composition.bootstrap_contexts import DQConfigsContext
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
@@ -68,13 +69,6 @@ def _extract_entity_type(pipeline_name: str) -> str | None:
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
-def _default_dq_configs_extractor() -> Callable[
-    [PipelineYamlConfig | None], DQConfigsContext
-]:
-    """Return the canonical DQ config extractor for runner assembly."""
-    return _extract_dq_configs
-
-
 class GenericPipelineFactory(Generic[TPipeline]):
     """Configurable factory for creating pipeline instances."""
 
@@ -104,10 +98,20 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
         self.provider_registry = provider_registry
-        # Use custom creator or resolve the canonical provider-bound creator.
         self._create_data_source = data_source_creator or get_data_source_creator(
             provider,
             provider_registry=provider_registry,
+        )
+
+    def _build_factory_context(self) -> _PipelineFactoryContext:
+        """Build current factory context from mutable compatibility seams."""
+        return _PipelineFactoryContext(
+            pipeline_name=self.pipeline_name,
+            create_data_source_fn=self._create_data_source,
+            pipeline_class=self.pipeline_class,
+            provider=self.provider,
+            transformer_class=self.transformer_class,
+            pandera_silver_schema=self.pandera_silver_schema,
         )
 
     def create_transformer(
@@ -167,14 +171,15 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> PipelineService:
         """Build shared pipeline services for the configured pipeline."""
         return build_factory_services(
-            pipeline_name=self.pipeline_name,
-            create_data_source_fn=self._create_data_source,
-            settings=settings,
-            logger=logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
+            factory_context=self._build_factory_context(),
+            request=_BuildFactoryServicesRequest(
+                settings,
+                logger,
+                config,
+                filter_config,
+                tracer,
+                dq_monitor,
+            ),
         )
 
     def create_with_services(
@@ -192,22 +197,19 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> TPipeline:
         """Create pipeline instance with wired services and optional transformer."""
         return create_pipeline_instance_with_services(
-            pipeline_name=self.pipeline_name,
-            pipeline_class=self.pipeline_class,
-            provider=self.provider,
-            create_data_source_fn=self._create_data_source,
-            transformer_class=self.transformer_class,
-            run_id=run_id,
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metrics=metrics,
-            cached_bronze=cached_bronze,
-            pandera_silver_schema=self.pandera_silver_schema,
+            factory_context=self._build_factory_context(),
+            request=_CreatePipelineWithServicesRequest(
+                run_id,
+                runtime,
+                settings,
+                logger,
+                config,
+                filter_config,
+                tracer,
+                dq_monitor,
+                metrics,
+                cached_bronze,
+            ),
         )
 
     def create_runner(
@@ -276,5 +278,5 @@ def assemble_runner(
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         yaml_config=yaml_config,
-        dq_configs_extractor=_default_dq_configs_extractor(),
+        dq_configs_extractor=_extract_dq_configs,
     )

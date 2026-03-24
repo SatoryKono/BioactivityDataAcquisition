@@ -1,4 +1,4 @@
-"""Public run-composite CLI entrypoint backed by the canonical domain module."""
+"""Retained public run-composite command seam over the canonical domain module."""
 
 from __future__ import annotations
 
@@ -7,9 +7,15 @@ from typing import TYPE_CHECKING
 from bioetl.interfaces.cli.commands._compat import alias_module
 
 if TYPE_CHECKING:
-    # from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-    from bioetl.application.composite.runtime_models import (
-        CompositeRuntimeConfig,  # noqa: F401
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+    from bioetl.interfaces.cli.commands.domains.composite.command import (
+        bootstrap_composite_runner as bootstrap_composite_runner,
+    )
+    from bioetl.interfaces.cli.commands.domains.composite.command import (
+        load_composite_config as load_composite_config,
+    )
+    from bioetl.interfaces.cli.commands.domains.composite.command import (
+        run_composite as run_composite,
     )
 
 alias_module(__name__, "bioetl.interfaces.cli.commands.domains.composite.command")

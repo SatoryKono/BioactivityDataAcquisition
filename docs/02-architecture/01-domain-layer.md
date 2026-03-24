@@ -15,7 +15,7 @@
 - Консистентность: инварианты удерживаются внутри aggregate boundaries.
 - Типобезопасность: значения и идентификаторы выражены через отдельные типы и value objects.
 
-## 2. Актуальная Спецификация (2026-03-10)
+## 2. Актуальная Спецификация (2026-03-24)
 
 ### 2.1. Порты (`ports/`)
 
@@ -24,12 +24,17 @@
 - источники и хранение (`DataSourcePort`, `StoragePort`, `CheckpointPort`, `LockPort`);
 - observability (`LoggerPort`, `MetricsPort`, `TracingPort`, `DQMonitorPort`);
 - качество данных (`BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`, валидаторы, quarantine/report);
-- runtime/resilience (`RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
+- runtime/resilience (`RunnerFactoryPort`, `PipelineFactoryPort`, `ExecutionObservabilityPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
 - NoOp реализации для опциональных зависимостей.
 
 Runtime-oriented порты намеренно остаются в `domain.ports`: это допустимо, потому что они выражают чистые абстракции
 межслойного контракта, а не concrete infrastructure behavior. Правило слоя звучит как "в domain нельзя тянуть I/O и
 конкретные adapter/framework dependencies", а не как "в domain нельзя описывать runtime contracts".
+
+После `RF-022` runtime factory contracts дополнительно очищены от outer-layer
+semantics: `PipelineFactoryPort` выражается через `SettingsPort`,
+`PipelineYamlConfigPort` и `ExecutionObservabilityPort`, а не через concrete
+composition/runtime bundle types.
 
 Правило импорта:
 

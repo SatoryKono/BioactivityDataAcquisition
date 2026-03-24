@@ -5,8 +5,12 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
+from bioetl.application.core.span_helpers import (
+    build_pipeline_span_attributes,
+    start_current_span,
+)
 from bioetl.application.core.postrun._service_collaborators import (
     resolve_postrun_collaborators,
 )
@@ -109,17 +113,13 @@ class PostrunService:
     @contextmanager
     def _postrun_span(self, span_name: str) -> Generator[Span, None, None]:
         """Context manager for OTel span lifecycle."""
-        otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
-        with cast(
-            "Span",
-            otel_tracer.start_as_current_span(
-                span_name,
-                attributes={
-                    "bioetl.pipeline": self._config.pipeline_name or "unknown",
-                    "bioetl.provider": self._config.provider,
-                    "bioetl.entity_type": self._config.entity_type,
-                    "bioetl.run_type": self._runtime.run_type.value,
-                },
+        with start_current_span(
+            tracing=self._tracer,
+            tracer_name=self.TRACER_NAME,
+            span_name=span_name,
+            attributes=build_pipeline_span_attributes(
+                config=self._config,
+                runtime=self._runtime,
             ),
         ) as span:
             yield span

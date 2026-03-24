@@ -100,7 +100,9 @@ def test_pipeline_config_resolution_import_warns_and_reexports_canonical_helpers
     from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
     assert compat_module.DomainConfigResolver is DomainConfigResolver
-    assert compat_module.resolve_domain_pipeline_config is resolve_domain_pipeline_config
+    assert (
+        compat_module.resolve_domain_pipeline_config is resolve_domain_pipeline_config
+    )
     assert compat_module.load_pipeline_config is load_pipeline_config
     assert compat_module.yaml_config_to_domain is yaml_config_to_domain
 

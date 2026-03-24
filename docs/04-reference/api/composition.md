@@ -21,7 +21,7 @@ seams are exposed through dedicated submodules such as `entrypoints`,
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
 | `composition.factories` | Factory classes for creating wired components | `GenericPipelineFactory`, `DataSourceFactory`, `StorageFactory`, `DQServicesFactory`, `build_pipeline_services` |
-| `composition.bootstrap` | Application bootstrapping and initialization | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, CLI bootstrap helpers, `load_pipeline_config` |
+| `composition.bootstrap` | Application bootstrapping and stable bootstrap access seams | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, `bootstrap_composite_runner`, CLI bootstrap helpers, `load_pipeline_config` (re-export), `load_composite_config` |
 | `composition.providers` | Provider registration and discovery | `ProviderRegistry`, `create_provider_registry`, `ensure_providers_loaded` |
 | `composition.runtime_builders` | Leaf runtime assembly helpers | `build_pipeline_runner` |
 | `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, `compute_config_hash`, `get_git_commit`, `get_pipeline_version` |
@@ -77,6 +77,12 @@ Import the symbols below from their defining submodules rather than from the
 ## Bootstrap (`composition.bootstrap`)
 
 ### Runtime Bootstrap
+
+Config-loading note: `load_pipeline_config()` is re-exported from
+`bioetl.infrastructure.config.pipeline_config_api`, while composite config
+loading is owned by `bioetl.infrastructure.config.composite_config_api` and is
+exposed through retained public bootstrap/entrypoint seams for stable runtime
+access.
 
 | Module | Description |
 |---|---|

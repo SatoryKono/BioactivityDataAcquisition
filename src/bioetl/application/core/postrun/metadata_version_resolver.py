@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.postrun._failure_policy import (
+    PostrunFailureHandlingMixin,
     PostrunFailurePolicySpec,
-    apply_postrun_failure_policy,
-    is_strict_validation_enabled,
 )
 
 if TYPE_CHECKING:
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, StorageMaintenancePort
 
 
-class PostrunMetadataVersionResolver:
+class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
     """Resolve Delta table version via injected storage port.
 
     All Delta Lake access is delegated to the ``StorageMaintenancePort``
@@ -60,23 +59,14 @@ class PostrunMetadataVersionResolver:
         try:
             return self._storage.get_table_version(table_path, layer=layer)
         except self._warning_allowlist as error:
-            should_raise = apply_postrun_failure_policy(
-                logger=self._logger,
-                runtime=self._runtime,
-                error=error,
-                spec=self._FAILURE_POLICY,
+            self._handle_allowlisted_failure(
+                error,
                 extra={
                     "layer": layer,
                     "table_path": table_path,
                 },
             )
-            if should_raise:
-                raise
             return None
-
-    def _is_strict_validation_enabled(self) -> bool:
-        """Compatibility wrapper around shared strict-mode evaluation."""
-        return is_strict_validation_enabled(self._runtime)
 
 
 __all__ = ["PostrunMetadataVersionResolver"]

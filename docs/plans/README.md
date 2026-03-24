@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-03-23*
+*Last updated: 2026-03-24*
 
 This directory contains implementation plans, corrective roadmaps, migration
 plans, and supporting architecture assessment snapshots.
@@ -36,6 +36,24 @@ Plans in this folder must not override normative documents.
 - Prefer updating an existing active plan over creating near-duplicates.
 - Move obsolete or historical planning artifacts to `docs/99-archive/` when no longer active.
 
+## Freshness Triggers
+
+Refresh this index, or add a short freshness note to linked dated reports, when:
+
+- a bounded refactor wave closes or materially changes a currently linked plan;
+- a supporting assessment in `reports/plans/` or `reports/{LLM}/` still speaks in
+  current tense about a now-closed wave;
+- active backlog ownership or the “one active backlog” rule changes;
+- an index entry stops being a live planning surface and becomes only historical context.
+
+Protocol:
+
+- Keep `docs/plans/README.md` focused on the current reading order.
+- For dated supporting assessments, prefer adding a `Freshness note` rather than
+  rewriting their original date/history.
+- Move superseded planning surfaces to archive only when they are no longer
+  needed for active evidence references.
+
 ## Active Plan Links
 
 ### Primary Active Backlog
@@ -56,6 +74,10 @@ published plan pages in this workspace snapshot.
 The architecture review plan was refreshed on `2026-03-23` with the current
 integral score, updated category table, and RF-style roadmap. It remains a
 supporting assessment map, not a second active backlog.
+
+If later waves close items named in that report, the report should keep its
+original date and gain a short freshness note instead of being silently treated
+as the live queue.
 
 ### Retained Historical Context With Live Evidence References
 

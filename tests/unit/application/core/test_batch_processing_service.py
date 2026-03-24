@@ -16,6 +16,9 @@ from bioetl.application.core.batch_processing_service import (
     BatchProcessingOutcome,
     BatchProcessingService,
 )
+from bioetl.application.core.batch_processing_support import (
+    BatchProcessingSupportService,
+)
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BatchID, BronzeRecord, RunType
@@ -151,6 +154,14 @@ def _make_service(
         ),
         tracing_manager=tracing,
         batch_id_factory=batch_id_factory,
+        support_service=BatchProcessingSupportService(
+            services=services,
+            logger=logger,
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+            tracing=tracing,
+        ),
     )
 
 
@@ -770,7 +781,7 @@ class TestGetSourceMetadata:
         result = svc._get_source_metadata(None)
 
         assert result is None
-        mock_context.logger.warning.assert_called_once()
+        mock_logger.warning.assert_called_once()
 
     def test_returns_none_when_query_string_is_none_and_no_metadata(
         self,

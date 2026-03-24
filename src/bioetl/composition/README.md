@@ -52,7 +52,7 @@ composition/
 | What you want to do | Start here |
 |---------------------|------------|
 | Run a single pipeline | `entrypoints.run_pipeline()` |
-| Bootstrap a composite pipeline runtime | `entrypoints.load_composite_config()` + `entrypoints.bootstrap_composite_runner()` |
+| Bootstrap a composite pipeline runtime | `entrypoints.load_composite_config()` (stable access seam over `infrastructure.config`) + `entrypoints.bootstrap_composite_runner()` |
 | Look up a pipeline by provider+entity | `registry.PipelineRegistry` |
 | Create an HTTP adapter for a provider | `providers.provider_registry.ProviderRegistry` |
 | Wire storage (Bronze/Silver/Gold) | `factories/storage/storage_factory.StorageFactory` |
@@ -121,6 +121,8 @@ StorageFactory
 - `composition.entrypoints` is the canonical public seam for CLI/interface access.
 - Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`
   stay private to `composition/` plus dedicated entrypoint tests.
-- Composite runtime flows should use `load_composite_config()` and
+- Composite runtime flows should use `load_composite_config()` as the stable
+  public access seam over the canonical owner
+  `bioetl.infrastructure.config.composite_config_api`, and
   `bootstrap_composite_runner()` instead of inventing a parallel `run_composite()`
   wrapper at the `entrypoints.py` level.

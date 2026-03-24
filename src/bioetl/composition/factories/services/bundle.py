@@ -10,10 +10,11 @@ from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.pipeline._creation_wiring import (
+from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,
+    _PipelineCreationRequest,
     _ServiceBundleDeps,
 )
 from bioetl.composition.factories.services.factory import BaseServicesFactory
@@ -275,16 +276,18 @@ def create_pipeline_with_services(
             provider=provider,
             create_data_source_fn=create_data_source_fn,
             transformer_class=transformer_class,
-            run_id=run_id,
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metrics=metrics,
-            cached_bronze=cached_bronze,
+            request=_PipelineCreationRequest(
+                run_id=run_id,
+                runtime=runtime,
+                settings=settings,
+                logger=logger,
+                config=config,
+                filter_config=filter_config,
+                tracer=tracer,
+                dq_monitor=dq_monitor,
+                metrics=metrics,
+                cached_bronze=cached_bronze,
+            ),
             pandera_silver_schema=pandera_silver_schema,
         ),
         deps=cast(_ServiceBundleDeps, _resolve_service_bundle_dependencies(_deps)),

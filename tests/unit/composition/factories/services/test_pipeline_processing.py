@@ -17,10 +17,15 @@ class TestBuildComponentsAndProcessingService:
     """Contract-level tests for pipeline_processing helpers."""
 
     @patch(
+        "bioetl.composition.factories.services.pipeline_processing.BatchProcessingSupportService"
+    )
+    @patch(
         "bioetl.composition.factories.services.pipeline_processing.BatchProcessingService"
     )
     def test_delegates_component_build_and_wraps_processing_service(
-        self, mock_processing_service_cls: MagicMock
+        self,
+        mock_processing_service_cls: MagicMock,
+        mock_support_service_cls: MagicMock,
     ) -> None:
         """Assembly should preserve pipeline/callback wiring across both builders."""
         pipeline = SimpleNamespace(
@@ -33,7 +38,9 @@ class TestBuildComponentsAndProcessingService:
         )
         components = MagicMock(name="components")
         processing_service = MagicMock(name="processing_service")
+        support_service = MagicMock(name="support_service")
         mock_processing_service_cls.return_value = processing_service
+        mock_support_service_cls.return_value = support_service
         create_components = MagicMock(return_value=components)
         processor_config = MagicMock(name="processor_config")
         error_classifier = MagicMock(name="error_classifier")
@@ -71,6 +78,14 @@ class TestBuildComponentsAndProcessingService:
             tracer=tracer,
             lock_validator=lock_validator,
         )
+        mock_support_service_cls.assert_called_once_with(
+            services=pipeline.services,
+            logger=pipeline.context.logger,
+            batch_metrics=components.batch_metrics,
+            transformer=components.transformer,
+            writer=components.writer,
+            tracing=tracing_manager,
+        )
         mock_processing_service_cls.assert_called_once_with(
             services=pipeline.services,
             context=pipeline.context,
@@ -78,4 +93,5 @@ class TestBuildComponentsAndProcessingService:
             components=components,
             tracing_manager=tracing_manager,
             batch_id_factory=batch_id_factory,
+            support_service=support_service,
         )

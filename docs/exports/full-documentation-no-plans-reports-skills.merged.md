@@ -1,11 +1,11 @@
 ---
 title: "BioETL Documentation (excluding plans/reports/skills)"
-date: 2026-03-23
+date: 2026-03-24
 ---
 
 # BioETL Documentation (excluding plans/reports/skills)
 
-_Generated: 2026-03-23_
+_Generated: 2026-03-24_
 _Status: Generated export artifact (non-normative). Canonical project guidance remains in `docs/02-architecture/**`, `docs/03-guides/**`, and `docs/04-reference/**`._
 
 \newpage
@@ -14,14 +14,15 @@ _Status: Generated export artifact (non-normative). Canonical project guidance r
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.24 | Last updated: 2026-03-20*
+*Synced with RULES.md v5.24 | Last updated: 2026-03-24*
 
-> **Documentation Update:** 2026-03-19
+> **Documentation Update:** 2026-03-24
 > - Compatibility inventory synced with the current measured CLI shim registry
 > - Source-code map updated for the storage subpackage decomposition (`bronze/`, `silver/`, `gold/`, `metadata/`, `delta/`, `support/`)
 > - Snapshot-style file/test counts removed from active navigation blocks to reduce drift
 > - Active entry points clarified: `RULES.md`, `TOOLS.md`, and canonical layer docs in `docs/02-architecture/`
 > - 2026-03-20: stale config-loader entry updated to current composition/runtime and infrastructure config seams
+> - 2026-03-24: composition/domain references synced with RF-021 config ownership and RF-022 runtime port contracts
 
 ## Quick Links
 
@@ -476,7 +477,7 @@ graph TD
 | `configs/entities/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
 | `src/bioetl/composition/bootstrap_contexts.py`     | Composition root          |
-| `src/bioetl/composition/bootstrap/runtime/config_loader.py` | Runtime bootstrap config loading |
+| `src/bioetl/infrastructure/config/composite_config_api.py` | Canonical composite-config loading seam |
 | `src/bioetl/infrastructure/config/`               | Infrastructure config loaders and normalization package |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
 | `docs/04-reference/contracts/gold/{provider}_{entity}_v{major}.{minor}.json` | Gold data contracts |
@@ -506,7 +507,7 @@ graph TD
 | RULES.md                 | 2026-03-13   | v5.24 (Latest)               |
 | REQUIREMENTS.md          | 2026-03-13   | v1.8 (docs governance sync)  |
 | glossary.md              | 2026-03-08   | v2.7 (Ubiquitous Language)   |
-| 00-map.md                | 2026-03-19   | v8.2 Active navigator synced |
+| 00-map.md                | 2026-03-24   | v8.3 Active navigator synced |
 | rules-summary.md         | 2026-03-13   | v5.24 Synced                 |
 | TOOLS.md                 | 2026-03-13   | v3.0 Active tools hub |
 | 03-guides/               | 2026-03-19   | Active guides index          |
@@ -519,7 +520,7 @@ graph TD
 
 ---
 
-*Last updated: 2026-03-19. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*
+*Last updated: 2026-03-24. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*
 
 # Source: `00-project/RULES.md`
 
@@ -4832,7 +4833,7 @@ concurrency:
 
 # Documentation Publication Policy
 
-*Версия: 1.3 (2026-03-13)*
+*Версия: 1.4 (2026-03-24)*
 
 ## Цель
 
@@ -4890,6 +4891,58 @@ concurrency:
 7. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
 8. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.
 
+## Freshness Protocol
+
+### 1. Trigger events
+
+Обязательный refresh или rebaseline note требуется, если меняется хотя бы одно из:
+
+- structural refactor, который меняет ownership, package boundaries или public seams;
+- config-topology / runtime-wiring change;
+- test/governance baseline, который меняет активную интерпретацию summary pages;
+- generated artifact refresh (`--check` / regeneration) для активного derived surface;
+- entry/index page, через которую команда реально находит текущее руководство.
+
+### 2. Refresh order
+
+1. Сначала обновлять `published` docs в `docs/00-05`.
+2. Затем обновлять high-signal `internal-published` indexes и summaries, если они:
+   - используются в planning/review;
+   - ссылаются на уже закрытые волны как на текущие;
+   - содержат current-tense рекомендации, переставшие быть актуальными.
+3. Исторические raw/evidence/archive материалы не переписывать без необходимости;
+   вместо этого обновлять верхний `SUMMARY.md`, `INDEX.md` или добавлять
+   явный freshness / rebaseline note.
+
+### 3. Dated reports and assessment snapshots
+
+- Dated reports под `reports/` и `reports/plans/` сохраняют исходную дату
+  создания как traceability marker.
+- Если позже меняется live posture, такие документы не нужно “переиздавать задним числом”;
+  нужно добавить короткий `Freshness note` / `Примечание о rebaseline`, который:
+  - явно указывает дату переоценки;
+  - перечисляет закрытые волны или changed assumptions;
+  - отправляет читателя к текущему active backlog / current summary.
+
+### 4. Generated artifacts
+
+- Generated artifacts не редактируются вручную, если для них существует generator.
+- Для них canonical protocol: `--check` в verify, regeneration через owner script,
+  и явная пометка, что артефакт derivative rather than policy.
+
+### 5. Minimum freshness checklist
+
+Перед merge для changeset, затрагивающего docs/governance surfaces:
+
+1. Проверить, не остались ли current-tense рекомендации для уже закрытых waves.
+2. Проверить, что active indexes (`docs/plans`, `docs/reports`, evidence indexes)
+   не ведут к stale interpretation без rebaseline note.
+3. Для generated surfaces прогнать owner `--check`.
+4. Для runtime/governance freshness прогнать:
+```bash
+./.venv/Scripts/python.exe scripts/docs/check_doc_drift.py --freshness
+```
+
 ## Минимальный чек-лист перед merge
 
 1. Прогнать базовую docs-проверку:
@@ -4904,7 +4957,9 @@ concurrency:
 ```bash
 bash scripts/docs/build_docs_site.sh --strict
 ```
-
+4. Если менялись active internal-published summaries, проверить, что они либо
+   refreshed, либо снабжены явной freshness/rebaseline note.
+ 
 ## Связанный документ
 
 - [Documentation Navigation Policy](07-doc-nav-policy.md)
@@ -6434,7 +6489,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 - Консистентность: инварианты удерживаются внутри aggregate boundaries.
 - Типобезопасность: значения и идентификаторы выражены через отдельные типы и value objects.
 
-## 2. Актуальная Спецификация (2026-03-10)
+## 2. Актуальная Спецификация (2026-03-24)
 
 ### 2.1. Порты (`ports/`)
 
@@ -6443,12 +6498,17 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 - источники и хранение (`DataSourcePort`, `StoragePort`, `CheckpointPort`, `LockPort`);
 - observability (`LoggerPort`, `MetricsPort`, `TracingPort`, `DQMonitorPort`);
 - качество данных (`BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`, валидаторы, quarantine/report);
-- runtime/resilience (`RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
+- runtime/resilience (`RunnerFactoryPort`, `PipelineFactoryPort`, `ExecutionObservabilityPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
 - NoOp реализации для опциональных зависимостей.
 
 Runtime-oriented порты намеренно остаются в `domain.ports`: это допустимо, потому что они выражают чистые абстракции
 межслойного контракта, а не concrete infrastructure behavior. Правило слоя звучит как "в domain нельзя тянуть I/O и
 конкретные adapter/framework dependencies", а не как "в domain нельзя описывать runtime contracts".
+
+После `RF-022` runtime factory contracts дополнительно очищены от outer-layer
+semantics: `PipelineFactoryPort` выражается через `SettingsPort`,
+`PipelineYamlConfigPort` и `ExecutionObservabilityPort`, а не через concrete
+composition/runtime bundle types.
 
 Правило импорта:
 
@@ -7420,23 +7480,23 @@ PubMedAdapter                         (pubchempy)
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-03-19):**
+**Доступные команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-03-24):**
 
 | Команда         | Модуль                       | Описание                                |
 | --------------- | ---------------------------- | --------------------------------------- |
 | `run`           | `run.py`                     | Retained public seam; canonical implementation lives in `domains/run/command.py` |
-| `run-all`       | `run_all.py`                 | Запуск всех пайплайнов провайдера       |
-| `run-composite` | `run_composite.py`           | Запуск композитного пайплайна (ADR-026) |
+| `run-all`       | `run_all.py`                 | Retained public seam; canonical implementation lives in `domains/run_all/command.py` |
+| `run-composite` | `run_composite.py`           | Retained public seam; canonical implementation lives in `domains/composite/command.py` |
 | `export`        | `export.py`                  | Экспорт данных из Gold                  |
-| `quarantine`    | `quarantine.py`              | Управление карантинными записями        |
-| `health`        | `health.py`                  | Проверка здоровья провайдеров           |
+| `quarantine`    | `quarantine.py`              | Retained public seam; canonical implementation lives in `domains/quarantine/command.py` |
+| `health`        | `health.py`                  | Retained public seam; canonical implementation lives in `domains/health/command.py` |
 | `config`        | `config.py`                  | Просмотр и валидация конфигураций       |
 | `checkpoint`    | `checkpoint.py`              | Управление checkpoint-ами               |
 | `lock`          | `lock.py`                    | Управление блокировками                 |
-| `vacuum`        | `vacuum.py`                  | VACUUM операции для Delta Lake          |
-| `cleanup`       | `cleanup.py`                 | Очистка Bronze данных                   |
-| `maintenance`   | `maintenance.py`             | Maintenance операции                    |
-| `archive`       | `archive.py`                 | Архивирование данных                    |
+| `vacuum`        | `vacuum.py`                  | Retained public seam; canonical implementation lives in `domains/maintenance/vacuum.py` |
+| `cleanup`       | `cleanup.py`                 | Retained public seam; canonical implementation lives in `domains/maintenance/cleanup.py` |
+| `maintenance`   | `maintenance.py`             | Retained public seam; canonical implementation lives in `domains/maintenance/command.py` |
+| `archive`       | `archive.py`                 | Retained public seam; canonical implementation lives in `domains/maintenance/archive.py` |
 | `adr`           | `adr.py`                     | Управление ADR (Architecture Decisions) |
 | `debug`         | `debug.py`                   | Диагностические утилиты                 |
 
@@ -7444,20 +7504,25 @@ PubMedAdapter                         (pubchempy)
 
 | Модуль                          | Назначение                              |
 | ------------------------------- | --------------------------------------- |
-| `execution_policy.py`           | Политики исполнения команд              |
-| `run_all_command_policy.py`     | Политики `run-all`                      |
-| `run_helpers.py`                | Вспомогательные функции для run-команд  |
-| `run_all_helpers.py`            | Вспомогательные функции для run-all     |
-| `run_command_policy.py`         | Политики run-команд                     |
-| `run_composite_helpers.py`      | Вспомогательные функции для composite   |
-| `run_composite_runtime.py`      | Runtime для composite                   |
-| `run_result_presenter.py`       | Форматирование результатов запуска      |
-| `health_rendering.py`           | Рендеринг health-результатов            |
-| `health_server_integration.py`  | Интеграция health-сервера               |
-| `metrics_server_integration.py` | Интеграция metrics-сервера              |
-| `quarantine_execution.py`       | Исполнение quarantine-операций          |
-| `quarantine_rendering.py`       | Рендеринг quarantine-результатов        |
-| `quarantine_support.py`         | Общие утилиты quarantine CLI            |
+| `execution_policy.py`           | Retained support seam; canonical implementation lives in `domains/shared/execution_policy.py` |
+| `run_all_command_policy.py`     | Retained support seam; canonical implementation lives in `domains/run_all/command_policy.py` |
+| `run_helpers.py`                | Retained support seam; canonical implementation lives in `domains/run/support.py` |
+| `run_all_helpers.py`            | Retained support seam; canonical implementation lives in `domains/run_all/support.py` |
+| `run_command_policy.py`         | Retained support seam; canonical implementation lives in `domains/run/command_policy.py` |
+| `run_runtime_helpers.py`        | Retained support seam; canonical implementation lives in `domains/run/runtime_helpers.py` |
+| `run_result_flow_helpers.py`    | Retained support seam; canonical implementation lives in `domains/run/result_flow.py` |
+| `run_service_access.py`         | Retained support seam; canonical implementation lives in `domains/run/service_access.py` |
+| `run_all_execution.py`          | Retained support seam; canonical implementation lives in `domains/run_all/execution.py` |
+| `run_composite_helpers.py`      | Retained support seam; canonical implementation lives in `domains/composite/support.py` |
+| `run_composite_runtime.py`      | Retained support seam; canonical implementation lives in `domains/composite/runtime.py` |
+| `run_composite_execution.py`    | Retained support seam; canonical implementation lives in `domains/composite/execution.py` |
+| `run_result_presenter.py`       | Retained support seam; canonical implementation lives in `domains/run/result_presenter.py` |
+| `health_rendering.py`           | Retained support seam; canonical implementation lives in `domains/health/rendering.py` |
+| `health_server_integration.py`  | Retained support seam; canonical implementation lives in `domains/health/server_integration.py` |
+| `metrics_server_integration.py` | Retained support seam; canonical implementation lives in `domains/health/metrics_server_integration.py` |
+| `quarantine_execution.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/execution.py` |
+| `quarantine_rendering.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/rendering.py` |
+| `quarantine_support.py`         | Retained support seam; canonical implementation lives in `domains/quarantine/support.py` |
 
 **Примеры использования:**
 
@@ -7489,8 +7554,8 @@ Endpoints: `/health`, `/health/live`, `/health/ready`.
 Graceful shutdown обрабатывается непосредственно в canonical domain command modules:
 
 - `interfaces/cli/commands/domains/run/command.py`
-- `interfaces/cli/commands/run_all.py`
-- `interfaces/cli/commands/run_composite.py`
+- `interfaces/cli/commands/domains/run_all/command.py`
+- `interfaces/cli/commands/domains/composite/command.py`
   Shutdown логика вынесена в `application/core/lifecycle/shutdown.py`.
 
 ----------------------------------------------------------------------
@@ -7550,7 +7615,7 @@ Graceful shutdown обрабатывается непосредственно в
 
 - **Глобальная осведомленность:** Единственный слой (наряду с `Interfaces`), который "знает" обо всех остальных слоях. Ему разрешено импортировать из `infrastructure`, `application` и `domain`.
 - **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические public seams проходят через `entrypoints.py`, `execution_api.py`, `services_api.py`, `resources_api.py`, а специализированные factory/bootstrap модули собирают runtime-компоненты.
-- **Конфигурация:** Преобразует сырые настройки из YAML или переменных окружения в доменные объекты конфигурации.
+- **Конфигурация:** Потребляет уже загруженные и нормализованные конфигурации. Канонический owner для YAML I/O, merge и normalization находится в `bioetl.infrastructure.config`, а `composition` сохраняет только thin public access / compat seams (`load_pipeline_config()`, `load_composite_config()`) для стабильных runtime entrypoints.
 
 ## 2. Ключевые Компоненты
 
@@ -7591,8 +7656,14 @@ composition/bootstrap/
 | `pipeline.py`        | Сборка pipeline (main entry point)                        |
 | `runner.py`          | Сборка `PipelineRunner`                                   |
 | `runner_assembly.py` | Runner assembly helpers                                   |
-| `infrastructure.config` / `pipeline_config_api.py` | Загрузка и валидация YAML-конфигураций |
+| `infrastructure/config/{pipeline_config_api.py, composite_config_api.py}` | Канонические public seams для загрузки и валидации YAML-конфигураций |
 | `runtime_basics.py`  | Базовые runtime утилиты                                   |
+
+`composition.bootstrap.runtime` больше не владеет raw config-loading логикой:
+runtime bootstrap использует канонические config-owner seams из
+`bioetl.infrastructure.config`, а в `composition` остаются только тонкие
+public access / compatibility wrappers там, где нужно удерживать стабильные
+import paths.
 
 **Composite pipeline bootstrap:**
 
@@ -7635,7 +7706,7 @@ composition/bootstrap/
 | Подпакет / Файл             | Ключевые компоненты                          | Назначение                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline/assembler.py`     | `GenericPipelineFactory`                     | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline/creation_api.py`  | `_PipelineCreationInputs`, `_create_pipeline_with_services_impl` | Compatibility shim; canonical owner for these wiring contracts is `pipeline/_creation_wiring.py` |
+| `pipeline/creation_api.py`  | `_PipelineCreationInputs`, `_create_pipeline_with_services_impl` | Compatibility shim; first-party code should prefer `pipeline/creation_support.py`, which delegates to `pipeline/_creation_wiring.py` |
 | `pipeline/registry.py`      | Реестр фабрик                                | Все зарегистрированные pipeline factories                      |
 | `pipeline/runner.py`        | `RunnerFactory`                              | Создание `PipelineRunner` с DI                                 |
 | `datasource/data_source_factory.py` | `DataSourceFactory`                 | Создает `DataSourcePort` для провайдера                        |
@@ -9832,12 +9903,16 @@ async def fetch-activity(activity-id: int) -> dict:
 # Source: `02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md`
 
 > **Superseded:** Signal handlers удалены 2025-12-31.
-> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/lifecycle/shutdown.py.
+> Graceful shutdown обрабатывается в canonical CLI domain command modules
+> (`interfaces/cli/commands/domains/run/command.py`,
+> `interfaces/cli/commands/domains/run_all/command.py`,
+> `interfaces/cli/commands/domains/composite/command.py`)
+> и `application/core/lifecycle/shutdown.py`.
 > orchestration/ модуль пуст.
 
 # ADR-008: Graceful Shutdown Strategy
 
-**Status:** Superseded (signal handlers removed; shutdown handled in CLI and application/core/lifecycle/shutdown.py)
+**Status:** Superseded (signal handlers removed; shutdown handled in canonical CLI domain command modules and application/core/lifecycle/shutdown.py)
 **Date:** 2025-12-22
 **Last Updated:** 2026-01-02
 **Decision makers:** @BioETL-Team
@@ -9846,7 +9921,7 @@ async def fetch-activity(activity-id: int) -> dict:
 
 ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding distributed locks. An abrupt shutdown (kill -9, OOM, etc.) can leave the system in an inconsistent state: orphaned locks, missing checkpoints, partially written batches. A coordinated shutdown mechanism was needed to ensure data integrity.
 
-> **Update 2025-12-31:** Signal handlers in `interfaces/orchestration/signals.py` were removed. Shutdown is now handled at CLI level via `KeyboardInterrupt` (in `interfaces/cli/run.py` and `run_all.py`). See `application/core/lifecycle/shutdown.py` for `ShutdownSignal`. The architecture diagram and implementation details below reflect the original design; the interfaces-layer signal handler box is no longer present.
+> **Update 2025-12-31:** Signal handlers in `interfaces/orchestration/signals.py` were removed. Shutdown is now handled at CLI level via `KeyboardInterrupt` in the canonical domain command modules `interfaces/cli/commands/domains/run/command.py`, `interfaces/cli/commands/domains/run_all/command.py`, and `interfaces/cli/commands/domains/composite/command.py`. Retained public seams `interfaces/cli/commands/run.py`, `run_all.py`, and `run_composite.py` remain import-stable entrypoints, but they no longer own the canonical shutdown flow. See `application/core/lifecycle/shutdown.py` for `ShutdownSignal`. The architecture diagram and implementation details below reflect the original design; the interfaces-layer signal handler box is no longer present.
 
 ## The Decision
 
@@ -38273,7 +38348,7 @@ seams are exposed through dedicated submodules such as `entrypoints`,
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
 | `composition.factories` | Factory classes for creating wired components | `GenericPipelineFactory`, `DataSourceFactory`, `StorageFactory`, `DQServicesFactory`, `build_pipeline_services` |
-| `composition.bootstrap` | Application bootstrapping and initialization | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, CLI bootstrap helpers, `load_pipeline_config` |
+| `composition.bootstrap` | Application bootstrapping and stable bootstrap access seams | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, `bootstrap_composite_runner`, CLI bootstrap helpers, `load_pipeline_config` (re-export), `load_composite_config` |
 | `composition.providers` | Provider registration and discovery | `ProviderRegistry`, `create_provider_registry`, `ensure_providers_loaded` |
 | `composition.runtime_builders` | Leaf runtime assembly helpers | `build_pipeline_runner` |
 | `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, `compute_config_hash`, `get_git_commit`, `get_pipeline_version` |
@@ -38329,6 +38404,12 @@ Import the symbols below from their defining submodules rather than from the
 ## Bootstrap (`composition.bootstrap`)
 
 ### Runtime Bootstrap
+
+Config-loading note: `load_pipeline_config()` is re-exported from
+`bioetl.infrastructure.config.pipeline_config_api`, while composite config
+loading is owned by `bioetl.infrastructure.config.composite_config_api` and is
+exposed through retained public bootstrap/entrypoint seams for stable runtime
+access.
 
 | Module | Description |
 |---|---|
@@ -38534,7 +38615,7 @@ external.
 
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
-| `domain.ports` | Protocol interfaces for dependency inversion (DI), including sanctioned runtime/resilience contracts | `DataSourcePort`, `StoragePort`, `LoggerPort`, `RunnerFactoryPort`, `RateLimiterPort` |
+| `domain.ports` | Protocol interfaces for dependency inversion (DI), including sanctioned runtime/resilience contracts | `DataSourcePort`, `StoragePort`, `LoggerPort`, `RunnerFactoryPort`, `ExecutionObservabilityPort` |
 | `domain.context` | Deterministic execution context primitives carried through pipeline flows | `PipelineContext`, `PipelineRunContext` |
 | `domain.entities` | Rich domain objects and Pydantic DTOs | `Bioactivity`, `Molecule`, `Target`, `BaseEntity` |
 | `domain.value_objects` | Immutable domain primitives with self-validation | `ChemblId`, `DOI`, `InChI`, `SMILES`, `PubMedId` |
@@ -38563,9 +38644,10 @@ external.
 All ports are defined as `typing.Protocol` in `domain.ports`. Consumers MUST import
 from the facade `bioetl.domain.ports`, not from internal modules (ARCH-008).
 This sanctioned facade also includes runtime-oriented cross-layer contracts such
-as `LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, and
-`CircuitBreakerPort`; they remain in `domain.ports` because they are pure
-abstractions rather than infrastructure implementations.
+as `LoggerPort`, `RunnerFactoryPort`, `RunnablePort`,
+`ExecutionObservabilityPort`, `RateLimiterPort`, and `CircuitBreakerPort`; they
+remain in `domain.ports` because they are pure abstractions rather than
+infrastructure implementations.
 
 ### Runtime Context
 
@@ -38624,6 +38706,7 @@ class DataSourcePort(Protocol):
 | `MetricsServerPort` | Metrics HTTP server management |
 | `DQMonitorPort` | Data quality monitoring |
 | `ExecutorMetricsPort` | Batch executor metrics |
+| `ExecutionObservabilityPort` | Domain-facing execution bundle for logger, metrics, tracing, and DQ monitor collaborators |
 
 ### Config Ports
 
@@ -38657,7 +38740,8 @@ class DataSourcePort(Protocol):
 | Port | Description |
 |---|---|
 | `RunnablePort` | Pipeline runnable interface |
-| `PipelineFactoryPort` | Pipeline creation |
+| `ExecutionMetricsRunnerPort` | Runnable that also exposes execution counters |
+| `PipelineFactoryPort` | Pipeline and runner creation through domain-facing settings/config/observability contracts |
 | `RunnerFactoryPort` | Runner creation |
 | `PipelineRegistryPort` | Pipeline registry lookup |
 | `RegistryAccessorPort` | Registry access |
@@ -38668,6 +38752,11 @@ class DataSourcePort(Protocol):
 | `ClockPort` | Time abstraction |
 | `MemoryMonitorPort` | Memory usage monitoring |
 | `MetricsExtractorPort` | Metrics extraction |
+
+`PipelineFactoryPort.create_runner()` now depends on `SettingsPort`,
+`PipelineYamlConfigPort`, and `ExecutionObservabilityPort` rather than a
+concrete composition bundle type. This keeps the contract in the domain layer
+while removing outer-layer runtime vocabulary from the port surface.
 
 ### Other Ports
 

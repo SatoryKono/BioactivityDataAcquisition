@@ -32,6 +32,8 @@ if TYPE_CHECKING:
     from bioetl.application.services.vacuum_service import VacuumService
 
 __all__ = [
+    "get_lifecycle_service",
+    "get_vacuum_service",
     "vacuum_all_command",
     "vacuum_command",
 ]

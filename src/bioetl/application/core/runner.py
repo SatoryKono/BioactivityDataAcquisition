@@ -21,6 +21,10 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._span_helpers import (
+    build_pipeline_span_attributes,
+    start_current_span,
+)
 from bioetl.domain.events import PipelineEvent
 
 if TYPE_CHECKING:
@@ -199,18 +203,14 @@ class PipelineRunner:
     @contextmanager
     def _pipeline_span(self) -> Generator[Span, None, None]:
         """Context manager for the top-level pipeline OTel span."""
-        otel_tracer = self._tracer.get_tracer("bioetl.runner")
-        with cast(
-            "Span",
-            otel_tracer.start_as_current_span(
-                "pipeline.run",
-                attributes={
-                    "bioetl.pipeline": self._config.pipeline_name or "unknown",
-                    "bioetl.provider": self._config.provider,
-                    "bioetl.entity_type": self._config.entity_type,
-                    "bioetl.run_type": self._runtime.run_type.value,
-                    "bioetl.run_id": str(self._context.run_id),
-                },
+        with start_current_span(
+            tracing=self._tracer,
+            tracer_name="bioetl.runner",
+            span_name="pipeline.run",
+            attributes=build_pipeline_span_attributes(
+                config=self._config,
+                runtime=self._runtime,
+                context=self._context,
             ),
         ) as span:
             yield span

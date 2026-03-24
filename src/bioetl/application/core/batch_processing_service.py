@@ -55,6 +55,7 @@ class BatchProcessingService:
         components: BatchProcessingComponents,
         tracing_manager: BatchTracingManagerService,
         batch_id_factory: BatchIdGeneratorPort,
+        support_service: BatchProcessingSupportService,
     ) -> None:
         """Initialise batch processing service with required collaborators."""
         self._services = services
@@ -66,14 +67,7 @@ class BatchProcessingService:
         self._writer = components.writer
         self._tracing = tracing_manager
         self._batch_id_factory = batch_id_factory
-        self._support = BatchProcessingSupportService(
-            services=services,
-            logger=self._logger,
-            batch_metrics=self._batch_metrics,
-            transformer=self._transformer,
-            writer=self._writer,
-            tracing=self._tracing,
-        )
+        self._support = support_service
 
     async def extract_records(
         self,

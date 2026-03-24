@@ -7,7 +7,7 @@ __all__ = ["BatchCheckpointRecoveryService"]
 
 from typing import TYPE_CHECKING
 
-from bioetl.domain.exceptions import BioETLError
+from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
@@ -19,13 +19,7 @@ if TYPE_CHECKING:
 class BatchCheckpointRecoveryService:
     """Owns checkpoint save semantics for runtime, shutdown, and recovery."""
 
-    _CHECKPOINT_SAVE_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-    )
+    _CHECKPOINT_SAVE_ERRORS = OPERATION_ERRORS
 
     def __init__(
         self,

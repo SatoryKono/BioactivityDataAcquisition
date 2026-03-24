@@ -42,9 +42,12 @@
 
 ## Текущий кодовый срез
 
-По текущему репозиторию главный остаточный pressure теперь сидит в одном месте:
+По текущему репозиторию активная очередь больше не выглядит как broad refactor
+program. После closeout `RF-024` и завершения `RF-023` follow-up остаточный
+pressure теперь удерживается в двух режимах:
 
-1. `topology watchpoints / conservative follow-up`
+1. `watch-mode governance refresh` для hotspot families и bounded ratchets
+2. `topology watchpoints / conservative follow-up`
 
 Текущий size snapshot для закрытых/guarded shared adapter seams:
 
@@ -69,6 +72,25 @@ Config-topology seams после `P1` closeout удерживаются как g
 - `src/bioetl/composition/providers/_default_registry.py`
 
 Это больше не большой provider/datasource SCC; это узкий compatibility seam.
+
+Дополнительно уже landed и удерживаются guardrails, которые раньше выглядели
+как "будущие задачи", но по текущему коду уже являются частью baseline:
+
+- `RF-023`: `configs/quality/debt_scorecard.yaml` уже держит report-only
+  family baseline для `application/core`,
+  `composition/bootstrap/runtime` и
+  `composition/factories/pipeline`;
+- `RF-023`: `make qa-hotspot-report` уже публикует repeatable hotspot snapshot
+  и append-only history artifact `reports/quality/hotspot-duplication-history.jsonl`;
+- `RF-024`: curated compatibility inventory уже ведётся через
+  `configs/quality/compatibility_facade_inventory.yaml` и
+  `docs/02-architecture/07-compatibility-facade-inventory.md`;
+- `RF-024`: transition debt ledger сейчас равен `0`, а remaining pipeline
+  shims удерживаются как measured-only surfaces под freeze guards.
+- `RF-024`: retained CLI entrypoint ledger теперь покрывает
+  `run*`, `health`, `quarantine`, `maintenance`, `archive`, `cleanup`,
+  `vacuum`, а helper-level CLI aliases и shared `execution_policy.py`
+  уже удерживаются как measured-only / no-new-first-party-imports seams.
 
 ## Активная очередь
 
@@ -234,18 +256,109 @@ Execution note:
   `batch_processing_support.py` больше не держат локальные копии runtime
   failure tuples
 
+### RF-023. Hotspot family governance closeout
+
+Статус: completed on `2026-03-24`.
+
+Что зафиксировано как closed baseline:
+
+- `configs/quality/debt_scorecard.yaml` держит repo-level `report-only`
+  baseline и active family-level duplication-only ratchets для
+  `application/core`, `composition/bootstrap/runtime` и
+  `composition/factories/pipeline`;
+- `Makefile` публикует canonical command `qa-hotspot-report`;
+- `reports/quality/hotspot-duplication-baseline.md` и
+  `reports/quality/hotspot-duplication-history.jsonl` уже фиксируют два
+  confirming clean snapshots с `0` duplication clusters во всех tracked
+  families;
+- `docs/reports/evidence/governance-signals/SUMMARY.md` синхронизирован с
+  этим posture и описывает active bounded ratchets как non-regression control,
+  а не как открытый refactor queue.
+
+Что это значит для живой очереди:
+
+- `RF-023` больше не является active backlog line;
+- tracked families теперь удерживаются в watch mode:
+  repo-level governance остаётся `report-only`,
+  duplication — под bounded family ratchets,
+  file-growth и fan-in — в watch-only posture;
+- новые hotspot slices должны открываться только при новом evidence или
+  regressions, а не как автоматическое продолжение уже закрытой wave.
+
+Чего не делать:
+
+- не включать repo-wide duplication gate;
+- не трактовать active family ratchets как повод открыть новую broad cleanup
+  program;
+- не смешивать hotspot governance с package-move инициативой.
+
+Признак сохранения closeout:
+
+- history artifact продолжает пополняться только после intentional slices или
+  reviewed governance refresh;
+- tracked families удерживают `0` duplication clusters;
+- decision notes и top-level summaries остаются синхронизированы с bounded
+  ratchet posture.
+
+### RF-024. Compatibility-surface governance closeout
+
+Статус: completed on `2026-03-24`.
+
+Что зафиксировано как closed baseline:
+
+- `transition_debt` в
+  `configs/quality/compatibility_facade_inventory.yaml` удерживается на `0`;
+- curated retained-entrypoint ledger покрывает CLI seams
+  `run.py`, `run_all.py`, `run_composite.py`, `health.py`,
+  `quarantine.py`, `maintenance.py`, `archive.py`, `cleanup.py`,
+  `vacuum.py`;
+- helper-level CLI aliases и shared `execution_policy.py` сведены к
+  measured-only / no-new-first-party-imports posture под freeze guards;
+- `pipeline.config_resolution`, `pipeline.configs`,
+  `pipeline.creation_api` и `services.creation_api` удерживаются как
+  controlled measured-only / deprecated seams без broad migration wave;
+- compatibility inventory, generated snapshot, boundary tests и
+  architecture freeze guards синхронизированы с этим baseline.
+
+Что это значит для живой очереди:
+
+- `RF-024` больше не является active backlog line;
+- новые compatibility decisions теперь должны открываться только как
+  отдельные bounded follow-up slices при появлении нового evidence;
+- measured-only review продолжается как routine governance, а не как
+  самостоятельная refactor wave.
+
+Чего не делать:
+
+- не переоткрывать `RF-024` под broad rename/package-consistency волну;
+- не превращать measured-only modules в curated rows без явного governance
+  повода;
+- не удалять retained entrypoints, пока inventory, tests и public import paths
+  не подтверждают readiness.
+
+Признак сохранения closeout:
+
+- transition debt остаётся `0`;
+- measured-only allowlist не растёт без явного approval/update в inventory;
+- новые compatibility changes оформляются как отдельные bounded decisions, а
+  не как возврат к repo-wide cleanup wave.
+
 ## Что не делать
 
 - не поднимать заново старые `rf-*`, `rf-fs-*`, `wave-3-*`, `wave-4-*`
   документы как параллельные master queues;
 - не смешивать config-topology cleanup с provider-registry migration wave;
 - не запускать repo-wide import cleanup без нового evidence;
-- не делать broad adapter rewrite вместо bounded-cluster подхода.
+- не делать broad adapter rewrite вместо bounded-cluster подхода;
+- не трактовать `RF-023` как повод для нового глобального duplication gate;
+- не трактовать закрытый `RF-024` как повод для массовой rename/move волны.
 
 ## Рекомендуемый порядок
 
-1. `P3` — watchlist review только при появлении нового evidence
-2. затем новый snapshot backlog, а не автоматический переход к следующему
+1. `watch-mode governance refresh` — обновлять hotspot history и summaries
+   только после intentional slices или reviewed drift
+2. `P3` — watchlist review только при появлении нового evidence
+3. затем новый snapshot backlog, а не автоматический переход к следующему
    старому dated plan
 
 ## Definition Of Done Для Папки `docs/plans`

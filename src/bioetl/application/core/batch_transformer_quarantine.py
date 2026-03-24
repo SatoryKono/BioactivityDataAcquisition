@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
 from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome,
     TransformedRecord,
@@ -13,19 +14,12 @@ from bioetl.application.core.quarantine_manager import (
     FilteredQuarantineEntry,
     QuarantineManagerService,
 )
-from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BatchID
 
-QUARANTINE_WRITE_WARN_ONLY_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+QUARANTINE_WRITE_WARN_ONLY_ERRORS = OPERATION_ERRORS
 
 
 async def flush_filtered_records(

@@ -8,9 +8,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    _BuildFactoryServicesRequest,
+    _CreatePipelineWithServicesRequest,
+    _PipelineFactoryContext,
     build_factory_services,
     create_factory_data_source,
     create_factory_runner,
+    create_pipeline_instance_with_services,
     create_transformer_instance,
 )
 
@@ -118,15 +122,107 @@ class TestBuildFactoryServices:
         expected = MagicMock()
         mock_build.return_value = expected
 
-        result = build_factory_services(
+        factory_context = _PipelineFactoryContext(
             pipeline_name="test",
             create_data_source_fn=MagicMock(),
+        )
+        request = _BuildFactoryServicesRequest(
             settings=MagicMock(),
             logger=MagicMock(),
+            config=MagicMock(),
+            filter_config=MagicMock(),
+            tracer=MagicMock(),
+            dq_monitor=MagicMock(),
+        )
+        result = build_factory_services(
+            factory_context=factory_context,
+            request=request,
         )
 
         assert result is expected
-        mock_build.assert_called_once()
+        mock_build.assert_called_once_with(
+            pipeline_name="test",
+            create_data_source_fn=factory_context.create_data_source_fn,
+            settings=request.settings,
+            logger=request.logger,
+            config=request.config,
+            filter_config=request.filter_config,
+            tracer=request.tracer,
+            dq_monitor=request.dq_monitor,
+        )
+
+
+@pytest.mark.unit
+class TestCreatePipelineInstanceWithServices:
+    """Tests for create_pipeline_instance_with_services."""
+
+    @patch(
+        "bioetl.composition.factories.pipeline.factory_method_helpers.create_pipeline_with_services"
+    )
+    def test_delegates_with_factory_context(
+        self,
+        mock_create_pipeline_with_services: MagicMock,
+    ) -> None:
+        """Context-backed helper should unwrap factory wiring into canonical call."""
+        expected_pipeline = MagicMock()
+        mock_create_pipeline_with_services.return_value = expected_pipeline
+        pipeline_class = MagicMock()
+        transformer_class = MagicMock()
+        create_data_source_fn = MagicMock()
+        factory_context = _PipelineFactoryContext(
+            pipeline_name="chembl_activity",
+            create_data_source_fn=create_data_source_fn,
+            pipeline_class=pipeline_class,
+            provider="chembl",
+            transformer_class=transformer_class,
+            pandera_silver_schema=MagicMock(),
+        )
+        runtime = MagicMock()
+        settings = MagicMock()
+        logger = MagicMock()
+        config = MagicMock()
+        filter_config = MagicMock()
+        tracer = MagicMock()
+        dq_monitor = MagicMock()
+        metrics = MagicMock()
+        cached_bronze = MagicMock()
+        request = _CreatePipelineWithServicesRequest(
+            run_id="run-1",
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
+        )
+
+        result = create_pipeline_instance_with_services(
+            factory_context=factory_context,
+            request=request,
+        )
+
+        assert result is expected_pipeline
+        mock_create_pipeline_with_services.assert_called_once_with(
+            pipeline_name="chembl_activity",
+            pipeline_class=pipeline_class,
+            provider="chembl",
+            create_data_source_fn=create_data_source_fn,
+            transformer_class=transformer_class,
+            pandera_silver_schema=factory_context.pandera_silver_schema,
+            run_id=request.run_id,
+            runtime=request.runtime,
+            settings=request.settings,
+            logger=request.logger,
+            config=request.config,
+            filter_config=request.filter_config,
+            tracer=request.tracer,
+            dq_monitor=request.dq_monitor,
+            metrics=request.metrics,
+            cached_bronze=request.cached_bronze,
+        )
 
 
 @pytest.mark.unit

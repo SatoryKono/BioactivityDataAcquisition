@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.composition.factories.pipeline._creation_wiring import (
+from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,

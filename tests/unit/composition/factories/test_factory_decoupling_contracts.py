@@ -142,7 +142,8 @@ def test_service_bundle_uses_config_resolution_seam_for_pipeline_config_access()
         if isinstance(node, ast.ImportFrom) and node.module is not None
     }
     assert (
-        "bioetl.composition.factories.pipeline.config_resolution" not in imported_modules
+        "bioetl.composition.factories.pipeline.config_resolution"
+        not in imported_modules
     ), "Service bundle must not keep routing through the config_resolution shim."
     assert "bioetl.infrastructure.config.pipeline_config_api" in imported_modules, (
         "Service bundle must import load_pipeline_config from the canonical infrastructure API."
@@ -165,16 +166,19 @@ def test_factory_method_helpers_use_config_resolution_seam() -> None:
         if isinstance(node, ast.ImportFrom) and node.module is not None
     }
     assert (
-        "bioetl.composition.factories.pipeline.config_resolution" not in imported_modules
-    ), "Factory method helpers must not keep routing through the config_resolution shim."
+        "bioetl.composition.factories.pipeline.config_resolution"
+        not in imported_modules
+    ), (
+        "Factory method helpers must not keep routing through the config_resolution shim."
+    )
     assert "bioetl.infrastructure.config.pipeline_config_api" in imported_modules, (
         "Factory method helpers must import pipeline_config_api directly."
     )
 
 
 @pytest.mark.unit
-def test_service_bundle_uses_creation_wiring_owner_directly() -> None:
-    """Service bundle should import creation contracts from the canonical owner."""
+def test_service_bundle_uses_public_creation_support_module() -> None:
+    """Service bundle should import creation contracts from the public support seam."""
     path = Path("src/bioetl/composition/factories/services/bundle.py")
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source)
@@ -184,13 +188,13 @@ def test_service_bundle_uses_creation_wiring_owner_directly() -> None:
         for node in tree.body
         if isinstance(node, ast.ImportFrom) and node.module is not None
     }
-    assert "bioetl.composition.factories.pipeline._creation_wiring" in imported_modules
+    assert "bioetl.composition.factories.pipeline.creation_support" in imported_modules
     assert "bioetl.composition.factories.pipeline.creation_api" not in imported_modules
 
 
 @pytest.mark.unit
-def test_services_package_root_uses_creation_wiring_owner_directly() -> None:
-    """Services package root should not add an extra creation_api hop."""
+def test_services_package_root_uses_public_creation_support_module() -> None:
+    """Services package root should use the public creation support seam."""
     path = Path("src/bioetl/composition/factories/services/__init__.py")
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source)
@@ -200,5 +204,5 @@ def test_services_package_root_uses_creation_wiring_owner_directly() -> None:
         for node in tree.body
         if isinstance(node, ast.ImportFrom) and node.module is not None
     }
-    assert "bioetl.composition.factories.pipeline._creation_wiring" in imported_modules
+    assert "bioetl.composition.factories.pipeline.creation_support" in imported_modules
     assert "bioetl.composition.factories.pipeline.creation_api" not in imported_modules

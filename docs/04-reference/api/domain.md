@@ -14,7 +14,7 @@ external.
 
 | Subpackage | Description | Key Public Symbols |
 |---|---|---|
-| `domain.ports` | Protocol interfaces for dependency inversion (DI), including sanctioned runtime/resilience contracts | `DataSourcePort`, `StoragePort`, `LoggerPort`, `RunnerFactoryPort`, `RateLimiterPort` |
+| `domain.ports` | Protocol interfaces for dependency inversion (DI), including sanctioned runtime/resilience contracts | `DataSourcePort`, `StoragePort`, `LoggerPort`, `RunnerFactoryPort`, `ExecutionObservabilityPort` |
 | `domain.context` | Deterministic execution context primitives carried through pipeline flows | `PipelineContext`, `PipelineRunContext` |
 | `domain.entities` | Rich domain objects and Pydantic DTOs | `Bioactivity`, `Molecule`, `Target`, `BaseEntity` |
 | `domain.value_objects` | Immutable domain primitives with self-validation | `ChemblId`, `DOI`, `InChI`, `SMILES`, `PubMedId` |
@@ -43,9 +43,10 @@ external.
 All ports are defined as `typing.Protocol` in `domain.ports`. Consumers MUST import
 from the facade `bioetl.domain.ports`, not from internal modules (ARCH-008).
 This sanctioned facade also includes runtime-oriented cross-layer contracts such
-as `LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, and
-`CircuitBreakerPort`; they remain in `domain.ports` because they are pure
-abstractions rather than infrastructure implementations.
+as `LoggerPort`, `RunnerFactoryPort`, `RunnablePort`,
+`ExecutionObservabilityPort`, `RateLimiterPort`, and `CircuitBreakerPort`; they
+remain in `domain.ports` because they are pure abstractions rather than
+infrastructure implementations.
 
 ### Runtime Context
 
@@ -104,6 +105,7 @@ class DataSourcePort(Protocol):
 | `MetricsServerPort` | Metrics HTTP server management |
 | `DQMonitorPort` | Data quality monitoring |
 | `ExecutorMetricsPort` | Batch executor metrics |
+| `ExecutionObservabilityPort` | Domain-facing execution bundle for logger, metrics, tracing, and DQ monitor collaborators |
 
 ### Config Ports
 
@@ -137,7 +139,8 @@ class DataSourcePort(Protocol):
 | Port | Description |
 |---|---|
 | `RunnablePort` | Pipeline runnable interface |
-| `PipelineFactoryPort` | Pipeline creation |
+| `ExecutionMetricsRunnerPort` | Runnable that also exposes execution counters |
+| `PipelineFactoryPort` | Pipeline and runner creation through domain-facing settings/config/observability contracts |
 | `RunnerFactoryPort` | Runner creation |
 | `PipelineRegistryPort` | Pipeline registry lookup |
 | `RegistryAccessorPort` | Registry access |
@@ -148,6 +151,11 @@ class DataSourcePort(Protocol):
 | `ClockPort` | Time abstraction |
 | `MemoryMonitorPort` | Memory usage monitoring |
 | `MetricsExtractorPort` | Metrics extraction |
+
+`PipelineFactoryPort.create_runner()` now depends on `SettingsPort`,
+`PipelineYamlConfigPort`, and `ExecutionObservabilityPort` rather than a
+concrete composition bundle type. This keeps the contract in the domain layer
+while removing outer-layer runtime vocabulary from the port surface.
 
 ### Other Ports
 
