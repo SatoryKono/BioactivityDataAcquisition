@@ -24,16 +24,15 @@ def test_get_run_statistics_returns_empty_dict_without_hook() -> None:
 
 @pytest.mark.asyncio
 async def test_build_final_metadata_write_coroutines_builds_silver_only() -> None:
-    """Silver metadata flow should remain executable after extraction."""
+    """Silver metadata finalization should remain executable after extraction."""
     storage = MagicMock()
     storage.get_table_path = MagicMock(return_value="/tmp/test_silver")
     storage.is_table_initialized = MagicMock(return_value=False)
 
     metadata_coordinator = MagicMock()
-    metadata_coordinator.create_silver_metadata = MagicMock(return_value=MagicMock())
     metadata_writer = MagicMock()
-    metadata_writer.write_silver_metadata = AsyncMock(return_value="silver.yaml")
-    metadata_writer.write_gold_metadata = AsyncMock(return_value="gold.yaml")
+    metadata_writer.finalize_silver_metadata = AsyncMock(return_value="silver.yaml")
+    metadata_writer.finalize_gold_metadata = AsyncMock(return_value="gold.yaml")
 
     config = PipelineConfig(
         pipeline_name="test_postrun_pipeline",
@@ -65,6 +64,6 @@ async def test_build_final_metadata_write_coroutines_builds_silver_only() -> Non
     assert len(coroutines) == 1
     await coroutines[0]
 
-    metadata_coordinator.create_silver_metadata.assert_called_once()
-    metadata_writer.write_silver_metadata.assert_awaited_once()
-    metadata_writer.write_gold_metadata.assert_not_awaited()
+    metadata_coordinator.create_silver_metadata.assert_not_called()
+    metadata_writer.finalize_silver_metadata.assert_awaited_once()
+    metadata_writer.finalize_gold_metadata.assert_not_awaited()

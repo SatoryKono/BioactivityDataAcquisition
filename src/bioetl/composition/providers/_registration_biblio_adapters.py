@@ -7,21 +7,21 @@ from typing import TYPE_CHECKING, Any
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
+from bioetl.composition.providers._models import ProviderSettingsProtocol
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
     from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
-    from bioetl.infrastructure.config import Settings
 
 
-def _get_default_email(settings: Settings | None) -> str | None:
+def _get_default_email(settings: ProviderSettingsProtocol | None) -> str | None:
     """Return non-empty default email from settings when available."""
     return None if settings is None else settings.default_email or None
 
 
-def _get_pubmed_api_key(settings: Settings | None) -> str | None:
+def _get_pubmed_api_key(settings: ProviderSettingsProtocol | None) -> str | None:
     """Return resolved PubMed API key from settings when configured."""
     if settings is None or settings.pubmed_api_key is None:
         return None
@@ -33,7 +33,7 @@ def _build_pubmed_adapter_from_settings(
     adapter_cls: type[PubMedAdapter],
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    settings: Settings | None,
+    settings: ProviderSettingsProtocol | None,
     **kwargs: Any,  # Any: forward arbitrary adapter kwargs
 ) -> PubMedAdapter:
     """Create PubMedAdapter with credential resolution owned by composition."""
@@ -83,7 +83,7 @@ def _build_openalex_adapter_from_settings(
     adapter_cls: type[OpenAlexAdapter],
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    settings: Settings | None,
+    settings: ProviderSettingsProtocol | None,
     **kwargs: Any,  # Any: forward arbitrary adapter kwargs
 ) -> OpenAlexAdapter:
     """Create OpenAlexAdapter with mailto resolution owned by composition."""

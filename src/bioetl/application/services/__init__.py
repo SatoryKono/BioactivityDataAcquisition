@@ -44,6 +44,13 @@ from bioetl.application.services.export_service import (
 from bioetl.application.services.health_service import (
     HealthService,
 )
+from bioetl.application.services.lineage_inspection_service import (
+    LineageFragmentInspectionResult,
+    LineageInspectionService,
+    LineageNodeRelation,
+    LineageRunExplanationResult,
+    LineageTraceResult,
+)
 from bioetl.application.services.metrics_service import (
     MetricsService,
 )
@@ -82,6 +89,11 @@ __all__ = [
     "ExportResult",
     "ExportService",
     "HealthService",
+    "LineageFragmentInspectionResult",
+    "LineageInspectionService",
+    "LineageNodeRelation",
+    "LineageRunExplanationResult",
+    "LineageTraceResult",
     "MetricsService",
     "PipelineNotFoundError",
     "PipelineRunLifecycleService",

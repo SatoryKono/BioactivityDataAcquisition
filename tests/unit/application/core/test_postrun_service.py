@@ -133,10 +133,12 @@ def mock_metadata_coordinator():
 def mock_metadata_writer():
     """Create a mock metadata writer."""
     writer = MagicMock()
-    writer.write_silver_metadata = AsyncMock(
+    writer.finalize_silver_metadata = AsyncMock(
         return_value="/path/to/silver_metadata.yaml"
     )
-    writer.write_gold_metadata = AsyncMock(return_value="/path/to/gold_metadata.yaml")
+    writer.finalize_gold_metadata = AsyncMock(
+        return_value="/path/to/gold_metadata.yaml"
+    )
     return writer
 
 
@@ -491,8 +493,8 @@ class TestPostrunServiceMetadata:
             dq_reports=None,
         )
 
-        mock_metadata_writer.write_silver_metadata.assert_awaited_once()
-        mock_metadata_writer.write_gold_metadata.assert_not_awaited()
+        mock_metadata_writer.finalize_silver_metadata.assert_awaited_once()
+        mock_metadata_writer.finalize_gold_metadata.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_run_final_metadata_phase_delegates_to_metadata_write_service(

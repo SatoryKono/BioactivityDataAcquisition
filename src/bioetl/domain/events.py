@@ -57,6 +57,7 @@ class PipelineEvent:
 
     # Maintenance events
     VACUUM_COMPLETED = "vacuum_completed"
+    ARTIFACT_PUBLISHED = "artifact_published"
 
     @classmethod
     def phase_started(cls, phase_value: str) -> str:

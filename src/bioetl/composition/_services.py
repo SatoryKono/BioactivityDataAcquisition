@@ -1,8 +1,4 @@
-"""Service factory entrypoints.
-
-Application and infrastructure service getters for CLI and other interfaces.
-Split from entrypoints.py per audit-package-structure-2026-02-07.
-"""
+"""Service factory entrypoints for CLI and other interfaces."""
 
 from __future__ import annotations
 
@@ -18,6 +14,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_export_service,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
+    bootstrap_lineage_service,
     bootstrap_lock_service,
     bootstrap_metrics_service,
     bootstrap_pipeline_runner_service,
@@ -35,6 +32,7 @@ if TYPE_CHECKING:
         ConfigService,
         ExportService,
         HealthService,
+        LineageInspectionService,
         MetricsService,
         PipelineRunnerService,
         QuarantineService,
@@ -55,6 +53,7 @@ __all__ = [
     "get_export_service",
     "get_health_server_dependencies",
     "get_health_service",
+    "get_lineage_service",
     "get_lock_service",
     "get_metrics_service",
     "get_pipeline_runner_service",
@@ -256,6 +255,12 @@ def get_run_manifest_service() -> RunManifestInspectionService:
     """Get a run-manifest inspection service for control-plane operations."""
     _ensure_registrations()
     return bootstrap_run_manifest_service()
+
+
+def get_lineage_service() -> LineageInspectionService:
+    """Get a lineage inspection service for traceability operations."""
+    _ensure_registrations()
+    return bootstrap_lineage_service()
 
 
 def get_health_service() -> HealthService:

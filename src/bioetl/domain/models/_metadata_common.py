@@ -226,6 +226,7 @@ class BaseOutputMetadata(BaseModel):
         record_count: Total records written to layer.
         total_bytes: Total size in bytes (compressed for Bronze, on-disk for Delta).
         content_hash: SHA256 hash of content for change detection.
+        lineage_fragment_id: Canonical lineage fragment identifier for full graph lookup.
         write_started_at: UTC timestamp when write operation started.
         write_completed_at: UTC timestamp when write operation completed.
     """
@@ -245,6 +246,10 @@ class BaseOutputMetadata(BaseModel):
     content_hash: str | None = Field(
         default=None,
         description="SHA256 hash of content for change detection",
+    )
+    lineage_fragment_id: str | None = Field(
+        default=None,
+        description="Canonical lineage fragment identifier for full graph lookup",
     )
     write_started_at: datetime | None = Field(
         default=None,

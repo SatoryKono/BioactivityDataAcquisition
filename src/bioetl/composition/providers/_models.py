@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -18,10 +17,28 @@ __all__ = [
     "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",
+    "ProviderSettingsProtocol",
 ]
 
 
 AdapterCreator = Callable[..., "DataSourcePort"]
+
+
+class SecretValueProviderProtocol(Protocol):
+    """Minimal secret wrapper contract used by provider settings wiring."""
+
+    def get_secret_value(self) -> str:
+        """Return the resolved secret payload."""
+        ...
+
+
+class ProviderSettingsProtocol(Protocol):
+    """Minimal settings surface required by provider registration helpers."""
+
+    default_email: str | None
+    strict_error_handling: bool
+    pubmed_api_key: SecretValueProviderProtocol | None
+    semanticscholar_api_key: SecretValueProviderProtocol | None
 
 
 class DataSourceCreatorProtocol(Protocol):
@@ -29,7 +46,7 @@ class DataSourceCreatorProtocol(Protocol):
 
     def __call__(
         self,
-        settings: Settings,
+        settings: ProviderSettingsProtocol,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,

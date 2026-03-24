@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers._config_helpers import _normalize_optional_override
+from bioetl.composition.providers._models import ProviderSettingsProtocol
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -37,7 +37,7 @@ class SemanticScholarRequestProfile:
 
 
 def _resolve_biblio_contact_email(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
 ) -> str | None:
     """Resolve pipeline email override with settings fallback."""
@@ -46,7 +46,7 @@ def _resolve_biblio_contact_email(
 
 
 def _resolve_pubmed_request_profile(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
 ) -> PubMedRequestProfile:
     """Resolve PubMed email + API key using pipeline override precedence."""
@@ -61,7 +61,7 @@ def _resolve_pubmed_request_profile(
 
 
 def _resolve_mailto_batch_profile(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     *,
     batch_size: int,
@@ -74,7 +74,7 @@ def _resolve_mailto_batch_profile(
 
 
 def _resolve_semanticscholar_request_profile(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     *,
     batch_size: int,
 ) -> SemanticScholarRequestProfile:

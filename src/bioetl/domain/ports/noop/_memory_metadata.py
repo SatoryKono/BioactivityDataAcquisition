@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -131,6 +132,21 @@ class NoOpMetadataWriter:
         """
         return ""
 
+    async def finalize_silver_metadata(
+        self,
+        base_path: str | Path,  # noqa: ARG002
+        *,
+        table_name: str | None = None,  # noqa: ARG002
+        flat_structure: bool = False,  # noqa: ARG002
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
+        dq_report_path: str | None = None,  # noqa: ARG002
+        completed_at: datetime | None = None,  # noqa: ARG002
+        delta_version_after: int | None = None,  # noqa: ARG002
+    ) -> str | None:
+        """No-op Silver finalization returns empty string when invoked."""
+        return ""
+
     async def write_gold_metadata(
         self,
         base_path: str | Path,  # noqa: ARG002
@@ -154,6 +170,20 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
+        return ""
+
+    async def finalize_gold_metadata(
+        self,
+        base_path: str | Path,  # noqa: ARG002
+        *,
+        table_name: str | None = None,  # noqa: ARG002
+        flat_structure: bool = False,  # noqa: ARG002
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
+        dq_report_path: str | None = None,  # noqa: ARG002
+        completed_at: datetime | None = None,  # noqa: ARG002
+    ) -> str | None:
+        """No-op Gold finalization returns empty string when invoked."""
         return ""
 
     async def aclose(self) -> None:

@@ -6,11 +6,10 @@ import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from deltalake import DeltaTable
 
-from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
@@ -28,6 +27,9 @@ from bioetl.infrastructure.storage.lineage_persistence import (
     resolve_metadata_and_lineage_fragment,
 )
 from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+if TYPE_CHECKING:
+    from bioetl.domain.lineage import LineageGraphFragment
 
 __all__ = [
     "_PreparedSilverWriteFinalizationContext",
@@ -226,24 +228,40 @@ async def _prepare_silver_merged_metadata_write(
         table_path=request.table_path,
         table_name=request.table_name,
     )
+    silver_input = SilverMetadataInput(
+        table_path=request.table_path,
+        records=request.records,
+        primary_keys=request.primary_keys,
+        mode=SilverWriteMode.DELETE,
+        version_after=context.version_after,
+        transform_version=host._transform_version,
+        transform_steps=host._transform_steps,
+    )
     builder = SilverMetadataBuilder(
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,
     )
-    metadata = builder.build_merged_metadata(
-        table_path=request.table_path,
-        table_name=request.table_name,
-        records=request.records,
-        primary_keys=request.primary_keys,
-        run_id=request.run_id,
-        sources_used=request.sources_used,
-        version_after=context.version_after,
+    metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
+        coordinator=host._metadata_coordinator,
+        bundle_factory_name="create_silver_metadata_bundle",
+        coordinator_factory_name="create_silver_metadata",
+        input_data=silver_input,
+        fallback_factory=lambda: builder.build_merged_metadata(
+            table_path=request.table_path,
+            table_name=request.table_name,
+            records=request.records,
+            primary_keys=request.primary_keys,
+            run_id=request.run_id,
+            sources_used=request.sources_used,
+            version_after=context.version_after,
+        ),
     )
     return _PreparedSilverMetadataWriteOperation(
         request=request,
         provider_name=context.provider_name,
         entity_name=context.entity_name,
         metadata=metadata,
+        lineage_fragment=lineage_fragment,
     )
 
 

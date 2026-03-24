@@ -53,6 +53,10 @@ class TestPipelineEventConstants:
         """Verify vacuum event is defined."""
         assert PipelineEvent.VACUUM_COMPLETED == "vacuum_completed"
 
+    def test_artifact_published_event_defined(self) -> None:
+        """Verify artifact publication event is defined."""
+        assert PipelineEvent.ARTIFACT_PUBLISHED == "artifact_published"
+
 
 class TestPipelineEventPhaseMethods:
     """Tests for PipelineEvent phase helper methods."""

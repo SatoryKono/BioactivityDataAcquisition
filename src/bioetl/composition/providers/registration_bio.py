@@ -20,7 +20,11 @@ from bioetl.composition.providers._config_helpers import (
     _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
 )
-from bioetl.composition.providers._models import HttpConfig, ProviderConfig
+from bioetl.composition.providers._models import (
+    HttpConfig,
+    ProviderConfig,
+    ProviderSettingsProtocol,
+)
 from bioetl.composition.providers._registration_contracts import (
     ProviderAssemblySupport,
     build_data_source_provider_config,
@@ -41,12 +45,11 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def _create_chembl_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
@@ -101,7 +104,7 @@ def _create_chembl_data_source(
 def _create_pubchem_adapter(
     http_client: UnifiedHTTPClient | None = None,
     logger: LoggerPort | None = None,
-    settings: Settings | None = None,
+    settings: ProviderSettingsProtocol | None = None,
     **kwargs: object,
 ) -> DataSourcePort:
     """Retained provider-registration wrapper for the PubChem composition factory."""
@@ -114,7 +117,7 @@ def _create_pubchem_adapter(
 
 
 def _create_pubchem_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
@@ -132,7 +135,7 @@ def _create_pubchem_data_source(
 
 
 def _create_uniprot_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
@@ -169,7 +172,7 @@ def _create_uniprot_data_source(
 
 
 def _create_uniprot_idmapping_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,

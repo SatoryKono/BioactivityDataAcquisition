@@ -16,7 +16,7 @@ __all__ = ["FileLineageStore"]
 
 def _stable_key_filename(key: str) -> str:
     """Return a filesystem-safe filename stem for one semantic key."""
-    return hashlib.sha1(key.encode("utf-8")).hexdigest()
+    return hashlib.sha256(key.encode("utf-8")).hexdigest()
 
 
 def _load_fragment_ids(index_path: Path, *, key: str) -> list[str]:

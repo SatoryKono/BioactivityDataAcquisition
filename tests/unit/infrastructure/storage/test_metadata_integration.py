@@ -132,6 +132,52 @@ class MockMetadataWriter:
         self.gold_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
 
+    async def finalize_silver_metadata(
+        self,
+        base_path: str | Path,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
+        delta_version_after: int | None = None,
+    ) -> str | None:
+        """Record Silver metadata finalization as a no-op compatible seam."""
+        _ = (
+            table_name,
+            flat_structure,
+            provider,
+            entity,
+            dq_report_path,
+            completed_at,
+            delta_version_after,
+        )
+        return str(Path(base_path) / "_metadata.yaml")
+
+    async def finalize_gold_metadata(
+        self,
+        base_path: str | Path,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
+    ) -> str | None:
+        """Record Gold metadata finalization as a no-op compatible seam."""
+        _ = (
+            table_name,
+            flat_structure,
+            provider,
+            entity,
+            dq_report_path,
+            completed_at,
+        )
+        return str(Path(base_path) / "_metadata.yaml")
+
     async def aclose(self) -> None:
         """No-op close."""
         pass

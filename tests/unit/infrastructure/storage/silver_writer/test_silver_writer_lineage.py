@@ -716,6 +716,68 @@ class TestSilverWriterLineage:
         )
 
     @pytest.mark.asyncio
+    async def test_write_silver_merged_metadata_persists_lineage_fragment(
+        self, noop_logger, valid_records
+    ):
+        """Merged Silver metadata should persist canonical lineage fragments too."""
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.ports import SilverMetadataInput
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        metadata = MagicMock()
+        fragment = LineageGraphFragment(fragment_id="silver:merged-fragment-1")
+        captured_input: SilverMetadataInput | None = None
+
+        class _Coordinator:
+            def create_silver_metadata_bundle(
+                self,
+                input_data: SilverMetadataInput,
+            ) -> MetadataLineageBundle:
+                nonlocal captured_input
+                captured_input = input_data
+                return MetadataLineageBundle(
+                    metadata=metadata,
+                    lineage_fragment=fragment,
+                )
+
+            def create_silver_metadata(self, input_data: object) -> object:
+                _ = input_data
+                return metadata
+
+        lineage_store = MagicMock()
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=noop_logger,
+            metadata_writer=MagicMock(),
+            metadata_coordinator=_Coordinator(),
+            lineage_store=lineage_store,
+        )
+        writer._get_delta_version = AsyncMock(return_value=11)  # type: ignore[method-assign]
+        writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
+
+        await writer._write_silver_merged_metadata(
+            table_path="/tmp/silver/composite/publication",
+            table_name="composite.publication",
+            records=valid_records,
+            primary_keys=["entity_id"],
+            run_id="run-1",
+            sources_used=["chembl"],
+        )
+
+        assert captured_input is not None
+        assert captured_input.mode is SilverWriteMode.DELETE
+        assert captured_input.version_after == 11
+        assert captured_input.records == valid_records
+        writer._write_silver_metadata_file.assert_awaited_once_with(
+            table_path="/tmp/silver/composite/publication",
+            metadata=metadata,
+            table_name="composite.publication",
+            provider_name="composite",
+            entity_name="publication",
+        )
+        lineage_store.save.assert_called_once_with(fragment)
+
+    @pytest.mark.asyncio
     async def test_metadata_write_paths_preserve_skip_logging_levels(
         self, valid_records
     ):

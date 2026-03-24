@@ -12,7 +12,10 @@ from bioetl.composition.providers._config_helpers import (
     _get_batch_size_from_config,
     _get_rate_limit_from_config,
 )
-from bioetl.composition.providers._models import ProviderConfig
+from bioetl.composition.providers._models import (
+    ProviderConfig,
+    ProviderSettingsProtocol,
+)
 from bioetl.composition.providers._registration_biblio_adapters import (
     _build_openalex_adapter_from_settings,
     _build_pubmed_adapter_from_settings,
@@ -36,14 +39,13 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def _create_pubmed_adapter_from_settings(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    settings: Settings | None,
+    settings: ProviderSettingsProtocol | None,
     **kwargs: object,
 ) -> PubMedAdapter:
     """Create PubMedAdapter with patch-friendly composition-local adapter binding."""
@@ -59,7 +61,7 @@ def _create_pubmed_adapter_from_settings(
 def _create_openalex_adapter_from_settings(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    settings: Settings | None,
+    settings: ProviderSettingsProtocol | None,
     **kwargs: object,
 ) -> OpenAlexAdapter:
     """Create OpenAlexAdapter with patch-friendly composition-local adapter binding."""
@@ -73,7 +75,7 @@ def _create_openalex_adapter_from_settings(
 
 
 def _create_pubmed_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
@@ -112,7 +114,7 @@ def _create_pubmed_data_source(
 
 
 def _create_crossref_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
@@ -150,7 +152,7 @@ def _create_crossref_data_source(
 
 
 def _create_openalex_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
@@ -184,7 +186,7 @@ def _create_openalex_data_source(
 
 
 def _create_semanticscholar_data_source(
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,

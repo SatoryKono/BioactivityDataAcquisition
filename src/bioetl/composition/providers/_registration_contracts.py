@@ -10,6 +10,7 @@ from bioetl.composition.providers._models import (
     AdapterCreator,
     DataSourceCreatorProtocol,
     HttpConfig,
+    ProviderSettingsProtocol,
     ProviderConfig,
 )
 
@@ -18,7 +19,6 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -28,7 +28,7 @@ class ProviderHttpClientFactoryProtocol(Protocol):
     def __call__(
         self,
         provider: str,
-        settings: Settings | None = None,
+        settings: ProviderSettingsProtocol | None = None,
         *,
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
@@ -45,7 +45,7 @@ class ProviderAdapterFactoryProtocol(Protocol):
         provider: str,
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
-        settings: Settings | None = None,
+        settings: ProviderSettingsProtocol | None = None,
         **kwargs: object,
     ) -> DataSourcePort:
         """Create a provider adapter via composition-owned wiring."""
@@ -57,7 +57,7 @@ class SupportAwareDataSourceCreatorProtocol(Protocol):
 
     def __call__(
         self,
-        settings: Settings,
+        settings: ProviderSettingsProtocol,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
@@ -80,7 +80,7 @@ class ProviderAssemblySupport:
 
 def _create_http_client_for_provider(
     provider: str,
-    settings: Settings | None = None,
+    settings: ProviderSettingsProtocol | None = None,
     *,
     metrics: MetricsPort | None = None,
     logger: LoggerPort | None = None,
@@ -102,7 +102,7 @@ def _create_adapter_for_provider(
     provider: str,
     http_client: UnifiedHTTPClient | None = None,
     logger: LoggerPort | None = None,
-    settings: Settings | None = None,
+    settings: ProviderSettingsProtocol | None = None,
     *,
     provider_registry: ProviderRegistry | None = None,
     **kwargs: object,

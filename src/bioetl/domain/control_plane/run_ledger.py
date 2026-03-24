@@ -42,6 +42,8 @@ class RunLedgerEntry:
     stage: str | None = None
     message: str | None = None
     error_type: str | None = None
+    dataset_ref: str | None = None
+    lineage_fragment_id: str | None = None
     metrics_snapshot: dict[str, int] | None = None
     details: dict[str, object] | None = None
 
@@ -65,6 +67,8 @@ class RunLedgerEntry:
             stage=None if payload.get("stage") is None else str(payload["stage"]),
             message=_load_optional_str(payload, "message"),
             error_type=_load_optional_str(payload, "error_type"),
+            dataset_ref=_load_optional_str(payload, "dataset_ref"),
+            lineage_fragment_id=_load_optional_str(payload, "lineage_fragment_id"),
             metrics_snapshot=_load_metrics_snapshot(payload.get("metrics_snapshot")),
             details=_load_details(payload.get("details")),
         )

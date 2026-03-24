@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.providers._models import (
     DataSourceCreatorProtocol,
+    ProviderSettingsProtocol,
     ProviderConfig,
 )
 
@@ -13,7 +14,6 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -27,7 +27,7 @@ class ProviderCreator:
         config: ProviderConfig,
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
-        settings: Settings | None = None,
+        settings: ProviderSettingsProtocol | None = None,
         **kwargs: object,
     ) -> DataSourcePort:
         """Create a provider adapter instance."""
@@ -45,7 +45,7 @@ class ProviderCreator:
         *,
         name: str,
         config: ProviderConfig,
-        settings: Settings,
+        settings: ProviderSettingsProtocol,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
@@ -91,7 +91,7 @@ def create_provider_adapter(
     config: ProviderConfig,
     http_client: UnifiedHTTPClient | None = None,
     logger: LoggerPort | None = None,
-    settings: Settings | None = None,
+    settings: ProviderSettingsProtocol | None = None,
     **kwargs: object,
 ) -> DataSourcePort:
     """Create a provider adapter instance using the supplied registry config."""
@@ -126,7 +126,7 @@ def create_provider_data_source(
     *,
     name: str,
     config: ProviderConfig,
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
@@ -177,7 +177,7 @@ def build_bound_data_source_creator(
     """Return a provider-bound data-source creator closure."""
 
     def creator(
-        settings: Settings,
+        settings: ProviderSettingsProtocol,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,

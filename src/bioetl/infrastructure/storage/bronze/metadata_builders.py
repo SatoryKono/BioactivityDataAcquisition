@@ -77,8 +77,8 @@ def build_bronze_metadata_payload(
         RuntimeMetadata,
         RunTypeEnum,
     )
+    from bioetl import __version__ as BIOETL_VERSION
     from bioetl.domain.models.metadata import SourceMetadata as SourceMetadataModel
-    from bioetl.domain.version import get_version
 
     run_type_map = {
         RunType.INCREMENTAL: RunTypeEnum.INCREMENTAL,
@@ -119,7 +119,7 @@ def build_bronze_metadata_payload(
         "environment": EnvironmentMetadata(
             hostname=socket.gethostname(),
             python_version=platform.python_version(),
-            bioetl_version=get_version(),
+            bioetl_version=BIOETL_VERSION,
         ),
     }
 

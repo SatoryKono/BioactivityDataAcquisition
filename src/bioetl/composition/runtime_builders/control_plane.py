@@ -215,7 +215,7 @@ def attach_manifest_id(ctx: PipelineRunContext, manifest_id: str) -> PipelineRun
     if is_dataclass(ctx):
         return replace(ctx, manifest_id=manifest_id)
     if hasattr(ctx, "__dict__"):
-        setattr(ctx, "manifest_id", manifest_id)
+        ctx.manifest_id = manifest_id
         return ctx
     raise TypeError("PipelineRunContext must support manifest_id attachment")
 
@@ -228,9 +228,22 @@ def _record_artifact(
     details: dict[str, object] | None,
 ) -> object:
     """Record one published artifact in the control-plane ledger."""
+    dataset_ref = None
+    lineage_fragment_id = None
+    if details is not None:
+        raw_dataset_ref = details.get("dataset_ref")
+        raw_lineage_fragment_id = details.get("lineage_fragment_id")
+        dataset_ref = None if raw_dataset_ref is None else str(raw_dataset_ref)
+        lineage_fragment_id = (
+            None
+            if raw_lineage_fragment_id is None
+            else str(raw_lineage_fragment_id)
+        )
     return service.record_artifact_published(
         layer=layer,
         artifact_path=artifact_path,
+        dataset_ref=dataset_ref,
+        lineage_fragment_id=lineage_fragment_id,
         details=details,
     )
 

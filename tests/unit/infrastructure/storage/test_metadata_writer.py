@@ -343,6 +343,63 @@ class TestMetadataWriter:
         assert content["schema"]["validation"] == "strict"
 
     @pytest.mark.asyncio
+    async def test_finalize_silver_metadata_updates_existing_sidecar(
+        self,
+        tmp_path: Path,
+        metadata_writer: MetadataWriter,
+        silver_metadata: SilverMetadata,
+    ) -> None:
+        """Silver finalization should patch the existing sidecar in place."""
+        base_path = tmp_path / "silver"
+        base_path.mkdir(parents=True)
+        await metadata_writer.write_silver_metadata(base_path, silver_metadata)
+
+        completed_at = datetime(2025, 1, 16, 12, 0, 0, tzinfo=UTC)
+        result = await metadata_writer.finalize_silver_metadata(
+            base_path,
+            dq_report_path="/tmp/dq/silver-report.json",
+            completed_at=completed_at,
+            delta_version_after=99,
+        )
+
+        metadata_path = base_path / METADATA_FILENAME
+        content = yaml.safe_load(metadata_path.read_text())
+        expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
+        assert result == str(metadata_path.resolve())
+        assert content["dq_report_path"] == "/tmp/dq/silver-report.json"
+        assert content["runtime"]["completed_at_utc"] == expected_completed_at
+        assert content["output"]["write_completed_at"] == expected_completed_at
+        assert content["delta"]["version_after"] == 99
+        assert content["output_ext"]["delta_version_after"] == 99
+
+    @pytest.mark.asyncio
+    async def test_finalize_gold_metadata_updates_existing_sidecar(
+        self,
+        tmp_path: Path,
+        metadata_writer: MetadataWriter,
+        gold_metadata: GoldMetadata,
+    ) -> None:
+        """Gold finalization should patch the existing sidecar in place."""
+        base_path = tmp_path / "gold"
+        base_path.mkdir(parents=True)
+        await metadata_writer.write_gold_metadata(base_path, gold_metadata)
+
+        completed_at = datetime(2025, 1, 16, 12, 5, 0, tzinfo=UTC)
+        result = await metadata_writer.finalize_gold_metadata(
+            base_path,
+            dq_report_path="/tmp/dq/gold-report.json",
+            completed_at=completed_at,
+        )
+
+        metadata_path = base_path / METADATA_FILENAME
+        content = yaml.safe_load(metadata_path.read_text())
+        expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
+        assert result == str(metadata_path.resolve())
+        assert content["dq_report_path"] == "/tmp/dq/gold-report.json"
+        assert content["runtime"]["completed_at_utc"] == expected_completed_at
+        assert content["output"]["write_completed_at"] == expected_completed_at
+
+    @pytest.mark.asyncio
     async def test_atomic_write_creates_no_temp_files(
         self,
         tmp_path: Path,
@@ -542,6 +599,15 @@ class TestNoOpMetadataWriter:
         writer = NoOpMetadataWriter()
         result = await writer.write_gold_metadata("/tmp/gold", gold_metadata)
         assert result == ""
+
+    @pytest.mark.asyncio
+    async def test_noop_finalize_methods_return_empty(
+        self,
+    ) -> None:
+        """Test NoOp finalize helpers return empty strings."""
+        writer = NoOpMetadataWriter()
+        assert await writer.finalize_silver_metadata("/tmp/silver") == ""
+        assert await writer.finalize_gold_metadata("/tmp/gold") == ""
 
     @pytest.mark.asyncio
     async def test_noop_aclose_is_idempotent(self) -> None:

@@ -54,7 +54,7 @@ class PostrunMetadataWriteService:
         executor: ExecutorMetricsPort,
         dq_reports: DQReportResult | None,
     ) -> None:
-        """Write final metadata when the required collaborators are configured."""
+        """Finalize existing metadata sidecars when the writer is configured."""
         if not self._has_metadata_targets():
             return
         write_coroutines = self._build_write_coroutines(
@@ -65,10 +65,8 @@ class PostrunMetadataWriteService:
             await asyncio.gather(*write_coroutines)
 
     def _has_metadata_targets(self) -> bool:
-        """Return whether the metadata pipeline has the required writers configured."""
-        return (
-            self._metadata_coordinator is not None and self._metadata_writer is not None
-        )
+        """Return whether postrun has enough collaborators to finalize sidecars."""
+        return self._metadata_writer is not None
 
     def _build_write_coroutines(
         self,

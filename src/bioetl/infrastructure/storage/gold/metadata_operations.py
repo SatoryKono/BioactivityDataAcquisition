@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID
@@ -23,6 +22,7 @@ from bioetl.infrastructure.storage.lineage_persistence import (
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
+    from bioetl.domain.lineage import LineageGraphFragment
     from bioetl.domain.models.metadata import GoldMetadata
     from bioetl.domain.ports import (
         LoggerPort,

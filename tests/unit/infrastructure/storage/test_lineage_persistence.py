@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -32,9 +33,14 @@ class _CoordinatorWithBundle:
         return self._metadata
 
 
+class _MetadataStub:
+    def __init__(self) -> None:
+        self.output = SimpleNamespace(lineage_fragment_id=None)
+
+
 @pytest.mark.unit
 def test_resolve_metadata_and_lineage_fragment_prefers_bundle_method() -> None:
-    metadata = MagicMock()
+    metadata = _MetadataStub()
     fragment = LineageGraphFragment(
         fragment_id="silver:fragment-1",
         created_at=datetime.now(UTC),
@@ -51,6 +57,7 @@ def test_resolve_metadata_and_lineage_fragment_prefers_bundle_method() -> None:
 
     assert resolved_metadata is metadata
     assert resolved_fragment == fragment
+    assert metadata.output.lineage_fragment_id == "silver:fragment-1"
 
 
 @pytest.mark.unit
@@ -68,4 +75,3 @@ async def test_persist_lineage_fragment_if_present_calls_store() -> None:
     )
 
     store.save.assert_called_once_with(fragment)
-
