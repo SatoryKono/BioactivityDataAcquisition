@@ -14,7 +14,7 @@ from typing import NamedTuple
 
 
 APPLICATION_DIR = Path("src/bioetl/application")
-EXCEPTION_MARKERS = ("EXC-002", "EXC-003")
+EXCEPTION_MARKERS = ("EXC-002", "EXC-003", "type: ignore[EXC-002]", "type: ignore[EXC-003]")
 
 
 class InlineInstantiationViolation(NamedTuple):

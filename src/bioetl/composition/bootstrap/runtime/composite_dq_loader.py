@@ -6,5 +6,4 @@ from bioetl.infrastructure.config._composite_dq_externalization import (
     merge_external_dq_overrides,
 )
 
-
 __all__ = ["merge_external_dq_overrides"]

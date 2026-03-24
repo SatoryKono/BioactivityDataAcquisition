@@ -76,6 +76,9 @@ SKIP_DIRS = frozenset(
         "dist",
         "site",
         "99-archive",
+        "ai",
+        "plans",
+        "reports",
     }
 )
 

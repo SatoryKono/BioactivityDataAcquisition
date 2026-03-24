@@ -43,8 +43,8 @@ from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
 
-ROOT = Path(__file__).resolve().parents[2]
 import sys
+ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
