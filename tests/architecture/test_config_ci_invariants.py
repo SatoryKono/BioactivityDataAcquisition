@@ -21,6 +21,12 @@ from typing import Any
 
 import pytest
 import yaml
+import sys
+from pathlib import Path
+
+# Add root to sys.path to allow importing from scripts
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT))
 
 from bioetl.domain.constants import META_FIELDS
 from bioetl.infrastructure.config.config_ci_contract import (
