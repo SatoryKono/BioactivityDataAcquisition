@@ -16,15 +16,14 @@ from bioetl.application.core.batch_processing_contracts import BatchProcessingOu
 from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
-from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import BatchIdGeneratorPort
 from bioetl.domain.types import BatchID, BronzeRecord
+from bioetl.domain.models.metadata import SourceMetadata
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from opentelemetry.trace import Span
-
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
@@ -67,7 +66,7 @@ class BatchProcessingService:
         self._writer = components.writer
         self._tracing = tracing_manager
         self._batch_id_factory = batch_id_factory
-        self._support = BatchProcessingSupportService(
+        self._support = BatchProcessingSupportService(  # type: ignore[EXC-002]
             services=services,
             logger=self._logger,
             batch_metrics=self._batch_metrics,

@@ -36,13 +36,13 @@ model: opus
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 40 ADR (ADR-001..ADR-040), все Accepted
+- Текущее состояние: 50 ADR (ADR-001..ADR-050), все Accepted
 
 **Ключевые файлы:**
 - Domain Ports: `src/bioetl/domain/ports/`
 - Adapters: `src/bioetl/infrastructure/adapters/{provider}/`
 - Pipelines: `src/bioetl/application/pipelines/`
-- Configs: `configs/pipelines/{provider}/{entity}.yaml`
+- Configs: `configs/entities/{provider}/{entity}.yaml`
 - ADR: `docs/02-architecture/decisions/`
 - RULES.md: `docs/00-project/RULES.md`
 - Self-review rules: `.claude/rules/ai-selfreview-rules.md`
@@ -333,11 +333,11 @@ code_review:
 3. Сравнить с domain entity и Pandera schema
 4. При расхождении → finding `AUD-SCHEMA-*` с severity MUST
 
-### Open Targets — валидация таргетов
+### OpenAlex — валидация таргетов
 
 | Сценарий | Инструмент | Параметры | Результат |
 |----------|------------|-----------|-----------|
-| Проверка target ID | `Open Targets:search_entities` | `query_strings=["EGFR"]` | Валидация ENSEMBL ID mapping |
+| Проверка target ID | `OpenAlex:search_entities` | `query_strings=["EGFR"]` | Валидация ENSEMBL ID mapping |
 
 ### Mermaid Chart — архитектурные диаграммы
 

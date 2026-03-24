@@ -21,12 +21,6 @@ from typing import Any
 
 import pytest
 import yaml
-import sys
-from pathlib import Path
-
-# Add root to sys.path to allow importing from scripts
-ROOT = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(ROOT))
 
 from bioetl.domain.constants import META_FIELDS
 from bioetl.infrastructure.config.config_ci_contract import (
@@ -48,6 +42,12 @@ from bioetl.infrastructure.config.config_ci_contract import (
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
+
+ROOT = Path(__file__).resolve().parents[2]
+import sys
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts.schema import check_config_invariants as invariant_script
 from scripts.schema.validate_pipeline_configs import _canonical_script
 

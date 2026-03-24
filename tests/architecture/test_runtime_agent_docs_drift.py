@@ -31,7 +31,7 @@ def test_runtime_agent_mirror_drift_check_passes_current_repo() -> None:
     mod.check_runtime_mirrors(report)
 
     assert not report.issues, (
-        "Critical runtime docs mirrors drifted from canonical .codex sources.\n"
+        "Critical runtime docs mirrors drifted from canonical .claude sources.\n"
         f"{_issues_to_text(report)}"
     )
 
