@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.infrastructure.config.pipeline_config_api import (
-    load_pipeline_config,
+from bioetl.composition.factories.pipeline.creation_support import (
+    _PipelineCreationRequest,
 )
 from bioetl.composition.factories.pipeline.transformer_dependencies import (
     build_transformer_dependencies,
@@ -16,6 +17,9 @@ from bioetl.composition.factories.services.bundle import (
     create_pipeline_with_services,
 )
 from bioetl.domain.services import IdentityService
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config,
+)
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -53,6 +57,33 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+
+
+@dataclass(frozen=True, slots=True)
+class _PipelineFactoryContext:
+    """Stable internal factory context shared across assembler helper calls."""
+
+    pipeline_name: str
+    create_data_source_fn: DataSourceCreatorProtocol
+    pipeline_class: type[BasePipeline] | None = None
+    provider: str | None = None
+    transformer_class: type[BaseTransformer] | None = None
+    pandera_silver_schema: object | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _BuildFactoryServicesRequest:
+    """Runtime request inputs for pipeline service assembly."""
+
+    settings: Settings
+    logger: LoggerPort
+    config: PipelineYamlConfig | None = None
+    filter_config: InputFilterConfig | None = None
+    tracer: TracingPort | None = None
+    dq_monitor: DQMonitorPort | None = None
+
+
+_CreatePipelineWithServicesRequest = _PipelineCreationRequest
 
 
 def create_transformer_instance(
@@ -120,67 +151,51 @@ def create_factory_data_source(
 
 def build_factory_services(
     *,
-    pipeline_name: str,
-    create_data_source_fn: DataSourceCreatorProtocol,
-    settings: Settings,
-    logger: LoggerPort,
-    config: PipelineYamlConfig | None = None,
-    filter_config: InputFilterConfig | None = None,
-    tracer: TracingPort | None = None,
-    dq_monitor: DQMonitorPort | None = None,
+    factory_context: _PipelineFactoryContext,
+    request: _BuildFactoryServicesRequest,
 ) -> PipelineService:
     """Build shared pipeline services for the configured pipeline."""
     return build_pipeline_services(
-        pipeline_name=pipeline_name,
-        create_data_source_fn=create_data_source_fn,
-        settings=settings,
-        logger=logger,
-        config=config,
-        filter_config=filter_config,
-        tracer=tracer,
-        dq_monitor=dq_monitor,
+        pipeline_name=factory_context.pipeline_name,
+        create_data_source_fn=factory_context.create_data_source_fn,
+        settings=request.settings,
+        logger=request.logger,
+        config=request.config,
+        filter_config=request.filter_config,
+        tracer=request.tracer,
+        dq_monitor=request.dq_monitor,
     )
 
 
 def create_pipeline_instance_with_services(
     *,
-    pipeline_name: str,
-    pipeline_class: type[TPipeline],
-    provider: str,
-    create_data_source_fn: DataSourceCreatorProtocol,
-    transformer_class: type[BaseTransformer] | None,
-    run_id: RunID,
-    runtime: RuntimeConfig,
-    settings: Settings,
-    logger: LoggerPort,
-    config: PipelineYamlConfig | None = None,
-    filter_config: InputFilterConfig | None = None,
-    tracer: TracingPort | None = None,
-    dq_monitor: DQMonitorPort | None = None,
-    metrics: MetricsPort | None = None,
-    cached_bronze: CachedBronzeContext | None = None,
-    pandera_silver_schema: object | None = None,
+    factory_context: _PipelineFactoryContext,
+    request: _CreatePipelineWithServicesRequest,
 ) -> TPipeline:
     """Create pipeline instance with wired services and optional transformer."""
+    if factory_context.pipeline_class is None or factory_context.provider is None:
+        raise AssertionError(
+            "factory_context must include pipeline_class and provider for pipeline creation"
+        )
     return cast(
         TPipeline,
         create_pipeline_with_services(
-            pipeline_name=pipeline_name,
-            pipeline_class=pipeline_class,
-            provider=provider,
-            create_data_source_fn=create_data_source_fn,
-            transformer_class=transformer_class,
-            pandera_silver_schema=pandera_silver_schema,
-            run_id=run_id,
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metrics=metrics,
-            cached_bronze=cached_bronze,
+            pipeline_name=factory_context.pipeline_name,
+            pipeline_class=factory_context.pipeline_class,
+            provider=factory_context.provider,
+            create_data_source_fn=factory_context.create_data_source_fn,
+            transformer_class=factory_context.transformer_class,
+            pandera_silver_schema=factory_context.pandera_silver_schema,
+            run_id=request.run_id,
+            runtime=request.runtime,
+            settings=request.settings,
+            logger=request.logger,
+            config=request.config,
+            filter_config=request.filter_config,
+            tracer=request.tracer,
+            dq_monitor=request.dq_monitor,
+            metrics=request.metrics,
+            cached_bronze=request.cached_bronze,
         ),
     )
 

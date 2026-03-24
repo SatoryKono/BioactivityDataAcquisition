@@ -49,6 +49,84 @@ retained_entrypoints:
       Use `bioetl.interfaces.cli.commands.run_composite` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.composite.command` directly outside the owning package or dedicated boundary tests.
     exit_criteria: >-
       First-party src reaches the run-composite command only through the retained public seam, and direct internal-owner imports remain confined to the owning package plus dedicated boundary tests.
+  - path: "src/bioetl/interfaces/cli/commands/health.py"
+    compatibility_role: "Retained public health command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.health.command`."
+    canonical_target: "bioetl.interfaces.cli.commands.health"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.health` as the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/health/__init__.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.health`, while direct `bioetl.interfaces.cli.commands.domains.health.command` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.health` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.health.command` directly outside the owning package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src reaches the health command only through the retained public seam, and direct internal-owner imports remain confined to the owning package plus dedicated boundary tests.
+  - path: "src/bioetl/interfaces/cli/commands/quarantine.py"
+    compatibility_role: "Retained public quarantine command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.quarantine.command`."
+    canonical_target: "bioetl.interfaces.cli.commands.quarantine"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.quarantine` as the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.quarantine`, while direct `bioetl.interfaces.cli.commands.domains.quarantine.command` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.quarantine` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.quarantine.command` directly outside the owning package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src reaches the quarantine command only through the retained public seam, and direct internal-owner imports remain confined to the owning package plus dedicated boundary tests.
+  - path: "src/bioetl/interfaces/cli/commands/maintenance.py"
+    compatibility_role: "Retained public maintenance command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.maintenance.command`."
+    canonical_target: "bioetl.interfaces.cli.commands.maintenance"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.maintenance` as the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py`; `tests`: import coverage may target `bioetl.interfaces.cli.commands.maintenance`, while direct `bioetl.interfaces.cli.commands.domains.maintenance.command` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.maintenance` for public CLI wiring; do not import `bioetl.interfaces.cli.commands.domains.maintenance.command` directly outside the owning package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src reaches the maintenance command only through the retained public seam, and direct internal-owner imports remain confined to the owning package plus dedicated boundary tests.
+  - path: "src/bioetl/interfaces/cli/commands/archive.py"
+    compatibility_role: "Retained public archive command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.maintenance.archive`."
+    canonical_target: "bioetl.interfaces.cli.commands.archive"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.archive` only as the public seam for import/patch stability; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/command.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.archive`, while direct `bioetl.interfaces.cli.commands.domains.maintenance.archive` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.archive` for public patch targets; do not import `bioetl.interfaces.cli.commands.domains.maintenance.archive` directly outside the owning maintenance package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src keeps direct archive-owner imports confined to the owning maintenance package, and public patch/import coverage remains on the retained top-level seam.
+  - path: "src/bioetl/interfaces/cli/commands/cleanup.py"
+    compatibility_role: "Retained public cleanup command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.maintenance.cleanup`."
+    canonical_target: "bioetl.interfaces.cli.commands.cleanup"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.cleanup` only as the public seam for import/patch stability; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/command.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.cleanup`, while direct `bioetl.interfaces.cli.commands.domains.maintenance.cleanup` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.cleanup` for public patch targets; do not import `bioetl.interfaces.cli.commands.domains.maintenance.cleanup` directly outside the owning maintenance package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src keeps direct cleanup-owner imports confined to the owning maintenance package, and public patch/import coverage remains on the retained top-level seam.
+  - path: "src/bioetl/interfaces/cli/commands/vacuum.py"
+    compatibility_role: "Retained public vacuum command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.maintenance.vacuum`."
+    canonical_target: "bioetl.interfaces.cli.commands.vacuum"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.vacuum` only as the public seam for import/patch stability; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/command.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.vacuum`, while direct `bioetl.interfaces.cli.commands.domains.maintenance.vacuum` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.vacuum` for public patch targets; do not import `bioetl.interfaces.cli.commands.domains.maintenance.vacuum` directly outside the owning maintenance package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src keeps direct vacuum-owner imports confined to the owning maintenance package, and public patch/import coverage remains on the retained top-level seam.
   - path: "src/bioetl/composition/entrypoints.py"
     compatibility_role: "Canonical composition entrypoint that intentionally shields internal `_pipeline_execution`, `_resource_management`, and `_services` module paths."
     canonical_target: "bioetl.composition.entrypoints"
@@ -168,6 +246,120 @@ measured_only_modules:
   - path: "src/bioetl/composition/factories/services/creation_api.py"
     owner: "bioetl.composition.factories.services"
     reason: "Deprecated compatibility alias over the sanctioned pipeline creation_api shim."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_command_policy.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing run command-policy imports; first-party src should keep importing the canonical domains.run.command_policy module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_helpers.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing run helper imports; first-party src should keep importing the canonical domains.run.support module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_result_flow_helpers.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for run result-flow helper imports; first-party src should keep importing the canonical domains.run.result_flow module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_result_presenter.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing run result-presentation imports; first-party src should keep importing the canonical domains.run.result_presenter module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_runtime_helpers.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for run runtime-helper imports; first-party src should keep importing the canonical domains.run.runtime_helpers module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_service_access.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for run service-access imports; first-party src should keep importing the canonical domains.run.service_access module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_all_command_policy.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing run-all command-policy imports; first-party src should keep importing the canonical domains.run_all.command_policy module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_all_execution.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for run-all execution helper imports; first-party src should keep importing the canonical domains.run_all.execution module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_all_helpers.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing run-all helper imports; first-party src should keep importing the canonical domains.run_all.support module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_composite_execution.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for run-composite execution helper imports; first-party src should keep importing the canonical domains.composite.execution module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_composite_helpers.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing run-composite helper imports; first-party src should keep importing the canonical domains.composite.support module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/run_composite_runtime.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing run-composite runtime imports; first-party src should keep importing the canonical domains.composite.runtime module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/quarantine_execution.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for quarantine execution helper imports; first-party src should keep importing the canonical domains.quarantine.execution module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/quarantine_rendering.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for quarantine rendering helper imports; first-party src should keep importing the canonical domains.quarantine.rendering module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/quarantine_support.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing quarantine helper imports; first-party src should keep importing the canonical domains.quarantine.support module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/health_rendering.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for health rendering helper imports; first-party src should keep importing the canonical domains.health.rendering module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/health_server_integration.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing health-server integration imports; first-party src should keep importing the canonical domains.health.server_integration module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/metrics_server_integration.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for test-facing metrics-server integration imports; first-party src should keep importing the canonical domains.health.metrics_server_integration module directly."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/interfaces/cli/commands/execution_policy.py"
+    owner: "bioetl.interfaces.cli.commands"
+    reason: "Compatibility support seam for shared CLI execution-policy imports; first-party src should keep importing the canonical domains.shared.execution_policy module directly."
     review_date: "2026-09-30"
     new_code_policy: "no-new-first-party-imports"
     promotion_trigger: "sanctioned-public-seam"

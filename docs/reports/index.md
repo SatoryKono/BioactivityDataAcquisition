@@ -16,6 +16,8 @@ Canonical sources:
   analysis and decision support.
 - They may be more detailed or more current about a local investigation, but
   they still do not replace canonical project guidance in `docs/00-05`.
+- Dated reports reused for current planning should carry a short freshness or
+  rebaseline note when later waves change their live interpretation.
 
 ## Main Entry Points
 

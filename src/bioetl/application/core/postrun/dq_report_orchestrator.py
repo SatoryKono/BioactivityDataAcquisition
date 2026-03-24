@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.postrun._failure_policy import (
+    PostrunFailureHandlingMixin,
     PostrunFailurePolicySpec,
-    apply_postrun_failure_policy,
-    is_strict_validation_enabled,
 )
 from bioetl.domain.exceptions import BioETLError
 
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
     )
 
 
-class PostrunDQReportService:
+class PostrunDQReportService(PostrunFailureHandlingMixin):
     """Orchestrates optional DQ report generation with strict/warning mode."""
 
     _FAILURE_POLICY = PostrunFailurePolicySpec(
@@ -101,20 +100,11 @@ class PostrunDQReportService:
                 )
             return result
         except self._handled_failures as error:
-            should_raise = apply_postrun_failure_policy(
-                logger=self._logger,
-                runtime=self._runtime,
-                error=error,
-                spec=self._FAILURE_POLICY,
+            self._handle_allowlisted_failure(
+                error,
                 emit_warning_error_log=True,
             )
-            if should_raise:
-                raise
             return None
-
-    def _is_strict_validation_enabled(self) -> bool:
-        """Compatibility wrapper around shared strict-mode evaluation."""
-        return is_strict_validation_enabled(self._runtime)
 
 
 __all__ = ["PostrunDQReportService"]

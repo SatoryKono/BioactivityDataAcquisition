@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._span_helpers import close_span, close_span_with_shutdown
+
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
@@ -247,12 +249,7 @@ class BatchTracingManagerService:
             error: Optional exception to record on the span.
 
         """
-        if not span:
-            return
-        if error:
-            span.set_attribute("error", True)
-            span.record_exception(error)
-        span.__exit__(None, None, None)
+        close_span(span, error)
 
     def end_span_with_shutdown(self, span: Span | None) -> None:
         """End span marking it as shutdown.
@@ -261,9 +258,7 @@ class BatchTracingManagerService:
             span: The span to end with shutdown marker.
 
         """
-        if span:
-            span.set_attribute("bioetl.shutdown", True)
-            span.__exit__(None, None, None)
+        close_span_with_shutdown(span)
 
 
 __all__ = ["BatchTracingManagerService"]

@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
+import pytest
+
+from bioetl.application.core._data_source_mixins import (
+    _SourceMetadataDelegationMixin,
+    _yield_plain_wrapped_fetch_records,
+    _yield_wrapped_fetch_records,
+)
 
 
 class _WrappedAdapter:
@@ -46,3 +52,69 @@ def test_get_source_metadata_returns_none_when_attribute_not_callable() -> None:
     result = wrapper.get_source_metadata("v2")
 
     assert result is None
+
+
+class _FetchRecordingAdapter:
+    def __init__(self) -> None:
+        self.fetch_calls: list[dict[str, object]] = []
+
+    async def fetch(self, **kwargs: object):
+        self.fetch_calls.append(kwargs)
+        yield {"id": "1"}
+        yield {"id": "2"}
+
+
+@pytest.mark.asyncio
+async def test_yield_wrapped_fetch_records_forwards_explicit_optional_kwargs() -> None:
+    adapter = _FetchRecordingAdapter()
+
+    records = [
+        record
+        async for record in _yield_wrapped_fetch_records(
+            adapter,
+            entity_type="publication",
+            limit=10,
+            query="kinase",
+            filter_ids=None,
+            filter_field=None,
+            offset=25,
+        )
+    ]
+
+    assert records == [{"id": "1"}, {"id": "2"}]
+    assert adapter.fetch_calls == [
+        {
+            "entity_type": "publication",
+            "limit": 10,
+            "query": "kinase",
+            "filter_ids": None,
+            "filter_field": None,
+            "offset": 25,
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_yield_plain_wrapped_fetch_records_omits_filter_kwargs() -> None:
+    adapter = _FetchRecordingAdapter()
+
+    records = [
+        record
+        async for record in _yield_plain_wrapped_fetch_records(
+            adapter,
+            entity_type="publication",
+            limit=5,
+            query="gene",
+            offset=7,
+        )
+    ]
+
+    assert records == [{"id": "1"}, {"id": "2"}]
+    assert adapter.fetch_calls == [
+        {
+            "entity_type": "publication",
+            "limit": 5,
+            "query": "gene",
+            "offset": 7,
+        }
+    ]

@@ -23,6 +23,7 @@ class MockDataSource:
     def __init__(self, documents: list[dict] | None = None):
         """Initialize with optional list of document records."""
         self._documents = documents or []
+        self.fetch_calls: list[dict[str, object]] = []
         self.__aenter__ = AsyncMock(return_value=self)
         self.__aexit__ = AsyncMock(return_value=None)
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
@@ -30,6 +31,7 @@ class MockDataSource:
 
     async def fetch(self, entity_type: str, **kwargs):
         """Yield configured documents."""
+        self.fetch_calls.append({"entity_type": entity_type, **kwargs})
         for doc in self._documents:
             yield doc
 
@@ -209,6 +211,17 @@ class TestPublicationTermDataSourceFetch:
         # Should get the original documents, not terms
         assert len(records) == 2
         assert all("publication_id" in r for r in records)
+
+    @pytest.mark.asyncio
+    async def test_fetch_other_entity_forwards_offset(self, mock_data_source):
+        """Test non-target fetch forwards offset to wrapped adapter."""
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
+
+        async for _ in wrapper.fetch("document", offset=25):
+            pass
+
+        assert mock_data_source.fetch_calls[-1]["entity_type"] == "document"
+        assert mock_data_source.fetch_calls[-1]["offset"] == 25
 
     @pytest.mark.asyncio
     async def test_fetch_publication_term_empty_result(
@@ -786,6 +799,56 @@ class TestPublicationTermFilterable:
             terms.append(term)
 
         assert len(terms) == 2
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_scales_upstream_limit(self):
+        """Target fallback path should preserve publication expansion limit."""
+
+        class _RecordingFilterableDataSource(MockFilterableDataSource):
+            def __init__(self, documents: list[dict] | None = None):
+                super().__init__(documents)
+                self.fallback_calls: list[dict[str, object]] = []
+
+            async def fetch_filtered_with_fallback(
+                self,
+                entity_type: str,
+                filter_ids: list[str],
+                filter_field: str,
+                fallback_mapping: dict[str, str],
+                limit: int | None = None,
+            ):
+                self.fallback_calls.append(
+                    {
+                        "entity_type": entity_type,
+                        "filter_ids": filter_ids,
+                        "filter_field": filter_field,
+                        "fallback_mapping": fallback_mapping,
+                        "limit": limit,
+                    }
+                )
+                async for doc in super().fetch_filtered_with_fallback(
+                    entity_type=entity_type,
+                    filter_ids=filter_ids,
+                    filter_field=filter_field,
+                    fallback_mapping=fallback_mapping,
+                    limit=limit,
+                ):
+                    yield doc
+
+        source = _RecordingFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        async for _ in wrapper.fetch_filtered_with_fallback(
+            entity_type="publication_term",
+            filter_ids=["CHEMBL1123456"],
+            filter_field="publication_id",
+            fallback_mapping={"CHEMBL1123456": "Test"},
+            limit=2,
+        ):
+            pass
+
+        assert source.fallback_calls[-1]["entity_type"] == "publication"
+        assert source.fallback_calls[-1]["limit"] == 100
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_fallback_raises_for_non_filterable(self):

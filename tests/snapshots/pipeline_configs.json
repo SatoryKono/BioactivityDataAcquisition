@@ -280,54 +280,18 @@
       ]
     },
     "table": {
-      "gold_table": "chembl_activity",
+      "gold_table": "chembl.activity",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "activity_id"
       ],
-      "silver_table": "chembl_activity",
+      "silver_table": "chembl.activity",
       "silver_write_mode": "append"
     },
     "transform_steps": [],
     "transform_version": null
-  },
-  "chembl_document": {
-    "batch_size": 100,
-    "checkpoint_interval": 1000,
-    "dq": {
-      "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "entity_type": "document",
-    "fields": [],
-    "gold_filters": {
-      "column_filters": [
-        {
-          "column": "doc_type",
-          "values": [
-            "PATENT",
-            "PUBLICATION"
-          ]
-        }
-      ],
-      "exclude_if_present": [],
-      "required_fields": [
-        "title"
-      ]
-    },
-    "gold_table": null,
-    "gold_write_mode": "overwrite",
-    "partition_cols": [],
-    "pipeline_name": "chembl_document",
-    "primary_keys": [
-      "publication_id"
-    ],
-    "provider": "chembl",
-    "silver_table": "chembl_document",
-    "write_mode": "merge"
   },
   "chembl_molecule": {
     "batch_size": 100,
@@ -527,14 +491,14 @@
       ]
     },
     "table": {
-      "gold_table": "chembl_molecule",
+      "gold_table": "chembl.molecule",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "molecule_id"
       ],
-      "silver_table": "chembl_molecule",
+      "silver_table": "chembl.molecule",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
@@ -656,54 +620,18 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "chembl_publication_term",
+      "gold_table": "chembl.publication_term",
       "gold_write_mode": "overwrite",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "entity_id"
       ],
-      "silver_table": "chembl_publication_term",
+      "silver_table": "chembl.publication_term",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
     "transform_version": null
-  },
-  "chembl_target": {
-    "batch_size": 100,
-    "checkpoint_interval": 1000,
-    "dq": {
-      "hard_fail_threshold": 0.2,
-      "soft_fail_threshold": 0.05,
-      "strict_validation": false
-    },
-    "entity_type": "target",
-    "fields": [],
-    "gold_filters": {
-      "column_filters": [
-        {
-          "column": "target_type",
-          "values": [
-            "PROTEIN COMPLEX",
-            "SINGLE PROTEIN"
-          ]
-        }
-      ],
-      "exclude_if_present": [],
-      "required_fields": [
-        "pref_name"
-      ]
-    },
-    "gold_table": null,
-    "gold_write_mode": "overwrite",
-    "partition_cols": [],
-    "pipeline_name": "chembl_target",
-    "primary_keys": [
-      "target_id"
-    ],
-    "provider": "chembl",
-    "silver_table": "chembl_target",
-    "write_mode": "merge"
   },
   "crossref_publication": {
     "batch_size": 100,
@@ -1030,14 +958,14 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "crossref_publication",
+      "gold_table": "crossref.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "doi"
       ],
-      "silver_table": "crossref_publication",
+      "silver_table": "crossref.publication",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
@@ -1414,14 +1342,14 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "openalex_publication",
+      "gold_table": "openalex.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "openalex_id"
       ],
-      "silver_table": "openalex_publication",
+      "silver_table": "openalex.publication",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
@@ -1568,14 +1496,14 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "pubchem_compound",
+      "gold_table": "pubchem.compound",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "molecule_id"
       ],
-      "silver_table": "pubchem_compound",
+      "silver_table": "pubchem.compound",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
@@ -1936,14 +1864,14 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "pubmed_publication",
+      "gold_table": "pubmed.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "pmid"
       ],
-      "silver_table": "pubmed_publication",
+      "silver_table": "pubmed.publication",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
@@ -2250,14 +2178,14 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "semanticscholar_publication",
+      "gold_table": "semanticscholar.publication",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "paper_id"
       ],
-      "silver_table": "semanticscholar_publication",
+      "silver_table": "semanticscholar.publication",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
@@ -2378,14 +2306,14 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "uniprot_idmapping",
+      "gold_table": "uniprot.idmapping",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "target_id"
       ],
-      "silver_table": "uniprot_idmapping",
+      "silver_table": "uniprot.idmapping",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],
@@ -2583,14 +2511,14 @@
       "required_fields": []
     },
     "table": {
-      "gold_table": "uniprot_protein",
+      "gold_table": "uniprot.protein",
       "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
         "accession"
       ],
-      "silver_table": "uniprot_protein",
+      "silver_table": "uniprot.protein",
       "silver_write_mode": "merge"
     },
     "transform_steps": [],

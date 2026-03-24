@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
@@ -44,7 +44,7 @@ def _create_pubmed_adapter_from_settings(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: object,
 ) -> PubMedAdapter:
     """Create PubMedAdapter with patch-friendly composition-local adapter binding."""
     return _build_pubmed_adapter_from_settings(
@@ -60,7 +60,7 @@ def _create_openalex_adapter_from_settings(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: object,
 ) -> OpenAlexAdapter:
     """Create OpenAlexAdapter with patch-friendly composition-local adapter binding."""
     return _build_openalex_adapter_from_settings(

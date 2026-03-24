@@ -139,16 +139,17 @@ class TestGenericPipelineFactory:
         )
 
         assert result is expected_services
-        mock_build_factory_services.assert_called_once_with(
-            pipeline_name="chembl_activity",
-            create_data_source_fn=data_source_creator,
-            settings=settings,
-            logger=logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
+        call_kwargs = mock_build_factory_services.call_args.kwargs
+        assert call_kwargs["factory_context"].pipeline_name == "chembl_activity"
+        assert (
+            call_kwargs["factory_context"].create_data_source_fn is data_source_creator
         )
+        assert call_kwargs["request"].settings is settings
+        assert call_kwargs["request"].logger is logger
+        assert call_kwargs["request"].config is config
+        assert call_kwargs["request"].filter_config is filter_config
+        assert call_kwargs["request"].tracer is tracer
+        assert call_kwargs["request"].dq_monitor is dq_monitor
 
     @patch(
         "bioetl.composition.factories.pipeline.assembler.create_pipeline_instance_with_services"
@@ -194,24 +195,32 @@ class TestGenericPipelineFactory:
         )
 
         assert result is expected_pipeline
-        mock_create_pipeline_with_services.assert_called_once_with(
-            pipeline_name="chembl_activity",
-            pipeline_class=factory.pipeline_class,
-            provider="chembl",
-            create_data_source_fn=factory._create_data_source,
-            transformer_class=factory.transformer_class,
-            run_id=run_id,
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metrics=metrics,
-            cached_bronze=cached_bronze,
-            pandera_silver_schema=factory.pandera_silver_schema,
+        call_kwargs = mock_create_pipeline_with_services.call_args.kwargs
+        assert call_kwargs["factory_context"].pipeline_name == "chembl_activity"
+        assert call_kwargs["factory_context"].pipeline_class is factory.pipeline_class
+        assert call_kwargs["factory_context"].provider == "chembl"
+        assert (
+            call_kwargs["factory_context"].create_data_source_fn
+            is factory._create_data_source
         )
+        assert (
+            call_kwargs["factory_context"].transformer_class
+            is factory.transformer_class
+        )
+        assert (
+            call_kwargs["factory_context"].pandera_silver_schema
+            is factory.pandera_silver_schema
+        )
+        assert call_kwargs["request"].run_id == run_id
+        assert call_kwargs["request"].runtime is runtime
+        assert call_kwargs["request"].settings is settings
+        assert call_kwargs["request"].logger is logger
+        assert call_kwargs["request"].config is config
+        assert call_kwargs["request"].filter_config is filter_config
+        assert call_kwargs["request"].tracer is tracer
+        assert call_kwargs["request"].dq_monitor is dq_monitor
+        assert call_kwargs["request"].metrics is metrics
+        assert call_kwargs["request"].cached_bronze is cached_bronze
 
     @patch(
         "bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config"

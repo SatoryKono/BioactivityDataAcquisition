@@ -2,9 +2,30 @@
 
 from __future__ import annotations
 
+import ast
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+@pytest.mark.unit
+def test_run_composite_module_reexports_canonical_command_surface() -> None:
+    """Top-level run_composite module should expose the canonical domain command."""
+    import bioetl.interfaces.cli.commands.run_composite as run_composite_module
+    from bioetl.interfaces.cli.commands.domains.composite import (
+        command as canonical_command,
+    )
+
+    assert run_composite_module.run_composite is canonical_command.run_composite
+    assert (
+        run_composite_module.load_composite_config
+        is canonical_command.load_composite_config
+    )
+    assert (
+        run_composite_module.bootstrap_composite_runner
+        is canonical_command.bootstrap_composite_runner
+    )
 
 
 @pytest.mark.unit
@@ -41,3 +62,22 @@ def test_bootstrap_composite_runner_delegates_to_composite_api() -> None:
 
     assert result is runner
     mock_bootstrap_composite_runner.assert_called_once_with(config, runtime)
+
+
+@pytest.mark.unit
+def test_cli_main_imports_run_composite_via_public_command_seam() -> None:
+    """cli.main should wire the public run_composite seam, not the internal owner."""
+    path = Path("src/bioetl/interfaces/cli/main.py")
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+
+    assert "bioetl.interfaces.cli.commands.run_composite" in imported_modules
+    assert (
+        "bioetl.interfaces.cli.commands.domains.composite.command"
+        not in imported_modules
+    )

@@ -52,6 +52,65 @@ RUN_ALL_COMMAND_INTERNAL_MODULE = (
 RUN_COMPOSITE_COMMAND_INTERNAL_MODULE = (
     "bioetl.interfaces.cli.commands.domains.composite.command"
 )
+HEALTH_COMMAND_INTERNAL_MODULE = "bioetl.interfaces.cli.commands.domains.health.command"
+QUARANTINE_COMMAND_INTERNAL_MODULE = (
+    "bioetl.interfaces.cli.commands.domains.quarantine.command"
+)
+MAINTENANCE_COMMAND_INTERNAL_MODULE = (
+    "bioetl.interfaces.cli.commands.domains.maintenance.command"
+)
+ARCHIVE_COMMAND_INTERNAL_MODULE = (
+    "bioetl.interfaces.cli.commands.domains.maintenance.archive"
+)
+CLEANUP_COMMAND_INTERNAL_MODULE = (
+    "bioetl.interfaces.cli.commands.domains.maintenance.cleanup"
+)
+VACUUM_COMMAND_INTERNAL_MODULE = (
+    "bioetl.interfaces.cli.commands.domains.maintenance.vacuum"
+)
+TEST_FACING_RUN_HELPER_SEAM_MODULES = frozenset(
+    {
+        "bioetl.interfaces.cli.commands.run_command_policy",
+        "bioetl.interfaces.cli.commands.run_helpers",
+        "bioetl.interfaces.cli.commands.run_result_flow_helpers",
+        "bioetl.interfaces.cli.commands.run_result_presenter",
+        "bioetl.interfaces.cli.commands.run_runtime_helpers",
+        "bioetl.interfaces.cli.commands.run_service_access",
+    }
+)
+TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES = frozenset(
+    {
+        "bioetl.interfaces.cli.commands.run_all_command_policy",
+        "bioetl.interfaces.cli.commands.run_all_execution",
+        "bioetl.interfaces.cli.commands.run_all_helpers",
+    }
+)
+TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES = frozenset(
+    {
+        "bioetl.interfaces.cli.commands.run_composite_execution",
+        "bioetl.interfaces.cli.commands.run_composite_helpers",
+        "bioetl.interfaces.cli.commands.run_composite_runtime",
+    }
+)
+TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES = frozenset(
+    {
+        "bioetl.interfaces.cli.commands.quarantine_execution",
+        "bioetl.interfaces.cli.commands.quarantine_rendering",
+        "bioetl.interfaces.cli.commands.quarantine_support",
+    }
+)
+TEST_FACING_HEALTH_HELPER_SEAM_MODULES = frozenset(
+    {
+        "bioetl.interfaces.cli.commands.health_rendering",
+        "bioetl.interfaces.cli.commands.health_server_integration",
+        "bioetl.interfaces.cli.commands.metrics_server_integration",
+    }
+)
+TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES = frozenset(
+    {
+        "bioetl.interfaces.cli.commands.execution_policy",
+    }
+)
 PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
@@ -336,6 +395,120 @@ ALLOWED_RUN_COMPOSITE_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
         / "cli"
         / "commands"
         / "run_composite.py",
+    }
+)
+ALLOWED_HEALTH_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "health.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "health"
+        / "__init__.py",
+    }
+)
+ALLOWED_HEALTH_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "health.py",
+    }
+)
+ALLOWED_QUARANTINE_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "quarantine.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "quarantine"
+        / "__init__.py",
+    }
+)
+ALLOWED_QUARANTINE_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "quarantine.py",
+    }
+)
+ALLOWED_MAINTENANCE_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "maintenance.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "maintenance"
+        / "__init__.py",
+    }
+)
+ALLOWED_MAINTENANCE_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "maintenance.py",
+    }
+)
+ALLOWED_ARCHIVE_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "archive.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "maintenance"
+        / "command.py",
+    }
+)
+ALLOWED_ARCHIVE_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "archive.py",
+    }
+)
+ALLOWED_CLEANUP_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "cleanup.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "maintenance"
+        / "command.py",
+    }
+)
+ALLOWED_CLEANUP_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "cleanup.py",
+    }
+)
+ALLOWED_VACUUM_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "vacuum.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "maintenance"
+        / "command.py",
+    }
+)
+ALLOWED_VACUUM_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "vacuum.py",
     }
 )
 ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
@@ -729,6 +902,318 @@ def test_run_composite_command_internal_module_string_is_confined_to_retained_ru
     assert not violations, (
         "Internal run-composite command module string references leaked into first-party src:\n"
         + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_health_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should reach health through the retained public seam."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=HEALTH_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_HEALTH_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal health command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_health_command_internal_module_string_is_confined_to_retained_health_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal health owner string references should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{HEALTH_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_HEALTH_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal health command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_quarantine_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should reach quarantine through the retained public seam."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=QUARANTINE_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_QUARANTINE_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal quarantine command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_quarantine_command_internal_module_string_is_confined_to_retained_quarantine_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal quarantine owner string refs should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{QUARANTINE_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_QUARANTINE_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal quarantine command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_maintenance_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should reach maintenance through the retained public seam."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=MAINTENANCE_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_MAINTENANCE_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal maintenance command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_maintenance_command_internal_module_string_is_confined_to_retained_maintenance_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal maintenance owner string refs should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{MAINTENANCE_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_MAINTENANCE_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal maintenance command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_archive_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should keep archive-owner imports confined to maintenance internals."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=ARCHIVE_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_ARCHIVE_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal archive command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_archive_command_internal_module_string_is_confined_to_retained_archive_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal archive owner string refs should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{ARCHIVE_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_ARCHIVE_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal archive command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_cleanup_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should keep cleanup-owner imports confined to maintenance internals."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=CLEANUP_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_CLEANUP_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal cleanup command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_cleanup_command_internal_module_string_is_confined_to_retained_cleanup_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal cleanup owner string refs should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{CLEANUP_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_CLEANUP_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal cleanup command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_vacuum_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should keep vacuum-owner imports confined to maintenance internals."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=VACUUM_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_VACUUM_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal vacuum command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_vacuum_command_internal_module_string_is_confined_to_retained_vacuum_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal vacuum owner string refs should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{VACUUM_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_VACUUM_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal vacuum command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_test_facing_run_helper_seams_are_not_imported_in_first_party_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should import canonical domains.run helper modules directly."""
+    violations: list[str] = []
+    for module_name in TEST_FACING_RUN_HELPER_SEAM_MODULES:
+        violations.extend(
+            _iter_module_import_violations(
+                source_ast_cache,
+                module_name=module_name,
+                allowed_files=frozenset(),
+            )
+        )
+    assert not violations, (
+        "Test-facing run helper seams leaked into first-party src imports:\n"
+        + "\n".join(sorted(violations))
+    )
+
+
+@pytest.mark.architecture
+def test_test_facing_run_all_helper_seams_are_not_imported_in_first_party_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should import canonical domains.run_all helper modules directly."""
+    violations: list[str] = []
+    for module_name in TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES:
+        violations.extend(
+            _iter_module_import_violations(
+                source_ast_cache,
+                module_name=module_name,
+                allowed_files=frozenset(),
+            )
+        )
+    assert not violations, (
+        "Test-facing run-all helper seams leaked into first-party src imports:\n"
+        + "\n".join(sorted(violations))
+    )
+
+
+@pytest.mark.architecture
+def test_test_facing_run_composite_helper_seams_are_not_imported_in_first_party_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should import canonical domains.composite helpers directly."""
+    violations: list[str] = []
+    for module_name in TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES:
+        violations.extend(
+            _iter_module_import_violations(
+                source_ast_cache,
+                module_name=module_name,
+                allowed_files=frozenset(),
+            )
+        )
+    assert not violations, (
+        "Test-facing run-composite helper seams leaked into first-party src imports:\n"
+        + "\n".join(sorted(violations))
+    )
+
+
+@pytest.mark.architecture
+def test_test_facing_quarantine_helper_seams_are_not_imported_in_first_party_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should import canonical domains.quarantine helpers directly."""
+    violations: list[str] = []
+    for module_name in TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES:
+        violations.extend(
+            _iter_module_import_violations(
+                source_ast_cache,
+                module_name=module_name,
+                allowed_files=frozenset(),
+            )
+        )
+    assert not violations, (
+        "Test-facing quarantine helper seams leaked into first-party src imports:\n"
+        + "\n".join(sorted(violations))
+    )
+
+
+@pytest.mark.architecture
+def test_test_facing_health_helper_seams_are_not_imported_in_first_party_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should import canonical domains.health helpers directly."""
+    violations: list[str] = []
+    for module_name in TEST_FACING_HEALTH_HELPER_SEAM_MODULES:
+        violations.extend(
+            _iter_module_import_violations(
+                source_ast_cache,
+                module_name=module_name,
+                allowed_files=frozenset(),
+            )
+        )
+    assert not violations, (
+        "Test-facing health helper seams leaked into first-party src imports:\n"
+        + "\n".join(sorted(violations))
+    )
+
+
+@pytest.mark.architecture
+def test_test_facing_shared_cli_policy_seams_are_not_imported_in_first_party_src(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should import canonical shared CLI policy modules directly."""
+    violations: list[str] = []
+    for module_name in TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES:
+        violations.extend(
+            _iter_module_import_violations(
+                source_ast_cache,
+                module_name=module_name,
+                allowed_files=frozenset(),
+            )
+        )
+    assert not violations, (
+        "Test-facing shared CLI policy seams leaked into first-party src imports:\n"
+        + "\n".join(sorted(violations))
     )
 
 

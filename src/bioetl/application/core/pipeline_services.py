@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-from bioetl.domain.exceptions import BioETLError
+from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
@@ -39,13 +39,7 @@ if TYPE_CHECKING:
     )
 
 
-_OBSERVABILITY_CLOSE_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_OBSERVABILITY_CLOSE_ERRORS = OPERATION_ERRORS
 
 
 @dataclass(frozen=True)

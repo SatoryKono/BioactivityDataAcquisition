@@ -190,3 +190,8 @@ class IntegrationPipelineTestCase:
         )
 
         return runner
+
+    @staticmethod
+    def resolve_delta_table_path(layer_path: str, table_name: str) -> str:
+        """Resolve a logical Delta table name to its on-disk directory."""
+        return f"{layer_path}/{table_name.replace('.', '/')}"

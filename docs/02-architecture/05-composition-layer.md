@@ -12,7 +12,7 @@
 
 - **Глобальная осведомленность:** Единственный слой (наряду с `Interfaces`), который "знает" обо всех остальных слоях. Ему разрешено импортировать из `infrastructure`, `application` и `domain`.
 - **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические public seams проходят через `entrypoints.py`, `execution_api.py`, `services_api.py`, `resources_api.py`, а специализированные factory/bootstrap модули собирают runtime-компоненты.
-- **Конфигурация:** Преобразует сырые настройки из YAML или переменных окружения в доменные объекты конфигурации.
+- **Конфигурация:** Потребляет уже загруженные и нормализованные конфигурации. Канонический owner для YAML I/O, merge и normalization находится в `bioetl.infrastructure.config`, а `composition` сохраняет только thin public access / compat seams (`load_pipeline_config()`, `load_composite_config()`) для стабильных runtime entrypoints.
 
 ## 2. Ключевые Компоненты
 
@@ -53,8 +53,14 @@ composition/bootstrap/
 | `pipeline.py`        | Сборка pipeline (main entry point)                        |
 | `runner.py`          | Сборка `PipelineRunner`                                   |
 | `runner_assembly.py` | Runner assembly helpers                                   |
-| `infrastructure.config` / `pipeline_config_api.py` | Загрузка и валидация YAML-конфигураций |
+| `infrastructure/config/{pipeline_config_api.py, composite_config_api.py}` | Канонические public seams для загрузки и валидации YAML-конфигураций |
 | `runtime_basics.py`  | Базовые runtime утилиты                                   |
+
+`composition.bootstrap.runtime` больше не владеет raw config-loading логикой:
+runtime bootstrap использует канонические config-owner seams из
+`bioetl.infrastructure.config`, а в `composition` остаются только тонкие
+public access / compatibility wrappers там, где нужно удерживать стабильные
+import paths.
 
 **Composite pipeline bootstrap:**
 
@@ -97,7 +103,7 @@ composition/bootstrap/
 | Подпакет / Файл             | Ключевые компоненты                          | Назначение                                                     |
 | --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline/assembler.py`     | `GenericPipelineFactory`                     | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline/creation_api.py`  | `_PipelineCreationInputs`, `_create_pipeline_with_services_impl` | Compatibility shim; canonical owner for these wiring contracts is `pipeline/_creation_wiring.py` |
+| `pipeline/creation_api.py`  | `_PipelineCreationInputs`, `_create_pipeline_with_services_impl` | Compatibility shim; first-party code should prefer `pipeline/creation_support.py`, which delegates to `pipeline/_creation_wiring.py` |
 | `pipeline/registry.py`      | Реестр фабрик                                | Все зарегистрированные pipeline factories                      |
 | `pipeline/runner.py`        | `RunnerFactory`                              | Создание `PipelineRunner` с DI                                 |
 | `datasource/data_source_factory.py` | `DataSourceFactory`                 | Создает `DataSourcePort` для провайдера                        |

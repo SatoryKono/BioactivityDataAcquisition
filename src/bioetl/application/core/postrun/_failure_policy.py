@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -18,6 +18,19 @@ class PostrunFailurePolicySpec:
     strict_reason_code: str
     warning_reason: str
     warning_reason_code: str
+
+
+class _HasPostrunRuntime(Protocol):
+    """Structural contract for postrun collaborators exposing runtime config."""
+
+    _runtime: object
+
+
+class _HasPostrunFailureHandling(_HasPostrunRuntime, Protocol):
+    """Structural contract for postrun collaborators using shared failure handling."""
+
+    _logger: LoggerPort
+    _FAILURE_POLICY: PostrunFailurePolicySpec
 
 
 def is_strict_validation_enabled(runtime: object) -> bool:
@@ -66,3 +79,54 @@ def apply_postrun_failure_policy(
         logger.error(spec.event, **warning_kwargs)
     logger.warning(spec.event, **warning_kwargs)
     return False
+
+
+def apply_postrun_failure_policy_or_raise(
+    *,
+    logger: LoggerPort,
+    runtime: object,
+    error: BaseException,
+    spec: PostrunFailurePolicySpec,
+    extra: dict[str, object] | None = None,
+    emit_warning_error_log: bool = False,
+) -> None:
+    """Apply warning/strict policy and re-raise when strict mode demands it."""
+    should_raise = apply_postrun_failure_policy(
+        logger=logger,
+        runtime=runtime,
+        error=error,
+        spec=spec,
+        extra=extra,
+        emit_warning_error_log=emit_warning_error_log,
+    )
+    if should_raise:
+        raise error
+
+
+class PostrunStrictValidationMixin:
+    """Compatibility mixin for postrun collaborators exposing strict mode check."""
+
+    def _is_strict_validation_enabled(self: _HasPostrunRuntime) -> bool:
+        """Compatibility wrapper around shared strict-mode evaluation."""
+        return is_strict_validation_enabled(self._runtime)
+
+
+class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
+    """Shared allowlisted failure handling for postrun collaborators."""
+
+    def _handle_allowlisted_failure(
+        self: _HasPostrunFailureHandling,
+        error: BaseException,
+        *,
+        extra: dict[str, object] | None = None,
+        emit_warning_error_log: bool = False,
+    ) -> None:
+        """Apply postrun warning/strict policy using instance-held collaborators."""
+        apply_postrun_failure_policy_or_raise(
+            logger=self._logger,
+            runtime=self._runtime,
+            error=error,
+            spec=self._FAILURE_POLICY,
+            extra=extra,
+            emit_warning_error_log=emit_warning_error_log,
+        )

@@ -120,4 +120,8 @@ COMMANDS = (
     quarantine_stats,
 )
 
-__all__ = ["quarantine"]
+__all__ = [
+    "get_quarantine_manager",
+    "get_quarantine_service",
+    "quarantine",
+]

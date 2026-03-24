@@ -1,13 +1,13 @@
 schema_version: 1
 baseline:
-  total_exemptions: 1
+  total_exemptions: 0
   by_registry:
     file_size_limits: 0
     function_complexity: 0
     function_length: 0
     class_size: 0
     class_method_count: 0
-    god_object: 1
+    god_object: 0
     domain_complexity: 0
 historical_baseline:
   total_exemptions: 10
@@ -139,19 +139,23 @@ report_only_hotspot_families:
   mode: report-only
   artifact_policy:
     duplication_command: "make qa-hotspot-report"
+    baseline_artifact: "reports/quality/hotspot-duplication-baseline.json"
     history_artifact: "reports/quality/hotspot-duplication-history.jsonl"
     latest_reviewed_snapshot: "2026-03-24"
+    confirming_clean_snapshots_required: 2
     expected_direction: "downward"
-    ratchet_policy: "Observe one to two successful refactor waves before enabling any family-level ratchet."
+    ratchet_policy: "Keep the hotspot layer report-only at the repo level; once a zero-duplication family has two confirming clean snapshots, activate only a bounded family-level duplication ratchet while file-growth and fan-in remain watch-only."
   families:
     - name: "application_core"
       owner: "@bioetl-architecture"
       linked_rf: "RF-023"
-      expected_action: "Split helper-heavy orchestration seams and shrink internal fan-in before introducing any family-specific gate."
+      ratchet_stage: "active"
+      ratchet_scope: "duplication-only"
+      expected_action: "Hold duplication at zero via an active family-level ratchet while keeping file-growth and fan-in in watch mode during core orchestration changes."
       path_prefixes:
         - "src/bioetl/application/core/"
       metrics:
-        duplication_clusters: 16
+        duplication_clusters: 0
         files: 81
         total_loc: 12259
         files_ge_250_loc: 18
@@ -160,41 +164,45 @@ report_only_hotspot_families:
         max_internal_fan_in_module: "bioetl.application.core.base_transformer"
       trend:
         status: "down_vs_2026-03-23"
-        next_action: "2026-03-24 reduced application/core duplication from 21 to 16; keep follow-up focused on remaining compatibility and batch/runtime duplicate slices before considering any ratchet."
+        next_action: "2026-03-24 now has two confirming clean snapshots for application/core; keep the bounded duplication-only family ratchet active while the remaining structural pressure stays in file-growth and fan-in."
     - name: "composition_bootstrap_runtime"
       owner: "@bioetl-platform"
       linked_rf: "RF-023"
-      expected_action: "Keep the zone report-only while watching for renewed duplication or file-growth during runtime/bootstrap changes."
+      ratchet_stage: "active"
+      ratchet_scope: "duplication-only"
+      expected_action: "Hold duplication at zero via an active family-level ratchet while keeping file-growth and fan-in in watch mode during runtime/bootstrap changes."
       path_prefixes:
         - "src/bioetl/composition/bootstrap/runtime/"
       metrics:
-        duplication_clusters: 1
+        duplication_clusters: 0
         files: 27
-        total_loc: 3196
+        total_loc: 3163
         files_ge_250_loc: 3
-        helper_function_ratio: 0.329
+        helper_function_ratio: 0.333
         max_internal_fan_in: 5
         max_internal_fan_in_module: "bioetl.composition.bootstrap.runtime.observability"
       trend:
-        status: "flat_vs_2026-03-23"
-        next_action: "2026-03-24 stayed flat at 1 duplication cluster; keep monitoring and only consider ratchet after a real downward move or another stable wave."
+        status: "down_vs_2026-03-23"
+        next_action: "2026-03-24 now has two confirming clean snapshots for composition/bootstrap/runtime; keep the bounded duplication-only family ratchet active while file-growth and fan-in remain watch-only."
     - name: "composition_factories_pipeline"
       owner: "@bioetl-platform"
       linked_rf: "RF-023"
-      expected_action: "Use the baseline to prioritize small factory seam extractions instead of broad composition rewrites."
+      ratchet_stage: "active"
+      ratchet_scope: "duplication-only"
+      expected_action: "Hold duplication at zero via an active family-level ratchet while keeping file-growth and fan-in in watch mode during pipeline-factory changes."
       path_prefixes:
         - "src/bioetl/composition/factories/pipeline/"
       metrics:
-        duplication_clusters: 4
-        files: 20
-        total_loc: 2500
+        duplication_clusters: 0
+        files: 22
+        total_loc: 2589
         files_ge_250_loc: 3
         helper_function_ratio: 0.469
         max_internal_fan_in: 6
         max_internal_fan_in_module: "bioetl.composition.factories.pipeline.registry"
       trend:
-        status: "flat_vs_2026-03-23"
-        next_action: "2026-03-24 stayed flat at 4 duplication clusters; keep it as a narrow cleanup target and wait for a downward move before any ratchet."
+        status: "down_vs_2026-03-23"
+        next_action: "2026-03-24 now has two confirming clean snapshots for composition/factories/pipeline; keep the bounded duplication-only family ratchet active while file-growth and fan-in remain watch-only."
 quarterly_targets:
   - quarter: "2026-Q1"
     max_total_exemptions: 10

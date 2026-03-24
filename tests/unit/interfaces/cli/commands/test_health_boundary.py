@@ -2,9 +2,27 @@
 
 from __future__ import annotations
 
+import ast
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+@pytest.mark.unit
+def test_health_module_reexports_canonical_health_command_symbols() -> None:
+    """Top-level health module should expose the canonical domain command surface."""
+    import bioetl.interfaces.cli.commands.health as health_module
+    from bioetl.interfaces.cli.commands.domains.health import (
+        command as canonical_command,
+    )
+
+    assert health_module.health is canonical_command.health
+    assert health_module.get_health_service is canonical_command.get_health_service
+    assert (
+        health_module.get_health_server_dependencies
+        is canonical_command.get_health_server_dependencies
+    )
 
 
 @pytest.mark.unit
@@ -39,3 +57,21 @@ def test_get_health_server_dependencies_delegates_to_services_api() -> None:
 
     assert result is dependencies
     mock_get_health_server_dependencies.assert_called_once_with()
+
+
+@pytest.mark.unit
+def test_cli_main_imports_health_via_public_command_seam() -> None:
+    """cli.main should wire the public health seam, not the internal owner module."""
+    path = Path("src/bioetl/interfaces/cli/main.py")
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+
+    assert "bioetl.interfaces.cli.commands.health" in imported_modules
+    assert (
+        "bioetl.interfaces.cli.commands.domains.health.command" not in imported_modules
+    )

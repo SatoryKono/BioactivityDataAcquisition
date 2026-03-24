@@ -90,14 +90,9 @@ class _BuildPipelineServicesFn(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class _PipelineCreationInputs:
-    """Immutable input bundle for pipeline creation."""
+class _PipelineCreationRequest:
+    """Shared runtime request bundle for pipeline creation helpers."""
 
-    pipeline_name: str
-    pipeline_class: type[BasePipeline]
-    provider: str
-    create_data_source_fn: DataSourceCreatorProtocol
-    transformer_class: type[BaseTransformer] | None
     run_id: RunID
     runtime: RuntimeConfig
     settings: Settings
@@ -108,6 +103,18 @@ class _PipelineCreationInputs:
     dq_monitor: DQMonitorPort | None = None
     metrics: MetricsPort | None = None
     cached_bronze: object | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _PipelineCreationInputs:
+    """Immutable input bundle for pipeline creation."""
+
+    pipeline_name: str
+    pipeline_class: type[BasePipeline]
+    provider: str
+    create_data_source_fn: DataSourceCreatorProtocol
+    transformer_class: type[BaseTransformer] | None
+    request: _PipelineCreationRequest
     pandera_silver_schema: object | None = None
 
 
@@ -129,7 +136,8 @@ def _create_pipeline_with_services_impl(
     Returns:
         Configured BasePipeline instance ready for execution.
     """
-    yaml_config = inputs.config or deps.load_pipeline_config(inputs.pipeline_name)
+    request = inputs.request
+    yaml_config = request.config or deps.load_pipeline_config(inputs.pipeline_name)
     run_context_factory = RunContextFactory(
         pipeline_name=inputs.pipeline_name,
         provider=inputs.provider,
@@ -140,8 +148,8 @@ def _create_pipeline_with_services_impl(
     )
     metadata_coordinator = MetadataCoordinator(
         run_context_factory.create(
-            run_id=inputs.run_id,
-            runtime=inputs.runtime,
+            run_id=request.run_id,
+            runtime=request.runtime,
             yaml_config=yaml_config,
         )
     )
@@ -149,19 +157,19 @@ def _create_pipeline_with_services_impl(
     services = build_pipeline_services_fn(
         pipeline_name=inputs.pipeline_name,
         create_data_source_fn=inputs.create_data_source_fn,
-        settings=inputs.settings,
-        logger=inputs.logger,
+        settings=request.settings,
+        logger=request.logger,
         config=yaml_config,
-        filter_config=inputs.filter_config,
-        tracer=inputs.tracer,
-        dq_monitor=inputs.dq_monitor,
+        filter_config=request.filter_config,
+        tracer=request.tracer,
+        dq_monitor=request.dq_monitor,
         metadata_coordinator=metadata_coordinator,
-        cached_bronze=inputs.cached_bronze,
+        cached_bronze=request.cached_bronze,
         silver_validator=_create_silver_validator(inputs.pandera_silver_schema),
     )
     domain_config = resolve_domain_pipeline_config(
         yaml_config,
-        relaxed_dq=inputs.settings.pipeline.relaxed_dq,
+        relaxed_dq=request.settings.pipeline.relaxed_dq,
         domain_mapper=deps.yaml_config_to_domain,
     )
     transformer = TransformerBuilder(
@@ -173,13 +181,13 @@ def _create_pipeline_with_services_impl(
         transformer_class=inputs.transformer_class,
         yaml_config=yaml_config,
         domain_config=domain_config,
-        tracer=inputs.tracer,
-        metrics=inputs.metrics,
+        tracer=request.tracer,
+        metrics=request.metrics,
     )
 
     return inputs.pipeline_class.create(
-        run_id=inputs.run_id,
-        runtime=inputs.runtime,
+        run_id=request.run_id,
+        runtime=request.runtime,
         services=services,
         config=domain_config,
         shutdown_signal=ShutdownSignal(),

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, TypeVar, runtime_checkable
 
-from bioetl.application.core.batch_execution._contracts import BatchResultBuilderPort
+from bioetl.application.core.batch_execution.contracts import BatchResultBuilderPort
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.domain.types import BronzeRecord
 

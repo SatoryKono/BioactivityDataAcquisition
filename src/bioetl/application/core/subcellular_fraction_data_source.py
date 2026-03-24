@@ -7,24 +7,28 @@ from Assay records and emit derived subcellular_fraction records.
 from __future__ import annotations
 
 import hashlib
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core._data_source_mixins import (
+    _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
     _SourceMetadataDelegationMixin,
+    _TargetEntityFetchDelegationMixin,
+    _WrappedDataSourceDelegationMixin,
 )
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-    from types import TracebackType
 
     from bioetl.domain.ports import DataSourcePort
-    from bioetl.domain.types import HealthStatus
 
 
 class SubcellularFractionDataSource(
+    _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
+    _TargetEntityFetchDelegationMixin,
+    _WrappedDataSourceDelegationMixin,
     _SourceMetadataDelegationMixin,
 ):
     """Wraps a DataSourcePort to extract subcellular fraction records."""
@@ -37,60 +41,24 @@ class SubcellularFractionDataSource(
         self._data_source = data_source
         self._seen_fractions: set[str] = set()
 
-    @property
-    def provider_name(self) -> str:
-        """Provider name from the wrapped data source."""
-        return self._data_source.provider_name
-
-    async def __aenter__(self) -> Self:
-        """Enter async context and reset cache."""
-        await self._data_source.__aenter__()
+    def _after_wrapped_data_source_enter(self) -> None:
+        """Reset wrapper cache when entering a new async lifecycle."""
         self._seen_fractions = set()
-        return self
 
-    async def __aexit__(
+    async def _fetch_target_records(
         self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        """Exit async context."""
-        await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
-
-    async def fetch(
-        self,
-        entity_type: str,
         limit: int | None = None,
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: heterogeneous record values
-        """Fetch records, extracting subcellular fractions if requested.
-
-        Args:
-            entity_type: Entity type identifier.
-            limit: Maximum number of records to process.
-            query: Search query string.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        if entity_type == self.TARGET_ENTITY_TYPE:
-            async for record in self._fetch_subcellular_fractions(
-                limit, query, filter_ids, filter_field
-            ):
-                yield record
-        else:
-            async for record in self._data_source.fetch(
-                entity_type=entity_type,
-                limit=limit,
-                query=query,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-            ):
-                yield record
+        """Yield subcellular-fraction records derived from assay fetches."""
+        _ = offset
+        async for record in self._fetch_subcellular_fractions(
+            limit, query, filter_ids, filter_field
+        ):
+            yield record
 
     async def _fetch_subcellular_fractions(
         self,
@@ -143,18 +111,6 @@ class SubcellularFractionDataSource(
             "assay_count": 1,
         }
 
-    async def health_check(self) -> HealthStatus:
-        """Delegate health check to wrapped adapter.
-
-        Returns:
-            The HealthStatus result.
-        """
-        return await self._data_source.health_check()
-
-    async def aclose(self) -> None:
-        """Delegate close to wrapped adapter."""
-        await self._data_source.aclose()
-
     async def _fetch_target_filtered_records(
         self,
         filterable: Any,  # Any: filterable adapter is structurally validated by mixin
@@ -191,26 +147,21 @@ class SubcellularFractionDataSource(
         ):
             yield record
 
-    async def _fetch_target_filtered_with_fallback_records(
+    def _resolve_target_fallback_upstream_limit(
         self,
-        filterable: Any,  # Any: filterable adapter is structurally validated by mixin
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
         limit: int | None = None,
+    ) -> int | None:
+        """Keep fallback-enabled assay fetches unbounded upstream."""
+        _ = limit
+        return None
+
+    def _yield_target_records_from_fallback_source_records(
+        self,
+        source_records: AsyncIterator[Any],
+        limit: int | None,
     ) -> AsyncIterator[JsonDict]:  # Any: heterogeneous record values
-        """Yield subcellular fractions from fallback-enabled upstream assays."""
-        async for record in self._fetch_filtered_fractions(
-            filterable.fetch_filtered_with_fallback(
-                entity_type=self.SOURCE_ENTITY_TYPE,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                fallback_mapping=fallback_mapping,
-                limit=None,
-            ),
-            limit,
-        ):
-            yield record
+        """Transform fallback-fetched assays into subcellular fraction records."""
+        return self._fetch_filtered_fractions(source_records, limit)
 
     async def _fetch_filtered_fractions(
         self,

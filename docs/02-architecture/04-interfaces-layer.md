@@ -22,23 +22,23 @@
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-03-19):**
+**Доступные команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-03-24):**
 
 | Команда         | Модуль                       | Описание                                |
 | --------------- | ---------------------------- | --------------------------------------- |
 | `run`           | `run.py`                     | Retained public seam; canonical implementation lives in `domains/run/command.py` |
-| `run-all`       | `run_all.py`                 | Запуск всех пайплайнов провайдера       |
-| `run-composite` | `run_composite.py`           | Запуск композитного пайплайна (ADR-026) |
+| `run-all`       | `run_all.py`                 | Retained public seam; canonical implementation lives in `domains/run_all/command.py` |
+| `run-composite` | `run_composite.py`           | Retained public seam; canonical implementation lives in `domains/composite/command.py` |
 | `export`        | `export.py`                  | Экспорт данных из Gold                  |
-| `quarantine`    | `quarantine.py`              | Управление карантинными записями        |
-| `health`        | `health.py`                  | Проверка здоровья провайдеров           |
+| `quarantine`    | `quarantine.py`              | Retained public seam; canonical implementation lives in `domains/quarantine/command.py` |
+| `health`        | `health.py`                  | Retained public seam; canonical implementation lives in `domains/health/command.py` |
 | `config`        | `config.py`                  | Просмотр и валидация конфигураций       |
 | `checkpoint`    | `checkpoint.py`              | Управление checkpoint-ами               |
 | `lock`          | `lock.py`                    | Управление блокировками                 |
-| `vacuum`        | `vacuum.py`                  | VACUUM операции для Delta Lake          |
-| `cleanup`       | `cleanup.py`                 | Очистка Bronze данных                   |
-| `maintenance`   | `maintenance.py`             | Maintenance операции                    |
-| `archive`       | `archive.py`                 | Архивирование данных                    |
+| `vacuum`        | `vacuum.py`                  | Retained public seam; canonical implementation lives in `domains/maintenance/vacuum.py` |
+| `cleanup`       | `cleanup.py`                 | Retained public seam; canonical implementation lives in `domains/maintenance/cleanup.py` |
+| `maintenance`   | `maintenance.py`             | Retained public seam; canonical implementation lives in `domains/maintenance/command.py` |
+| `archive`       | `archive.py`                 | Retained public seam; canonical implementation lives in `domains/maintenance/archive.py` |
 | `adr`           | `adr.py`                     | Управление ADR (Architecture Decisions) |
 | `debug`         | `debug.py`                   | Диагностические утилиты                 |
 
@@ -46,20 +46,25 @@
 
 | Модуль                          | Назначение                              |
 | ------------------------------- | --------------------------------------- |
-| `execution_policy.py`           | Политики исполнения команд              |
-| `run_all_command_policy.py`     | Политики `run-all`                      |
-| `run_helpers.py`                | Вспомогательные функции для run-команд  |
-| `run_all_helpers.py`            | Вспомогательные функции для run-all     |
-| `run_command_policy.py`         | Политики run-команд                     |
-| `run_composite_helpers.py`      | Вспомогательные функции для composite   |
-| `run_composite_runtime.py`      | Runtime для composite                   |
-| `run_result_presenter.py`       | Форматирование результатов запуска      |
-| `health_rendering.py`           | Рендеринг health-результатов            |
-| `health_server_integration.py`  | Интеграция health-сервера               |
-| `metrics_server_integration.py` | Интеграция metrics-сервера              |
-| `quarantine_execution.py`       | Исполнение quarantine-операций          |
-| `quarantine_rendering.py`       | Рендеринг quarantine-результатов        |
-| `quarantine_support.py`         | Общие утилиты quarantine CLI            |
+| `execution_policy.py`           | Retained support seam; canonical implementation lives in `domains/shared/execution_policy.py` |
+| `run_all_command_policy.py`     | Retained support seam; canonical implementation lives in `domains/run_all/command_policy.py` |
+| `run_helpers.py`                | Retained support seam; canonical implementation lives in `domains/run/support.py` |
+| `run_all_helpers.py`            | Retained support seam; canonical implementation lives in `domains/run_all/support.py` |
+| `run_command_policy.py`         | Retained support seam; canonical implementation lives in `domains/run/command_policy.py` |
+| `run_runtime_helpers.py`        | Retained support seam; canonical implementation lives in `domains/run/runtime_helpers.py` |
+| `run_result_flow_helpers.py`    | Retained support seam; canonical implementation lives in `domains/run/result_flow.py` |
+| `run_service_access.py`         | Retained support seam; canonical implementation lives in `domains/run/service_access.py` |
+| `run_all_execution.py`          | Retained support seam; canonical implementation lives in `domains/run_all/execution.py` |
+| `run_composite_helpers.py`      | Retained support seam; canonical implementation lives in `domains/composite/support.py` |
+| `run_composite_runtime.py`      | Retained support seam; canonical implementation lives in `domains/composite/runtime.py` |
+| `run_composite_execution.py`    | Retained support seam; canonical implementation lives in `domains/composite/execution.py` |
+| `run_result_presenter.py`       | Retained support seam; canonical implementation lives in `domains/run/result_presenter.py` |
+| `health_rendering.py`           | Retained support seam; canonical implementation lives in `domains/health/rendering.py` |
+| `health_server_integration.py`  | Retained support seam; canonical implementation lives in `domains/health/server_integration.py` |
+| `metrics_server_integration.py` | Retained support seam; canonical implementation lives in `domains/health/metrics_server_integration.py` |
+| `quarantine_execution.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/execution.py` |
+| `quarantine_rendering.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/rendering.py` |
+| `quarantine_support.py`         | Retained support seam; canonical implementation lives in `domains/quarantine/support.py` |
 
 **Примеры использования:**
 
@@ -91,8 +96,8 @@ Endpoints: `/health`, `/health/live`, `/health/ready`.
 Graceful shutdown обрабатывается непосредственно в canonical domain command modules:
 
 - `interfaces/cli/commands/domains/run/command.py`
-- `interfaces/cli/commands/run_all.py`
-- `interfaces/cli/commands/run_composite.py`
+- `interfaces/cli/commands/domains/run_all/command.py`
+- `interfaces/cli/commands/domains/composite/command.py`
   Shutdown логика вынесена в `application/core/lifecycle/shutdown.py`.
 
 ----------------------------------------------------------------------

@@ -31,6 +31,8 @@ from bioetl.interfaces.cli.formatters import (
 __all__ = [
     "bronze_cleanup_command",
     "cleanup_preview_command",
+    "get_bronze_cleanup_service",
+    "preview_pipeline_cleanup",
 ]
 
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
@@ -23,6 +23,9 @@ from bioetl.infrastructure.config.contract_policy_validation import (
 from bioetl.infrastructure.config.contract_policy_validation import (
     validate_pipeline_contract_policy as _validate_pipeline_contract_policy_impl,
 )
+
+if TYPE_CHECKING:
+    from bioetl.composition.factories.pipeline.assembler import GenericPipelineFactory
 
 
 def _schema_columns(
@@ -58,7 +61,7 @@ def create_factory(
     config: PipelineFactoryConfig,
     *,
     provider_registry: ProviderRegistry | None = None,
-) -> Any:
+) -> GenericPipelineFactory:
     """Create a GenericPipelineFactory from configuration.
 
     Args:

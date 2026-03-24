@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+from bioetl.application.core.batch_execution.lifecycle import *  # noqa: F403
 from bioetl.application.core.batch_execution.lifecycle import (
-    BatchExecutionContext,
-    BatchExecutionFinalizationContext,
-    BatchExecutionLifecycleContext,
-    BatchExecutionLifecycleService,
-    prepare_execution_context,
+    __all__ as _LIFECYCLE_EXPORTS,
+)
+from bioetl.application.core.batch_execution.contracts import (
+    BatchExecutionStatePort,
+    BatchResultBuilderPort,
 )
 from bioetl.application.core.batch_execution.run_service import (
     BatchExecutionRunService,
@@ -17,11 +18,9 @@ from bioetl.application.core.batch_execution.state_service import (
 )
 
 __all__ = [
-    "BatchExecutionContext",
-    "BatchExecutionFinalizationContext",
-    "BatchExecutionLifecycleContext",
-    "BatchExecutionLifecycleService",
+    *_LIFECYCLE_EXPORTS,
+    "BatchExecutionStatePort",
+    "BatchResultBuilderPort",
     "BatchExecutionRunService",
     "BatchExecutionStateService",
-    "prepare_execution_context",
 ]

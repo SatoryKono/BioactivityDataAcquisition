@@ -53,6 +53,9 @@ from bioetl.application.core.batch_memory_manager import BatchMemoryManagerServi
 from bioetl.application.core.batch_processing_service import (
     BatchProcessingService,
 )
+from bioetl.application.core.batch_processing_support import (
+    BatchProcessingSupportService,
+)
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
@@ -258,6 +261,14 @@ def _create_batch_executor(
         components=components,
         tracing_manager=tracing_manager,
         batch_id_factory=effective_batch_id_factory,
+        support_service=BatchProcessingSupportService(
+            services=services,
+            logger=services.logger,
+            batch_metrics=components.batch_metrics,
+            transformer=components.transformer,
+            writer=components.writer,
+            tracing=tracing_manager,
+        ),
     )
     execution_lifecycle_service = BatchExecutionLifecycleService(
         progress_service=progress_service,

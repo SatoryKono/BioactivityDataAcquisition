@@ -6,6 +6,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
+from bioetl.application.core._span_helpers import close_span
 from bioetl.domain.locking import LockNotHeldError
 from bioetl.domain.types import JsonDict
 
@@ -61,12 +62,7 @@ class BatchWriterTracingMixin:
 
     def _end_span(self, span: SpanType | None, error: Exception | None = None) -> None:
         """Close tracing span with optional exception metadata."""
-        if not span:
-            return
-        if error:
-            span.set_attribute("error", True)
-            span.record_exception(error)
-        span.__exit__(None, None, None)
+        close_span(span, error)
 
     def log_and_track_write_error(
         self, layer: str, error: Exception, batch_id: BatchID

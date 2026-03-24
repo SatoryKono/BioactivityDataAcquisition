@@ -5,20 +5,7 @@ Pre-pipeline health checks, medallion config validation, and aggregation.
 
 from __future__ import annotations
 
-from bioetl.application.core.preflight.health_aggregator import (
-    HealthAggregator,
-    _HealthAggregator,
-)
-from bioetl.application.core.preflight.medallion_validator import (
-    MedallionConfigValidator,
-    _MedallionConfigValidator,
-)
-from bioetl.application.core.preflight.service import PreflightService
+from bioetl.application.core.preflight.service import *  # noqa: F403
+from bioetl.application.core.preflight.service import __all__ as _PREFLIGHT_EXPORTS
 
-__all__ = [
-    "HealthAggregator",
-    "MedallionConfigValidator",
-    "PreflightService",
-    "_HealthAggregator",
-    "_MedallionConfigValidator",
-]
+__all__ = _PREFLIGHT_EXPORTS
