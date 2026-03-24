@@ -485,6 +485,8 @@ class TestWriteMetadataPathLogic:
             "layer": "gold",
             "path": str(base_path / "chembl_activity_metadata.yaml"),
             "run_id": metadata.runtime.run_id,
+            "dataset_ref": "gold:chembl.activity",
+            "lineage_fragment_id": None,
         }
         assert result == str((base_path / "chembl_activity_metadata.yaml").resolve())
 

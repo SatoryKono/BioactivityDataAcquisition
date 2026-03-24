@@ -6,9 +6,13 @@ __all__ = ["METADATA_FILENAME", "MetadataWriter"]
 
 import asyncio
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+import yaml
+
+from bioetl.domain.lineage import DatasetRef
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
@@ -41,6 +45,127 @@ if TYPE_CHECKING:
 
 _get_metadata_filename = _operations._get_metadata_filename
 ArtifactPublicationRecorder = Callable[[str, str, dict[str, object] | None], object]
+
+
+def _derive_dataset_ref(
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+) -> str | None:
+    """Return canonical dataset ref when the sidecar represents a dataset artifact."""
+    layer = str(getattr(metadata, "layer", ""))
+    if layer == "silver":
+        output_ext = getattr(metadata, "output_ext", None)
+        return DatasetRef(
+            layer="silver",
+            logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
+            version=getattr(output_ext, "delta_version_after", None),
+            provider=metadata.pipeline.provider,
+            entity=metadata.pipeline.entity,
+        ).node_id
+    if layer == "gold":
+        return DatasetRef(
+            layer="gold",
+            logical_name=f"{metadata.pipeline.provider}.{metadata.pipeline.entity}",
+            provider=metadata.pipeline.provider,
+            entity=metadata.pipeline.entity,
+        ).node_id
+    return None
+
+
+def _resolve_lineage_log_context(
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+) -> dict[str, object]:
+    """Resolve optional lineage anchors for control-plane and log emission."""
+    return {
+        "dataset_ref": _derive_dataset_ref(metadata),
+        "lineage_fragment_id": metadata.output.lineage_fragment_id,
+    }
+
+
+def _apply_common_metadata_finalization(
+    *,
+    metadata: SilverMetadata | GoldMetadata,
+    dq_report_path: str | None,
+    completed_at: datetime | None,
+) -> None:
+    """Apply shared postrun finalization fields to one sidecar model."""
+    if dq_report_path is not None:
+        metadata.dq_report_path = dq_report_path
+    if completed_at is not None:
+        metadata.runtime.completed_at_utc = completed_at
+        metadata.output.write_completed_at = completed_at
+
+
+def _apply_silver_metadata_finalization(
+    *,
+    metadata: SilverMetadata,
+    dq_report_path: str | None,
+    completed_at: datetime | None,
+    delta_version_after: int | None,
+) -> None:
+    """Apply Silver-specific postrun finalization fields."""
+    _apply_common_metadata_finalization(
+        metadata=metadata,
+        dq_report_path=dq_report_path,
+        completed_at=completed_at,
+    )
+    if delta_version_after is not None:
+        metadata.delta.version_after = delta_version_after
+        metadata.output_ext.delta_version_after = delta_version_after
+
+
+def _apply_gold_metadata_finalization(
+    *,
+    metadata: GoldMetadata,
+    dq_report_path: str | None,
+    completed_at: datetime | None,
+) -> None:
+    """Apply Gold-specific postrun finalization fields."""
+    _apply_common_metadata_finalization(
+        metadata=metadata,
+        dq_report_path=dq_report_path,
+        completed_at=completed_at,
+    )
+
+
+def _load_existing_metadata_model(
+    metadata_path: Path,
+    *,
+    layer: str,
+) -> SilverMetadata | GoldMetadata | None:
+    """Load an existing Silver/Gold sidecar model from disk when present."""
+    if not metadata_path.exists():
+        return None
+
+    payload = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return None
+    output_payload = payload.get("output")
+    if isinstance(output_payload, dict):
+        output_payload.pop("write_duration_ms", None)
+
+    from bioetl.domain.models.metadata import GoldMetadata, SilverMetadata
+
+    if layer == "silver":
+        return SilverMetadata.model_validate(payload)
+    return GoldMetadata.model_validate(payload)
+
+
+def _resolve_existing_metadata_path(
+    *,
+    base_path: str | Path,
+    layer: str,
+    table_name: str | None = None,
+    flat_structure: bool = False,
+    provider: str | None = None,
+    entity: str | None = None,
+) -> Path:
+    """Resolve an existing sidecar path without requiring a metadata payload."""
+    path = Path(base_path)
+    if provider and entity:
+        return path / _get_metadata_filename(provider, entity)
+    if flat_structure and table_name:
+        return path / f"{table_name}_metadata.yaml"
+    return path / METADATA_FILENAME
 
 
 async def _execute_atomic_metadata_write(
@@ -99,15 +224,45 @@ def _finalize_metadata_write_operation(
     *,
     logger: LoggerPort,
     operation: _PreparedMetadataWriteOperation,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
 ) -> str:
     """Emit final write log and return the resolved metadata sidecar path."""
+    lineage_context = _resolve_lineage_log_context(metadata)
     logger.info(
         "metadata_written",
         layer=operation.telemetry_context.layer,
         path=str(operation.prepared_write.metadata_path),
         run_id=operation.run_id,
+        dataset_ref=lineage_context["dataset_ref"],
+        lineage_fragment_id=lineage_context["lineage_fragment_id"],
     )
     return str(operation.prepared_write.metadata_path.resolve())
+
+
+def _record_artifact_publication(
+    *,
+    recorder: ArtifactPublicationRecorder | None,
+    layer: str,
+    base_path: str | Path,
+    metadata_path: str,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
+) -> None:
+    """Emit the optional control-plane artifact publication callback."""
+    if recorder is None:
+        return
+    lineage_context = _resolve_lineage_log_context(metadata)
+    details: dict[str, object] = {
+        "artifact_kind": "layer_output",
+        "metadata_path": metadata_path,
+        "record_count": int(metadata.output.record_count),
+        "total_bytes": int(metadata.output.total_bytes),
+        "pipeline_name": metadata.pipeline.name,
+        "provider": metadata.pipeline.provider,
+        "entity": metadata.pipeline.entity,
+        "dataset_ref": lineage_context["dataset_ref"],
+        "lineage_fragment_id": lineage_context["lineage_fragment_id"],
+    }
+    recorder(layer, str(Path(base_path).resolve()), details)
 
 
 async def _execute_prepared_metadata_write_operation(
@@ -116,6 +271,7 @@ async def _execute_prepared_metadata_write_operation(
     metrics: MetricsPort | None,
     retry_policy: AdaptiveRetryPolicy,
     operation: _PreparedMetadataWriteOperation,
+    metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
 ) -> str:
     """Execute one prepared metadata write operation end-to-end."""
     await _execute_atomic_metadata_write(
@@ -125,7 +281,11 @@ async def _execute_prepared_metadata_write_operation(
         retry_policy=retry_policy,
         context=operation.telemetry_context,
     )
-    return _finalize_metadata_write_operation(logger=logger, operation=operation)
+    return _finalize_metadata_write_operation(
+        logger=logger,
+        operation=operation,
+        metadata=metadata,
+    )
 
 
 class MetadataWriter:
@@ -175,6 +335,47 @@ class MetadataWriter:
             entity=entity,
         )
 
+    async def _finalize_existing_layer_metadata(
+        self,
+        *,
+        base_path: str | Path,
+        layer: str,
+        apply_finalization: Callable[[SilverMetadata | GoldMetadata], None],
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> str | None:
+        """Load, patch, and atomically rewrite an existing Silver/Gold sidecar."""
+        metadata_path = _resolve_existing_metadata_path(
+            base_path=base_path,
+            layer=layer,
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
+        )
+        existing_metadata = await asyncio.to_thread(
+            _load_existing_metadata_model,
+            metadata_path,
+            layer=layer,
+        )
+        if existing_metadata is None:
+            return None
+
+        apply_finalization(existing_metadata)
+        return await self._write_metadata(
+            self._build_metadata_write_request(
+                base_path=base_path,
+                metadata=existing_metadata,
+                layer=layer,
+                table_name=table_name,
+                flat_structure=flat_structure,
+                provider=provider,
+                entity=entity,
+            )
+        )
+
     async def _write_layer_metadata(
         self,
         *,
@@ -198,35 +399,14 @@ class MetadataWriter:
                 entity=entity,
             )
         )
-        self._record_artifact_publication(
+        _record_artifact_publication(
+            recorder=self._artifact_recorder,
             layer=layer,
             base_path=base_path,
             metadata_path=metadata_path,
             metadata=metadata,
         )
         return metadata_path
-
-    def _record_artifact_publication(
-        self,
-        *,
-        layer: str,
-        base_path: str | Path,
-        metadata_path: str,
-        metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
-    ) -> None:
-        """Emit optional control-plane artifact publication callback."""
-        if self._artifact_recorder is None:
-            return
-        details: dict[str, object] = {
-            "artifact_kind": "layer_output",
-            "metadata_path": metadata_path,
-            "record_count": int(metadata.output.record_count),
-            "total_bytes": int(metadata.output.total_bytes),
-            "pipeline_name": metadata.pipeline.name,
-            "provider": metadata.pipeline.provider,
-            "entity": metadata.pipeline.entity,
-        }
-        self._artifact_recorder(layer, str(Path(base_path).resolve()), details)
 
     async def write_bronze_metadata(
         self,
@@ -292,6 +472,37 @@ class MetadataWriter:
             entity=entity,
         )
 
+    async def finalize_silver_metadata(
+        self,
+        base_path: str | Path,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
+        delta_version_after: int | None = None,
+    ) -> str | None:
+        """Finalize an existing Silver sidecar in place without republishing artifacts."""
+        def apply_finalization(metadata: SilverMetadata | GoldMetadata) -> None:
+            _apply_silver_metadata_finalization(
+                metadata=cast("SilverMetadata", metadata),
+                dq_report_path=dq_report_path,
+                completed_at=completed_at,
+                delta_version_after=delta_version_after,
+            )
+
+        return await self._finalize_existing_layer_metadata(
+            base_path=base_path,
+            layer="silver",
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
+            apply_finalization=apply_finalization,
+        )
+
     async def write_gold_metadata(
         self,
         base_path: str | Path,
@@ -327,6 +538,35 @@ class MetadataWriter:
             entity=entity,
         )
 
+    async def finalize_gold_metadata(
+        self,
+        base_path: str | Path,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
+    ) -> str | None:
+        """Finalize an existing Gold sidecar in place without republishing artifacts."""
+        def apply_finalization(metadata: SilverMetadata | GoldMetadata) -> None:
+            _apply_gold_metadata_finalization(
+                metadata=cast("GoldMetadata", metadata),
+                dq_report_path=dq_report_path,
+                completed_at=completed_at,
+            )
+
+        return await self._finalize_existing_layer_metadata(
+            base_path=base_path,
+            layer="gold",
+            table_name=table_name,
+            flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
+            apply_finalization=apply_finalization,
+        )
+
     async def _write_metadata(self, request: _MetadataWriteRequest) -> str:
         """Write sidecar metadata for Bronze/Silver/Gold layers and return file path."""
         operation = _prepare_metadata_write_operation(request)
@@ -335,6 +575,7 @@ class MetadataWriter:
             metrics=self._metrics,
             retry_policy=self._atomic_replace_retry_policy,
             operation=operation,
+            metadata=request.metadata,
         )
 
     async def aclose(self) -> None:

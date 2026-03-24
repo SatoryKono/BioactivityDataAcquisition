@@ -592,7 +592,11 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     silver_writer.recorder(
         "silver",
         "/tmp/output/silver/chembl/activity",
-        {"metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml"},
+        {
+            "metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml",
+            "dataset_ref": "silver:chembl.activity@1",
+            "lineage_fragment_id": "silver:fragment-1",
+        },
     )
     ledger_path = (
         tmp_path / "output" / "control" / "run_ledger" / f"{manifest_id}.jsonl"
@@ -602,6 +606,8 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     ledger_payload = json.loads(lines[1])
     assert ledger_payload["event_type"] == "artifact_published"
     assert ledger_payload["stage"] == "silver"
+    assert ledger_payload["dataset_ref"] == "silver:chembl.activity@1"
+    assert ledger_payload["lineage_fragment_id"] == "silver:fragment-1"
 
 
 def test_runner_builder_uses_runtime_config_access_seam() -> None:

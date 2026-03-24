@@ -12,12 +12,12 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl import __version__ as BIOETL_VERSION
 from bioetl.domain.services.composite_metadata_helpers import (
     extract_composite_output_ext as _extract_composite_output_ext,
 )
 from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.types import JsonDict, ScdConfig
-from bioetl.domain.version import get_version as _get_bioetl_version
 from bioetl.infrastructure.storage.metadata.builder_base import (
     _get_git_commit_cached,
     _MetadataBuilderBase,
@@ -147,7 +147,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             name=f"{provider_name}_{entity_name}",
             provider=provider_name,
             entity=entity_name,
-            version=_get_bioetl_version(),
+            version=BIOETL_VERSION,
             git_commit=_get_git_commit_cached(),
         )
         return runtime, pipeline

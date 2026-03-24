@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from typing import TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.ports import LineageStorePort
+
+if TYPE_CHECKING:
+    from bioetl.domain.lineage import LineageGraphFragment
 
 __all__ = [
     "persist_lineage_fragment_if_present",

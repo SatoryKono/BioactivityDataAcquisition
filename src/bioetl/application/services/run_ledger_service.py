@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 
@@ -103,6 +104,8 @@ class RunLedgerService:
         *,
         layer: str,
         artifact_path: str,
+        dataset_ref: str | None = None,
+        lineage_fragment_id: str | None = None,
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a published layer artifact tied to this manifest."""
@@ -110,9 +113,11 @@ class RunLedgerService:
         if details:
             payload.update(details)
         return self._append(
-            event_type="artifact_published",
+            event_type=PipelineEvent.ARTIFACT_PUBLISHED,
             status="published",
             stage=layer,
+            dataset_ref=dataset_ref,
+            lineage_fragment_id=lineage_fragment_id,
             details=payload,
         )
 
@@ -124,6 +129,8 @@ class RunLedgerService:
         stage: str | None = None,
         message: str | None = None,
         error_type: str | None = None,
+        dataset_ref: str | None = None,
+        lineage_fragment_id: str | None = None,
         metrics_snapshot: dict[str, int] | None = None,
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
@@ -138,6 +145,8 @@ class RunLedgerService:
             stage=stage,
             message=message,
             error_type=error_type,
+            dataset_ref=dataset_ref,
+            lineage_fragment_id=lineage_fragment_id,
             metrics_snapshot=metrics_snapshot,
             details=details,
         )

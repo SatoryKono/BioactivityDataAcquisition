@@ -1161,6 +1161,71 @@ class TestLineageFragments:
             for edge in fragment.edges
         )
 
+    def test_silver_fragment_exposes_composite_source_and_cv_summary(self) -> None:
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="composite",
+            entity="publication",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = SilverMetadataInput(
+            table_path="/data/output/silver/composite/publication",
+            records=[
+                {
+                    "id": 1,
+                    "_composite_run_id": "comp-run-456",
+                    "_source_providers": "['seed', 'crossref']",
+                    "_enrichment_status": "{'crossref': 'success'}",
+                    "_field_sources": "{'doi': 'seed', 'title': 'crossref'}",
+                    "_seed_record_id": "seed-123",
+                    "_cv_warn": True,
+                },
+                {
+                    "id": 2,
+                    "_field_sources": "{'abstract': 'crossref'}",
+                    "_cv_error": True,
+                    "_cv_quarantine": True,
+                },
+            ],
+            primary_keys=["id"],
+            mode=SilverWriteMode.DELETE,
+            version_after=11,
+        )
+
+        fragment = coordinator.build_silver_lineage_fragment(input_data)
+
+        silver_dataset = next(
+            node
+            for node in fragment.nodes
+            if node.node_type == LineageNodeType.DATASET
+            and node.node_id == "silver:composite.publication@11"
+        )
+        crossref_source = next(
+            node
+            for node in fragment.nodes
+            if node.node_type == LineageNodeType.SOURCE_SYSTEM
+            and node.node_id == "source_system:crossref"
+        )
+
+        assert silver_dataset.attributes["composite_run_id"] == "comp-run-456"
+        assert silver_dataset.attributes["source_providers"] == ["seed", "crossref"]
+        assert silver_dataset.attributes["provider_fields"] == {
+            "crossref": ["abstract", "title"],
+            "seed": ["doi"],
+        }
+        assert silver_dataset.attributes["cv_warn_count"] == 1
+        assert silver_dataset.attributes["cv_error_count"] == 1
+        assert silver_dataset.attributes["cv_quarantine_count"] == 1
+        assert crossref_source.attributes["selected_fields"] == ["abstract", "title"]
+        assert any(
+            edge.edge_type == LineageEdgeType.DERIVED_FROM
+            and edge.source.node_id == silver_dataset.node_id
+            and edge.target.node_id == crossref_source.node_id
+            for edge in fragment.edges
+        )
+
     def test_gold_fragment_links_silver_refs_schema_and_transforms(self) -> None:
         context = RunContext.create(
             run_id=RunID(uuid4()),
@@ -1207,6 +1272,85 @@ class TestLineageFragments:
         )
         assert any(edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges)
 
+    def test_gold_fragment_exposes_composite_source_and_cv_summary(self) -> None:
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.REBUILD,
+            started_at=datetime.now(UTC),
+            provider="composite",
+            entity="publication",
+            manifest_id="manifest-003",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = GoldMetadataInput(
+            table_path="/data/output/gold/composite/publication",
+            table_name="composite.publication",
+            records=[
+                {
+                    "id": 1,
+                    "_composite_run_id": "comp-run-123",
+                    "_source_providers": "['seed', 'openalex']",
+                    "_enrichment_status": "{'openalex': 'success'}",
+                    "_field_sources": "{'title': 'openalex', 'doi': 'seed'}",
+                    "_seed_record_id": "seed-001",
+                    "_lineage_created_at": "2026-03-24T10:00:00+00:00",
+                    "_cv_warn": True,
+                    "_cv_error": False,
+                    "_cv_quarantine": False,
+                },
+                {
+                    "id": 2,
+                    "_field_sources": "{'abstract': 'openalex'}",
+                    "_cv_warn": False,
+                    "_cv_error": True,
+                    "_cv_quarantine": True,
+                },
+            ],
+            mode=GoldWriteMode.OVERWRITE,
+        )
+
+        fragment = coordinator.build_gold_lineage_fragment(input_data)
+
+        gold_dataset = next(
+            node
+            for node in fragment.nodes
+            if node.node_type == LineageNodeType.DATASET
+            and node.node_id == "gold:composite.publication"
+        )
+        openalex_source = next(
+            node
+            for node in fragment.nodes
+            if node.node_type == LineageNodeType.SOURCE_SYSTEM
+            and node.node_id == "source_system:openalex"
+        )
+        openalex_edge = next(
+            edge
+            for edge in fragment.edges
+            if edge.edge_type == LineageEdgeType.DERIVED_FROM
+            and edge.source.node_id == gold_dataset.node_id
+            and edge.target.node_id == openalex_source.node_id
+        )
+
+        assert gold_dataset.attributes["composite_run_id"] == "comp-run-123"
+        assert gold_dataset.attributes["composite_name"] == "composite.publication"
+        assert gold_dataset.attributes["source_providers"] == ["seed", "openalex"]
+        assert gold_dataset.attributes["seed_record_id"] == "seed-001"
+        assert gold_dataset.attributes["field_sources"] == {
+            "title": "openalex",
+            "doi": "seed",
+        }
+        assert gold_dataset.attributes["provider_fields"] == {
+            "openalex": ["abstract", "title"],
+            "seed": ["doi"],
+        }
+        assert gold_dataset.attributes["cv_warn_count"] == 1
+        assert gold_dataset.attributes["cv_error_count"] == 1
+        assert gold_dataset.attributes["cv_quarantine_count"] == 1
+        assert openalex_source.attributes["selected_fields"] == ["abstract", "title"]
+        assert openalex_source.attributes["enrichment_status"] == "success"
+        assert openalex_edge.attributes["selected_field_count"] == 2
+        assert openalex_edge.attributes["enrichment_status"] == "success"
+
     def test_silver_metadata_bundle_keeps_metadata_and_fragment_aligned(
         self, coordinator: MetadataCoordinator
     ) -> None:
@@ -1224,6 +1368,10 @@ class TestLineageFragments:
         assert isinstance(bundle, MetadataLineageBundle)
         assert bundle.metadata.lineage.source_batch_ids == ["batch-001"]
         assert bundle.metadata.lineage.transform_steps == ["normalize", "validate"]
+        assert (
+            bundle.metadata.output.lineage_fragment_id
+            == bundle.lineage_fragment.fragment_id
+        )
         assert any(
             node.node_id == "silver:chembl.activity@4"
             for node in bundle.lineage_fragment.nodes
@@ -1254,9 +1402,33 @@ class TestLineageFragments:
         assert isinstance(bundle, MetadataLineageBundle)
         assert bundle.metadata.lineage.source_tables == {"chembl.activity": 12}
         assert bundle.metadata.lineage.transform_steps == ["merge"]
+        assert (
+            bundle.metadata.output.lineage_fragment_id
+            == bundle.lineage_fragment.fragment_id
+        )
         assert any(
             edge.edge_type == LineageEdgeType.USED_SCHEMA
             for edge in bundle.lineage_fragment.edges
+        )
+
+    def test_bronze_metadata_bundle_sets_lineage_fragment_anchor(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=10,
+            compressed_size=512,
+            output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+        )
+
+        bundle = coordinator.create_bronze_metadata_bundle(input_data)
+
+        assert isinstance(bundle, MetadataLineageBundle)
+        assert (
+            bundle.metadata.output.lineage_fragment_id
+            == bundle.lineage_fragment.fragment_id
         )
 
 

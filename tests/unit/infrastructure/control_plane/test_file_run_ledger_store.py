@@ -28,6 +28,8 @@ def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None
         event_type="run_finished",
         occurred_at=datetime.now(UTC),
         status="success",
+        dataset_ref="gold:chembl.activity",
+        lineage_fragment_id="gold:fragment-1",
         metrics_snapshot={"records_fetched": 5},
     )
 

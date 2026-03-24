@@ -22,8 +22,9 @@ import platform
 import socket
 from datetime import datetime
 from functools import cached_property
-from typing import ClassVar, Final
+from typing import TYPE_CHECKING, ClassVar, Final
 
+from bioetl import __version__ as BIOETL_VERSION
 from bioetl.application.services.metadata_assemblers import (
     GoldMetadataAssembler,
     SilverMetadataAssembler,
@@ -34,7 +35,6 @@ from bioetl.application.services.metadata_lineage_fragments import (
     build_gold_lineage_fragment,
     build_silver_lineage_fragment,
 )
-from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
@@ -56,7 +56,9 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
-from bioetl.domain.version import get_version as _get_bioetl_version
+
+if TYPE_CHECKING:
+    from bioetl.domain.lineage import LineageGraphFragment
 
 __all__ = [
     "MetadataCoordinator",
@@ -122,7 +124,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             cls._cached_environment = EnvironmentMetadata(
                 hostname=socket.gethostname(),
                 python_version=platform.python_version(),
-                bioetl_version=_get_bioetl_version(),
+                bioetl_version=BIOETL_VERSION,
             )
         return cls._cached_environment
 

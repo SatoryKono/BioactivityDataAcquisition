@@ -67,18 +67,15 @@ class TestPostrunMetadataWriteService:
     async def test_write_final_metadata_if_available_writes_silver_outputs(
         self,
     ) -> None:
-        """Configured metadata ports should execute the built write coroutines."""
+        """Configured metadata writer should finalize Silver sidecars."""
         storage = MagicMock()
         storage.get_table_path = MagicMock(return_value="/tmp/test_silver")
         storage.is_table_initialized = MagicMock(return_value=False)
 
         metadata_coordinator = MagicMock()
-        metadata_coordinator.create_silver_metadata = MagicMock(
-            return_value=MagicMock()
-        )
         metadata_writer = MagicMock()
-        metadata_writer.write_silver_metadata = AsyncMock(return_value="silver.yaml")
-        metadata_writer.write_gold_metadata = AsyncMock(return_value="gold.yaml")
+        metadata_writer.finalize_silver_metadata = AsyncMock(return_value="silver.yaml")
+        metadata_writer.finalize_gold_metadata = AsyncMock(return_value="gold.yaml")
         metadata_version_resolver = MagicMock()
         metadata_version_resolver.resolve_delta_version = MagicMock(return_value=7)
 
@@ -98,7 +95,7 @@ class TestPostrunMetadataWriteService:
 
         await service.write_final_metadata_if_available(executor, dq_reports=None)
 
-        metadata_coordinator.create_silver_metadata.assert_called_once()
-        metadata_writer.write_silver_metadata.assert_awaited_once()
-        metadata_writer.write_gold_metadata.assert_not_awaited()
+        metadata_coordinator.create_silver_metadata.assert_not_called()
+        metadata_writer.finalize_silver_metadata.assert_awaited_once()
+        metadata_writer.finalize_gold_metadata.assert_not_awaited()
         metadata_version_resolver.resolve_delta_version.assert_called_once()

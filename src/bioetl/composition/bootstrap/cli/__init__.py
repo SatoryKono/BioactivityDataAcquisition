@@ -36,6 +36,7 @@ from bioetl.composition.bootstrap.cli.health import (
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
 )
+from bioetl.composition.bootstrap.cli.lineage import bootstrap_lineage_service
 from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
 from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
 from bioetl.composition.bootstrap.cli.noop import (
@@ -56,29 +57,24 @@ from bioetl.composition.bootstrap.cli.storage import (
 )
 
 __all__ = [
-    # Health
     "HealthServerDependencies",
-    # ADR
     "bootstrap_adr_service",
     "bootstrap_bronze_cleanup_service",
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",
     "bootstrap_cleanup_service",
-    # Config
     "bootstrap_config_service",
     "bootstrap_export_service",
     "bootstrap_health_server_dependencies",
     "bootstrap_health_service",
     "bootstrap_lifecycle_service",
-    # Lock
+    "bootstrap_lineage_service",
     "bootstrap_lock_service",
-    # Metrics
     "bootstrap_metrics_service",
     "bootstrap_quarantine_manager",
     "bootstrap_quarantine_service",
     "bootstrap_run_manifest_service",
     "bootstrap_vacuum_service",
-    # NoOp factories (centralized)
     "create_noop_logger",
     "create_noop_metrics",
     "create_noop_observability_bundle",

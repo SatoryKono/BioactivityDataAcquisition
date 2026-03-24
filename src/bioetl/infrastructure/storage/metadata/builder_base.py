@@ -7,8 +7,8 @@ from platform import node as hostname
 from platform import python_version
 from typing import TYPE_CHECKING
 
+from bioetl import __version__ as BIOETL_VERSION
 from bioetl.domain.types import JsonDict
-from bioetl.domain.version import get_version as _get_bioetl_version
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
@@ -91,7 +91,7 @@ class _MetadataBuilderBase:
             name=f"composite_{entity_name}",
             provider=provider_name,
             entity=entity_name,
-            version=_get_bioetl_version(),
+            version=BIOETL_VERSION,
             git_commit=_get_git_commit_cached(),
         )
         lineage = LineageMetadata(
@@ -126,7 +126,7 @@ class _MetadataBuilderBase:
         return EnvironmentMetadata(
             hostname=hostname(),
             python_version=python_version(),
-            bioetl_version=_get_bioetl_version(),
+            bioetl_version=BIOETL_VERSION,
         )
 
 

@@ -135,12 +135,16 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
     entry = service.record_artifact_published(
         layer="silver",
         artifact_path="/tmp/output/silver/chembl/activity",
+        dataset_ref="silver:chembl.activity@7",
+        lineage_fragment_id="silver:fragment-1",
         details={"metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml"},
     )
 
     assert entry.event_type == "artifact_published"
     assert entry.status == "published"
     assert entry.stage == "silver"
+    assert entry.dataset_ref == "silver:chembl.activity@7"
+    assert entry.lineage_fragment_id == "silver:fragment-1"
     assert entry.details == {
         "artifact_path": "/tmp/output/silver/chembl/activity",
         "metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml",

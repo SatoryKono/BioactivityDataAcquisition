@@ -11,6 +11,7 @@ Implements RULES.md 2.3 and 02-user-rules.md 2.4:
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
@@ -98,6 +99,30 @@ class MetadataWriterPort(Protocol):
         """
         ...
 
+    async def finalize_silver_metadata(
+        self,
+        base_path: str | Path,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
+        delta_version_after: int | None = None,
+    ) -> str | None:
+        """Finalize an existing Silver sidecar without rebuilding metadata.
+
+        Implementations should load the already-written Silver sidecar,
+        patch only postrun-final values such as DQ report path or a final
+        Delta version anchor, and atomically rewrite the same file.
+
+        Returns:
+            Absolute path to the rewritten metadata file, or ``None`` when
+            the target sidecar does not exist.
+        """
+        ...
+
     async def write_gold_metadata(
         self,
         base_path: str | Path,
@@ -126,6 +151,28 @@ class MetadataWriterPort(Protocol):
         Note:
             Updates existing metadata file on each rebuild.
             Uses atomic write (temp file + rename) for consistency.
+        """
+        ...
+
+    async def finalize_gold_metadata(
+        self,
+        base_path: str | Path,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
+    ) -> str | None:
+        """Finalize an existing Gold sidecar without rebuilding metadata.
+
+        Implementations should load the already-written Gold sidecar,
+        patch only postrun-final values, and atomically rewrite the same file.
+
+        Returns:
+            Absolute path to the rewritten metadata file, or ``None`` when
+            the target sidecar does not exist.
         """
         ...
 

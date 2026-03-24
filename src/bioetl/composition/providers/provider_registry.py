@@ -17,6 +17,7 @@ from bioetl.composition.providers._models import (
     AdapterCreator,
     DataSourceCreatorProtocol,
     HttpConfig,
+    ProviderSettingsProtocol,
     ProviderConfig,
 )
 from bioetl.composition.providers._store import ProviderStore
@@ -25,7 +26,6 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -121,7 +121,7 @@ class ProviderRegistry:
         name: str,
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
-        settings: Settings | None = None,
+        settings: ProviderSettingsProtocol | None = None,
         **kwargs: object,
     ) -> DataSourcePort:
         """Create a provider adapter instance using registry metadata."""
@@ -145,7 +145,7 @@ class ProviderRegistry:
     def create_data_source(
         self,
         name: str,
-        settings: Settings,
+        settings: ProviderSettingsProtocol,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
@@ -177,7 +177,7 @@ class ProviderRegistry:
         self._creator.require_data_source_creator(name=name, config=config)
 
         def create_data_source_for_provider(
-            settings: Settings,
+            settings: ProviderSettingsProtocol,
             pipeline_config: PipelineYamlConfig,
             logger: LoggerPort,
             filter_config: InputFilterConfig | None = None,

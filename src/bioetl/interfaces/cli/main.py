@@ -8,13 +8,14 @@ from __future__ import annotations
 
 import click
 
-from bioetl.domain.version import get_version
+from bioetl import __version__ as BIOETL_VERSION
 from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
 from bioetl.interfaces.cli.commands.debug import debug
 from bioetl.interfaces.cli.commands.export import export_command
 from bioetl.interfaces.cli.commands.health import health
+from bioetl.interfaces.cli.commands.lineage import lineage
 from bioetl.interfaces.cli.commands.lock import lock
 from bioetl.interfaces.cli.commands.maintenance import maintenance
 from bioetl.interfaces.cli.commands.quarantine import quarantine
@@ -49,7 +50,7 @@ def _build_main_registry() -> object:
 
 
 @click.group()
-@click.version_option(version=get_version())
+@click.version_option(version=BIOETL_VERSION)
 @click.pass_context
 def cli(ctx: click.Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
@@ -62,6 +63,7 @@ cli.add_command(run)
 cli.add_command(run_all)
 cli.add_command(run_composite)
 cli.add_command(run_manifest)
+cli.add_command(lineage)
 cli.add_command(adr)
 cli.add_command(export_command, name="export")
 cli.add_command(quarantine)

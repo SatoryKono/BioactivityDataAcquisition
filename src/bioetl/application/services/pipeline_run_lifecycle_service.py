@@ -10,19 +10,61 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
-
-from bioetl.domain.aggregates.pipeline_run import PipelineRun
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
+
+
+class _PipelineRunLifecycleProtocol(Protocol):
+    """Minimal lifecycle surface required from a PipelineRun-like aggregate."""
+
+    def start(self, started_at: datetime) -> None: ...
+
+    def record_stage_start(self, *, stage: str, started_at: datetime) -> None: ...
+
+    def record_stage_success(
+        self,
+        *,
+        stage: str,
+        result: JsonDict | None,
+        records_processed: int,
+        started_at: datetime,
+        completed_at: datetime,
+    ) -> None: ...
+
+    def record_stage_failure(
+        self,
+        *,
+        stage: str,
+        error: str | Exception,
+        error_type: str | None,
+        started_at: datetime,
+        completed_at: datetime,
+    ) -> None: ...
+
+    def complete(self, *, completed_at: datetime) -> None: ...
+
+    def fail(
+        self,
+        *,
+        error: str,
+        error_type: str | None,
+        failed_at: datetime,
+    ) -> None: ...
+
+    def shutdown(self, *, shutdown_at: datetime) -> None: ...
 
 
 @dataclass(slots=True)
 class PipelineRunLifecycleService:
     """Coordinate PipelineRun lifecycle transitions in application layer."""
 
-    def start_run(self, run: PipelineRun, started_at: datetime | None = None) -> None:
+    def start_run(
+        self,
+        run: _PipelineRunLifecycleProtocol,
+        started_at: datetime | None = None,
+    ) -> None:
         """Start pipeline run.
 
         Args:
@@ -33,7 +75,7 @@ class PipelineRunLifecycleService:
 
     def stage_started(
         self,
-        run: PipelineRun,
+        run: _PipelineRunLifecycleProtocol,
         stage: str,
         started_at: datetime | None = None,
     ) -> None:
@@ -48,7 +90,7 @@ class PipelineRunLifecycleService:
 
     def stage_succeeded(
         self,
-        run: PipelineRun,
+        run: _PipelineRunLifecycleProtocol,
         stage: str,
         *,
         result: JsonDict | None = None,  # Any: stage payload can vary
@@ -77,7 +119,7 @@ class PipelineRunLifecycleService:
 
     def stage_failed(
         self,
-        run: PipelineRun,
+        run: _PipelineRunLifecycleProtocol,
         stage: str,
         *,
         error: str | Exception,
@@ -106,7 +148,7 @@ class PipelineRunLifecycleService:
 
     def complete_run(
         self,
-        run: PipelineRun,
+        run: _PipelineRunLifecycleProtocol,
         completed_at: datetime | None = None,
     ) -> None:
         """Complete run when all stage invariants are satisfied.
@@ -119,7 +161,7 @@ class PipelineRunLifecycleService:
 
     def fail_run(
         self,
-        run: PipelineRun,
+        run: _PipelineRunLifecycleProtocol,
         *,
         error: str,
         error_type: str | None = None,
@@ -141,7 +183,7 @@ class PipelineRunLifecycleService:
 
     def shutdown_run(
         self,
-        run: PipelineRun,
+        run: _PipelineRunLifecycleProtocol,
         shutdown_at: datetime | None = None,
     ) -> None:
         """Mark run as gracefully shut down.

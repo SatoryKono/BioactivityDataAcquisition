@@ -5,22 +5,18 @@ from __future__ import annotations
 __all__ = ["SilverWriterMaintenanceMixin"]
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 import pyarrow as pa
+from deltalake import DeltaTable
 
 from bioetl.domain.medallion import SilverWriteMode
-
-if TYPE_CHECKING:
-    from datetime import datetime
-    from pathlib import Path
-
-    from deltalake import DeltaTable
-
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.domain.types import BronzeRecord, MetaDict
-    from bioetl.infrastructure.export.csv_exporter import CsvExporter
-    from bioetl.infrastructure.storage.support.retention import RetentionPolicy
+from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import BronzeRecord, MetaDict
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 
 class SilverWriterMaintenanceMixin:

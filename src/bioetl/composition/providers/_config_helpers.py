@@ -15,6 +15,7 @@ from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
     RateLimitContext,
 )
+from bioetl.composition.providers._models import ProviderSettingsProtocol
 from bioetl.composition.source_config_access import load_source_config
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
@@ -26,7 +27,6 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.models.filter import ExtractionParams
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
@@ -213,7 +213,7 @@ def _wire_composable_fallback(data_source: DataSourcePort) -> None:
 
 def _create_http_data_source(
     provider: str,
-    settings: Settings,
+    settings: ProviderSettingsProtocol,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None,
     metrics: MetricsPort | None,
