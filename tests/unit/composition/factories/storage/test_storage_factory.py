@@ -8,6 +8,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.composition.factories.storage.storage_factory import BronzeWriter
+from bioetl.composition.factories.storage.storage_factory import GoldWriter
+from bioetl.composition.factories.storage.storage_factory import SilverWriter
 from bioetl.composition.factories.storage.storage_factory import StorageContext
 from bioetl.composition.factories.storage.storage_factory import StorageFactory
 
@@ -165,3 +168,80 @@ def test_create_uses_test_mode_paths_and_overrides_csv_export_targets(
     assert result.adapter.gold.csv_exporter is not None
     assert Path(result.adapter.silver.csv_exporter.base_path) == settings.silver_path
     assert Path(result.adapter.gold.csv_exporter.base_path) == settings.gold_path
+
+
+@pytest.mark.unit
+def test_create_forwards_optional_runtime_collaborators_to_adapter_builder(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Top-level StorageFactory should preserve optional runtime collaborators."""
+    ctx = SimpleNamespace(
+        bronze_path=tmp_path / "bronze",
+        silver_path=tmp_path / "silver",
+        gold_path=tmp_path / "gold",
+    )
+    adapter = MagicMock()
+    mock_build_ctx = MagicMock(return_value=ctx)
+    mock_create_adapter = MagicMock(return_value=adapter)
+    monkeypatch.setattr(
+        "bioetl.composition.factories.storage.factory.build_storage_creation_context",
+        mock_build_ctx,
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.factories.storage.factory.create_storage_adapter",
+        mock_create_adapter,
+    )
+
+    settings = _make_settings(
+        test_mode=False,
+        bronze_path=tmp_path / "default" / "bronze",
+        silver_path=tmp_path / "default" / "silver",
+        gold_path=tmp_path / "default" / "gold",
+        checkpoint_path=tmp_path / "checkpoints",
+    )
+    config = _make_config(
+        bronze_layer=_make_sink_layer(tmp_path / "yaml" / "bronze"),
+        silver_layer=_make_sink_layer(tmp_path / "yaml" / "silver"),
+        gold_layer=_make_sink_layer(tmp_path / "yaml" / "gold"),
+    )
+    logger = MagicMock()
+    metrics = MagicMock()
+    tracing = MagicMock()
+    metadata_coordinator = MagicMock()
+    silver_validator = MagicMock()
+
+    result = StorageFactory.create(
+        settings=settings,
+        config=config,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+        metadata_coordinator=metadata_coordinator,
+        silver_validator=silver_validator,
+    )
+
+    assert isinstance(result, StorageContext)
+    assert result.adapter is adapter
+    assert result.bronze_path == ctx.bronze_path
+    assert result.silver_path == ctx.silver_path
+    assert result.gold_path == ctx.gold_path
+    assert result.checkpoints_path == settings.checkpoint_path
+    mock_build_ctx.assert_called_once_with(
+        settings=settings,
+        config=config,
+        logger=logger,
+    )
+    mock_create_adapter.assert_called_once_with(
+        ctx=ctx,
+        bronze_writer_cls=BronzeWriter,
+        silver_writer_cls=SilverWriter,
+        gold_writer_cls=GoldWriter,
+        settings=settings,
+        config=config,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+        metadata_coordinator=metadata_coordinator,
+        silver_validator=silver_validator,
+    )

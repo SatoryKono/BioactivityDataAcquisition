@@ -7,7 +7,7 @@ Canonical import paths::
     register_all_pipelines : from bioetl.composition.factories.pipeline.registry import register_all_pipelines
     PipelineRegistry       : from bioetl.composition import PipelineRegistry
 
-Compatibility path::
+Deprecated compatibility path::
 
     PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.configs import PIPELINE_CONFIGS
 """

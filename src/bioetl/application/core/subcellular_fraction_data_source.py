@@ -9,8 +9,10 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
-from bioetl.domain.ports import FilterableDataSourcePort
+from bioetl.application.core._data_source_mixins import (
+    _FilterableTargetDelegationMixin,
+    _SourceMetadataDelegationMixin,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -21,7 +23,10 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
+class SubcellularFractionDataSource(
+    _FilterableTargetDelegationMixin,
+    _SourceMetadataDelegationMixin,
+):
     """Wraps a DataSourcePort to extract subcellular fraction records."""
 
     SOURCE_ENTITY_TYPE = "assay"
@@ -150,134 +155,62 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         """Delegate close to wrapped adapter."""
         await self._data_source.aclose()
 
-    def _ensure_filterable(self, method_name: str) -> FilterableDataSourcePort:
-        """Check that wrapped adapter implements FilterableDataSourcePort."""
-        if not isinstance(self._data_source, FilterableDataSourcePort):
-            raise TypeError(
-                f"Wrapped adapter {self._data_source.provider_name} does not implement "
-                f"FilterableDataSourcePort. {method_name}() requires a filterable adapter."
-            )
-        return self._data_source
-
-    async def fetch_filtered(
+    async def _fetch_target_filtered_records(
         self,
-        entity_type: str,
+        filterable: Any,  # Any: filterable adapter is structurally validated by mixin
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: heterogeneous record values
-        """Fetch filtered records with subcellular fraction extraction.
-
-        Args:
-            entity_type: Entity type identifier.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        filterable = self._ensure_filterable("fetch_filtered")
-
-        if entity_type == self.TARGET_ENTITY_TYPE:
-            async for record in self._fetch_filtered_fractions(
-                filterable.fetch_filtered(
-                    entity_type=self.SOURCE_ENTITY_TYPE,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    limit=None,
-                ),
-                limit,
-            ):
-                yield record
-        else:
-            async for record in filterable.fetch_filtered(
-                entity_type=entity_type,
+        """Yield subcellular fractions from filtered upstream assays."""
+        async for record in self._fetch_filtered_fractions(
+            filterable.fetch_filtered(
+                entity_type=self.SOURCE_ENTITY_TYPE,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
-                limit=limit,
-            ):
-                yield record
+                limit=None,
+            ),
+            limit,
+        ):
+            yield record
 
-    async def fetch_multi_filtered(
+    async def _fetch_target_multi_filtered_records(
         self,
-        entity_type: str,
+        filterable: Any,  # Any: filterable adapter is structurally validated by mixin
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: heterogeneous record values
-        """Fetch multi-filtered records with subcellular fraction extraction.
-
-        Args:
-            entity_type: Entity type identifier.
-            filters: Filters.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        filterable = self._ensure_filterable("fetch_multi_filtered")
-
-        if entity_type == self.TARGET_ENTITY_TYPE:
-            async for record in self._fetch_filtered_fractions(
-                filterable.fetch_multi_filtered(
-                    entity_type=self.SOURCE_ENTITY_TYPE,
-                    filters=filters,
-                    limit=None,
-                ),
-                limit,
-            ):
-                yield record
-        else:
-            async for record in filterable.fetch_multi_filtered(
-                entity_type=entity_type,
+        """Yield subcellular fractions from multi-filtered upstream assays."""
+        async for record in self._fetch_filtered_fractions(
+            filterable.fetch_multi_filtered(
+                entity_type=self.SOURCE_ENTITY_TYPE,
                 filters=filters,
-                limit=limit,
-            ):
-                yield record
+                limit=None,
+            ),
+            limit,
+        ):
+            yield record
 
-    async def fetch_filtered_with_fallback(
+    async def _fetch_target_filtered_with_fallback_records(
         self,
-        entity_type: str,
+        filterable: Any,  # Any: filterable adapter is structurally validated by mixin
         filter_ids: list[str],
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: heterogeneous record values
-        """Fetch records with fallback and subcellular fraction extraction.
-
-        Args:
-            entity_type: Entity type identifier.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-            fallback_mapping: Fallback mapping.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        filterable = self._ensure_filterable("fetch_filtered_with_fallback")
-
-        if entity_type == self.TARGET_ENTITY_TYPE:
-            async for record in self._fetch_filtered_fractions(
-                filterable.fetch_filtered_with_fallback(
-                    entity_type=self.SOURCE_ENTITY_TYPE,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    fallback_mapping=fallback_mapping,
-                    limit=None,
-                ),
-                limit,
-            ):
-                yield record
-        else:
-            async for record in filterable.fetch_filtered_with_fallback(
-                entity_type=entity_type,
+        """Yield subcellular fractions from fallback-enabled upstream assays."""
+        async for record in self._fetch_filtered_fractions(
+            filterable.fetch_filtered_with_fallback(
+                entity_type=self.SOURCE_ENTITY_TYPE,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
                 fallback_mapping=fallback_mapping,
-                limit=limit,
-            ):
-                yield record
+                limit=None,
+            ),
+            limit,
+        ):
+            yield record
 
     async def _fetch_filtered_fractions(
         self,

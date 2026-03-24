@@ -5,21 +5,23 @@ Defines protocols for pipeline runner creation and execution.
 
 from __future__ import annotations
 
+from bioetl.domain.ports.config import PipelineYamlConfigPort, SettingsPort
+from bioetl.domain.ports.observability import (
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports.observability import (
-        DQMonitorPort,
-        LoggerPort,
-        MetricsPort,
-        TracingPort,
-    )
     from bioetl.domain.types import RunID
 
 __all__ = [
+    "ExecutionObservabilityPort",
     "ExecutionMetricsReadablePort",
     "ExecutionMetricsRunnerPort",
     "MetricsExtractorPort",
@@ -80,6 +82,20 @@ class ExecutionMetricsRunnerPort(
     Protocol,
 ):
     """Protocol for runners that are executable and expose counters."""
+
+
+@runtime_checkable
+class ExecutionObservabilityPort(Protocol):
+    """Protocol for execution-time observability collaborators.
+
+    Keeps the runner-factory contract expressed in terms of observability ports
+    rather than a concrete composition bundle type.
+    """
+
+    logger: LoggerPort
+    metrics: MetricsPort
+    tracer: TracingPort | None
+    dq_monitor: DQMonitorPort | None
 
 
 @runtime_checkable
@@ -157,7 +173,7 @@ class MetricsExtractorPort(Protocol):
 
 @runtime_checkable
 class PipelineFactoryPort(Protocol):
-    """Protocol for pipeline factories."""
+    """Protocol for constructing pipelines and execution runners."""
 
     pipeline_name: str
     silver_schema: object | None
@@ -167,9 +183,9 @@ class PipelineFactoryPort(Protocol):
         self,
         run_id: RunID,
         runtime: RuntimeConfig,
-        settings: object,
+        settings: SettingsPort,
         logger: LoggerPort,
-        config: object | None = ...,
+        config: PipelineYamlConfigPort | None = ...,
         filter_config: InputFilterConfig | None = ...,
         tracer: TracingPort | None = ...,
         dq_monitor: DQMonitorPort | None = ...,
@@ -181,17 +197,17 @@ class PipelineFactoryPort(Protocol):
         Args:
             run_id: Pipeline run identifier.
             runtime: Runtime configuration.
-            settings: Settings object (infrastructure.config.Settings).
-            logger: Logger instance.
-            config: Configuration object (PipelineYamlConfig).
-            filter_config: Configuration for filter.
-            tracer: Tracing instance.
-            dq_monitor: Dq monitor.
-            metrics: Metrics collector instance.
-            cached_bronze: Cached bronze.
+            settings: Domain-facing execution settings contract.
+            logger: Structured logging port for pipeline assembly signals.
+            config: Optional pipeline-definition contract for explicit wiring.
+            filter_config: Optional input-filter contract for record selection.
+            tracer: Optional tracing port for execution spans.
+            dq_monitor: Optional data-quality monitoring port.
+            metrics: Optional metrics collection port.
+            cached_bronze: Optional cached Bronze execution context.
 
         Returns:
-            Newly created BasePipeline instance.
+            Opaque assembled pipeline instance ready for runner wiring.
         """
         ...
 
@@ -199,24 +215,24 @@ class PipelineFactoryPort(Protocol):
         self,
         run_id: RunID,
         runtime: RuntimeConfig,
-        settings: object,
-        observability: object,
+        settings: SettingsPort,
+        observability: ExecutionObservabilityPort,
         filter_config: InputFilterConfig | None = None,
-        config: object | None = None,
+        config: PipelineYamlConfigPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
-    ) -> object:
+    ) -> ExecutionMetricsRunnerPort:
         """Create pipeline runner.
 
         Args:
             run_id: Pipeline run identifier.
             runtime: Runtime configuration.
-            settings: Settings object (infrastructure.config.Settings).
-            observability: ObservabilityBundle from composition layer.
-            filter_config: Configuration for filter.
-            config: Configuration object (PipelineYamlConfig).
-            cached_bronze: Cached bronze.
+            settings: Domain-facing execution settings contract.
+            observability: Domain-facing observability context for runner wiring.
+            filter_config: Optional input-filter contract for record selection.
+            config: Optional pipeline-definition contract for explicit wiring.
+            cached_bronze: Optional cached Bronze execution context.
 
         Returns:
-            Newly created PipelineRunner instance.
+            Runnable execution object exposing the metrics runner contract.
         """
         ...

@@ -145,25 +145,11 @@ def test_transformer_builder_builds_transformer_with_policy_fallback() -> None:
 @pytest.mark.unit
 def test_construction_module_reexports_canonical_helpers() -> None:
     from bioetl.composition.factories.pipeline import construction
-    from bioetl.composition.factories.pipeline.config_resolution import (
-        DomainConfigResolver as CompatDomainConfigResolver,
-        load_pipeline_config as compat_load_pipeline_config,
-        resolve_domain_pipeline_config as compat_resolve_domain_pipeline_config,
-        yaml_config_to_domain as compat_yaml_config_to_domain,
-    )
-    from bioetl.infrastructure.config.converters import yaml_config_to_domain
     from bioetl.infrastructure.config.domain_config_resolver import (
         resolve_domain_pipeline_config,
-    )
-    from bioetl.infrastructure.config.pipeline_config_api import (
-        load_pipeline_config,
     )
 
     assert construction.RunContextFactory is RunContextFactory
     assert construction.DomainConfigResolver is DomainConfigResolver
     assert construction.TransformerBuilder is TransformerBuilder
-    assert CompatDomainConfigResolver is DomainConfigResolver
     assert construction.resolve_domain_pipeline_config is resolve_domain_pipeline_config
-    assert compat_resolve_domain_pipeline_config is resolve_domain_pipeline_config
-    assert compat_load_pipeline_config is load_pipeline_config
-    assert compat_yaml_config_to_domain is yaml_config_to_domain

@@ -18,6 +18,7 @@ import re
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
+from datetime import date
 from pathlib import Path
 
 _HEADER_RE = re.compile(
@@ -52,6 +53,34 @@ class TargetDuplicationReport:
     returncode: int
     duplicate_count: int
     clusters: tuple[DuplicateCluster, ...]
+    raw_duplicate_count: int | None = None
+
+
+def _top_duplicate_pairs(
+    clusters: tuple[DuplicateCluster, ...],
+    *,
+    limit: int = 5,
+) -> list[dict[str, object]]:
+    """Summarize the most frequently repeated module pairs for prioritization."""
+    pair_counts: dict[tuple[str, str], int] = {}
+    for cluster in clusters:
+        modules = [module.module for module in cluster.modules[:2]]
+        if len(modules) < 2:
+            continue
+        pair = tuple(sorted(modules))
+        pair_counts[pair] = pair_counts.get(pair, 0) + 1
+
+    ranked = sorted(
+        pair_counts.items(),
+        key=lambda item: (-item[1], item[0][0], item[0][1]),
+    )
+    return [
+        {
+            "modules": [left, right],
+            "duplicate_clusters": count,
+        }
+        for (left, right), count in ranked[:limit]
+    ]
 
 
 def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
@@ -103,7 +132,128 @@ def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
     return clusters
 
 
-def _scan_target(target: str, *, timeout_seconds: int) -> TargetDuplicationReport:
+def _compile_patterns(raw_patterns: list[str]) -> tuple[re.Pattern[str], ...]:
+    """Compile user-provided regex patterns once for reuse."""
+    return tuple(re.compile(pattern) for pattern in raw_patterns)
+
+
+def _filter_clusters_by_module_patterns(
+    clusters: list[DuplicateCluster],
+    *,
+    exclude_module_patterns: tuple[re.Pattern[str], ...],
+) -> list[DuplicateCluster]:
+    """Drop clusters involving explicitly normalized module patterns."""
+    if not exclude_module_patterns:
+        return clusters
+
+    filtered: list[DuplicateCluster] = []
+    for cluster in clusters:
+        if any(
+            pattern.search(module.module)
+            for pattern in exclude_module_patterns
+            for module in cluster.modules
+        ):
+            continue
+        filtered.append(cluster)
+    return filtered
+
+
+def _load_history_records(path: Path) -> list[dict[str, object]]:
+    """Load prior JSONL history records when present."""
+    if not path.exists():
+        return []
+
+    records: list[dict[str, object]] = []
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        payload = json.loads(line)
+        if isinstance(payload, dict):
+            records.append(payload)
+    return records
+
+
+def _build_trend_summary(
+    *,
+    history_records: list[dict[str, object]],
+    current_targets: list[dict[str, object]],
+    snapshot_date: str,
+    total_duplicate_clusters: int,
+) -> dict[str, object]:
+    """Compare current snapshot against the most recent prior observation."""
+    if not history_records:
+        return {"status": "no_prior_snapshot", "snapshot_date": snapshot_date}
+
+    previous: dict[str, object] | None = None
+    for candidate in reversed(history_records):
+        candidate_snapshot_date = candidate.get("snapshot_date")
+        if candidate_snapshot_date != snapshot_date:
+            previous = candidate
+            break
+    if previous is None:
+        return {"status": "no_prior_distinct_snapshot", "snapshot_date": snapshot_date}
+
+    previous_summary = previous.get("summary", {})
+    previous_targets_raw = previous.get("targets", [])
+    previous_targets = {
+        item.get("target"): item
+        for item in previous_targets_raw
+        if isinstance(item, dict) and isinstance(item.get("target"), str)
+    }
+
+    comparison_rows: list[dict[str, object]] = []
+    for item in current_targets:
+        target = item.get("target")
+        if not isinstance(target, str):
+            continue
+        current_count = item.get("duplicate_count")
+        if not isinstance(current_count, int):
+            continue
+        previous_item = previous_targets.get(target)
+        previous_count = (
+            previous_item.get("duplicate_count")
+            if isinstance(previous_item, dict)
+            and isinstance(previous_item.get("duplicate_count"), int)
+            else None
+        )
+        comparison_rows.append(
+            {
+                "target": target,
+                "current_duplicate_count": current_count,
+                "previous_duplicate_count": previous_count,
+                "delta_duplicate_count": (
+                    current_count - previous_count
+                    if previous_count is not None
+                    else None
+                ),
+            }
+        )
+
+    previous_total = previous_summary.get("total_duplicate_clusters")
+    total_delta = (
+        total_duplicate_clusters - previous_total
+        if isinstance(previous_total, int)
+        else None
+    )
+    previous_snapshot_date = previous.get("snapshot_date") or previous_summary.get(
+        "snapshot_date"
+    )
+    return {
+        "status": "compared_to_previous",
+        "snapshot_date": snapshot_date,
+        "previous_snapshot_date": previous_snapshot_date,
+        "total_duplicate_cluster_delta": total_delta,
+        "targets": comparison_rows,
+    }
+
+
+def _scan_target(
+    target: str,
+    *,
+    timeout_seconds: int,
+    exclude_module_patterns: tuple[re.Pattern[str], ...] = (),
+) -> TargetDuplicationReport:
     """Run pylint duplicate-code scan for one target and parse findings."""
     cmd = [
         sys.executable,
@@ -126,30 +276,66 @@ def _scan_target(target: str, *, timeout_seconds: int) -> TargetDuplicationRepor
         details = stderr or stdout or f"unexpected return code {result.returncode}"
         raise RuntimeError(f"duplication scan failed for {target}: {details}")
 
-    clusters = _parse_pylint_duplicate_output(result.stdout)
+    raw_clusters = _parse_pylint_duplicate_output(result.stdout)
+    clusters = _filter_clusters_by_module_patterns(
+        raw_clusters,
+        exclude_module_patterns=exclude_module_patterns,
+    )
     return TargetDuplicationReport(
         target=target,
         returncode=result.returncode,
         duplicate_count=len(clusters),
         clusters=tuple(clusters),
+        raw_duplicate_count=len(raw_clusters),
     )
 
 
 def _build_payload(
     reports: list[TargetDuplicationReport],
+    *,
+    snapshot_date: str,
+    exclude_module_patterns: list[str],
+    trend_summary: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build machine-readable payload for JSON output."""
+    total_duplicate_clusters = sum(r.duplicate_count for r in reports)
+    total_raw_duplicate_clusters = sum(
+        r.raw_duplicate_count if r.raw_duplicate_count is not None else r.duplicate_count
+        for r in reports
+    )
     summary = {
+        "snapshot_date": snapshot_date,
         "targets": len(reports),
-        "total_duplicate_clusters": sum(r.duplicate_count for r in reports),
+        "total_duplicate_clusters": total_duplicate_clusters,
+        "total_raw_duplicate_clusters": total_raw_duplicate_clusters,
+        "total_excluded_duplicate_clusters": total_raw_duplicate_clusters
+        - total_duplicate_clusters,
     }
     return {
         "summary": summary,
+        "normalization": {
+            "exclude_module_patterns": exclude_module_patterns,
+        },
+        "trend": trend_summary or {"status": "no_prior_snapshot"},
         "targets": [
             {
                 "target": report.target,
                 "returncode": report.returncode,
                 "duplicate_count": report.duplicate_count,
+                "raw_duplicate_count": (
+                    report.raw_duplicate_count
+                    if report.raw_duplicate_count is not None
+                    else report.duplicate_count
+                ),
+                "excluded_duplicate_count": (
+                    (
+                        report.raw_duplicate_count
+                        if report.raw_duplicate_count is not None
+                        else report.duplicate_count
+                    )
+                    - report.duplicate_count
+                ),
+                "top_pairs": _top_duplicate_pairs(report.clusters),
                 "clusters": [
                     {
                         "path": cluster.path,
@@ -164,23 +350,55 @@ def _build_payload(
     }
 
 
-def _render_markdown(reports: list[TargetDuplicationReport]) -> str:
+def _render_markdown(
+    reports: list[TargetDuplicationReport],
+    *,
+    exclude_module_patterns: tuple[str, ...] = (),
+    trend_summary: dict[str, object] | None = None,
+) -> str:
     """Render a compact markdown summary for review and local artifacts."""
     total = sum(r.duplicate_count for r in reports)
+    raw_total = sum(
+        r.raw_duplicate_count if r.raw_duplicate_count is not None else r.duplicate_count
+        for r in reports
+    )
+    normalized = bool(exclude_module_patterns)
     lines = [
         "# Duplication Baseline Report",
         "",
         "- mode: report-only",
         f"- targets: {len(reports)}",
         f"- total_duplicate_clusters: {total}",
-        "",
-        "> Interpretation note: this is a visibility baseline. `R0801` can over-report",
-        "> around facades, export barrels, and compatibility shims, so use it as",
-        "> prioritization input rather than immediate blocking debt.",
-        "",
-        "| Target | Duplicate clusters |",
-        "| --- | ---: |",
     ]
+    if normalized:
+        lines.extend(
+            [
+                f"- total_raw_duplicate_clusters: {raw_total}",
+                f"- excluded_duplicate_clusters: {raw_total - total}",
+                "- normalized_view: enabled",
+                "- exclude_module_patterns: "
+                + ", ".join(f"`{pattern}`" for pattern in exclude_module_patterns),
+            ]
+        )
+    if trend_summary and trend_summary.get("status") == "compared_to_previous":
+        lines.extend(
+            [
+                f"- previous_snapshot_date: {trend_summary.get('previous_snapshot_date')}",
+                "- total_duplicate_cluster_delta_vs_previous: "
+                f"{trend_summary.get('total_duplicate_cluster_delta'):+d}",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "> Interpretation note: this is a visibility baseline. `R0801` can over-report",
+            "> around facades, export barrels, and compatibility shims, so use it as",
+            "> prioritization input rather than immediate blocking debt.",
+            "",
+            "| Target | Duplicate clusters |",
+            "| --- | ---: |",
+        ]
+    )
     for report in reports:
         lines.append(f"| `{report.target}` | {report.duplicate_count} |")
 
@@ -193,6 +411,42 @@ def _render_markdown(reports: list[TargetDuplicationReport]) -> str:
                 f"- duplicate clusters: {report.duplicate_count}",
             ]
         )
+        raw_duplicate_count = (
+            report.raw_duplicate_count
+            if report.raw_duplicate_count is not None
+            else report.duplicate_count
+        )
+        if raw_duplicate_count != report.duplicate_count:
+            lines.extend(
+                [
+                    f"- raw duplicate clusters: {raw_duplicate_count}",
+                    f"- excluded duplicate clusters: "
+                    f"{raw_duplicate_count - report.duplicate_count}",
+                ]
+            )
+        top_pairs = _top_duplicate_pairs(report.clusters)
+        if top_pairs:
+            lines.extend(
+                [
+                    "",
+                    "| Top recurring module pairs | Duplicate clusters |",
+                    "| --- | ---: |",
+                ]
+            )
+            for item in top_pairs:
+                modules = item.get("modules", [])
+                count = item.get("duplicate_clusters")
+                if (
+                    isinstance(modules, list)
+                    and len(modules) == 2
+                    and isinstance(modules[0], str)
+                    and isinstance(modules[1], str)
+                    and isinstance(count, int)
+                ):
+                    lines.append(
+                        "| "
+                        f"`{modules[0]}` <-> `{modules[1]}` | {count} |"
+                    )
         if not report.clusters:
             lines.append("- no `R0801` findings")
             continue
@@ -214,6 +468,36 @@ def _render_markdown(reports: list[TargetDuplicationReport]) -> str:
                 f"\n- … truncated {len(report.clusters) - 12} additional clusters for brevity"
             )
 
+    if trend_summary and trend_summary.get("status") == "compared_to_previous":
+        target_rows = trend_summary.get("targets", [])
+        lines.extend(
+            [
+                "",
+                "## Trend vs Previous Snapshot",
+                "",
+                f"- previous snapshot: `{trend_summary.get('previous_snapshot_date')}`",
+                "- total duplicate cluster delta: "
+                f"{trend_summary.get('total_duplicate_cluster_delta'):+d}",
+                "",
+                "| Target | Current | Previous | Delta |",
+                "| --- | ---: | ---: | ---: |",
+            ]
+        )
+        for item in target_rows:
+            if not isinstance(item, dict):
+                continue
+            target = item.get("target")
+            current_count = item.get("current_duplicate_count")
+            previous_count = item.get("previous_duplicate_count")
+            delta = item.get("delta_duplicate_count")
+            if not isinstance(target, str) or not isinstance(current_count, int):
+                continue
+            previous_text = str(previous_count) if isinstance(previous_count, int) else "n/a"
+            delta_text = f"{delta:+d}" if isinstance(delta, int) else "n/a"
+            lines.append(
+                f"| `{target}` | {current_count} | {previous_text} | {delta_text} |"
+            )
+
     lines.append("")
     return "\n".join(lines)
 
@@ -221,6 +505,29 @@ def _render_markdown(reports: list[TargetDuplicationReport]) -> str:
 def _write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def _append_history_jsonl(path: Path, *, payload: dict[str, object]) -> None:
+    """Append a compact observation record for later trend comparisons."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    targets = payload.get("targets", [])
+    record = {
+        "snapshot_date": payload.get("summary", {}).get("snapshot_date"),
+        "summary": payload.get("summary", {}),
+        "normalization": payload.get("normalization", {}),
+        "targets": [
+            {
+                "target": item.get("target"),
+                "duplicate_count": item.get("duplicate_count"),
+                "raw_duplicate_count": item.get("raw_duplicate_count"),
+                "excluded_duplicate_count": item.get("excluded_duplicate_count"),
+            }
+            for item in targets
+            if isinstance(item, dict)
+        ],
+    }
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, ensure_ascii=True) + "\n")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -247,32 +554,109 @@ def _parse_args() -> argparse.Namespace:
         default=90,
         help="Per-target timeout for pylint duplicate-code scans.",
     )
+    parser.add_argument(
+        "--exclude-module-pattern",
+        action="append",
+        default=[],
+        help=(
+            "Regex for module names to exclude from the normalized view. "
+            "Raw counts remain in the JSON payload."
+        ),
+    )
+    parser.add_argument(
+        "--history-jsonl",
+        default=None,
+        help="Optional append-only JSONL history file for trend snapshots.",
+    )
+    parser.add_argument(
+        "--snapshot-date",
+        default=None,
+        help="Optional snapshot date label (defaults to today in ISO format).",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = _parse_args()
+    snapshot_date = args.snapshot_date or date.today().isoformat()
+    exclude_module_patterns = _compile_patterns(args.exclude_module_pattern)
     reports = [
-        _scan_target(target, timeout_seconds=args.timeout_seconds)
+        _scan_target(
+            target,
+            timeout_seconds=args.timeout_seconds,
+            exclude_module_patterns=exclude_module_patterns,
+        )
         for target in args.targets
     ]
+    target_rows = [
+        {
+            "target": report.target,
+            "duplicate_count": report.duplicate_count,
+            "raw_duplicate_count": (
+                report.raw_duplicate_count
+                if report.raw_duplicate_count is not None
+                else report.duplicate_count
+            ),
+            "excluded_duplicate_count": (
+                (
+                    report.raw_duplicate_count
+                    if report.raw_duplicate_count is not None
+                    else report.duplicate_count
+                )
+                - report.duplicate_count
+            ),
+        }
+        for report in reports
+    ]
+    history_records = (
+        _load_history_records(Path(args.history_jsonl)) if args.history_jsonl else []
+    )
+    trend_summary = _build_trend_summary(
+        history_records=history_records,
+        current_targets=target_rows,
+        snapshot_date=snapshot_date,
+        total_duplicate_clusters=sum(report.duplicate_count for report in reports),
+    )
 
-    payload = _build_payload(reports)
+    payload = _build_payload(
+        reports,
+        snapshot_date=snapshot_date,
+        exclude_module_patterns=args.exclude_module_pattern,
+        trend_summary=trend_summary,
+    )
     json_path = Path(args.json_out)
     md_path = Path(args.md_out)
     _write_text(json_path, json.dumps(payload, ensure_ascii=True, indent=2) + "\n")
-    _write_text(md_path, _render_markdown(reports))
+    _write_text(
+        md_path,
+        _render_markdown(
+            reports,
+            exclude_module_patterns=tuple(args.exclude_module_pattern),
+            trend_summary=trend_summary,
+        ),
+    )
+    if args.history_jsonl:
+        _append_history_jsonl(Path(args.history_jsonl), payload=payload)
 
     total = sum(report.duplicate_count for report in reports)
+    raw_total = sum(
+        report.raw_duplicate_count
+        if report.raw_duplicate_count is not None
+        else report.duplicate_count
+        for report in reports
+    )
     print(
         "[duplication-baseline] "
         f"targets={len(reports)}; total_duplicate_clusters={total}; "
+        f"total_raw_duplicate_clusters={raw_total}; "
         f"json={json_path}; markdown={md_path}"
     )
     for report in reports:
         print(
             "[duplication-baseline] "
-            f"target={report.target}; duplicate_clusters={report.duplicate_count}"
+            f"target={report.target}; duplicate_clusters={report.duplicate_count}; "
+            "raw_duplicate_clusters="
+            f"{report.raw_duplicate_count if report.raw_duplicate_count is not None else report.duplicate_count}"
         )
     return 0
 

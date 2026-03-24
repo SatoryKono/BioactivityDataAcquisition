@@ -20,6 +20,7 @@ from bioetl.domain.ports.runtime.registry_port import (
     RegistryAccessorPort,
 )
 from bioetl.domain.ports.runtime.runner import (
+    ExecutionObservabilityPort,
     ExecutionMetricsReadablePort,
     ExecutionMetricsRunnerPort,
     MetricsExtractorPort,
@@ -36,6 +37,7 @@ __all__ = [
     "ClockPort",
     "CompositeCheckpointPort",
     "DebugAction",
+    "ExecutionObservabilityPort",
     "ExecutionMetricsReadablePort",
     "ExecutionMetricsRunnerPort",
     "LockPort",

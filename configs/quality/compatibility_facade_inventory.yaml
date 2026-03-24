@@ -10,6 +10,45 @@ tracked_docstring_prefixes:
   - "Storage compatibility-only facade"
 transition_debt: []
 retained_entrypoints:
+  - path: "src/bioetl/interfaces/cli/commands/run.py"
+    compatibility_role: "Retained public run command seam that shields the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`."
+    canonical_target: "bioetl.interfaces.cli.commands.run"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.run` as the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/run/__init__.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.run`, while direct `bioetl.interfaces.cli.commands.domains.run.command` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.run` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.run.command` directly outside the owning package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src reaches the run command only through the retained public seam, and direct internal-owner imports remain confined to the owning package plus dedicated boundary tests.
+  - path: "src/bioetl/interfaces/cli/commands/run_all.py"
+    compatibility_role: "Retained public run-all command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.run_all.command`."
+    canonical_target: "bioetl.interfaces.cli.commands.run_all"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.run_all` as the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.run_all`, while direct `bioetl.interfaces.cli.commands.domains.run_all.command` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.run_all` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.run_all.command` directly outside the owning package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src reaches the run-all command only through the retained public seam, and direct internal-owner imports remain confined to the owning package plus dedicated boundary tests.
+  - path: "src/bioetl/interfaces/cli/commands/run_composite.py"
+    compatibility_role: "Retained public run-composite command seam that shields the internal owner module `bioetl.interfaces.cli.commands.domains.composite.command`."
+    canonical_target: "bioetl.interfaces.cli.commands.run_composite"
+    status: "retained-entrypoint"
+    owner: "bioetl.interfaces.cli.commands"
+    introduced_in: "2026-03 RF-024"
+    review_date: "2026-09-30"
+    allowed_call_sites: >-
+      `src`: use `bioetl.interfaces.cli.commands.run_composite` as the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/composite/__init__.py`; `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.run_composite`, while direct `bioetl.interfaces.cli.commands.domains.composite.command` imports stay confined to dedicated boundary coverage
+    migration_path: >-
+      Use `bioetl.interfaces.cli.commands.run_composite` for public CLI wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.composite.command` directly outside the owning package or dedicated boundary tests.
+    exit_criteria: >-
+      First-party src reaches the run-composite command only through the retained public seam, and direct internal-owner imports remain confined to the owning package plus dedicated boundary tests.
   - path: "src/bioetl/composition/entrypoints.py"
     compatibility_role: "Canonical composition entrypoint that intentionally shields internal `_pipeline_execution`, `_resource_management`, and `_services` module paths."
     canonical_target: "bioetl.composition.entrypoints"
@@ -108,33 +147,27 @@ measured_only_modules:
     review_date: "2026-09-30"
     new_code_policy: "no-new-first-party-imports"
     promotion_trigger: "sanctioned-public-seam"
-  - path: "src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py"
-    owner: "bioetl.composition.bootstrap.runtime"
-    reason: "Compatibility seam for composite DQ config externalization helpers."
-    review_date: "2026-09-30"
-    new_code_policy: "no-new-first-party-imports"
-    promotion_trigger: "sanctioned-public-seam"
   - path: "src/bioetl/composition/factories/pipeline/config_resolution.py"
     owner: "bioetl.composition.factories.pipeline"
-    reason: "Compatibility shim for pipeline domain-config resolution helpers."
+    reason: "Deprecated compatibility shim for pipeline domain-config resolution helpers; dedicated compatibility tests only."
     review_date: "2026-09-30"
     new_code_policy: "no-new-first-party-imports"
     promotion_trigger: "sanctioned-public-seam"
   - path: "src/bioetl/composition/factories/pipeline/configs.py"
     owner: "bioetl.composition.factories.pipeline"
-    reason: "Compatibility shim for the canonical pipeline registry manifest."
+    reason: "Deprecated compatibility shim for the canonical pipeline registry manifest; dedicated compatibility tests only."
     review_date: "2026-09-30"
     new_code_policy: "no-new-first-party-imports"
     promotion_trigger: "sanctioned-public-seam"
   - path: "src/bioetl/composition/factories/pipeline/creation_api.py"
     owner: "bioetl.composition.factories.pipeline"
-    reason: "Compatibility shim for canonical pipeline creation wiring symbols."
+    reason: "Sanctioned compatibility shim for canonical pipeline creation wiring symbols."
     review_date: "2026-09-30"
     new_code_policy: "no-new-first-party-imports"
     promotion_trigger: "sanctioned-public-seam"
   - path: "src/bioetl/composition/factories/services/creation_api.py"
     owner: "bioetl.composition.factories.services"
-    reason: "Compatibility shim for pipeline creation wiring symbols."
+    reason: "Deprecated compatibility alias over the sanctioned pipeline creation_api shim."
     review_date: "2026-09-30"
     new_code_policy: "no-new-first-party-imports"
     promotion_trigger: "sanctioned-public-seam"

@@ -414,6 +414,24 @@ class TestRegistryFactoryProtocol:
             "PipelineFactoryPort MUST have create_runner()"
         )
 
+    def test_pipeline_factory_protocol_uses_domain_runtime_contracts(self) -> None:
+        """PipelineFactoryPort should stay expressed in domain-facing contracts."""
+        create_with_services_annotations = (
+            PipelineFactoryPort.create_with_services.__annotations__
+        )
+        create_runner_annotations = PipelineFactoryPort.create_runner.__annotations__
+
+        assert create_with_services_annotations["settings"] == "SettingsPort"
+        assert create_with_services_annotations["config"] == (
+            "PipelineYamlConfigPort | None"
+        )
+        assert create_runner_annotations["settings"] == "SettingsPort"
+        assert create_runner_annotations["observability"] == (
+            "ExecutionObservabilityPort"
+        )
+        assert create_runner_annotations["config"] == "PipelineYamlConfigPort | None"
+        assert create_runner_annotations["return"] == "ExecutionMetricsRunnerPort"
+
 
 class TestDefaultRegistryHelper:
     """Test get_default_registry() helper function."""
