@@ -1,11 +1,13 @@
-# Title: Pipeline Execution Sequence (Full)
+# Title: Pipeline Execution Sequence — Runner to Postrun
 
 - Исходная диаграмма: `foundation/06-pipeline-execution.mmd`
 
 ## Описание
-Диаграмма Title: Pipeline Execution Sequence (Full) из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 06-pipeline-execution. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Pipeline Execution), §3.2 (Preflight), §3.4 (Postrun). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: CLI, bootstrap_pipeline, PipelineRunner, PreflightService, PipelineExecutor. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Pipeline Execution Sequence — Runner to Postrun показывает актуальный execution path после выноса batch choreography в `BatchExecutor` и `BatchProcessingService`, а также после стабилизации `PostrunService` и `MedallionLifecycleService` как отдельных lifecycle collaborators. Она представлена в формате `sequenceDiagram` и используется как компактная foundation-view для ревью изменений вокруг `application/core/runner.py`, `application/core/batch_executor.py`, `application/core/batch_processing_service.py`, `application/core/preflight/service.py` и `application/core/postrun/service.py`. Уровень детализации обозначен как `Component / Class`, поэтому схема концентрируется на наблюдаемом runtime порядке вызовов: создание `PipelineRunner`, вход в managed contexts, preflight, подготовка medallion layers, batch execution, checkpoint persistence и postrun finalization.
+
+Значимые участники последовательности: `build_pipeline_runner`, `PipelineRunner`, `PipelineService`, `LockCoordinator`, `PreflightService`, `MedallionLifecycleService`, `CheckpointManagerService`, `BatchExecutor`, `BatchProcessingService`, `BaseTransformer`, `StoragePort`, `PostrunService`. По этой схеме удобно валидировать, что runtime flow больше не идёт через устаревший `PipelineExecutor`, а строится вокруг `PipelineRunner -> BatchExecutor -> BatchProcessingService` с отдельной postrun/lifecycle фазой.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата метаданных: `2026-03-24`

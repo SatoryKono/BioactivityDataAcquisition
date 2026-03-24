@@ -1,16 +1,16 @@
 %% BioETL — Class Diagram: Application Core Services
 %% PipelineRunner, BatchExecutor, and their composition.
 
-%% @version 1.1.0
-%% @date    2026-02-26
+%% @version 1.2.0
+%% @date    2026-03-24
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @nodes   16
+%% @nodes   18
 %% @uniform-group core    nodes=PipelineRunner,PipelineService,BatchExecutor
 %% @uniform-group batch   nodes=BatchTransformer,BatchWriter
 %% @uniform-group infra   nodes=BatchMemoryManagerService,BatchMetricsRecorderService,BatchTracingManagerService
 %% @uniform-group manager nodes=CheckpointManagerService,LockCoordinator
-%% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManager,ShutdownSignal,HeartbeatTask,ErrorClassifier
+%% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManagerService,MedallionLifecycleService,PipelineObserver,ShutdownSignal,HeartbeatTask,ErrorClassifier
 
 %% @uniform-width group
 %% @uniform class width=592 groups=5 width_strategy=group
@@ -26,13 +26,18 @@ classDiagram
             -_config
             -_runtime
             -_services
+            -_context
             -_executor
             -_checkpoint_manager
-            -_shutdown_signal
             -_lock_manager
             -_preflight_service
             -_postrun_service
+            -_lifecycle_service
+            -_observer
+            -_shutdown_signal
+            -_tracer
             +run()
+            +execution_metrics()
             +... : lifecycle orchestration
         }
 
@@ -47,23 +52,31 @@ classDiagram
             +tracing
             +logger
             +dq_monitor
-            +... : optional reporting services
+            +metadata_coordinator
+            +dq_report_service
+            +aclose()
         }
 
         class BatchExecutor {
             -_services
             -_context
             -_config
-            -_checkpoint_manager
+            -_memory
+            -_execution_run_service
+            -_extraction_loop_service
+            -_execution_state_service
+            -_processing_port
             +batch_size
             +checkpoint_interval
             +records_fetched
             +records_bronze
+            +records_silver
+            +records_gold
             +records_quarantined
             +execute(limit, query, offset)
             +process(records, start_index)
             +get_dq_context()
-            +... : run statistics API
+            +get_run_statistics()
         }
     }
 
@@ -110,6 +123,7 @@ classDiagram
             +track_batch_size(stage, size)
             +track_processed_records(stage, count)
             +track_error(stage, error_type)
+            +track_dq_validation_failure(stage, severity, count)
             +track_quarantined_records(error_type, count)
         }
 
@@ -120,6 +134,7 @@ classDiagram
             +start_execution_span()
             +start_batch_span(batch_id, count, start)
             +start_layer_span(name, batch_id, count)
+            +set_execution_stats(span, ...)
             +end_span(span, error)
         }
     }
@@ -134,6 +149,7 @@ classDiagram
             +load_checkpoint()
             +save_checkpoint(offset)
             +delete_checkpoint()
+            +list_all()
         }
 
         class LockCoordinator {
@@ -143,7 +159,8 @@ classDiagram
             -_shutdown_signal
             -_heartbeat
             -_fencing_token
-            +acquire(timeout)
+            +acquire()
+            +start_heartbeat()
             +release()
             +validate()
         }
@@ -151,16 +168,35 @@ classDiagram
 
     namespace Support_Services {
         class PreflightService {
-            +execute(config, runtime, services, context, observer)
+            +validate_infrastructure(services)
+            +validate_medallion_config(runtime, bronze, silver, gold)
+            +validate_preflight(services, runtime, bronze, silver, gold)
         }
 
         class PostrunService {
-            +execute(config, runtime, context, executor, metadata, observer)
+            +run(executor, dq_context)
+            +run_dq_checks(executor)
+            +run_vacuum_if_enabled()
+            +run_silver_compact_if_needed()
+            +cleanup(tracer)
         }
 
-        class QuarantineManager {
+        class QuarantineManagerService {
             -_quarantine
+            -_pipeline_name
             +quarantine_record(raw, error_type, batch_id, msg, ts)
+            +quarantine_records(records, batch_id, ts)
+        }
+
+        class MedallionLifecycleService {
+            +prepare_for_run(config, runtime)
+            +finalize_run(config, runtime, metrics)
+            +clear(policy, silver_table, gold_table)
+        }
+
+        class PipelineObserver {
+            +\_\_enter\_\_()
+            +\_\_exit\_\_(exc_type, exc_val, tb)
         }
 
         class ShutdownSignal {
@@ -186,6 +222,8 @@ classDiagram
     PipelineRunner *-- CheckpointManagerService
     PipelineRunner *-- PreflightService
     PipelineRunner *-- PostrunService
+    PipelineRunner *-- MedallionLifecycleService
+    PipelineRunner *-- PipelineObserver
     PipelineRunner *-- ShutdownSignal
     PipelineRunner o-- PipelineService
 
@@ -194,7 +232,7 @@ classDiagram
     BatchExecutor *-- BatchMemoryManagerService
     BatchExecutor *-- BatchMetricsRecorderService
     BatchExecutor *-- BatchTracingManagerService
-    BatchExecutor *-- QuarantineManager
+    BatchExecutor *-- QuarantineManagerService
     BatchExecutor *-- CheckpointManagerService
 
     BatchTransformer --> ErrorClassifier
@@ -214,7 +252,9 @@ classDiagram
     style LockCoordinator fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PreflightService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PostrunService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style QuarantineManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style QuarantineManagerService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style MedallionLifecycleService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PipelineObserver fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style ShutdownSignal fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style HeartbeatTask fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style ErrorClassifier fill:#eff6ff,stroke:#2563eb,stroke-width:2px

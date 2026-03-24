@@ -40,7 +40,7 @@
 20. **Domain Exceptions Hierarchy** - Class - BioETLError и подклассы
 
 ### 1.3 Application Layer (10)
-21. **Pipeline Core Components** - Component - PipelineRunner, BatchExecutor, RecordProcessor
+21. **Pipeline Core Components** - Component - PipelineRunner, BatchExecutor, BatchProcessingService
 22. **Pipeline Lifecycle** - State - Состояния выполнения пайплайна
 23. **Services Architecture** - Component - 14 application services
 24. **Transformer Hierarchy** - Class - BaseTransformer и конкретные реализации

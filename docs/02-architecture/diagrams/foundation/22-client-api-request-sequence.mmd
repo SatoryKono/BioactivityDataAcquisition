@@ -1,116 +1,82 @@
 %% Title: HTTP Client API Request Sequence
-%% Covers: RULES.md §3.6 (Resilience), §3.7 (Rate Limiting)
-%% Updated: 2026-02-17
-%% Components: UnifiedHTTPClient, CircuitBreaker, RateLimiter, exponential backoff, retry logic
+%% Covers: RULES.md §3.6 (Resilience), §3.7 (Rate Limiting), UnifiedHTTPClient retry flow
+%% Updated: 2026-03-24
+%% Components: ProviderAdapter, UnifiedHTTPClient, TokenBucketRateLimiter, CircuitBreakerGuard, httpx AsyncClient, retry/backoff
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-24
 %% @type    sequenceDiagram
 %% @level   Mixed (System / Component / Class)
-%% @nodes   6
+%% @nodes   7
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform sequence width=240 max_title_len=25
+%% @uniform sequence width=244 max_title_len=26
 sequenceDiagram
     autonumber
-    participant Executor as PipelineExecutor
-    participant Adapter as ChemblAdapter
-    participant CB as CircuitBreaker
-    participant RL as TokenBucket (RateLimiter)
-    participant HTTP as UnifiedHTTPClient
-    participant API as ChEMBL API
+    participant Adapter as ProviderAdapter
+    participant Client as UnifiedHTTPClient
+    participant RL as TokenBucketRateLimiter
+    participant CB as CircuitBreakerGuard
+    participant HTTPX as httpx.AsyncClient
+    participant API as External Provider API
+    participant Obs as Tracing + Metrics
 
-    Note over Executor,Adapter: Phase 1: Request Initiation
+    Note over Adapter,Client: Phase 1: Request entry
 
-    Executor->>Adapter: fetch(query)
-    activate Adapter
+    Adapter->>Client: get(url, params) / post(...)
+    activate Client
+    Client->>Obs: start request span
 
-    Adapter->>CB: check_state()
-    activate CB
+    Note over Client,API: Phase 2: Retry-orchestrated attempts
 
-    alt Circuit OPEN
-        CB-->>Adapter: State.OPEN
-        Adapter-->>Executor: raise CircuitOpenError
-        Note right of CB: Circuit opened: 5 consecutive failures, recovery timeout: 300s
-    else Circuit CLOSED or HALF_OPEN
-        CB-->>Adapter: State.CLOSED (or HALF_OPEN)
+    loop attempt in retry_config.max_attempts
+        Client->>RL: acquire()
+        RL-->>Client: token granted
+
+        Client->>CB: call(client.request, method, url, **kwargs)
+        activate CB
+
+        alt circuit open
+            CB-->>Client: raise CircuitBreakerOpenError
+            Client->>Obs: mark span error + trip telemetry
+            Client-->>Adapter: raise CircuitBreakerOpenError
+        else call allowed
+            CB->>HTTPX: request(method, url, **kwargs)
+            activate HTTPX
+            HTTPX->>API: HTTP request
+
+            alt 2xx success
+                API-->>HTTPX: response
+                HTTPX-->>CB: httpx.Response
+                CB-->>Client: response
+                Client->>Obs: record duration/status metrics
+                Client-->>Adapter: httpx.Response
+
+            else retryable status / transient error
+                API-->>HTTPX: 429 / 5xx or timeout
+                HTTPX-->>CB: response or exception
+                CB-->>Client: outcome
+                Client->>Client: calculate backoff<br/>honor Retry-After when present
+                Client->>Obs: log retry attempt
+            else terminal error
+                API-->>HTTPX: 4xx / non-retryable failure
+                HTTPX-->>CB: response or exception
+                CB-->>Client: outcome
+                Client->>Obs: mark span error
+                Client-->>Adapter: raise HTTPError / BioETLError
+            end
+            deactivate HTTPX
+        end
+
         deactivate CB
-
-        Note over Adapter,RL: Phase 2: Rate Limiting
-
-        Adapter->>RL: acquire()
-        activate RL
-        Note right of RL: Token Bucket Algorithm (ChEMBL: unlimited, PubChem: 5 req/sec)
-        RL->>RL: Wait for token if needed
-        RL-->>Adapter: Token acquired
-        deactivate RL
-
-        Note over Adapter,API: Phase 3: HTTP Request with Retry
-
-        loop Retry loop (max 3 attempts)
-            Adapter->>HTTP: request(method="GET", url="/activities", params)
-            HTTP->>API: GET /chembl/api/data/activity.json?...
-
-            alt 200 OK
-                API-->>HTTP: JSON response
-                HTTP-->>Adapter: Response(status=200, data)
-
-                Adapter->>CB: record_success()
-                Note right of CB: failure_count = 0
-
-                Adapter-->>Executor: AsyncIterator[BronzeRecord]
-
-            else 429 Rate Limited
-                API-->>HTTP: 429 + Retry-After header
-                HTTP-->>Adapter: Response(status=429)
-
-                Note right of Adapter: Extract Retry-After value (default: 60 seconds)
-                Adapter->>Adapter: await asyncio.sleep(retry_after)
-
-            else 5xx Server Error (500, 502, 503, 504)
-                API-->>HTTP: 5xx error
-                HTTP-->>Adapter: Response(status=5xx)
-
-                Adapter->>CB: record_failure()
-                Note right of CB: failure_count += 1
-
-                Note over Adapter: Calculate backoff delay
-                Note right of Adapter: Exponential backoff with jitter (~2s, ~4s, ~8s)
-
-                Adapter->>Adapter: await asyncio.sleep(delay)
-
-            else Connection Error / Timeout
-                HTTP-->>Adapter: raise ConnectionError
-
-                Adapter->>CB: record_failure()
-                Adapter->>Adapter: await asyncio.sleep(delay)
-            end
-        end
-
-        alt Max retries exceeded
-            Adapter->>CB: record_failure()
-
-            opt failure_count >= 5
-                CB->>CB: transition to OPEN
-                Note right of CB: Circuit tripped! (circuit_breaker_trips_total += 1)
-            end
-
-            Adapter-->>Executor: raise RetryExhaustedError
-        end
     end
 
-    deactivate Adapter
+    Note over Client,Obs: Phase 3: Retry exhaustion finalization
 
-    rect rgb(255, 250, 205)
-        Note over CB: Circuit Breaker Parameters
-        Note right of CB: failure_threshold: 5, recovery_timeout: 300s
-    end
+    Client->>Obs: finalize_request_observability(...)
+    Client-->>Adapter: raise RetryExhaustedError
+    deactivate Client
 
     rect rgb(240, 255, 240)
-        Note over RL: Rate Limiter Parameters
-        Note right of RL: ChEMBL: No limit, PubChem: 5/s, UniProt: 100/s, PubMed: 3/s
-    end
-
-    rect rgb(240, 248, 255)
-        Note over HTTP: Retry Policy
-        Note right of HTTP: max_retries: 3, backoff_factor: 2.0, jitter: 0.1-0.5
+        Note over Client,API: Additional path
+        Note right of Client: get_once() still uses rate limiter + circuit breaker,<br/>but skips the retry loop and raises on first non-2xx response.
     end

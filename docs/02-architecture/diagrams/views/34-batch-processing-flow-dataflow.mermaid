@@ -1,52 +1,37 @@
 %% View: Data-Flow | Parent: 34-batch-processing-flow-full.mermaid
 %% @uniform width=140 height=56 max_title_len=9 max_desc_lines=0
-flowchart TB
-
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N12["errors"]
-    end
+flowchart LR
 
     subgraph Application["Application Layer"]
         direction TB
-        N8["Runner"]
-        N4["batch_num"]
+        RAW["BronzeRecord batch"]
+        BT["BatchTransformer"]
+        TR["TransformResult"]
+        QM["QuarantineManagerService"]
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
+    subgraph Storage["Storage / Outputs"]
         direction TB
-        N1["Bronze"]
-        N2["Silver"]
-        N3["Gold"]
-        N5["BW"]
-        N6["BE"]
-        N7["BT"]
-        N9["BTM"]
-        N10["DS"]
-        N11["Trans"]
+        BR["BronzeWriter"]
+        SI["SilverWriter"]
+        GO["GoldWriter"]
+        BZ["Bronze layer"]
+        SV["Silver layer"]
+        GD["Gold layer"]
     end
 
-    N8 ==> N6
-    N6 --> N9
-    N6 --> N10
-    N10 --> N6
-    N6 --> N7
-    N7 --> N11
-    N11 --> N7
-    N7 --> N6
-    N7 --> N12
-    N6 --> N5
-    N5 --> N1
-    N5 --> N2
-    N5 --> N3
-    N5 --> N6
-    N6 --> N12
-    N6 --> N8
-    N8 --> N4
+    RAW ==> BR
+    BR --> BZ
+    RAW --> BT
+    BT --> TR
+    TR --> QM
+    TR ==> SI
+    SI --> SV
+    TR ==> GO
+    GO --> GD
 
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Storage fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
     classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;

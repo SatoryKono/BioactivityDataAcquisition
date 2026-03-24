@@ -1,0 +1,494 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="class" class="classDiagram" style="max-width:2117.91px;background-color:white" viewBox="-8 0 2117.906 2346"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px; 
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="nodes"><g class="root"><g class="clusters" transform="translate(-8)"><g id="uniprot_model_annotations" class="cluster undefined" data-look="classic"><path d="M8 8h318.047v2330H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="96.516" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(70.508 8)"><tspan x="96.516">uniprot_model_annotat</tspan><tspan x="96.516" dy="16.8">ions</tspan></text></g></g></g><g class="nodes" transform="translate(-8)"><g id="classId-UniProtComment-0" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M85.242 43h163.563v104H85.242"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M85.242 43h163.563M85.242 43h163.563m0 0v104m0-104v104m0 0H85.242m163.563 0H85.242m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="65.781" y="12" class="fo-fallback" text-anchor="middle" transform="translate(101.242 63)"><tspan x="65.781">UniProtComment</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M85.242 99h163.563M85.242 99h163.563M85.242 123h163.563m-163.563 0h163.563" class="divider"/></g><g id="classId-UniProtEcNumber-1" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M82.125 197h169.797v104H82.125"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M82.125 197h169.797m-169.797 0h169.797m0 0v104m0-104v104m0 0H82.125m169.797 0H82.125m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="68.898" y="12" class="fo-fallback" text-anchor="middle" transform="translate(98.125 217)"><tspan x="68.898">UniProtEcNumber</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M82.125 253h169.797m-169.797 0h169.797M82.125 277h169.797m-169.797 0h169.797" class="divider"/></g><g id="classId-UniProtEvidence-2" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M87.008 351h160.031v104H87.008"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M87.008 351h160.031m-160.031 0h160.031m0 0v104m0-104v104m0 0H87.008m160.031 0H87.008m0 0V351m0 104V351"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="64.016" y="12" class="fo-fallback" text-anchor="middle" transform="translate(103.008 371)"><tspan x="64.016">UniProtEvidence</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M87.008 407h160.031m-160.031 0h160.031M87.008 431h160.031m-160.031 0h160.031" class="divider"/></g><g id="classId-UniProtFullName-3" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M86.125 505h161.797v104H86.125"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M86.125 505h161.797m-161.797 0h161.797m0 0v104m0-104v104m0 0H86.125m161.797 0H86.125m0 0V505m0 104V505"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="64.898" y="12" class="fo-fallback" text-anchor="middle" transform="translate(102.125 525)"><tspan x="64.898">UniProtFullName</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M86.125 561h161.797m-161.797 0h161.797M86.125 585h161.797m-161.797 0h161.797" class="divider"/></g><g id="classId-UniProtGene-4" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M102.125 659h129.797v104H102.125"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M102.125 659h129.797m-129.797 0h129.797m0 0v104m0-104v104m0 0H102.125m129.797 0H102.125m0 0V659m0 104V659"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="48.898" y="12" class="fo-fallback" text-anchor="middle" transform="translate(118.125 679)"><tspan x="48.898">UniProtGene</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M102.125 715h129.797m-129.797 0h129.797M102.125 739h129.797m-129.797 0h129.797" class="divider"/></g><g id="classId-UniProtIsoform-5" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M92.797 813H241.25v104H92.797"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M92.797 813H241.25m-148.453 0H241.25m0 0v104m0-104v104m0 0H92.797m148.453 0H92.797m0 0V813m0 104V813"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="58.227" y="12" class="fo-fallback" text-anchor="middle" transform="translate(108.797 833)"><tspan x="58.227">UniProtIsoform</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M92.797 869H241.25m-148.453 0H241.25M92.797 893H241.25m-148.453 0H241.25" class="divider"/></g><g id="classId-UniProtKeyword-6" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M88.352 967h157.343v104H88.352"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M88.352 967h157.343m-157.343 0h157.343m0 0v104m0-104v104m0 0H88.352m157.343 0H88.352m0 0V967m0 104V967"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="62.672" y="12" class="fo-fallback" text-anchor="middle" transform="translate(104.352 987)"><tspan x="62.672">UniProtKeyword</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M88.352 1023h157.343m-157.343 0h157.343M88.352 1047h157.343m-157.343 0h157.343" class="divider"/></g><g id="classId-UniProtLocation-7" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M88.805 1121h156.437v104H88.805"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M88.805 1121h156.437m-156.437 0h156.437m0 0v104m0-104v104m0 0H88.805m156.437 0H88.805m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="62.219" y="12" class="fo-fallback" text-anchor="middle" transform="translate(104.805 1141)"><tspan x="62.219">UniProtLocation</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M88.805 1177h156.437m-156.437 0h156.437M88.805 1201h156.437m-156.437 0h156.437" class="divider"/></g><g id="classId-UniProtName-8" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M100.344 1275h133.36v104h-133.36"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M100.344 1275h133.36m-133.36 0h133.36m0 0v104m0-104v104m0 0h-133.36m133.36 0h-133.36m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="50.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(116.344 1295)"><tspan x="50.68">UniProtName</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M100.344 1331h133.36m-133.36 0h133.36M100.344 1355h133.36m-133.36 0h133.36" class="divider"/></g><g id="classId-UniProtOrganism-9" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M84.79 1429h164.468v104H84.789"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M84.79 1429h164.468m-164.469 0h164.469m0 0v104m0-104v104m0 0H84.789m164.469 0H84.789m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="66.234" y="12" class="fo-fallback" text-anchor="middle" transform="translate(100.79 1449)"><tspan x="66.234">UniProtOrganism</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M84.79 1485h164.468m-164.469 0h164.469M84.79 1509h164.468m-164.469 0h164.469" class="divider"/></g><g id="classId-UniProtProteinDescription-10" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M50.57 1583h232.907v104H50.57"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M50.57 1583h232.907m-232.907 0h232.907m0 0v104m0-104v104m0 0H50.57m232.907 0H50.57m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="100.453" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(66.57 1603)"><tspan x="100.453">UniProtProteinDescript</tspan><tspan x="100.453" dy="16.8">ion</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M50.57 1639h232.907m-232.907 0h232.907M50.57 1663h232.907m-232.907 0h232.907" class="divider"/></g><g id="classId-UniProtReaction-11" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M88.352 1737h157.343v104H88.352"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M88.352 1737h157.343m-157.343 0h157.343m0 0v104m0-104v104m0 0H88.352m157.343 0H88.352m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="62.672" y="12" class="fo-fallback" text-anchor="middle" transform="translate(104.352 1757)"><tspan x="62.672">UniProtReaction</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M88.352 1793h157.343m-157.343 0h157.343M88.352 1817h157.343m-157.343 0h157.343" class="divider"/></g><g id="classId-UniProtRecommendedName-12" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 1891h248.047v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 1891h248.047M43 1891h248.047m0 0v104m0-104v104m0 0H43m248.047 0H43m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="108.023" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 1911)"><tspan x="108.023">UniProtRecommendedName</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 1947h248.047M43 1947h248.047M43 1971h248.047M43 1971h248.047" class="divider"/></g><g id="classId-UniProtSubcellularLocation-13" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M45.68 2045h242.687v104H45.68"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M45.68 2045h242.687m-242.687 0h242.687m0 0v104m0-104v104m0 0H45.68m242.687 0H45.68m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="105.344" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(61.68 2065)"><tspan x="105.344">UniProtSubcellularLocat</tspan><tspan x="105.344" dy="16.8">ion</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M45.68 2101h242.687m-242.687 0h242.687M45.68 2125h242.687m-242.687 0h242.687" class="divider"/></g><g id="classId-UniProtText-14" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M106.281 2199h121.485v104H106.28"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M106.281 2199h121.485m-121.485 0h121.485m0 0v104m0-104v104m0 0H106.28m121.485 0H106.28m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="44.742" y="12" class="fo-fallback" text-anchor="middle" transform="translate(122.281 2219)"><tspan x="44.742">UniProtText</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M106.281 2255h121.485m-121.485 0h121.485M106.281 2279h121.485m-121.485 0h121.485" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(360.047 770)"><g id="uniprot_model_structures" class="cluster undefined" data-look="classic"><path d="M8 8h284.234v790H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="90.273" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59.844 8)"><tspan x="90.273">uniprot_model_struct</tspan><tspan x="90.273" dy="16.8">ures</tspan></text></g></g></g><g class="nodes" transform="translate(360.047 770)"><g id="classId-UniProtCrossReference-15" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43.867 43h212.5v104h-212.5"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43.867 43h212.5m-212.5 0h212.5m0 0v104m0-104v104m0 0h-212.5m212.5 0h-212.5m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="90.25" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59.867 63)"><tspan x="90.25">UniProtCrossReferenc</tspan><tspan x="90.25" dy="16.8">e</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43.867 99h212.5m-212.5 0h212.5M43.867 123h212.5m-212.5 0h212.5" class="divider"/></g><g id="classId-UniProtExtraAttributes-16" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M47.438 197h205.359v104H47.437"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M47.438 197h205.359m-205.36 0h205.36m0 0v104m0-104v104m0 0H47.437m205.36 0H47.437m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="86.68" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(63.438 217)"><tspan x="86.68">UniProtExtraAttribu</tspan><tspan x="86.68" dy="16.8">tes</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M47.438 253h205.359m-205.36 0h205.36M47.438 277h205.359m-205.36 0h205.36" class="divider"/></g><g id="classId-UniProtFeature-17" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M76.328 351h147.578v104H76.328"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M76.328 351h147.578m-147.578 0h147.578m0 0v104m0-104v104m0 0H76.328m147.578 0H76.328m0 0V351m0 104V351"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="57.789" y="12" class="fo-fallback" text-anchor="middle" transform="translate(92.328 371)"><tspan x="57.789">UniProtFeature</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M76.328 407h147.578m-147.578 0h147.578M76.328 431h147.578m-147.578 0h147.578" class="divider"/></g><g id="classId-UniProtFeatureLocation-18" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 505h214.234v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 505h214.234M43 505h214.234m0 0v104m0-104v104m0 0H43m214.234 0H43m0 0V505m0 104V505"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="91.117" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 525)"><tspan x="91.117">UniProtFeatureLocati</tspan><tspan x="91.117" dy="16.8">on</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 561h214.234M43 561h214.234M43 585h214.234M43 585h214.234" class="divider"/></g><g id="classId-UniProtSequence-19" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M67.438 659h165.359v104H67.437"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M67.438 659h165.359m-165.36 0h165.36m0 0v104m0-104v104m0 0H67.437m165.36 0H67.437m0 0V659m0 104V659"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="66.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(83.438 679)"><tspan x="66.68">UniProtSequence</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M67.438 715h165.359m-165.36 0h165.36M67.438 739h165.359m-165.36 0h165.36" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(694.281 847)"><g id="uniprot_model_records" class="cluster undefined" data-look="classic"><path d="M8 8h290.484v636H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="81.828" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(71.414 8)"><tspan x="81.828">uniprot_model_reco</tspan><tspan x="81.828" dy="16.8">rds</tspan></text></g></g></g><g class="nodes" transform="translate(694.281 847)"><g id="classId-UniProtFeatureRecord-20" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M51.89 43h202.704v104H51.89"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M51.89 43h202.704M51.89 43h202.703m0 0v104m0-104v104m0 0H51.89m202.703 0H51.89m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="85.352" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(67.89 63)"><tspan x="85.352">UniProtFeatureRecor</tspan><tspan x="85.352" dy="16.8">d</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M51.89 99h202.704M51.89 99h202.703M51.89 123h202.704M51.89 123h202.703" class="divider"/></g><g id="classId-UniProtProteinRecord-21" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M53.234 197H253.25v104H53.234"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M53.234 197H253.25m-200.016 0H253.25m0 0v104m0-104v104m0 0H53.234m200.016 0H53.234m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="84.008" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(69.234 217)"><tspan x="84.008">UniProtProteinReco</tspan><tspan x="84.008" dy="16.8">rd</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M53.234 253H253.25m-200.016 0H253.25M53.234 277H253.25m-200.016 0H253.25" class="divider"/></g><g id="classId-UniProtSearchResponse-22" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43.438 351h219.609v104H43.437"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43.438 351h219.609m-219.61 0h219.61m0 0v104m0-104v104m0 0H43.437m219.61 0H43.437m0 0V351m0 104V351"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="93.805" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59.438 371)"><tspan x="93.805">UniProtSearchResponse</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43.438 407h219.609m-219.61 0h219.61M43.438 431h219.609m-219.61 0h219.61" class="divider"/></g><g id="classId-UniProtSequenceRecord-23" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 505h220.484v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 505h220.484M43 505h220.484m0 0v104m0-104v104m0 0H43m220.484 0H43m0 0V505m0 104V505"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="94.242" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 525)"><tspan x="94.242">UniProtSequenceRecord</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 561h220.484M43 561h220.484M43 585h220.484M43 585h220.484" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(1034.766 1001)"><g id="idmapping_errors" class="cluster undefined" data-look="classic"><path d="M8 8h284.828v328H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="62.258" y="12" class="fo-fallback" text-anchor="middle" transform="translate(88.156 8)"><tspan x="62.258">idmapping_errors</tspan></text></g></g></g><g class="nodes" transform="translate(1034.766 1001)"><g id="classId-IDMappingJobError-24" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M59.742 43h181.344v104H59.742"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M59.742 43h181.344M59.742 43h181.344m0 0v104m0-104v104m0 0H59.742m181.344 0H59.742m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="74.672" y="12" class="fo-fallback" text-anchor="middle" transform="translate(75.742 63)"><tspan x="74.672">IDMappingJobError</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M59.742 99h181.344M59.742 99h181.344M59.742 123h181.344m-181.344 0h181.344" class="divider"/></g><g id="classId-IDMappingTimeoutError-25" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 197h214.828v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 197h214.828M43 197h214.828m0 0v104m0-104v104m0 0H43m214.828 0H43m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="91.414" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 217)"><tspan x="91.414">IDMappingTimeoutErro</tspan><tspan x="91.414" dy="16.8">r</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 253h214.828M43 253h214.828M43 277h214.828M43 277h214.828" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(1369.594 1001)"><g id="idmapping_health" class="cluster undefined" data-look="classic"><path d="M8 8h341.156v328H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="63.164" y="12" class="fo-fallback" text-anchor="middle" transform="translate(115.414 8)"><tspan x="63.164">idmapping_health</tspan></text></g></g></g><g class="nodes" transform="translate(1369.594 1001)"><g id="classId-IDMappingHealthDependencies-26" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h271.156v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h271.156M43 43h271.156m0 0v104m0-104v104m0 0H43m271.156 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="119.578" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="119.578">IDMappingHealthDependencie</tspan><tspan x="119.578" dy="16.8">s</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h271.156M43 99h271.156M43 123h271.156M43 123h271.156" class="divider"/></g><g id="classId-IDMappingHealthMixin-27" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M76.797 197h203.562v104H76.797"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M76.797 197h203.562m-203.562 0h203.562m0 0v104m0-104v104m0 0H76.797m203.562 0H76.797m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="85.781" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(92.797 217)"><tspan x="85.781">IDMappingHealth</tspan><tspan x="85.781" dy="16.8">Mixin</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M76.797 253h203.562m-203.562 0h203.562M76.797 277h203.562m-203.562 0h203.562" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(1760.75 1001)"><g id="idmapping_retry" class="cluster undefined" data-look="classic"><path d="M8 8h333.156v328H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="57.367" y="12" class="fo-fallback" text-anchor="middle" transform="translate(117.21 8)"><tspan x="57.367">idmapping_retry</tspan></text></g></g></g><g class="nodes" transform="translate(1760.75 1001)"><g id="classId-IDMappingRetryDependencies-28" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h263.156v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h263.156M43 43h263.156m0 0v104m0-104v104m0 0H43m263.156 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="115.578" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="115.578">IDMappingRetryDependencie</tspan><tspan x="115.578" dy="16.8">s</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h263.156M43 99h263.156M43 123h263.156M43 123h263.156" class="divider"/></g><g id="classId-IDMappingRetryMixin-29" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M76.797 197h195.562v104H76.797"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M76.797 197h195.562m-195.562 0h195.562m0 0v104m0-104v104m0 0H76.797m195.562 0H76.797m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="81.781" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(92.797 217)"><tspan x="81.781">IDMappingRetry</tspan><tspan x="81.781" dy="16.8">Mixin</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M76.797 253h195.562m-195.562 0h195.562M76.797 277h195.562m-195.562 0h195.562" class="divider"/></g></g></g></g></g></svg>

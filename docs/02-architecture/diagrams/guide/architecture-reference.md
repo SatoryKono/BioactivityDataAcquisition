@@ -428,16 +428,16 @@ Port protocol families — контракты между Domain и Infrastructur
    - Orchestrates: preflight → execution → postrun
    - Uses RunnerServices bundle
 
-1. **BatchExecutor** (786 LOC)
+1. **BatchExecutor** (264 LOC)
 
    - Execute loop: fetch → process → adapt batch size
    - Loads checkpoint for incremental runs
 
-1. **RecordProcessor** (222 LOC)
+1. **BatchProcessingService** (178 LOC)
 
-   - Delegates: transform → write-bronze → write-silver → write-gold
+   - Orchestrates: source metadata → bronze write → transform → concurrent silver/gold writes
 
-1. **BatchTransformer** (404 LOC)
+1. **BatchTransformer** (220 LOC)
 
    - Applies BaseTransformer
    - Schema validation

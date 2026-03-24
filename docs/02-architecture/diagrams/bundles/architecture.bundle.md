@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams Bundle
 
-- Generated: 2026-03-23T10:52:06
+- Generated: 2026-03-24T10:46:07
 - Diagram count: 52
 
 ## Table of Contents
@@ -62,8 +62,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-high-level-hexagonal"></a>
-## 01-high-level-hexagonal — High-Level Hexagonal Architecture
+## 01-high-level-hexagonal
+
+**High-Level Hexagonal Architecture**
 
 ![01-high-level-hexagonal](../architecture/svg/01-high-level-hexagonal.svg)
 
@@ -80,8 +81,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01a-hexagonal-overview"></a>
-## 01a-hexagonal-overview — Hexagonal Overview
+## 01a-hexagonal-overview
+
+**Hexagonal Overview**
 
 ![01a-hexagonal-overview](../architecture/svg/01a-hexagonal-overview.svg)
 
@@ -98,8 +100,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01b-hexagonal-domain-app"></a>
-## 01b-hexagonal-domain-app — Hexagonal Domain and Application
+## 01b-hexagonal-domain-app
+
+**Hexagonal Domain and Application**
 
 ![01b-hexagonal-domain-app](../architecture/svg/01b-hexagonal-domain-app.svg)
 
@@ -116,8 +119,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01c-hexagonal-infra-comp"></a>
-## 01c-hexagonal-infra-comp — Hexagonal Infrastructure and Composition
+## 01c-hexagonal-infra-comp
+
+**Hexagonal Infrastructure and Composition**
 
 ![01c-hexagonal-infra-comp](../architecture/svg/01c-hexagonal-infra-comp.svg)
 
@@ -134,8 +138,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01d-hexagonal-overview-rounded"></a>
-## 01d-hexagonal-overview-rounded — Hexagonal Overview (Rounded Nodes)
+## 01d-hexagonal-overview-rounded
+
+**Hexagonal Overview (Rounded Nodes)**
 
 ![01d-hexagonal-overview-rounded](../architecture/svg/01d-hexagonal-overview-rounded.svg)
 
@@ -152,8 +157,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-layer-dependency-matrix"></a>
-## 02-layer-dependency-matrix — Layer Dependency Matrix (ARCH-001)
+## 02-layer-dependency-matrix
+
+**Layer Dependency Matrix (ARCH-001)**
 
 ![02-layer-dependency-matrix](../architecture/svg/02-layer-dependency-matrix.svg)
 
@@ -170,8 +176,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-medallion-data-flow"></a>
-## 03-medallion-data-flow — Medallion Architecture Data Flow (Bronze → Silver → Gold)
+## 03-medallion-data-flow
+
+**Medallion Architecture Data Flow (Bronze → Silver → Gold)**
 
 ![03-medallion-data-flow](../architecture/svg/03-medallion-data-flow.svg)
 
@@ -188,8 +195,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="03a-medallion-layers-overview"></a>
-## 03a-medallion-layers-overview — Medallion Layers Overview
+## 03a-medallion-layers-overview
+
+**Medallion Layers Overview**
 
 ![03a-medallion-layers-overview](../architecture/svg/03a-medallion-layers-overview.svg)
 
@@ -207,8 +215,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-pipeline-execution-flow"></a>
-## 04-pipeline-execution-flow — Pipeline Execution Lifecycle
+## 04-pipeline-execution-flow
+
+**Pipeline Execution Lifecycle**
 
 ![04-pipeline-execution-flow](../architecture/svg/04-pipeline-execution-flow.svg)
 
@@ -225,8 +234,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-provider-adapter-hierarchy"></a>
-## 05-provider-adapter-hierarchy — Provider Adapter Hierarchy
+## 05-provider-adapter-hierarchy
+
+**Provider Adapter Hierarchy**
 
 ![05-provider-adapter-hierarchy](../architecture/svg/05-provider-adapter-hierarchy.svg)
 
@@ -243,8 +253,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05a-adapter-hierarchy-base"></a>
-## 05a-adapter-hierarchy-base — Adapter Hierarchy: Base Types
+## 05a-adapter-hierarchy-base
+
+**Adapter Hierarchy: Base Types**
 
 ![05a-adapter-hierarchy-base](../architecture/svg/05a-adapter-hierarchy-base.svg)
 
@@ -261,8 +272,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05b-adapter-hierarchy-providers"></a>
-## 05b-adapter-hierarchy-providers — Adapter Hierarchy: Provider Implementations
+## 05b-adapter-hierarchy-providers
+
+**Adapter Hierarchy: Provider Implementations**
 
 ![05b-adapter-hierarchy-providers](../architecture/svg/05b-adapter-hierarchy-providers.svg)
 
@@ -279,8 +291,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-storage-layer"></a>
-## 06-storage-layer — Storage Layer Components
+## 06-storage-layer
+
+**Storage Layer Components**
 
 ![06-storage-layer](../architecture/svg/06-storage-layer.svg)
 
@@ -297,8 +310,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="06a-storage-writers"></a>
-## 06a-storage-writers — Storage Writers
+## 06a-storage-writers
+
+**Storage Writers**
 
 ![06a-storage-writers](../architecture/svg/06a-storage-writers.svg)
 
@@ -315,8 +329,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="06b-storage-support"></a>
-## 06b-storage-support — Storage Support Components
+## 06b-storage-support
+
+**Storage Support Components**
 
 ![06b-storage-support](../architecture/svg/06b-storage-support.svg)
 
@@ -333,8 +348,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-dq-system"></a>
-## 07-dq-system — Data Quality (DQ) System
+## 07-dq-system
+
+**Data Quality (DQ) System**
 
 ![07-dq-system](../architecture/svg/07-dq-system.svg)
 
@@ -351,8 +367,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07a-dq-analysis"></a>
-## 07a-dq-analysis — DQ Analysis Services
+## 07a-dq-analysis
+
+**DQ Analysis Services**
 
 ![07a-dq-analysis](../architecture/svg/07a-dq-analysis.svg)
 
@@ -369,8 +386,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07b-dq-pipeline"></a>
-## 07b-dq-pipeline — DQ Pipeline Integration
+## 07b-dq-pipeline
+
+**DQ Pipeline Integration**
 
 ![07b-dq-pipeline](../architecture/svg/07b-dq-pipeline.svg)
 
@@ -387,8 +405,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-composite-pipeline"></a>
-## 08-composite-pipeline — Composite Pipeline Architecture
+## 08-composite-pipeline
+
+**Composite Pipeline Architecture**
 
 ![08-composite-pipeline](../architecture/svg/08-composite-pipeline.svg)
 
@@ -405,8 +424,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08a-composite-config"></a>
-## 08a-composite-config — Composite Pipeline Configuration & FSM
+## 08a-composite-config
+
+**Composite Pipeline Configuration & FSM**
 
 ![08a-composite-config](../architecture/svg/08a-composite-config.svg)
 
@@ -423,8 +443,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08b-composite-execution"></a>
-## 08b-composite-execution — Composite Pipeline Execution
+## 08b-composite-execution
+
+**Composite Pipeline Execution**
 
 ![08b-composite-execution](../architecture/svg/08b-composite-execution.svg)
 
@@ -441,8 +462,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="09-observability-stack"></a>
-## 09-observability-stack — Observability Stack
+## 09-observability-stack
+
+**Observability Stack**
 
 ![09-observability-stack](../architecture/svg/09-observability-stack.svg)
 
@@ -459,8 +481,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="09a-observability-app"></a>
-## 09a-observability-app — Observability: Application Layer
+## 09a-observability-app
+
+**Observability: Application Layer**
 
 ![09a-observability-app](../architecture/svg/09a-observability-app.svg)
 
@@ -477,8 +500,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="09b-observability-infra"></a>
-## 09b-observability-infra — Observability: Infrastructure Layer
+## 09b-observability-infra
+
+**Observability: Infrastructure Layer**
 
 ![09b-observability-infra](../architecture/svg/09b-observability-infra.svg)
 
@@ -495,8 +519,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="10-resilience-patterns"></a>
-## 10-resilience-patterns — Resilience Patterns
+## 10-resilience-patterns
+
+**Resilience Patterns**
 
 ![10-resilience-patterns](../architecture/svg/10-resilience-patterns.svg)
 
@@ -513,8 +538,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="11-configuration-system"></a>
-## 11-configuration-system — Configuration System
+## 11-configuration-system
+
+**Configuration System**
 
 ![11-configuration-system](../architecture/svg/11-configuration-system.svg)
 
@@ -531,8 +557,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="11a-config-loading"></a>
-## 11a-config-loading — Configuration: Loading Pipeline
+## 11a-config-loading
+
+**Configuration: Loading Pipeline**
 
 ![11a-config-loading](../architecture/svg/11a-config-loading.svg)
 
@@ -549,8 +576,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="11b-config-domain"></a>
-## 11b-config-domain — Configuration: Domain & Application Config
+## 11b-config-domain
+
+**Configuration: Domain & Application Config**
 
 ![11b-config-domain](../architecture/svg/11b-config-domain.svg)
 
@@ -567,62 +595,66 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="12-bootstrap-di-container"></a>
-## 12-bootstrap-di-container — Bootstrap / DI Container (Composition Root)
+## 12-bootstrap-di-container
+
+**Bootstrap / DI Container (Composition Root)**
 
 ![12-bootstrap-di-container](../architecture/svg/12-bootstrap-di-container.svg)
 
 ### Описание
-Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the current narrow public APIs plus retained broad seam used to assemble runtime and admin services.. Схема имеет плотность порядка 20 узлов и 31 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition seams, Internal composition modules, Registries + factories, Runtime bootstrap, CLI/bootstrap services, Created collaborators. Показательные узлы для быстрого чтения: Entry callers CLI + tests/scripts + future API, composition.execution_api preferred execution seam, composition.services_api preferred services seam, composition.resources_api preferred resource seam, composition.entrypoints retained broad facade, composition.bootstrap runtime / cli / assembly. Примечание: Decomposed into 12a, 12b sub-diagrams.
+Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: current entrypoints/bootstrap seams and the runtime/admin assembly path they drive today.. Схема имеет плотность порядка 20 узлов и 30 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition seams, Internal composition modules, Registries + factories, Runtime bootstrap, CLI/bootstrap services, Created collaborators. Показательные узлы для быстрого чтения: Entry callers CLI + tests/scripts + programmatic integrations, composition.entrypoints run/build + service getters, composition.bootstrap lower-level runtime / cli seam, ProviderRegistry provider configs + creators, PipelineRegistry pipeline definitions, DataSourceFactory canonical provider adapter path. Примечание: Decomposed into 12a, 12b sub-diagrams.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-19`
+- Дата: `2026-03-24`
 - Узлы (metadata): `20`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="12a-bootstrap-factories"></a>
-## 12a-bootstrap-factories — Bootstrap: Registries, Public APIs, and Factory Seams
+## 12a-bootstrap-factories
+
+**Bootstrap: Registries, Public APIs, and Factory Seams**
 
 ![12a-bootstrap-factories](../architecture/svg/12a-bootstrap-factories.svg)
 
 ### Описание
-Диаграмма «Bootstrap: Registries, Public APIs, and Factory Seams» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Focuses on current public composition APIs, registries, provider wiring, and canonical factory seams.. Схема имеет плотность порядка 11 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Registries + factories. Показательные узлы для быстрого чтения: composition.execution_api, composition.services_api, composition.resources_api, composition.entrypoints retained broad seam, composition.bootstrap, ProviderRegistry.
+Диаграмма «Bootstrap: Registries, Public APIs, and Factory Seams» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Focuses on current entrypoint/bootstrap surfaces, registries, provider wiring, and canonical factory seams.. Схема имеет плотность порядка 11 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Registries + factories. Показательные узлы для быстрого чтения: composition.entrypoints run/build + service getters, composition.bootstrap lower-level seam, ProviderRegistry, PipelineRegistry, DataSourceFactory, GenericPipelineFactory / RunnerFactory.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-19`
+- Дата: `2026-03-24`
 - Узлы (metadata): `11`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="12b-bootstrap-wiring"></a>
-## 12b-bootstrap-wiring — Bootstrap: Runtime and Admin Wiring
+## 12b-bootstrap-wiring
+
+**Bootstrap: Runtime and Admin Wiring**
 
 ![12b-bootstrap-wiring](../architecture/svg/12b-bootstrap-wiring.svg)
 
 ### Описание
-Диаграмма «Bootstrap: Runtime and Admin Wiring» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers how narrow public composition APIs and the retained broad seam expose runtime/admin assembly outputs.. Схема имеет плотность порядка 19 узлов и 24 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition APIs, Composition bootstrap, Infrastructure collaborators, Created services. Показательные узлы для быстрого чтения: execution_api, services_api, resources_api, entrypoints retained broad seam, bootstrap.runtime, bootstrap.cli.
+Диаграмма «Bootstrap: Runtime and Admin Wiring» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers how current entrypoints/bootstrap seams expose runtime and admin assembly outputs.. Схема имеет плотность порядка 19 узлов и 22 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Public composition APIs, Composition bootstrap, Infrastructure collaborators, Created services. Показательные узлы для быстрого чтения: composition.entrypoints, composition.bootstrap lower-level seam, bootstrap_pipeline_runner, bootstrap_pipeline_runner_service, build_pipeline_runner, bootstrap.cli + bootstrap.assembly.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-19`
+- Дата: `2026-03-24`
 - Узлы (metadata): `19`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="13-port-protocol-contracts"></a>
-## 13-port-protocol-contracts — Port/Protocol Contracts (Full Map)
+## 13-port-protocol-contracts
+
+**Port/Protocol Contracts (Full Map)**
 
 ![13-port-protocol-contracts](../architecture/svg/13-port-protocol-contracts.svg)
 
@@ -639,8 +671,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13a-data-storage-ports"></a>
-## 13a-data-storage-ports — DataSource and Storage Ports
+## 13a-data-storage-ports
+
+**DataSource and Storage Ports**
 
 ![13a-data-storage-ports](../architecture/svg/13a-data-storage-ports.svg)
 
@@ -657,8 +690,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13a-port-contracts-data-sources"></a>
-## 13a-port-contracts-data-sources — Port Contracts: Data Sources
+## 13a-port-contracts-data-sources
+
+**Port Contracts: Data Sources**
 
 ![13a-port-contracts-data-sources](../architecture/svg/13a-port-contracts-data-sources.svg)
 
@@ -675,8 +709,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13b-operational-ports"></a>
-## 13b-operational-ports — Operational and Observability Ports
+## 13b-operational-ports
+
+**Operational and Observability Ports**
 
 ![13b-operational-ports](../architecture/svg/13b-operational-ports.svg)
 
@@ -693,8 +728,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13b-port-contracts-storage"></a>
-## 13b-port-contracts-storage — Port Contracts: Storage
+## 13b-port-contracts-storage
+
+**Port Contracts: Storage**
 
 ![13b-port-contracts-storage](../architecture/svg/13b-port-contracts-storage.svg)
 
@@ -711,8 +747,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13c-port-contracts-observability"></a>
-## 13c-port-contracts-observability — Port Contracts: Observability and Resilience
+## 13c-port-contracts-observability
+
+**Port Contracts: Observability and Resilience**
 
 ![13c-port-contracts-observability](../architecture/svg/13c-port-contracts-observability.svg)
 
@@ -729,8 +766,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13c-validation-dq-ports"></a>
-## 13c-validation-dq-ports — Validation and Data Quality Ports
+## 13c-validation-dq-ports
+
+**Validation and Data Quality Ports**
 
 ![13c-validation-dq-ports](../architecture/svg/13c-validation-dq-ports.svg)
 
@@ -747,8 +785,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13d-port-contracts-services"></a>
-## 13d-port-contracts-services — Port Contracts: Services and Controls
+## 13d-port-contracts-services
+
+**Port Contracts: Services and Controls**
 
 ![13d-port-contracts-services](../architecture/svg/13d-port-contracts-services.svg)
 
@@ -765,8 +804,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13e-operational-ports-domain"></a>
-## 13e-operational-ports-domain — Domain Operational Ports
+## 13e-operational-ports-domain
+
+**Domain Operational Ports**
 
 ![13e-operational-ports-domain](../architecture/svg/13e-operational-ports-domain.svg)
 
@@ -783,8 +823,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13f-operational-ports-infra"></a>
-## 13f-operational-ports-infra — Infrastructure Operational Implementations
+## 13f-operational-ports-infra
+
+**Infrastructure Operational Implementations**
 
 ![13f-operational-ports-infra](../architecture/svg/13f-operational-ports-infra.svg)
 
@@ -801,8 +842,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14-cli-interface-layer"></a>
-## 14-cli-interface-layer — CLI / Interface Layer
+## 14-cli-interface-layer
+
+**CLI / Interface Layer**
 
 ![14-cli-interface-layer](../architecture/svg/14-cli-interface-layer.svg)
 
@@ -819,8 +861,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14a-cli-commands"></a>
-## 14a-cli-commands — CLI: Command Structure
+## 14a-cli-commands
+
+**CLI: Command Structure**
 
 ![14a-cli-commands](../architecture/svg/14a-cli-commands.svg)
 
@@ -837,8 +880,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14b-cli-routing"></a>
-## 14b-cli-routing — CLI: Routing to Composition Boundary
+## 14b-cli-routing
+
+**CLI: Routing to Composition Boundary**
 
 ![14b-cli-routing](../architecture/svg/14b-cli-routing.svg)
 
@@ -855,26 +899,28 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="15-batch-executor-internals"></a>
-## 15-batch-executor-internals — BatchExecutor Internal Architecture
+## 15-batch-executor-internals
+
+**BatchExecutor Internal Architecture**
 
 ![15-batch-executor-internals](../architecture/svg/15-batch-executor-internals.svg)
 
 ### Описание
-Диаграмма «BatchExecutor Internal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the composition of BatchExecutor and its helper components.. Схема имеет плотность порядка 15 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: BatchExecutor, Composed Helper Components, Data Flow Through Batch, TransformResult, Error Classification. Показательные узлы для быстрого чтения: QuarantineManager -------- quarantine failed records + quarantine_record(), CheckpointManagerService -------- offset checkpoints + load/save/delete, Raw API Records (dict[str, Any]), Silver Records (Delta Lake), TransformResult silver_records + gold_records quarantined_count + errors, ErrorClassifier -------- QUARANTINE / RETRY / FATAL.
+Диаграмма «BatchExecutor Internal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Component / Service». В комментариях исходника зафиксирован фокус диаграммы: the current decomposition of BatchExecutor runtime orchestration.. Схема имеет плотность порядка 16 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: BatchExecutor Shell, Run Orchestration, Processing And State Contracts, BatchProcessingService Internals. Показательные узлы для быстрого чтения: BatchTransformer -------- transform_batch() quarantine + DQ thresholds, BatchWriter -------- write_bronze/silver/gold lock-safe validation path, QuarantineManagerService -------- quarantine_record() quarantine_records().
 
 ### Метаданные
 - Тип: `flowchart`
-- Уровень: `System / Component`
-- Дата: `2026-02-24`
-- Узлы (metadata): `15`
+- Уровень: `Component / Service`
+- Дата: `2026-03-24`
+- Узлы (metadata): `16`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="16-transformer-hierarchy"></a>
-## 16-transformer-hierarchy — Transformer Hierarchy
+## 16-transformer-hierarchy
+
+**Transformer Hierarchy**
 
 ![16-transformer-hierarchy](../architecture/svg/16-transformer-hierarchy.svg)
 
@@ -891,8 +937,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="16a-transformer-base"></a>
-## 16a-transformer-base — Base Transformer and ChEMBL Transformers
+## 16a-transformer-base
+
+**Base Transformer and ChEMBL Transformers**
 
 ![16a-transformer-base](../architecture/svg/16a-transformer-base.svg)
 
@@ -909,8 +956,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="16b-transformer-pub-other"></a>
-## 16b-transformer-pub-other — Publication, UniProt, Other Transformers and Blocks
+## 16b-transformer-pub-other
+
+**Publication, UniProt, Other Transformers and Blocks**
 
 ![16b-transformer-pub-other](../architecture/svg/16b-transformer-pub-other.svg)
 
@@ -927,8 +975,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="17-security-pii-audit"></a>
-## 17-security-pii-audit — Security, PII Hashing, and Audit Trail
+## 17-security-pii-audit
+
+**Security, PII Hashing, and Audit Trail**
 
 ![17-security-pii-audit](../architecture/svg/17-security-pii-audit.svg)
 
@@ -945,8 +994,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="18-lock-checkpoint-shutdown"></a>
-## 18-lock-checkpoint-shutdown — Locking, Checkpoint, and Graceful Shutdown
+## 18-lock-checkpoint-shutdown
+
+**Locking, Checkpoint, and Graceful Shutdown**
 
 ![18-lock-checkpoint-shutdown](../architecture/svg/18-lock-checkpoint-shutdown.svg)
 
@@ -963,8 +1013,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="18a-lock-system"></a>
-## 18a-lock-system — Lock System
+## 18a-lock-system
+
+**Lock System**
 
 ![18a-lock-system](../architecture/svg/18a-lock-system.svg)
 
@@ -981,8 +1032,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="18b-checkpoint-shutdown"></a>
-## 18b-checkpoint-shutdown — Checkpoint and Shutdown System
+## 18b-checkpoint-shutdown
+
+**Checkpoint and Shutdown System**
 
 ![18b-checkpoint-shutdown](../architecture/svg/18b-checkpoint-shutdown.svg)
 

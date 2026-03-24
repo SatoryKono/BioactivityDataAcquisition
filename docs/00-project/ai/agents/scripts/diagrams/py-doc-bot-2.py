@@ -5,9 +5,11 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -70,9 +72,32 @@ def _resource_path_sep() -> str:
     return ";" if os.name == "nt" else ":"
 
 
+def rewrite_image_links(markdown_text: str, *, base_dir: Path) -> str:
+    """Rewrite bundle image links to absolute PNG assets for DOCX compatibility."""
+    pattern = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
+
+    def _replace(match: re.Match[str]) -> str:
+        alt = match.group(1)
+        target = match.group(2)
+        updated = target
+        if "/svg/" in updated and updated.endswith(".svg"):
+            updated = updated.replace("/svg/", "/png/")[:-4] + ".png"
+
+        if "://" in updated or updated.startswith("data:"):
+            return f"![{alt}]({updated})"
+
+        absolute = (base_dir / updated).resolve()
+        return f"![{alt}]({absolute.as_uri()})"
+
+    return pattern.sub(_replace, markdown_text)
+
+
 def run(cmd: list[str], cwd: Path | None = None) -> None:
     completed = subprocess.run(
-        cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True,
+        cmd,
+        cwd=str(cwd) if cwd else None,
+        capture_output=True,
+        text=True,
     )
     if completed.returncode == 0:
         return
@@ -89,28 +114,36 @@ def render_one(input_md: Path, reference_doc: Path | None) -> Path:
         raise FileNotFoundError(f"Input markdown not found: {input_md}")
 
     output_docx = input_md.with_suffix(".docx")
-    sep = _resource_path_sep()
-    resource_path = f"{input_md.parent}{sep}{REPO_ROOT}"
+    markdown_text = input_md.read_text(encoding="utf-8")
+    markdown_text = rewrite_image_links(markdown_text, base_dir=input_md.parent)
 
-    cmd = [
-        "pandoc",
-        input_md.name,
-        "--from",
-        "markdown",
-        "--to",
-        "docx",
-        "--standalone",
-        "--resource-path",
-        resource_path,
-        "--output",
-        str(output_docx),
-    ]
-    if PAGEBREAK_LUA.exists():
-        cmd.extend(["--lua-filter", str(PAGEBREAK_LUA)])
-    if reference_doc is not None:
-        cmd.extend(["--reference-doc", str(reference_doc)])
+    with tempfile.TemporaryDirectory(prefix="bioetl-diagram-docx-") as tmp_dir_raw:
+        tmp_dir = Path(tmp_dir_raw)
+        tmp_md = tmp_dir / input_md.name
+        tmp_md.write_text(markdown_text, encoding="utf-8")
 
-    run(cmd, cwd=input_md.parent)
+        sep = _resource_path_sep()
+        resource_path = f"{input_md.parent}{sep}{REPO_ROOT}"
+
+        cmd = [
+            "pandoc",
+            str(tmp_md),
+            "--from",
+            "markdown",
+            "--to",
+            "docx",
+            "--standalone",
+            "--resource-path",
+            resource_path,
+            "--output",
+            str(output_docx),
+        ]
+        if PAGEBREAK_LUA.exists():
+            cmd.extend(["--lua-filter", str(PAGEBREAK_LUA)])
+        if reference_doc is not None:
+            cmd.extend(["--reference-doc", str(reference_doc)])
+
+        run(cmd)
     return output_docx
 
 

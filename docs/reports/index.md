@@ -18,6 +18,8 @@ Canonical sources:
   they still do not replace canonical project guidance in `docs/00-05`.
 - Dated reports reused for current planning should carry a short freshness or
   rebaseline note when later waves change their live interpretation.
+- top-level [`reports/`](../../reports/README.md) remains the working area for
+  generated and iteration-heavy outputs before curation.
 
 ## Main Entry Points
 

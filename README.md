@@ -91,6 +91,22 @@ and [Tools Hub](docs/00-project/TOOLS.md) for current guidance. Materials under
 [`docs/99-archive/`](docs/99-archive/README.md) are preserved for traceability,
 but active docs in `docs/00-05` remain the source of truth.
 
+## Repository Structure
+
+| Path | Role | Orientation |
+| --- | --- | --- |
+| `src/bioetl/` | Runtime source tree organized by the five-layer architecture | [Source Map](src/bioetl/README.md) |
+| `configs/` | Provider, entity, composite, and quality configuration assets | [configs/README.md](configs/README.md) |
+| `tests/` | Unit, integration, e2e, smoke, and architecture verification | `tests/` mirrors source concerns by scope |
+| `docs/` | Canonical project guidance and internal-published reference material | Start at [Project Map](docs/00-project/00-map.md) |
+| `docs/reports/` | Curated internal-published evidence and report artifacts | [docs/reports/index.md](docs/reports/index.md) |
+| `reports/` | Generated or working analysis outputs before curation | [reports/README.md](reports/README.md) |
+| `scripts/` | Operational and maintenance tooling | [scripts/README.md](scripts/README.md) |
+
+The current top-level layout is intentionally stable. Structural improvements
+should usually target a specific family or navigation seam rather than trigger a
+repo-wide reorganization wave.
+
 ## Quick Start
 
 ### Prerequisites

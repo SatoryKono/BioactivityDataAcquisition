@@ -3,9 +3,11 @@
 - Исходная диаграмма: `foundation/03-pipeline-execution-happy-path.mmd`
 
 ## Описание
-Диаграмма Title: Pipeline Execution — Happy Path из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 03-pipeline-execution-happy-path. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Pipeline Execution), §3.3 (Locking), §3.4 (Postrun). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: CLI, bootstrap_pipeline(), PipelineRunner, LockCoordinator, PreflightService. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Pipeline Execution — Happy Path показывает сокращённый, но уже актуальный execution path для обычного успешного запуска пайплайна. Она представлена в формате `sequenceDiagram` и используется как foundation-view для быстрого чтения жизненного цикла без детализации по Bronze/Silver/Gold writer internals. Уровень детализации обозначен как `Component / Class`, поэтому схема акцентирует только основные фазы: создание `PipelineRunner`, managed startup с lock/preflight/medallion prepare, batch execution через `BatchExecutor` и `BatchProcessingService`, postrun finalization и cleanup.
+
+Значимые участники последовательности: `build_pipeline_runner`, `PipelineRunner`, `LockCoordinator`, `PreflightService`, `MedallionLifecycleService`, `CheckpointManagerService`, `BatchExecutor`, `BatchProcessingService`, `PostrunService`. По этой схеме удобно быстро проверять happy-path порядок вызовов после удаления старого `PipelineExecutor` choreography из application/core.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата метаданных: `2026-03-24`

@@ -1,110 +1,80 @@
 %% Title: Delta Lake Write Sequence (Silver Layer)
-%% Covers: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake)
-%% Updated: 2026-02-17
-%% Components: SilverWriter, Delta table, Arrow conversion, Merge/Append/Overwrite, content_hash dedup
+%% Covers: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake), silver writer orchestration
+%% Updated: 2026-03-24
+%% Components: BatchProcessingService, SilverWriter, validation/Arrow prep, Delta dispatch, merge resilience, metadata finalization
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-24
 %% @type    sequenceDiagram
 %% @level   Mixed (System / Component / Class)
 %% @nodes   7
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform sequence width=168 max_title_len=16
+%% @uniform sequence width=184 max_title_len=18
 sequenceDiagram
     autonumber
-    participant Processor as RecordProcessor
+    participant Processing as BatchProcessingService
     participant Writer as SilverWriter
-    participant Lock as LockPort
-    participant Arrow as PyArrow
-    participant Delta as deltalake (Rust)
-    participant Storage as Local FS
-    participant Metrics as MetricsPort
+    participant Validate as Validation + Arrow prep
+    participant Dispatch as Delta dispatch policy
+    participant Delta as DeltaTable / write_deltalake
+    participant Storage as Delta log + parquet files
+    participant Metadata as Silver metadata finalization
 
-    Note over Processor,Writer: Phase 1: Pre-Write Lock Validation
+    Note over Processing,Writer: Phase 1: Silver stage entry
 
-    Processor->>Writer: merge(records, table="silver/chembl/activity", primary_key=["content_hash"])
+    Processing->>Writer: write_silver(table_name, records, primary_keys, schema, mode)
     activate Writer
+    Writer->>Writer: execute_silver_write_with_tracing(...)
 
-    Writer->>Lock: validate_owner(key="lock:chembl_activity", owner_id)
-    Lock-->>Writer: True (valid)
+    Note over Writer,Validate: Phase 2: Validate and prepare payload
 
-    Note over Writer,Arrow: Phase 2: Convert to Arrow
+    Writer->>Validate: _prepare_silver_write_payload(...)
+    activate Validate
+    Note right of Validate: Validate write mode and keys<br/>Deduplicate primary keys<br/>Run Pandera + schema drift policy<br/>Build Arrow table
+    Validate-->>Writer: Prepared payload
+    deactivate Validate
 
-    Writer->>Arrow: to_arrow_table(records)
-    activate Arrow
-    Note right of Arrow: Schema inference<br/>Type mapping:<br/>• str → utf8<br/>• int → int64<br/>• float → float64<br/>• datetime → timestamp
-    Arrow-->>Writer: pa.Table
-    deactivate Arrow
+    Note over Writer,Delta: Phase 3: Dispatch by mode
 
-    Note over Writer,Delta: Phase 3: Open Delta Table
+    Writer->>Dispatch: _dispatch_write_with_domain_errors(table_name, request)
+    activate Dispatch
 
-    Writer->>Delta: open_table(path)
-    activate Delta
-    Delta->>Storage: read _delta_log/
-    Storage-->>Delta: Transaction log entries
-    Delta-->>Writer: DeltaTable(version=N)
-    deactivate Delta
-
-    Note over Writer,Delta: Phase 4: Execute Merge Operation
-
-    alt mode == "merge" (SilverWriteMode.MERGE)
-        Writer->>Delta: merge(source=table, target=path, predicate="content_hash")
+    alt mode == merge
+        Dispatch->>Delta: load DeltaTable(table_path)
         activate Delta
-        Note right of Delta: MERGE INTO target<br/>USING source<br/>ON source.content_hash = target.content_hash<br/>WHEN MATCHED THEN UPDATE SET *<br/>WHEN NOT MATCHED THEN INSERT *
-
-        Delta->>Delta: Compute diff
-        Note right of Delta: Identify:<br/>• New records (INSERT)<br/>• Changed records (UPDATE)<br/>• Unchanged (skip)
-
-        Delta->>Storage: Write new Parquet files
-        Storage-->>Delta: file_paths
-        Delta->>Storage: Write _delta_log/{version+1}.json
-        Storage-->>Delta: OK
-
-        Delta-->>Writer: MergeResult(inserted, updated, deleted)
+        Delta->>Storage: read _delta_log
+        Storage-->>Delta: current table snapshot
+        Delta->>Delta: merge(source, predicate by primary keys)
+        Delta->>Storage: write parquet files
+        Delta->>Storage: append new _delta_log version
+        Storage-->>Delta: commit complete
+        Delta-->>Dispatch: merge applied
         deactivate Delta
-
-    else mode == "append" (SilverWriteMode.APPEND)
-        Writer->>Delta: write_deltalake(table, mode="append")
+    else mode == append / delete
+        Dispatch->>Delta: write_deltalake(mode=append/overwrite)
         activate Delta
-        Delta->>Storage: Write Parquet files
-        Storage-->>Delta: file_paths
-        Delta->>Storage: Write _delta_log/{version+1}.json
-        Delta-->>Writer: WriteResult(rows_inserted)
-        deactivate Delta
-
-    else mode == "overwrite" (SilverWriteMode.DELETE)
-        Writer->>Delta: write_deltalake(table, mode="overwrite")
-        activate Delta
-        Delta->>Storage: Write new Parquet files
-        Delta->>Storage: Write _delta_log with tombstones
-        Delta-->>Writer: WriteResult(rows_inserted)
+        Delta->>Storage: write parquet + delta log updates
+        Storage-->>Delta: commit complete
+        Delta-->>Dispatch: write applied
         deactivate Delta
     end
 
-    Note over Writer,Lock: Phase 5: Post-Write Lock Validation
+    Dispatch-->>Writer: write dispatched
+    deactivate Dispatch
 
-    Writer->>Lock: validate_owner(key="lock:chembl_activity", owner_id)
-    Lock-->>Writer: True (still valid)
+    Note over Writer,Metadata: Phase 4: Metadata and result assembly
 
-    Note right of Writer: Safety Guard Pattern:<br/>If lock lost during write,<br/>another process may have<br/>written conflicting data.<br/>This check ensures consistency.
+    Writer->>Metadata: _complete_silver_write_pipeline(ctx, payload)
+    activate Metadata
+    Metadata->>Storage: read current Delta version
+    Metadata->>Storage: write Silver metadata sidecar
+    Metadata-->>Writer: SilverWriteResult
+    deactivate Metadata
 
-    Note over Writer,Metrics: Phase 6: Emit Metrics
-
-    Writer->>Metrics: observe_histogram("silver_write_duration_ms", duration)
-    Writer->>Metrics: increment_counter("silver_records_written", count)
-    Writer->>Metrics: set_gauge("silver_table_version", version)
-
-    Writer-->>Processor: WriteResult
+    Writer-->>Processing: SilverWriteResult
     deactivate Writer
 
-    Note over Processor: WriteResult contains:<br/>• success: bool<br/>• records_written: int<br/>• version: int<br/>• files_added: list[str]<br/>• merge_stats: MergeStats
-
     rect rgb(255, 250, 205)
-        Note over Writer,Delta: ACID Properties
-        Note right of Delta: Delta Lake guarantees:<br/>• Atomicity: All-or-nothing writes<br/>• Consistency: Schema enforcement<br/>• Isolation: Optimistic concurrency<br/>• Durability: Transaction log
-    end
-
-    rect rgb(255, 240, 245)
-        Note over Writer: Error Handling
-        Note right of Writer: On lock validation failure:<br/>1. Abort transaction<br/>2. Raise LockNotHeldError<br/>3. DO NOT commit partial writes
+        Note over Writer,Delta: Resilience semantics
+        Note right of Delta: Merge path uses timeout + retry helpers.<br/>Schema/Delta errors are translated to domain write errors.<br/>No separate lock-validation step is modeled here.
     end

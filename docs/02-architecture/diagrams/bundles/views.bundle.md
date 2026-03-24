@@ -1,6 +1,6 @@
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-03-23T10:52:06
+- Generated: 2026-03-24T10:35:54
 - Diagram count: 162
 
 ## Table of Contents
@@ -11,11 +11,11 @@
 - [02-medallion — Medallion Architecture Layers](#02-medallion-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [03-medallion-data-flow — 03 Medallion Data Flow](#03-medallion-data-flow-full) — 2 views: full, overview
 - [04-domain-layer-class-diagram — Domain Layer Class Diagram](#04-domain-layer-class-diagram-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
-- [05-layers-interaction — Layer Interaction — Hexagonal Architecture](#05-layers-interaction-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
+- [05-layers-interaction — Layer Interaction — Hexagonal Runtime Topology](#05-layers-interaction-full) — 5 views: dataflow, domain, full, infra, overview
 - [05-pipeline-lifecycle-states — Pipeline Lifecycle State Machine](#05-pipeline-lifecycle-states-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [06-application-layer-class-diagram — Application Layer Class Diagram](#06-application-layer-class-diagram-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [07-circuit-breaker-states — Circuit Breaker State Machine](#07-circuit-breaker-states-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
-- [08-complete-etl-workflow — Complete ETL Workflow (6 Phases)](#08-complete-etl-workflow-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
+- [08-complete-etl-workflow — Complete ETL Workflow (6 Phases)](#08-complete-etl-workflow-full) — 5 views: dataflow, domain, full, infra, overview
 - [08-domain-ddd — Domain Layer — DDD Components](#08-domain-ddd-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [10-infrastructure-layer-class-diagram — Infrastructure Layer Class Diagram](#10-infrastructure-layer-class-diagram-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [12-local-deployment-architecture — Local Deployment Architecture](#12-local-deployment-architecture-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
@@ -31,7 +31,7 @@
 - [31-pipeline-run-lifecycle — Pipeline Run Lifecycle — From Config to Completion](#31-pipeline-run-lifecycle-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [32-single-record-journey — Record Processing Pipeline — Single Record Journey](#32-single-record-journey-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [33-cli-run-interaction — CLI Run Command → PipelineRunner Full Interaction](#33-cli-run-interaction-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
-- [34-batch-processing-flow — Batch Processing Flow — Extract to Write](#34-batch-processing-flow-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
+- [34-batch-processing-flow — Batch Processing Flow — BatchProcessingService choreography](#34-batch-processing-flow-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [35-bootstrap-sequence — Composition Layer Bootstrap Sequence](#35-bootstrap-sequence-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [36-architecture-principles-mindmap — Architecture Principles Mind Map](#36-architecture-principles-mindmap-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
 - [39-medallion-invariants — Medallion Architecture Invariants (ARCH-007)](#39-medallion-invariants-full) — 5 views: data-flow, domain-focus, full, infrastructure-mapping, overview
@@ -45,8 +45,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="00-legend"></a>
-## 00-legend — 00 Legend
+## 00-legend
+
+**00 Legend**
 
 ![00-legend](../views/svg/00-legend.svg)
 
@@ -61,13 +62,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-full-system-component-dataflow"></a>
-## 01-full-system-component-dataflow — 01 Full System Component
+## 01-full-system-component-dataflow
+
+**01 Full System Component**
 
 ![01-full-system-component-dataflow](../views/svg/01-full-system-component-dataflow.svg)
 
 ### Описание
-Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 12 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, PipelineRunner, BatchTransformer, PipelineExecutor, RecordProcessor, ActivityTransformer.
+Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 9 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CLI, build_pipeline_runner, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -77,13 +79,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-full-system-component-domain"></a>
-## 01-full-system-component-domain — 01 Full System Component
+## 01-full-system-component-domain
+
+**01 Full System Component**
 
 ![01-full-system-component-domain](../views/svg/01-full-system-component-domain.svg)
 
 ### Описание
-Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer. Показательные узлы для быстрого чтения: DataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort, MetricsPort.
+Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 9 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer. Показательные узлы для быстрого чтения: Port facades, Entities / value objects, Pipeline + runtime config, Errors / events, PipelineRunner, PipelineService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -93,18 +96,19 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-full-system-component-full"></a>
-## 01-full-system-component-full — Full System Component Diagram
+## 01-full-system-component-full
+
+**Full System Component Diagram**
 
 ![01-full-system-component-full](../views/svg/01-full-system-component-full.svg)
 
 ### Описание
-Диаграмма «Full System Component Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters). Схема имеет плотность порядка 64 узлов и 78 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Bioactivity Sources, Publication Sources, Interfaces Layer, Composition Layer, Application Layer. Показательные узлы для быстрого чтения: ChEMBL API, PubChem API, UniProt API, PubMed API, CrossRef API, OpenAlex API. Связанный ADR: ADR-040.
+Диаграмма «Full System Component Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core. Схема имеет плотность порядка 31 узлов и 38 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: Bioactivity APIs, Publication APIs, CLI run / health / debug, Signal orchestration, build_pipeline_runner, PipelineRegistry. Связанный ADR: ADR-040.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-27`
+- Дата: `2026-03-24`
 - Представление: `Full`
 - ADR: `ADR-040`
 
@@ -112,13 +116,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-full-system-component-infra"></a>
-## 01-full-system-component-infra — 01 Full System Component
+## 01-full-system-component-infra
+
+**01 Full System Component**
 
 ![01-full-system-component-infra](../views/svg/01-full-system-component-infra.svg)
 
 ### Описание
-Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 20 узлов и 1 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: StoragePort, LockPort, CheckpointPort, QuarantinePort, MetricsPort, TracingPort.
+Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 8 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Composition, Infrastructure, Domain. Показательные узлы для быстрого чтения: build_pipeline_runner, StorageFactory, Provider adapters, Unified HTTP stack, Bronze / Delta / Gold, Lock / checkpoint.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -128,13 +133,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-full-system-component-overview"></a>
-## 01-full-system-component-overview — 01 Full System Component
+## 01-full-system-component-overview
+
+**01 Full System Component**
 
 ![01-full-system-component-overview](../views/svg/01-full-system-component-overview.svg)
 
 ### Описание
-Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 12 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces, Composition, Application, Domain Ports, Infrastructure. Показательные узлы для быстрого чтения: Provider APIs, CLI, Bootstrap, Factories, PipelineRunner, PipelineExecutor.
+Диаграмма «01 Full System Component» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `01-full-system-component-full.mermaid`. Схема имеет плотность порядка 7 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: External APIs, CLI / health / debug, Runtime assembly, Pipeline runtime, Domain contracts, Infra adapters.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -144,8 +150,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-high-level-dataflow"></a>
-## 01-high-level-dataflow — 01 High Level
+## 01-high-level-dataflow
+
+**01 High Level**
 
 ![01-high-level-dataflow](../views/svg/01-high-level-dataflow.svg)
 
@@ -160,8 +167,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-high-level-domain"></a>
-## 01-high-level-domain — 01 High Level
+## 01-high-level-domain
+
+**01 High Level**
 
 ![01-high-level-domain](../views/svg/01-high-level-domain.svg)
 
@@ -176,8 +184,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-high-level-full"></a>
-## 01-high-level-full — High-Level System Architecture
+## 01-high-level-full
+
+**High-Level System Architecture**
 
 ![01-high-level-full](../views/svg/01-high-level-full.svg)
 
@@ -194,8 +203,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-high-level-infra"></a>
-## 01-high-level-infra — 01 High Level
+## 01-high-level-infra
+
+**01 High Level**
 
 ![01-high-level-infra](../views/svg/01-high-level-infra.svg)
 
@@ -210,8 +220,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-high-level-overview"></a>
-## 01-high-level-overview — 01 High Level
+## 01-high-level-overview
+
+**01 High Level**
 
 ![01-high-level-overview](../views/svg/01-high-level-overview.svg)
 
@@ -226,8 +237,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-medallion-dataflow"></a>
-## 02-medallion-dataflow — 02 Medallion
+## 02-medallion-dataflow
+
+**02 Medallion**
 
 ![02-medallion-dataflow](../views/svg/02-medallion-dataflow.svg)
 
@@ -242,8 +254,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-medallion-domain"></a>
-## 02-medallion-domain — 02 Medallion
+## 02-medallion-domain
+
+**02 Medallion**
 
 ![02-medallion-domain](../views/svg/02-medallion-domain.svg)
 
@@ -258,8 +271,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-medallion-full"></a>
-## 02-medallion-full — Medallion Architecture Layers
+## 02-medallion-full
+
+**Medallion Architecture Layers**
 
 ![02-medallion-full](../views/svg/02-medallion-full.svg)
 
@@ -276,8 +290,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-medallion-infra"></a>
-## 02-medallion-infra — 02 Medallion
+## 02-medallion-infra
+
+**02 Medallion**
 
 ![02-medallion-infra](../views/svg/02-medallion-infra.svg)
 
@@ -292,8 +307,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-medallion-overview"></a>
-## 02-medallion-overview — 02 Medallion
+## 02-medallion-overview
+
+**02 Medallion**
 
 ![02-medallion-overview](../views/svg/02-medallion-overview.svg)
 
@@ -308,8 +324,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-medallion-data-flow-full"></a>
-## 03-medallion-data-flow-full — 03 Medallion Data Flow
+## 03-medallion-data-flow-full
+
+**03 Medallion Data Flow**
 
 ![03-medallion-data-flow-full](../views/svg/03-medallion-data-flow-full.svg)
 
@@ -324,8 +341,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-medallion-data-flow-overview"></a>
-## 03-medallion-data-flow-overview — 03 Medallion Data Flow
+## 03-medallion-data-flow-overview
+
+**03 Medallion Data Flow**
 
 ![03-medallion-data-flow-overview](../views/svg/03-medallion-data-flow-overview.svg)
 
@@ -340,8 +358,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-domain-layer-class-diagram-dataflow"></a>
-## 04-domain-layer-class-diagram-dataflow — 04 Domain Layer Class Diagram
+## 04-domain-layer-class-diagram-dataflow
+
+**04 Domain Layer Class Diagram**
 
 ![04-domain-layer-class-diagram-dataflow](../views/svg/04-domain-layer-class-diagram-dataflow.svg)
 
@@ -356,8 +375,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-domain-layer-class-diagram-domain"></a>
-## 04-domain-layer-class-diagram-domain — 04 Domain Layer Class Diagram
+## 04-domain-layer-class-diagram-domain
+
+**04 Domain Layer Class Diagram**
 
 ![04-domain-layer-class-diagram-domain](../views/svg/04-domain-layer-class-diagram-domain.svg)
 
@@ -372,8 +392,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-domain-layer-class-diagram-full"></a>
-## 04-domain-layer-class-diagram-full — Domain Layer Class Diagram
+## 04-domain-layer-class-diagram-full
+
+**Domain Layer Class Diagram**
 
 ![04-domain-layer-class-diagram-full](../views/svg/04-domain-layer-class-diagram-full.svg)
 
@@ -390,8 +411,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-domain-layer-class-diagram-infra"></a>
-## 04-domain-layer-class-diagram-infra — 04 Domain Layer Class Diagram
+## 04-domain-layer-class-diagram-infra
+
+**04 Domain Layer Class Diagram**
 
 ![04-domain-layer-class-diagram-infra](../views/svg/04-domain-layer-class-diagram-infra.svg)
 
@@ -406,8 +428,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-domain-layer-class-diagram-overview"></a>
-## 04-domain-layer-class-diagram-overview — 04 Domain Layer Class Diagram
+## 04-domain-layer-class-diagram-overview
+
+**04 Domain Layer Class Diagram**
 
 ![04-domain-layer-class-diagram-overview](../views/svg/04-domain-layer-class-diagram-overview.svg)
 
@@ -422,79 +445,84 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-layers-interaction-dataflow"></a>
-## 05-layers-interaction-dataflow — 05 Layers Interaction
+## 05-layers-interaction-dataflow
+
+**05 Layers Interaction**
 
 ![05-layers-interaction-dataflow](../views/svg/05-layers-interaction-dataflow.svg)
 
 ### Описание
-Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 12 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Runner, BatchExec, Transformer, Merger, CompositeRunner.
+Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Dataflow. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 9 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: CLI, build_pipeline_runner, PipelineRunner, BatchExecutor, BatchProcessingService, BatchTransformer / BatchWriter.
 
 ### Метаданные
 - Тип: `flowchart`
-- Представление: `Data-Flow`
+- Представление: `Dataflow`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-layers-interaction-domain"></a>
-## 05-layers-interaction-domain — 05 Layers Interaction
+## 05-layers-interaction-domain
+
+**05 Layers Interaction**
 
 ![05-layers-interaction-domain](../views/svg/05-layers-interaction-domain.svg)
 
 ### Описание
-Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Exceptions, Domain, Factories, Coordinator, Application.
+Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 9 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application contracts, Domain responsibilities. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineService, BatchProcessingService, CompositeRunner, Port facades.
 
 ### Метаданные
 - Тип: `flowchart`
-- Представление: `Domain-Focus`
+- Представление: `Domain`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-layers-interaction-full"></a>
-## 05-layers-interaction-full — Layer Interaction — Hexagonal Architecture
+## 05-layers-interaction-full
+
+**Layer Interaction — Hexagonal Runtime Topology**
 
 ![05-layers-interaction-full](../views/svg/05-layers-interaction-full.svg)
 
 ### Описание
-Диаграмма «Layer Interaction — Hexagonal Architecture» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Layers), §1.2 (Ports & Adapters). Схема имеет плотность порядка 19 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces Layer, Composition Layer, Application Layer, Composite Pipeline (ADR-026), Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CLI Entry Point, bootstrap_pipeline, PipelineRegistry, Factories, PipelineRunner, BatchExecutor.
+Диаграмма «Layer Interaction — Hexagonal Runtime Topology» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Component / Class». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Layers), §1.2 (Ports & Adapters), composition/runtime_builders, application/core. Схема имеет плотность порядка 23 узлов и 29 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces Layer, Composition Layer, Application Layer, Composite Pipeline (ADR-026), Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CLI commands, PipelineRunnerService, build_pipeline_runner, PipelineRegistry, GenericPipelineFactory, StorageFactory.
 
 ### Метаданные
 - Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата: `2026-03-24`
 - Представление: `Full`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-layers-interaction-infra"></a>
-## 05-layers-interaction-infra — 05 Layers Interaction
+## 05-layers-interaction-infra
+
+**05 Layers Interaction**
 
 ![05-layers-interaction-infra](../views/svg/05-layers-interaction-infra.svg)
 
 ### Описание
-Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 20 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Types, Exceptions, Runner, BatchExec, Transformer.
+Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infra. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 8 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Composition, Application, Infrastructure adapters. Показательные узлы для быстрого чтения: build_pipeline_runner, StorageFactory, PipelineService, Preflight / Postrun, Provider adapters, Bronze / Delta / Gold.
 
 ### Метаданные
 - Тип: `flowchart`
-- Представление: `Infrastructure-Mapping`
+- Представление: `Infra`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-layers-interaction-overview"></a>
-## 05-layers-interaction-overview — 05 Layers Interaction
+## 05-layers-interaction-overview
+
+**05 Layers Interaction**
 
 ![05-layers-interaction-overview](../views/svg/05-layers-interaction-overview.svg)
 
 ### Описание
-Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 15 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Composition Layer, Interfaces Layer. Показательные узлы для быстрого чтения: Ports, Types, Factories, Runner, BatchExec, Services.
+Диаграмма «05 Layers Interaction» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `05-layers-interaction-full.mermaid`. Схема имеет плотность порядка 11 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Interfaces, Composition, Application, Domain, Infrastructure. Показательные узлы для быстрого чтения: CLI, RunnerService, build_pipeline_runner, GenericPipelineFactory, PipelineRunner, BatchProcessingService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -504,8 +532,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-pipeline-lifecycle-states-dataflow"></a>
-## 05-pipeline-lifecycle-states-dataflow — 05 Pipeline Lifecycle States
+## 05-pipeline-lifecycle-states-dataflow
+
+**05 Pipeline Lifecycle States**
 
 ![05-pipeline-lifecycle-states-dataflow](../views/svg/05-pipeline-lifecycle-states-dataflow.svg)
 
@@ -520,8 +549,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-pipeline-lifecycle-states-domain"></a>
-## 05-pipeline-lifecycle-states-domain — 05 Pipeline Lifecycle States
+## 05-pipeline-lifecycle-states-domain
+
+**05 Pipeline Lifecycle States**
 
 ![05-pipeline-lifecycle-states-domain](../views/svg/05-pipeline-lifecycle-states-domain.svg)
 
@@ -536,8 +566,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-pipeline-lifecycle-states-full"></a>
-## 05-pipeline-lifecycle-states-full — Pipeline Lifecycle State Machine
+## 05-pipeline-lifecycle-states-full
+
+**Pipeline Lifecycle State Machine**
 
 ![05-pipeline-lifecycle-states-full](../views/svg/05-pipeline-lifecycle-states-full.svg)
 
@@ -554,8 +585,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-pipeline-lifecycle-states-infra"></a>
-## 05-pipeline-lifecycle-states-infra — 05 Pipeline Lifecycle States
+## 05-pipeline-lifecycle-states-infra
+
+**05 Pipeline Lifecycle States**
 
 ![05-pipeline-lifecycle-states-infra](../views/svg/05-pipeline-lifecycle-states-infra.svg)
 
@@ -570,8 +602,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-pipeline-lifecycle-states-overview"></a>
-## 05-pipeline-lifecycle-states-overview — 05 Pipeline Lifecycle States
+## 05-pipeline-lifecycle-states-overview
+
+**05 Pipeline Lifecycle States**
 
 ![05-pipeline-lifecycle-states-overview](../views/svg/05-pipeline-lifecycle-states-overview.svg)
 
@@ -586,13 +619,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-application-layer-class-diagram-dataflow"></a>
-## 06-application-layer-class-diagram-dataflow — 06 Application Layer Class Diagram
+## 06-application-layer-class-diagram-dataflow
+
+**06 Application Layer Class Diagram**
 
 ![06-application-layer-class-diagram-dataflow](../views/svg/06-application-layer-class-diagram-dataflow.svg)
 
 ### Описание
-Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: BaseChemblTransformer, RecordProcessor, BasePipeline, PipelineRunner, PipelineExecutor, BatchTransformer.
+Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 9 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Execution Flow, Injected Context. Показательные узлы для быстрого чтения: PipelineRunner, BatchExecutor, BatchProcessingService, BatchTransformer, BatchWriter, BasePipeline.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -602,13 +636,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-application-layer-class-diagram-domain"></a>
-## 06-application-layer-class-diagram-domain — 06 Application Layer Class Diagram
+## 06-application-layer-class-diagram-domain
+
+**06 Application Layer Class Diagram**
 
 ![06-application-layer-class-diagram-domain](../views/svg/06-application-layer-class-diagram-domain.svg)
 
 ### Описание
-Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 19 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: RunnerServices, BaseChemblTransformer, RecordProcessor, BasePipeline, PipelineRunner, PipelineExecutor.
+Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 9 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Pipeline Definition And Transform, Runtime Data. Показательные узлы для быстрого чтения: BasePipeline, PipelineService, BaseTransformer, BatchTransformer, BatchProcessingService, BatchWriter.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -618,31 +653,33 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-application-layer-class-diagram-full"></a>
-## 06-application-layer-class-diagram-full — Application Layer Class Diagram
+## 06-application-layer-class-diagram-full
+
+**Application Layer Class Diagram**
 
 ![06-application-layer-class-diagram-full](../views/svg/06-application-layer-class-diagram-full.svg)
 
 ### Описание
-Диаграмма «Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). Схема имеет плотность порядка 22 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineService.
+Диаграмма «Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Component / Class». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), application/core/, application/services/, application/observability/. Схема имеет плотность порядка 18 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineRunnerDependencies, BatchExecutor, BatchProcessingService, BatchTransformer.
 
 ### Метаданные
 - Тип: `classDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата: `2026-03-24`
 - Представление: `Full`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-application-layer-class-diagram-infra"></a>
-## 06-application-layer-class-diagram-infra — 06 Application Layer Class Diagram
+## 06-application-layer-class-diagram-infra
+
+**06 Application Layer Class Diagram**
 
 ![06-application-layer-class-diagram-infra](../views/svg/06-application-layer-class-diagram-infra.svg)
 
 ### Описание
-Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 20 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: RunnerServices, RecordProcessor, PipelineRunner, BasePipeline, PipelineExecutor, BatchTransformer.
+Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runner Orchestration, Lifecycle / Support Services, Execution Support. Показательные узлы для быстрого чтения: PipelineRunner, RunnerDependencies, PipelineService, LockCoordinator, CheckpointManagerService, PreflightService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -652,13 +689,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-application-layer-class-diagram-overview"></a>
-## 06-application-layer-class-diagram-overview — 06 Application Layer Class Diagram
+## 06-application-layer-class-diagram-overview
+
+**06 Application Layer Class Diagram**
 
 ![06-application-layer-class-diagram-overview](../views/svg/06-application-layer-class-diagram-overview.svg)
 
 ### Описание
-Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 15 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: PipelineRunner, RunnerServices, BaseChemblTransformer, BaseTransformer, PreflightService, PostrunService.
+Диаграмма «06 Application Layer Class Diagram» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `06-application-layer-class-diagram-full.mermaid`. Схема имеет плотность порядка 14 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Core, Processing Flow, Lifecycle Services. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, RunnerDependencies, BatchExecutor, PipelineService, BatchProcessingService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -668,8 +706,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-circuit-breaker-states-dataflow"></a>
-## 07-circuit-breaker-states-dataflow — 07 Circuit Breaker States
+## 07-circuit-breaker-states-dataflow
+
+**07 Circuit Breaker States**
 
 ![07-circuit-breaker-states-dataflow](../views/svg/07-circuit-breaker-states-dataflow.svg)
 
@@ -684,8 +723,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-circuit-breaker-states-domain"></a>
-## 07-circuit-breaker-states-domain — 07 Circuit Breaker States
+## 07-circuit-breaker-states-domain
+
+**07 Circuit Breaker States**
 
 ![07-circuit-breaker-states-domain](../views/svg/07-circuit-breaker-states-domain.svg)
 
@@ -700,8 +740,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-circuit-breaker-states-full"></a>
-## 07-circuit-breaker-states-full — Circuit Breaker State Machine
+## 07-circuit-breaker-states-full
+
+**Circuit Breaker State Machine**
 
 ![07-circuit-breaker-states-full](../views/svg/07-circuit-breaker-states-full.svg)
 
@@ -718,8 +759,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-circuit-breaker-states-infra"></a>
-## 07-circuit-breaker-states-infra — 07 Circuit Breaker States
+## 07-circuit-breaker-states-infra
+
+**07 Circuit Breaker States**
 
 ![07-circuit-breaker-states-infra](../views/svg/07-circuit-breaker-states-infra.svg)
 
@@ -734,8 +776,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-circuit-breaker-states-overview"></a>
-## 07-circuit-breaker-states-overview — 07 Circuit Breaker States
+## 07-circuit-breaker-states-overview
+
+**07 Circuit Breaker States**
 
 ![07-circuit-breaker-states-overview](../views/svg/07-circuit-breaker-states-overview.svg)
 
@@ -750,79 +793,84 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-complete-etl-workflow-dataflow"></a>
-## 08-complete-etl-workflow-dataflow — 08 Complete Etl Workflow
+## 08-complete-etl-workflow-dataflow
+
+**08 Complete Etl Workflow**
 
 ![08-complete-etl-workflow-dataflow](../views/svg/08-complete-etl-workflow-dataflow.svg)
 
 ### Описание
-Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 12 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: A6, A7, A8, B1, A4, A5.
+Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Dataflow. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 8 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Data source, BatchExecutor, BatchProcessingService, write_bronze_layer, transform_batch, write_silver_gold_concurrent.
 
 ### Метаданные
 - Тип: `flowchart`
-- Представление: `Data-Flow`
+- Представление: `Dataflow`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-complete-etl-workflow-domain"></a>
-## 08-complete-etl-workflow-domain — 08 Complete Etl Workflow
+## 08-complete-etl-workflow-domain
+
+**08 Complete Etl Workflow**
 
 ![08-complete-etl-workflow-domain](../views/svg/08-complete-etl-workflow-domain.svg)
 
 ### Описание
-Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: B1, B2, B4, B3, B5, B8.
+Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 9 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application orchestration, Domain artifacts. Показательные узлы для быстрого чтения: PipelineRunner, BatchExecutor, BatchProcessingService, PostrunService, RunType / medallion policy, BronzeRecord batch.
 
 ### Метаданные
 - Тип: `flowchart`
-- Представление: `Domain-Focus`
+- Представление: `Domain`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-complete-etl-workflow-full"></a>
-## 08-complete-etl-workflow-full — Complete ETL Workflow (6 Phases)
+## 08-complete-etl-workflow-full
+
+**Complete ETL Workflow (6 Phases)**
 
 ![08-complete-etl-workflow-full](../views/svg/08-complete-etl-workflow-full.svg)
 
 ### Описание
-Диаграмма «Complete ETL Workflow (6 Phases)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3 (Pipeline Execution), §3.2 (Preflight), §3.4 (Postrun). Схема имеет плотность порядка 16 узлов и 57 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Phase 1: Prepare, Phase 2: Extract, Phase 3: Transform, Normalization Rules, Metadata Fields, Phase 4: Validate. Показательные узлы для быстрого чтения: Load YAML Config, Fetch from API, Load Bronze Records, NaN/Inf → null, Floats → round(10), Dates → ISO YYYY-MM-DD.
+Диаграмма «Complete ETL Workflow (6 Phases)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Component / Class». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: application/core/{runner,batch_executor,batch_processing_service,postrun/service}.py, application/services/medallion_lifecycle.py. Схема имеет плотность порядка 24 узлов и 28 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Phase 1: Startup, Phase 2: Extract, Phase 3: Bronze + Transform, Phase 4: Silver / Gold Load, Phase 5: Postrun, Phase 6: Cleanup. Показательные узлы для быстрого чтения: Enter services + lock contexts, validate_infrastructure, prepare_for_run, load checkpoint / resolve offset, BatchExecutor.execute, extract_records via DataSourcePort.fetch.
 
 ### Метаданные
 - Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата: `2026-03-24`
 - Представление: `Full`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-complete-etl-workflow-infra"></a>
-## 08-complete-etl-workflow-infra — 08 Complete Etl Workflow
+## 08-complete-etl-workflow-infra
+
+**08 Complete Etl Workflow**
 
 ![08-complete-etl-workflow-infra](../views/svg/08-complete-etl-workflow-infra.svg)
 
 ### Описание
-Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 16 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: A6, A7, A8, B1, A4, A5.
+Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infra. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 9 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application, Infrastructure. Показательные узлы для быстрого чтения: PipelineRunner, BatchProcessingService, PostrunService, PipelineService, DataSourcePort impl, StoragePort impl.
 
 ### Метаданные
 - Тип: `flowchart`
-- Представление: `Infrastructure-Mapping`
+- Представление: `Infra`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-complete-etl-workflow-overview"></a>
-## 08-complete-etl-workflow-overview — 08 Complete Etl Workflow
+## 08-complete-etl-workflow-overview
+
+**08 Complete Etl Workflow**
 
 ![08-complete-etl-workflow-overview](../views/svg/08-complete-etl-workflow-overview.svg)
 
 ### Описание
-Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 15 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: D8, D7, D10, E_ERR, D9, E1.
+Диаграмма «08 Complete Etl Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `08-complete-etl-workflow-full.mermaid`. Схема имеет плотность порядка 6 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Startup, Extract, Bronze + Transform, Silver / Gold, Postrun, Cleanup.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -832,8 +880,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-domain-ddd-dataflow"></a>
-## 08-domain-ddd-dataflow — 08 Domain Ddd
+## 08-domain-ddd-dataflow
+
+**08 Domain Ddd**
 
 ![08-domain-ddd-dataflow](../views/svg/08-domain-ddd-dataflow.svg)
 
@@ -848,8 +897,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-domain-ddd-domain"></a>
-## 08-domain-ddd-domain — 08 Domain Ddd
+## 08-domain-ddd-domain
+
+**08 Domain Ddd**
 
 ![08-domain-ddd-domain](../views/svg/08-domain-ddd-domain.svg)
 
@@ -864,8 +914,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-domain-ddd-full"></a>
-## 08-domain-ddd-full — Domain Layer — DDD Components
+## 08-domain-ddd-full
+
+**Domain Layer — DDD Components**
 
 ![08-domain-ddd-full](../views/svg/08-domain-ddd-full.svg)
 
@@ -882,8 +933,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-domain-ddd-infra"></a>
-## 08-domain-ddd-infra — 08 Domain Ddd
+## 08-domain-ddd-infra
+
+**08 Domain Ddd**
 
 ![08-domain-ddd-infra](../views/svg/08-domain-ddd-infra.svg)
 
@@ -898,8 +950,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-domain-ddd-overview"></a>
-## 08-domain-ddd-overview — 08 Domain Ddd
+## 08-domain-ddd-overview
+
+**08 Domain Ddd**
 
 ![08-domain-ddd-overview](../views/svg/08-domain-ddd-overview.svg)
 
@@ -914,8 +967,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="10-infrastructure-layer-class-diagram-dataflow"></a>
-## 10-infrastructure-layer-class-diagram-dataflow — 10 Infrastructure Layer Class Diagram
+## 10-infrastructure-layer-class-diagram-dataflow
+
+**10 Infrastructure Layer Class Diagram**
 
 ![10-infrastructure-layer-class-diagram-dataflow](../views/svg/10-infrastructure-layer-class-diagram-dataflow.svg)
 
@@ -930,8 +984,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="10-infrastructure-layer-class-diagram-domain"></a>
-## 10-infrastructure-layer-class-diagram-domain — 10 Infrastructure Layer Class Diagram
+## 10-infrastructure-layer-class-diagram-domain
+
+**10 Infrastructure Layer Class Diagram**
 
 ![10-infrastructure-layer-class-diagram-domain](../views/svg/10-infrastructure-layer-class-diagram-domain.svg)
 
@@ -946,8 +1001,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="10-infrastructure-layer-class-diagram-full"></a>
-## 10-infrastructure-layer-class-diagram-full — Infrastructure Layer Class Diagram
+## 10-infrastructure-layer-class-diagram-full
+
+**Infrastructure Layer Class Diagram**
 
 ![10-infrastructure-layer-class-diagram-full](../views/svg/10-infrastructure-layer-class-diagram-full.svg)
 
@@ -964,8 +1020,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="10-infrastructure-layer-class-diagram-infra"></a>
-## 10-infrastructure-layer-class-diagram-infra — 10 Infrastructure Layer Class Diagram
+## 10-infrastructure-layer-class-diagram-infra
+
+**10 Infrastructure Layer Class Diagram**
 
 ![10-infrastructure-layer-class-diagram-infra](../views/svg/10-infrastructure-layer-class-diagram-infra.svg)
 
@@ -980,8 +1037,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="10-infrastructure-layer-class-diagram-overview"></a>
-## 10-infrastructure-layer-class-diagram-overview — 10 Infrastructure Layer Class Diagram
+## 10-infrastructure-layer-class-diagram-overview
+
+**10 Infrastructure Layer Class Diagram**
 
 ![10-infrastructure-layer-class-diagram-overview](../views/svg/10-infrastructure-layer-class-diagram-overview.svg)
 
@@ -996,8 +1054,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="12-local-deployment-architecture-dataflow"></a>
-## 12-local-deployment-architecture-dataflow — 12 Local Deployment Architecture
+## 12-local-deployment-architecture-dataflow
+
+**12 Local Deployment Architecture**
 
 ![12-local-deployment-architecture-dataflow](../views/svg/12-local-deployment-architecture-dataflow.svg)
 
@@ -1012,8 +1071,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="12-local-deployment-architecture-domain"></a>
-## 12-local-deployment-architecture-domain — 12 Local Deployment Architecture
+## 12-local-deployment-architecture-domain
+
+**12 Local Deployment Architecture**
 
 ![12-local-deployment-architecture-domain](../views/svg/12-local-deployment-architecture-domain.svg)
 
@@ -1028,8 +1088,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="12-local-deployment-architecture-full"></a>
-## 12-local-deployment-architecture-full — Local Deployment Architecture
+## 12-local-deployment-architecture-full
+
+**Local Deployment Architecture**
 
 ![12-local-deployment-architecture-full](../views/svg/12-local-deployment-architecture-full.svg)
 
@@ -1046,8 +1107,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="12-local-deployment-architecture-infra"></a>
-## 12-local-deployment-architecture-infra — 12 Local Deployment Architecture
+## 12-local-deployment-architecture-infra
+
+**12 Local Deployment Architecture**
 
 ![12-local-deployment-architecture-infra](../views/svg/12-local-deployment-architecture-infra.svg)
 
@@ -1062,8 +1124,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="12-local-deployment-architecture-overview"></a>
-## 12-local-deployment-architecture-overview — 12 Local Deployment Architecture
+## 12-local-deployment-architecture-overview
+
+**12 Local Deployment Architecture**
 
 ![12-local-deployment-architecture-overview](../views/svg/12-local-deployment-architecture-overview.svg)
 
@@ -1078,8 +1141,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13-port-protocol-contracts-full"></a>
-## 13-port-protocol-contracts-full — 13 Port Protocol Contracts
+## 13-port-protocol-contracts-full
+
+**13 Port Protocol Contracts**
 
 ![13-port-protocol-contracts-full](../views/svg/13-port-protocol-contracts-full.svg)
 
@@ -1094,8 +1158,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="13-port-protocol-contracts-overview"></a>
-## 13-port-protocol-contracts-overview — 13 Port Protocol Contracts
+## 13-port-protocol-contracts-overview
+
+**13 Port Protocol Contracts**
 
 ![13-port-protocol-contracts-overview](../views/svg/13-port-protocol-contracts-overview.svg)
 
@@ -1110,8 +1175,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14-provider-health-states-dataflow"></a>
-## 14-provider-health-states-dataflow — 14 Provider Health States
+## 14-provider-health-states-dataflow
+
+**14 Provider Health States**
 
 ![14-provider-health-states-dataflow](../views/svg/14-provider-health-states-dataflow.svg)
 
@@ -1126,8 +1192,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14-provider-health-states-domain"></a>
-## 14-provider-health-states-domain — 14 Provider Health States
+## 14-provider-health-states-domain
+
+**14 Provider Health States**
 
 ![14-provider-health-states-domain](../views/svg/14-provider-health-states-domain.svg)
 
@@ -1142,8 +1209,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14-provider-health-states-full"></a>
-## 14-provider-health-states-full — Provider Health State Machine
+## 14-provider-health-states-full
+
+**Provider Health State Machine**
 
 ![14-provider-health-states-full](../views/svg/14-provider-health-states-full.svg)
 
@@ -1160,8 +1228,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14-provider-health-states-infra"></a>
-## 14-provider-health-states-infra — 14 Provider Health States
+## 14-provider-health-states-infra
+
+**14 Provider Health States**
 
 ![14-provider-health-states-infra](../views/svg/14-provider-health-states-infra.svg)
 
@@ -1176,8 +1245,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="14-provider-health-states-overview"></a>
-## 14-provider-health-states-overview — 14 Provider Health States
+## 14-provider-health-states-overview
+
+**14 Provider Health States**
 
 ![14-provider-health-states-overview](../views/svg/14-provider-health-states-overview.svg)
 
@@ -1192,8 +1262,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="15-dq-check-workflow-dataflow"></a>
-## 15-dq-check-workflow-dataflow — 15 Dq Check Workflow
+## 15-dq-check-workflow-dataflow
+
+**15 Dq Check Workflow**
 
 ![15-dq-check-workflow-dataflow](../views/svg/15-dq-check-workflow-dataflow.svg)
 
@@ -1208,8 +1279,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="15-dq-check-workflow-domain"></a>
-## 15-dq-check-workflow-domain — 15 Dq Check Workflow
+## 15-dq-check-workflow-domain
+
+**15 Dq Check Workflow**
 
 ![15-dq-check-workflow-domain](../views/svg/15-dq-check-workflow-domain.svg)
 
@@ -1224,8 +1296,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="15-dq-check-workflow-full"></a>
-## 15-dq-check-workflow-full — Data Quality Check Workflow
+## 15-dq-check-workflow-full
+
+**Data Quality Check Workflow**
 
 ![15-dq-check-workflow-full](../views/svg/15-dq-check-workflow-full.svg)
 
@@ -1242,8 +1315,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="15-dq-check-workflow-infra"></a>
-## 15-dq-check-workflow-infra — 15 Dq Check Workflow
+## 15-dq-check-workflow-infra
+
+**15 Dq Check Workflow**
 
 ![15-dq-check-workflow-infra](../views/svg/15-dq-check-workflow-infra.svg)
 
@@ -1258,8 +1332,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="15-dq-check-workflow-overview"></a>
-## 15-dq-check-workflow-overview — 15 Dq Check Workflow
+## 15-dq-check-workflow-overview
+
+**15 Dq Check Workflow**
 
 ![15-dq-check-workflow-overview](../views/svg/15-dq-check-workflow-overview.svg)
 
@@ -1274,8 +1349,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="16-transformer-hierarchy-full"></a>
-## 16-transformer-hierarchy-full — 16 Transformer Hierarchy
+## 16-transformer-hierarchy-full
+
+**16 Transformer Hierarchy**
 
 ![16-transformer-hierarchy-full](../views/svg/16-transformer-hierarchy-full.svg)
 
@@ -1290,8 +1366,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="16-transformer-hierarchy-overview"></a>
-## 16-transformer-hierarchy-overview — 16 Transformer Hierarchy
+## 16-transformer-hierarchy-overview
+
+**16 Transformer Hierarchy**
 
 ![16-transformer-hierarchy-overview](../views/svg/16-transformer-hierarchy-overview.svg)
 
@@ -1306,8 +1383,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="21-activity-entity-data-flow-dataflow"></a>
-## 21-activity-entity-data-flow-dataflow — 21 Activity Entity Data Flow
+## 21-activity-entity-data-flow-dataflow
+
+**21 Activity Entity Data Flow**
 
 ![21-activity-entity-data-flow-dataflow](../views/svg/21-activity-entity-data-flow-dataflow.svg)
 
@@ -1322,8 +1400,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="21-activity-entity-data-flow-domain"></a>
-## 21-activity-entity-data-flow-domain — 21 Activity Entity Data Flow
+## 21-activity-entity-data-flow-domain
+
+**21 Activity Entity Data Flow**
 
 ![21-activity-entity-data-flow-domain](../views/svg/21-activity-entity-data-flow-domain.svg)
 
@@ -1338,8 +1417,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="21-activity-entity-data-flow-full"></a>
-## 21-activity-entity-data-flow-full — Activity Entity Data Flow (Extract → Transform → Load)
+## 21-activity-entity-data-flow-full
+
+**Activity Entity Data Flow (Extract → Transform → Load)**
 
 ![21-activity-entity-data-flow-full](../views/svg/21-activity-entity-data-flow-full.svg)
 
@@ -1356,8 +1436,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="21-activity-entity-data-flow-infra"></a>
-## 21-activity-entity-data-flow-infra — 21 Activity Entity Data Flow
+## 21-activity-entity-data-flow-infra
+
+**21 Activity Entity Data Flow**
 
 ![21-activity-entity-data-flow-infra](../views/svg/21-activity-entity-data-flow-infra.svg)
 
@@ -1372,8 +1453,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="21-activity-entity-data-flow-overview"></a>
-## 21-activity-entity-data-flow-overview — 21 Activity Entity Data Flow
+## 21-activity-entity-data-flow-overview
+
+**21 Activity Entity Data Flow**
 
 ![21-activity-entity-data-flow-overview](../views/svg/21-activity-entity-data-flow-overview.svg)
 
@@ -1388,8 +1470,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="26-hexagonal-ports-adapters-dataflow"></a>
-## 26-hexagonal-ports-adapters-dataflow — 26 Hexagonal Ports Adapters
+## 26-hexagonal-ports-adapters-dataflow
+
+**26 Hexagonal Ports Adapters**
 
 ![26-hexagonal-ports-adapters-dataflow](../views/svg/26-hexagonal-ports-adapters-dataflow.svg)
 
@@ -1404,8 +1487,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="26-hexagonal-ports-adapters-domain"></a>
-## 26-hexagonal-ports-adapters-domain — 26 Hexagonal Ports Adapters
+## 26-hexagonal-ports-adapters-domain
+
+**26 Hexagonal Ports Adapters**
 
 ![26-hexagonal-ports-adapters-domain](../views/svg/26-hexagonal-ports-adapters-domain.svg)
 
@@ -1420,8 +1504,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="26-hexagonal-ports-adapters-full"></a>
-## 26-hexagonal-ports-adapters-full — Hexagonal Architecture — Ports and Adapters Overview
+## 26-hexagonal-ports-adapters-full
+
+**Hexagonal Architecture — Ports and Adapters Overview**
 
 ![26-hexagonal-ports-adapters-full](../views/svg/26-hexagonal-ports-adapters-full.svg)
 
@@ -1438,8 +1523,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="26-hexagonal-ports-adapters-infra"></a>
-## 26-hexagonal-ports-adapters-infra — 26 Hexagonal Ports Adapters
+## 26-hexagonal-ports-adapters-infra
+
+**26 Hexagonal Ports Adapters**
 
 ![26-hexagonal-ports-adapters-infra](../views/svg/26-hexagonal-ports-adapters-infra.svg)
 
@@ -1454,8 +1540,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="26-hexagonal-ports-adapters-overview"></a>
-## 26-hexagonal-ports-adapters-overview — 26 Hexagonal Ports Adapters
+## 26-hexagonal-ports-adapters-overview
+
+**26 Hexagonal Ports Adapters**
 
 ![26-hexagonal-ports-adapters-overview](../views/svg/26-hexagonal-ports-adapters-overview.svg)
 
@@ -1470,8 +1557,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="28-composition-root-di-graph-dataflow"></a>
-## 28-composition-root-di-graph-dataflow — 28 Composition Root Di Graph
+## 28-composition-root-di-graph-dataflow
+
+**28 Composition Root Di Graph**
 
 ![28-composition-root-di-graph-dataflow](../views/svg/28-composition-root-di-graph-dataflow.svg)
 
@@ -1486,8 +1574,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="28-composition-root-di-graph-domain"></a>
-## 28-composition-root-di-graph-domain — 28 Composition Root Di Graph
+## 28-composition-root-di-graph-domain
+
+**28 Composition Root Di Graph**
 
 ![28-composition-root-di-graph-domain](../views/svg/28-composition-root-di-graph-domain.svg)
 
@@ -1502,26 +1591,28 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="28-composition-root-di-graph-full"></a>
-## 28-composition-root-di-graph-full — Composition Root Wiring — Full DI Graph
+## 28-composition-root-di-graph-full
+
+**Composition Root Wiring — Full DI Graph**
 
 ![28-composition-root-di-graph-full](../views/svg/28-composition-root-di-graph-full.svg)
 
 ### Описание
-Диаграмма «Composition Root Wiring — Full DI Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005. Схема имеет плотность порядка 19 узлов и 35 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Entry Point, Composition Factories, Logger & Observability, Client & Data Source, Storage & Services, Pipeline Construction. Показательные узлы для быстрого чтения: CLI run command, bootstrap/runtime/assembly.py, BootstrapLogger • configure structlog, DQServicesFactory • create() → DQ analyzers + monitor, HttpClientFactory • create(provider) → UnifiedHTTPClient, DataSourceFactory • create(provider, config) → DataSourcePort impl.
+Диаграмма «Composition Root Wiring — Full DI Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Layer), ADR-005. Схема имеет плотность порядка 19 узлов и 31 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Entry Point, Composition Factories, Logger & Observability, Client & Data Source, Storage, Pipeline Construction. Показательные узлы для быстрого чтения: CLI run command, bootstrap/runtime/assembly.py, BootstrapLogger • configure structlog, ObservabilityBundle • logger + metrics + tracing, HttpClientFactory • create(provider) → UnifiedHTTPClient, DataSourceFactory • create(provider, config) → DataSourcePort impl.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Дата: `2026-03-24`
 - Представление: `Full`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="28-composition-root-di-graph-infra"></a>
-## 28-composition-root-di-graph-infra — 28 Composition Root Di Graph
+## 28-composition-root-di-graph-infra
+
+**28 Composition Root Di Graph**
 
 ![28-composition-root-di-graph-infra](../views/svg/28-composition-root-di-graph-infra.svg)
 
@@ -1536,13 +1627,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="28-composition-root-di-graph-overview"></a>
-## 28-composition-root-di-graph-overview — 28 Composition Root Di Graph
+## 28-composition-root-di-graph-overview
+
+**28 Composition Root Di Graph**
 
 ![28-composition-root-di-graph-overview](../views/svg/28-composition-root-di-graph-overview.svg)
 
 ### Описание
-Диаграмма «28 Composition Root Di Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `28-composition-root-di-graph-full.mermaid`. Схема имеет плотность порядка 12 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Entry, Composition Factories, Created Runtime. Показательные узлы для быстрого чтения: CLI run, Bootstrap runtime, LoggerFactory, HttpClientFactory, DataSourceFactory, StorageFactory.
+Диаграмма «28 Composition Root Di Graph» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `28-composition-root-di-graph-full.mermaid`. Схема имеет плотность порядка 11 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Entry, Pipeline Assembly, Created Runtime. Показательные узлы для быстрого чтения: CLI run, Bootstrap runtime, GenericPipelineFactory, factory_method_helpers, creation_support, DataSourceFactory.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1552,8 +1644,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="29-composite-pipeline-workflow-dataflow"></a>
-## 29-composite-pipeline-workflow-dataflow — 29 Composite Pipeline Workflow
+## 29-composite-pipeline-workflow-dataflow
+
+**29 Composite Pipeline Workflow**
 
 ![29-composite-pipeline-workflow-dataflow](../views/svg/29-composite-pipeline-workflow-dataflow.svg)
 
@@ -1568,8 +1661,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="29-composite-pipeline-workflow-domain"></a>
-## 29-composite-pipeline-workflow-domain — 29 Composite Pipeline Workflow
+## 29-composite-pipeline-workflow-domain
+
+**29 Composite Pipeline Workflow**
 
 ![29-composite-pipeline-workflow-domain](../views/svg/29-composite-pipeline-workflow-domain.svg)
 
@@ -1584,8 +1678,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="29-composite-pipeline-workflow-full"></a>
-## 29-composite-pipeline-workflow-full — Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
+## 29-composite-pipeline-workflow-full
+
+**Composite Pipeline Full Workflow — Seed to Gold (ADR-026)**
 
 ![29-composite-pipeline-workflow-full](../views/svg/29-composite-pipeline-workflow-full.svg)
 
@@ -1602,8 +1697,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="29-composite-pipeline-workflow-infra"></a>
-## 29-composite-pipeline-workflow-infra — 29 Composite Pipeline Workflow
+## 29-composite-pipeline-workflow-infra
+
+**29 Composite Pipeline Workflow**
 
 ![29-composite-pipeline-workflow-infra](../views/svg/29-composite-pipeline-workflow-infra.svg)
 
@@ -1618,8 +1714,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="29-composite-pipeline-workflow-overview"></a>
-## 29-composite-pipeline-workflow-overview — 29 Composite Pipeline Workflow
+## 29-composite-pipeline-workflow-overview
+
+**29 Composite Pipeline Workflow**
 
 ![29-composite-pipeline-workflow-overview](../views/svg/29-composite-pipeline-workflow-overview.svg)
 
@@ -1634,8 +1731,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="30-port-adapter-mapping-dataflow"></a>
-## 30-port-adapter-mapping-dataflow — 30 Port Adapter Mapping
+## 30-port-adapter-mapping-dataflow
+
+**30 Port Adapter Mapping**
 
 ![30-port-adapter-mapping-dataflow](../views/svg/30-port-adapter-mapping-dataflow.svg)
 
@@ -1650,8 +1748,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="30-port-adapter-mapping-domain"></a>
-## 30-port-adapter-mapping-domain — 30 Port Adapter Mapping
+## 30-port-adapter-mapping-domain
+
+**30 Port Adapter Mapping**
 
 ![30-port-adapter-mapping-domain](../views/svg/30-port-adapter-mapping-domain.svg)
 
@@ -1666,8 +1765,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="30-port-adapter-mapping-full"></a>
-## 30-port-adapter-mapping-full — Port-to-Adapter Mapping Table Diagram
+## 30-port-adapter-mapping-full
+
+**Port-to-Adapter Mapping Table Diagram**
 
 ![30-port-adapter-mapping-full](../views/svg/30-port-adapter-mapping-full.svg)
 
@@ -1684,8 +1784,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="30-port-adapter-mapping-infra"></a>
-## 30-port-adapter-mapping-infra — 30 Port Adapter Mapping
+## 30-port-adapter-mapping-infra
+
+**30 Port Adapter Mapping**
 
 ![30-port-adapter-mapping-infra](../views/svg/30-port-adapter-mapping-infra.svg)
 
@@ -1700,8 +1801,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="30-port-adapter-mapping-overview"></a>
-## 30-port-adapter-mapping-overview — 30 Port Adapter Mapping
+## 30-port-adapter-mapping-overview
+
+**30 Port Adapter Mapping**
 
 ![30-port-adapter-mapping-overview](../views/svg/30-port-adapter-mapping-overview.svg)
 
@@ -1716,8 +1818,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="31-pipeline-run-lifecycle-dataflow"></a>
-## 31-pipeline-run-lifecycle-dataflow — 31 Pipeline Run Lifecycle
+## 31-pipeline-run-lifecycle-dataflow
+
+**31 Pipeline Run Lifecycle**
 
 ![31-pipeline-run-lifecycle-dataflow](../views/svg/31-pipeline-run-lifecycle-dataflow.svg)
 
@@ -1732,8 +1835,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="31-pipeline-run-lifecycle-domain"></a>
-## 31-pipeline-run-lifecycle-domain — 31 Pipeline Run Lifecycle
+## 31-pipeline-run-lifecycle-domain
+
+**31 Pipeline Run Lifecycle**
 
 ![31-pipeline-run-lifecycle-domain](../views/svg/31-pipeline-run-lifecycle-domain.svg)
 
@@ -1748,8 +1852,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="31-pipeline-run-lifecycle-full"></a>
-## 31-pipeline-run-lifecycle-full — Pipeline Run Lifecycle — From Config to Completion
+## 31-pipeline-run-lifecycle-full
+
+**Pipeline Run Lifecycle — From Config to Completion**
 
 ![31-pipeline-run-lifecycle-full](../views/svg/31-pipeline-run-lifecycle-full.svg)
 
@@ -1766,8 +1871,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="31-pipeline-run-lifecycle-infra"></a>
-## 31-pipeline-run-lifecycle-infra — 31 Pipeline Run Lifecycle
+## 31-pipeline-run-lifecycle-infra
+
+**31 Pipeline Run Lifecycle**
 
 ![31-pipeline-run-lifecycle-infra](../views/svg/31-pipeline-run-lifecycle-infra.svg)
 
@@ -1782,8 +1888,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="31-pipeline-run-lifecycle-overview"></a>
-## 31-pipeline-run-lifecycle-overview — 31 Pipeline Run Lifecycle
+## 31-pipeline-run-lifecycle-overview
+
+**31 Pipeline Run Lifecycle**
 
 ![31-pipeline-run-lifecycle-overview](../views/svg/31-pipeline-run-lifecycle-overview.svg)
 
@@ -1798,13 +1905,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="32-single-record-journey-dataflow"></a>
-## 32-single-record-journey-dataflow — 32 Single Record Journey
+## 32-single-record-journey-dataflow
+
+**32 Single Record Journey**
 
 ![32-single-record-journey-dataflow](../views/svg/32-single-record-journey-dataflow.svg)
 
 ### Описание
-Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 12 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: SW, ST, TFG, GV, GW, CLEAN.
+Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 7 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: BronzeRecord, write_bronze_layer, transform_batch, dq route, write_silver, write_gold.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1814,13 +1922,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="32-single-record-journey-domain"></a>
-## 32-single-record-journey-domain — 32 Single Record Journey
+## 32-single-record-journey-domain
+
+**32 Single Record Journey**
 
 ![32-single-record-journey-domain](../views/svg/32-single-record-journey-domain.svg)
 
 ### Описание
-Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 20 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: HASH, DQ, META, NORM, TI, BT.
+Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 8 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runtime artifacts, Domain outputs. Показательные узлы для быстрого чтения: BronzeRecord, run metadata, _content_hash, TransformResult, SilverRecord, GoldRecord.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1830,31 +1939,33 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="32-single-record-journey-full"></a>
-## 32-single-record-journey-full — Record Processing Pipeline — Single Record Journey
+## 32-single-record-journey-full
+
+**Record Processing Pipeline — Single Record Journey**
 
 ![32-single-record-journey-full](../views/svg/32-single-record-journey-full.svg)
 
 ### Описание
-Диаграмма «Record Processing Pipeline — Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1-§2.6 (Data Flow, DQ), §2.8 (Normalization). Схема имеет плотность порядка 18 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: 1. External API, 2. Bronze Layer, 3. Transform (RecordProcessor), 4. Validate, 5. Route Decision, 6. Silver Layer. Показательные узлы для быстрого чтения: REST API Response (e.g., ChEMBL /activity), BronzeWriter.write_bronze() JSONL + zstd + atomic rename manifest update, ("Bronze File bronze/chembl/activity/ 2026-02-17/batch_001.jsonl.zst"  ), BatchTransformer.transform(), BaseTransformer._transform_impl() (e.g., ActivityTransformer), Add Metadata _run_id, _run_type _source_batch_id, _ingestion_ts.
+Диаграмма «Record Processing Pipeline — Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Component / Class». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: application/core/{batch_processing_service,batch_processing_support,batch_transformer,batch_writer}.py. Схема имеет плотность порядка 19 узлов и 18 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: 1. Source Record, 2. Bronze Capture, 3. Transform Record, 4. DQ + Route, 5. Persist Outputs. Показательные узлы для быстрого чтения: Provider response raw BronzeRecord bytes, DataSourcePort.fetch() yield BronzeRecord, BatchProcessingService.process_batch() batch_id + source metadata, write_bronze_layer() BatchWriter.write_bronze(), ("Bronze file / manifest bronze/.../batch_*.jsonl.zst"), BatchTransformer.transform_batch().
 
 ### Метаданные
 - Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата: `2026-03-24`
 - Представление: `Full`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="32-single-record-journey-infra"></a>
-## 32-single-record-journey-infra — 32 Single Record Journey
+## 32-single-record-journey-infra
+
+**32 Single Record Journey**
 
 ![32-single-record-journey-infra](../views/svg/32-single-record-journey-infra.svg)
 
 ### Описание
-Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 20 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: SW, ST, TFG, GV, GW, CLEAN.
+Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 9 узлов и 5 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application, Infrastructure. Показательные узлы для быстрого чтения: DataSourcePort.fetch(), write_bronze_layer(), write_silver_gold_concurrent(), quarantine_records(), Provider adapter, Bronze file / manifest.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1864,13 +1975,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="32-single-record-journey-overview"></a>
-## 32-single-record-journey-overview — 32 Single Record Journey
+## 32-single-record-journey-overview
+
+**32 Single Record Journey**
 
 ![32-single-record-journey-overview](../views/svg/32-single-record-journey-overview.svg)
 
 ### Описание
-Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 15 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: ST, BF, BT, TI, NORM, META.
+Диаграмма «32 Single Record Journey» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `32-single-record-journey-full.mermaid`. Схема имеет плотность порядка 5 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Source, Bronze capture, Transform, DQ route, Persist outputs.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1880,8 +1992,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="33-cli-run-interaction-dataflow"></a>
-## 33-cli-run-interaction-dataflow — 33 Cli Run Interaction
+## 33-cli-run-interaction-dataflow
+
+**33 Cli Run Interaction**
 
 ![33-cli-run-interaction-dataflow](../views/svg/33-cli-run-interaction-dataflow.svg)
 
@@ -1896,8 +2009,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="33-cli-run-interaction-domain"></a>
-## 33-cli-run-interaction-domain — 33 Cli Run Interaction
+## 33-cli-run-interaction-domain
+
+**33 Cli Run Interaction**
 
 ![33-cli-run-interaction-domain](../views/svg/33-cli-run-interaction-domain.svg)
 
@@ -1912,8 +2026,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="33-cli-run-interaction-full"></a>
-## 33-cli-run-interaction-full — CLI Run Command → PipelineRunner Full Interaction
+## 33-cli-run-interaction-full
+
+**CLI Run Command → PipelineRunner Full Interaction**
 
 ![33-cli-run-interaction-full](../views/svg/33-cli-run-interaction-full.svg)
 
@@ -1930,8 +2045,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="33-cli-run-interaction-infra"></a>
-## 33-cli-run-interaction-infra — 33 Cli Run Interaction
+## 33-cli-run-interaction-infra
+
+**33 Cli Run Interaction**
 
 ![33-cli-run-interaction-infra](../views/svg/33-cli-run-interaction-infra.svg)
 
@@ -1946,8 +2062,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="33-cli-run-interaction-overview"></a>
-## 33-cli-run-interaction-overview — 33 Cli Run Interaction
+## 33-cli-run-interaction-overview
+
+**33 Cli Run Interaction**
 
 ![33-cli-run-interaction-overview](../views/svg/33-cli-run-interaction-overview.svg)
 
@@ -1962,13 +2079,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="34-batch-processing-flow-dataflow"></a>
-## 34-batch-processing-flow-dataflow — 34 Batch Processing Flow
+## 34-batch-processing-flow-dataflow
+
+**34 Batch Processing Flow**
 
 ![34-batch-processing-flow-dataflow](../views/svg/34-batch-processing-flow-dataflow.svg)
 
 ### Описание
-Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 12 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: errors, Runner, batch_num, Bronze, Silver, Gold.
+Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Data-Flow. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 10 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Storage / Outputs. Показательные узлы для быстрого чтения: BronzeRecord batch, BatchTransformer, TransformResult, QuarantineManagerService, BronzeWriter, SilverWriter.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1978,13 +2096,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="34-batch-processing-flow-domain"></a>
-## 34-batch-processing-flow-domain — 34 Batch Processing Flow
+## 34-batch-processing-flow-domain
+
+**34 Batch Processing Flow**
 
 ![34-batch-processing-flow-domain](../views/svg/34-batch-processing-flow-domain.svg)
 
 ### Описание
-Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: errors, error_count, BatchExecutor, BatchTransformer, BatchTracingManagerService, DataSourcePort.
+Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 13 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain / Data Objects, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: BronzeRecord batch, SourceMetadata, TransformResult, BatchProcessingOutcome, BatchProcessingService, SupportService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1994,31 +2113,33 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="34-batch-processing-flow-full"></a>
-## 34-batch-processing-flow-full — Batch Processing Flow — Extract to Write
+## 34-batch-processing-flow-full
+
+**Batch Processing Flow — BatchProcessingService choreography**
 
 ![34-batch-processing-flow-full](../views/svg/34-batch-processing-flow-full.svg)
 
 ### Описание
-Диаграмма «Batch Processing Flow — Extract to Write» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Data Flow), application/core/batch_executor.py.
+Диаграмма «Batch Processing Flow — BatchProcessingService choreography» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Component / Class». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Data Flow), application/core/{batch_executor,batch_processing_service,batch_processing_support}.py.
 
 ### Метаданные
 - Тип: `sequenceDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата: `2026-03-24`
 - Представление: `Full`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="34-batch-processing-flow-infra"></a>
-## 34-batch-processing-flow-infra — 34 Batch Processing Flow
+## 34-batch-processing-flow-infra
+
+**34 Batch Processing Flow**
 
 ![34-batch-processing-flow-infra](../views/svg/34-batch-processing-flow-infra.svg)
 
 ### Описание
-Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 20 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: strip_values, errors, filter_ids, _run_type, PipelineRunner, BatchExecutor.
+Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Infrastructure-Mapping. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 11 узлов и 10 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: BatchProcessingService, SupportService, BatchWriter, BatchTracingManagerService, BatchMetricsRecorderService, QuarantineManagerService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2028,13 +2149,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="34-batch-processing-flow-overview"></a>
-## 34-batch-processing-flow-overview — 34 Batch Processing Flow
+## 34-batch-processing-flow-overview
+
+**34 Batch Processing Flow**
 
 ![34-batch-processing-flow-overview](../views/svg/34-batch-processing-flow-overview.svg)
 
 ### Описание
-Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 15 узлов и 20 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Application Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: strip, errors, filter_ids, error_count, BE, BT.
+Диаграмма «34 Batch Processing Flow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `34-batch-processing-flow-full.mermaid`. Схема имеет плотность порядка 13 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runtime Data, Application Layer, Ports / Storage. Показательные узлы для быстрого чтения: SourceMetadata, TransformResult, BatchProcessingOutcome, PipelineRunner, BatchExecutor, BatchProcessingService.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2044,8 +2166,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="35-bootstrap-sequence-dataflow"></a>
-## 35-bootstrap-sequence-dataflow — 35 Bootstrap Sequence
+## 35-bootstrap-sequence-dataflow
+
+**35 Bootstrap Sequence**
 
 ![35-bootstrap-sequence-dataflow](../views/svg/35-bootstrap-sequence-dataflow.svg)
 
@@ -2060,8 +2183,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="35-bootstrap-sequence-domain"></a>
-## 35-bootstrap-sequence-domain — 35 Bootstrap Sequence
+## 35-bootstrap-sequence-domain
+
+**35 Bootstrap Sequence**
 
 ![35-bootstrap-sequence-domain](../views/svg/35-bootstrap-sequence-domain.svg)
 
@@ -2076,26 +2200,28 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="35-bootstrap-sequence-full"></a>
-## 35-bootstrap-sequence-full — Composition Layer Bootstrap Sequence
+## 35-bootstrap-sequence-full
+
+**Composition Layer Bootstrap Sequence**
 
 ![35-bootstrap-sequence-full](../views/svg/35-bootstrap-sequence-full.svg)
 
 ### Описание
-Диаграмма «Composition Layer Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/. Схема имеет плотность порядка 35 узлов и 27 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Step 1: Logger, Step 2: Configuration, Step 3: Observability Bundle, Step 4: Storage, Step 5: HTTP Client, Step 6: Data Source. Показательные узлы для быстрого чтения: BootstrapLogger.configure(), StructlogLogger (JSON, ISO timestamps, run_id binding), ConfigLoader.load(pipeline_name), PipelineYamlConfig (_base.yaml merged with entity.yaml), DQConfigLoader.load(), FilterConfigLoader.load().
+Диаграмма «Composition Layer Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/. Схема имеет плотность порядка 28 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Step 1: Logger, Step 2: Configuration, Step 3: Observability Bundle, Step 4: Storage, Step 5: HTTP Client, Step 6: Data Source. Показательные узлы для быстрого чтения: BootstrapLogger.configure(), StructlogLogger (JSON, ISO timestamps, run_id binding), ConfigLoader.load(pipeline_name), PipelineYamlConfig (_base.yaml merged with entity.yaml), DQ + Filter config loaders, ObservabilityBundle.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-02-24`
+- Дата: `2026-03-24`
 - Представление: `Full`
 
 \newpage
 
 <div style="page-break-before: always;"></div>
 
-<a id="35-bootstrap-sequence-infra"></a>
-## 35-bootstrap-sequence-infra — 35 Bootstrap Sequence
+## 35-bootstrap-sequence-infra
+
+**35 Bootstrap Sequence**
 
 ![35-bootstrap-sequence-infra](../views/svg/35-bootstrap-sequence-infra.svg)
 
@@ -2110,13 +2236,14 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="35-bootstrap-sequence-overview"></a>
-## 35-bootstrap-sequence-overview — 35 Bootstrap Sequence
+## 35-bootstrap-sequence-overview
+
+**35 Bootstrap Sequence**
 
 ![35-bootstrap-sequence-overview](../views/svg/35-bootstrap-sequence-overview.svg)
 
 ### Описание
-Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 15 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: S5A, S5B, S1B, S2A, S2B, S4D.
+Диаграмма «35 Bootstrap Sequence» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Overview. Родительская диаграмма: `35-bootstrap-sequence-full.mermaid`. Схема имеет плотность порядка 11 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: ConfigLoader, StorageFactory, HttpClientFactory, DataSourceFactory, ProviderRegistry, Coordination ports.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -2126,8 +2253,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="36-architecture-principles-mindmap-dataflow"></a>
-## 36-architecture-principles-mindmap-dataflow — 36 Architecture Principles Mindmap
+## 36-architecture-principles-mindmap-dataflow
+
+**36 Architecture Principles Mindmap**
 
 ![36-architecture-principles-mindmap-dataflow](../views/svg/36-architecture-principles-mindmap-dataflow.svg)
 
@@ -2142,8 +2270,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="36-architecture-principles-mindmap-domain"></a>
-## 36-architecture-principles-mindmap-domain — 36 Architecture Principles Mindmap
+## 36-architecture-principles-mindmap-domain
+
+**36 Architecture Principles Mindmap**
 
 ![36-architecture-principles-mindmap-domain](../views/svg/36-architecture-principles-mindmap-domain.svg)
 
@@ -2158,8 +2287,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="36-architecture-principles-mindmap-full"></a>
-## 36-architecture-principles-mindmap-full — Architecture Principles Mind Map
+## 36-architecture-principles-mindmap-full
+
+**Architecture Principles Mind Map**
 
 ![36-architecture-principles-mindmap-full](../views/svg/36-architecture-principles-mindmap-full.svg)
 
@@ -2176,8 +2306,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="36-architecture-principles-mindmap-infra"></a>
-## 36-architecture-principles-mindmap-infra — 36 Architecture Principles Mindmap
+## 36-architecture-principles-mindmap-infra
+
+**36 Architecture Principles Mindmap**
 
 ![36-architecture-principles-mindmap-infra](../views/svg/36-architecture-principles-mindmap-infra.svg)
 
@@ -2192,8 +2323,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="36-architecture-principles-mindmap-overview"></a>
-## 36-architecture-principles-mindmap-overview — 36 Architecture Principles Mindmap
+## 36-architecture-principles-mindmap-overview
+
+**36 Architecture Principles Mindmap**
 
 ![36-architecture-principles-mindmap-overview](../views/svg/36-architecture-principles-mindmap-overview.svg)
 
@@ -2208,8 +2340,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="39-medallion-invariants-dataflow"></a>
-## 39-medallion-invariants-dataflow — 39 Medallion Invariants
+## 39-medallion-invariants-dataflow
+
+**39 Medallion Invariants**
 
 ![39-medallion-invariants-dataflow](../views/svg/39-medallion-invariants-dataflow.svg)
 
@@ -2224,8 +2357,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="39-medallion-invariants-domain"></a>
-## 39-medallion-invariants-domain — 39 Medallion Invariants
+## 39-medallion-invariants-domain
+
+**39 Medallion Invariants**
 
 ![39-medallion-invariants-domain](../views/svg/39-medallion-invariants-domain.svg)
 
@@ -2240,8 +2374,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="39-medallion-invariants-full"></a>
-## 39-medallion-invariants-full — Medallion Architecture Invariants (ARCH-007)
+## 39-medallion-invariants-full
+
+**Medallion Architecture Invariants (ARCH-007)**
 
 ![39-medallion-invariants-full](../views/svg/39-medallion-invariants-full.svg)
 
@@ -2258,8 +2393,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="39-medallion-invariants-infra"></a>
-## 39-medallion-invariants-infra — 39 Medallion Invariants
+## 39-medallion-invariants-infra
+
+**39 Medallion Invariants**
 
 ![39-medallion-invariants-infra](../views/svg/39-medallion-invariants-infra.svg)
 
@@ -2274,8 +2410,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="39-medallion-invariants-overview"></a>
-## 39-medallion-invariants-overview — 39 Medallion Invariants
+## 39-medallion-invariants-overview
+
+**39 Medallion Invariants**
 
 ![39-medallion-invariants-overview](../views/svg/39-medallion-invariants-overview.svg)
 
@@ -2290,8 +2427,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="41-error-classification-tree-dataflow"></a>
-## 41-error-classification-tree-dataflow — 41 Error Classification Tree
+## 41-error-classification-tree-dataflow
+
+**41 Error Classification Tree**
 
 ![41-error-classification-tree-dataflow](../views/svg/41-error-classification-tree-dataflow.svg)
 
@@ -2306,8 +2444,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="41-error-classification-tree-domain"></a>
-## 41-error-classification-tree-domain — 41 Error Classification Tree
+## 41-error-classification-tree-domain
+
+**41 Error Classification Tree**
 
 ![41-error-classification-tree-domain](../views/svg/41-error-classification-tree-domain.svg)
 
@@ -2322,8 +2461,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="41-error-classification-tree-full"></a>
-## 41-error-classification-tree-full — Error Classification Decision Tree — Full Logic
+## 41-error-classification-tree-full
+
+**Error Classification Decision Tree — Full Logic**
 
 ![41-error-classification-tree-full](../views/svg/41-error-classification-tree-full.svg)
 
@@ -2340,8 +2480,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="41-error-classification-tree-infra"></a>
-## 41-error-classification-tree-infra — 41 Error Classification Tree
+## 41-error-classification-tree-infra
+
+**41 Error Classification Tree**
 
 ![41-error-classification-tree-infra](../views/svg/41-error-classification-tree-infra.svg)
 
@@ -2356,8 +2497,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="41-error-classification-tree-overview"></a>
-## 41-error-classification-tree-overview — 41 Error Classification Tree
+## 41-error-classification-tree-overview
+
+**41 Error Classification Tree**
 
 ![41-error-classification-tree-overview](../views/svg/41-error-classification-tree-overview.svg)
 
@@ -2372,8 +2514,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="44-cross-provider-enrichment-dataflow"></a>
-## 44-cross-provider-enrichment-dataflow — 44 Cross Provider Enrichment
+## 44-cross-provider-enrichment-dataflow
+
+**44 Cross Provider Enrichment**
 
 ![44-cross-provider-enrichment-dataflow](../views/svg/44-cross-provider-enrichment-dataflow.svg)
 
@@ -2388,8 +2531,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="44-cross-provider-enrichment-domain"></a>
-## 44-cross-provider-enrichment-domain — 44 Cross Provider Enrichment
+## 44-cross-provider-enrichment-domain
+
+**44 Cross Provider Enrichment**
 
 ![44-cross-provider-enrichment-domain](../views/svg/44-cross-provider-enrichment-domain.svg)
 
@@ -2404,8 +2548,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="44-cross-provider-enrichment-full"></a>
-## 44-cross-provider-enrichment-full — Cross-Provider Data Enrichment Flow — Publication
+## 44-cross-provider-enrichment-full
+
+**Cross-Provider Data Enrichment Flow — Publication**
 
 ![44-cross-provider-enrichment-full](../views/svg/44-cross-provider-enrichment-full.svg)
 
@@ -2422,8 +2567,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="44-cross-provider-enrichment-infra"></a>
-## 44-cross-provider-enrichment-infra — 44 Cross Provider Enrichment
+## 44-cross-provider-enrichment-infra
+
+**44 Cross Provider Enrichment**
 
 ![44-cross-provider-enrichment-infra](../views/svg/44-cross-provider-enrichment-infra.svg)
 
@@ -2438,8 +2584,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="44-cross-provider-enrichment-overview"></a>
-## 44-cross-provider-enrichment-overview — 44 Cross Provider Enrichment
+## 44-cross-provider-enrichment-overview
+
+**44 Cross Provider Enrichment**
 
 ![44-cross-provider-enrichment-overview](../views/svg/44-cross-provider-enrichment-overview.svg)
 
@@ -2454,8 +2601,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="46-yaml-config-resolution-dataflow"></a>
-## 46-yaml-config-resolution-dataflow — 46 Yaml Config Resolution
+## 46-yaml-config-resolution-dataflow
+
+**46 Yaml Config Resolution**
 
 ![46-yaml-config-resolution-dataflow](../views/svg/46-yaml-config-resolution-dataflow.svg)
 
@@ -2470,8 +2618,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="46-yaml-config-resolution-domain"></a>
-## 46-yaml-config-resolution-domain — 46 Yaml Config Resolution
+## 46-yaml-config-resolution-domain
+
+**46 Yaml Config Resolution**
 
 ![46-yaml-config-resolution-domain](../views/svg/46-yaml-config-resolution-domain.svg)
 
@@ -2486,8 +2635,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="46-yaml-config-resolution-full"></a>
-## 46-yaml-config-resolution-full — YAML Configuration Resolution Chain
+## 46-yaml-config-resolution-full
+
+**YAML Configuration Resolution Chain**
 
 ![46-yaml-config-resolution-full](../views/svg/46-yaml-config-resolution-full.svg)
 
@@ -2504,8 +2654,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="46-yaml-config-resolution-infra"></a>
-## 46-yaml-config-resolution-infra — 46 Yaml Config Resolution
+## 46-yaml-config-resolution-infra
+
+**46 Yaml Config Resolution**
 
 ![46-yaml-config-resolution-infra](../views/svg/46-yaml-config-resolution-infra.svg)
 
@@ -2520,8 +2671,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="46-yaml-config-resolution-overview"></a>
-## 46-yaml-config-resolution-overview — 46 Yaml Config Resolution
+## 46-yaml-config-resolution-overview
+
+**46 Yaml Config Resolution**
 
 ![46-yaml-config-resolution-overview](../views/svg/46-yaml-config-resolution-overview.svg)
 
@@ -2536,8 +2688,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="48-composite-phase-lifecycle-dataflow"></a>
-## 48-composite-phase-lifecycle-dataflow — 48 Composite Phase Lifecycle
+## 48-composite-phase-lifecycle-dataflow
+
+**48 Composite Phase Lifecycle**
 
 ![48-composite-phase-lifecycle-dataflow](../views/svg/48-composite-phase-lifecycle-dataflow.svg)
 
@@ -2552,8 +2705,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="48-composite-phase-lifecycle-domain"></a>
-## 48-composite-phase-lifecycle-domain — 48 Composite Phase Lifecycle
+## 48-composite-phase-lifecycle-domain
+
+**48 Composite Phase Lifecycle**
 
 ![48-composite-phase-lifecycle-domain](../views/svg/48-composite-phase-lifecycle-domain.svg)
 
@@ -2568,8 +2722,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="48-composite-phase-lifecycle-full"></a>
-## 48-composite-phase-lifecycle-full — Composite Pipeline Phase Lifecycle (FSM)
+## 48-composite-phase-lifecycle-full
+
+**Composite Pipeline Phase Lifecycle (FSM)**
 
 ![48-composite-phase-lifecycle-full](../views/svg/48-composite-phase-lifecycle-full.svg)
 
@@ -2586,8 +2741,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="48-composite-phase-lifecycle-infra"></a>
-## 48-composite-phase-lifecycle-infra — 48 Composite Phase Lifecycle
+## 48-composite-phase-lifecycle-infra
+
+**48 Composite Phase Lifecycle**
 
 ![48-composite-phase-lifecycle-infra](../views/svg/48-composite-phase-lifecycle-infra.svg)
 
@@ -2602,8 +2758,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="48-composite-phase-lifecycle-overview"></a>
-## 48-composite-phase-lifecycle-overview — 48 Composite Phase Lifecycle
+## 48-composite-phase-lifecycle-overview
+
+**48 Composite Phase Lifecycle**
 
 ![48-composite-phase-lifecycle-overview](../views/svg/48-composite-phase-lifecycle-overview.svg)
 
@@ -2618,8 +2775,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="50-exception-hierarchy-dataflow"></a>
-## 50-exception-hierarchy-dataflow — 50 Exception Hierarchy
+## 50-exception-hierarchy-dataflow
+
+**50 Exception Hierarchy**
 
 ![50-exception-hierarchy-dataflow](../views/svg/50-exception-hierarchy-dataflow.svg)
 
@@ -2634,8 +2792,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="50-exception-hierarchy-domain"></a>
-## 50-exception-hierarchy-domain — 50 Exception Hierarchy
+## 50-exception-hierarchy-domain
+
+**50 Exception Hierarchy**
 
 ![50-exception-hierarchy-domain](../views/svg/50-exception-hierarchy-domain.svg)
 
@@ -2650,8 +2809,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="50-exception-hierarchy-full"></a>
-## 50-exception-hierarchy-full — Exception Hierarchy — Full Tree
+## 50-exception-hierarchy-full
+
+**Exception Hierarchy — Full Tree**
 
 ![50-exception-hierarchy-full](../views/svg/50-exception-hierarchy-full.svg)
 
@@ -2668,8 +2828,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="50-exception-hierarchy-infra"></a>
-## 50-exception-hierarchy-infra — 50 Exception Hierarchy
+## 50-exception-hierarchy-infra
+
+**50 Exception Hierarchy**
 
 ![50-exception-hierarchy-infra](../views/svg/50-exception-hierarchy-infra.svg)
 
@@ -2684,8 +2845,9 @@
 
 <div style="page-break-before: always;"></div>
 
-<a id="50-exception-hierarchy-overview"></a>
-## 50-exception-hierarchy-overview — 50 Exception Hierarchy
+## 50-exception-hierarchy-overview
+
+**50 Exception Hierarchy**
 
 ![50-exception-hierarchy-overview](../views/svg/50-exception-hierarchy-overview.svg)
 

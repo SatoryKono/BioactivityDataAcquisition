@@ -1,13 +1,13 @@
 %% Title: CLI Entry Point to Pipeline Execution Full Chain
-%% Covers: RULES.md §1.1 (Interfaces Layer), interfaces/cli/
+%% Covers: interfaces/cli/commands/domains/run/{command,command_policy,runtime_helpers}.py, application/services/{cli_run_orchestration_service,pipeline_runner_service}.py
 %% Rank: 12 (Score 8.31) — From click command to exit code
-%% Updated: 2026-02-17
+%% Updated: 2026-03-24
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-24
 %% @type    flowchart
-%% @level   Mixed (System / Component / Class)
-%% @nodes   19
+%% @level   Component / Class
+%% @nodes   20
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -19,68 +19,56 @@
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-%% @uniform width=712 height=184 max_title_len=71 max_desc_lines=8
+%% @uniform width=684 height=164 max_title_len=68 max_desc_lines=7
 flowchart TB
     subgraph CLI["Interfaces Layer (Click)"]
-        CMD["bioetl run<br/>--pipeline chembl_activity<br/>--run-type incremental<br/>--resume"]
-        PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• resume flag"]
-        OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• resume: bool"]
+        CMD["bioetl run ..."]
+        INPUT["build_run_command_input()<br/>normalized RunCommandInput"]
+        POLICY["run_command_flow()"]
     end
 
-    subgraph Service["Application Service Layer"]
-        PRS["PipelineRunnerService.run()<br/>• lookup pipeline in registry<br/>• validate run options"]
-        RESOLVE["PipelineRegistry.get(name)<br/>→ PipelineFactoryPort"]
+    subgraph Policy["CLI Policy / App Service"]
+        DESTRUCT["handle_destructive_step()<br/>preview / confirm rebuilds"]
+        PREP["CliRunOrchestrationService<br/>prepare_execution_request()"]
+        EXEC["CliRunOrchestrationService<br/>execute_pipeline()"]
     end
 
-    subgraph Bootstrap["Composition Layer"]
-        BOOT["bootstrap_pipeline()<br/>→ assembly.py"]
-        ASSEMBLE["Assembly Sequence<br/>logger -> config -> storage<br/>http -> adapter -> services<br/>runner"]
+    subgraph Runtime["Async Runtime Helper"]
+        HEALTH["ensure_metrics_server_started()<br/>health_server_context(...)"]
+        SERVICE["get_pipeline_runner_service()"]
+        RUN_ASYNC["run_pipeline_async()"]
     end
 
-    subgraph Execute["Application Core"]
-        OBS_ENTER["PipelineObserver.__enter__()<br/>→ log started, inc counter"]
-        RUNNER["PipelineRunner.run()"]
-        LOCK["LockCoordinator.acquire()<br/>→ HeartbeatTask.start()"]
-        PRE["PreflightService.run()<br/>→ PreflightReport"]
-        BATCH["BatchExecutor loop<br/>→ extract/transform/validate/write"]
-        POST["PostrunService.run()<br/>→ vacuum, DQ report"]
-        UNLOCK["LockCoordinator.release()<br/>→ HeartbeatTask.stop()"]
-        OBS_EXIT["PipelineObserver.__exit__()<br/>→ observe duration"]
+    subgraph Composition["Composition Layer"]
+        BUILD["build_pipeline_runner()<br/>registry + config + observability"]
+    end
+
+    subgraph AppCore["Application Runtime"]
+        RUNNER_SVC["PipelineRunnerService.run()<br/>build context + create runner"]
+        EXEC_SVC["PipelineRunExecutionService.execute()<br/>runner.run() + extract metrics"]
+        PIPELINE["PipelineRunner.run()<br/>preflight -> execution -> postrun"]
     end
 
     subgraph Result["Result & Exit"]
-        RES_OK["RunResult(status=SUCCESS)<br/>PipelineRunResult.SUCCESS"]
-        RES_FAIL["RunResult(status=FAILED)<br/>PipelineRunResult.FAILED"]
-        EXIT_OK["ExitCode.SUCCESS (0)"]
-        EXIT_ERR["ExitCode.PIPELINE_ERROR (1)<br/>ExitCode.CONFIG_ERROR (2)"]
+        RESULT["RunResult<br/>status + metrics + error details"]
+        FINALIZE["_finalize_run_result()<br/>echo_run_result()"]
+        EXIT["map_status_to_exit_code()<br/>process exit"]
     end
 
-    %% Flow
-    CMD --> PARSE --> OPTS
-    OPTS ==> PRS
-    PRS --> RESOLVE
-    RESOLVE --> BOOT --> ASSEMBLE
+    CMD --> INPUT --> POLICY
+    POLICY --> DESTRUCT --> PREP
+    PREP ==> EXEC
+    EXEC --> RUN_ASYNC
+    RUN_ASYNC -.-> HEALTH
+    RUN_ASYNC --> SERVICE --> RUNNER_SVC
+    SERVICE -.-> BUILD
+    RUNNER_SVC --> EXEC_SVC --> PIPELINE
+    PIPELINE --> RESULT
+    RESULT --> FINALIZE --> EXIT
 
-    ASSEMBLE --> OBS_ENTER
-    OBS_ENTER --> RUNNER
-    RUNNER --> LOCK --> PRE
-
-    PRE -->|"pass"| BATCH
-    PRE -->|"fail"| RES_FAIL
-
-    BATCH --> POST --> UNLOCK --> OBS_EXIT
-
-    OBS_EXIT -->|"success"| RES_OK
-    OBS_EXIT -->|"error"| RES_FAIL
-
-    LOCK -->|"lock error"| RES_FAIL
-    BATCH -->|"LockLostError"| RES_FAIL
-
-    RES_OK --> EXIT_OK
-    RES_FAIL --> EXIT_ERR
-
-    %% Styling
-    style CLI fill:#f5f3ff,stroke:#7c3aed
-    style Bootstrap fill:#ffe4e6,stroke:#dc2626
-    style Execute fill:#eff6ff,stroke:#2563eb
-    style Result fill:#f0fdf4,stroke:#16a34a
+    style CLI fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Policy fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Runtime fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Composition fill:#ffe4e6,stroke:#dc2626,stroke-width:2px
+    style AppCore fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Result fill:#f8fafc,stroke:#475569,stroke-width:2px

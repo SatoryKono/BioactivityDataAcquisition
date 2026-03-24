@@ -4,6 +4,13 @@
 
 Этот файл служит обзорной narrative-картой по семействам class-диаграмм. Он помогает ориентироваться в canonical families и representative slices, но не является точным инвентарём текущего числа классов или связей.
 
+Отдельно от этой narrative-карты публикуется supplemental generated layer:
+AST-derived package-family class diagrams (`90-pkg-*.mmd`) для всех
+`src/bioetl/**` families с более чем тремя top-level classes, которые не были
+покрыты curated family set. Этот generated слой расширяет coverage class
+diagrams, но сам `class-summary.md` по-прежнему остаётся curated narrative
+обзором, а не inventory-реестром.
+
 ## 01-domain-ports — Domain Port Protocols
 
 Диаграмма «Domain Port Protocols» описывает модуль `01-domain-ports` и фиксирует архитектурные границы, основные роли классов и характер их взаимодействий. Основной фокус: all protocol interfaces defined in `domain/ports`, включая narrow storage ports и backward-compatible aggregate `StoragePort`. Схема используется как representative family-level overview, а не как исчерпывающий инвентарь текущей кодовой поверхности. Для быстрого чтения и ревью полезно начать с элементов: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.

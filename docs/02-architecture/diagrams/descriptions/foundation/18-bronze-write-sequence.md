@@ -3,9 +3,11 @@
 - Исходная диаграмма: `foundation/18-bronze-write-sequence.mmd`
 
 ## Описание
-Диаграмма Title: Bronze Write Sequence (JSONL + zstd) из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 18-bronze-write-sequence. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §2.1 (Bronze Layer), §2.2 (Append-Only). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: PipelineExecutor, BronzeWriter, LockPort, zstd Compressor, Local FS. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма описывает текущий Bronze write path в BioETL: `BatchProcessingService` вызывает `BronzeWriter.write_bronze(...)`, после чего writer проходит через подготовку запроса, потоковую zstd-компрессию, atomic rename и post-write side effects. В отличие от старой версии, здесь больше нет искусственного шага с `PipelineExecutor` и отдельной lock-валидации внутри bronze writer: фактический контракт держится на `prepare_bronze_write(...)`, файловой атомарности и последующих metadata/audit действиях.
+
+Схема полезна как опорная карта для обсуждения append-only поведения Bronze слоя, sidecar metadata и failure semantics. Ключевые участники: `BatchProcessingService`, `BronzeWriter`, `prepare_bronze_write()`, `zstd + atomic file write`, `Metadata/Audit side effects`, `Tracing + Metrics`.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Дата метаданных: `2026-03-24`

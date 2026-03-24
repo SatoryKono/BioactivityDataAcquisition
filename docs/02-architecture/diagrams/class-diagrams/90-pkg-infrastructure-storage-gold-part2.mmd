@@ -1,0 +1,31 @@
+%% Title: Package Family: infrastructure/storage/gold (Part 2/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 2/2; modules: validation_mixin, io_helpers, metadata_mixin, read_cleanup_mixin, runtime_helpers.
+%% Components: top-level classes grouped by source module.
+%% @type    classDiagram
+%% @date    2026-03-24
+%% @level   Package Family / Inventory Slice
+%% @nodes   6
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace validation_mixin {
+        class GoldWriterValidationMixin
+        class _RunInExecutorHost
+    }
+
+    namespace io_helpers {
+        class _GoldWriterSCDHostProtocol
+    }
+
+    namespace metadata_mixin {
+        class GoldWriterMetadataMixin
+    }
+
+    namespace read_cleanup_mixin {
+        class GoldWriterReadCleanupMixin
+    }
+
+    namespace runtime_helpers {
+        class GoldWriterRuntimeServices
+    }
+

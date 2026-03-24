@@ -1,80 +1,27 @@
-%% View: Domain-Focus | Parent: 05-layers-interaction-full.mermaid
-%% @uniform width=160 height=56 max_title_len=15 max_desc_lines=0
-flowchart TB
-%% keep-orphan: N16, N17, N18, N19, N20, N7, N8
-
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N6["Ports"]
-        N7["Exceptions"]
-        N8["Domain"]
-        N9["Factories"]
-        N12["Coordinator"]
-        N15["Application"]
-        N16["Types"]
-        N17["Entities"]
-        N20["Observability"]
+%% View: Domain | Parent: 05-layers-interaction-full.mermaid
+%% @uniform width=172 height=56 max_title_len=17 max_desc_lines=0
+flowchart LR
+    subgraph Application["Application contracts"]
+        BasePipeline["BasePipeline"]
+        Runner["PipelineRunner"]
+        Services["PipelineService"]
+        Processing["BatchProcessingService"]
+        Composite["CompositeRunner"]
     end
 
-    subgraph Application["Application Layer"]
-        direction TB
-        N2["BatchExec"]
-        N3["CompositeRunner"]
-        N4["Transformer"]
-        N5["Services"]
-        N13["Merger"]
-        N1["Runner"]
+    subgraph Domain["Domain responsibilities"]
+        Ports["Port facades"]
+        Models["Entities / VOs"]
+        RuntimeTypes["Config / runtime"]
+        Errors["Errors / events"]
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
-        N18["Adapters"]
-        N19["Storage"]
-    end
+    BasePipeline --> Ports
+    Services --> Ports
+    Processing --> Models
+    Runner --> RuntimeTypes
+    Runner --> Errors
+    Composite --> Models
 
-    subgraph Composition["Composition Layer"]
-        direction TB
-        N10["Bootstrap"]
-        N11["Registry"]
-    end
-
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
-        N14["CLI"]
-    end
-
-    N10 --> N11
-    N10 --> N9
-    N1 --> N2
-    N2 --> N4
-    N1 --> N5
-    N3 --> N12
-    N3 --> N13
-    N14 --> N10
-    N9 --> N1
-    N15 --> N6
-
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
-    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-
-    %% linkStyle: orchestration 0,2-4,6-7 | di 1,5,9 | generic 8
-
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
-    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
-    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
-    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
-
-    linkStyle 0 stroke:#16a34a,stroke-width:2px
-    linkStyle 1 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 2 stroke:#16a34a,stroke-width:2px
-    linkStyle 3 stroke:#16a34a,stroke-width:2px
-    linkStyle 4 stroke:#16a34a,stroke-width:2px
-    linkStyle 5 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 6 stroke:#16a34a,stroke-width:2px
-    linkStyle 7 stroke:#16a34a,stroke-width:2px
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

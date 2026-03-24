@@ -65,7 +65,6 @@ __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory
 
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract entity_type suffix (e.g. 'chembl_activity' -> 'activity')."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
@@ -270,7 +269,6 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble a PipelineRunner from a pipeline instance."""
     return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,

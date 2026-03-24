@@ -1,0 +1,494 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="class" class="classDiagram" style="max-width:4272.42px;background-color:white" viewBox="-8 0 4272.422 1507"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .labelBkg{background:#eff6ff;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;line-height:initial;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px; 
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><defs><marker id="my-svg_class-aggregationStart" class="marker aggregation class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-aggregationEnd" class="marker aggregation class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-extensionStart" class="marker extension class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_class-extensionEnd" class="marker extension class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionStart" class="marker composition class" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-compositionEnd" class="marker composition class" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyStart" class="marker dependency class" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_class-dependencyEnd" class="marker dependency class" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_class-lollipopStart" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_class-lollipopEnd" class="marker lollipop class" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="clusters"><g id="client_fallback_policy" class="cluster undefined" data-look="classic"><path d="M1354.094 8h334.094v1297h-334.094z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="75.156" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1445.984 8)"><tspan x="75.156">client_fallback_po</tspan><tspan x="75.156" dy="16.8">licy</tspan></text></g></g><g id="client" class="cluster undefined" data-look="classic"><path d="M1404.344 1350h233.594v149h-233.594z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="18.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1502.46 1350)"><tspan x="18.68">client</tspan></text></g></g></g><g class="edgePaths"><path id="id__CrossRefFallbackPolicyMixin_CrossRefAdapter_1" marker-start="url(#my-svg_class-extensionStart)" d="M1521.141 725.75v646.75" class="edge-thickness-normal edge-pattern-solid relation" data-edge="true" data-et="edge" data-id="id__CrossRefFallbackPolicyMixin_CrossRefAdapter_1" data-points="W3sieCI6MTUyMS4xNDA2MjUsInkiOjcwOC41fSx7IngiOjE1MjEuMTQwNjI1LCJ5IjoxMzA1fSx7IngiOjE1MjEuMTQwNjI1LCJ5IjoxMzI3LjV9LHsieCI6MTUyMS4xNDA2MjUsInkiOjEzNTB9LHsieCI6MTUyMS4xNDA2MjUsInkiOjEzNzIuNX1d"/></g><g class="nodes"><g class="root"><g class="clusters" transform="translate(-8 22.5)"><g id="models_shared" class="cluster undefined" data-look="classic"><path d="M8 8h262.953v1252H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="54.703" y="12" class="fo-fallback" text-anchor="middle" transform="translate(84.773 8)"><tspan x="54.703">models_shared</tspan></text></g></g></g><g class="nodes" transform="translate(-8 22.5)"><g id="classId-CrossRefAssertion-0" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M51.008 43h176.937v104H51.008"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M51.008 43h176.937M51.008 43h176.937m0 0v104m0-104v104m0 0H51.008m176.937 0H51.008m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="72.469" y="12" class="fo-fallback" text-anchor="middle" transform="translate(67.008 63)"><tspan x="72.469">CrossRefAssertion</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M51.008 99h176.937M51.008 99h176.937M51.008 123h176.937m-176.937 0h176.937" class="divider"/></g><g id="classId-CrossRefAuthor-1" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M61.695 197h155.563v104H61.695"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M61.695 197h155.563m-155.563 0h155.563m0 0v104m0-104v104m0 0H61.695m155.563 0H61.695m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="61.781" y="12" class="fo-fallback" text-anchor="middle" transform="translate(77.695 217)"><tspan x="61.781">CrossRefAuthor</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M61.695 253h155.563m-155.563 0h155.563M61.695 277h155.563m-155.563 0h155.563" class="divider"/></g><g id="classId-CrossRefClinicalTrial-2" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 351h192.953v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 351h192.953M43 351h192.953m0 0v104m0-104v104m0 0H43m192.953 0H43m0 0V351m0 104V351"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="80.477" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 371)"><tspan x="80.477">CrossRefClinicalTr</tspan><tspan x="80.477" dy="16.8">ial</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 407h192.953M43 407h192.953M43 431h192.953M43 431h192.953" class="divider"/></g><g id="classId-CrossRefDateParts-3" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M50.555 505h177.843v104H50.555"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M50.555 505h177.843m-177.843 0h177.843m0 0v104m0-104v104m0 0H50.555m177.843 0H50.555m0 0V505m0 104V505"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="72.922" y="12" class="fo-fallback" text-anchor="middle" transform="translate(66.555 525)"><tspan x="72.922">CrossRefDateParts</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M50.555 561h177.843m-177.843 0h177.843M50.555 585h177.843m-177.843 0h177.843" class="divider"/></g><g id="classId-CrossRefFunder-4" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M60.797 659h157.36v104H60.796"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M60.797 659h157.36m-157.36 0h157.36m0 0v104m0-104v104m0 0H60.796m157.36 0H60.796m0 0V659m0 104V659"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="62.68" y="12" class="fo-fallback" text-anchor="middle" transform="translate(76.797 679)"><tspan x="62.68">CrossRefFunder</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M60.797 715h157.36m-157.36 0h157.36M60.797 739h157.36m-157.36 0h157.36" class="divider"/></g><g id="classId-CrossRefLicense-5" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M58.117 813h162.719v104H58.117"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M58.117 813h162.719m-162.719 0h162.719m0 0v104m0-104v104m0 0H58.117m162.719 0H58.117m0 0V813m0 104V813"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="65.359" y="12" class="fo-fallback" text-anchor="middle" transform="translate(74.117 833)"><tspan x="65.359">CrossRefLicense</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M58.117 869h162.719m-162.719 0h162.719M58.117 893h162.719m-162.719 0h162.719" class="divider"/></g><g id="classId-CrossRefLink-6" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M71.46 967h136.032v104H71.461"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M71.46 967h136.032m-136.031 0h136.031m0 0v104m0-104v104m0 0H71.461m136.031 0H71.461m0 0V967m0 104V967"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="52.016" y="12" class="fo-fallback" text-anchor="middle" transform="translate(87.46 987)"><tspan x="52.016">CrossRefLink</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M71.46 1023h136.032m-136.031 0h136.031M71.46 1047h136.032m-136.031 0h136.031" class="divider"/></g><g id="classId-CrossRefReference-7" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M49.219 1121h180.515v104H49.22"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M49.219 1121h180.515m-180.515 0h180.515m0 0v104m0-104v104m0 0H49.22m180.515 0H49.22m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="74.258" y="12" class="fo-fallback" text-anchor="middle" transform="translate(65.219 1141)"><tspan x="74.258">CrossRefReference</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M49.219 1177h180.515m-180.515 0h180.515M49.219 1201h180.515m-180.515 0h180.515" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(304.953 407.5)"><g id="batch_support" class="cluster undefined" data-look="classic"><path d="M8 8h220.266v482H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="50.703" y="12" class="fo-fallback" text-anchor="middle" transform="translate(67.43 8)"><tspan x="50.703">batch_support</tspan></text></g></g></g><g class="nodes" transform="translate(304.953 407.5)"><g id="classId-BaseMetrics-8" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M54.992 43h126.281v104H54.993"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M54.992 43h126.281m-126.28 0h126.28m0 0v104m0-104v104m0 0H54.993m126.28 0H54.993m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="47.141" y="12" class="fo-fallback" text-anchor="middle" transform="translate(70.992 63)"><tspan x="47.141">BaseMetrics</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M54.992 99h126.281m-126.28 0h126.28M54.992 123h126.281m-126.28 0h126.28" class="divider"/></g><g id="classId-HeadersBuilder-9" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 197h150.266v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 197h150.266M43 197h150.266m0 0v104m0-104v104m0 0H43m150.266 0H43m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="59.133" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 217)"><tspan x="59.133">HeadersBuilder</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 253h150.266M43 253h150.266M43 277h150.266M43 277h150.266" class="divider"/></g><g id="classId-HttpTransport-10" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M49.242 351h137.781v104H49.243"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M49.242 351h137.781m-137.78 0h137.78m0 0v104m0-104v104m0 0H49.243m137.78 0H49.243m0 0V351m0 104V351"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="52.891" y="12" class="fo-fallback" text-anchor="middle" transform="translate(65.242 371)"><tspan x="52.891">HttpTransport</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M49.242 407h137.781m-137.78 0h137.78M49.242 431h137.781m-137.78 0h137.78" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(575.219 407.5)"><g id="response_models" class="cluster undefined" data-look="classic"><path d="M8 8h344.734v482H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="63.148" y="12" class="fo-fallback" text-anchor="middle" transform="translate(117.219 8)"><tspan x="63.148">response_models</tspan></text></g></g></g><g class="nodes" transform="translate(575.219 407.5)"><g id="classId-CrossRefMessage-11" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M95 43h170.734v104H95"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M95 43h170.734M95 43h170.734m0 0v104m0-104v104m0 0H95m170.734 0H95m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="69.367" y="12" class="fo-fallback" text-anchor="middle" transform="translate(111 63)"><tspan x="69.367">CrossRefMessage</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M95 99h170.734M95 99h170.734M95 123h170.734M95 123h170.734" class="divider"/></g><g id="classId-CrossRefPublicationResponse-12" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M47.453 197h265.828v104H47.453"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M47.453 197h265.828m-265.828 0h265.828m0 0v104m0-104v104m0 0H47.453m265.828 0H47.453m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="116.914" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(63.453 217)"><tspan x="116.914">CrossRefPublicationRespons</tspan><tspan x="116.914" dy="16.8">e</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M47.453 253h265.828m-265.828 0h265.828M47.453 277h265.828m-265.828 0h265.828" class="divider"/></g><g id="classId-CrossRefPublicationsResponse-13" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 351h274.734v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 351h274.734M43 351h274.734m0 0v104m0-104v104m0 0H43m274.734 0H43m0 0V351m0 104V351"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="121.367" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 371)"><tspan x="121.367">CrossRefPublicationsRespons</tspan><tspan x="121.367" dy="16.8">e</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 407h274.734M43 407h274.734M43 431h274.734M43 431h274.734" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(969.953 484.5)"><g id="response_mapper" class="cluster undefined" data-look="classic"><path d="M8 8h333.141v328H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="64.484" y="12" class="fo-fallback" text-anchor="middle" transform="translate(110.086 8)"><tspan x="64.484">response_mapper</tspan></text></g></g></g><g class="nodes" transform="translate(969.953 484.5)"><g id="classId-CrossRefHealthProbeMapping-14" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h263.14v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h263.14M43 43h263.14m0 0v104m0-104v104m0 0H43m263.14 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="115.57" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="115.57">CrossRefHealthProbeMappin</tspan><tspan x="115.57" dy="16.8">g</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h263.14M43 99h263.14M43 123h263.14M43 123h263.14" class="divider"/></g><g id="classId-CrossRefResponseMapper-15" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M56.32 197h236.5v104H56.32"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M56.32 197h236.5m-236.5 0h236.5m0 0v104m0-104v104m0 0H56.32m236.5 0H56.32m0 0V197m0 104V197"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="102.25" y="12" class="fo-fallback" text-anchor="middle" transform="translate(72.32 217)"><tspan x="102.25">CrossRefResponseMapper</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M56.32 253h236.5m-236.5 0h236.5M56.32 277h236.5m-236.5 0h236.5" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(1707.188 561.5)"><g id="doi_batch_processor" class="cluster undefined" data-look="classic"><path d="M8 8h250.5v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="74.273" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(58.977 8)"><tspan x="74.273">doi_batch_processo</tspan><tspan x="74.273" dy="16.8">r</tspan></text></g></g></g><g class="nodes" transform="translate(1707.188 561.5)"><g id="classId-DoiBatchProcessor-17" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h180.5v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h180.5M43 43h180.5m0 0v104m0-104v104m0 0H43m180.5 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="74.25" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="74.25">DoiBatchProcessor</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h180.5M43 99h180.5M43 123h180.5M43 123h180.5" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(2007.688 561.5)"><g id="search_paginator" class="cluster undefined" data-look="classic"><path d="M8 8h229.156v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="61.82" y="12" class="fo-fallback" text-anchor="middle" transform="translate(60.758 8)"><tspan x="61.82">search_paginator</tspan></text></g></g></g><g class="nodes" transform="translate(2007.688 561.5)"><g id="classId-SearchPaginator-18" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h159.156v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h159.156M43 43h159.156m0 0v104m0-104v104m0 0H43m159.156 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="63.578" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="63.578">SearchPaginator</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h159.156M43 99h159.156M43 123h159.156M43 123h159.156" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(2286.844 561.5)"><g id="client_runtime_helpers" class="cluster undefined" data-look="classic"><path d="M8 8h302.969v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="80.492" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(78.992 8)"><tspan x="80.492">client_runtime_hel</tspan><tspan x="80.492" dy="16.8">pers</tspan></text></g></g></g><g class="nodes" transform="translate(2286.844 561.5)"><g id="classId-CrossRefRuntimeServices-20" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h232.969v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h232.969M43 43h232.969m0 0v104m0-104v104m0 0H43m232.969 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="100.484" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="100.484">CrossRefRuntimeService</tspan><tspan x="100.484" dy="16.8">s</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h232.969M43 99h232.969M43 123h232.969M43 123h232.969" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(2639.813 561.5)"><g id="exceptions" class="cluster undefined" data-look="classic"><path d="M8 8h238.031v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="38.25" y="12" class="fo-fallback" text-anchor="middle" transform="translate(88.766 8)"><tspan x="38.25">exceptions</tspan></text></g></g></g><g class="nodes" transform="translate(2639.813 561.5)"><g id="classId-CrossRefApiError-21" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h168.031v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h168.031M43 43h168.031m0 0v104m0-104v104m0 0H43m168.031 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="68.016" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="68.016">CrossRefApiError</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h168.031M43 99h168.031M43 123h168.031M43 123h168.031" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(2927.844 561.5)"><g id="fallback" class="cluster undefined" data-look="classic"><path d="M8 8h329.344v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="27.125" y="12" class="fo-fallback" text-anchor="middle" transform="translate(145.547 8)"><tspan x="27.125">fallback</tspan></text></g></g></g><g class="nodes" transform="translate(2927.844 561.5)"><g id="classId-CrossRefTitleFallbackHandler-22" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h259.344v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h259.344M43 43h259.344m0 0v104m0-104v104m0 0H43m259.344 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="113.672" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="113.672">CrossRefTitleFallbackHand</tspan><tspan x="113.672" dy="16.8">ler</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h259.344M43 99h259.344M43 123h259.344M43 123h259.344" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(3307.188 561.5)"><g id="fetch_flow" class="cluster undefined" data-look="classic"><path d="M8 8h252.25v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="36.023" y="12" class="fo-fallback" text-anchor="middle" transform="translate(98.102 8)"><tspan x="36.023">fetch_flow</tspan></text></g></g></g><g class="nodes" transform="translate(3307.188 561.5)"><g id="classId-CrossRefFetchFlow-23" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h182.25v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h182.25M43 43h182.25m0 0v104m0-104v104m0 0H43m182.25 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="75.125" y="12" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="75.125">CrossRefFetchFlow</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h182.25M43 99h182.25M43 123h182.25M43 123h182.25" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(3609.438 561.5)"><g id="models" class="cluster undefined" data-look="classic"><path d="M8 8h314.484v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="25.789" y="12" class="fo-fallback" text-anchor="middle" transform="translate(139.453 8)"><tspan x="25.789">models</tspan></text></g></g></g><g class="nodes" transform="translate(3609.438 561.5)"><g id="classId-CrossRefPublicationRecord-24" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h244.484v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h244.484M43 43h244.484m0 0v104m0-104v104m0 0H43m244.484 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="106.242" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="106.242">CrossRefPublicationReco</tspan><tspan x="106.242" dy="16.8">rd</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h244.484M43 99h244.484M43 123h244.484M43 123h244.484" class="divider"/></g></g></g><g class="root"><g class="clusters" transform="translate(3973.922 561.5)"><g id="query_builder" class="cluster undefined" data-look="classic"><path d="M8 8h274.5v174H8z" style="fill:none!important;stroke:black!important"/><g class="cluster-label"><text xml:space="preserve" x="48.477" y="12" class="fo-fallback" text-anchor="middle" transform="translate(96.773 8)"><tspan x="48.477">query_builder</tspan></text></g></g></g><g class="nodes" transform="translate(3973.922 561.5)"><g id="classId-CrossRefQueryBuilder-25" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M43 43h204.5v104H43"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M43 43h204.5M43 43h204.5m0 0v104m0-104v104m0 0H43m204.5 0H43m0 0V43m0 104V43"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="86.25" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(59 63)"><tspan x="86.25">CrossRefQueryBuilde</tspan><tspan x="86.25" dy="16.8">r</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M43 99h204.5M43 99h204.5M43 123h204.5M43 123h204.5" class="divider"/></g></g></g><g id="classId-_CrossRefFallbackPolicyMixin-16" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M1389.094 604.5h264.093v104h-264.093"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M1389.094 604.5h264.093m-264.093 0h264.093m0 0v104m0-104v104m0 0h-264.093m264.093 0h-264.093m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="116.047" y="3.6" class="fo-fallback" text-anchor="middle" transform="translate(1405.094 624.5)"><tspan x="116.047">_CrossRefFallbackPolicy</tspan><tspan x="116.047" dy="16.8">Mixin</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M1389.094 660.5h264.093m-264.093 0h264.093M1389.094 684.5h264.093m-264.093 0h264.093" class="divider"/></g><g id="classId-CrossRefAdapter-19" class="node default"><g class="basic label-container"><path fill="#eff6ff" stroke-width="0" d="M1439.344 1372.5h163.593v104h-163.593"/><path fill="none" stroke="#2563eb" stroke-dasharray="0 0" stroke-width="1.3" d="M1439.344 1372.5h163.593m-163.593 0h163.593m0 0v104m0-104v104m0 0h-163.593m163.593 0h-163.593m0 0v-104m0 104v-104"/></g><g class="label-group text"><g class="label" style="font-weight:bolder"><text xml:space="preserve" x="65.797" y="12" class="fo-fallback" text-anchor="middle" transform="translate(1455.344 1392.5)"><tspan x="65.797">CrossRefAdapter</tspan></text></g></g><path fill="none" stroke-dasharray="0 0" stroke-width="1.3" d="M1439.344 1428.5h163.593m-163.593 0h163.593M1439.344 1452.5h163.593m-163.593 0h163.593" class="divider"/></g></g></g></svg>

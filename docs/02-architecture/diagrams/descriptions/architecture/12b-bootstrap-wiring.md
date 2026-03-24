@@ -3,9 +3,11 @@
 - Исходная диаграмма: `architecture/12b-bootstrap-wiring.mmd`
 
 ## Описание
-Диаграмма Bootstrap: Wiring Graph показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 12b-bootstrap-wiring. В исходном файле прямо зафиксирован контекст: Covers runtime assembly sequence and main dependency injection graph.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Composition Layer, Infrastructure Layer, Application Layer. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: Composition Layer, bootstrap_pipeline_runner, RunnerBootstrap, StorageBootstrap, CheckpointBootstrap, LockBootstrap. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=15), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
+Диаграмма Bootstrap: Runtime and Admin Wiring показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Она описывает текущую wiring-модель: `composition.entrypoints` и retained `composition.bootstrap` выводят к `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, `build_pipeline_runner`, `bootstrap.cli + bootstrap.assembly` и composite runtime helpers. Ниже уже видны созданные collaborator groups: provider adapter, `StorageContext / StorageAdapter`, observability bundle, locking/checkpoint ports, `PipelineRunner`, `PipelineRunnerService`, `CompositePipelineRunnerService` и admin services.
+
+Этот view полезен для проверки того, что runtime wiring больше не выглядит как абстрактные `RunnerBootstrap / StorageBootstrap` блоки, а выражен через реальные bootstrap functions и assembly leaves, которые сегодня владеют DI-путём.
 
 ## Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
+- Дата метаданных: `2026-03-24`
