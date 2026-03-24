@@ -1,66 +1,70 @@
-%% Title: Batch Processing Flow — Extract to Write
-%% Covers: RULES.md §2.1 (Data Flow), application/core/batch_executor.py
-%% Rank: 9 (Score 8.44) — Core data processing loop for every batch
-%% Updated: 2026-02-17
+%% Title: Batch Processing Flow — BatchProcessingService choreography
+%% Covers: RULES.md §2.1 (Data Flow), application/core/{batch_executor,batch_processing_service,batch_processing_support}.py
+%% Rank: 9 (Score 8.44) — Core data processing choreography for every batch
+%% Updated: 2026-03-24
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-24
 %% @type    sequenceDiagram
-%% @level   Mixed (System / Component / Class)
-%% @nodes   13
+%% @level   Component / Class
+%% @nodes   14
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform sequence width=200 max_title_len=20
 sequenceDiagram
     autonumber
     participant Runner as PipelineRunner
-    participant BE as BatchExecutor<br/>(786 LOC)
-    participant DS as DataSourcePort<br/>(e.g., ChemblAdapter)
+    participant BE as BatchExecutor
+    participant BPS as BatchProcessingService
+    participant DS as DataSourcePort
+    participant BTM as BatchTracingManagerService
+    participant SUP as BatchProcessingSupportService
     participant BT as BatchTransformer
-    participant Trans as BaseTransformer<br/>(e.g., ActivityTransformer)
     participant BW as BatchWriter
     participant Bronze as BronzeWriter
     participant Silver as SilverWriter
     participant Gold as GoldWriter
-    participant QM as QuarantineManager
+    participant QM as QuarantineManagerService
     participant BMR as BatchMetricsRecorderService
-    participant BTM as BatchTracingManagerService
-    participant CM as CheckpointManagerService
+    participant State as BatchExecutionStateService
 
-    Runner->>BE: execute_batch(batch_num)
-    BE->>BTM: start_span("batch")
+    Runner->>BE: execute(limit, query, offset)
 
-    Note over BE,DS: Extract Phase
-    BE->>DS: async for page in fetch(entity_type,<br/>limit=1000, filter_ids=...)
-    DS-->>BE: dict records (one API page)
+    Note over BE,BPS: extraction loop assembles one batch before processing
+    BE->>BPS: extract_records(limit, query, offset)
+    BPS->>DS: fetch(entity_type, limit, query, offset)
+    DS-->>BPS: Bronze records
 
-    Note over BE,BT: Transform Phase
-    BE->>BT: transform(raw_records)
-    BT->>Trans: _transform_impl(records)
-    Trans-->>BT: transformed records
-    BT->>BT: normalize values<br/>(NaN→null, strip, dates→ISO)
-    BT->>BT: add metadata<br/>(_run_id, _run_type, _ingestion_ts)
-    BT->>BT: compute _content_hash (sha256)
-    BT-->>BE: TransformResult(records, errors)
+    Note over BE,BPS: once one batch is assembled
+    BE->>BPS: process_batch(records, start_index, query_string)
+    BPS->>BTM: start_batch_span(batch_id, count, start_index)
+    BPS->>SUP: get_source_metadata(query_string)
+    SUP-->>BPS: SourceMetadata?
 
-    Note over BE,BW: Write Phase
-    BE->>BW: write(batch_data)
-    BW->>Bronze: write_bronze(records)<br/>→ JSONL + zstd
-    BW->>Silver: write_silver(df, primary_keys)<br/>→ Delta Lake merge/upsert
-    BW->>Gold: write_gold(df)<br/>→ transform_for_gold() + strict validate
+    Note over BPS,SUP: Bronze write + transform + Silver/Gold choreography
+    BPS->>SUP: write_bronze_layer(records, batch_id, ingestion_ts, metadata)
+    SUP->>BW: write_bronze(...)
+    BW->>Bronze: write_bronze(records,...)
+    SUP->>BMR: track_batch_size("bronze")<br/>track_processed_records("bronze")
 
-    alt DQ errors detected
-        BW->>QM: route_failed_records(failures)
-        QM->>QM: create QuarantineEntry<br/>truncate payload (64KB)
+    BPS->>SUP: transform_and_track_metrics(records, batch_id, start_index)
+    SUP->>BT: transform_batch(records, batch_id, start_index)
+    BT->>QM: flush filtered / DQ records when needed
+    SUP->>BMR: track quarantined / silver / gold counts
+
+    BPS->>SUP: write_silver_gold_concurrent(transform_result, ...)
+    par Silver write
+        SUP->>BW: write_silver(...)
+        BW->>Silver: Delta merge / append
+    and Gold write
+        SUP->>BW: write_gold(...)
+        BW->>Gold: validate + write
     end
 
-    BW-->>BE: write complete
+    BPS->>SUP: finalize_batch_span(span, records, transform_result)
+    SUP->>BTM: set_batch_result(...) + end_span()
+    SUP-->>BPS: BatchProcessingOutcome
+    BPS-->>BE: BatchProcessingOutcome
 
-    Note over BE,BMR: Metrics Phase
-    BE->>BMR: record(batch_size, duration, errors)
-    BMR->>BMR: observe_histogram(batch_size)<br/>increment_counter(records_total)<br/>increment_counter(errors_total)
-    BE->>BTM: end_span(status)
-
-    BE-->>Runner: BatchResult(record_count, error_count)
-
-    Runner->>CM: save(last_id, batch_num)
-    CM->>CM: write JSON checkpoint<br/>(atomic file write)
+    BE->>State: commit_successful_batch(records, outcome)
+    State-->>BE: cumulative counters updated
+    BE-->>Runner: continue extraction loop / build batch result

@@ -1,396 +1,211 @@
 %% Title: Application Layer Class Diagram
-%% Covers: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution)
-%% Updated: 2026-02-17
-%% Components: PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, LockCoordinator, CheckpointManagerService
+%% Covers: RULES.md §1.1 (Application Layer), application/core/, application/services/, application/observability/
+%% Updated: 2026-03-24
+%% Components: BasePipeline, PipelineRunner, BatchExecutor, BatchProcessingService, PipelineService, lifecycle/postrun collaborators
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-24
 %% @type    classDiagram
-%% @level   Mixed (System / Component / Class)
-%% @nodes   22
+%% @level   Component / Class
+%% @nodes   18
 %%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
-%% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=13
+%% @uniform class width=208 height=220 max_title_len=21 max_desc_lines=12
 classDiagram
     direction TB
 
     namespace Core {
         class BasePipeline {
             <<abstract>>
-            #config: PipelineConfig
-            #runtime: RuntimeConfig
-            #services: PipelineService
-            +create(config, runtime, services)$ BasePipeline
-            +pipeline_name() str
-            +provider() str
-            +run_id() RunID
-            
-            
-            
-            
-            
+            #_config
+            #_runtime
+            #_services
+            #_context
+            #_transformer
+            +create(...)
+            +transform_bronze_to_silver(...)
         }
 
         class PipelineRunner {
-            -_pipeline: BasePipeline
-            -_services: RunnerServices
-            -_lock_key: str
-            +run() RunResult
-            -_acquire_lock() bool
-            -_run_preflight() PreflightResult
-            -_execute() ExecutionResult
-            -_run_postrun() PostrunResult
-            -_release_lock() None
-            
-            
-            
-            
+            -_pipeline
+            -_services
+            -_executor
+            -_checkpoint_manager
+            -_lock_manager
+            -_preflight_service
+            -_postrun_service
+            -_lifecycle_service
+            -_observer
+            +run()
+            +execution_metrics()
         }
 
-        class PipelineExecutor {
-            -_pipeline: BasePipeline
-            -_processor: RecordProcessor
-            -_batch_size: int = 100
-            -_checkpoint_interval: int = 1000
-            +execute() ExecutionResult
-            -_fetch_and_process() AsyncIterator~BatchResult~
-            -_adaptive_batch_size() int
-            
-            
-            
-            
-            
-            
+        class PipelineRunnerDependencies {
+            <<frozen dataclass>>
+            +executor
+            +checkpoint_manager
+            +lock_manager
+            +preflight
+            +postrun
+            +lifecycle_service
+            +observer
         }
 
-        class RecordProcessor {
-            -_transformer: BatchTransformer
-            -_writer: BatchWriter
-            -_quarantine: QuarantineManager
-            -_metrics: BatchMetricsRecorderService
-            +process_batch(records) BatchResult
-            +process_stream(records) AsyncIterator~BatchResult~
-            
-            
-            
-            
-            
-            
-            
+        class BatchExecutor {
+            -_services
+            -_context
+            -_config
+            -_processing_port
+            -_execution_state_service
+            +execute(...)
+            +process(...)
+            +get_run_statistics()
+        }
+
+        class BatchProcessingService {
+            -_services
+            -_support
+            -_transformer
+            -_writer
+            -_tracing
+            +extract_records(...)
+            +process_batch(...)
         }
 
         class BatchTransformer {
-            -_transformer: BaseTransformer
-            -_logger: LoggerPort
-            +transform_batch(records) TransformResult
-            +transform_stream(records) AsyncIterator~TransformResult~
-            
-            
-            
-            
-            
-            
-            
-            
-            
+            -_transform
+            -_quarantine_manager
+            -_batch_metrics
+            +transform_batch(...)
+            +transform_single(...)
+        }
+
+        class BatchWriter {
+            -_storage
+            -_gold_validator
+            -_batch_metrics
+            +write_bronze(...)
+            +write_silver(...)
+            +write_gold(...)
         }
 
         class PipelineService {
             <<frozen dataclass>>
-            +data_source: DataSourcePort
-            +storage: StoragePort
-            +lock: LockPort
-            +checkpoint: CheckpointPort
-            +quarantine: QuarantinePort
-            +metrics: MetricsPort
-            +tracing: TracingPort
-            +logger: LoggerPort
-            +dq_monitor: DQMonitorPort?
-            
-            
-            
-        }
-
-        class RunnerServices {
-            <<frozen dataclass>>
-            +lock_manager: LockCoordinator
-            +preflight: PreflightService
-            +postrun: PostrunService
-            +lifecycle_orch: LifecycleOrchestrator
-            +observer: PipelineObserver
-            +context_holder: LockContextHolder?
-            
-            
-            
-            
-            
-            
+            +data_source
+            +storage
+            +lock
+            +checkpoint
+            +quarantine
+            +metrics
+            +tracing
+            +logger
+            +dq_monitor
+            +metadata_coordinator
+            +dq_report_service
+            +aclose()
         }
     }
 
     namespace Services {
         class LockCoordinator {
-            -_lock: LockPort
-            -_logger: LoggerPort
-            -_ttl: int = 90
-            -_heartbeat_interval: int = 30
-            +acquire_lock(resource, owner_id) LockResult
-            +release_lock(resource, owner_id) bool
-            +refresh_lock(resource, owner_id) bool
-            
-            
-            
-            
-            
-            
+            -_lock
+            -_run_id
+            -_config
+            -_heartbeat
+            +acquire()
+            +start_heartbeat()
+            +validate()
+            +release()
         }
 
         class CheckpointManagerService {
-            -_checkpoint: CheckpointPort
-            -_logger: LoggerPort
-            +load_checkpoint(key) CheckpointState?
-            +save_checkpoint(key, state) None
-            +delete_checkpoint(key) None
-            
-            
-            
-            
-            
-            
-            
-            
-        }
-
-        class QuarantineManager {
-            -_quarantine: QuarantinePort
-            -_logger: LoggerPort
-            +quarantine_record(record, error) None
-            +quarantine_batch(records, errors) int
-            
-            
-            
-            
-            
-            
-            
-            
-            
+            -_checkpoint
+            -_pipeline_name
+            -_run_id
+            +load_checkpoint()
+            +save_checkpoint(...)
+            +delete_checkpoint()
         }
 
         class PreflightService {
-            -_data_source: DataSourcePort
-            -_storage: StoragePort
-            -_logger: LoggerPort
-            +run_checks() PreflightResult
-            -_check_data_source_health() HealthStatus
-            -_check_storage_health() bool
-            
-            
-            
-            
-            
-            
-            
+            -_health_aggregator
+            -_medallion_validator
+            +validate_infrastructure(...)
+            +validate_preflight(...)
         }
 
         class PostrunService {
-            -_storage: StoragePort
-            -_metrics: MetricsPort
-            -_logger: LoggerPort
-            -_dq_config: DQConfig
-            +run_checks(execution_metrics) PostrunResult
-            -_check_dq_thresholds() DQCheckResult
-            -_emit_dq_metrics() None
-            
-            
-            
-            
-            
-            
+            -_dq_service
+            -_lifecycle_service
+            +run(...)
+            +run_dq_checks(...)
+            +run_vacuum_if_enabled()
+            +cleanup(...)
         }
 
-        class LifecycleOrchestrator {
-            -_lifecycle_service: MedallionLifecycleService
-            -_policy: MedallionPolicy
-            -_logger: LoggerPort
-            +clear_for_run(run_type, tables) ClearResult
-            
-            
-            
-            
-            
-            
-            
-            
-            
+        class MedallionLifecycleService {
+            +prepare_for_run(...)
+            +finalize_run(...)
+            +clear(...)
         }
 
         class PipelineObserver {
-            -_tracer: TracingPort
-            -_metrics: MetricsPort
-            -_logger: LoggerPort
-            +observe_batch(batch_id, records) Span
-            +record_duration(stage, duration) None
-            +record_error(error_type) None
-            
-            
-            
-            
-            
-            
-            
-        }
-
-        class MemoryMonitor {
-            -_threshold_pct: float = 0.8
-            -_monitor_interval_ms: int = 1000
-            +get_memory_stats() MemoryStats
-            +should_reduce_batch() bool
-            -_get_stats_estimate() MemoryStats
-            
-            
-            
-            
-            
-            
-            
-            
+            -_metrics
+            -_logger
+            -_tracer
+            +emit_phase_started(...)
+            +emit_phase_completed(...)
         }
 
         class BatchMetricsRecorderService {
-            -_metrics: MetricsPort
-            +record_fetch(count, duration) None
-            +record_transform(count, duration) None
-            +record_write(count, duration, layer) None
-            
-            
-            
-            
-            
-            
-            
-            
-            
+            -_metrics
+            +track_batch_size(...)
+            +track_processed_records(...)
+            +track_error(...)
+        }
+
+        class BatchTracingManagerService {
+            -_tracer
+            -_context
+            +start_execution_span()
+            +start_batch_span(...)
+            +end_span(...)
+        }
+
+        class QuarantineManagerService {
+            -_quarantine
+            -_pipeline_name
+            +quarantine_record(...)
+            +quarantine_records(...)
         }
     }
 
     namespace Transformers {
         class BaseTransformer {
             <<abstract>>
-            #config: PipelineConfig
-            #runtime: RuntimeConfig
-            #logger: LoggerPort
-            +transform(record: BronzeRecord) SilverRecord
-            +transform_batch(records) list~SilverRecord~
-            #_transform_impl(record)* SilverRecord
-            #compute_content_hash(provider, data) ContentHash
-            #serialize_json(value) str
-            #entity_to_silver_record(entity) SilverRecord
-            #_get_required_field(record, field) Any
-            #_extract_nested(record, path) Any?
-            #_create_entity(**kwargs) BaseEntity
-        }
-
-        class BaseChemblTransformer {
-            <<abstract>>
-            #_normalize_chembl_id(id) str
-            #_normalize_units(value, units) tuple
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        }
-
-        class ActivityTransformer {
-            +entity: str = "activity"
-            #_transform_impl(record) SilverRecord
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        }
-
-        class MoleculeTransformer {
-            +entity: str = "molecule"
-            #_transform_impl(record) SilverRecord
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        }
-
-        class AssayTransformer {
-            +entity: str = "assay"
-            #_transform_impl(record) SilverRecord
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        }
-
-        class TargetTransformer {
-            +entity: str = "target"
-            #_transform_impl(record) SilverRecord
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+            +transform(...)
+            +transform_batch(...)
         }
     }
 
-    %% Inheritance
-    BaseChemblTransformer --|> BaseTransformer
-    ActivityTransformer --|> BaseChemblTransformer
-    MoleculeTransformer --|> BaseChemblTransformer
-    AssayTransformer --|> BaseChemblTransformer
-    TargetTransformer --|> BaseChemblTransformer
-
-    %% Composition
     PipelineRunner --> BasePipeline
-    PipelineRunner --> RunnerServices
-    PipelineExecutor --> BasePipeline
-    PipelineExecutor --> RecordProcessor
-    RecordProcessor --> BatchTransformer
-    RecordProcessor --> QuarantineManager
-    RecordProcessor --> BatchMetricsRecorderService
-    BatchTransformer --> BaseTransformer
+    PipelineRunner --> PipelineService
+    PipelineRunner --> PipelineRunnerDependencies
+    PipelineRunnerDependencies --> BatchExecutor
+    PipelineRunnerDependencies --> CheckpointManagerService
+    PipelineRunnerDependencies --> LockCoordinator
+    PipelineRunnerDependencies --> PreflightService
+    PipelineRunnerDependencies --> PostrunService
+    PipelineRunnerDependencies --> MedallionLifecycleService
+    PipelineRunnerDependencies ..> PipelineObserver
 
     BasePipeline --> PipelineService
-    RunnerServices --> LockCoordinator
-    RunnerServices --> PreflightService
-    RunnerServices --> PostrunService
-    RunnerServices --> LifecycleOrchestrator
-    RunnerServices --> PipelineObserver
+    BasePipeline ..> BaseTransformer
+    BatchExecutor --> BatchProcessingService : processing_port impl
+    BatchProcessingService --> PipelineService
+    BatchProcessingService --> BatchTransformer
+    BatchProcessingService --> BatchWriter
+    BatchProcessingService ..> BatchTracingManagerService
+    BatchProcessingService ..> BatchMetricsRecorderService
+    BatchTransformer --> BaseTransformer
+    BatchTransformer --> QuarantineManagerService
+    BatchWriter ..> BatchMetricsRecorderService

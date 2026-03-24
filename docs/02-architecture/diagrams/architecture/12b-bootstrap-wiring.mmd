@@ -1,8 +1,8 @@
 %% BioETL — Bootstrap: Runtime and Admin Wiring
-%% Covers how narrow public composition APIs and the retained broad seam expose runtime/admin assembly outputs.
+%% Covers how current entrypoints/bootstrap seams expose runtime and admin assembly outputs.
 
-%% @version 1.2.0
-%% @date    2026-03-19
+%% @version 1.3.0
+%% @date    2026-03-24
 %% @type    flowchart
 %% @level   System / Component
 %% @view    bootstrap-wiring
@@ -23,64 +23,63 @@
 }}%%
 graph TB
     subgraph Public["Public composition APIs"]
-        EXEC["execution_api"]:::size-sm
-        SVC["services_api"]:::size-sm
-        RES["resources_api"]:::size-sm
-        ENTRY["entrypoints<br/>retained broad seam"]:::size-sm
+        ENTRY["composition.entrypoints"]:::size-sm
+        BOOT["composition.bootstrap<br/>lower-level seam"]:::size-sm
     end
 
     subgraph Composition["Composition bootstrap"]
-        BOOTR["bootstrap.runtime"]:::size-sm
-        BOOTC["bootstrap.cli"]:::size-sm
-        ASSEMBLY["bootstrap.assembly"]:::size-sm
-        RFB["RunnerFactoryBuilderService"]:::size-sm
-        CSS["CompositeSupportServicesFactory"]:::size-sm
+        BPR["bootstrap_pipeline_runner"]:::size-sm
+        BPS["bootstrap_pipeline_runner_service"]:::size-sm
+        BUILDER["build_pipeline_runner"]:::size-sm
+        SUPPORT["bootstrap.cli + bootstrap.assembly"]:::size-sm
+        CH["Composite runtime helpers<br/>RunnerFactoryBuilderService +<br/>CompositeSupportServicesFactory"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure collaborators"]
         ADAPTER["Provider adapter<br/>DataSourcePort"]:::size-sm
-        STORAGE["StorageAdapter"]:::size-sm
+        STORAGE["StorageContext / StorageAdapter"]:::size-sm
         OBS["Observability bundle<br/>logger / metrics / tracer"]:::size-sm
         LOCK["Lock + checkpoint / quarantine ports"]:::size-sm
     end
 
     subgraph Application["Created services"]
-        PRUN["PipelineRunnerService"]:::size-sm
+        PRUN["PipelineRunner"]:::size-sm
+        PSVC["PipelineRunnerService"]:::size-sm
         CRUN["CompositePipelineRunnerService"]:::size-sm
         ADM["Health / export / checkpoint<br/>vacuum / quarantine services"]:::size-sm
     end
 
-    EXEC --> BOOTR
-    EXEC --> PRUN
-    EXEC --> CRUN
-    SVC --> BOOTR
-    SVC --> BOOTC
-    RES --> ASSEMBLY
-    ENTRY -.->|"wide facade"| BOOTR
-    ENTRY -.->|"wide facade"| BOOTC
-    ENTRY -.->|"wide facade"| ASSEMBLY
+    ENTRY --> BPR
+    ENTRY --> BPS
+    ENTRY --> SUPPORT
+    BOOT -.->|"lower-level access"| BPR
+    BOOT -.->|"lower-level access"| BPS
+    BOOT -.->|"lower-level access"| SUPPORT
 
-    BOOTR --> RFB
-    BOOTR --> CSS
-    BOOTR --> ADAPTER
-    ASSEMBLY --> STORAGE
-    ASSEMBLY --> LOCK
-    BOOTR --> OBS
-    BOOTC --> ADM
-    RFB --> PRUN
-    CSS --> CRUN
+    BPR --> BUILDER
+    BPR --> OBS
+    BPS --> PSVC
+    SUPPORT --> STORAGE
+    SUPPORT --> LOCK
+    SUPPORT --> ADM
+    CH --> CRUN
+
+    BUILDER --> ADAPTER
+    BUILDER --> STORAGE
+    BUILDER --> PRUN
+
     ADAPTER --> PRUN
     STORAGE --> PRUN
     OBS --> PRUN
     STORAGE --> CRUN
-    OBS --> CRUN
     LOCK --> CRUN
+    OBS --> CRUN
 
     classDef comp fill:#fff7ed,stroke:#f59e0b
     classDef infra fill:#fff1f2,stroke:#dc2626
     classDef app fill:#f0fdf4,stroke:#16a34a
 
-    class EXEC,SVC,RES,ENTRY comp
-    class BOOTR,BOOTC,ASSEMBLY,RFB,CSS comp
+    class ENTRY,BOOT comp
+    class BPR,BPS,BUILDER,SUPPORT,CH comp
     class ADAPTER,STORAGE,OBS,LOCK infra
-    class PRUN,CRUN,ADM app
+    class PRUN,PSVC,CRUN,ADM app

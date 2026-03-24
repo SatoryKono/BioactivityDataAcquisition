@@ -1,11 +1,11 @@
-# Title: PipelineRunner Internal Component Diagram
+# Title: PipelineRunner Collaborator Diagram
 
 - Исходная диаграмма: `foundation/42-pipeline-runner-class.mmd`
 
 ## Описание
-Диаграмма Title: PipelineRunner Internal Component Diagram из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате classDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 42-pipeline-runner-class. В комментариях исходника зафиксирован фокус диаграммы: Covers: application/core/runner.py, application/core/pipeline_services.py. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: PipelineRunner Collaborator Diagram показывает актуальную модель `PipelineRunner` после перехода на grouped dependency contract `PipelineRunnerDependencies` и выделенные lifecycle/preflight/postrun collaborators. Она представлена в формате classDiagram и используется как компактная foundation-view для ревью изменений вокруг `application/core/runner.py`, `application/core/pipeline_services.py` и assembly-path из `composition/factories/pipeline/runner_assembly.py`. Уровень детализации обозначен как Component / Class, поэтому схема сфокусирована на инжектируемых зависимостях и orchestration seams, а не на полном внутреннем поведении всех downstream services. Ключевые элементы здесь: `PipelineRunner`, `PipelineRunnerDependencies`, `PipelineService`, `BatchExecutor`, `LockCoordinator`, `PreflightService`, `PostrunService`, `MedallionLifecycleService`, `PipelineObserver`, `ShutdownSignal`. По этой схеме удобно проверять, что `PipelineRunner` не тянет лишние инфраструктурные детали напрямую и работает через заранее собранные collaborators.
 
 ## Метаданные
 - Тип: `classDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата метаданных: `2026-03-24`

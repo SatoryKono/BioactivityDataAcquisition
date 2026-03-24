@@ -1,8 +1,8 @@
 %% BioETL — Bootstrap / DI Container (Composition Root)
-%% Shows the current narrow public APIs plus retained broad seam used to assemble runtime and admin services.
+%% Shows current entrypoints/bootstrap seams and the runtime/admin assembly path they drive today.
 
-%% @version 1.2.0
-%% @date    2026-03-19
+%% @version 1.3.0
+%% @date    2026-03-24
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   20
@@ -21,14 +21,11 @@
 }}%%
 %% @uniform width=192 height=108 max_title_len=20 max_desc_lines=4
 graph TB
-    CALLERS["Entry callers<br/>CLI + tests/scripts + future API"]:::size-md
+    CALLERS["Entry callers<br/>CLI + tests/scripts<br/>+ programmatic integrations"]:::size-md
 
     subgraph Public["Public composition seams"]
-        EXEC["composition.execution_api<br/>preferred execution seam"]:::size-md
-        SVC["composition.services_api<br/>preferred services seam"]:::size-md
-        RES["composition.resources_api<br/>preferred resource seam"]:::size-md
-        ENTRY["composition.entrypoints<br/>retained broad facade"]:::size-md
-        BOOT["composition.bootstrap<br/>runtime / cli / assembly"]:::size-md
+        ENTRY["composition.entrypoints<br/>run/build + service getters"]:::size-md
+        BOOT["composition.bootstrap<br/>lower-level runtime / cli seam"]:::size-md
     end
 
     subgraph Composition["Internal composition modules"]
@@ -36,12 +33,14 @@ graph TB
             PR["ProviderRegistry<br/>provider configs + creators"]:::size-md
             PIPE["PipelineRegistry<br/>pipeline definitions"]:::size-md
             DSF["DataSourceFactory<br/>canonical provider adapter path"]:::size-md
-            RF["RunnerFactory<br/>pipeline runner creation"]:::size-md
+            PF["GenericPipelineFactory / RunnerFactory<br/>pipeline creation seams"]:::size-md
+            SF["StorageFactory<br/>storage creation seam"]:::size-md
         end
 
         subgraph Runtime["Runtime bootstrap"]
-            RUNTIME["bootstrap.runtime<br/>pipeline / composite bootstrap"]:::size-md
-            RH["Runtime assembly helpers<br/>RunnerFactoryBuilderService +<br/>CompositeSupportServicesFactory"]:::size-md
+            BPR["bootstrap_pipeline_runner<br/>runtime bootstrap entry"]:::size-md
+            BUILDER["build_pipeline_runner<br/>runtime assembly leaf"]:::size-md
+            RH["Composite runtime helpers<br/>RunnerFactoryBuilderService +<br/>CompositeSupportServicesFactory"]:::size-md
         end
 
         subgraph Admin["CLI/bootstrap services"]
@@ -51,42 +50,40 @@ graph TB
 
     subgraph Created["Created collaborators"]
         ADAPTER["Provider adapter<br/>DataSourcePort"]:::size-md
-        STORAGE["StorageAdapter<br/>Bronze / Silver / Gold"]:::size-md
+        STORAGE["StorageContext / StorageAdapter<br/>Bronze / Silver / Gold"]:::size-md
         OBS["Observability bundle<br/>logger / metrics / tracer"]:::size-md
         LOCK["LockPort + checkpoint / quarantine ports"]:::size-md
-        RUNNER["PipelineRunner"]:::size-md
+        RUNNER["PipelineRunner /<br/>PipelineRunnerService"]:::size-md
         COMPOSITE["CompositePipelineRunnerService"]:::size-md
         ADMINSVC["Admin services<br/>health / export / vacuum / checkpoint"]:::size-md
     end
 
-    CALLERS ==> EXEC
-    CALLERS ==> SVC
-    CALLERS ==> RES
-    CALLERS -.->|"broad / compat surface"| ENTRY
+    CALLERS ==> ENTRY
+    CALLERS -.->|"lower-level / tests"| BOOT
 
-    EXEC --> BOOT
-    SVC --> BOOT
-    RES --> BOOT
-    ENTRY -.->|"retained wide surface"| BOOT
+    ENTRY --> BPR
+    ENTRY --> SUPPORT
+    BOOT -.->|"lower-level access"| BPR
+    BOOT -.->|"lower-level access"| SUPPORT
 
-    BOOT --> RUNTIME
-    BOOT --> SUPPORT
-
-    RUNTIME --> PR
-    RUNTIME --> PIPE
-    RUNTIME --> DSF
-    RUNTIME --> RF
-    RUNTIME --> RH
+    BPR --> PR
+    BPR --> PIPE
+    BPR --> DSF
+    BPR --> PF
+    BPR --> SF
+    BPR --> BUILDER
+    BPR --> RH
 
     PR --> DSF
-    PIPE --> RF
+    PIPE --> PF
+    PF --> BUILDER
 
     DSF -->|creates| ADAPTER
+    SF -->|creates| STORAGE
     SUPPORT -->|creates| STORAGE
     SUPPORT -->|creates| LOCK
-    RUNTIME -->|creates| OBS
-    RF -->|creates| RUNNER
-    RH --> RUNNER
+    BPR -->|creates| OBS
+    BUILDER -->|creates| RUNNER
     RH -->|creates| COMPOSITE
     SUPPORT -->|creates| ADMINSVC
 
@@ -104,7 +101,7 @@ graph TB
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class CALLERS entry
-    class EXEC,SVC,RES,ENTRY,BOOT public
-    class PR,PIPE,DSF,RF,RUNTIME,RH,SUPPORT comp
+    class ENTRY,BOOT public
+    class PR,PIPE,DSF,PF,SF,BPR,BUILDER,RH,SUPPORT comp
     class ADAPTER,STORAGE,OBS,LOCK infra
     class RUNNER,COMPOSITE,ADMINSVC app

@@ -3,9 +3,11 @@
 - Исходная диаграмма: `foundation/08-complete-etl-workflow.mmd`
 
 ## Описание
-Диаграмма Title: Complete ETL Workflow (6 Phases) из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 08-complete-etl-workflow. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Pipeline Execution), §3.2 (Preflight), §3.4 (Postrun). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: Phase 1: Prepare, Phase 2: Extract, Phase 3: Transform, Normalization Rules, Metadata Fields. Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: Phase 1: Prepare, Phase 2: Extract, Phase 3: Transform, Normalization Rules, NaN/Inf → null, Floats → round(10). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Complete ETL Workflow (6 Phases) показывает актуальный end-to-end runtime flow пайплайна после стабилизации `PipelineRunner`, `BatchExecutor`, `BatchProcessingService` и `PostrunService` как отдельных orchestration seams. Она представлена в формате `flowchart` и используется как foundation-view для просмотра полного пути выполнения: managed startup, extraction loop, Bronze/transform choreography, concurrent Silver/Gold writes, postrun finalization и cleanup.
+
+Ключевые узлы здесь: `validate_infrastructure`, `prepare_for_run`, `BatchExecutor.execute`, `extract_records via DataSourcePort.fetch`, `write_bronze_layer`, `transform_batch`, `write_silver_gold_concurrent`, `PostrunService.run`, `finalize_run vacuum`, `PipelineService.aclose`. По этой схеме удобно валидировать, что execution path больше не завязан на старый `PipelineExecutor`, а строится вокруг текущих runtime collaborators и явных postrun/cleanup phases.
 
 ## Метаданные
 - Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата метаданных: `2026-03-24`

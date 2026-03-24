@@ -528,7 +528,7 @@ grep -rn "class ИмяКласса" src/bioetl/ --include="*.py"
 ```
 Interfaces  → CLI (Click), HTTP health server
 Composition → Bootstrap, Factories, Registry (DI)
-Application → PipelineRunner, BatchExecutor, RecordProcessor, Transformers, Services
+Application → PipelineRunner, BatchExecutor, BatchProcessingService, Transformers, Services
 Domain      → Ports (24 Protocol), Entities, VOs, Aggregates, Config, Schemas, Services
 Infrastructure → Adapters (7 providers), Storage (Bronze/Silver/Gold), HTTP, Locking, Observability
 ```

@@ -1,89 +1,82 @@
 %% Title: Bronze Write Sequence (JSONL + zstd)
-%% Covers: RULES.md §2.1 (Bronze Layer), §2.2 (Append-Only)
-%% Updated: 2026-02-17
-%% Components: BronzeWriter, LockCoordinator, JSONL serializer, zstd compression, LineageLog
+%% Covers: RULES.md §2.1 (Bronze Layer), §2.2 (Append-Only), application/core batch processing
+%% Updated: 2026-03-24
+%% Components: BatchProcessingService, BronzeWriter, prepare_bronze_write, zstd stream write, metadata/audit side effects
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-24
 %% @type    sequenceDiagram
 %% @level   Mixed (System / Component / Class)
 %% @nodes   7
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform sequence width=168 max_title_len=16
+%% @uniform sequence width=176 max_title_len=18
 sequenceDiagram
     autonumber
-    participant Executor as PipelineExecutor
+    participant Processing as BatchProcessingService
     participant Writer as BronzeWriter
-    participant Lock as LockPort
-    participant Compressor as zstd Compressor
+    participant Prepare as prepare_bronze_write()
+    participant Compressor as zstd + atomic file write
     participant Storage as Local FS
-    participant Lineage as LineageLog
-    participant Metrics as MetricsPort
+    participant Metadata as Metadata/Audit side effects
+    participant Obs as Tracing + Metrics
 
-    Note over Executor,Writer: Phase 1: Prepare Batch
+    Note over Processing,Writer: Phase 1: Bronze stage entry
 
-    Executor->>Writer: write_batch(records, provider="chembl", entity="activity")
+    Processing->>Writer: write_bronze(records, batch_id, ingestion_ts, source_metadata)
     activate Writer
+    Writer->>Obs: start span "write_bronze"<br/>increment bronze_write_attempts_total
 
-    Writer->>Writer: Generate batch_id (UUID)
-    Writer->>Writer: Validate records (JSON parseable)
+    Note over Writer,Prepare: Phase 2: Normalize request
 
-    opt require_lock=True
-        Writer->>Lock: validate_owner(key, owner_id)
-        Lock-->>Writer: True (valid)
-    end
+    Writer->>Prepare: _prepare_bronze_write(request)
+    activate Prepare
+    Note right of Prepare: Validate names and UTC timestamps<br/>Optionally validate JSON records<br/>Build relative path + metadata
+    Prepare-->>Writer: BronzeWritePrepared
+    deactivate Prepare
 
-    Note over Writer,Storage: Phase 2: Serialize & Compress
+    Note over Writer,Storage: Phase 3: Stream-compress and persist
 
-    Writer->>Writer: Serialize records to JSONL
-    Note right of Writer: One JSON object per line\nUTF-8 encoding
-
-    Writer->>Compressor: compress(jsonl_bytes)
+    Writer->>Compressor: _write_bronze_data_and_sidecar(prepared)
     activate Compressor
-    Note right of Compressor: zstd compression\nLevel: 3\nThreads: -1 (auto)
-    Compressor-->>Writer: compressed_bytes
-    deactivate Compressor
-
-    Note over Writer,Storage: Phase 3: Build Path & Write
-
-    Writer->>Writer: Build path
-    Note right of Writer: Path: bronze/v1/{provider}/{entity}/{date}/batch_{batch_id}.jsonl.zst
-
-    Writer->>Storage: write_bytes(path, compressed_bytes)
-    activate Storage
-    Storage-->>Writer: OK (file written)
-    deactivate Storage
+    Compressor->>Storage: write temp .jsonl.zst
+    Storage-->>Compressor: temp file path
+    Compressor->>Compressor: stream zstd chunks
+    Compressor->>Storage: atomic rename to final batch path
+    Storage-->>Compressor: file persisted
 
     opt save_json=True
-        Writer->>Storage: write_bytes(path.json, uncompressed)
-        Storage-->>Writer: OK
+        Compressor->>Storage: write JSONL debug copy
+        Storage-->>Compressor: JSON copy persisted
     end
 
-    Note over Writer,Lineage: Phase 4: Record Lineage
+    Compressor-->>Writer: record_count + sizes
+    deactivate Compressor
 
-    Writer->>Lineage: record(entry)
-    activate Lineage
-    Note right of Lineage: LineageLogEntry (batch_id, pipeline, bronze_paths, version)
-    Lineage-->>Writer: OK
-    deactivate Lineage
+    Note over Writer,Metadata: Phase 4: Post-write side effects
 
-    Note over Writer,Metrics: Phase 5: Emit Metrics
+    Writer->>Metadata: _run_bronze_post_write_actions(...)
+    activate Metadata
+    Metadata->>Storage: checksum / stat / metadata path resolution
+    Metadata->>Metadata: build BronzeWriteResult
 
-    Writer->>Metrics: observe_histogram("bronze_write_duration_ms", duration)
-    Writer->>Metrics: increment_counter("bronze_records_written", count)
-    Writer->>Metrics: observe_histogram("bronze_batch_size_bytes", size)
+    opt audit enabled
+        Metadata->>Metadata: log bronze audit entry
+    end
 
-    Writer-->>Executor: BronzeWriteResult
+    opt metadata enabled
+        Metadata->>Storage: write bronze metadata sidecar
+    end
+
+    Metadata-->>Writer: BronzeWriteResult
+    deactivate Metadata
+
+    Note over Writer,Obs: Phase 5: Final telemetry
+
+    Writer->>Obs: observe bronze_write_total_duration_seconds
+    Writer-->>Processing: BronzeWriteResult
     deactivate Writer
 
-    Note over Executor: BronzeWriteResult (path, batch_id, record_count, compressed_size, ratio)
-
     rect rgb(255, 240, 245)
-        Note over Writer,Storage: Error Handling
-        Note right of Writer: On failure: log error, raise BronzeWriteError, pipeline handles checkpoint
-    end
-
-    rect rgb(240, 255, 240)
-        Note over Writer: Atomicity Guarantee
-        Note right of Writer: Write to temp file first, then atomic rename (no partial writes)
+        Note over Writer,Storage: Failure semantics
+        Note right of Writer: Temp file is removed on write failure.<br/>No lock validation happens inside BronzeWriter.<br/>Atomic rename prevents partial final files.
     end

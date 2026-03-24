@@ -3,9 +3,9 @@
 - Исходная диаграмма: `foundation/06-application-layer-class-diagram.mmd`
 
 ## Описание
-Диаграмма Title: Application Layer Class Diagram из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате classDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 06-application-layer-class-diagram. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Application Layer Class Diagram показывает актуальную верхнеуровневую topology слоя `application` после decomposition waves в `core`, `services` и `observability`. Она представлена в формате classDiagram и используется как foundation-map для навигации между `BasePipeline`, `PipelineRunner`, `BatchExecutor`, `BatchProcessingService`, `PipelineService`, lifecycle/postrun collaborators и transformer-facing contracts. Уровень детализации обозначен как Component / Class, поэтому схема не пытается перечислить все provider-specific transformers или все leaf helpers, а фиксирует канонические application seams и их связи. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §1.1 (Application Layer), application/core/, application/services/, application/observability/. По этой схеме удобно проверять, что orchestration, processing, lifecycle и observability остаются разделёнными и собираются вокруг DI-bound contracts, а не вокруг старых монолитных executor/service bundles.
 
 ## Метаданные
 - Тип: `classDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата метаданных: `2026-03-24`

@@ -69,14 +69,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--prefer-svg",
         action="store_true",
-        default=True,
-        help="Rewrite markdown image refs from /png/*.png to /svg/*.svg (default: on).",
+        default=False,
+        help="Rewrite markdown image refs from /png/*.png to /svg/*.svg.",
     )
     parser.add_argument(
         "--no-prefer-svg",
         action="store_false",
         dest="prefer_svg",
-        help="Do not rewrite PNG links to SVG for PDF generation.",
+        help="Rewrite SVG image refs to PNG for PDF generation (default behavior).",
     )
     parser.add_argument(
         "--skip-bounds-check",
@@ -112,6 +112,8 @@ def rewrite_image_links(markdown_text: str, *, base_dir: Path, prefer_svg: bool)
         updated = target
         if prefer_svg and "/png/" in updated and updated.endswith(".png"):
             updated = updated.replace("/png/", "/svg/")[:-4] + ".svg"
+        elif not prefer_svg and "/svg/" in updated and updated.endswith(".svg"):
+            updated = updated.replace("/svg/", "/png/")[:-4] + ".png"
 
         if "://" in updated or updated.startswith("data:"):
             return f"![{alt}]({updated})"
@@ -123,13 +125,17 @@ def rewrite_image_links(markdown_text: str, *, base_dir: Path, prefer_svg: bool)
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> None:
-    completed = subprocess.run(cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True)
+    completed = subprocess.run(
+        cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True
+    )
     if completed.returncode == 0:
         return
     stderr = completed.stderr.strip()
     stdout = completed.stdout.strip()
     details = stderr or stdout or "(no output)"
-    raise RuntimeError(f"Command failed ({completed.returncode}): {' '.join(cmd)}\n{details}")
+    raise RuntimeError(
+        f"Command failed ({completed.returncode}): {' '.join(cmd)}\n{details}"
+    )
 
 
 def render_one(
@@ -163,22 +169,22 @@ def render_one(
         resource_path = f"{input_md.parent}{sep}{REPO_ROOT}"
 
         pandoc_cmd = [
-                "pandoc",
-                str(tmp_md),
-                "--from",
-                "markdown",
-                "--to",
-                "html5",
-                "--standalone",
-                "--metadata",
-                f"title={title}",
-                "--css",
-                str(css_path),
-                "--resource-path",
-                resource_path,
-                "--output",
-                str(tmp_html),
-            ]
+            "pandoc",
+            str(tmp_md),
+            "--from",
+            "markdown",
+            "--to",
+            "html5",
+            "--standalone",
+            "--metadata",
+            f"title={title}",
+            "--css",
+            str(css_path),
+            "--resource-path",
+            resource_path,
+            "--output",
+            str(tmp_html),
+        ]
         if PAGEBREAK_LUA.exists():
             pandoc_cmd.extend(["--lua-filter", str(PAGEBREAK_LUA)])
         run(pandoc_cmd)
@@ -229,7 +235,10 @@ def main() -> int:
         if shutil.which(tool) is None:
             missing_tools.append(tool)
     if missing_tools:
-        print(f"[ERROR] Missing required tools: {', '.join(missing_tools)}", file=sys.stderr)
+        print(
+            f"[ERROR] Missing required tools: {', '.join(missing_tools)}",
+            file=sys.stderr,
+        )
         return 2
     if not css_path.exists():
         print(f"[ERROR] CSS file not found: {css_path}", file=sys.stderr)

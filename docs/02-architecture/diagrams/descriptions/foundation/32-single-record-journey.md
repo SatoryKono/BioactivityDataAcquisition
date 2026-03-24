@@ -3,9 +3,11 @@
 - Исходная диаграмма: `foundation/32-single-record-journey.mmd`
 
 ## Описание
-Диаграмма Title: Record Processing Pipeline — Single Record Journey из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 32-single-record-journey. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §2.1-§2.6 (Data Flow, DQ), §2.8 (Normalization). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: 1. External API, 2. Bronze Layer, 3. Transform (RecordProcessor), 4. Validate, 5. Route Decision. Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: 1. External API, REST API Response (e.g., ChEMBL /activity), 2. Bronze Layer, BronzeWriter.write_bronze() • JSONL serialization • zstd compression • atomic rename • _manifest.json, 3. Transform (RecordProcessor), BatchTransformer.transform(). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Record Processing Pipeline — Single Record Journey показывает актуальный путь одной записи через современный batch-processing stack BioETL. Она представлена в формате `flowchart` и используется как onboarding-friendly foundation-view для понимания того, как `BronzeRecord` проходит через `BatchProcessingService`, Bronze capture, `BatchTransformer`, DQ/quarantine routing и concurrent Silver/Gold persistence.
+
+Ключевые узлы здесь: `DataSourcePort.fetch()`, `BatchProcessingService.process_batch()`, `write_bronze_layer()`, `BatchTransformer.transform_batch()`, `BaseTransformer._transform_impl()`, нормализация, run metadata, `_content_hash`, `TransformResult`, `flush_filtered_records() / flush_dq_records()`, `write_silver_gold_concurrent()`, `BatchWriter.write_silver()`, `BatchWriter.write_gold()`. По этой схеме удобно видеть, что single-record path больше не описывается старым `RecordProcessor`, а раскладывается на явные modern seams в application/core.
 
 ## Метаданные
 - Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата метаданных: `2026-03-24`

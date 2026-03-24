@@ -1,82 +1,79 @@
-%% Title: Pipeline Execution Sequence (Full)
-%% Covers: RULES.md §3 (Pipeline Execution), §3.2 (Preflight), §3.4 (Postrun)
-%% Updated: 2026-02-17
-%% Components: CLI, bootstrap_pipeline, PipelineRunner, PreflightService, PipelineExecutor, DataSourcePort, BaseTransformer, StoragePort, PostrunService
+%% Title: Pipeline Execution Sequence — Runner to Postrun
+%% Covers: application/core/{runner,batch_executor,batch_processing_service}.py, preflight/service.py, postrun/service.py
+%% Updated: 2026-03-24
+%% Components: CLI, build_pipeline_runner, PipelineRunner, PipelineService, LockCoordinator, PreflightService, MedallionLifecycleService, CheckpointManagerService, BatchExecutor, BatchProcessingService, BaseTransformer, StoragePort, PostrunService
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-03-24
 %% @type    sequenceDiagram
-%% @level   Mixed (System / Component / Class)
-%% @nodes   9
-%% @uniform sequence width=184 max_title_len=18
+%% @level   Component / Class
+%% @nodes   13
+%% @uniform sequence width=176 max_title_len=18
 
 sequenceDiagram
     autonumber
-    participant CLI as CLI
-    participant Boot as bootstrap_pipeline
+    actor CLI as CLI
+    participant Builder as build_pipeline_runner
     participant Runner as PipelineRunner
+    participant Services as PipelineService
+    participant Lock as LockCoordinator
     participant Preflight as PreflightService
-    participant Executor as PipelineExecutor
-    participant DataSource as DataSourcePort
+    participant Lifecycle as MedallionLifecycleService
+    participant Checkpoint as CheckpointManagerService
+    participant Executor as BatchExecutor
+    participant Processing as BatchProcessingService
     participant Transformer as BaseTransformer
     participant Storage as StoragePort
     participant Postrun as PostrunService
 
-    %% Bootstrap Phase
-    CLI->>Boot: run(pipeline_name, run_type)
-    activate Boot
-    Boot->>Boot: ensure_providers_loaded()
-    Boot->>Boot: load_pipeline_config()
-    Boot->>Boot: bootstrap_observability()
-    Boot->>Boot: create_runner()
-    Boot-->>CLI: PipelineRunner
-    deactivate Boot
+    CLI->>Builder: create runner for pipeline/runtime
+    Builder-->>CLI: PipelineRunner
 
-    %% Pre-flight Phase
     CLI->>Runner: run()
     activate Runner
-    Runner->>Preflight: execute()
-    activate Preflight
-    Preflight->>Storage: health_check()
-    Storage-->>Preflight: HEALTHY
-    Preflight->>DataSource: health_check()
-    DataSource-->>Preflight: HEALTHY
-    Preflight-->>Runner: success
-    deactivate Preflight
+    Runner->>Services: __aenter__()
+    Runner->>Lock: __aenter__() / acquire()
+    Runner->>Preflight: validate_infrastructure(services)
+    Preflight-->>Runner: HealthReport
+    Runner->>Lifecycle: prepare_for_run(config, runtime)
+    Lifecycle-->>Runner: prepare result
+    Runner->>Checkpoint: load_checkpoint()
+    Checkpoint-->>Runner: offset or None
 
-    %% Lock Acquisition
-    Runner->>Runner: acquire_lock()
-
-    %% Execution Phase
-    Runner->>Executor: execute()
+    Runner->>Executor: execute(limit, query, offset)
     activate Executor
 
-    loop Each Batch
-        Executor->>DataSource: fetch(batch)
-        DataSource-->>Executor: records[]
+    loop while source returns records
+        Executor->>Processing: process_batch(records, start_index)
+        activate Processing
+        Processing->>Storage: write_bronze(records)
+        Processing->>Transformer: transform_batch(records)
+        Transformer-->>Processing: transformed outcome
+        par silver and gold persistence
+            Processing->>Storage: write_silver(...)
+        and
+            Processing->>Storage: write_gold(...)
+        end
+        Processing-->>Executor: batch outcome
+        deactivate Processing
 
-        Executor->Transformer: transform(records)
-        Transformer-->Executor: silver_records[]
-
-        Executor->>Storage: write_bronze(records)
-        Executor->>Storage: write_silver(silver_records)
-        Executor->>Storage: write_gold(gold_records)
-
-        Executor->>Executor: checkpoint()
+        Executor->>Checkpoint: save_checkpoint(records_processed)
     end
 
-    Executor-->>Runner: execution_result
+    Executor-->>Runner: execution complete
     deactivate Executor
 
-    %% Post-run Phase
-    Runner->>Postrun: execute()
+    Runner->>Postrun: run(executor, dq_context)
     activate Postrun
-    Postrun->>Postrun: run_dq_checks()
-    Postrun->>Storage: vacuum()
-    Postrun-->>Runner: postrun_result
+    Postrun->>Postrun: run_silver_compact_if_needed()
+    Postrun->>Postrun: run_dq_checks(executor)
+    Postrun->>Lifecycle: finalize_run(config, runtime, metrics)
+    Lifecycle-->>Postrun: vacuum result
+    Postrun-->>Runner: postrun result
     deactivate Postrun
 
-    %% Cleanup
-    Runner->>Runner: release_lock()
-    Runner-->>CLI: pipeline_result
+    Runner->>Checkpoint: delete_checkpoint()
+    Runner->>Lock: __aexit__() / release()
+    Runner->>Services: __aexit__() / aclose()
+    Runner-->>CLI: pipeline completed
     deactivate Runner

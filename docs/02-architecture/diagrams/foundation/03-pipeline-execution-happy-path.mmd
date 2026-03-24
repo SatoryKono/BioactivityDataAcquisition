@@ -1,13 +1,13 @@
 %% Title: Pipeline Execution — Happy Path
-%% Covers: RULES.md §3 (Pipeline Execution), §3.3 (Locking), §3.4 (Postrun)
-%% Updated: 2026-02-17
-%% Components: CLI, bootstrap_pipeline, PipelineRunner, LockCoordinator, PreflightService, PipelineExecutor, PostrunService
+%% Covers: application/core/runner.py, batch_executor.py, batch_processing_service.py, preflight/service.py, postrun/service.py
+%% Updated: 2026-03-24
+%% Components: CLI, build_pipeline_runner, PipelineRunner, LockCoordinator, PreflightService, MedallionLifecycleService, CheckpointManagerService, BatchExecutor, BatchProcessingService, PostrunService
 
-%% @version 1.1.0
-%% @date    2026-02-24
+%% @version 1.2.0
+%% @date    2026-03-24
 %% @type    sequenceDiagram
-%% @level   Mixed (System / Component / Class)
-%% @nodes   11
+%% @level   Component / Class
+%% @nodes   10
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -19,86 +19,63 @@
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-%% @uniform sequence width=248 max_title_len=26
+%% @uniform sequence width=232 max_title_len=26
 sequenceDiagram
     autonumber
-    participant CLI as CLI
-    participant Bootstrap as bootstrap_pipeline()
+    actor CLI as CLI
+    participant Builder as build_pipeline_runner
     participant Runner as PipelineRunner
     participant LockMgr as LockCoordinator
     participant Preflight as PreflightService
-    participant Executor as PipelineExecutor
-    participant Adapter as DataSourceAdapter
-    participant Processor as RecordProcessor
-    participant Writers as Bronze/Silver/Gold Writers
-    participant Postrun as PostrunService
+    participant Lifecycle as MedallionLifecycleService
     participant Checkpoint as CheckpointManagerService
+    participant Executor as BatchExecutor
+    participant Processing as BatchProcessingService
+    participant Postrun as PostrunService
 
-    CLI->>Bootstrap: run(pipeline_name, config)
-    Bootstrap->>Runner: create(services, config)
+    CLI->>Builder: create runner for pipeline/runtime
+    Builder-->>CLI: PipelineRunner
 
     rect rgb(240, 248, 255)
-        Note over Runner,LockMgr: Phase 1: Lock Acquisition
-        Runner->>LockMgr: acquire_lock(resource, owner_id, ttl=90s)
-        LockMgr-->>Runner: LockResult(acquired=true)
-        Runner->>LockMgr: start_heartbeat(interval=30s)
+        Note over Runner,LockMgr: Phase 1: Managed startup
+        CLI->>Runner: run()
+        activate Runner
+        Runner->>LockMgr: __aenter__() / acquire()
         activate LockMgr
-    end
-
-    rect rgb(255, 250, 240)
-        Note over Runner,Preflight: Phase 2: Preflight Checks
-        Runner->>Preflight: run_checks()
-        Preflight->>Adapter: health_check()
-        Adapter-->>Preflight: HealthStatus.HEALTHY
-        Preflight-->>Runner: PreflightResult(passed=true)
+        Runner->>Preflight: validate_infrastructure(services)
+        Preflight-->>Runner: HealthReport
+        Runner->>Lifecycle: prepare_for_run(config, runtime)
+        Lifecycle-->>Runner: prepare result
     end
 
     rect rgb(240, 255, 240)
-        Note over Runner,Writers: Phase 3: ETL Execution
-        Runner->>Executor: execute(pipeline)
+        Note over Runner,Processing: Phase 2: Batch execution
+        Runner->>Checkpoint: load_checkpoint()
+        Checkpoint-->>Runner: offset or None
+        Runner->>Executor: execute(limit, query, offset)
 
-        loop For each batch
-            Executor->>Adapter: fetch(query)
-            Adapter-->>Executor: AsyncIterator[BronzeRecord]
-
-            Executor->>Processor: process_batch(records)
-            Processor->>Writers: write_bronze(records)
-            Writers-->>Processor: BronzeWriteResult
-
-            Processor->>Processor: transform(records)
-            Note right of Processor: normalize, compute hash, add metadata
-
-            Processor->>Writers: merge_silver(records, primary_key)
-            Writers->>LockMgr: validate_owner()
-            LockMgr-->>Writers: valid
-            Writers-->>Processor: WriteResult
-
-            Processor->>Writers: write_gold(records, schema)
-            Writers->>LockMgr: validate_owner()
-            LockMgr-->>Writers: valid
-            Writers-->>Processor: WriteResult
-
-            Processor-->>Executor: BatchResult
-
-            Note over LockMgr: Every 30s
-            LockMgr->>LockMgr: heartbeat()
+        loop while source returns records
+            Executor->>Processing: process_batch(records, start_index)
+            Processing-->>Executor: batch outcome
+            Executor->>Checkpoint: save_checkpoint(records_processed)
         end
 
-        Executor-->>Runner: ExecutionResult
+        Executor-->>Runner: execution complete
     end
 
     rect rgb(255, 240, 245)
-        Note over Runner,Checkpoint: Phase 4: Postrun & Cleanup
-        Runner->>Postrun: run_checks(metrics)
-        Note right of Postrun: DQ threshold validation
-        Postrun-->>Runner: PostrunResult
-
-        Runner->>Checkpoint: delete(pipeline_name)
-        Checkpoint-->>Runner: deleted
-
-        Runner->>LockMgr: release_lock()
-        deactivate LockMgr
-        LockMgr-->>Runner: released
+        Note over Runner,Postrun: Phase 3: Postrun finalization
+        Runner->>Postrun: run(executor, dq_context)
+        Postrun->>Lifecycle: finalize_run(config, runtime, metrics)
+        Lifecycle-->>Postrun: vacuum result
+        Postrun-->>Runner: postrun result
     end
 
-    Runner-->>CLI: RunResult(success=true, metrics)
+    rect rgb(255, 250, 240)
+        Note over Runner,LockMgr: Phase 4: Cleanup
+        Runner->>Checkpoint: delete_checkpoint()
+        Runner->>LockMgr: __aexit__() / release()
+        deactivate LockMgr
+        Runner-->>CLI: pipeline completed
+        deactivate Runner
+    end

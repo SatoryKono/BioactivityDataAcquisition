@@ -1,58 +1,45 @@
 %% View: Infrastructure-Mapping | Parent: 06-application-layer-class-diagram-full.mermaid
-%% @uniform width=208 height=56 max_title_len=21 max_desc_lines=0
+%% @uniform width=232 height=72 max_title_len=24 max_desc_lines=1
 flowchart TB
-%% keep-orphan: N4, N5
-
-    subgraph Application["Application Layer"]
+    subgraph Orchestration["Runner Orchestration"]
         direction TB
-        N6["RunnerServices"]
-        N7["RecordProcessor"]
-        N8["PipelineRunner"]
-        N9["BasePipeline"]
-        N10["PipelineExecutor"]
-        N11["BatchTransformer"]
-        N12["BaseTransformer"]
-        N13["BaseChemblTransformer"]
-        N14["ActivityTransformer"]
-        N15["MoleculeTransformer"]
-        N16["AssayTransformer"]
-        N17["TargetTransformer"]
-        N18["PipelineService"]
-        N19["PreflightService"]
-        N20["PostrunService"]
+        PR["PipelineRunner"]
+        RD["RunnerDependencies"]
+        PS["PipelineService"]
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
+    subgraph Collaborators["Lifecycle / Support Services"]
         direction TB
-        N1["LockCoordinator"]
-        N2["QuarantineManager"]
-        N3["BatchMetricsRecorderService"]
-        N4["CheckpointManagerService"]
-        N5["MemoryMonitor"]
+        LK["LockCoordinator"]
+        CM["CheckpointManagerService"]
+        PF["PreflightService"]
+        PO["PostrunService"]
+        ML["MedallionLifecycleService"]
+        OB["PipelineObserver"]
     end
 
-    N13 --> N12
-    N14 --> N13
-    N15 --> N13
-    N16 --> N13
-    N17 --> N13
-    N8 --> N9
-    N8 --> N6
-    N10 --> N9
-    N10 --> N7
-    N7 --> N11
-    N7 --> N2
-    N7 --> N3
-    N11 --> N12
-    N9 --> N18
-    N6 --> N1
-    N6 --> N19
-    N6 --> N20
+    subgraph Processing["Execution Support"]
+        direction TB
+        BE["BatchExecutor"]
+        BTM["BatchTracingManagerService"]
+        BMR["BatchMetricsRecorderService"]
+    end
 
-    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    PR ==> RD
+    PR --> PS
+    RD --> LK
+    RD --> CM
+    RD --> PF
+    RD --> PO
+    RD --> ML
+    RD -.-> OB
+    RD --> BE
+    BE -.-> BTM
+    BE -.-> BMR
 
-    %% linkStyle: primary=15 edge(s) | secondary=2 edge(s)
+    style Orchestration fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Collaborators fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Processing fill:#eff6ff,stroke:#2563eb,stroke-width:2px
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
     classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
@@ -60,5 +47,4 @@ flowchart TB
     classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
     classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 15,16 stroke:#16a34a,stroke-width:2px
+    linkStyle default stroke:#1E293B,stroke-width:4px

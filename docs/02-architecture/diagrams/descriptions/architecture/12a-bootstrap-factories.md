@@ -3,9 +3,11 @@
 - Исходная диаграмма: `architecture/12a-bootstrap-factories.mmd`
 
 ## Описание
-Диаграмма Bootstrap: Factories and Registries показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 12a-bootstrap-factories. В исходном файле прямо зафиксирован контекст: Covers composition root factories, provider registry, and builder assembly.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Interfaces Layer, Composition Layer. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: Interfaces Layer, CLI Commands (Click), HTTP Interface, Composition Layer, ProviderRegistry, DataSourceFactory. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=8), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
+Диаграмма Bootstrap: Factories and Registries показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Она концентрируется на актуальных public and factory seams composition-слоя: `composition.entrypoints`, `composition.bootstrap`, `ProviderRegistry`, `PipelineRegistry`, `DataSourceFactory`, `GenericPipelineFactory / RunnerFactory`, `StorageFactory` и composite-specific helper seam, где остаются `RunnerFactoryBuilderService + CompositeSupportServicesFactory`.
+
+Этот срез нужен для быстрого чтения factory topology без лишней runtime-детализации. По нему удобно видеть, что provider/data source и pipeline/storage creation теперь читаются через канонические registry/factory seams, а legacy-looking helper names сохранены только там, где они действительно обслуживают composite runtime path.
 
 ## Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
+- Дата метаданных: `2026-03-24`

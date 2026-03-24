@@ -1,11 +1,11 @@
-# Title: Batch Processing Flow — Extract to Write
+# Title: Batch Processing Flow — BatchProcessingService choreography
 
 - Исходная диаграмма: `foundation/34-batch-processing-flow.mmd`
 
 ## Описание
-Диаграмма Title: Batch Processing Flow — Extract to Write из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 34-batch-processing-flow. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §2.1 (Data Flow), application/core/batch_executor.py. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: PipelineRunner, BatchExecutor (786 LOC), DataSourcePort (e.g., ChemblAdapter), BatchTransformer, BaseTransformer (e.g., ActivityTransformer). По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Показательные узлы диаграммы: batch. Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Batch Processing Flow — BatchProcessingService choreography фиксирует актуальный batch-processing path после выноса processing choreography из `BatchExecutor` в `BatchProcessingService` и `BatchProcessingSupportService`. Она представлена в формате sequenceDiagram и используется как опорная foundation-view для ревью изменений в extract/transform/write flow. Уровень детализации обозначен как Component / Class, поэтому схема концентрируется на актуальной последовательности вызовов между `BatchExecutor`, `BatchProcessingService`, `BatchTracingManagerService`, `BatchProcessingSupportService`, `BatchTransformer`, `BatchWriter` и `BatchExecutionStateService`, а не на старом монолитном executor flow. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §2.1 (Data Flow), application/core/{batch_executor,batch_processing_service,batch_processing_support}.py. По этой схеме удобно валидировать extract phase, source metadata enrichment, Bronze write, transform metrics, concurrent Silver/Gold writes и state commit после успешного batch outcome.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Уровень: `Component / Class`
+- Дата метаданных: `2026-03-24`

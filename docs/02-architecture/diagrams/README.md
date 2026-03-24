@@ -90,7 +90,16 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 > `13a/13b/13c` have two parallel decomposition tracks by design:
 > `port-contracts-*` = contract-centric views, `*-ports` = operational slices.
 
-## Class Diagrams (19 families)
+## Class Diagrams (19 curated families + supplemental package-family coverage)
+
+The canonical handcrafted layer still consists of the 19 curated families below.
+In addition, the directory now publishes AST-derived supplemental package-family
+class diagrams for every `src/bioetl/**` family with more than three top-level
+classes that was not already covered by the curated set.
+
+- Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`
+- Generated source naming: `class-diagrams/90-pkg-*.mmd`
+- Current supplemental coverage: **61 package families / 69 density-aware slices**
 
 | # | Family | File | Description |
 |---|--------|------|-------------|

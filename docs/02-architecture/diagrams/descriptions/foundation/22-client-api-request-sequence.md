@@ -3,9 +3,11 @@
 - Исходная диаграмма: `foundation/22-client-api-request-sequence.mmd`
 
 ## Описание
-Диаграмма Title: HTTP Client API Request Sequence из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 22-client-api-request-sequence. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3.6 (Resilience), §3.7 (Rate Limiting). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: PipelineExecutor, ChemblAdapter, CircuitBreaker, TokenBucket (RateLimiter), UnifiedHTTPClient. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма теперь отражает реальный retry flow `UnifiedHTTPClient`, а не старый путь через `PipelineExecutor`. Входной вызов идёт от `ProviderAdapter` в `UnifiedHTTPClient.get()/post()`, дальше внутри `HTTPClientRetryMixin` запускаются request span, rate limiter, circuit breaker, `httpx.AsyncClient.request(...)`, retry/backoff логика и финальная observability-сводка. Отдельно отмечен путь `get_once()`, который использует те же limiter/breaker seams, но без retry loop.
+
+Этот срез нужен как компактная модель resilience-поведения адаптеров: где именно применяется `TokenBucketRateLimiter`, как `CircuitBreakerGuard` оборачивает вызов, какие ответы считаются retryable и в какой момент формируется `RetryExhaustedError`. Ключевые участники: `ProviderAdapter`, `UnifiedHTTPClient`, `TokenBucketRateLimiter`, `CircuitBreakerGuard`, `httpx.AsyncClient`, `External Provider API`, `Tracing + Metrics`.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Дата метаданных: `2026-03-24`

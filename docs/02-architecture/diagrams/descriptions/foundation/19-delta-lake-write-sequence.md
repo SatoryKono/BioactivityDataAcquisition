@@ -3,9 +3,11 @@
 - Исходная диаграмма: `foundation/19-delta-lake-write-sequence.mmd`
 
 ## Описание
-Диаграмма Title: Delta Lake Write Sequence (Silver Layer) из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 19-delta-lake-write-sequence. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: RecordProcessor, SilverWriter, LockPort, PyArrow, deltalake (Rust). По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма фиксирует актуальный silver write choreography: `BatchProcessingService` передаёт нормализованные записи в `SilverWriter`, тот подготавливает payload через validation/Arrow seam, затем dispatch-политика выбирает merge или plain Delta write path, а финализация отдельно собирает metadata и `SilverWriteResult`. Старый `RecordProcessor` и lock-check этап удалены, потому что они больше не отражают реальную структуру silver writer.
+
+Схема помогает быстро проверить текущую ответственность слоёв: где заканчивается application-orchestration, где начинается `SilverWriter`, как выглядит mode-based dispatch и где возникает Delta/metadata side effect. Ключевые участники: `BatchProcessingService`, `SilverWriter`, `Validation + Arrow prep`, `Delta dispatch policy`, `DeltaTable / write_deltalake`, `Delta log + parquet files`, `Silver metadata finalization`.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Дата метаданных: `2026-03-24`

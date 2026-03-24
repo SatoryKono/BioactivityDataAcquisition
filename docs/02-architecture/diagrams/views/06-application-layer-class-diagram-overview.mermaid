@@ -1,47 +1,50 @@
 %% View: Overview | Parent: 06-application-layer-class-diagram-full.mermaid
-%% @uniform width=208 height=56 max_title_len=21 max_desc_lines=0
+%% @uniform width=208 height=72 max_title_len=21 max_desc_lines=1
 flowchart TB
-
-    subgraph Application["Application Layer"]
+    subgraph Core["Application Core"]
         direction TB
-        N1["PipelineRunner"]
-        N2["RunnerServices"]
-        N3["BaseChemblTransformer"]
-        N4["BaseTransformer"]
-        N6["PreflightService"]
-        N7["PostrunService"]
-        N8["LifecycleOrchestrator"]
-        N9["PipelineObserver"]
-        N10["ActivityTransformer"]
-        N11["MoleculeTransformer"]
-        N12["AssayTransformer"]
-        N13["TargetTransformer"]
-        N14["PipelineExecutor"]
-        N15["RecordProcessor"]
+        BP["BasePipeline"]
+        PR["PipelineRunner"]
+        RD["RunnerDependencies"]
+        BE["BatchExecutor"]
+        PS["PipelineService"]
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
+    subgraph Processing["Processing Flow"]
         direction TB
-        N5["LockCoordinator"]
+        BPS["BatchProcessingService"]
+        BT["BatchTransformer"]
+        BW["BatchWriter"]
+        TR["BaseTransformer"]
     end
 
-    N3 --> N4
-    N10 --> N3
-    N11 --> N3
-    N12 --> N3
-    N13 --> N3
-    N1 --> N2
-    N14 --> N15
-    N2 --> N5
-    N2 --> N6
-    N2 --> N7
-    N2 --> N8
-    N2 --> N9
+    subgraph Lifecycle["Lifecycle Services"]
+        direction TB
+        LK["LockCoordinator"]
+        PF["PreflightService"]
+        PO["PostrunService"]
+        ML["MedallionLifecycleService"]
+        OB["PipelineObserver"]
+    end
 
-    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    PR ==> RD
+    PR --> BP
+    PR --> PS
+    RD --> BE
+    RD --> LK
+    RD --> PF
+    RD --> PO
+    RD --> ML
+    RD -.-> OB
+    BE --> BPS
+    BPS --> BT
+    BPS --> BW
+    BP -.-> TR
+    BT --> TR
 
-    %% linkStyle: primary=10 edge(s) | secondary=2 edge(s)
+    style Core fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Processing fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Lifecycle fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
     classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
@@ -49,5 +52,4 @@ flowchart TB
     classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
     classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10,11 stroke:#16a34a,stroke-width:2px
+    linkStyle default stroke:#1E293B,stroke-width:4px

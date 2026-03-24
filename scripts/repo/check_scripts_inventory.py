@@ -533,7 +533,9 @@ def _extract_registry_entries(
     entries_raw = registry.get("entries")
     if isinstance(entries_raw, dict):
         return entries_raw
-    print(f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}")
+    print(
+        f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}"
+    )
     return None
 
 
@@ -681,7 +683,9 @@ def main(argv: list[str] | None = None) -> int:
         _write_manifest(manifest_path, payload)
         print(f"[OK] Updated scripts inventory manifest: {manifest_path}")
 
-    check_result = _run_requested_checks(root=root, args=args, payload=payload, manifest_path=manifest_path)
+    check_result = _run_requested_checks(
+        root=root, args=args, payload=payload, manifest_path=manifest_path
+    )
     if check_result != 0:
         return check_result
 
@@ -697,7 +701,11 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _run_requested_checks(
-    *, root: Path, args: argparse.Namespace, payload: dict[str, object], manifest_path: Path
+    *,
+    root: Path,
+    args: argparse.Namespace,
+    payload: dict[str, object],
+    manifest_path: Path,
 ) -> int:
     if args.check:
         result = _check(manifest_path, payload)
@@ -732,9 +740,20 @@ def _payload_status_counts(payload: dict[str, object]) -> tuple[int, dict[str, o
     return total_scripts, status_counts
 
 
+def _write_ascii_json_stdout(payload: dict[str, object]) -> None:
+    """Write ASCII-only JSON bytes regardless of console codepage settings."""
+    rendered = json.dumps(payload, ensure_ascii=True, indent=2) + "\n"
+    stdout_buffer = getattr(sys.stdout, "buffer", None)
+    if stdout_buffer is not None:
+        stdout_buffer.write(rendered.encode("ascii"))
+        stdout_buffer.flush()
+        return
+    sys.stdout.write(rendered)
+
+
 def _print_payload(*, args: argparse.Namespace, payload: dict[str, object]) -> None:
     if args.json:
-        print(json.dumps(payload, ensure_ascii=True, indent=2))
+        _write_ascii_json_stdout(payload)
         return
 
     total_scripts, status_counts = _payload_status_counts(payload)
