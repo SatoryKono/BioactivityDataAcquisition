@@ -49,10 +49,15 @@ def register_all_providers(
 
     Each provider includes a data_source_creator for unified registry access.
     """
+    from bioetl.composition.providers.provider_registry import ProviderRegistry
+
     target_registry = _resolve_registration_registry(registry)
+    provider_registry = (
+        target_registry if isinstance(target_registry, ProviderRegistry) else None
+    )
     support = resolve_provider_assembly_support(
         assembly_support,
-        provider_registry=cast("ProviderRegistrarProtocol | None", target_registry),
+        provider_registry=provider_registry,
     )
     for provider_name, config in _build_provider_configs(
         assembly_support=support

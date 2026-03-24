@@ -202,7 +202,8 @@ class PipelineRunner:
     @property
     def manifest_id(self) -> str | None:
         """Control-plane manifest identifier linked to this run."""
-        return self._context.manifest_id
+        manifest_id = getattr(self._context, "manifest_id", None)
+        return None if manifest_id is None else str(manifest_id)
 
     @property
     def services(self) -> PipelineService:

@@ -33,13 +33,13 @@ def get_run_manifest_service() -> RunManifestInspectionService:
 
 def _emit_payload(payload: dict[str, object], output_format: str) -> None:
     """Serialize CLI payload to the requested output format."""
-    if output_format == "text":
-        echo_info(_render_text_payload(payload))
-        return
     if output_format == "json":
         echo_info(json.dumps(payload, indent=2, default=str))
         return
-    echo_info(yaml.dump(payload, default_flow_style=False, sort_keys=False))
+    if output_format == "yaml":
+        echo_info(yaml.dump(payload, default_flow_style=False, sort_keys=False))
+        return
+    echo_info(_render_text_payload(payload))
 
 
 def _format_scalar(value: object) -> str:

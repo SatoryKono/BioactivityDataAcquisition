@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.datasource.data_source_factory import (
@@ -190,20 +190,23 @@ class GenericPipelineFactory(Generic[TPipeline]):
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
         """Create pipeline instance with wired services and optional transformer."""
-        return create_pipeline_instance_with_services(
-            factory_context=self._build_factory_context(),
-            request=_CreatePipelineWithServicesRequest(
-                run_id,
-                runtime,
-                settings,
-                logger,
-                manifest_id,
-                config,
-                filter_config,
-                tracer,
-                dq_monitor,
-                metrics,
-                cached_bronze,
+        return cast(
+            TPipeline,
+            create_pipeline_instance_with_services(
+                factory_context=self._build_factory_context(),
+                request=_CreatePipelineWithServicesRequest(
+                    run_id,
+                    runtime,
+                    settings,
+                    logger,
+                    manifest_id,
+                    config,
+                    filter_config,
+                    tracer,
+                    dq_monitor,
+                    metrics,
+                    cached_bronze,
+                ),
             ),
         )
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, Self, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 RecordT = TypeVar("RecordT")
+RecordOutT = TypeVar("RecordOutT", covariant=True)
+WrappedDataSourceT = TypeVar("WrappedDataSourceT", bound="_HasWrappedDataSource")
 _UNSET_FETCH_ARG = object()
 
 
@@ -30,6 +32,10 @@ class _HasWrappedDataSource(Protocol):
     """
 
     _data_source: DataSourcePort
+
+    def _after_wrapped_data_source_enter(self) -> None:
+        """Reset wrapper-local state after entering the wrapped data source."""
+        ...
 
 
 class _SourceMetadataDelegationMixin:
@@ -60,7 +66,7 @@ class _WrappedDataSourceDelegationMixin:
         """Provider name from the wrapped data source."""
         return self._data_source.provider_name
 
-    async def __aenter__(self: _HasWrappedDataSource) -> Self:
+    async def __aenter__(self: WrappedDataSourceT) -> WrappedDataSourceT:
         """Enter async context and allow subclasses to reset wrapper state."""
         await self._data_source.__aenter__()
         self._after_wrapped_data_source_enter()
@@ -87,20 +93,20 @@ class _WrappedDataSourceDelegationMixin:
         await self._data_source.aclose()
 
 
-class _TargetEntityFetchWrapper(Protocol[RecordT]):
+class _TargetEntityFetchWrapper(Protocol[RecordOutT]):
     """Structural contract for wrappers deriving a target entity from a source."""
 
     _data_source: DataSourcePort
     TARGET_ENTITY_TYPE: str
 
-    async def _fetch_target_records(
+    def _fetch_target_records(
         self,
         limit: int | None,
         query: str | None,
         filter_ids: list[str] | None,
         filter_field: str | None,
         offset: int | None,
-    ) -> AsyncIterator[RecordT]:
+    ) -> AsyncIterator[RecordOutT]:
         """Yield target records derived from the wrapped source."""
 
 
@@ -137,42 +143,53 @@ class _TargetEntityFetchDelegationMixin:
         )
 
 
-class _FilterableTargetWrapper(Protocol[RecordT]):
+class _FilterableTargetWrapper(Protocol[RecordOutT]):
     """Structural contract for wrappers exposing a derived target entity."""
 
-    _data_source: object
+    _data_source: DataSourcePort
     SOURCE_ENTITY_TYPE: str
     TARGET_ENTITY_TYPE: str
 
-    async def _fetch_target_filtered_records(
+    def _fetch_target_filtered_records(
         self,
         filterable: FilterableDataSourcePort,
         filter_ids: list[str],
         filter_field: str,
         limit: int | None,
-    ) -> AsyncIterator[RecordT]:
+    ) -> AsyncIterator[RecordOutT]:
         """Yield target records from a filtered upstream stream."""
 
-    async def _fetch_target_multi_filtered_records(
+    def _fetch_target_multi_filtered_records(
         self,
         filterable: FilterableDataSourcePort,
         filters: dict[str, list[str]],
         limit: int | None,
-    ) -> AsyncIterator[RecordT]:
+    ) -> AsyncIterator[RecordOutT]:
         """Yield target records from a multi-filtered upstream stream."""
 
-    async def _fetch_target_filtered_with_fallback_records(
+    def _fetch_target_filtered_with_fallback_records(
         self,
         filterable: FilterableDataSourcePort,
         filter_ids: list[str],
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None,
-    ) -> AsyncIterator[RecordT]:
+    ) -> AsyncIterator[RecordOutT]:
         """Yield target records from a fallback-enabled upstream stream."""
 
 
-class _FallbackFilterableTargetWrapper(Protocol[RecordT]):
+class _FilterableTargetDelegatingWrapper(
+    _FilterableTargetWrapper[RecordOutT],
+    Protocol[RecordOutT],
+):
+    """Structural contract for wrappers using filterable delegation mixin."""
+
+    def _ensure_filterable(self, method_name: str) -> FilterableDataSourcePort:
+        """Validate and return the wrapped filterable data source."""
+        ...
+
+
+class _FallbackFilterableTargetWrapper(Protocol[RecordOutT]):
     """Structural contract for target wrappers with shared fallback behavior."""
 
     SOURCE_ENTITY_TYPE: str
@@ -187,7 +204,7 @@ class _FallbackFilterableTargetWrapper(Protocol[RecordT]):
         self,
         source_records: AsyncIterator[object],
         limit: int | None,
-    ) -> AsyncIterator[RecordT]:
+    ) -> AsyncIterator[RecordOutT]:
         """Transform fallback-fetched source records into target records."""
 
 
@@ -206,7 +223,7 @@ class _FilterableTargetDelegationMixin:
         )
 
     async def fetch_filtered(
-        self: _FilterableTargetWrapper,
+        self: _FilterableTargetDelegatingWrapper[RecordT],
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -227,10 +244,10 @@ class _FilterableTargetDelegationMixin:
                 limit=limit,
             ),
         ):
-            yield record
+            yield cast("RecordT", record)
 
     async def fetch_multi_filtered(
-        self: _FilterableTargetWrapper[RecordT],
+        self: _FilterableTargetDelegatingWrapper[RecordT],
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
@@ -249,10 +266,10 @@ class _FilterableTargetDelegationMixin:
                 limit=limit,
             ),
         ):
-            yield record
+            yield cast("RecordT", record)
 
     async def fetch_filtered_with_fallback(
-        self: _FilterableTargetWrapper[RecordT],
+        self: _FilterableTargetDelegatingWrapper[RecordT],
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -279,7 +296,7 @@ class _FilterableTargetDelegationMixin:
                 limit=limit,
             ),
         ):
-            yield record
+            yield cast("RecordT", record)
 
 
 class _FallbackFilterableTargetFetchMixin:
@@ -342,7 +359,11 @@ async def _yield_wrapped_fetch_records(
         fetch_kwargs["filter_ids"] = filter_ids
     if filter_field is not _UNSET_FETCH_ARG:
         fetch_kwargs["filter_field"] = filter_field
-    async for record in data_source.fetch(**fetch_kwargs):
+    iterator = cast(
+        "AsyncIterator[RecordT]",
+        cast("Any", data_source).fetch(**fetch_kwargs),
+    )
+    async for record in iterator:
         yield record
 
 

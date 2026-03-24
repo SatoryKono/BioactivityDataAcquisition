@@ -106,7 +106,7 @@ class RunLedgerService:
         details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record a published layer artifact tied to this manifest."""
-        payload = {"artifact_path": artifact_path}
+        payload: dict[str, object] = {"artifact_path": artifact_path}
         if details:
             payload.update(details)
         return self._append(

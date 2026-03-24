@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, cast
 from uuid import UUID
 
 from bioetl.domain.types import RunID, RunType
@@ -17,7 +19,7 @@ __all__ = [
 ]
 
 
-def _normalize_mapping(value: dict[object, object]) -> dict[str, object]:
+def _normalize_mapping(value: Mapping[object, object]) -> dict[str, object]:
     """Normalize nested mappings into JSON-serializable primitives."""
     return {str(key): _normalize_serializable(item) for key, item in value.items()}
 
@@ -35,8 +37,10 @@ def _normalize_scalar(value: object) -> object:
 
 def _normalize_serializable(value: object) -> object:
     """Normalize nested values into JSON-serializable primitives."""
-    if is_dataclass(value):
-        return _normalize_mapping(asdict(value))
+    if is_dataclass(value) and not isinstance(value, type):
+        return _normalize_mapping(
+            cast("Mapping[object, object]", asdict(cast("Any", value)))
+        )
     if isinstance(value, dict):
         return _normalize_mapping(value)
     if isinstance(value, (list, tuple, set, frozenset)):
@@ -110,9 +114,9 @@ class RunManifest:
             pipeline_name=str(payload["pipeline_name"]),
             provider=str(payload["provider"]),
             entity=str(payload["entity"]),
-            launch_context=dict(payload.get("launch_context", {})),
-            runtime_config=dict(payload.get("runtime_config", {})),
-            resolved_config=dict(payload.get("resolved_config", {})),
+            launch_context=_load_object_mapping(payload.get("launch_context")),
+            runtime_config=_load_object_mapping(payload.get("runtime_config")),
+            resolved_config=_load_object_mapping(payload.get("resolved_config")),
             code_provenance=_load_code_provenance(payload.get("code_provenance")),
             source_refs=_load_source_refs(payload.get("source_refs")),
             planned_artifacts=_load_artifacts(payload.get("planned_artifacts")),
@@ -127,12 +131,19 @@ def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
 
 def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
     """Deserialize code provenance payload safely."""
-    payload = raw_code if isinstance(raw_code, dict) else {}
+    payload = _load_object_mapping(raw_code)
     return RunCodeProvenance(
         pipeline_version=_load_optional_str(payload, "pipeline_version"),
         git_commit=_load_optional_str(payload, "git_commit"),
         config_hash=_load_optional_str(payload, "config_hash"),
     )
+
+
+def _load_object_mapping(raw_mapping: object) -> dict[str, object]:
+    """Deserialize an arbitrary mapping into a string-keyed object payload."""
+    if not isinstance(raw_mapping, dict):
+        return {}
+    return {str(key): value for key, value in raw_mapping.items()}
 
 
 def _load_source_refs(raw_sources: object) -> tuple[RunSourceRef, ...]:

@@ -61,7 +61,7 @@ def create_factory(
     config: PipelineFactoryConfig,
     *,
     provider_registry: ProviderRegistry | None = None,
-) -> GenericPipelineFactory:
+) -> GenericPipelineFactory[GenericPipeline]:
     """Create a GenericPipelineFactory from configuration.
 
     Args:

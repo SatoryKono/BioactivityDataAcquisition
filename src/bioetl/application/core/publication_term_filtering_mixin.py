@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core._data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
@@ -65,4 +65,7 @@ class PublicationTermFilteringMixin(
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Transform fallback-fetched publications into publication-term records."""
-        return self._yield_terms_from_publications(source_records, limit)
+        return cast(
+            "AsyncIterator[BronzeRecord]",
+            self._yield_terms_from_publications(source_records, limit),
+        )
