@@ -1,17 +1,17 @@
 %% Title: Composition Root Wiring — Public APIs and Assembly
 %% Covers: RULES.md §1.1 (Composition Layer), ADR-005, RF-011
 %% Rank: 3 (Score 9.00) — Current composition seams and retained facade policy
-%% Updated: 2026-03-19
+%% Updated: 2026-03-24
 
-%% @version 1.2.0
-%% @date    2026-03-19
+%% @version 1.3.0
+%% @date    2026-03-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Module)
-%% @nodes   17
+%% @nodes   19
 %% keep-orphan: ENTRY
 %% @uniform-group interfaces nodes=CLI
-%% @uniform-group public     nodes=EXEC,SERV,RES,ENTRY
-%% @uniform-group assembly   nodes=BPR,BSRV,SB,RF,DSF,STF,REG
+%% @uniform-group public     nodes=EXEC,SERV,RES,CAPI,ENTRY
+%% @uniform-group assembly   nodes=BPR,BSRV,GPF,FMH,CSUP,CWIR,DSF,STF,REG
 %% @uniform-group runtime    nodes=PRS,PRUN,PS,ADP,STOR
 %% @uniform-width group
 flowchart TB
@@ -23,14 +23,17 @@ flowchart TB
         EXEC["execution_api<br/>runner creation + metrics flush"]
         SERV["services_api<br/>service accessors"]
         RES["resources_api<br/>cleanup / checkpoint / archive helpers"]
+        CAPI["creation_api<br/>compat shim → creation_support"]
         ENTRY["entrypoints.py<br/>retained broad facade"]
     end
 
     subgraph Assembly["Composition assembly"]
         BPR["bootstrap_pipeline_runner()"]
         BSRV["bootstrap_pipeline_runner_service()"]
-        SB["ServicesBuilder"]
-        RF["RunnerFactory"]
+        GPF["GenericPipelineFactory<br/>create_runner + create_with_services"]
+        FMH["factory_method_helpers<br/>+ _PipelineFactoryContext"]
+        CSUP["creation_support<br/>public creation seam"]
+        CWIR["_creation_wiring<br/>pipeline creation internals"]
         DSF["DataSourceFactory"]
         STF["StorageFactory"]
         REG["ProviderRegistry"]
@@ -51,22 +54,25 @@ flowchart TB
     ENTRY -. retained public re-export .-> EXEC
     ENTRY -. retained public re-export .-> SERV
     ENTRY -. retained public re-export .-> RES
+    ENTRY -. retained public re-export .-> CAPI
 
     EXEC ==> BPR
     SERV ==> BSRV
+    CAPI --> CSUP
     RES --> STF
 
-    BPR --> SB
-    BPR --> RF
-    BSRV --> SB
-    BSRV --> RF
-    SB --> DSF
-    SB --> STF
+    BPR --> GPF
+    BSRV --> GPF
+    GPF --> FMH
+    FMH --> DSF
+    FMH --> STF
+    FMH --> CSUP
+    CSUP --> CWIR
+    CWIR --> PS
     DSF --> REG
     DSF --> ADP
     STF --> STOR
-    SB --> PS
-    RF --> PRUN
+    FMH --> PRUN
     BSRV --> PRS
     PRS --> PS
     PRUN --> PS
@@ -83,6 +89,6 @@ flowchart TB
     classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
 
     class CLI layer_interfaces;
-    class EXEC,SERV,RES,ENTRY,BPR,BSRV,SB,RF,DSF,STF,REG layer_composition;
+    class EXEC,SERV,RES,CAPI,ENTRY,BPR,BSRV,GPF,FMH,CSUP,CWIR,DSF,STF,REG layer_composition;
     class PRS,PRUN,PS layer_application;
     class ADP,STOR layer_infrastructure;

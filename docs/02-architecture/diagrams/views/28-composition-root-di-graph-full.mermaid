@@ -1,21 +1,21 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/28-composition-root-di-graph.mmd
 %% Full reference diagram retained after decomposition.
-%% Synced: 2026-02-27
+%% Synced: 2026-03-24
 
 %% Title: Composition Root Wiring — Full DI Graph
 %% Covers: RULES.md §1.1 (Composition Layer), ADR-005
 %% Rank: 3 (Score 9.00) — Complete dependency injection assembly
-%% Updated: 2026-02-17
+%% Updated: 2026-03-24
 
-%% @version 1.1.0
-%% @date    2026-02-24
+%% @version 1.2.0
+%% @date    2026-03-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 %% @uniform-group entry     nodes=CLI,BOOT
-%% @uniform-group factories nodes=BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF
-%% @uniform-group registry  nodes=PR,OB
-%% @uniform-group created   nodes=UHC,ADP,BW,SLL,PS,RUN
+%% @uniform-group factories nodes=BL,OB,HCF,DSF,STF,GPF,FMH,CAP,CSUP,CWIR
+%% @uniform-group registry  nodes=PR
+%% @uniform-group created   nodes=UHC,ADP,STOR,PS,PRS,RUN
 %% @uniform-width group
 
 %% @uniform width=296 groups=4 width_strategy=group
@@ -35,7 +35,6 @@
   }
 }}%%
 flowchart TB
-%% keep-orphan: OB
     subgraph Entry["Entry Point"]
         CLI["CLI run command<br/><br/>"]
         BOOT["bootstrap/runtime/assembly.py<br/><br/>"]
@@ -46,7 +45,7 @@ flowchart TB
 
         subgraph LoggerFactories["Logger & Observability"]
             BL["BootstrapLogger<br/>• configure structlog<br/><br/>"]
-            DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor<br/><br/>"]
+            OB["ObservabilityBundle<br/>• logger + metrics + tracing<br/><br/>"]
         end
 
         subgraph ClientFactories["Client & Data Source"]
@@ -54,21 +53,21 @@ flowchart TB
             DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl<br/><br/>"]
         end
 
-        subgraph StorageFactories["Storage & Services"]
+        subgraph StorageFactories["Storage"]
             STF["StorageFactory<br/>• create(config)<br/>→ Bronze/Silver/Gold writers<br/>"]
-            STA["StorageAdapter<br/>• create_bronze/silver/gold<br/>"]
-            SB["ServicesBuilder<br/>• wire storage/lock/obs<br/>• build() → PipelineService"]
         end
 
         subgraph PipelineFactories["Pipeline Construction"]
-            RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner<br/><br/>"]
-            GPF["GenericPipelineFactory<br/>• pipeline/transformer/schema bindings<br/>"]
+            GPF["GenericPipelineFactory<br/>• create_runner + create_with_services<br/>"]
+            FMH["factory_method_helpers<br/>• build_factory_services()<br/>• create_factory_runner()"]
+            CAP["creation_api<br/>compat shim<br/><br/>"]
+            CSUP["creation_support<br/>public creation seam<br/><br/>"]
+            CWIR["_creation_wiring<br/>pipeline creation internals<br/><br/>"]
         end
     end
 
     subgraph Registry["Registration"]
         PR["ProviderRegistry<br/>• 8 providers registered<br/><br/>"]
-        OB["ObservabilityBundle<br/>• logger + metrics + tracing<br/><br/>"]
     end
 
     subgraph Created["Created Instances"]
@@ -77,12 +76,12 @@ flowchart TB
             direction TB
             UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/>"]
             ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/>"]
-            BW["BronzeWriter<br/><br/>"]
-            SLL["StructlogLogger<br/><br/>"]
+            STOR["Bronze / Silver / Gold writers<br/><br/>"]
         end
         subgraph RuntimeCore["Application Instances"]
             direction TB
             PS["PipelineService<br/>(frozen bundle)<br/><br/>"]
+            PRS["PipelineRunnerService<br/><br/>"]
             RUN["PipelineRunner<br/>(fully assembled)<br/><br/>"]
         end
     end
@@ -90,39 +89,34 @@ flowchart TB
     %% Bootstrap flow
     CLI ==> BOOT
     BOOT -.-> BL
-    BL --> SLL
+    BL --> OB
     BOOT -.-> HCF
-    HCF -.-> UHC
+    HCF --> UHC
     BOOT -.-> DSF
     DSF -.->|"uses"| PR
     DSF -.->|"uses"| UHC
     DSF --> ADP
     BOOT -.-> STF
-    STF -.-> STA
-    STA ==> BW & SW & GW
-    BOOT -.-> DQF
-    BOOT ==> SB
-    SB -.->|"injects"| BW & SW & GW
-    SB -.->|"injects"| ML
-    SB -.->|"injects"| LC
-    SB -.->|"injects"| UQ
-    SB -.->|"injects"| SLL
-    SB -.->|"injects"| PMM
-    SB -.->|"injects"| NOT
-    SB ==> PS
-    BOOT ==> RF
-    RF -.->|"uses"| PS
-    RF -.->|"uses"| ADP
-    RF ==> RUN
-
-    %% Registry connections
-    GPF -.->|"registers"| PLREG
-    PR -.->|"maps"| DSR
+    STF --> STOR
+    BOOT ==> GPF
+    GPF --> FMH
+    CAP -. compat .-> CSUP
+    FMH --> CSUP
+    CSUP --> CWIR
+    FMH --> DSF
+    FMH --> STF
+    CWIR --> PS
+    GPF --> PRS
+    FMH ==> RUN
+    RUN --> PS
+    RUN --> ADP
+    PRS --> PS
+    OB -.-> RUN
 
     %% Layout constraints
     CLI ~~~ BOOT
     PR ~~~ OB
-    UHC ~~~ ADP ~~~ BW ~~~ SLL ~~~ PS ~~~ RUN
+    UHC ~~~ ADP ~~~ STOR ~~~ PS ~~~ PRS ~~~ RUN
 
     %% Styling
     style Entry fill:#f5f3ff,stroke:#7c3aed
@@ -145,11 +139,11 @@ flowchart TB
     classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1.4px,stroke-dasharray:3 2;
 
     class CLI layer_interfaces;
-    class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
-    class PS,RUN layer_application;
-    class UHC,ADP,BW,SLL layer_infrastructure;
+    class BOOT,BL,OB,HCF,DSF,STF,GPF,FMH,CAP,CSUP,CWIR,PR layer_composition;
+    class PS,PRS,RUN layer_application;
+    class UHC,ADP,STOR layer_infrastructure;
 
     %% Click tooltips
-    click SB "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Injects storage, lock, checkpoint, quarantine, logger, metrics, tracing"
+    click FMH "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Assembler helpers coordinate storage, data source, and runner creation seams"
     click DSF "../../00-project/RULES.md" "Resolves provider registry and shared HTTP client"
-    click RF "../../00-project/RULES.md" "Builds PipelineRunner from composed services and adapter"
+    click CSUP "../../00-project/RULES.md" "Sanctioned support seam for pipeline creation wiring"
