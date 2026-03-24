@@ -38,6 +38,8 @@ class TestPipelineSettings:
         assert settings.silver_merge_timeout.execution_timeout_seconds == 45.0
         assert settings.silver_merge_timeout.unit_execution_timeout_seconds == 15.0
         assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == 90.0
+        assert settings.control_plane.run_manifest_enabled is True
+        assert settings.control_plane.run_ledger_enabled is True
 
     def test_custom_values(self) -> None:
         """Test custom pipeline settings."""
@@ -55,6 +57,10 @@ class TestPipelineSettings:
                 "e2e_execution_timeout_seconds": 120.0,
                 "max_retries": 0,
             },
+            control_plane={
+                "run_manifest_enabled": True,
+                "run_ledger_enabled": False,
+            },
         )
 
         assert settings.batch_size == 500
@@ -69,6 +75,18 @@ class TestPipelineSettings:
         assert settings.silver_merge_timeout.execution_timeout_seconds == 60.0
         assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == 120.0
         assert settings.silver_merge_timeout.max_retries == 0
+        assert settings.control_plane.run_manifest_enabled is True
+        assert settings.control_plane.run_ledger_enabled is False
+
+    def test_control_plane_validation_requires_manifest_for_ledger(self) -> None:
+        """Ledger cannot be enabled when manifest creation is disabled."""
+        with pytest.raises(ValidationError):
+            PipelineSettings(
+                control_plane={
+                    "run_manifest_enabled": False,
+                    "run_ledger_enabled": True,
+                }
+            )
 
     def test_batch_size_validation(self) -> None:
         """Test batch_size validation."""

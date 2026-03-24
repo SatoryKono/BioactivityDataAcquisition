@@ -44,6 +44,9 @@ from bioetl.composition.bootstrap.cli.noop import (
     create_noop_observability_bundle,
     create_noop_tracing,
 )
+from bioetl.composition.bootstrap.cli.run_manifest import (
+    bootstrap_run_manifest_service,
+)
 from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_bronze_cleanup_service,
     bootstrap_cleanup_service,
@@ -73,6 +76,7 @@ __all__ = [
     "bootstrap_metrics_service",
     "bootstrap_quarantine_manager",
     "bootstrap_quarantine_service",
+    "bootstrap_run_manifest_service",
     "bootstrap_vacuum_service",
     # NoOp factories (centralized)
     "create_noop_logger",

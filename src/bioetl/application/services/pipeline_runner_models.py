@@ -24,6 +24,7 @@ class RunResult:
     pipeline_name: str
     run_id: str
     run_type: str
+    manifest_id: str | None = None
     records_fetched: int = 0
     records_bronze: int = 0
     records_silver: int = 0

@@ -43,6 +43,7 @@ standard runbook path.
 
 - [Observability Checklist](runbooks/observability-checklist.md)
 - [Checkpoint Debugging](runbooks/checkpoint-debugging.md)
+- [Run Manifest Inspection](runbooks/run-manifest-inspection.md)
 
 ### Extended / Non-Default Material
 

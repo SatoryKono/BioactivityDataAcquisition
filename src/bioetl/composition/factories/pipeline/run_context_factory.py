@@ -40,6 +40,7 @@ class RunContextFactory:
         run_id: RunID,
         runtime: RuntimeConfig,
         yaml_config: PipelineYamlConfig,
+        manifest_id: str | None = None,
     ) -> RunContext:
         """Create metadata ``RunContext`` from runtime and resolved YAML."""
         entity = self.entity_type_extractor(self.pipeline_name) or self.pipeline_name
@@ -52,4 +53,5 @@ class RunContextFactory:
             pipeline_version=self.pipeline_version_getter(yaml_config),
             git_commit=self.git_commit_getter(),
             config_hash=self.config_hash_getter(yaml_config),
+            manifest_id=manifest_id,
         )

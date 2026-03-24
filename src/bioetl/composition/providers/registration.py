@@ -52,7 +52,7 @@ def register_all_providers(
     target_registry = _resolve_registration_registry(registry)
     support = resolve_provider_assembly_support(
         assembly_support,
-        provider_registry=cast("ProviderRegistry | None", target_registry),
+        provider_registry=cast("ProviderRegistrarProtocol | None", target_registry),
     )
     for provider_name, config in _build_provider_configs(
         assembly_support=support

@@ -16,6 +16,7 @@ from bioetl.composition._services import (
     get_pipeline_runner_service,
     get_quarantine_port,
     get_quarantine_service,
+    get_run_manifest_service,
     get_vacuum_service,
 )
 
@@ -33,5 +34,6 @@ __all__ = [
     "get_pipeline_runner_service",
     "get_quarantine_port",
     "get_quarantine_service",
+    "get_run_manifest_service",
     "get_vacuum_service",
 ]

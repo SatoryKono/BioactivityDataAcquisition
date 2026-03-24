@@ -49,6 +49,7 @@ from bioetl.composition.bootstrap.cli import (
     bootstrap_metrics_service,
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
+    bootstrap_run_manifest_service,
     bootstrap_vacuum_service,
 )
 
@@ -93,6 +94,7 @@ __all__ = [
     "bootstrap_quarantine_manager",
     "bootstrap_quarantine_port",
     "bootstrap_quarantine_service",
+    "bootstrap_run_manifest_service",
     "bootstrap_vacuum_service",
     "load_composite_config",
     "load_pipeline_config",

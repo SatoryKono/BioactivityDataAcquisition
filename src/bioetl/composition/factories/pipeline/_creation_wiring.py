@@ -97,6 +97,7 @@ class _PipelineCreationRequest:
     runtime: RuntimeConfig
     settings: Settings
     logger: LoggerPort
+    manifest_id: str | None = None
     config: PipelineYamlConfig | None = None
     filter_config: object | None = None
     tracer: TracingPort | None = None
@@ -151,6 +152,7 @@ def _create_pipeline_with_services_impl(
             run_id=request.run_id,
             runtime=request.runtime,
             yaml_config=yaml_config,
+            manifest_id=request.manifest_id,
         )
     )
 

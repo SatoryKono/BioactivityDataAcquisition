@@ -255,6 +255,7 @@ class PipelineRunnerService:
         )
         return self._build_run_result(
             outcome=outcome,
+            runner=runner,
             pipeline_name=pipeline_name,
             run_id=run_id,
             run_type=run_type,
@@ -265,6 +266,7 @@ class PipelineRunnerService:
         self,
         *,
         outcome: PipelineExecutionResult,
+        runner: ExecutionMetricsRunnerPort,
         pipeline_name: str,
         run_id: RunID,
         run_type: str,
@@ -277,6 +279,7 @@ class PipelineRunnerService:
             status=status,
             pipeline_name=pipeline_name,
             run_id=str(run_id),
+            manifest_id=getattr(runner, "manifest_id", None),
             run_type=run_type,
             records_fetched=metrics.get("records_fetched", 0),
             records_bronze=metrics.get("records_bronze", 0),

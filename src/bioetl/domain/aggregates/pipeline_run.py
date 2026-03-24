@@ -51,6 +51,7 @@ class PipelineRun(_PipelineRunReadModelMixin, _PipelineRunLifecycleMixin):
     _started_at: datetime | None
     _ended_at: datetime | None
     _events: list[DomainEvent]
+    _manifest_id: str | None
     _metadata: JsonDict
 
     def __init__(
@@ -58,6 +59,7 @@ class PipelineRun(_PipelineRunReadModelMixin, _PipelineRunLifecycleMixin):
         run_id: RunID,
         run_type: RunType,
         pipeline_name: str = "",
+        manifest_id: str | None = None,
         metadata: JsonDict | None = None,
     ) -> None:
         """Initialize a new pipeline run.
@@ -76,4 +78,5 @@ class PipelineRun(_PipelineRunReadModelMixin, _PipelineRunLifecycleMixin):
         self._started_at = None
         self._ended_at = None
         self._events = []
+        self._manifest_id = manifest_id
         self._metadata = metadata or {}

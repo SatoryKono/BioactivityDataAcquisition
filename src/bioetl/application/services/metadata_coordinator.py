@@ -137,6 +137,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         """
         return RuntimeMetadata(
             run_id=str(self._context.run_id),
+            manifest_id=self._context.manifest_id,
             run_type=self._run_type_enum,
             started_at_utc=started_at or self._context.started_at,
             completed_at_utc=completed_at,

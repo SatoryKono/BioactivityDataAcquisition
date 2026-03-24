@@ -36,6 +36,7 @@ This section contains playbooks for handling common alerts and operational tasks
 | Runbook | Description | Priority |
 |---------|-------------|----------|
 | [Observability Checklist](observability-checklist.md) | Metrics, logging, and alerting verification | - |
+| [Run Manifest Inspection](run-manifest-inspection.md) | Inspect run control-plane provenance, config, and ledger history | P1 |
 
 ---
 
@@ -44,4 +45,4 @@ This section contains playbooks for handling common alerts and operational tasks
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
 ---
-*Last updated: 2026-03-13*
+*Last updated: 2026-03-24*

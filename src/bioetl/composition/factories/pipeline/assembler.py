@@ -60,13 +60,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-
 __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
-
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
-
 
 class GenericPipelineFactory(Generic[TPipeline]):
     """Configurable factory for creating pipeline instances."""
@@ -103,7 +100,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         )
 
     def _build_factory_context(self) -> _PipelineFactoryContext:
-        """Build current factory context from mutable compatibility seams."""
         return _PipelineFactoryContext(
             pipeline_name=self.pipeline_name,
             create_data_source_fn=self._create_data_source,
@@ -149,7 +145,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create provider data source via injected data-source creator."""
         return create_factory_data_source(
             create_data_source_fn=self._create_data_source,
             settings=settings,
@@ -168,7 +163,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
-        """Build shared pipeline services for the configured pipeline."""
         return build_factory_services(
             factory_context=self._build_factory_context(),
             request=_BuildFactoryServicesRequest(
@@ -187,6 +181,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         runtime: RuntimeConfig,
         settings: Settings,
         logger: LoggerPort,
+        manifest_id: str | None = None,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
@@ -202,6 +197,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 runtime,
                 settings,
                 logger,
+                manifest_id,
                 config,
                 filter_config,
                 tracer,
@@ -217,6 +213,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         runtime: RuntimeConfig,
         settings: Settings,
         observability: ObservabilityBundle,
+        manifest_id: str | None = None,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
@@ -230,13 +227,13 @@ class GenericPipelineFactory(Generic[TPipeline]):
             runtime=runtime,
             settings=settings,
             observability=observability,
+            manifest_id=manifest_id,
             create_with_services_fn=self.create_with_services,
             assemble_runner_fn=assemble_runner,
             filter_config=filter_config,
             config=config,
             cached_bronze=cached_bronze,
         )
-
 
 def create_pipeline_factory(
     pipeline_name: str,
@@ -248,7 +245,6 @@ def create_pipeline_factory(
     transformer_class: type[BaseTransformer] | None = None,
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
-    """Create a configured :class:`GenericPipelineFactory`."""
     return GenericPipelineFactory(
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,

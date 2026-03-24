@@ -88,6 +88,7 @@ class PipelineRunContext:
     pipeline_name: str
     run_id: RunID
     run_type: RunType
+    manifest_id: str | None = None
 
     resume: bool = False
     dry_run: bool = False

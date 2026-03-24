@@ -37,6 +37,7 @@ from bioetl.domain.ports.config import (
     SettingsLoaderPort,
     SettingsPort,
 )
+from bioetl.domain.ports.control_plane import RunLedgerPort, RunManifestPort
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
     DataSourceFactoryPort,
@@ -98,9 +99,9 @@ from bioetl.domain.ports.runtime import (
     ClockPort,
     CompositeCheckpointPort,
     DebugAction,
-    ExecutionObservabilityPort,
     ExecutionMetricsReadablePort,
     ExecutionMetricsRunnerPort,
+    ExecutionObservabilityPort,
     LockPort,
     MemoryMonitorPort,
     MemoryStats,
@@ -157,9 +158,9 @@ __all__ = [
     "DomainConfigMapperPort",
     "ErrorClassifierPort",
     "ErrorHandlerPort",
-    "ExecutionObservabilityPort",
     "ExecutionMetricsReadablePort",
     "ExecutionMetricsRunnerPort",
+    "ExecutionObservabilityPort",
     "ExecutorMetricsPort",
     "ExportCatalogPort",
     "ExportWriterPort",
@@ -202,6 +203,8 @@ __all__ = [
     "QuarantineWriteRequest",
     "RateLimiterPort",
     "RegistryAccessorPort",
+    "RunLedgerPort",
+    "RunManifestPort",
     "RunnablePort",
     "RunnerFactoryPort",
     "SettingsLoaderPort",

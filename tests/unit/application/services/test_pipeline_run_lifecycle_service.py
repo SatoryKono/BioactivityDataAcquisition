@@ -26,6 +26,7 @@ def run() -> PipelineRun:
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
         pipeline_name="chembl_activity",
+        manifest_id="manifest-1",
     )
 
 
@@ -53,6 +54,7 @@ def test_start_and_complete_flow(
     assert len(run.stages) == 1
     assert run.stages[0].status == StageStatus.SUCCESS
     assert run.stages[0].records_processed == 10
+    assert run.manifest_id == "manifest-1"
 
 
 def test_stage_failed_marks_run_failed(

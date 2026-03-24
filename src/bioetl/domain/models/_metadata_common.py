@@ -150,6 +150,7 @@ class RuntimeMetadata(BaseModel):
 
     Attributes:
         run_id: Unique pipeline run identifier (UUID).
+        manifest_id: Immutable control-plane manifest identifier for the run.
         run_type: Type of pipeline run.
         started_at_utc: UTC timestamp when run started.
         completed_at_utc: UTC timestamp when run completed.
@@ -157,6 +158,10 @@ class RuntimeMetadata(BaseModel):
     """
 
     run_id: str = Field(description="Pipeline run UUID (correlation ID)")
+    manifest_id: str | None = Field(
+        default=None,
+        description="Immutable run-manifest identifier for control-plane linkage",
+    )
     run_type: RunTypeEnum = Field(description="Type of pipeline run")
     started_at_utc: datetime = Field(description="Run start timestamp (ISO 8601 UTC)")
     completed_at_utc: datetime | None = Field(

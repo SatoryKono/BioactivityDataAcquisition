@@ -39,6 +39,7 @@ class RunContext:
         pipeline_version: Pipeline version for reproducibility (e.g., '1.0.0').
         git_commit: Git commit hash for reproducibility.
         config_hash: SHA256 hash of pipeline configuration for change detection.
+        manifest_id: Optional control-plane manifest identifier linked to the run.
 
     Example:
         >>> from datetime import UTC, datetime
@@ -69,6 +70,7 @@ class RunContext:
     pipeline_version: str | None = None
     git_commit: str | None = None
     config_hash: str | None = None
+    manifest_id: str | None = None
 
     def __post_init__(self) -> None:
         """Validate run context after initialization."""
@@ -100,6 +102,7 @@ class RunContext:
         pipeline_version: str | None = None,
         git_commit: str | None = None,
         config_hash: str | None = None,
+        manifest_id: str | None = None,
     ) -> RunContext:
         """Factory method to create RunContext with derived pipeline_name.
 
@@ -114,6 +117,7 @@ class RunContext:
             pipeline_version: Optional pipeline version for metadata.
             git_commit: Optional git commit hash for reproducibility.
             config_hash: Optional SHA256 hash of pipeline config.
+            manifest_id: Optional immutable control-plane manifest identifier.
 
         Returns:
             RunContext with pipeline_name derived as '{provider}_{entity}'.
@@ -130,4 +134,5 @@ class RunContext:
             pipeline_version=pipeline_version,
             git_commit=git_commit,
             config_hash=config_hash,
+            manifest_id=manifest_id,
         )

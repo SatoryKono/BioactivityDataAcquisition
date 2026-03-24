@@ -23,6 +23,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner_service,
     bootstrap_quarantine_port,
     bootstrap_quarantine_service,
+    bootstrap_run_manifest_service,
     bootstrap_vacuum_service,
 )
 
@@ -37,6 +38,7 @@ if TYPE_CHECKING:
         MetricsService,
         PipelineRunnerService,
         QuarantineService,
+        RunManifestInspectionService,
         VacuumService,
     )
     from bioetl.application.services.lock_service import LockService
@@ -58,6 +60,7 @@ __all__ = [
     "get_pipeline_runner_service",
     "get_quarantine_port",
     "get_quarantine_service",
+    "get_run_manifest_service",
     "get_vacuum_service",
 ]
 
@@ -247,6 +250,12 @@ def get_config_service() -> ConfigService:
     """
     _ensure_registrations()
     return bootstrap_config_service()
+
+
+def get_run_manifest_service() -> RunManifestInspectionService:
+    """Get a run-manifest inspection service for control-plane operations."""
+    _ensure_registrations()
+    return bootstrap_run_manifest_service()
 
 
 def get_health_service() -> HealthService:

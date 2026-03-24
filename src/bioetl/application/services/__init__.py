@@ -60,6 +60,12 @@ from bioetl.application.services.pipeline_runner_service import (
 from bioetl.application.services.quarantine_service import (
     QuarantineService,
 )
+from bioetl.application.services.run_manifest_inspection_service import (
+    RunManifestDiffEntry,
+    RunManifestDiffResult,
+    RunManifestInspectionResult,
+    RunManifestInspectionService,
+)
 from bioetl.application.services.vacuum_service import (
     TableVacuumResult,
     VacuumAllResult,
@@ -82,6 +88,10 @@ __all__ = [
     "PipelineRunResult",
     "PipelineRunnerService",
     "QuarantineService",
+    "RunManifestDiffEntry",
+    "RunManifestDiffResult",
+    "RunManifestInspectionResult",
+    "RunManifestInspectionService",
     "RunOptions",
     "RunResult",
     "TableInfo",

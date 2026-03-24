@@ -4,7 +4,7 @@ BioETL command-line interface (CLI) - основной способ взаимо
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
 **Версия:** 6.0.0
-**Дата обновления:** 2026-03-02
+**Дата обновления:** 2026-03-24
 
 ---
 
@@ -189,6 +189,70 @@ bioetl run-composite --composite publication --enrich-only crossref,openalex
 
 # Только обязательные enrichers
 bioetl run-composite --composite publication --required-only
+```
+
+---
+
+### `run-manifest` — Inspect control-plane manifests and ledgers
+
+Просмотр immutable run manifest и append-only ledger history для уже
+запущенных пайплайнов.
+
+Поведение команды зависит от runtime rollout flags:
+
+- `settings.pipeline.control_plane.run_manifest_enabled`
+- `settings.pipeline.control_plane.run_ledger_enabled`
+
+Если `run_manifest_enabled=false`, команда не сможет разрешить новые запуски,
+потому что control-plane artifacts не создаются. Если manifest включён, а ledger
+выключен, `show` по-прежнему вернёт manifest payload, но без history entries.
+
+#### `run-manifest show` — Показать manifest и ledger
+
+```bash
+bioetl run-manifest show <RUN-ID|MANIFEST-ID> [--format text|json|yaml]
+```
+
+Команда:
+
+- разрешает `run_id` через control-plane index;
+- выводит manifest payload;
+- добавляет ledger history для этого же manifest.
+
+По умолчанию команда использует человекочитаемый `text`-формат. Для
+machine-readable вывода укажи `--format json` или `--format yaml`.
+
+**Примеры:**
+
+```bash
+bioetl run-manifest show 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87
+bioetl run-manifest show 8d166b4d-c4a8-4755-896e-cf9158c5b5ec --format yaml
+```
+
+#### `run-manifest diff` — Сравнить два запуска
+
+```bash
+bioetl run-manifest diff <LEFT> <RIGHT> [--format text|json|yaml]
+```
+
+Команда сравнивает top-level reproducibility-significant поля двух manifest:
+
+- `pipeline_name`
+- `run_type`
+- `runtime_config`
+- `resolved_config`
+- `code_provenance`
+- `source_refs`
+- `planned_artifacts`
+
+По умолчанию diff печатается в компактном `text`-виде. Для автоматической
+обработки используй `--format json` или `--format yaml`.
+
+**Примеры:**
+
+```bash
+bioetl run-manifest diff 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 17f6799e-6c1a-4dd6-a7a1-b1fe2ea3e9ae
+bioetl run-manifest diff 8d166b4d-c4a8-4755-896e-cf9158c5b5ec d775f516-ff3e-4d66-a369-1417c3ff093f --format yaml
 ```
 
 ---

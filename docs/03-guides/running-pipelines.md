@@ -3,7 +3,7 @@
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
 **Версия:** 6.1.0
-**Дата обновления:** 2026-03-13
+**Дата обновления:** 2026-03-24
 
 ----------------------------------------------------------------------
 
@@ -48,7 +48,34 @@ bioetl run --pipeline chembl_activity --limit 100
 
 # Запуск полного пайплайна
 bioetl run --pipeline chembl_activity
+
+# Инспекция control-plane артефактов завершённого запуска
+bioetl run-manifest show <RUN-ID>
 ```
+
+### Run Manifest и Run Ledger
+
+Если `settings.pipeline.control_plane.run_manifest_enabled=true`, каждый запуск
+создаёт immutable manifest до начала фактического выполнения пайплайна. Если
+дополнительно включён `run_ledger_enabled`, runtime пишет append-only историю
+lifecycle и artifact publication events, связанную через `manifest_id`.
+
+Для inspection используются команды:
+
+```bash
+bioetl run-manifest show <RUN-ID|MANIFEST-ID>
+bioetl run-manifest diff <LEFT> <RIGHT>
+```
+
+Файловое MVP-хранилище control-plane лежит в:
+
+```text
+data/output/control/run_manifest/{manifest_id}.json
+data/output/control/run_ledger/{manifest_id}.jsonl
+```
+
+Sidecar metadata Bronze/Silver/Gold не встраивает полный manifest payload, но
+несёт ссылку `runtime.manifest_id` для связи dataset -> run control plane.
 
 ----------------------------------------------------------------------
 

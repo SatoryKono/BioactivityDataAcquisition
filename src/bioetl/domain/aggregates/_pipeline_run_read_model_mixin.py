@@ -19,6 +19,7 @@ class _PipelineRunAttrs:
     __slots__ = (
         "_ended_at",
         "_events",
+        "_manifest_id",
         "_metadata",
         "_pipeline_name",
         "_run_id",
@@ -36,6 +37,7 @@ class _PipelineRunAttrs:
     _started_at: datetime | None
     _ended_at: datetime | None
     _events: list[DomainEvent]
+    _manifest_id: str | None
     _metadata: JsonDict
 
 
@@ -83,6 +85,11 @@ class _PipelineRunReadModelMixin(_PipelineRunAttrs):
     def metadata(self) -> JsonDict:
         """Copy of run metadata."""
         return self._metadata.copy()
+
+    @property
+    def manifest_id(self) -> str | None:
+        """Optional control-plane manifest identifier associated with the run."""
+        return self._manifest_id
 
     @property
     def duration_seconds(self) -> float | None:

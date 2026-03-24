@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -76,6 +77,13 @@ class NoOpMemoryMonitor:
 
 class NoOpMetadataWriter:
     """No-op implementation of MetadataWriterPort."""
+
+    def attach_artifact_recorder(
+        self,
+        recorder: Callable[[str, str, dict[str, object] | None], object] | None,
+    ) -> None:
+        """Accept an artifact recorder and intentionally ignore it."""
+        _ = recorder
 
     async def write_bronze_metadata(
         self,

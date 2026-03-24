@@ -124,6 +124,17 @@ class TestRunResultModel:
 
         assert result.duration_seconds == 150.0
 
+    def test_manifest_id_is_preserved_when_present(self) -> None:
+        result = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="run-001",
+            run_type="incremental",
+            manifest_id="manifest-001",
+        )
+
+        assert result.manifest_id == "manifest-001"
+
 
 @pytest.mark.unit
 class TestPipelineNotFoundErrorModel:
