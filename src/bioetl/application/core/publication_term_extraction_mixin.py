@@ -16,6 +16,27 @@ if TYPE_CHECKING:
 class PublicationTermExtractionMixin:
     """Shared publication->term extraction flow."""
 
+    async def _yield_terms_from_publications(
+        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        publications: AsyncIterator[BronzeRecord],
+        limit: int | None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Expand a publication stream into term records with optional limit."""
+        term_count = 0
+        async for publication in publications:
+            publication_id = publication.get("publication_id") or publication.get(
+                "document_chembl_id"
+            )
+            if not publication_id:
+                continue
+
+            terms = self._extract_terms_from_publication(publication, publication_id)
+            for term in terms:
+                yield term
+                term_count += 1
+                if limit and term_count >= limit:
+                    return
+
     async def _fetch_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         limit: int | None,
@@ -32,27 +53,15 @@ class PublicationTermExtractionMixin:
             filter_field: Optional field name on which to filter upstream publications.
                 When None, no field filter is applied.
         """
-        term_count = 0
         publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
-
-        async for publication in self._data_source.fetch(
+        publications = self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
             limit=publication_limit,
             filter_ids=filter_ids,
             filter_field=filter_field,
-        ):
-            publication_id = publication.get("publication_id") or publication.get(
-                "document_chembl_id"
-            )
-            if not publication_id:
-                continue
-
-            terms = self._extract_terms_from_publication(publication, publication_id)
-            for term in terms:
-                yield term
-                term_count += 1
-                if limit and term_count >= limit:
-                    return
+        )
+        async for term in self._yield_terms_from_publications(publications, limit):
+            yield term
 
     def _extract_terms_from_publication(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
@@ -190,24 +199,12 @@ class PublicationTermExtractionMixin:
             limit: Optional maximum number of term records to yield. The upstream
                 publication fetch uses a multiplied limit to account for term expansion.
         """
-        term_count = 0
         publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
-
-        async for publication in filterable.fetch_filtered(
+        publications = filterable.fetch_filtered(
             entity_type=self.SOURCE_ENTITY_TYPE,
             filter_ids=filter_ids,
             filter_field=filter_field,
             limit=publication_limit,
-        ):
-            publication_id = publication.get("publication_id") or publication.get(
-                "document_chembl_id"
-            )
-            if not publication_id:
-                continue
-
-            terms = self._extract_terms_from_publication(publication, publication_id)
-            for term in terms:
-                yield term
-                term_count += 1
-                if limit and term_count >= limit:
-                    return
+        )
+        async for term in self._yield_terms_from_publications(publications, limit):
+            yield term

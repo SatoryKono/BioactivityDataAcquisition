@@ -135,11 +135,12 @@ hotspot_budgets:
       class_size: 1
       god_object: 1
 report_only_hotspot_families:
-  snapshot_date: '2026-03-23'
+  snapshot_date: '2026-03-24'
   mode: report-only
   artifact_policy:
     duplication_command: "make qa-hotspot-report"
     history_artifact: "reports/quality/hotspot-duplication-history.jsonl"
+    latest_reviewed_snapshot: "2026-03-24"
     expected_direction: "downward"
     ratchet_policy: "Observe one to two successful refactor waves before enabling any family-level ratchet."
   families:
@@ -150,7 +151,7 @@ report_only_hotspot_families:
       path_prefixes:
         - "src/bioetl/application/core/"
       metrics:
-        duplication_clusters: 21
+        duplication_clusters: 16
         files: 81
         total_loc: 12259
         files_ge_250_loc: 18
@@ -158,8 +159,8 @@ report_only_hotspot_families:
         max_internal_fan_in: 22
         max_internal_fan_in_module: "bioetl.application.core.base_transformer"
       trend:
-        status: "baseline_opened"
-        next_action: "Compare against the next refactor wave and only ratchet after two non-regressing observations."
+        status: "down_vs_2026-03-23"
+        next_action: "2026-03-24 reduced application/core duplication from 21 to 16; keep follow-up focused on remaining compatibility and batch/runtime duplicate slices before considering any ratchet."
     - name: "composition_bootstrap_runtime"
       owner: "@bioetl-platform"
       linked_rf: "RF-023"
@@ -175,8 +176,8 @@ report_only_hotspot_families:
         max_internal_fan_in: 5
         max_internal_fan_in_module: "bioetl.composition.bootstrap.runtime.observability"
       trend:
-        status: "watch"
-        next_action: "Hold as a baseline-only monitor and ratchet only if the next waves stay flat or improve."
+        status: "flat_vs_2026-03-23"
+        next_action: "2026-03-24 stayed flat at 1 duplication cluster; keep monitoring and only consider ratchet after a real downward move or another stable wave."
     - name: "composition_factories_pipeline"
       owner: "@bioetl-platform"
       linked_rf: "RF-023"
@@ -192,8 +193,8 @@ report_only_hotspot_families:
         max_internal_fan_in: 6
         max_internal_fan_in_module: "bioetl.composition.factories.pipeline.registry"
       trend:
-        status: "watch"
-        next_action: "Treat as a narrow backlog signal and wait for at least one successful cleanup wave before any ratchet."
+        status: "flat_vs_2026-03-23"
+        next_action: "2026-03-24 stayed flat at 4 duplication clusters; keep it as a narrow cleanup target and wait for a downward move before any ratchet."
 quarterly_targets:
   - quarter: "2026-Q1"
     max_total_exemptions: 10

@@ -213,7 +213,76 @@ class TestGenericPipelineFactory:
             pandera_silver_schema=factory.pandera_silver_schema,
         )
 
-    @patch("bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config")
+    @patch(
+        "bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config"
+    )
+    @patch("bioetl.composition.factories.pipeline.assembler.assemble_runner")
+    def test_create_runner_loads_yaml_config_and_forwards_runtime_support_when_omitted(
+        self,
+        mock_assemble_runner: MagicMock,
+        mock_load_pipeline_config: MagicMock,
+    ) -> None:
+        """Implicit config path should load YAML once and preserve runtime support seams."""
+        yaml_config = MagicMock()
+        pipeline = MagicMock()
+        runner = MagicMock()
+        mock_load_pipeline_config.return_value = yaml_config
+        mock_assemble_runner.return_value = runner
+        factory = GenericPipelineFactory(
+            pipeline_name="chembl_activity",
+            pipeline_class=MagicMock,
+            provider="chembl",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            data_source_creator=MagicMock(),
+        )
+        factory.create_with_services = MagicMock(return_value=pipeline)  # type: ignore[method-assign]
+        runtime = SimpleNamespace(strict_gold_validation=False)
+        settings = SimpleNamespace(env="dev", test_mode=False)
+        observability = SimpleNamespace(
+            logger=MagicMock(),
+            tracer=MagicMock(),
+            dq_monitor=MagicMock(),
+            metrics=MagicMock(),
+        )
+        filter_config = MagicMock()
+        cached_bronze = MagicMock()
+
+        result = factory.create_runner(
+            run_id="run-load-path",
+            runtime=runtime,
+            settings=settings,
+            observability=observability,
+            filter_config=filter_config,
+            cached_bronze=cached_bronze,
+        )
+
+        assert result is runner
+        mock_load_pipeline_config.assert_called_once_with("chembl_activity")
+        factory.create_with_services.assert_called_once_with(
+            run_id="run-load-path",
+            runtime=runtime,
+            settings=settings,
+            logger=observability.logger,
+            config=yaml_config,
+            filter_config=filter_config,
+            tracer=observability.tracer,
+            dq_monitor=observability.dq_monitor,
+            metrics=observability.metrics,
+            cached_bronze=cached_bronze,
+        )
+        mock_assemble_runner.assert_called_once_with(
+            pipeline=pipeline,
+            observability=observability,
+            silver_schema=factory.silver_schema,
+            gold_schema=factory.gold_schema,
+            strict_gold_validation=False,
+            yaml_config=yaml_config,
+        )
+
+    @patch(
+        "bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config"
+    )
     @patch("bioetl.composition.factories.pipeline.assembler.assemble_runner")
     def test_create_runner_uses_explicit_config_and_observability_contract(
         self,
@@ -278,7 +347,9 @@ class TestGenericPipelineFactory:
             yaml_config=config,
         )
 
-    @patch("bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config")
+    @patch(
+        "bioetl.composition.factories.pipeline.factory_method_helpers.load_pipeline_config"
+    )
     @patch("bioetl.composition.factories.pipeline.assembler.assemble_runner")
     def test_create_runner_forces_strict_gold_validation_in_prod(
         self,

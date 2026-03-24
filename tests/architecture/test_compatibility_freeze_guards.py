@@ -45,6 +45,13 @@ PIPELINE_CONFIGS_COMPAT_MODULE = "bioetl.composition.factories.pipeline.configs"
 PIPELINE_CREATION_API_COMPAT_MODULE = (
     "bioetl.composition.factories.pipeline.creation_api"
 )
+RUN_COMMAND_INTERNAL_MODULE = "bioetl.interfaces.cli.commands.domains.run.command"
+RUN_ALL_COMMAND_INTERNAL_MODULE = (
+    "bioetl.interfaces.cli.commands.domains.run_all.command"
+)
+RUN_COMPOSITE_COMMAND_INTERNAL_MODULE = (
+    "bioetl.interfaces.cli.commands.domains.composite.command"
+)
 PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(
     {
@@ -262,6 +269,75 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
         }
     ),
 }
+ALLOWED_RUN_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run"
+        / "__init__.py",
+    }
+)
+ALLOWED_RUN_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run.py",
+    }
+)
+ALLOWED_RUN_ALL_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run_all"
+        / "__init__.py",
+    }
+)
+ALLOWED_RUN_ALL_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "run_all.py",
+    }
+)
+ALLOWED_RUN_COMPOSITE_COMMAND_INTERNAL_SRC_FILES = frozenset(
+    {
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "run_composite.py",
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "composite"
+        / "__init__.py",
+    }
+)
+ALLOWED_RUN_COMPOSITE_COMMAND_INTERNAL_STRING_SRC_FILES = frozenset(
+    {
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "run_composite.py",
+    }
+)
 ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "interfaces" / "cli" / "__init__.py",
@@ -310,13 +386,7 @@ ALLOWED_INFRASTRUCTURE_CONFIG_LOADER_SYMBOL_SRC_FILES: frozenset[Path] = frozens
 ALLOWED_PIPELINE_CONFIG_RESOLUTION_SRC_FILES: frozenset[Path] = frozenset()
 ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES = frozenset(
     {
-        ROOT
-        / "tests"
-        / "unit"
-        / "composition"
-        / "factories"
-        / "pipeline"
-        / "test_pipeline_factory_construction.py",
+        ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
     }
 )
 ALLOWED_PIPELINE_CONFIGS_COMPAT_TEST_FILES = frozenset(
@@ -563,6 +633,102 @@ def test_cli_registry_helper_module_is_confined_to_cli_src_entrypoints(
     assert not violations, (
         "CLI registry helper compatibility seam leaked beyond the known CLI src "
         "entrypoints:\n" + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_run_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should reach the run command through the retained public seam."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=RUN_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_RUN_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal run command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_run_command_internal_module_string_is_confined_to_retained_run_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal run-owner string references should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{RUN_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_RUN_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal run command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_run_all_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should reach run-all through the retained public seam."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=RUN_ALL_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_RUN_ALL_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal run-all command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_run_all_command_internal_module_string_is_confined_to_retained_run_all_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal run-all owner string references should stay inside the retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{RUN_ALL_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_RUN_ALL_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal run-all command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_run_composite_command_internal_module_is_not_imported_in_src_outside_owning_package(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """First-party src should reach run-composite through the retained public seam."""
+    violations = _iter_module_import_violations(
+        source_ast_cache,
+        module_name=RUN_COMPOSITE_COMMAND_INTERNAL_MODULE,
+        allowed_files=ALLOWED_RUN_COMPOSITE_COMMAND_INTERNAL_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal run-composite command module leaked into first-party src imports:\n"
+        + "\n".join(violations)
+    )
+
+
+@pytest.mark.architecture
+def test_run_composite_command_internal_module_string_is_confined_to_retained_run_composite_seam_in_src(
+    source_content_cache: dict[Path, str],
+) -> None:
+    """Internal run-composite owner string refs should stay inside retained seam."""
+    violations = _iter_string_mentions(
+        source_content_cache,
+        needle=f'"{RUN_COMPOSITE_COMMAND_INTERNAL_MODULE}"',
+        allowed_files=ALLOWED_RUN_COMPOSITE_COMMAND_INTERNAL_STRING_SRC_FILES,
+    )
+    assert not violations, (
+        "Internal run-composite command module string references leaked into first-party src:\n"
+        + "\n".join(violations)
     )
 
 
