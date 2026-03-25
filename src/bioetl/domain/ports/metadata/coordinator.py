@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.types import JsonDict, ScdConfig
+from bioetl.domain.types.dq_contracts import DQRuleProvenance
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
@@ -106,7 +107,7 @@ class SilverMetadataInput:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
-    dq_rule_provenance: list[dict[str, str | None]] | None = None
+    dq_rule_provenance: list[DQRuleProvenance] | None = None
     partition_by: list[str] | None = None
     governance: GovernanceMetadata | None = None
     started_at: datetime | None = None
@@ -155,6 +156,10 @@ class GoldMetadataInput:
         partition_count: Number of partitions (ADR-029).
         schema_validation_enabled: Whether schema validation ran before write.
         schema_validation_strict: Whether validation used strict mode.
+        dq_rule_provenance: List of DQ rule provenance entries for traceability.
+        dq_policy_hash: Hash of the effective DQ policy for consistency checking.
+        contract_ref: Reference to the DQ contract used for validation.
+        contract_version: Version of the DQ contract used for validation.
     """
 
     table_path: str
@@ -177,6 +182,10 @@ class GoldMetadataInput:
     partition_count: int = 0  # ADR-029: Number of partitions
     schema_validation_enabled: bool = False
     schema_validation_strict: bool | None = None
+    dq_rule_provenance: list[DQRuleProvenance] | None = None
+    dq_policy_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
 
     def __post_init__(self) -> None:
         """Coerce legacy mapping payloads into typed SCD config."""

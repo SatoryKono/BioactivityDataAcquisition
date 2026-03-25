@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.providers._models import (
     DataSourceCreatorProtocol,
-    ProviderSettingsProtocol,
     ProviderConfig,
+    ProviderSettingsProtocol,
 )
 
 if TYPE_CHECKING:

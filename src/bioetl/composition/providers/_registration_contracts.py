@@ -10,8 +10,8 @@ from bioetl.composition.providers._models import (
     AdapterCreator,
     DataSourceCreatorProtocol,
     HttpConfig,
-    ProviderSettingsProtocol,
     ProviderConfig,
+    ProviderSettingsProtocol,
 )
 
 if TYPE_CHECKING:

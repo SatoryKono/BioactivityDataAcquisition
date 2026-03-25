@@ -14,6 +14,32 @@ from bioetl.domain.config.validation import (
     CrossFieldValidation,
     FieldValidation,
 )
+from bioetl.domain.types.dq_contracts import DQDisposition
+
+
+class frozendict(dict):
+    """Immutable dictionary for disposition_overrides."""
+
+    def __setitem__(self, _key, _value):
+        raise TypeError("frozendict is immutable")
+
+    def __delitem__(self, _key):
+        raise TypeError("frozendict is immutable")
+
+    def clear(self):
+        raise TypeError("frozendict is immutable")
+
+    def pop(self, _key, _default=None):
+        raise TypeError("frozendict is immutable")
+
+    def popitem(self):
+        raise TypeError("frozendict is immutable")
+
+    def update(self, _other=None, **_kwargs):
+        raise TypeError("frozendict is immutable")
+
+    def setdefault(self, _key, _default=None):
+        raise TypeError("frozendict is immutable")
 
 __all__ = [
     "DQConfig",
@@ -70,6 +96,14 @@ class DQConfig:
         conditional_validations: Conditional validation rules.
         invalid_record_policy: Policy for handling invalid records.
         report: DQ report configuration.
+
+        # Contract-based DQ configuration (Epic 2: Effective Policy Resolver)
+        contract_ref: str | None = None
+        contract_version: str | None = None
+        rule_bundle_version: str | None = None
+        default_disposition_policy: DQDisposition = DQDisposition.WARN
+        disposition_overrides: dict[str, DQDisposition] = field(default_factory=dict)
+        strictness_mode: Literal["lenient", "moderate", "strict"] = "moderate"
     """
 
     soft_fail_threshold: float = 0.05
@@ -83,8 +117,16 @@ class DQConfig:
     report: DQReportConfig = field(default_factory=DQReportConfig)
     key_nullability_rules: tuple[KeyNullabilityRule, ...] = ()
 
+    # Contract-based DQ configuration
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    rule_bundle_version: str | None = None
+    default_disposition_policy: DQDisposition = DQDisposition.WARN
+    disposition_overrides: dict[str, DQDisposition] = field(default_factory=dict)
+    strictness_mode: Literal["lenient", "moderate", "strict"] = "moderate"
+
     def __post_init__(self) -> None:
-        """Validate threshold invariants on creation."""
+        """Validate threshold invariants and freeze sequences on creation."""
         self.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -98,6 +140,14 @@ class DQConfig:
                 "key_nullability_rules",
             ),
         )
+        # Convert disposition_overrides to tuple of items for hashability
+        # Always convert to tuple to ensure consistency
+        if isinstance(self.disposition_overrides, dict):
+            object.__setattr__(
+                self,
+                "disposition_overrides",
+                tuple(self.disposition_overrides.items()),
+            )
 
     @staticmethod
     def validate_thresholds(

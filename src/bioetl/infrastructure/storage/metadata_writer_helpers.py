@@ -6,11 +6,12 @@ import asyncio
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import yaml
 
 from bioetl.domain.lineage import DatasetRef
+from bioetl.domain.models.metadata import BronzeMetadata, GoldMetadata, SilverMetadata
+from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 from bioetl.infrastructure.storage.metadata import writer_operations as _operations
 from bioetl.infrastructure.storage.metadata.writer_operations import (
@@ -26,15 +27,6 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
     AtomicWriteError,
     atomic_write_text,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.models.metadata import (
-        BronzeMetadata,
-        GoldMetadata,
-        SilverMetadata,
-    )
-    from bioetl.domain.ports import LoggerPort, MetricsPort
-
 
 _get_metadata_filename = _operations._get_metadata_filename
 ArtifactPublicationRecorder = Callable[[str, str, dict[str, object] | None], object]

@@ -253,15 +253,14 @@ class PipelineRunner:
         shutdown_recorded = False
 
         try:
-            with self._pipeline_span():
-                with self._observer:
-                    try:
-                        async with self._services, self._lock_manager:
-                            await self._run_managed_pipeline()
-                    except PipelineShutdownError:
-                        self._record_run_shutdown()
-                        shutdown_recorded = True
-                        raise
+            with self._pipeline_span(), self._observer:
+                try:
+                    async with self._services, self._lock_manager:
+                        await self._run_managed_pipeline()
+                except PipelineShutdownError:
+                    self._record_run_shutdown()
+                    shutdown_recorded = True
+                    raise
         except PipelineShutdownError:
             if not shutdown_recorded:
                 self._record_run_shutdown()

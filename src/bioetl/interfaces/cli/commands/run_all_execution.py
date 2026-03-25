@@ -8,16 +8,16 @@ from bioetl.interfaces.cli.commands._compat import alias_module
 
 if TYPE_CHECKING:
     from bioetl.interfaces.cli.commands.domains.run_all.execution import (
-        run_all_pipelines_async as run_all_pipelines_async,
-    )
-    from bioetl.interfaces.cli.commands.domains.run_all.execution import (
         RunAllBatchExecutionRequest as RunAllBatchExecutionRequest,
     )
     from bioetl.interfaces.cli.commands.domains.run_all.execution import (
-        run_batch_with_policy as run_batch_with_policy,
+        RunAllPolicyRequest as RunAllPolicyRequest,
     )
     from bioetl.interfaces.cli.commands.domains.run_all.execution import (
-        RunAllPolicyRequest as RunAllPolicyRequest,
+        run_all_pipelines_async as run_all_pipelines_async,
+    )
+    from bioetl.interfaces.cli.commands.domains.run_all.execution import (
+        run_batch_with_policy as run_batch_with_policy,
     )
 
 alias_module(__name__, "bioetl.interfaces.cli.commands.domains.run_all.execution")

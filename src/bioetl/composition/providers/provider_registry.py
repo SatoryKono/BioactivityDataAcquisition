@@ -17,8 +17,8 @@ from bioetl.composition.providers._models import (
     AdapterCreator,
     DataSourceCreatorProtocol,
     HttpConfig,
-    ProviderSettingsProtocol,
     ProviderConfig,
+    ProviderSettingsProtocol,
 )
 from bioetl.composition.providers._store import ProviderStore
 

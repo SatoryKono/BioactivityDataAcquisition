@@ -11,6 +11,9 @@ if TYPE_CHECKING:
         BatchRunResult as BatchRunResult,
     )
     from bioetl.interfaces.cli.commands.domains.run_all.support import (
+        RunAllExecutionPlan as RunAllExecutionPlan,
+    )
+    from bioetl.interfaces.cli.commands.domains.run_all.support import (
         create_run_all_options as create_run_all_options,
     )
     from bioetl.interfaces.cli.commands.domains.run_all.support import (
@@ -39,9 +42,6 @@ if TYPE_CHECKING:
     )
     from bioetl.interfaces.cli.commands.domains.run_all.support import (
         resolve_run_all_registry as resolve_run_all_registry,
-    )
-    from bioetl.interfaces.cli.commands.domains.run_all.support import (
-        RunAllExecutionPlan as RunAllExecutionPlan,
     )
     from bioetl.interfaces.cli.commands.domains.run_all.support import (
         should_prompt_for_destructive_run as should_prompt_for_destructive_run,
