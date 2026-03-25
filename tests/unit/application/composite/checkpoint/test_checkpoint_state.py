@@ -449,6 +449,13 @@ class TestToDict:
             "dependency_results",
             "completed_enrichers",
             "enrichment_results",
+            "merge_completed",
+            "merge_result",
+            "checkpoint_schema_version",
+            "effective_config_hash",
+            "contract_ref",
+            "contract_version",
+            "composite_run_identity",
             "created_at",
             "updated_at",
         }

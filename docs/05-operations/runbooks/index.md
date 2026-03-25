@@ -37,6 +37,9 @@ This section contains playbooks for handling common alerts and operational tasks
 |---------|-------------|----------|
 | [Observability Checklist](observability-checklist.md) | Metrics, logging, and alerting verification | - |
 | [Run Manifest Inspection](run-manifest-inspection.md) | Inspect run control-plane provenance, config, and ledger history | P1 |
+| [Traceability Signal Ownership](traceability-signal-ownership.md) | Signal ownership matrix for alert -> diagnostics -> escalation | P1 |
+| [Traceability Tabletop Drills](traceability-tabletop-drills.md) | Tabletop scenarios and scoring for operator adoption | P2 |
+| [Traceability Adoption Checklist](traceability-adoption-checklist.md) | Exit-gate checklist and session evidence log for operator adoption | P2 |
 
 ---
 
@@ -45,4 +48,4 @@ This section contains playbooks for handling common alerts and operational tasks
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
 ---
-*Last updated: 2026-03-24*
+*Last updated: 2026-03-25*

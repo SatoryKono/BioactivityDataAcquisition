@@ -6,11 +6,16 @@ See ADR-026 for architectural decisions.
 
 Transition flow: NOT_STARTED -> SEED_RUNNING -> SEED_COMPLETED ->
 DEPENDENCIES_RUNNING -> DEPENDENCIES_COMPLETED -> ENRICHING ->
-ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
+ENRICHMENT_COMPLETED -> MERGING -> CROSS_VALIDATION_RUNNING ->
+CROSS_VALIDATION_COMPLETED -> COMPLETED. Any active state can -> FAILED.
 
 Note: Dependencies are optional. If no dependencies, SEED_COMPLETED transitions
 directly to ENRICHING (or DEPENDENCIES_RUNNING which immediately transitions to
 DEPENDENCIES_COMPLETED).
+
+Note: Cross-validation is optional. If no cross-validation configured, MERGING
+transitions directly to COMPLETED (or CROSS_VALIDATION_RUNNING which immediately
+transitions to CROSS_VALIDATION_COMPLETED).
 """
 
 from __future__ import annotations
@@ -32,11 +37,11 @@ class CompositePipelineState(StrEnum):
 
     States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, DEPENDENCIES_RUNNING,
     DEPENDENCIES_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, MERGING,
-    COMPLETED, FAILED.
+    CROSS_VALIDATION_RUNNING, CROSS_VALIDATION_COMPLETED, COMPLETED, FAILED.
 
     Terminal states: COMPLETED, FAILED (no transitions allowed).
-    Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING
-        (work in progress).
+    Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING,
+        CROSS_VALIDATION_RUNNING (work in progress).
     """
 
     NOT_STARTED = "not_started"
@@ -47,6 +52,8 @@ class CompositePipelineState(StrEnum):
     ENRICHING = "enriching"
     ENRICHMENT_COMPLETED = "enrichment_completed"
     MERGING = "merging"
+    CROSS_VALIDATION_RUNNING = "cross_validation_running"
+    CROSS_VALIDATION_COMPLETED = "cross_validation_completed"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -59,13 +66,15 @@ class CompositePipelineState(StrEnum):
     def is_active(self) -> bool:
         """Check if this is an active state (work in progress).
 
-        Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING.
+        Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING,
+            CROSS_VALIDATION_RUNNING.
         """
         return self in {
             CompositePipelineState.SEED_RUNNING,
             CompositePipelineState.DEPENDENCIES_RUNNING,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.MERGING,
+            CompositePipelineState.CROSS_VALIDATION_RUNNING,
         }
 
     @property
@@ -79,7 +88,7 @@ class CompositePipelineState(StrEnum):
 
         Resumable states have completed work that can be skipped on resume:
         SEED_COMPLETED, DEPENDENCIES_RUNNING, DEPENDENCIES_COMPLETED, ENRICHING,
-        ENRICHMENT_COMPLETED, FAILED.
+        ENRICHMENT_COMPLETED, CROSS_VALIDATION_RUNNING, CROSS_VALIDATION_COMPLETED, FAILED.
 
         FAILED is resumable to allow retry after merge failure - the seed,
         dependency, and enrichment results are preserved in the checkpoint.
@@ -101,6 +110,8 @@ class CompositePipelineState(StrEnum):
             CompositePipelineState.DEPENDENCIES_COMPLETED,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.ENRICHMENT_COMPLETED,
+            CompositePipelineState.CROSS_VALIDATION_RUNNING,
+            CompositePipelineState.CROSS_VALIDATION_COMPLETED,
             CompositePipelineState.FAILED,
         }
 
@@ -166,6 +177,7 @@ class CompositePipelineState(StrEnum):
 # Valid transitions for each state
 # Maps current state value -> set of allowed next state values
 # Note: seed_completed can go to dependencies_running OR enriching (if no dependencies)
+# Note: merging can go to cross_validation_running OR completed (if no cross-validation)
 _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "not_started": frozenset({"seed_running"}),
     "seed_running": frozenset({"seed_completed", "failed"}),
@@ -174,7 +186,9 @@ _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "dependencies_completed": frozenset({"enriching"}),
     "enriching": frozenset({"enrichment_completed", "failed"}),
     "enrichment_completed": frozenset({"merging"}),
-    "merging": frozenset({"completed", "failed"}),
+    "merging": frozenset({"cross_validation_running", "completed"}),
+    "cross_validation_running": frozenset({"cross_validation_completed", "failed"}),
+    "cross_validation_completed": frozenset({"completed"}),
     "completed": frozenset(),  # Terminal state
     "failed": frozenset(),  # Terminal state
 }
@@ -189,8 +203,10 @@ _STATE_METRIC_VALUES: Mapping[CompositePipelineState, int] = {
     CompositePipelineState.ENRICHING: 5,
     CompositePipelineState.ENRICHMENT_COMPLETED: 6,
     CompositePipelineState.MERGING: 7,
-    CompositePipelineState.COMPLETED: 8,
-    CompositePipelineState.FAILED: 9,
+    CompositePipelineState.CROSS_VALIDATION_RUNNING: 8,
+    CompositePipelineState.CROSS_VALIDATION_COMPLETED: 9,
+    CompositePipelineState.COMPLETED: 10,
+    CompositePipelineState.FAILED: 11,
 }
 
 

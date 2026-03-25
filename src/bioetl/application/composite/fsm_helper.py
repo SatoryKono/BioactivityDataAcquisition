@@ -156,6 +156,10 @@ class FSMStateHelperService:
             phase_description = (
                 f"enrichment ({completed_count}/{total_enrichers} enrichers completed)"
             )
+        elif state.merge_completed:
+            # Cross-validation failed - resume from MERGING (will re-run cross-validation)
+            resume_phase = CompositePipelineState.MERGING
+            phase_description = "cross_validation (merge completed)"
         else:
             # Merge failed - resume from ENRICHMENT_COMPLETED (will re-run merge)
             resume_phase = CompositePipelineState.ENRICHMENT_COMPLETED

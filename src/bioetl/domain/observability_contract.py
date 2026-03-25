@@ -21,44 +21,6 @@ __all__ = [
 ]
 
 
-REQUIRED_OBSERVABILITY_FIELDS: Final[tuple[str, ...]] = (
-    "event",
-    "provider",
-    "pipeline",
-    "run_id",
-    "error_type",
-    "severity",
-)
-
-OBSERVABILITY_METRIC_LABEL_FIELDS: Final[tuple[str, ...]] = (
-    "event",
-    "provider",
-    "pipeline",
-    "severity",
-    "error_type",
-)
-
-OBSERVABILITY_LEGACY_TO_CANONICAL: Final[dict[str, str]] = {
-    "event_name": "event",
-    "provider_name": "provider",
-    "pipeline_name": "pipeline",
-    "correlation_id": "run_id",
-    "log_level": "severity",
-}
-
-_ALLOWED_SEVERITY_VALUES: Final[frozenset[str]] = frozenset(
-    {"debug", "info", "warning", "error"}
-)
-
-
-@dataclass(frozen=True)
-class ObservabilityContractPayload:
-    """Validated event payload with canonical metric labels."""
-
-    context: dict[str, object]
-    metric_labels: dict[str, str]
-
-
 def _coerce_non_empty(value: object | None, *, fallback: str) -> str:
     if value is None:
         return fallback
@@ -81,6 +43,133 @@ def _has_required_context_value(context: Mapping[str, object], field: str) -> bo
     return _coerce_non_empty(context.get(field), fallback="") != ""
 
 
+def _match_event_family_by_suffix(normalized_event_name: str) -> str | None:
+    for suffix, family in _EVENT_FAMILY_SUFFIXES:
+        if normalized_event_name.endswith(suffix):
+            return family
+    return None
+
+
+def _match_event_family_by_prefix(normalized_event_name: str) -> str | None:
+    for prefix, family in _EVENT_FAMILY_PREFIXES:
+        if normalized_event_name.startswith(prefix):
+            return family
+    return None
+
+
+def _infer_event_family(event_name: object | None) -> str:
+    normalized_event_name = _coerce_non_empty(
+        event_name, fallback="unknown_event"
+    ).lower()
+    exact_match = _EVENT_FAMILY_EXACT.get(normalized_event_name)
+    if exact_match is not None:
+        return exact_match
+    suffix_match = _match_event_family_by_suffix(normalized_event_name)
+    if suffix_match is not None:
+        return suffix_match
+    prefix_match = _match_event_family_by_prefix(normalized_event_name)
+    if prefix_match is not None:
+        return prefix_match
+    return "diagnostic"
+
+
+def _normalize_optional_correlation_value(value: object | None) -> str | None:
+    normalized = _coerce_non_empty(value, fallback="")
+    return normalized if normalized else None
+
+
+def _apply_correlation_defaults(
+    *,
+    normalized: dict[str, object],
+    correlation_defaults: Mapping[str, object] | None,
+) -> None:
+    if correlation_defaults is None:
+        return
+    for field_name in OBSERVABILITY_CORRELATION_FIELDS:
+        if normalized.get(field_name) is not None:
+            continue
+        fallback_value = _normalize_optional_correlation_value(
+            correlation_defaults.get(field_name)
+        )
+        if fallback_value is not None:
+            normalized[field_name] = fallback_value
+
+
+REQUIRED_OBSERVABILITY_FIELDS: Final[tuple[str, ...]] = (
+    "event",
+    "provider",
+    "pipeline",
+    "run_id",
+    "error_type",
+    "severity",
+)
+
+OBSERVABILITY_METRIC_LABEL_FIELDS: Final[tuple[str, ...]] = (
+    "event",
+    "provider",
+    "pipeline",
+    "severity",
+    "error_type",
+)
+
+OBSERVABILITY_CORRELATION_FIELDS: Final[tuple[str, ...]] = (
+    "manifest_id",
+    "entity",
+    "run_type",
+    "dataset_ref",
+    "lineage_fragment_id",
+    "effective_config_hash",
+    "contract_ref",
+    "contract_version",
+    "composite_run_id",
+)
+
+OBSERVABILITY_LEGACY_TO_CANONICAL: Final[dict[str, str]] = {
+    "event_name": "event",
+    "provider_name": "provider",
+    "pipeline_name": "pipeline",
+    "correlation_id": "run_id",
+    "log_level": "severity",
+}
+
+_ALLOWED_SEVERITY_VALUES: Final[frozenset[str]] = frozenset(
+    {"debug", "info", "warning", "error"}
+)
+
+_EVENT_FAMILY_EXACT: Final[dict[str, str]] = {
+    "pipeline_started": "pipeline.lifecycle",
+    "pipeline_finished": "pipeline.lifecycle",
+    "pipeline_failed": "pipeline.lifecycle",
+    "pipeline_shutdown": "pipeline.lifecycle",
+    "artifact_published": "artifact",
+    "vacuum_completed": "artifact",
+}
+
+_EVENT_FAMILY_PREFIXES: Final[tuple[tuple[str, str], ...]] = (
+    ("dq_", "dq"),
+    ("lineage_", "lineage"),
+    ("checkpoint_", "checkpoint"),
+    ("composite_", "composite"),
+    ("artifact_", "artifact"),
+)
+
+_EVENT_FAMILY_SUFFIXES: Final[tuple[tuple[str, str], ...]] = (
+    ("_started", "pipeline.phase"),
+    ("_completed", "pipeline.phase"),
+)
+
+
+@dataclass(frozen=True)
+class ObservabilityContractPayload:
+    """Validated event payload with canonical metric labels."""
+
+    context: dict[str, object]
+    metric_labels: dict[str, str]
+
+
+
+
+
 def normalize_observability_context(
     *,
     event_name: str,
@@ -89,6 +178,7 @@ def normalize_observability_context(
     default_pipeline: str,
     default_run_id: str,
     default_severity: str,
+    correlation_defaults: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     """Normalize event context to canonical keys.
 
@@ -138,6 +228,14 @@ def normalize_observability_context(
         normalized.get("error_type"),
         fallback=default_error_type,
     )
+    _apply_correlation_defaults(
+        normalized=normalized,
+        correlation_defaults=correlation_defaults,
+    )
+    normalized["event_family"] = _coerce_non_empty(
+        normalized.get("event_family"),
+        fallback=_infer_event_family(normalized.get("event")),
+    )
 
     return normalized
 
@@ -150,6 +248,7 @@ def enforce_observability_contract_context(
     default_pipeline: str,
     default_run_id: str,
     default_severity: str,
+    correlation_defaults: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     """Normalize and enforce required observability contract fields.
 
@@ -175,6 +274,7 @@ def enforce_observability_contract_context(
         default_pipeline=safe_pipeline,
         default_run_id=safe_run_id,
         default_severity=default_severity,
+        correlation_defaults=correlation_defaults,
     )
 
     missing = missing_observability_fields(normalized)
@@ -205,6 +305,14 @@ def enforce_observability_contract_context(
     repaired["error_type"] = _coerce_non_empty(
         repaired.get("error_type"),
         fallback="unknown" if repaired["severity"] == "error" else "none",
+    )
+    _apply_correlation_defaults(
+        normalized=repaired,
+        correlation_defaults=correlation_defaults,
+    )
+    repaired["event_family"] = _coerce_non_empty(
+        repaired.get("event_family"),
+        fallback=_infer_event_family(repaired.get("event")),
     )
     return repaired
 
@@ -266,6 +374,7 @@ def build_observability_contract_payload(
     default_pipeline: str,
     default_run_id: str,
     default_severity: str,
+    correlation_defaults: Mapping[str, object] | None = None,
 ) -> ObservabilityContractPayload:
     """Validate event context once and derive canonical metric labels.
 
@@ -287,6 +396,7 @@ def build_observability_contract_payload(
         default_pipeline=default_pipeline,
         default_run_id=default_run_id,
         default_severity=default_severity,
+        correlation_defaults=correlation_defaults,
     )
     return ObservabilityContractPayload(
         context=normalized,

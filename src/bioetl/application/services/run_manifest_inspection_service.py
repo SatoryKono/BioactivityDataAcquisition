@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from collections import Counter
+from dataclasses import dataclass, field
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -24,12 +25,14 @@ class RunManifestInspectionResult:
 
     manifest: RunManifest
     ledger_entries: tuple[RunLedgerEntry, ...] = ()
+    diagnostics: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI presentation."""
         return {
             "manifest": self.manifest.to_dict(),
             "ledger_entries": [entry.to_dict() for entry in self.ledger_entries],
+            "diagnostics": self.diagnostics,
         }
 
 
@@ -80,9 +83,11 @@ class RunManifestInspectionService:
         ledger_entries: tuple[RunLedgerEntry, ...] = ()
         if self.ledger_port is not None:
             ledger_entries = tuple(self.ledger_port.list_entries(manifest.manifest_id))
+        diagnostics = _build_diagnostics_summary(ledger_entries)
         return RunManifestInspectionResult(
             manifest=manifest,
             ledger_entries=ledger_entries,
+            diagnostics=diagnostics,
         )
 
     def diff(
@@ -136,3 +141,108 @@ class RunManifestInspectionService:
             sort_keys=True,
             default=str,
         )
+
+
+def _build_diagnostics_summary(
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, object]:
+    """Build compact operator-oriented diagnostics summary."""
+    if not ledger_entries:
+        return {}
+
+    family_counter: Counter[str] = Counter()
+    type_counter: Counter[str] = Counter()
+    artifact_refs: list[dict[str, object]] = []
+    lineage_fragment_ids: set[str] = set()
+    missing_link_count = 0
+    for entry in ledger_entries:
+        family_counter.update([entry.event_family or "diagnostic"])
+        type_counter.update([entry.event_type])
+        artifact_ref = _build_artifact_ref(entry)
+        if artifact_ref is not None:
+            artifact_refs.append(artifact_ref)
+            if (
+                artifact_ref.get("dataset_ref") is None
+                and artifact_ref.get("lineage_fragment_id") is None
+            ):
+                missing_link_count += 1
+        if entry.lineage_fragment_id:
+            lineage_fragment_ids.add(entry.lineage_fragment_id)
+
+    latest_entry = ledger_entries[-1]
+    alert_signals = _build_alert_signals(
+        latest_status=latest_entry.status,
+        artifact_refs=artifact_refs,
+        lineage_fragment_ids=lineage_fragment_ids,
+        missing_link_count=missing_link_count,
+    )
+    next_steps = _build_next_steps(alert_signals)
+    return {
+        "total_events": len(ledger_entries),
+        "latest_event_type": latest_entry.event_type,
+        "latest_status": latest_entry.status,
+        "event_family_counts": dict(sorted(family_counter.items())),
+        "event_type_counts": dict(sorted(type_counter.items())),
+        "artifact_refs": artifact_refs,
+        "lineage_fragment_ids": sorted(lineage_fragment_ids),
+        "missing_artifact_links": missing_link_count,
+        "alert_signals": alert_signals,
+        "next_steps": next_steps,
+    }
+
+
+def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
+    if entry.event_family != "artifact" and entry.event_type != "artifact_published":
+        return None
+    details = entry.details or {}
+    artifact_path = details.get("artifact_path")
+    return {
+        "event_type": entry.event_type,
+        "stage": entry.stage,
+        "dataset_ref": entry.dataset_ref,
+        "lineage_fragment_id": entry.lineage_fragment_id,
+        "artifact_path": None if artifact_path is None else str(artifact_path),
+    }
+
+
+def _build_alert_signals(
+    *,
+    latest_status: str | None,
+    artifact_refs: list[dict[str, object]],
+    lineage_fragment_ids: set[str],
+    missing_link_count: int,
+) -> dict[str, bool]:
+    """Map diagnostics summary to alert-oriented boolean signals."""
+    latest_status_normalized = (latest_status or "").strip().lower()
+    artifact_ref_count = len(artifact_refs)
+    has_artifact_refs = artifact_ref_count > 0
+    return {
+        "run_failed": latest_status_normalized == "failed",
+        "run_shutdown": latest_status_normalized == "shutdown",
+        "artifact_linkage_gap": missing_link_count > 0,
+        "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
+    }
+
+
+def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
+    """Return operator-oriented next steps based on active alert signals."""
+    steps: list[str] = []
+    if alert_signals.get("run_failed", False):
+        steps.append(
+            "Inspect failure classification and decide retry/quarantine/escalation."
+        )
+    if alert_signals.get("artifact_linkage_gap", False):
+        steps.append(
+            "Validate artifact publication metadata and repair dataset/lineage links."
+        )
+    if alert_signals.get("lineage_gap", False):
+        steps.append(
+            "Investigate lineage persistence for published artifacts before restart."
+        )
+    if alert_signals.get("run_shutdown", False):
+        steps.append(
+            "Confirm graceful shutdown reason and resume policy compatibility."
+        )
+    if not steps:
+        steps.append("No alert signals detected; continue routine monitoring.")
+    return steps

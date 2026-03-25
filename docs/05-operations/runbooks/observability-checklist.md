@@ -107,6 +107,23 @@ pytest tests/architecture/test_layer_dependencies.py::test_adapters_have_health_
 cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .stage)'
 ```
 
+### Validate Alert-to-Diagnostics Route
+
+```bash
+bioetl run-manifest show <run-id|manifest-id> --format json
+```
+
+Checklist for incident triage payload:
+
+- `diagnostics.latest_status`
+- `diagnostics.latest_event_type`
+- `diagnostics.event_family_counts`
+- `diagnostics.alert_signals`
+- `diagnostics.next_steps`
+
+If `diagnostics.alert_signals.artifact_linkage_gap=true`, escalation must include
+artifact/linkage remediation before retry.
+
 ## Adding New Adapters
 
 When creating a new adapter:

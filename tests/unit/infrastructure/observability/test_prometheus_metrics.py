@@ -392,3 +392,71 @@ class TestMetricLabelAliasCompatibility:
                 severity="info",
                 error_type="none",
             )
+
+
+@pytest.mark.unit
+class TestMetricCardinalityGuards:
+    """Guards against accidental high-cardinality metric labels (Wave 4 / Track E)."""
+
+    def test_observability_events_total_label_contract_is_stable(self) -> None:
+        from bioetl.infrastructure.observability.metrics import OBSERVABILITY_EVENTS_TOTAL
+
+        assert OBSERVABILITY_EVENTS_TOTAL._labelnames == (
+            "event",
+            "provider",
+            "pipeline",
+            "severity",
+            "error_type",
+        )
+
+    def test_registered_metrics_do_not_use_run_level_correlation_labels(self) -> None:
+        from bioetl.infrastructure.observability.metrics import __all__ as metric_symbols
+
+        from bioetl.infrastructure.observability import metrics as metrics_module
+
+        forbidden = frozenset(
+            {
+                "run_id",
+                "manifest_id",
+                "dataset_ref",
+                "lineage_fragment_id",
+                "composite_run_id",
+                "effective_config_hash",
+                "contract_ref",
+                "contract_version",
+            }
+        )
+        legacy_run_id_allowlist = frozenset(
+            {
+                "INFRASTRUCTURE_VALIDATED",
+                "PREFLIGHT_CONFIG_ERRORS_TOTAL",
+                "PREFLIGHT_MEDALLION_POLICY_VALID",
+            }
+        )
+
+        violations: list[str] = []
+        observed_legacy_symbols: set[str] = set()
+        for symbol in metric_symbols:
+            metric_obj = getattr(metrics_module, symbol, None)
+            label_names = getattr(metric_obj, "_labelnames", None)
+            if not isinstance(label_names, tuple):
+                continue
+            overlaps = sorted(forbidden.intersection(label_names))
+            if not overlaps:
+                continue
+            if symbol in legacy_run_id_allowlist and overlaps == ["run_id"]:
+                observed_legacy_symbols.add(symbol)
+                continue
+            if overlaps:
+                violations.append(
+                    f"{symbol}: forbidden labels present -> {', '.join(overlaps)}"
+                )
+
+        assert not violations, (
+            "Metrics must keep high-cardinality correlation anchors out of labels:\n"
+            + "\n".join(f"  - {line}" for line in violations)
+        )
+        assert observed_legacy_symbols == set(legacy_run_id_allowlist), (
+            "Legacy run_id label allowlist changed unexpectedly; review label "
+            "cardinality policy and update this guard intentionally."
+        )

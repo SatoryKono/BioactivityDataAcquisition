@@ -65,12 +65,21 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
 
     assert entry.entry_id == "entry-1"
     assert entry.event_type == "manifest_created"
+    assert entry.event_family == "diagnostic"
     assert entry.status == "created"
     assert entry.details == {
         "execution_fingerprint": "fingerprint-1",
         "pipeline_name": "chembl_activity",
         "provider": "chembl",
         "entity": "activity",
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "manifest_created",
+            "event_family": "diagnostic",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "created",
+        },
     }
     assert store.list_entries("manifest-1") == [entry]
 
@@ -92,10 +101,22 @@ def test_record_run_failed_captures_message_and_metrics() -> None:
     )
 
     assert entry.event_type == "run_failed"
+    assert entry.event_family == "pipeline.lifecycle"
     assert entry.status == "failed"
     assert entry.message == "boom"
     assert entry.error_type == "RuntimeError"
     assert entry.metrics_snapshot == {"records_fetched": 10}
+    assert entry.details == {
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "run_failed",
+            "event_family": "pipeline.lifecycle",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "failed",
+            "error_type": "RuntimeError",
+        }
+    }
     assert store.list_entries_by_run_id(run_id) == [entry]
 
 
@@ -116,10 +137,22 @@ def test_record_stage_completed_captures_stage_and_metrics() -> None:
     )
 
     assert entry.event_type == "stage_completed"
+    assert entry.event_family == "pipeline.phase"
     assert entry.status == "completed"
     assert entry.stage == "postrun"
     assert entry.metrics_snapshot == {"records_silver": 42}
-    assert entry.details == {"result": "ok"}
+    assert entry.details == {
+        "result": "ok",
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "stage_completed",
+            "event_family": "pipeline.phase",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "completed",
+            "stage": "postrun",
+        },
+    }
 
 
 def test_record_artifact_published_captures_layer_and_path() -> None:
@@ -141,6 +174,7 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
     )
 
     assert entry.event_type == "artifact_published"
+    assert entry.event_family == "artifact"
     assert entry.status == "published"
     assert entry.stage == "silver"
     assert entry.dataset_ref == "silver:chembl.activity@7"
@@ -148,4 +182,15 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
     assert entry.details == {
         "artifact_path": "/tmp/output/silver/chembl/activity",
         "metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml",
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "artifact_published",
+            "event_family": "artifact",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "published",
+            "stage": "silver",
+            "dataset_ref": "silver:chembl.activity@7",
+            "lineage_fragment_id": "silver:fragment-1",
+        },
     }
