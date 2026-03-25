@@ -13,9 +13,6 @@ from bioetl.application.core.batch_execution import (
     BatchExecutionRunService,
     prepare_execution_context,
 )
-from bioetl.application.core.batch_runtime_failure_policy import (
-    PIPELINE_EXECUTION_ERRORS,
-)
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_protocols import (
     BatchStateCommitPort,
@@ -23,6 +20,9 @@ from bioetl.application.core.batch_executor_protocols import (
 )
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
+)
+from bioetl.application.core.batch_runtime_failure_policy import (
+    PIPELINE_EXECUTION_ERRORS,
 )
 from bioetl.application.core.lifecycle.batch_fsm import (
     BatchExecutionCommand,

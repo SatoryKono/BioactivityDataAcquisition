@@ -6,6 +6,7 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.composite.lineage import CompositeLineageMetadata
 from bioetl.domain.lineage import (
     LineageEdge,
     LineageEdgeType,
@@ -133,8 +134,71 @@ def _build_composite_source_nodes_and_edges(
                     "enrichment_status": enrichment_status.get(provider),
                 },
             )
-        )
+    )
     return nodes, edges
+
+
+def _build_dataset_composite_attributes(
+    *,
+    composite_run_id: str | None,
+    composite_name: str,
+    source_providers: Sequence[str],
+    enrichment_status: Mapping[str, str],
+    field_sources: Mapping[str, str],
+    provider_field_map: Mapping[str, list[str]],
+    seed_record_id: str | None,
+    lineage_created_at: datetime | None,
+) -> dict[str, object]:
+    """Build one canonical dataset-level composite lineage summary."""
+    return {
+        "composite_run_id": composite_run_id,
+        "composite_name": composite_name,
+        "source_providers": list(source_providers),
+        "enrichment_status": dict(enrichment_status),
+        "field_sources": dict(field_sources),
+        "provider_fields": dict(provider_field_map),
+        "seed_record_id": seed_record_id,
+        "lineage_created_at": (
+            None if lineage_created_at is None else lineage_created_at.isoformat()
+        ),
+    }
+
+
+def _build_composite_dataset_enrichment(
+    *,
+    run_context: RunContext,
+    dataset_node: LineageNodeRef,
+    records: Sequence[Mapping[str, object]] | None,
+    composite_lineage: CompositeLineageMetadata,
+    created_at: datetime,
+) -> tuple[dict[str, object], list[LineageNodeRef], list[LineageEdge]]:
+    """Build dataset attributes and source edges for one composite lineage payload."""
+    enrichment_status = {
+        provider: status.status
+        for provider, status in composite_lineage.enrichment_status.items()
+    }
+    provider_field_map = _build_provider_field_map(records)
+    dataset_attributes = _build_dataset_composite_attributes(
+        composite_run_id=composite_lineage.composite_run_id or None,
+        composite_name=composite_lineage.composite_name,
+        source_providers=composite_lineage.source_providers,
+        enrichment_status=enrichment_status,
+        field_sources=composite_lineage.field_sources,
+        provider_field_map=provider_field_map,
+        seed_record_id=composite_lineage.seed_record_id,
+        lineage_created_at=composite_lineage.created_at,
+    )
+    composite_nodes, composite_edges = _build_composite_source_nodes_and_edges(
+        dataset_node=dataset_node,
+        run_context=run_context,
+        created_at=created_at,
+        source_providers=composite_lineage.source_providers,
+        provider_field_map=provider_field_map,
+        enrichment_status=enrichment_status,
+        composite_run_id=composite_lineage.composite_run_id or None,
+        composite_name=composite_lineage.composite_name,
+    )
+    return dataset_attributes, composite_nodes, composite_edges
 
 
 def _build_dataset_composite_lineage_components(
@@ -153,42 +217,23 @@ def _build_dataset_composite_lineage_components(
     if composite_lineage is None and not cv_summary:
         return dataset_node, [], []
 
-    provider_field_map = _build_provider_field_map(records)
     dataset_attributes: dict[str, object] = {}
     composite_nodes: list[LineageNodeRef] = []
     composite_edges: list[LineageEdge] = []
 
     if composite_lineage is not None:
-        enrichment_status = {
-            provider: status.status
-            for provider, status in composite_lineage.enrichment_status.items()
-        }
-        dataset_attributes.update(
-            {
-                "composite_run_id": composite_lineage.composite_run_id or None,
-                "composite_name": composite_lineage.composite_name,
-                "source_providers": list(composite_lineage.source_providers),
-                "enrichment_status": enrichment_status,
-                "field_sources": dict(composite_lineage.field_sources),
-                "provider_fields": provider_field_map,
-                "seed_record_id": composite_lineage.seed_record_id,
-                "lineage_created_at": (
-                    None
-                    if composite_lineage.created_at is None
-                    else composite_lineage.created_at.isoformat()
-                ),
-            }
-        )
-        composite_nodes, composite_edges = _build_composite_source_nodes_and_edges(
-            dataset_node=dataset_node,
+        (
+            composite_attributes,
+            composite_nodes,
+            composite_edges,
+        ) = _build_composite_dataset_enrichment(
             run_context=run_context,
+            dataset_node=dataset_node,
+            records=records,
+            composite_lineage=composite_lineage,
             created_at=created_at,
-            source_providers=composite_lineage.source_providers,
-            provider_field_map=provider_field_map,
-            enrichment_status=enrichment_status,
-            composite_run_id=composite_lineage.composite_run_id or None,
-            composite_name=composite_lineage.composite_name,
         )
+        dataset_attributes.update(composite_attributes)
 
     dataset_attributes.update(cv_summary)
     enriched_dataset = _merge_gold_dataset_attributes(dataset_node, dataset_attributes)

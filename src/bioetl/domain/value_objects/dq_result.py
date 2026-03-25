@@ -14,6 +14,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from bioetl.domain.types.dq_contracts import (
+    DQDisposition,
+    DQPolicyRef,
+    DQRuleOutcome,
+    DQViolationKind,
+)
+
 
 class DQEvaluationStatus(StrEnum):
     """Status of Data Quality evaluation.
@@ -54,6 +61,8 @@ class DQResult:
         anomalies: List of detected anomalies (empty if dq_monitor not available).
         has_critical: Whether any critical anomalies were found.
         check_duration_ms: Duration of anomaly detection in milliseconds.
+        rule_outcomes: List of individual rule evaluation outcomes (contract-based DQ).
+        policy_ref: Reference to the governing DQ policy contract.
     """
 
     error_rate: float
@@ -61,6 +70,8 @@ class DQResult:
     anomalies: tuple[object, ...] = field(default_factory=tuple)
     has_critical: bool = False
     check_duration_ms: float = 0.0
+    rule_outcomes: tuple[DQRuleOutcome, ...] = field(default_factory=tuple)
+    policy_ref: DQPolicyRef | None = None
 
     def __post_init__(self) -> None:
         """Validate and ensure immutability of anomalies."""
@@ -86,6 +97,49 @@ class DQResult:
     def anomalies_count(self) -> int:
         """Count of detected anomalies."""
         return len(self.anomalies)
+
+    @property
+    def rule_outcomes_count(self) -> int:
+        """Count of rule evaluation outcomes."""
+        return len(self.rule_outcomes)
+
+    @property
+    def has_rule_violations(self) -> bool:
+        """Check if any rules resulted in violations (non-PASS dispositions)."""
+        return any(
+            outcome.disposition != DQDisposition.PASS
+            for outcome in self.rule_outcomes
+        )
+
+    @property
+    def has_quarantine_decisions(self) -> bool:
+        """Check if any rules resulted in quarantine decisions."""
+        return any(
+            outcome.disposition == DQDisposition.QUARANTINE
+            for outcome in self.rule_outcomes
+        )
+
+    @property
+    def has_fail_decisions(self) -> bool:
+        """Check if any rules resulted in fail decisions."""
+        return any(
+            outcome.disposition == DQDisposition.FAIL
+            for outcome in self.rule_outcomes
+        )
+
+    def get_outcomes_by_violation_kind(self, kind: DQViolationKind) -> list[DQRuleOutcome]:
+        """Get rule outcomes filtered by violation kind."""
+        return [
+            outcome for outcome in self.rule_outcomes
+            if outcome.violation_kind == kind
+        ]
+
+    def get_outcomes_by_severity(self, severity: str) -> list[DQRuleOutcome]:
+        """Get rule outcomes filtered by severity."""
+        return [
+            outcome for outcome in self.rule_outcomes
+            if outcome.severity == severity
+        ]
 
 
 __all__ = ["DQEvaluationStatus", "DQResult"]

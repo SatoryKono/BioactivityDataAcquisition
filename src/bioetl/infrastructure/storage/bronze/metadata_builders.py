@@ -68,6 +68,7 @@ def build_bronze_metadata_payload(
     import platform
     import socket
 
+    from bioetl import __version__ as BIOETL_VERSION
     from bioetl.domain.models.metadata import (
         BaseOutputMetadata,
         BronzeOutputExt,
@@ -77,7 +78,6 @@ def build_bronze_metadata_payload(
         RuntimeMetadata,
         RunTypeEnum,
     )
-    from bioetl import __version__ as BIOETL_VERSION
     from bioetl.domain.models.metadata import SourceMetadata as SourceMetadataModel
 
     run_type_map = {

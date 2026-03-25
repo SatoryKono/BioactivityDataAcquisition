@@ -17,6 +17,7 @@ from bioetl.infrastructure.storage.metadata.writer_operations import (
     _MetadataWriteRequest,
     _prepare_metadata_write_operation,
 )
+
 from .metadata_writer_helpers import (
     ArtifactPublicationRecorder,
     _apply_gold_metadata_finalization,
