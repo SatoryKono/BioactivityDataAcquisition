@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
+import yaml
+
 from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
@@ -110,6 +112,55 @@ def _resolve_provider_entity(
     return str(provider), str(entity)
 
 
+def _coerce_optional_text(value: object) -> str | None:
+    """Return normalized non-empty text when available."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _resolve_contract_identity(
+    *,
+    provider: str,
+    entity: str,
+) -> tuple[str, str | None, str | None, str | None, str | None]:
+    """Resolve contract identity fields from canonical registry when available."""
+    contract_ref = f"{provider}.{entity}"
+    registry_path = Path("configs/base/contract_registry.yaml")
+    if not registry_path.exists():
+        return contract_ref, None, None, None, None
+    try:
+        payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return contract_ref, None, None, None, None
+    if not isinstance(payload, dict):
+        return contract_ref, None, None, None, None
+    entries = payload.get("entries")
+    if not isinstance(entries, dict):
+        return contract_ref, None, None, None, None
+    entry = entries.get(contract_ref)
+    if not isinstance(entry, dict):
+        return contract_ref, None, None, None, None
+    identity = entry.get("identity")
+    identity_payload = identity if isinstance(identity, dict) else {}
+    contract_version = _coerce_optional_text(identity_payload.get("contract_version"))
+    contract_schema_hash = _coerce_optional_text(identity_payload.get("schema_hash"))
+    dq_policy_ref = _coerce_optional_text(
+        identity_payload.get("dq_policy_ref") or entry.get("dq_policy_ref")
+    )
+    rule_bundle_version = _coerce_optional_text(
+        identity_payload.get("rule_bundle_version") or entry.get("rule_bundle_version")
+    )
+    return (
+        contract_ref,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+    )
+
+
 def _build_planned_artifacts(
     *,
     settings: Settings,
@@ -144,6 +195,11 @@ class _ManifestControlPlaneRefs:
     config_hash: str | None
     dq_contract_compatibility_hash: str | None
     effective_config_artifact_id: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    contract_schema_hash: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
 
 
 def create_run_manifest(
@@ -167,6 +223,13 @@ def create_run_manifest(
         pipeline_name=ctx.pipeline_name,
         yaml_config=yaml_config,
     )
+    (
+        contract_ref,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+    ) = _resolve_contract_identity(provider=provider, entity=entity)
     manifest_store = FileRunManifestStore(
         base_path=_control_plane_root(inputs.settings, "run_manifest")
     )
@@ -212,6 +275,11 @@ def create_run_manifest(
             pipeline_version=get_pipeline_version(yaml_config),
             git_commit=get_git_commit(),
             config_hash=effective_config_hash,
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            contract_schema_hash=contract_schema_hash,
+            dq_policy_ref=dq_policy_ref,
+            rule_bundle_version=rule_bundle_version,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )
@@ -225,6 +293,11 @@ def create_run_manifest(
             config_hash=effective_config_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            contract_schema_hash=contract_schema_hash,
+            dq_policy_ref=dq_policy_ref,
+            rule_bundle_version=rule_bundle_version,
         ),
         ledger_service,
     )

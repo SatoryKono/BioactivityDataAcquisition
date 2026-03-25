@@ -146,6 +146,10 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
 
     code_provenance_first = manifest_first["code_provenance"]
     code_provenance_second = manifest_second["code_provenance"]
+    assert code_provenance_first["contract_ref"] == "chembl.activity"
+    assert code_provenance_second["contract_ref"] == "chembl.activity"
+    assert isinstance(code_provenance_first.get("contract_version"), str)
+    assert isinstance(code_provenance_second.get("contract_version"), str)
     assert code_provenance_first["config_hash"] == code_provenance_second["config_hash"]
     assert (
         code_provenance_first["dq_contract_compatibility_hash"]

@@ -54,6 +54,11 @@ def _make_request() -> RunManifestCreateRequest:
         pipeline_version="1.2.3",
         git_commit="abc1234",
         config_hash="deadbeef",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        contract_schema_hash="abc123",
+        dq_policy_ref="chembl.dq.v1",
+        rule_bundle_version="dq-rules.v1.0",
     )
 
 
@@ -68,6 +73,11 @@ def test_create_manifest_persists_and_links_run_id() -> None:
 
     assert manifest.manifest_id == "manifest-1"
     assert manifest.code_provenance.git_commit == "abc1234"
+    assert manifest.code_provenance.contract_ref == "chembl.activity"
+    assert manifest.code_provenance.contract_version == "1.0.0"
+    assert manifest.code_provenance.contract_schema_hash == "abc123"
+    assert manifest.code_provenance.dq_policy_ref == "chembl.dq.v1"
+    assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
     assert store.get("manifest-1") == manifest
     assert store.get_by_run_id(manifest.run_id) == manifest
 

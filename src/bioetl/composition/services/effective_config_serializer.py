@@ -185,7 +185,10 @@ class EffectiveConfigSerializer:
             "policy_hash": policy_ref.policy_hash,
         }
 
-    def _dq_policy_snapshot_to_dict(self, snapshot: DQPolicySnapshot) -> JsonDict:  # Any: DQPolicySnapshot serialization
+    def _dq_policy_snapshot_to_dict(
+        self,
+        snapshot: DQPolicySnapshot,
+    ) -> JsonDict:  # Any: DQPolicySnapshot serialization
         return {
             "contract_ref": snapshot.contract_ref,
             "contract_version": snapshot.contract_version,

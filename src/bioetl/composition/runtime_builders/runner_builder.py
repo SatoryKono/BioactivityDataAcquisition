@@ -217,6 +217,11 @@ def build_pipeline_runner(
             config_hash=control_plane_refs.config_hash,
             dq_contract_compatibility_hash=control_plane_refs.dq_contract_compatibility_hash,
             effective_config_artifact_id=control_plane_refs.effective_config_artifact_id,
+            contract_ref=control_plane_refs.contract_ref,
+            contract_version=control_plane_refs.contract_version,
+            contract_schema_hash=control_plane_refs.contract_schema_hash,
+            dq_policy_ref=control_plane_refs.dq_policy_ref,
+            rule_bundle_version=control_plane_refs.rule_bundle_version,
         )
     runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,

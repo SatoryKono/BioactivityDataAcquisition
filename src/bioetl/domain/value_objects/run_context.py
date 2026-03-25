@@ -73,6 +73,11 @@ class RunContext:
     git_commit: str | None = None
     config_hash: str | None = None
     manifest_id: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    contract_schema_hash: str | None = None
+    dq_policy_ref: str | None = None
+    rule_bundle_version: str | None = None
     # Data Quality integration
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
@@ -108,6 +113,11 @@ class RunContext:
         git_commit: str | None = None,
         config_hash: str | None = None,
         manifest_id: str | None = None,
+        contract_ref: str | None = None,
+        contract_version: str | None = None,
+        contract_schema_hash: str | None = None,
+        dq_policy_ref: str | None = None,
+        rule_bundle_version: str | None = None,
         dq_contract_compatibility_hash: str | None = None,
         effective_config_artifact_id: str | None = None,
     ) -> RunContext:
@@ -144,6 +154,11 @@ class RunContext:
             git_commit=git_commit,
             config_hash=config_hash,
             manifest_id=manifest_id,
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            contract_schema_hash=contract_schema_hash,
+            dq_policy_ref=dq_policy_ref,
+            rule_bundle_version=rule_bundle_version,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )

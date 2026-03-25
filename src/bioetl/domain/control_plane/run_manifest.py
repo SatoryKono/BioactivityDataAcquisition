@@ -92,6 +92,11 @@ class RunCodeProvenance:
     pipeline_version: str | None = None
     git_commit: str | None = None
     config_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    contract_schema_hash: str | None = None
+    dq_policy_ref: str | None = None
+    rule_bundle_version: str | None = None
     # Data Quality integration
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
@@ -158,6 +163,11 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
         pipeline_version=_load_optional_str(payload, "pipeline_version"),
         git_commit=_load_optional_str(payload, "git_commit"),
         config_hash=_load_optional_str(payload, "config_hash"),
+        contract_ref=_load_optional_str(payload, "contract_ref"),
+        contract_version=_load_optional_str(payload, "contract_version"),
+        contract_schema_hash=_load_optional_str(payload, "contract_schema_hash"),
+        dq_policy_ref=_load_optional_str(payload, "dq_policy_ref"),
+        rule_bundle_version=_load_optional_str(payload, "rule_bundle_version"),
         dq_contract_compatibility_hash=_load_optional_str(
             payload, "dq_contract_compatibility_hash"
         ),

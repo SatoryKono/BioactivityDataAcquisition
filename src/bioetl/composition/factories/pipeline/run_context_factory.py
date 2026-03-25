@@ -5,7 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import TYPE_CHECKING
+
+import yaml
 
 from bioetl.composition.factories.pipeline.construction_types import (
     EntityTypeExtractor,
@@ -37,6 +40,54 @@ def _get_transform_steps(yaml_config: PipelineYamlConfig) -> tuple[str, ...]:
     return tuple(str(step) for step in (steps or ()))
 
 
+def _coerce_optional_text(value: object) -> str | None:
+    """Return normalized non-empty text when available."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _resolve_contract_identity_snapshot(
+    provider: str,
+    entity: str,
+) -> tuple[str, str | None, str | None, str | None, str | None]:
+    """Resolve contract identity fields from the canonical registry."""
+    contract_ref = f"{provider}.{entity}"
+    registry_path = Path("configs/base/contract_registry.yaml")
+    if not registry_path.exists():
+        return contract_ref, None, None, None, None
+    try:
+        payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return contract_ref, None, None, None, None
+    if not isinstance(payload, dict):
+        return contract_ref, None, None, None, None
+    entries = payload.get("entries")
+    if not isinstance(entries, dict):
+        return contract_ref, None, None, None, None
+    entry = entries.get(contract_ref)
+    if not isinstance(entry, dict):
+        return contract_ref, None, None, None, None
+    identity = entry.get("identity")
+    identity_payload = identity if isinstance(identity, dict) else {}
+    contract_version = _coerce_optional_text(identity_payload.get("contract_version"))
+    contract_schema_hash = _coerce_optional_text(identity_payload.get("schema_hash"))
+    dq_policy_ref = _coerce_optional_text(
+        identity_payload.get("dq_policy_ref") or entry.get("dq_policy_ref")
+    )
+    rule_bundle_version = _coerce_optional_text(
+        identity_payload.get("rule_bundle_version") or entry.get("rule_bundle_version")
+    )
+    return (
+        contract_ref,
+        contract_version,
+        contract_schema_hash,
+        dq_policy_ref,
+        rule_bundle_version,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class RunContextFactory:
     """Build ``RunContext`` for metadata coordinator wiring."""
@@ -53,6 +104,9 @@ class RunContextFactory:
     transform_steps_getter: Callable[[PipelineYamlConfig], tuple[str, ...]] = (
         _get_transform_steps
     )
+    contract_identity_resolver: Callable[
+        [str, str], tuple[str, str | None, str | None, str | None, str | None]
+    ] = _resolve_contract_identity_snapshot
 
     def create(
         self,
@@ -67,6 +121,13 @@ class RunContextFactory:
     ) -> RunContext:
         """Create metadata ``RunContext`` from runtime and resolved YAML."""
         entity = self.entity_type_extractor(self.pipeline_name) or self.pipeline_name
+        (
+            contract_ref,
+            contract_version,
+            contract_schema_hash,
+            dq_policy_ref,
+            rule_bundle_version,
+        ) = self.contract_identity_resolver(self.provider, entity)
         resolved_config_hash = (
             self.config_hash_getter(yaml_config) if config_hash is None else config_hash
         )
@@ -82,6 +143,11 @@ class RunContextFactory:
             git_commit=self.git_commit_getter(),
             config_hash=resolved_config_hash,
             manifest_id=manifest_id,
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            contract_schema_hash=contract_schema_hash,
+            dq_policy_ref=dq_policy_ref,
+            rule_bundle_version=rule_bundle_version,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )

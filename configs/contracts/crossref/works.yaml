@@ -1,9 +1,9 @@
-# ChEMBL Activity Data Quality Contract
+# CrossRef Works Data Quality Contract
 # Aligned with configs/base/contract_registry.yaml identity tuple.
 
-contract_ref: "chembl.activity"
+contract_ref: "crossref.works"
 contract_version: "1.0.0"
-dq_policy_ref: "chembl.dq.v1"
+dq_policy_ref: "crossref.dq.v1"
 rule_bundle_version: "dq-rules.v1.0"
 default_disposition_policy: "warn"
 strictness_mode: "moderate"
@@ -12,8 +12,7 @@ hard_fail_threshold: 0.20
 strict_validation: false
 invalid_record_policy: "quarantine"
 disposition_overrides:
-  "activity_id_required": "fail"
-  "standard_value_range": "warn"
+  "doi_required": "fail"
 report:
   enabled: true
   format: "json"
