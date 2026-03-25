@@ -266,8 +266,7 @@ def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
     def serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
         """Serialize a complex Arrow column into stringified JSON values."""
         vals = [
-            serialize_to_json(val) if (val := v.as_py()) is not None else None
-            for v in col
+            serialize_to_json(val) if (val := v.as_py()) is not None else None for v in col
         ]
         return pa.array(vals, type=pa.string())
 
