@@ -61,9 +61,15 @@ class RunContextFactory:
         runtime: RuntimeConfig,
         yaml_config: PipelineYamlConfig,
         manifest_id: str | None = None,
+        config_hash: str | None = None,
+        dq_contract_compatibility_hash: str | None = None,
+        effective_config_artifact_id: str | None = None,
     ) -> RunContext:
         """Create metadata ``RunContext`` from runtime and resolved YAML."""
         entity = self.entity_type_extractor(self.pipeline_name) or self.pipeline_name
+        resolved_config_hash = (
+            self.config_hash_getter(yaml_config) if config_hash is None else config_hash
+        )
         return RunContext.create(
             run_id=run_id,
             run_type=runtime.run_type,
@@ -74,6 +80,8 @@ class RunContextFactory:
             transform_steps=self.transform_steps_getter(yaml_config),
             pipeline_version=self.pipeline_version_getter(yaml_config),
             git_commit=self.git_commit_getter(),
-            config_hash=self.config_hash_getter(yaml_config),
+            config_hash=resolved_config_hash,
             manifest_id=manifest_id,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
         )

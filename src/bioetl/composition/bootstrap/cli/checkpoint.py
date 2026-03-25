@@ -19,6 +19,7 @@ from bioetl.application.core.lifecycle.checkpoint_manager import (
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.services import CheckpointService, QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
+    bootstrap_checkpoint_compatibility_service,
     bootstrap_checkpoint_port,
     bootstrap_quarantine_port,
 )
@@ -71,12 +72,15 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManagerService
     checkpoint_port = bootstrap_checkpoint_port(pipeline_name)
     noop_logger = create_noop_logger()
 
+    compatibility_service = bootstrap_checkpoint_compatibility_service(noop_logger)
+
     return CheckpointManagerService(
         checkpoint_port=checkpoint_port,
         logger=noop_logger,
         pipeline_name=pipeline_name,
         run_id=RunID(uuid4()),  # Dummy run_id for CLI inspection
         resume=False,
+        checkpoint_compatibility_service=compatibility_service,
     )
 
 

@@ -148,7 +148,7 @@ where = ["src"]
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 # Local default is serial for stability.

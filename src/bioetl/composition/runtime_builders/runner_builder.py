@@ -16,9 +16,8 @@ from bioetl.composition.runtime_builders.config_access import (
     load_source_config,
 )
 from bioetl.composition.runtime_builders.control_plane import (
-    attach_control_plane_collaborators,
     attach_manifest_id,
-    create_run_manifest,
+    create_run_manifest_with_effective_config,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
     ResolvedVacuumSettings,
@@ -30,6 +29,9 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
+)
+from bioetl.composition.runtime_builders.ledger_collaborator import (
+    attach_control_plane_collaborators,
 )
 from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
@@ -99,6 +101,13 @@ def _create_runner_from_factory(
                 inputs.observability,
             ),
             manifest_id=getattr(ctx, "manifest_id", None),
+            config_hash=getattr(ctx, "config_hash", None),
+            dq_contract_compatibility_hash=getattr(
+                ctx, "dq_contract_compatibility_hash", None
+            ),
+            effective_config_artifact_id=getattr(
+                ctx, "effective_config_artifact_id", None
+            ),
             filter_config=inputs.filter_config,
             config=inputs.yaml_config,
             cached_bronze=inputs.cached_bronze,
@@ -195,12 +204,20 @@ def build_pipeline_runner(
     manifest_enabled, ledger_enabled = _resolve_control_plane_flags(inputs.settings)
     run_ledger_service: RunLedgerService | None = None
     if manifest_enabled:
-        manifest_id, run_ledger_service = create_run_manifest(
-            ctx=ctx,
-            inputs=inputs,
-            ledger_enabled=ledger_enabled,
+        control_plane_refs, run_ledger_service = (
+            create_run_manifest_with_effective_config(
+                ctx=ctx,
+                inputs=inputs,
+                ledger_enabled=ledger_enabled,
+            )
         )
-        ctx = attach_manifest_id(ctx, manifest_id)
+        ctx = attach_manifest_id(
+            ctx,
+            control_plane_refs.manifest_id,
+            config_hash=control_plane_refs.config_hash,
+            dq_contract_compatibility_hash=control_plane_refs.dq_contract_compatibility_hash,
+            effective_config_artifact_id=control_plane_refs.effective_config_artifact_id,
+        )
     runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,
         ctx=ctx,

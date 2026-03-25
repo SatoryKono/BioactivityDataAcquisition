@@ -157,7 +157,9 @@ class SubcellularFractionDataSource(
 
     def _yield_target_records_from_fallback_source_records(
         self,
-        source_records: AsyncIterator[Any],
+        source_records: AsyncIterator[
+            Any  # Any: upstream source rows are heterogeneous
+        ],
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:  # Any: heterogeneous record values
         """Transform fallback-fetched assays into subcellular fraction records."""

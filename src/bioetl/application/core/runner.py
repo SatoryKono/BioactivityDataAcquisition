@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 
 _RUN_FAILURE_EXCEPTIONS = (
@@ -109,6 +110,21 @@ def _resolve_legacy_dependencies(
         observer=cast("PipelineObserver", values["observer"]),
         shutdown_signal=cast("ShutdownSignal", values["shutdown_signal"]),
     )
+
+
+async def _load_checkpoint_with_current_metadata(
+    checkpoint_manager: CheckpointManagerService,
+) -> CheckpointMetadata | dict[str, object] | None:
+    """Load checkpoint with compatibility fallback for legacy test doubles."""
+    load_checkpoint = checkpoint_manager.load_checkpoint
+    try:
+        return await load_checkpoint(
+            current_metadata=getattr(checkpoint_manager, "current_metadata", None)
+        )
+    except TypeError as exc:
+        if "current_metadata" not in str(exc):
+            raise
+        return await load_checkpoint()
 
 
 class PipelineRunner:
@@ -359,17 +375,22 @@ class PipelineRunner:
             )
             return self._runtime.start_offset
 
-        checkpoint_meta = await self._checkpoint_manager.load_checkpoint()
+        checkpoint_meta = await _load_checkpoint_with_current_metadata(
+            self._checkpoint_manager
+        )
         return self._extract_checkpoint_offset(checkpoint_meta)
 
     def _extract_checkpoint_offset(
         self,
-        checkpoint_meta: dict[str, object] | None,
+        checkpoint_meta: CheckpointMetadata | dict[str, object] | None,
     ) -> int | None:
         """Extract the persisted record offset from checkpoint metadata."""
         if checkpoint_meta is None:
             return None
-        return cast("int | None", checkpoint_meta.get("records_processed"))
+        if hasattr(checkpoint_meta, "records_processed"):
+            return int(cast("CheckpointMetadata", checkpoint_meta).records_processed)
+        raw_records = checkpoint_meta.get("records_processed")
+        return raw_records if isinstance(raw_records, int) else None
 
     async def _execute_pipeline(self, *, offset: int | None) -> None:
         """Execute the pipeline batch executor with resolved runtime inputs."""
@@ -402,11 +423,3 @@ class PipelineRunner:
     def _check_data_quality(self) -> None:
         """Check data quality metrics and report anomalies."""
         self._postrun_service.run_dq_checks(self._executor)
-
-    async def _run_vacuum_if_enabled(self) -> None:
-        """Run VACUUM on Silver and Gold tables if enabled."""
-        await self._postrun_service.run_vacuum_if_enabled()
-
-    async def _cleanup(self) -> None:
-        """Cleanup all resources including observability."""
-        await self._postrun_service.cleanup(self._tracer)

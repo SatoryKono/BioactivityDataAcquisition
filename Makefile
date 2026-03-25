@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check qa-arch-fast qa-arch-full qa-types qa-debt qa-hotspot-report
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci test-cov-fast-stable lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check qa-arch-fast qa-arch-full qa-types qa-debt qa-hotspot-report
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -48,6 +48,8 @@ HOTSPOT_DUPLICATION_TARGETS ?= src/bioetl/application/core src/bioetl/compositio
 HOTSPOT_DUPLICATION_JSON ?= reports/quality/hotspot-duplication-baseline.json
 HOTSPOT_DUPLICATION_MD ?= reports/quality/hotspot-duplication-baseline.md
 HOTSPOT_DUPLICATION_HISTORY ?= reports/quality/hotspot-duplication-history.jsonl
+LOCAL_COV_FAIL_UNDER ?= 80
+INCLUDE_ARCH_GATES ?= 0
 
 # Colors for output
 BLUE := \033[0;34m
@@ -96,6 +98,30 @@ test: test-deps-dev ## Run all tests serially with coverage (stable local defaul
 test-ci: test-deps-dev ## Run resilient CI flow (parallel + fallback + serial marker pass)
 	@echo "$(BLUE)Running resilient CI test flow...$(NC)"
 	$(PY_RUN) scripts/ci/run_pytest_resilient.py
+
+test-cov-fast-stable: test-deps-dev ## Fast+stable local coverage (parallel non-serial + serial pass)
+	@echo "$(BLUE)Running coverage in 2 phases (parallel non-serial + serial)...$(NC)"
+	mkdir -p reports/coverage
+	rm -f reports/coverage/.coverage.parallel reports/coverage/.coverage.serial reports/coverage/.coverage
+	COVERAGE_FILE=reports/coverage/.coverage.parallel \
+	$(RUN) pytest tests/ \
+	  -m "not serial and not e2e and not benchmark and not slow" \
+	  --ignore=tests/architecture \
+	  -n 4 --dist loadscope --max-worker-restart=0 \
+	  --cov=src/bioetl --cov-report=
+	COVERAGE_FILE=reports/coverage/.coverage.serial \
+	$(RUN) pytest tests/ \
+	  -m "serial and not e2e and not benchmark and not slow" \
+	  --ignore=tests/architecture \
+	  -p no:xdist \
+	  --cov=src/bioetl --cov-report=
+ifneq ($(INCLUDE_ARCH_GATES),0)
+	$(RUN) pytest tests/architecture/ -p no:xdist -q --tb=short
+endif
+	COVERAGE_FILE=reports/coverage/.coverage \
+	$(RUN) coverage combine reports/coverage
+	COVERAGE_FILE=reports/coverage/.coverage \
+	$(RUN) coverage report --show-missing --fail-under=$(LOCAL_COV_FAIL_UNDER)
 
 test-serial: ## Run all tests serially (for debugging)
 	@echo "$(BLUE)Running tests (serial mode)...$(NC)"

@@ -1,6 +1,6 @@
 # Run Manifest Inspection
 
-*Last verified: 2026-03-24*
+*Last verified: 2026-03-25*
 
 ## Purpose
 
@@ -21,12 +21,16 @@ The control-plane layer is governed by runtime settings under
 
 - `run_manifest_enabled`
 - `run_ledger_enabled`
+- `checkpoint_compatibility_policy` (`observe|soft_fail|hard_fail`)
 
 Operationally:
 
 - when `run_manifest_enabled=false`, no control-plane artifact is expected;
 - when `run_manifest_enabled=true` and `run_ledger_enabled=false`, manifest
   inspection still works but ledger history is intentionally absent.
+- when resume is enabled, `checkpoint_compatibility_policy` controls behavior on
+  checkpoint/runtime identity mismatch (`observe` logs-only, `soft_fail` blocks
+  resume, `hard_fail` raises error).
 
 ## Inputs
 
@@ -90,6 +94,8 @@ not reproducibly identical.
 
 Inspect:
 
+- `code_provenance.effective_config_artifact_id`
+- `code_provenance.config_hash`
 - `runtime_config`
 - `resolved_config`
 - `source_refs`
@@ -119,7 +125,31 @@ data/output/control/run_manifest/{manifest_id}.json
 data/output/control/run_manifest/_by_run_id/{run_id}.txt
 data/output/control/run_ledger/{manifest_id}.jsonl
 data/output/control/run_ledger/_by_run_id/{run_id}.txt
+data/output/control/effective_config/{artifact_id}.json
+data/output/control/effective_config/_by_run_id/{run_id}.txt
 ```
+
+## Runtime Diagnostic Events
+
+When effective-config persistence is healthy, logs include:
+
+- `effective_config_artifact_persisted`
+
+When persistence/linkage fails before runner assembly completes, logs include:
+
+- `effective_config_artifact_persist_failed`
+
+Use these events together with `run_id` and `manifest_id` to accelerate
+triage of control-plane regressions.
+
+## CI Gate
+
+Track D regression checks run in the dedicated CI job:
+
+- GitHub Actions workflow `Tests` -> job `track-d-gates`
+
+This gate verifies fixture-governance invariants, checkpoint compatibility
+policy behavior, and tracked-fixture control-plane linkage.
 
 ## Escalation Guidance
 

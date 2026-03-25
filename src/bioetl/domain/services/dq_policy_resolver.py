@@ -96,6 +96,7 @@ class DQPolicyResolver:
 
         # Convert to sorted JSON for stable hashing
         import json
+
         policy_json = json.dumps(policy_data, sort_keys=True)
         return hashlib.sha256(policy_json.encode("utf-8")).hexdigest()
 
@@ -142,48 +143,69 @@ class DQPolicyResolver:
         _anomaly_signal: bool = False,
     ) -> DQDisposition:
         """Apply strictness mode adjustments to base disposition."""
-        # Start with the default disposition from config
-        base_disposition = self.config.default_disposition_policy
+        disposition = self._apply_severity_adjustment(
+            self.config.default_disposition_policy,
+            severity,
+        )
+        disposition = self._apply_mode_adjustment(disposition)
+        return self._apply_violation_kind_adjustment(disposition, violation_kind)
 
-        # Adjust based on severity
+    def _apply_severity_adjustment(
+        self,
+        base_disposition: DQDisposition,
+        severity: str,
+    ) -> DQDisposition:
+        """Adjust disposition by rule severity."""
         if severity == "high":
-            if base_disposition in (DQDisposition.PASS, DQDisposition.WARN):
-                base_disposition = DQDisposition.QUARANTINE
-            elif base_disposition == DQDisposition.QUARANTINE:
-                base_disposition = DQDisposition.FAIL
-        elif severity == "low":
-            if base_disposition == DQDisposition.FAIL:
-                base_disposition = DQDisposition.QUARANTINE
-            elif base_disposition == DQDisposition.QUARANTINE:
-                base_disposition = DQDisposition.WARN
+            escalation_map = {
+                DQDisposition.PASS: DQDisposition.QUARANTINE,
+                DQDisposition.WARN: DQDisposition.QUARANTINE,
+                DQDisposition.QUARANTINE: DQDisposition.FAIL,
+            }
+            return escalation_map.get(base_disposition, base_disposition)
 
-        # Apply strictness mode adjustments
-        if self.config.strictness_mode == "strict":
-            # In strict mode, escalate dispositions
-            if base_disposition == DQDisposition.WARN:
-                base_disposition = DQDisposition.QUARANTINE
-            elif base_disposition == DQDisposition.QUARANTINE:
-                base_disposition = DQDisposition.FAIL
-        elif self.config.strictness_mode == "lenient":
-            # In lenient mode, de-escalate dispositions
-            if base_disposition == DQDisposition.QUARANTINE:
-                base_disposition = DQDisposition.WARN
-            elif base_disposition == DQDisposition.FAIL:
-                base_disposition = DQDisposition.QUARANTINE
-
-        # Special handling for different violation kinds
-        if violation_kind == DQViolationKind.SCHEMA_VIOLATION:
-            # Schema violations are usually more severe
-            if base_disposition in (DQDisposition.PASS, DQDisposition.WARN):
-                base_disposition = DQDisposition.QUARANTINE
-        elif (
-            violation_kind == DQViolationKind.ANOMALY_SIGNAL
-            and base_disposition == DQDisposition.FAIL
-        ):
-            # Anomaly signals are usually less severe
-            base_disposition = DQDisposition.QUARANTINE
+        if severity == "low":
+            deescalation_map = {
+                DQDisposition.FAIL: DQDisposition.QUARANTINE,
+                DQDisposition.QUARANTINE: DQDisposition.WARN,
+            }
+            return deescalation_map.get(base_disposition, base_disposition)
 
         return base_disposition
+
+    def _apply_mode_adjustment(self, disposition: DQDisposition) -> DQDisposition:
+        """Adjust disposition by configured strictness mode."""
+        if self.config.strictness_mode == "strict":
+            strict_map = {
+                DQDisposition.WARN: DQDisposition.QUARANTINE,
+                DQDisposition.QUARANTINE: DQDisposition.FAIL,
+            }
+            return strict_map.get(disposition, disposition)
+
+        if self.config.strictness_mode == "lenient":
+            lenient_map = {
+                DQDisposition.QUARANTINE: DQDisposition.WARN,
+                DQDisposition.FAIL: DQDisposition.QUARANTINE,
+            }
+            return lenient_map.get(disposition, disposition)
+
+        return disposition
+
+    def _apply_violation_kind_adjustment(
+        self,
+        disposition: DQDisposition,
+        violation_kind: DQViolationKind,
+    ) -> DQDisposition:
+        """Apply violation-kind specific guardrails."""
+        if violation_kind == DQViolationKind.SCHEMA_VIOLATION:
+            if disposition in (DQDisposition.PASS, DQDisposition.WARN):
+                return DQDisposition.QUARANTINE
+            return disposition
+        if violation_kind == DQViolationKind.ANOMALY_SIGNAL:
+            if disposition == DQDisposition.FAIL:
+                return DQDisposition.QUARANTINE
+            return disposition
+        return disposition
 
     def _apply_contract_adjustments(
         self,
@@ -242,6 +264,7 @@ class DQPolicyResolver:
             disposition=disposition,
             affected_fields=affected_fields or [],
             config_path=config_path,
+            policy_ref=self.build_policy_ref(),
         )
 
     def get_effective_policy_summary(self) -> dict[str, object]:

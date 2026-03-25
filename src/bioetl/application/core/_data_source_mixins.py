@@ -361,7 +361,7 @@ async def _yield_wrapped_fetch_records(
         fetch_kwargs["filter_field"] = filter_field
     iterator = cast(
         "AsyncIterator[RecordT]",
-        cast("Any", data_source).fetch(**fetch_kwargs),
+        cast("Any", data_source).fetch(**fetch_kwargs),  # Any: optional fetch kwargs are protocol-specific
     )
     async for record in iterator:
         yield record

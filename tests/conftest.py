@@ -1,10 +1,15 @@
 import enum
 import os
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
 
 import pytest
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

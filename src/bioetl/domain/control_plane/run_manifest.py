@@ -6,10 +6,13 @@ from collections.abc import Mapping
 from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from bioetl.domain.types import RunID, RunType
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
 __all__ = [
     "RunArtifactRef",
@@ -40,7 +43,7 @@ def _normalize_dataclass_value(value: object) -> dict[str, object] | None:
     if not is_dataclass(value) or isinstance(value, type):
         return None
     return _normalize_mapping(
-        cast("Mapping[object, object]", asdict(cast("Any", value)))
+        cast("Mapping[object, object]", asdict(cast("DataclassInstance", value)))
     )
 
 
@@ -89,6 +92,9 @@ class RunCodeProvenance:
     pipeline_version: str | None = None
     git_commit: str | None = None
     config_hash: str | None = None
+    # Data Quality integration
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,6 +158,12 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
         pipeline_version=_load_optional_str(payload, "pipeline_version"),
         git_commit=_load_optional_str(payload, "git_commit"),
         config_hash=_load_optional_str(payload, "config_hash"),
+        dq_contract_compatibility_hash=_load_optional_str(
+            payload, "dq_contract_compatibility_hash"
+        ),
+        effective_config_artifact_id=_load_optional_str(
+            payload, "effective_config_artifact_id"
+        ),
     )
 
 

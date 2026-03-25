@@ -1,5 +1,3 @@
-"""Generic pipeline assembly facade."""
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
@@ -9,9 +7,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
     get_data_source_creator,
 )
-from bioetl.composition.factories.dq.context_resolver import (
-    extract_dq_configs as _extract_dq_configs,
-)
+from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
     _CreatePipelineWithServicesRequest,
@@ -21,10 +17,9 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_factory_runner,
     create_pipeline_instance_with_services,
     create_transformer_instance,
+    extract_entity_type,
 )
-from bioetl.composition.factories.pipeline.runner_assembly import (
-    assemble_runner_impl as _assemble_runner_impl,
-)
+from bioetl.composition.factories.pipeline.runner_assembly import assemble_runner_impl
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.services import IdentityService
 
@@ -60,16 +55,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-__all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
-
-
-def _extract_entity_type(pipeline_name: str) -> str | None:
-    return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+_extract_entity_type, _extract_dq_configs, _assemble_runner_impl = extract_entity_type, extract_dq_configs, assemble_runner_impl  # noqa: E501
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
-    """Configurable factory for creating pipeline instances."""
-
     def __init__(
         self,
         pipeline_name: str,
@@ -82,7 +71,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         transformer_class: type[BaseTransformer] | None = None,
         provider_registry: ProviderRegistry | None = None,
     ) -> None:
-        """Initialize factory dependencies and schema contracts."""
         if gold_schema is None:
             raise ValueError(
                 f"gold_schema is required for pipeline '{pipeline_name}'. "
@@ -123,7 +111,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> BaseTransformer | None:
-        """Create transformer when a transformer class is configured."""
         return create_transformer_instance(
             transformer_class=self.transformer_class,
             provider=self.provider,
@@ -184,6 +171,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
         settings: Settings,
         logger: LoggerPort,
         manifest_id: str | None = None,
+        config_hash: str | None = None,
+        dq_contract_compatibility_hash: str | None = None,
+        effective_config_artifact_id: str | None = None,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
@@ -201,6 +191,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
                     settings,
                     logger,
                     manifest_id,
+                    config_hash,
+                    dq_contract_compatibility_hash,
+                    effective_config_artifact_id,
                     config,
                     filter_config,
                     tracer,
@@ -218,6 +211,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
         settings: Settings,
         observability: ObservabilityBundle,
         manifest_id: str | None = None,
+        config_hash: str | None = None,
+        dq_contract_compatibility_hash: str | None = None,
+        effective_config_artifact_id: str | None = None,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
@@ -231,6 +227,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             settings=settings,
             observability=observability,
             manifest_id=manifest_id,
+            config_hash=config_hash,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
             create_with_services_fn=self.create_with_services,
             assemble_runner_fn=assemble_runner,
             filter_config=filter_config,

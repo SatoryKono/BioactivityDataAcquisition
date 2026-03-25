@@ -74,6 +74,7 @@ class DQRuleOutcome:
     disposition_reason: str | None = None
     affected_fields: list[str] | None = None
     config_path: str | None = None
+    policy_ref: DQPolicyRef | None = None
 
     def __post_init__(self) -> None:
         """Validate required fields."""

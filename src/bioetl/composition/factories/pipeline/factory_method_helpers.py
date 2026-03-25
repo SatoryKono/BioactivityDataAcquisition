@@ -86,6 +86,11 @@ class _BuildFactoryServicesRequest:
 _CreatePipelineWithServicesRequest = _PipelineCreationRequest
 
 
+def extract_entity_type(pipeline_name: str) -> str | None:
+    """Extract trailing entity from `<provider>_<entity>` pipeline names."""
+    return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+
+
 def create_transformer_instance(
     *,
     transformer_class: type[BaseTransformer] | None,
@@ -177,23 +182,38 @@ def create_pipeline_instance_with_services(
         raise AssertionError(
             "factory_context must include pipeline_class and provider for pipeline creation"
         )
+    create_pipeline_kwargs: dict[str, object] = {
+        "pipeline_name": factory_context.pipeline_name,
+        "pipeline_class": factory_context.pipeline_class,
+        "provider": factory_context.provider,
+        "create_data_source_fn": factory_context.create_data_source_fn,
+        "transformer_class": factory_context.transformer_class,
+        "pandera_silver_schema": factory_context.pandera_silver_schema,
+        "run_id": request.run_id,
+        "runtime": request.runtime,
+        "settings": request.settings,
+        "logger": request.logger,
+        "config": request.config,
+        "filter_config": cast("InputFilterConfig | None", request.filter_config),
+        "tracer": request.tracer,
+        "dq_monitor": request.dq_monitor,
+        "metrics": request.metrics,
+        "cached_bronze": cast("CachedBronzeContext | None", request.cached_bronze),
+    }
+    if request.manifest_id is not None:
+        create_pipeline_kwargs["manifest_id"] = request.manifest_id
+    if request.config_hash is not None:
+        create_pipeline_kwargs["config_hash"] = request.config_hash
+    if request.dq_contract_compatibility_hash is not None:
+        create_pipeline_kwargs["dq_contract_compatibility_hash"] = (
+            request.dq_contract_compatibility_hash
+        )
+    if request.effective_config_artifact_id is not None:
+        create_pipeline_kwargs["effective_config_artifact_id"] = (
+            request.effective_config_artifact_id
+        )
     return create_pipeline_with_services(
-        pipeline_name=factory_context.pipeline_name,
-        pipeline_class=factory_context.pipeline_class,
-        provider=factory_context.provider,
-        create_data_source_fn=factory_context.create_data_source_fn,
-        transformer_class=factory_context.transformer_class,
-        pandera_silver_schema=factory_context.pandera_silver_schema,
-        run_id=request.run_id,
-        runtime=request.runtime,
-        settings=request.settings,
-        logger=request.logger,
-        config=request.config,
-        filter_config=cast("InputFilterConfig | None", request.filter_config),
-        tracer=request.tracer,
-        dq_monitor=request.dq_monitor,
-        metrics=request.metrics,
-        cached_bronze=cast("CachedBronzeContext | None", request.cached_bronze),
+        **cast("dict[str, Any]", create_pipeline_kwargs),  # Any: pipeline kwargs are heterogeneous
     )
 
 
@@ -207,6 +227,9 @@ def create_factory_runner(
     settings: Settings,
     observability: ObservabilityBundle,
     manifest_id: str | None = None,
+    config_hash: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    effective_config_artifact_id: str | None = None,
     create_with_services_fn: Callable[..., TPipeline],
     assemble_runner_fn: Callable[..., PipelineRunner],
     filter_config: InputFilterConfig | None = None,
@@ -229,8 +252,18 @@ def create_factory_runner(
     }
     if manifest_id is not None:
         create_with_services_kwargs["manifest_id"] = manifest_id
+    if config_hash is not None:
+        create_with_services_kwargs["config_hash"] = config_hash
+    if dq_contract_compatibility_hash is not None:
+        create_with_services_kwargs["dq_contract_compatibility_hash"] = (
+            dq_contract_compatibility_hash
+        )
+    if effective_config_artifact_id is not None:
+        create_with_services_kwargs["effective_config_artifact_id"] = (
+            effective_config_artifact_id
+        )
     pipeline = create_with_services_fn(
-        **cast("dict[str, Any]", create_with_services_kwargs)
+        **cast("dict[str, Any]", create_with_services_kwargs),  # Any: kwargs payload is heterogeneous
     )
     return assemble_runner_fn(
         pipeline=pipeline,

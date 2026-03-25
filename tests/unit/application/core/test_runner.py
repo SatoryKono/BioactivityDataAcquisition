@@ -824,6 +824,8 @@ class TestPipelineRunnerRun:
         mock_checkpoint_manager,
     ):
         """Checkpoint metadata should drive resume offset when no override exists."""
+        current_metadata = object()
+        mock_checkpoint_manager.current_metadata = current_metadata
         mock_checkpoint_manager.load_checkpoint.return_value = {
             "records_processed": 125,
         }
@@ -831,7 +833,9 @@ class TestPipelineRunnerRun:
         offset = await runner._resolve_execution_offset()
 
         assert offset == 125
-        mock_checkpoint_manager.load_checkpoint.assert_called_once()
+        mock_checkpoint_manager.load_checkpoint.assert_called_once_with(
+            current_metadata=current_metadata
+        )
 
 
 @pytest.mark.unit

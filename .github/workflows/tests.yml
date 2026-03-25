@@ -162,6 +162,9 @@ jobs:
             -   name: Pre-merge naming/package consistency gate
                 run: uv run python scripts/qa/check_naming_package_consistency.py --check
 
+            -   name: DQ consistency validation (fail-fast)
+                run: uv run python scripts/qa/validate_dq_consistency.py
+
             -   name: "Quality ratchet (fail-fast: domain)"
                 run: |
                     uv run pytest \
@@ -213,6 +216,60 @@ jobs:
 
             -   name: Validate docker-compose.monitoring.yml syntax
                 run: docker compose -f docker-compose.monitoring.yml config > /dev/null
+
+    track-d-gates:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        needs: smoke-check
+        env:
+            BIOETL_TEST_MODE: "true"
+            BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+            BIOETL_TEST_RELAXED_DQ: "1"
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.11"
+
+            -   name: Run Track D fail-fast gate (fixtures + compatibility + linkage)
+                run: |
+                    mkdir -p reports/test-telemetry
+                    uv run pytest \
+                      tests/architecture/test_config_ci_invariants.py::TestBronzeFixtureCoverage::test_bronze_fixture_coverage \
+                      tests/integration/ci/test_config_stability.py::TestCheckpointResumeCompatibilityPolicy \
+                      tests/integration/ci/test_track_d_fixture_control_plane_linkage.py \
+                      -q --tb=short --maxfail=1 \
+                      --junitxml=reports/test-telemetry/junit-track-d.xml
+
+            -   name: Upload Track D telemetry
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-telemetry-track-d
+                    path: reports/test-telemetry/junit-track-d.xml
+                    if-no-files-found: warn
+                    retention-days: 14
+
+    dq-consistency-gate:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        needs: governance-preflight
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    python-version: "3.11"
+
+            -   name: Run DQ consistency validation
+                run: uv run python scripts/qa/validate_dq_consistency.py
 
     quality-metrics-gate:
         runs-on: ubuntu-latest

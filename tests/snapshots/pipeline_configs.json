@@ -107,7 +107,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -119,8 +123,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "activity",
     "fields": [],
@@ -397,7 +403,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -409,8 +419,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "molecule",
     "fields": [],
@@ -561,7 +573,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -573,8 +589,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "publication_term",
     "fields": [],
@@ -901,7 +919,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -913,8 +935,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "publication",
     "fields": [],
@@ -1285,7 +1309,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -1297,8 +1325,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "publication",
     "fields": [],
@@ -1447,7 +1477,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -1459,8 +1493,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "compound",
     "fields": [],
@@ -1807,7 +1843,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -1819,8 +1859,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "publication",
     "fields": [],
@@ -2121,7 +2163,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -2133,8 +2179,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "publication",
     "fields": [],
@@ -2257,7 +2305,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -2269,8 +2321,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "idmapping",
     "fields": [],
@@ -2453,7 +2507,11 @@
     ],
     "dq": {
       "conditional_validations": [],
+      "contract_ref": null,
+      "contract_version": null,
       "cross_field_validations": [],
+      "default_disposition_policy": "warn",
+      "disposition_overrides": [],
       "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
@@ -2465,8 +2523,10 @@
         "output_path": null,
         "sample_size": 10
       },
+      "rule_bundle_version": null,
       "soft_fail_threshold": 0.05,
-      "strict_validation": false
+      "strict_validation": false,
+      "strictness_mode": "moderate"
     },
     "entity_type": "protein",
     "fields": [],

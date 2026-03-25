@@ -149,10 +149,12 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
     assert fake_factory.kwargs is not None
     assert fake_factory.kwargs["runtime"] == "runtime"
     assert fake_factory.kwargs["cached_bronze"].enabled is True
-    assert [event for event, _ in logger_calls] == [
+    events = [event for event, _ in logger_calls]
+    assert events[:2] == [
         "input_filter_enabled",
         "cached_bronze_mode_enabled",
     ]
+    assert "effective_config_artifact_persisted" in events
     assert isinstance(fake_factory.kwargs["manifest_id"], str)
 
 
@@ -273,7 +275,12 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
     expected_inputs = SimpleNamespace(
         settings="settings",
         yaml_config="yaml-config",
-        observability="observability",
+        observability=SimpleNamespace(
+            logger=SimpleNamespace(
+                info=lambda *_, **__: None,
+                error=lambda *_, **__: None,
+            )
+        ),
         runtime_config="runtime",
         filter_config=None,
         cached_bronze=SimpleNamespace(enabled=False),
@@ -381,6 +388,44 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert payload["manifest_id"] == manifest_id
     assert payload["pipeline_name"] == "chembl_activity"
+    code_provenance = payload["code_provenance"]
+    assert isinstance(code_provenance, dict)
+    effective_config_artifact_id = code_provenance["effective_config_artifact_id"]
+    assert isinstance(effective_config_artifact_id, str)
+    assert code_provenance["config_hash"] == fake_factory.kwargs["config_hash"]
+    assert (
+        code_provenance["dq_contract_compatibility_hash"]
+        == fake_factory.kwargs["dq_contract_compatibility_hash"]
+    )
+    assert (
+        effective_config_artifact_id
+        == fake_factory.kwargs["effective_config_artifact_id"]
+    )
+
+    effective_config_path = (
+        tmp_path
+        / "output"
+        / "control"
+        / "effective_config"
+        / f"{effective_config_artifact_id}.json"
+    )
+    assert effective_config_path.exists()
+    effective_payload = json.loads(effective_config_path.read_text(encoding="utf-8"))
+    assert isinstance(effective_payload, dict)
+    assert effective_payload["artifact_id"] == effective_config_artifact_id
+
+    effective_index_path = (
+        tmp_path
+        / "output"
+        / "control"
+        / "effective_config"
+        / "_by_run_id"
+        / f"{context.run_id}.txt"
+    )
+    assert effective_index_path.exists()
+    assert effective_index_path.read_text(encoding="utf-8").strip() == (
+        effective_config_artifact_id
+    )
     assert fake_factory.runner.attached_run_ledger_service is not None
 
     ledger_path = (

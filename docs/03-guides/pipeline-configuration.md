@@ -18,6 +18,7 @@ BioETL использует **YAML-файлы** для конфигурации 
 - **Иерархические DQ/Filter правила (ADR-027/028):** 3-уровневая иерархия с merge
 - **Pydantic валидация:** Схемы проверяются при загрузке
 - **Immutable Domain Objects:** Конфиги преобразуются в frozen dataclasses
+- **Fixture governance (dual model):** tracked fixture manifest + gap registry
 
 ----------------------------------------------------------------------
 
@@ -28,7 +29,8 @@ configs/
 ├── base/                         # Глобальные defaults
 │   ├── pipeline.yaml            # Общие pipeline/filter defaults
 │   ├── quality.yaml             # Общие DQ defaults
-│   └── bronze_fixture_gaps.yaml # Fixture gap policy
+│   ├── bronze_fixture_manifest.yaml # Positive fixture inventory (tracked CI samples)
+│   └── bronze_fixture_gaps.yaml # Exception registry for missing fixture coverage
 ├── providers/                    # Provider-level source/quality/filters
 │   ├── chembl.yaml
 │   ├── crossref.yaml
@@ -95,6 +97,21 @@ quality/governance assets и composite helpers, поэтому active guide фи
 | Quality/governance configs | Quality policy, debt, source-test, and composite quality files (`configs/quality`) |
 | Enum configs | Enum and publication-classification assets (`configs/enums`) |
 | Misc standalone configs | Naming exceptions and similar top-level config assets |
+
+### Fixture Governance: `manifest + gaps`
+
+Для Bronze testability используется dual model:
+
+- `configs/base/bronze_fixture_manifest.yaml` — позитивный реестр
+  `tracked_ci_sample` fixtures (канонический CI baseline).
+- `configs/base/bronze_fixture_gaps.yaml` — реестр дефицитов и исключений
+  для pipeline keys, где tracked fixture пока отсутствует.
+
+Практическое правило:
+
+- pipeline считается покрытым, если есть `tracked_ci_sample` в manifest;
+- если tracked fixture отсутствует, должен быть explicit entry в `gaps`;
+- для ключей, покрытых `tracked_ci_sample`, gap-запись должна быть закрыта/удалена.
 
 ----------------------------------------------------------------------
 
