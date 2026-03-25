@@ -237,3 +237,60 @@ def test_layer_separation():
 
     # Runtime guard should be None (not run during preflight)
     assert result.runtime_guard_result is None
+
+
+def test_preflight_governance_integration():
+    """Test that preflight governance is properly integrated."""
+    from bioetl.domain.services.preflight_governance import GovernancePolicy
+    
+    # Test with default governance policy
+    service = CompositeValidationService()
+    config = CompositeValidationConfig(
+        pipeline_name="test_pipeline",
+        composite_config={
+            "sources": ["source1"],  # Missing required fields
+            "aggregation": {"group_by": ["field"]},
+        },
+        governance_policy=GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY,
+    )
+    result = service.validate_composite(config)
+    
+    # Verify that execution_decision is present
+    assert result.execution_decision is not None
+    assert "governance_metadata" in result.execution_decision
+    assert "execution_decision" in result.execution_decision
+    assert "validation_summary" in result.execution_decision
+    
+    # Check governance metadata
+    governance_metadata = result.execution_decision["governance_metadata"]
+    assert governance_metadata["policy"] == "block_on_blockers_only"
+    
+    # Check execution decision
+    execution_decision = result.execution_decision["execution_decision"]
+    assert "execution_allowed" in execution_decision
+    # Should block because there are blocker issues
+    assert execution_decision["execution_allowed"] is False
+
+
+def test_preflight_governance_warning_only():
+    """Test warning-only governance policy."""
+    from bioetl.domain.services.preflight_governance import GovernancePolicy
+    
+    service = CompositeValidationService()
+    config = CompositeValidationConfig(
+        pipeline_name="test_pipeline",
+        composite_config={
+            "sources": ["source1"],  # Missing required fields
+            "aggregation": {"group_by": ["field"]},
+        },
+        governance_policy=GovernancePolicy.WARNING_ONLY,
+    )
+    result = service.validate_composite(config)
+    
+    # Warning only should allow execution even with issues
+    assert result.execution_decision is not None
+    governance_metadata = result.execution_decision["governance_metadata"]
+    assert governance_metadata["policy"] == "warning_only"
+    
+    execution_decision = result.execution_decision["execution_decision"]
+    assert execution_decision["execution_allowed"] is True

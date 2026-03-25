@@ -69,6 +69,7 @@ class CompositeValidationReport:
     structural_result: ValidationResult
     deep_preflight_result: ValidationResult
     runtime_guard_result: ValidationResult | None = None
+    execution_decision: JsonDict | None = None
 
     def has_any_issues(self) -> bool:
         """Return True when at least one issue exists in any layer."""

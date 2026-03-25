@@ -122,3 +122,31 @@ def test_build_payload_returns_validated_context_and_metric_labels() -> None:
     }
     assert payload.metric_labels["event"] == "contract_event"
     assert payload.metric_labels["provider"] == "default_provider"
+
+
+def test_build_payload_enriches_event_family_and_correlation_defaults() -> None:
+    payload = build_observability_contract_payload(
+        event_name="preflight_started",
+        context={},
+        default_provider="chembl",
+        default_pipeline="chembl_activity",
+        default_run_id="run-123",
+        default_severity="info",
+        correlation_defaults={
+            "manifest_id": "manifest-1",
+            "entity": "activity",
+            "run_type": "incremental",
+            "effective_config_hash": "sha256:abc",
+            "contract_ref": "gold.activity",
+            "contract_version": "1.0.0",
+        },
+    )
+
+    assert payload.context["event_family"] == "pipeline.phase"
+    assert payload.context["manifest_id"] == "manifest-1"
+    assert payload.context["entity"] == "activity"
+    assert payload.context["run_type"] == "incremental"
+    assert payload.context["effective_config_hash"] == "sha256:abc"
+    assert payload.context["contract_ref"] == "gold.activity"
+    assert payload.context["contract_version"] == "1.0.0"
+    assert "manifest_id" not in payload.metric_labels

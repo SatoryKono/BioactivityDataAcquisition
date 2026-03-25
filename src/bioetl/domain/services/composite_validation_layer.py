@@ -13,6 +13,11 @@ from bioetl.domain.services.cross_validation_validator import (
     CrossValidationConfig,
     CrossValidationValidator,
 )
+from bioetl.domain.services.preflight_governance import (
+    GovernancePolicy,
+    PreflightGovernanceConfig,
+    PreflightGovernanceService,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
     CompositeValidationReport,
@@ -24,6 +29,16 @@ from bioetl.domain.types.validation_severity import (
     ValidationLayer,
     ValidationSeverity,
 )
+from bioetl.domain.services.composite_validation_helpers import (
+    _append_config_issue_if_invalid,
+    _convert_to_aggregation_config,
+    _convert_to_cross_validation_config,
+    _create_issue,
+    _extract_priority,
+    _get_layer_for_code,
+    _is_valid_field_priorities,
+    _is_valid_lineage_config,
+)
 
 
 @dataclass(frozen=True)
@@ -32,6 +47,7 @@ class CompositeValidationConfig:
     composite_config: JsonDict
     execution_context: JsonDict | None = None
     strict_mode: bool = True
+    governance_policy: GovernancePolicy = GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
 
 
 class CompositeValidationService:
@@ -40,6 +56,11 @@ class CompositeValidationService:
     def __init__(self) -> None:
         self._aggregation_validator = AggregationValidator()
         self._cross_validation_validator = CrossValidationValidator()
+        self._preflight_governance = PreflightGovernanceService(
+            config=PreflightGovernanceConfig(
+                policy=GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
+            )
+        )
 
     def validate_composite(
         self,
@@ -47,10 +68,31 @@ class CompositeValidationService:
     ) -> CompositeValidationReport:
         structural_result = self._run_structural_validation(config)
         deep_preflight_result = self._run_deep_preflight_validation(config)
+        
+        # Create validation report
+        validation_report = CompositeValidationReport(
+            structural_result=structural_result,
+            deep_preflight_result=deep_preflight_result,
+            runtime_guard_result=None,
+        )
+        
+        # Apply preflight governance
+        governance_config = PreflightGovernanceConfig(
+            policy=config.governance_policy,
+            ci_integration=config.execution_context.get("ci_integration", False) if config.execution_context else False,
+        )
+        governance_service = PreflightGovernanceService(config=governance_config)
+        governance_decision = governance_service.apply_governance(
+            validation_report,
+            execution_context=config.execution_context,
+        )
+        
+        # Merge governance decision into validation report
         return CompositeValidationReport(
             structural_result=structural_result,
             deep_preflight_result=deep_preflight_result,
             runtime_guard_result=None,
+            execution_decision=governance_decision,
         )
 
     def _run_structural_validation(
@@ -111,7 +153,7 @@ class CompositeValidationService:
             cross_validation_issues = self._validate_cross_validation_config(
                 cross_validation_config, source_names
             )
-            issues.extend(cross_validation_issues.issues)
+            issues.extend(cross_validation_issues)
         self._append_config_issue_if_invalid(
             issues=issues,
             composite_config=composite_config,
@@ -151,13 +193,13 @@ class CompositeValidationService:
             return
         if isinstance(section_value, dict) and validator(section_value):
             return
-        issues.append(
-            self._create_issue(
-                code=code,
-                severity=severity,
-                message=message,
-                details={details_key: section_value},
-            )
+        _append_config_issue_if_invalid(
+            issues=issues,
+            is_valid=False,
+            code=code,
+            severity=severity,
+            message=message,
+            details={details_key: section_value},
         )
 
     def _create_issue(
@@ -168,32 +210,16 @@ class CompositeValidationService:
         details: JsonDict | None = None,
         location: str | None = None,
     ) -> ValidationIssue:
-        return ValidationIssue(
-            code=code,
-            severity=severity,
-            layer=self._get_layer_for_code(code),
-            message=message,
-            details=details or {},
-            location=location,
-        )
-
-    @staticmethod
-    def _get_layer_for_code(code: IssueCode) -> ValidationLayer:
-        if code.value.startswith("CMP-STR-"):
-            return ValidationLayer.STRUCTURAL
-        if code.value.startswith("CMP-PF-"):
-            return ValidationLayer.DEEP_PREFLIGHT
-        return ValidationLayer.RUNTIME_GUARD
+        return _create_issue(code, severity, message, details, location)
 
     def _validate_aggregation_config(
         self,
         config: JsonDict | object,
         source_schema: JsonDict,
-    ) -> ValidationResult:
-        """Validate cross-validation configuration using CrossValidationValidator."""
+    ) -> list[ValidationIssue]:
         if not isinstance(config, dict):
             return [
-                self._create_issue(
+                _create_issue(
                     IssueCode.CMP_PF_AGG_001,
                     ValidationSeverity.BLOCKER,
                     "Aggregation configuration must be a dictionary",
@@ -201,10 +227,10 @@ class CompositeValidationService:
                 )
             ]
         try:
-            aggregation_config = self._convert_to_aggregation_config(config)
+            aggregation_config = _convert_to_aggregation_config(config)
         except (KeyError, ValueError) as exc:
             return [
-                self._create_issue(
+                _create_issue(
                     IssueCode.CMP_PF_AGG_001,
                     ValidationSeverity.BLOCKER,
                     f"Invalid aggregation config format: {exc!s}",
@@ -217,96 +243,53 @@ class CompositeValidationService:
         )
         return validation_result.issues
 
-    @staticmethod
-    def _convert_to_aggregation_config(config: JsonDict) -> AggregationConfig:
-        return AggregationConfig(
-            group_by=config.get("group_by", []),
-            aggregations=config.get("aggregations", {}),
-            source_field=config.get("source_field"),
-            provenance_tracking=config.get("provenance_tracking", True),
-        )
-
     def _validate_cross_validation_config(
         self, config: JsonDict, source_names: list[str]
     ) -> list[ValidationIssue]:
-        if not isinstance(config, dict):
-            return ValidationResult(
-                issues=[
-                    self._create_issue(
-                        IssueCode.CMP_PF_CV_002,
-                        ValidationSeverity.BLOCKER,
-                        "Cross-validation configuration must be a dictionary",
-                        {"actual_type": type(config).__name__},
-                    )
-                ],
-                validation_layer=ValidationLayer.DEEP_PREFLIGHT,
-                execution_context={},
-            )
-        rules = config.get("rules")
-        if not isinstance(rules, dict) or not rules:
-            return ValidationResult(
-                issues=[
-                    self._create_issue(
-                        IssueCode.CMP_PF_CV_008,
-                        ValidationSeverity.BLOCKER,
-                        "Cross-validation rules cannot be empty",
-                        {"rules": rules if isinstance(rules, dict) else {}},
-                    )
-                ],
-                validation_layer=ValidationLayer.DEEP_PREFLIGHT,
-                execution_context={},
-            )
-        try:
-            cross_val_config = self._convert_to_cross_validation_config(config)
-        except (KeyError, ValueError) as exc:
-            return ValidationResult(
-                issues=[
-                    self._create_issue(
-                        IssueCode.CMP_PF_CV_003,
-                        ValidationSeverity.BLOCKER,
-                        f"Invalid cross-validation config format: {exc!s}",
-                        {"config": config},
-                    )
-                ],
-                validation_layer=ValidationLayer.DEEP_PREFLIGHT,
-                execution_context={},
-            )
+        precheck_errors = self._precheck_cross_validation_config(config)
+        if precheck_errors:
+            return precheck_errors
+        cross_val_config = _convert_to_cross_validation_config(config)
         validation_result = self._cross_validation_validator.validate_cross_validation_config(
             cross_val_config, source_names
         )
-        return validation_result
+        return validation_result.issues
 
-    @staticmethod
-    def _convert_to_cross_validation_config(config: JsonDict) -> CrossValidationConfig:
-        return CrossValidationConfig(
-            pairs=config.get("pairs", []),
-            rules=config.get("rules", {}),
-            strict_mode=config.get("strict_mode", True),
-            coverage_threshold=config.get("coverage_threshold"),
-            consistency_threshold=config.get("consistency_threshold"),
-        )
+    def _precheck_cross_validation_config(
+        self,
+        config: JsonDict,
+    ) -> list[ValidationIssue]:
+        if not isinstance(config, dict):
+            return [
+                _create_issue(
+                    IssueCode.CMP_PF_CV_002,
+                    ValidationSeverity.BLOCKER,
+                    "Cross-validation configuration must be a dictionary",
+                    {"actual_type": type(config).__name__},
+                )
+            ]
+        rules = config.get("rules")
+        if isinstance(rules, dict) and rules:
+            return []
+        return [
+            _create_issue(
+                IssueCode.CMP_PF_CV_008,
+                ValidationSeverity.BLOCKER,
+                "Cross-validation rules cannot be empty",
+                {"rules": rules if isinstance(rules, dict) else {}},
+            )
+        ]
 
     def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
-        seen_priorities: dict[str, object] = {}
-        for field, priority_config in priorities.items():
-            priority = self._extract_priority(priority_config)
-            if priority is None:
-                return False
-            previous = seen_priorities.get(field)
-            if previous is not None and previous != priority:
-                return False
-            seen_priorities[field] = priority
-        return True
+        return _is_valid_field_priorities(priorities)
 
     @staticmethod
     def _extract_priority(priority_config: object) -> object | None:
-        if isinstance(priority_config, dict):
-            return priority_config.get("priority")
-        return None
+        return _extract_priority(priority_config)
 
     @staticmethod
     def _is_valid_lineage_config(config: JsonDict) -> bool:
-        return all(field in config for field in ("tracking_level", "source_fields"))
+        return _is_valid_lineage_config(config)
 
 
 def create_composite_validation_service() -> CompositeValidationService:

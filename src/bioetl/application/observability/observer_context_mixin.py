@@ -23,6 +23,11 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
     pipeline_name: str
     run_id: str
     run_type: str
+    manifest_id: str | None
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    composite_run_id: str | None
     start_time: float | None
     span: Span | None
     _metrics: MetricsPort
@@ -58,15 +63,32 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         """Open tracing span if tracer is configured."""
         if self._tracer:
             otel_tracer = self._tracer.get_tracer("bioetl.pipeline")
+            attributes = self._build_trace_attributes()
             self.span = otel_tracer.start_as_current_span(
                 f"pipeline.{self.pipeline_name}",
-                attributes={
-                    "bioetl.pipeline": self.pipeline_name,
-                    "bioetl.run_id": self.run_id,
-                    "bioetl.run_type": self.run_type,
-                },
+                attributes=attributes,
             )
             self.span.__enter__()
+
+    def _build_trace_attributes(self) -> dict[str, object]:
+        """Build span attributes with optional correlation anchors."""
+        attributes: dict[str, object] = {
+            "bioetl.pipeline": self.pipeline_name,
+            "bioetl.run_id": self.run_id,
+            "bioetl.run_type": self.run_type,
+        }
+        optional_attributes = {
+            "bioetl.manifest_id": self.manifest_id,
+            "bioetl.effective_config_hash": self.effective_config_hash,
+            "bioetl.contract_ref": self.contract_ref,
+            "bioetl.contract_version": self.contract_version,
+            "bioetl.composite_run_id": self.composite_run_id,
+        }
+        for key, value in optional_attributes.items():
+            if value is None:
+                continue
+            attributes[key] = value
+        return attributes
 
     @staticmethod
     def _resolve_status(exc_val: BaseException | None) -> tuple[str, bool]:

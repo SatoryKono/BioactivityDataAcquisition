@@ -29,6 +29,16 @@ class CompositeCheckpointState:
     dependency_results: dict[str, DependencyResult] = field(default_factory=dict)
     completed_enrichers: frozenset[str] = field(default_factory=frozenset)
     enrichment_results: dict[str, EnrichmentResult] = field(default_factory=dict)
+    merge_completed: bool = False
+    merge_result: JsonDict | None = None
+    
+    # Checkpoint compatibility anchors (Track C)
+    checkpoint_schema_version: str = "1.0.0"
+    effective_config_hash: str = ""
+    contract_ref: str = ""
+    contract_version: str = "1.0.0"
+    composite_run_identity: str = ""
+    
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -51,6 +61,13 @@ class CompositeCheckpointState:
             dependency_results=self.dependency_results,
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
+            merge_completed=self.merge_completed,
+            merge_result=self.merge_result,
+            checkpoint_schema_version=self.checkpoint_schema_version,
+            effective_config_hash=self.effective_config_hash,
+            contract_ref=self.contract_ref,
+            contract_version=self.contract_version,
+            composite_run_identity=self.composite_run_identity,
             created_at=self.created_at,
             updated_at=datetime.now(tz=UTC),
         )
@@ -81,6 +98,13 @@ class CompositeCheckpointState:
             dependency_results=new_results,
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
+            merge_completed=self.merge_completed,
+            merge_result=self.merge_result,
+            checkpoint_schema_version=self.checkpoint_schema_version,
+            effective_config_hash=self.effective_config_hash,
+            contract_ref=self.contract_ref,
+            contract_version=self.contract_version,
+            composite_run_identity=self.composite_run_identity,
             created_at=self.created_at,
             updated_at=datetime.now(tz=UTC),
         )
@@ -111,6 +135,13 @@ class CompositeCheckpointState:
             dependency_results=self.dependency_results,
             completed_enrichers=frozenset(new_completed),
             enrichment_results=new_results,
+            merge_completed=self.merge_completed,
+            merge_result=self.merge_result,
+            checkpoint_schema_version=self.checkpoint_schema_version,
+            effective_config_hash=self.effective_config_hash,
+            contract_ref=self.contract_ref,
+            contract_version=self.contract_version,
+            composite_run_identity=self.composite_run_identity,
             created_at=self.created_at,
             updated_at=datetime.now(tz=UTC),
         )
@@ -134,6 +165,43 @@ class CompositeCheckpointState:
             dependency_results=self.dependency_results,
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
+            merge_completed=self.merge_completed,
+            merge_result=self.merge_result,
+            checkpoint_schema_version=self.checkpoint_schema_version,
+            effective_config_hash=self.effective_config_hash,
+            contract_ref=self.contract_ref,
+            contract_version=self.contract_version,
+            composite_run_identity=self.composite_run_identity,
+            created_at=self.created_at,
+            updated_at=datetime.now(tz=UTC),
+        )
+
+    def with_merge_completed(self, result: JsonDict) -> CompositeCheckpointState:
+        """Create new state with merge marked as completed.
+
+        Args:
+            result: Merge result from the completed merge operation.
+
+        Returns:
+            New immutable checkpoint state with merge_completed=True and MERGING FSM state.
+        """
+        return CompositeCheckpointState(
+            composite_name=self.composite_name,
+            run_id=self.run_id,
+            state=CompositePipelineState.MERGING,
+            seed_completed=self.seed_completed,
+            seed_result=self.seed_result,
+            completed_dependencies=self.completed_dependencies,
+            dependency_results=self.dependency_results,
+            completed_enrichers=self.completed_enrichers,
+            enrichment_results=self.enrichment_results,
+            merge_completed=True,
+            merge_result=result,
+            checkpoint_schema_version=self.checkpoint_schema_version,
+            effective_config_hash=self.effective_config_hash,
+            contract_ref=self.contract_ref,
+            contract_version=self.contract_version,
+            composite_run_identity=self.composite_run_identity,
             created_at=self.created_at,
             updated_at=datetime.now(tz=UTC),
         )
@@ -161,6 +229,14 @@ class CompositeCheckpointState:
             "dependency_results": self._serialize_dependency_results(),
             "completed_enrichers": list(self.completed_enrichers),
             "enrichment_results": self._serialize_enrichment_results(),
+            "merge_completed": self.merge_completed,
+            "merge_result": self.merge_result,
+            # Checkpoint compatibility anchors
+            "checkpoint_schema_version": self.checkpoint_schema_version,
+            "effective_config_hash": self.effective_config_hash,
+            "contract_ref": self.contract_ref,
+            "contract_version": self.contract_version,
+            "composite_run_identity": self.composite_run_identity,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
@@ -288,6 +364,14 @@ class CompositeCheckpointState:
             dependency_results=dependency_results,
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
             enrichment_results=enrichment_results,
+            merge_completed=data.get("merge_completed", False),
+            merge_result=data.get("merge_result"),
+            # Checkpoint compatibility anchors with backward compatibility
+            checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),
+            effective_config_hash=data.get("effective_config_hash", ""),
+            contract_ref=data.get("contract_ref", ""),
+            contract_version=data.get("contract_version", "1.0.0"),
+            composite_run_identity=data.get("composite_run_identity", ""),
             created_at=created_at,
             updated_at=updated_at,
         )

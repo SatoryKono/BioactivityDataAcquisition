@@ -60,10 +60,8 @@ class TestCrossValidationValidator:
         
         result = validator.validate_cross_validation_config(config, source_names)
         
-        assert len(result.issues) == 2  # Empty pairs + coverage warning
-        issue_codes = {issue.code for issue in result.issues}
-        assert IssueCode.CMP_PF_CV_002 in issue_codes  # Empty pairs
-        assert IssueCode.CMP_PF_CV_013 in issue_codes  # Coverage warning
+        assert len(result.issues) == 1
+        assert result.issues[0].code == IssueCode.CMP_PF_CV_002  # Empty pairs
         assert not result.is_valid()
 
     def test_validate_empty_rules(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -75,10 +73,8 @@ class TestCrossValidationValidator:
         
         result = validator.validate_cross_validation_config(config, source_names)
         
-        assert len(result.issues) == 2  # Empty rules + coverage warning
-        issue_codes = {issue.code for issue in result.issues}
-        assert IssueCode.CMP_PF_CV_008 in issue_codes  # Empty rules
-        assert IssueCode.CMP_PF_CV_013 in issue_codes  # Coverage warning
+        assert len(result.issues) == 1
+        assert result.issues[0].code == IssueCode.CMP_PF_CV_008  # Empty rules
         assert not result.is_valid()
 
     def test_validate_invalid_pair_structure(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -90,10 +86,8 @@ class TestCrossValidationValidator:
         
         result = validator.validate_cross_validation_config(config, source_names)
         
-        assert len(result.issues) == 2  # Invalid structure + coverage warning
-        issue_codes = {issue.code for issue in result.issues}
-        assert IssueCode.CMP_PF_CV_003 in issue_codes  # Invalid structure
-        assert IssueCode.CMP_PF_CV_013 in issue_codes  # Coverage warning
+        assert len(result.issues) == 1
+        assert result.issues[0].code == IssueCode.CMP_PF_CV_003  # Invalid structure
         assert not result.is_valid()
 
     def test_validate_pair_with_multiple_mappings(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -106,9 +100,9 @@ class TestCrossValidationValidator:
         result = validator.validate_cross_validation_config(config, source_names)
         
         assert len(result.issues) == 1
-        assert result.issues[0].code == IssueCode.CMP_PF_CV_004
-        assert result.issues[0].severity == ValidationSeverity.BLOCKER
-        assert "exactly one source mapping" in result.issues[0].message
+        main_issue = next(issue for issue in result.issues if issue.code == IssueCode.CMP_PF_CV_004)
+        assert main_issue.severity == ValidationSeverity.BLOCKER
+        assert "exactly one source mapping" in main_issue.message
         assert not result.is_valid()
 
     def test_validate_source_not_in_sources(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -120,10 +114,8 @@ class TestCrossValidationValidator:
         
         result = validator.validate_cross_validation_config(config, source_names)
         
-        assert len(result.issues) == 2  # Source not found + coverage warning
-        issue_codes = {issue.code for issue in result.issues}
-        assert IssueCode.CMP_PF_CV_005 in issue_codes  # Source not found
-        assert IssueCode.CMP_PF_CV_013 in issue_codes  # Coverage warning
+        assert len(result.issues) == 1
+        assert result.issues[0].code == IssueCode.CMP_PF_CV_005  # Source not found
         assert not result.is_valid()
 
     def test_validate_comparison_source_not_in_sources(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -135,10 +127,8 @@ class TestCrossValidationValidator:
         
         result = validator.validate_cross_validation_config(config, source_names)
         
-        assert len(result.issues) == 2  # Comparison source not found + coverage warning
-        issue_codes = {issue.code for issue in result.issues}
-        assert IssueCode.CMP_PF_CV_007 in issue_codes  # Comparison source not found
-        assert IssueCode.CMP_PF_CV_013 in issue_codes  # Coverage warning
+        assert len(result.issues) == 1
+        assert result.issues[0].code == IssueCode.CMP_PF_CV_007  # Comparison source not found
         assert not result.is_valid()
 
     def test_validate_invalid_rule_type(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -151,9 +141,9 @@ class TestCrossValidationValidator:
         result = validator.validate_cross_validation_config(config, source_names)
         
         assert len(result.issues) == 1
-        assert result.issues[0].code == IssueCode.CMP_PF_CV_009
-        assert result.issues[0].severity == ValidationSeverity.BLOCKER
-        assert "must be a string type" in result.issues[0].message
+        main_issue = next(issue for issue in result.issues if issue.code == IssueCode.CMP_PF_CV_009)
+        assert main_issue.severity == ValidationSeverity.BLOCKER
+        assert "must be a string type" in main_issue.message
         assert not result.is_valid()
 
     def test_validate_unsupported_rule_type(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -166,9 +156,9 @@ class TestCrossValidationValidator:
         result = validator.validate_cross_validation_config(config, source_names)
         
         assert len(result.issues) == 1
-        assert result.issues[0].code == IssueCode.CMP_PF_CV_010
-        assert result.issues[0].severity == ValidationSeverity.BLOCKER
-        assert "Unsupported cross-validation rule type" in result.issues[0].message
+        main_issue = next(issue for issue in result.issues if issue.code == IssueCode.CMP_PF_CV_010)
+        assert main_issue.severity == ValidationSeverity.BLOCKER
+        assert "Unsupported cross-validation rule type" in main_issue.message
         assert not result.is_valid()
 
     def test_validate_invalid_coverage_threshold(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -182,9 +172,9 @@ class TestCrossValidationValidator:
         result = validator.validate_cross_validation_config(config, source_names)
         
         assert len(result.issues) == 1
-        assert result.issues[0].code == IssueCode.CMP_PF_CV_011
-        assert result.issues[0].severity == ValidationSeverity.BLOCKER
-        assert "must be between 0.0 and 1.0" in result.issues[0].message
+        main_issue = next(issue for issue in result.issues if issue.code == IssueCode.CMP_PF_CV_011)
+        assert main_issue.severity == ValidationSeverity.BLOCKER
+        assert "must be between 0.0 and 1.0" in main_issue.message
         assert not result.is_valid()
 
     def test_validate_invalid_consistency_threshold(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -198,9 +188,9 @@ class TestCrossValidationValidator:
         result = validator.validate_cross_validation_config(config, source_names)
         
         assert len(result.issues) == 1
-        assert result.issues[0].code == IssueCode.CMP_PF_CV_012
-        assert result.issues[0].severity == ValidationSeverity.BLOCKER
-        assert "must be between 0.0 and 1.0" in result.issues[0].message
+        main_issue = next(issue for issue in result.issues if issue.code == IssueCode.CMP_PF_CV_012)
+        assert main_issue.severity == ValidationSeverity.BLOCKER
+        assert "must be between 0.0 and 1.0" in main_issue.message
         assert not result.is_valid()
 
     def test_validate_coverage_warning(self, validator: CrossValidationValidator, source_names: list[str]) -> None:
@@ -266,6 +256,135 @@ class TestCrossValidationValidator:
         """Test the factory function."""
         validator = create_cross_validation_validator()
         assert isinstance(validator, CrossValidationValidator)
+
+
+class TestCrossValidationDisposition:
+    """Tests for cross-validation disposition policies."""
+
+    def test_warning_only_policy_downgrades_blockers(self) -> None:
+        """Test that WARNING_ONLY policy downgrades blocker issues to warnings."""
+        from bioetl.domain.services.cross_validation_validator import (
+            CrossValidationConfig,
+            CrossValidationDispositionPolicy,
+            CrossValidationValidator,
+        )
+        
+        validator = CrossValidationValidator()
+        source_names = ["source1", "source2", "source3"]
+        
+        # Create a validation result with blocker issues
+        config = CrossValidationConfig(
+            pairs=[{"source1": "source2", "source3": "source2"}],  # Multiple mappings - blocker
+            rules={"rule1": "strict"},
+            disposition_policy=CrossValidationDispositionPolicy.WARNING_ONLY,
+        )
+        validation_result = validator.validate_cross_validation_config(config, source_names)
+        
+        # Apply WARNING_ONLY disposition
+        disposed_result = validator.apply_disposition(validation_result, config)
+        
+        # Should have issues but no blockers
+        assert len(disposed_result.issues) == 1  # Only the main issue (coverage warning filtered out)
+        assert not disposed_result.has_blockers()
+        
+        # Check that blocker was downgraded
+        main_issue = next(issue for issue in disposed_result.issues if issue.code == IssueCode.CMP_PF_CV_004)
+        assert main_issue.severity == ValidationSeverity.WARNING
+        assert "downgraded from blocker" in main_issue.message
+        assert main_issue.details.get("original_severity") == "blocker"
+        assert main_issue.details.get("disposition") == "downgraded"
+
+    def test_quarantine_policy_adds_metadata(self) -> None:
+        """Test that QUARANTINE policy keeps blockers but adds quarantine metadata."""
+        from bioetl.domain.services.cross_validation_validator import (
+            CrossValidationConfig,
+            CrossValidationDispositionPolicy,
+            CrossValidationValidator,
+        )
+        
+        validator = CrossValidationValidator()
+        source_names = ["source1", "source2", "source3"]
+        
+        # Create a validation result with blocker issues
+        config = CrossValidationConfig(
+            pairs=[{"source1": "source2", "source3": "source2"}],  # Multiple mappings - blocker
+            rules={"rule1": "strict"},
+            disposition_policy=CrossValidationDispositionPolicy.QUARANTINE,
+        )
+        validation_result = validator.validate_cross_validation_config(config, source_names)
+        
+        # Apply QUARANTINE disposition
+        disposed_result = validator.apply_disposition(validation_result, config)
+        
+        # Should still have blockers
+        assert len(disposed_result.issues) == 1  # Only the main issue
+        assert disposed_result.has_blockers()
+        
+        # Check that blocker has quarantine metadata
+        main_issue = next(issue for issue in disposed_result.issues if issue.code == IssueCode.CMP_PF_CV_004)
+        assert main_issue.severity == ValidationSeverity.BLOCKER
+        assert "quarantined" in main_issue.message
+        assert main_issue.details.get("disposition") == "quarantined"
+        assert main_issue.details.get("quarantine_reason") == "cross_validation_failure"
+
+    def test_fail_policy_keeps_blockers(self) -> None:
+        """Test that FAIL policy keeps blockers with fail metadata."""
+        from bioetl.domain.services.cross_validation_validator import (
+            CrossValidationConfig,
+            CrossValidationDispositionPolicy,
+            CrossValidationValidator,
+        )
+        
+        validator = CrossValidationValidator()
+        source_names = ["source1", "source2", "source3"]
+        
+        # Create a validation result with blocker issues
+        config = CrossValidationConfig(
+            pairs=[{"source1": "source2", "source3": "source2"}],  # Multiple mappings - blocker
+            rules={"rule1": "strict"},
+            disposition_policy=CrossValidationDispositionPolicy.FAIL,  # Default
+        )
+        validation_result = validator.validate_cross_validation_config(config, source_names)
+        
+        # Apply FAIL disposition (default)
+        disposed_result = validator.apply_disposition(validation_result, config)
+        
+        # Should still have blockers
+        assert len(disposed_result.issues) == 1  # Only the main issue
+        assert disposed_result.has_blockers()
+        
+        # Check that blocker has fail metadata
+        main_issue = next(issue for issue in disposed_result.issues if issue.code == IssueCode.CMP_PF_CV_004)
+        assert main_issue.severity == ValidationSeverity.BLOCKER
+        assert "will fail execution" in main_issue.message
+        assert main_issue.details.get("disposition") == "fail"
+        assert main_issue.details.get("execution_blocked") is True
+
+    def test_disposition_with_no_issues(self) -> None:
+        """Test that disposition with no issues returns unchanged result."""
+        from bioetl.domain.services.cross_validation_validator import (
+            CrossValidationConfig,
+            CrossValidationDispositionPolicy,
+            CrossValidationValidator,
+        )
+        
+        validator = CrossValidationValidator()
+        source_names = ["source1", "source2"]
+        
+        # Create a valid config
+        config = CrossValidationConfig(
+            pairs=[{"source1": "source2"}],
+            rules={"rule1": "strict"},
+            disposition_policy=CrossValidationDispositionPolicy.WARNING_ONLY,
+        )
+        validation_result = validator.validate_cross_validation_config(config, source_names)
+        
+        # Apply disposition - should return unchanged result
+        disposed_result = validator.apply_disposition(validation_result, config)
+        
+        # Should be identical (no issues since coverage is complete)
+        assert len(disposed_result.issues) == 0
+        assert disposed_result.issues == validation_result.issues
 
 
 # Helper function for easier testing

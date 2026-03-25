@@ -89,6 +89,7 @@ def _render_show_payload(payload: dict[str, object]) -> str:
     """Render one manifest inspection payload in human-readable form."""
     manifest = payload.get("manifest", {})
     ledger_entries = payload.get("ledger_entries", [])
+    diagnostics = payload.get("diagnostics", {})
     if not isinstance(manifest, dict):
         return json.dumps(payload, indent=2, default=str)
     provenance = manifest.get("code_provenance", {})
@@ -148,6 +149,23 @@ def _render_show_payload(payload: dict[str, object]) -> str:
             lines.append(f"  - {summary}")
     else:
         _append_section(lines, "Ledger", (("entries", 0),))
+    if isinstance(diagnostics, dict):
+        _append_section(
+            lines,
+            "Diagnostics",
+            (
+                ("latest_status", diagnostics.get("latest_status")),
+                ("latest_event_type", diagnostics.get("latest_event_type")),
+                ("total_events", diagnostics.get("total_events")),
+                ("event_family_counts", diagnostics.get("event_family_counts")),
+                ("event_type_counts", diagnostics.get("event_type_counts")),
+                ("missing_artifact_links", diagnostics.get("missing_artifact_links")),
+                ("lineage_fragment_ids", diagnostics.get("lineage_fragment_ids")),
+                ("artifact_refs", diagnostics.get("artifact_refs")),
+                ("alert_signals", diagnostics.get("alert_signals")),
+                ("next_steps", diagnostics.get("next_steps")),
+            ),
+        )
     return "\n".join(lines)
 
 

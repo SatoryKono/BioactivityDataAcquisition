@@ -279,6 +279,23 @@ def test_provider_dashboard_uses_pipeline_filters():
         "Provider dashboard still uses fragile $provider_.* regex in panel queries"
     )
 
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_queries_do_not_filter_by_run_id_label(dashboard_path):
+    """Dashboards must avoid run_id label filters to prevent high cardinality usage."""
+    dashboard = load_dashboard(dashboard_path)
+    expressions = get_panel_expressions(dashboard)
+
+    offenders = [
+        expr
+        for expr in expressions
+        if re.search(r"\brun_id\s*(=|=~|!=|!~)\s*", expr) is not None
+    ]
+    assert not offenders, (
+        f"Dashboard {dashboard_path.name} must not filter by run_id label.\n"
+        + "\n".join(offenders[:10])
+    )
+
     variables = [
         var.get("name") for var in dashboard.get("templating", {}).get("list", [])
     ]

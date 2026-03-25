@@ -215,10 +215,12 @@ class TestMergedMetadataExplainabilityService:
         summary = service.generate_explainability_summary([])
         
         assert summary["record_count"] == 0
-        assert summary["field_count"] == 0
-        assert summary["avg_fields_per_record"] == 0
+        assert summary["source_provider_distribution"] == {}
+        assert summary["merge_strategy_distribution"] == {}
         assert summary["conflict_summary"]["total_conflicts"] == 0
+        assert summary["conflict_summary"]["conflict_rate"] == 0.0
         assert summary["enrichment_summary"]["total_enrichments"] == 0
+        assert summary["enrichment_summary"]["enrichment_rate"] == 0.0
 
     def test_generate_explainability_summary_with_data(
         self, service: MergedMetadataExplainabilityService, 

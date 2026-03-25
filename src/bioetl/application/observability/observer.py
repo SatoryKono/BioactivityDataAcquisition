@@ -270,6 +270,14 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
         provider, _entity = pipeline_name.split("_", 1)
         return provider or pipeline_name
 
+    @staticmethod
+    def _derive_entity_name(pipeline_name: str) -> str | None:
+        """Derive entity name from canonical pipeline naming."""
+        if "_" not in pipeline_name:
+            return None
+        _provider, entity = pipeline_name.split("_", 1)
+        return entity or None
+
 
 class PipelineObserver(
     _ObserverContextManagerMixin,
@@ -286,12 +294,24 @@ class PipelineObserver(
         metrics: MetricsPort,
         logger: LoggerPort,
         tracer: TracingPort | None = None,
+        manifest_id: str | None = None,
+        entity: str | None = None,
+        effective_config_hash: str | None = None,
+        contract_ref: str | None = None,
+        contract_version: str | None = None,
+        composite_run_id: str | None = None,
     ) -> None:
         """Initialize observer."""
         self.pipeline_name = pipeline_name
         self.run_id = str(run_id)
         self.run_type = run_type.value
         self.provider_name = self._derive_provider_name(pipeline_name)
+        self.manifest_id = manifest_id
+        self.entity = entity or self._derive_entity_name(pipeline_name)
+        self.effective_config_hash = effective_config_hash
+        self.contract_ref = contract_ref
+        self.contract_version = contract_version
+        self.composite_run_id = composite_run_id
         self._metrics = metrics
         self._logger = logger
         self._tracer = tracer

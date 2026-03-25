@@ -327,6 +327,42 @@ class TestObserverEmitEvent:
             },
         )
 
+    def test_emit_event_includes_extended_correlation_context(
+        self,
+        metrics_mock,
+        logger_mock,
+        run_id,
+    ):
+        observer = PipelineObserver(
+            pipeline_name="chembl_activity",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+            manifest_id="manifest-1",
+            effective_config_hash="sha256:abc",
+            contract_ref="gold.activity",
+            contract_version="1.0.0",
+            composite_run_id="composite-7",
+        )
+
+        observer.emit_event(
+            "preflight_started",
+            LifecyclePhase.PREFLIGHT,
+            level="info",
+        )
+
+        logger_mock.info.assert_called_once()
+        context = logger_mock.info.call_args[1]
+        assert context["event_family"] == "pipeline.phase"
+        assert context["manifest_id"] == "manifest-1"
+        assert context["entity"] == "activity"
+        assert context["run_type"] == "incremental"
+        assert context["effective_config_hash"] == "sha256:abc"
+        assert context["contract_ref"] == "gold.activity"
+        assert context["contract_version"] == "1.0.0"
+        assert context["composite_run_id"] == "composite-7"
+
     def test_emit_event_uses_correct_log_level(self, metrics_mock, logger_mock, run_id):
         """Test emit_event routes to correct log level."""
         observer = PipelineObserver(

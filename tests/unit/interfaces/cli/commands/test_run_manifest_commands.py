@@ -62,6 +62,19 @@ class _FakeRunManifestService:
         return RunManifestInspectionResult(
             manifest=self._manifest,
             ledger_entries=(self._ledger_entry,),
+            diagnostics={
+                "total_events": 1,
+                "latest_event_type": "run_finished",
+                "latest_status": "success",
+                "event_family_counts": {"pipeline.lifecycle": 1},
+                "alert_signals": {
+                    "run_failed": False,
+                    "run_shutdown": False,
+                    "artifact_linkage_gap": False,
+                    "lineage_gap": False,
+                },
+                "next_steps": ["No alert signals detected; continue routine monitoring."],
+            },
         )
 
     def diff(
@@ -123,6 +136,8 @@ class TestRunManifestCommands:
         payload = json.loads(result.output)
         assert payload["manifest"]["manifest_id"] == "manifest-1"
         assert payload["ledger_entries"][0]["event_type"] == "run_finished"
+        assert payload["diagnostics"]["latest_status"] == "success"
+        assert "alert_signals" in payload["diagnostics"]
 
     def test_show_defaults_to_human_readable_text(
         self,
@@ -138,6 +153,9 @@ class TestRunManifestCommands:
         assert "manifest_id: manifest-1" in result.output
         assert "Code Provenance" in result.output
         assert "Ledger" in result.output
+        assert "Diagnostics" in result.output
+        assert "latest_status: success" in result.output
+        assert "No alert signals detected; continue routine monitoring." in result.output
         assert "run_finished" in result.output
 
     def test_show_missing_manifest_prints_error(

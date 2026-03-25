@@ -50,6 +50,23 @@ bioetl run-manifest show <run-id|manifest-id>
 The default output is a compact human-readable `text` view. Use
 `--format json` or `--format yaml` when a machine-readable payload is needed.
 
+### Fast diagnostics extraction
+
+```bash
+bioetl run-manifest show <run-id|manifest-id> --format json
+```
+
+Use the `diagnostics` block for immediate triage:
+
+- `latest_status`, `latest_event_type` - current execution outcome;
+- `event_family_counts`, `event_type_counts` - event-stream health summary;
+- `artifact_refs` - direct links from run to published dataset artifacts;
+- `lineage_fragment_ids` - lineage fragment linkage visibility;
+- `missing_artifact_links` - count of artifact events without
+  `dataset_ref/lineage_fragment_id`.
+- `alert_signals` - normalized boolean incident signals for routing/escalation.
+- `next_steps` - operator-oriented next actions derived from active signals.
+
 ### Diff two runs
 
 ```bash
@@ -116,6 +133,22 @@ For a healthy successful run with ledger enabled, expect at least:
 
 For interrupted or failing runs, expect `run_failed` and/or `run_shutdown`.
 
+### 5. Confirm diagnostics linkage quality
+
+Inspect:
+
+- `diagnostics.total_events`
+- `diagnostics.event_family_counts`
+- `diagnostics.artifact_refs`
+- `diagnostics.lineage_fragment_ids`
+- `diagnostics.missing_artifact_links`
+
+Escalate when:
+
+- `missing_artifact_links > 0` for production-critical runs;
+- `artifact_published` exists but `artifact_refs` is empty;
+- `lineage_fragment_ids` is unexpectedly empty for Silver/Gold publishing runs.
+
 ## Storage Locations
 
 When direct filesystem inspection is needed:
@@ -159,6 +192,9 @@ Escalate if:
 - ledger exists but is empty;
 - `run_finished` is missing for a run reported as successful;
 - sidecar metadata lacks `manifest_id`.
+- `diagnostics.missing_artifact_links > 0` and incident severity is P0/P1;
+- `event_family_counts` is inconsistent with expected lifecycle for run status
+  (for example, `latest_status=success` without `pipeline.lifecycle` completion).
 
 See also:
 

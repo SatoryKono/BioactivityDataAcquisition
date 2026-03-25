@@ -157,13 +157,20 @@ def _build_observer(
     observability: ObservabilityBundle,
     logger_port: LoggerPort,
 ) -> PipelineObserver:
+    context = pipeline.context
     return PipelineObserver(
         pipeline_name=pipeline.config.pipeline_name,
-        run_id=pipeline.context.run_id,
+        run_id=context.run_id,
         run_type=pipeline.runtime.run_type,
         metrics=pipeline.services.metrics,
         logger=logger_port,
         tracer=observability.tracer,
+        manifest_id=getattr(context, "manifest_id", None),
+        entity=getattr(context, "entity", None),
+        effective_config_hash=getattr(context, "config_hash", None),
+        contract_ref=getattr(context, "contract_ref", None),
+        contract_version=getattr(context, "contract_version", None),
+        composite_run_id=getattr(context, "composite_run_id", None),
     )
 
 

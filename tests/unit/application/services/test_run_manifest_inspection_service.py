@@ -101,6 +101,99 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
 
     assert result.manifest == manifest
     assert result.ledger_entries == (ledger_entry,)
+    assert result.diagnostics["total_events"] == 1
+    assert result.diagnostics["latest_event_type"] == "run_finished"
+    assert result.diagnostics["latest_status"] == "success"
+    assert result.diagnostics["event_family_counts"] == {"pipeline.lifecycle": 1}
+    assert result.diagnostics["alert_signals"] == {
+        "run_failed": False,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+    }
+    assert result.diagnostics["next_steps"] == [
+        "No alert signals detected; continue routine monitoring."
+    ]
+
+
+def test_show_collects_artifact_diagnostic_links() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-2", run_id=run_id)
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-1",
+            manifest_id="manifest-2",
+            run_id=run_id,
+            event_type="artifact_published",
+            occurred_at=datetime.now(UTC),
+            status="published",
+            stage="silver",
+            dataset_ref="silver:chembl.activity@1",
+            lineage_fragment_id="silver:fragment-1",
+            details={"artifact_path": "/tmp/output/silver/chembl/activity"},
+        )
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = service.show("manifest-2")
+
+    assert result.diagnostics["event_family_counts"] == {"artifact": 1}
+    assert result.diagnostics["lineage_fragment_ids"] == ["silver:fragment-1"]
+    assert result.diagnostics["missing_artifact_links"] == 0
+    assert result.diagnostics["alert_signals"] == {
+        "run_failed": False,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+    }
+    assert result.diagnostics["artifact_refs"] == [
+        {
+            "event_type": "artifact_published",
+            "stage": "silver",
+            "dataset_ref": "silver:chembl.activity@1",
+            "lineage_fragment_id": "silver:fragment-1",
+            "artifact_path": "/tmp/output/silver/chembl/activity",
+        }
+    ]
+
+
+def test_show_marks_artifact_linkage_gap_signal() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-3", run_id=run_id)
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-1",
+            manifest_id="manifest-3",
+            run_id=run_id,
+            event_type="artifact_published",
+            occurred_at=datetime.now(UTC),
+            status="published",
+            stage="silver",
+            details={"artifact_path": "/tmp/output/silver/chembl/activity"},
+        )
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = service.show("manifest-3")
+
+    assert result.diagnostics["missing_artifact_links"] == 1
+    assert result.diagnostics["alert_signals"]["artifact_linkage_gap"] is True
+    assert result.diagnostics["next_steps"] == [
+        "Validate artifact publication metadata and repair dataset/lineage links.",
+        "Investigate lineage persistence for published artifacts before restart.",
+    ]
 
 
 def test_diff_reports_changed_top_level_fields() -> None:

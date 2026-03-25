@@ -16,6 +16,13 @@ class _ObserverEventMixin:
     provider_name: str
     pipeline_name: str
     run_id: str
+    manifest_id: str | None
+    entity: str | None
+    run_type: str | None
+    effective_config_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    composite_run_id: str | None
 
     @staticmethod
     def _normalize_severity(level: str) -> str:
@@ -56,9 +63,27 @@ class _ObserverEventMixin:
             default_pipeline=self.pipeline_name,
             default_run_id=self.run_id,
             default_severity=severity,
+            correlation_defaults=self._build_correlation_defaults(),
         )
         self._log_event(event_name, severity=severity, context=payload.context)
         self._emit_observability_event_metric(payload.metric_labels)
+
+    def _build_correlation_defaults(self) -> dict[str, object]:
+        """Build optional correlation defaults for canonical observability context."""
+        defaults: dict[str, object] = {}
+        for key in (
+            "manifest_id",
+            "entity",
+            "run_type",
+            "effective_config_hash",
+            "contract_ref",
+            "contract_version",
+            "composite_run_id",
+        ):
+            value = getattr(self, key, None)
+            if value is not None:
+                defaults[key] = value
+        return defaults
 
     def _log_event(
         self,
