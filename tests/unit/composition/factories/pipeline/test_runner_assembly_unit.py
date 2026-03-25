@@ -8,7 +8,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
-from bioetl.composition.factories.pipeline.runner_assembly import assemble_runner_impl
+from bioetl.composition.factories.pipeline.runner_assembly import (
+    _build_checkpoint_manager,
+    assemble_runner_impl,
+)
 
 
 def _make_pipeline() -> SimpleNamespace:
@@ -39,11 +42,19 @@ def _make_pipeline() -> SimpleNamespace:
         health_check_mode="strict",
     )
     context = SimpleNamespace(run_id="run-123")
+    settings = SimpleNamespace(
+        pipeline=SimpleNamespace(
+            control_plane=SimpleNamespace(
+                checkpoint_compatibility_policy="soft_fail",
+            )
+        )
+    )
     return SimpleNamespace(
         services=services,
         config=config,
         runtime=runtime,
         context=context,
+        settings=settings,
         run_id="run-123",
         shutdown_signal=MagicMock(),
     )
@@ -106,3 +117,82 @@ def test_assemble_runner_impl_uses_injected_dq_configs_extractor() -> None:
 
     assert result is mock_create_pipeline_runner.return_value
     assert mock_build_postrun_service.call_args.kwargs["dq_configs"] is dq_configs
+
+
+@pytest.mark.unit
+def test_build_checkpoint_manager_uses_control_plane_policy() -> None:
+    pipeline = _make_pipeline()
+    logger = MagicMock()
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "observe"
+
+    with (
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".CheckpointCompatibilityService",
+            return_value=MagicMock(),
+        ),
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".ServicesBuilder.create_checkpoint_manager",
+            return_value=MagicMock(),
+        ) as mock_create_manager,
+    ):
+        _build_checkpoint_manager(
+            pipeline=pipeline,
+            logger_port=logger,
+        )
+
+    assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "observe"
+
+
+@pytest.mark.unit
+def test_build_checkpoint_manager_supports_hard_fail_policy() -> None:
+    pipeline = _make_pipeline()
+    logger = MagicMock()
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "hard_fail"
+
+    with (
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".CheckpointCompatibilityService",
+            return_value=MagicMock(),
+        ),
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".ServicesBuilder.create_checkpoint_manager",
+            return_value=MagicMock(),
+        ) as mock_create_manager,
+    ):
+        _build_checkpoint_manager(
+            pipeline=pipeline,
+            logger_port=logger,
+        )
+
+    assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "hard_fail"
+
+
+@pytest.mark.unit
+def test_build_checkpoint_manager_fallbacks_to_soft_fail_on_invalid_policy() -> None:
+    pipeline = _make_pipeline()
+    logger = MagicMock()
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "invalid"
+
+    with (
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".CheckpointCompatibilityService",
+            return_value=MagicMock(),
+        ),
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".ServicesBuilder.create_checkpoint_manager",
+            return_value=MagicMock(),
+        ) as mock_create_manager,
+    ):
+        _build_checkpoint_manager(
+            pipeline=pipeline,
+            logger_port=logger,
+        )
+
+    assert mock_create_manager.call_args.kwargs["compatibility_policy"] == "soft_fail"
+    logger.warning.assert_called_once()

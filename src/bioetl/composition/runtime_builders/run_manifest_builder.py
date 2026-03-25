@@ -1,0 +1,230 @@
+"""Run manifest creation for control-plane."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, is_dataclass
+from enum import Enum
+from pathlib import Path
+from typing import TYPE_CHECKING, cast
+from uuid import UUID
+
+from bioetl.application.services.run_ledger_service import RunLedgerService
+from bioetl.application.services.run_manifest_service import (
+    RunManifestCreateRequest,
+    RunManifestService,
+)
+from bioetl.composition.services.versioning import (
+    get_git_commit,
+    get_pipeline_version,
+)
+from bioetl.domain.control_plane import RunArtifactRef, RunSourceRef
+from bioetl.infrastructure.control_plane import FileRunManifestStore
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+
+    from bioetl.composition.runtime_builders.inputs_resolver import (
+        RunnerInputs,
+    )
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.infrastructure.config import Settings
+
+
+def _normalize_snapshot(value: object) -> object:
+    """Normalize dataclass/Pydantic values into JSON-safe primitives."""
+    if not isinstance(value, type) and is_dataclass(value):
+        return _normalize_snapshot(asdict(cast("DataclassInstance", value)))
+    if hasattr(value, "__dict__") and not isinstance(value, type):
+        return _normalize_snapshot(
+            {key: item for key, item in vars(value).items() if not key.startswith("_")}
+        )
+    if isinstance(value, dict):
+        return {str(key): _normalize_snapshot(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [_normalize_snapshot(item) for item in value]
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, UUID):
+        return str(value)
+    return value
+
+
+def _to_serializable_mapping(value: object) -> dict[str, object]:
+    """Convert dataclass or model objects into plain mappings."""
+    if hasattr(value, "model_dump"):
+        payload = value.model_dump(mode="json", exclude_none=True)
+    elif hasattr(value, "dict"):
+        payload = value.dict(exclude_none=True)
+    elif hasattr(value, "__dict__"):
+        payload = {
+            key: item for key, item in vars(value).items() if not key.startswith("_")
+        }
+    else:
+        payload = _normalize_snapshot(value)
+    if not isinstance(payload, dict):
+        return {"value": _normalize_snapshot(payload)}
+    normalized = _normalize_snapshot(payload)
+    if not isinstance(normalized, dict):
+        raise TypeError("Manifest snapshot normalization must return a mapping")
+    return normalized
+
+
+def _build_launch_context_snapshot(
+    ctx: PipelineRunContext,
+    *,
+    run_type_value: str,
+    execution_context_value: str,
+) -> dict[str, object]:
+    """Capture launch-time options that materially affect execution semantics."""
+    return {
+        "pipeline_name": str(ctx.pipeline_name),
+        "run_type": run_type_value,
+        "resume": getattr(ctx, "resume", False),
+        "dry_run": getattr(ctx, "dry_run", False),
+        "limit": getattr(ctx, "limit", None),
+        "query": getattr(ctx, "query", None),
+        "start_offset": getattr(ctx, "start_offset", None),
+        "log_level": getattr(ctx, "log_level", "INFO"),
+        "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
+        "skip_gold": getattr(ctx, "skip_gold", False),
+        "execution_context": execution_context_value,
+        "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
+        "input_filter": _to_serializable_mapping(getattr(ctx, "input_filter", None)),
+        "cached_bronze": _to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
+    }
+
+
+def _resolve_provider_entity(
+    *,
+    pipeline_name: str,
+    yaml_config: object,
+) -> tuple[str, str]:
+    """Resolve provider/entity from YAML when available, otherwise fallback."""
+    if "_" in pipeline_name:
+        fallback_provider, fallback_entity = pipeline_name.split("_", 1)
+    else:
+        fallback_provider = pipeline_name
+        fallback_entity = pipeline_name
+    provider = getattr(yaml_config, "provider", fallback_provider) or fallback_provider
+    entity = getattr(yaml_config, "entity_type", fallback_entity) or fallback_entity
+    return str(provider), str(entity)
+
+
+def _build_planned_artifacts(
+    *,
+    settings: Settings,
+    provider: str,
+    entity: str,
+) -> tuple[RunArtifactRef, ...]:
+    """Capture planned layer roots for the manifest control-plane snapshot."""
+    output_root = Path(getattr(settings, "data_dir", "data")) / "output"
+    return (
+        RunArtifactRef(
+            layer="bronze", path=str(output_root / "bronze" / provider / entity)
+        ),
+        RunArtifactRef(
+            layer="silver", path=str(output_root / "silver" / provider / entity)
+        ),
+        RunArtifactRef(
+            layer="gold", path=str(output_root / "gold" / provider / entity)
+        ),
+    )
+
+
+def _control_plane_root(settings: Settings, leaf: str) -> Path:
+    """Return the canonical control-plane output root for one leaf namespace."""
+    return Path(getattr(settings, "data_dir", "data")) / "output" / "control" / leaf
+
+
+@dataclass(frozen=True, slots=True)
+class _ManifestControlPlaneRefs:
+    """Resolved control-plane references produced before factory runner wiring."""
+
+    manifest_id: str
+    config_hash: str | None
+    dq_contract_compatibility_hash: str | None
+    effective_config_artifact_id: str | None
+
+
+def create_run_manifest(
+    *,
+    ctx: PipelineRunContext,
+    inputs: RunnerInputs,
+    ledger_enabled: bool,
+    effective_config_artifact_id: str,
+    effective_config_hash: str,
+    dq_contract_compatibility_hash: str,
+) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
+    """Create immutable manifest before pipeline assembly begins."""
+    yaml_config = inputs.yaml_config
+    raw_run_type = getattr(ctx, "run_type", "incremental")
+    run_type_value = str(getattr(raw_run_type, "value", raw_run_type))
+    raw_execution_context = getattr(ctx, "execution_context", "isolated")
+    execution_context_value = str(
+        getattr(raw_execution_context, "value", raw_execution_context)
+    )
+    provider, entity = _resolve_provider_entity(
+        pipeline_name=ctx.pipeline_name,
+        yaml_config=yaml_config,
+    )
+    manifest_store = FileRunManifestStore(
+        base_path=_control_plane_root(inputs.settings, "run_manifest")
+    )
+    ledger_service: RunLedgerService | None = None
+    if ledger_enabled:
+        from bioetl.application.services.run_ledger_service import RunLedgerService
+        from bioetl.infrastructure.control_plane import FileRunLedgerStore
+
+        ledger_service = RunLedgerService(
+            ledger_port=FileRunLedgerStore(
+                base_path=_control_plane_root(inputs.settings, "run_ledger")
+            ),
+            manifest_id="pending",
+            run_id=ctx.run_id,
+        )
+    manifest = RunManifestService(manifest_port=manifest_store).create_manifest(
+        RunManifestCreateRequest(
+            run_id=ctx.run_id,
+            run_type=raw_run_type,
+            pipeline_name=ctx.pipeline_name,
+            provider=provider,
+            entity=entity,
+            launch_context=_build_launch_context_snapshot(
+                ctx,
+                run_type_value=run_type_value,
+                execution_context_value=execution_context_value,
+            ),
+            runtime_config=_to_serializable_mapping(inputs.runtime_config),
+            resolved_config=_to_serializable_mapping(yaml_config),
+            source_refs=(
+                RunSourceRef(
+                    provider=provider,
+                    entity=entity,
+                    pipeline_name=ctx.pipeline_name,
+                    query=getattr(ctx, "query", None),
+                ),
+            ),
+            planned_artifacts=_build_planned_artifacts(
+                settings=inputs.settings,
+                provider=provider,
+                entity=entity,
+            ),
+            pipeline_version=get_pipeline_version(yaml_config),
+            git_commit=get_git_commit(),
+            config_hash=effective_config_hash,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+        )
+    )
+    if ledger_service is not None:
+        ledger_service.manifest_id = manifest.manifest_id
+        ledger_service.record_manifest_created(manifest)
+    return (
+        _ManifestControlPlaneRefs(
+            manifest_id=manifest.manifest_id,
+            config_hash=effective_config_hash,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+        ),
+        ledger_service,
+    )

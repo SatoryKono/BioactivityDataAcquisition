@@ -1,0 +1,89 @@
+"""Ledger collaborator attachment for control-plane."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.run_ledger_service import RunLedgerService
+
+
+def _record_artifact(
+    service: RunLedgerService,
+    *,
+    layer: str,
+    artifact_path: str,
+    details: dict[str, object] | None,
+) -> object:
+    """Record one published artifact in the control-plane ledger."""
+    dataset_ref = None
+    lineage_fragment_id = None
+    if details is not None:
+        raw_dataset_ref = details.get("dataset_ref")
+        raw_lineage_fragment_id = details.get("lineage_fragment_id")
+        dataset_ref = None if raw_dataset_ref is None else str(raw_dataset_ref)
+        lineage_fragment_id = (
+            None
+            if raw_lineage_fragment_id is None
+            else str(raw_lineage_fragment_id)
+        )
+    return service.record_artifact_published(
+        layer=layer,
+        artifact_path=artifact_path,
+        dataset_ref=dataset_ref,
+        lineage_fragment_id=lineage_fragment_id,
+        details=details,
+    )
+
+
+def _attach_artifact_recorder(
+    target: object,
+    service: RunLedgerService,
+) -> None:
+    """Attach an artifact-recorder callback to one metadata writer when supported."""
+    attach = getattr(target, "attach_artifact_recorder", None)
+    if callable(attach):
+        attach(
+            lambda layer, artifact_path, details=None: _record_artifact(
+                service,
+                layer=layer,
+                artifact_path=artifact_path,
+                details=details,
+            )
+        )
+
+
+def attach_control_plane_collaborators(
+    runner: PipelineRunner,
+    run_ledger_service: RunLedgerService,
+) -> None:
+    """Attach ledger collaborators to the runner and its metadata writers."""
+    runner.attach_run_ledger_service(run_ledger_service)
+
+    services = getattr(runner, "services", None)
+    if services is None:
+        return
+
+    candidates: list[object] = []
+    metadata_writer = getattr(services, "metadata_writer", None)
+    if metadata_writer is not None:
+        candidates.append(metadata_writer)
+
+    storage = getattr(services, "storage", None)
+    if storage is not None:
+        for writer_name in ("bronze", "silver", "gold"):
+            writer = getattr(storage, writer_name, None)
+            if writer is None:
+                continue
+            writer_metadata = getattr(writer, "_metadata_writer", None)
+            if writer_metadata is not None:
+                candidates.append(writer_metadata)
+
+    seen: set[int] = set()
+    for candidate in candidates:
+        candidate_id = id(candidate)
+        if candidate_id in seen:
+            continue
+        seen.add(candidate_id)
+        _attach_artifact_recorder(candidate, run_ledger_service)

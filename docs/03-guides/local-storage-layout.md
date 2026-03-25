@@ -240,6 +240,7 @@ configs/
 ├── base/
 │   ├── pipeline.yaml
 │   ├── quality.yaml
+│   ├── bronze_fixture_manifest.yaml
 │   └── bronze_fixture_gaps.yaml
 ├── providers/
 │   ├── chembl.yaml
@@ -293,6 +294,16 @@ configs/
 | Composite config | `configs/composites/{entity}.yaml` | Multi-provider enrichment orchestration |
 
 For details, see [DQ Configuration Guide](dq-configuration.md) and [Pipeline Configuration Guide](pipeline-configuration.md).
+
+### Fixture Governance Artifacts
+
+- `configs/base/bronze_fixture_manifest.yaml`:
+  positive inventory of tracked CI Bronze samples.
+- `configs/base/bronze_fixture_gaps.yaml`:
+  explicit exceptions for pipelines that still lack tracked fixtures.
+
+This separation allows deterministic CI coverage while keeping unfinished
+pipelines visible and actionable.
 
 ## Migration from S3
 

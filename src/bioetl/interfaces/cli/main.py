@@ -12,6 +12,7 @@ from bioetl import __version__ as BIOETL_VERSION
 from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
+from bioetl.interfaces.cli.commands.config_dq import dq
 from bioetl.interfaces.cli.commands.debug import debug
 from bioetl.interfaces.cli.commands.export import export_command
 from bioetl.interfaces.cli.commands.health import health
@@ -69,6 +70,7 @@ cli.add_command(export_command, name="export")
 cli.add_command(quarantine)
 cli.add_command(checkpoint)
 cli.add_command(config)
+cli.add_command(dq)
 cli.add_command(debug)
 cli.add_command(health)
 cli.add_command(lock)

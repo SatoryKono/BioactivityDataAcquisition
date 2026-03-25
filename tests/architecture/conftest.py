@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import os
 from pathlib import Path
 import pickle
 
@@ -23,6 +24,11 @@ _CACHE_VERSION = 2
 def _cache_dir(project_root: Path) -> Path:
     """Return persistent cache directory for architecture fixture artifacts."""
     cache_dir = project_root / ".pytest_cache" / "bioetl_architecture"
+    worker_id = os.getenv("PYTEST_XDIST_WORKER")
+    if worker_id:
+        # Isolate per-worker cache writes under xdist to avoid file lock contention
+        # on Windows when multiple workers update the same pickle files.
+        cache_dir = cache_dir / worker_id
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir
 

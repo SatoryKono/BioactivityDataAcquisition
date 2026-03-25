@@ -55,6 +55,7 @@ COMPOSITES_DIR = CONFIGS_DIR / "composites"
 PROVIDERS_DIR = CONFIGS_DIR / "providers"
 BRONZE_INPUT_DIR = PROJECT_ROOT / "data" / "input" / "bronze"
 BRONZE_FIXTURE_GAPS_PATH = CONFIGS_DIR / "base" / "bronze_fixture_gaps.yaml"
+BRONZE_FIXTURE_MANIFEST_PATH = CONFIGS_DIR / "base" / "bronze_fixture_manifest.yaml"
 
 # ---------------------------------------------------------------------------
 # Known providers and canonical data
@@ -175,6 +176,22 @@ def _load_bronze_fixture_gaps() -> dict[str, dict[str, Any]]:
 
     result: dict[str, dict[str, Any]] = {}
     for key, value in raw_gaps.items():
+        if not isinstance(key, str):
+            continue
+        if not isinstance(value, dict):
+            continue
+        result[key] = value
+    return result
+
+
+def _load_bronze_fixture_manifest() -> dict[str, dict[str, Any]]:
+    data = _load_yaml(BRONZE_FIXTURE_MANIFEST_PATH)
+    raw_fixtures = data.get("fixtures")
+    if not isinstance(raw_fixtures, dict):
+        return {}
+
+    result: dict[str, dict[str, Any]] = {}
+    for key, value in raw_fixtures.items():
         if not isinstance(key, str):
             continue
         if not isinstance(value, dict):
@@ -659,19 +676,44 @@ class TestBronzeFixtureCoverage:
     """INV-CFG-008: each pipeline must have Bronze input fixture or explicit GAP."""
 
     _MIN_RECOMMENDED_RECORDS = 200
+    _MIN_TRACKED_SAMPLE_RECORDS = 20
+    _ALLOWED_GAP_STATUS = {"open", "in_progress", "blocked"}
+    _ALLOWED_FIXTURE_KINDS = {"tracked_ci_sample", "local_runtime_snapshot"}
+    _ALLOWED_VALIDATION_STATUSES = {"valid", "provisional", "stale"}
 
     def test_bronze_fixture_gap_registry_exists(self) -> None:
         assert BRONZE_FIXTURE_GAPS_PATH.exists(), (
             f"Missing gap registry: {_rel(BRONZE_FIXTURE_GAPS_PATH)}"
         )
 
+    def test_bronze_fixture_manifest_exists(self) -> None:
+        assert BRONZE_FIXTURE_MANIFEST_PATH.exists(), (
+            f"Missing fixture manifest: {_rel(BRONZE_FIXTURE_MANIFEST_PATH)}"
+        )
+
+    def test_tracked_fixture_manifest_has_representative_baseline(self) -> None:
+        manifest = _load_bronze_fixture_manifest()
+        tracked = [
+            key
+            for key, entry in manifest.items()
+            if entry.get("fixture_kind") == "tracked_ci_sample"
+            and entry.get("validation_status") == "valid"
+        ]
+        assert len(tracked) >= 4, (
+            "Fixture manifest must include at least 4 valid tracked_ci_sample "
+            f"entries, found {len(tracked)}: {sorted(tracked)}"
+        )
+
     def test_bronze_fixture_coverage(self) -> None:
         gaps = _load_bronze_fixture_gaps()
+        manifest = _load_bronze_fixture_manifest()
 
         pipeline_keys: set[str] = set()
         missing_fixture: list[str] = []
         insufficient_fixture: list[str] = []
         invalid_gap_entries: list[str] = []
+        invalid_manifest_entries: list[str] = []
+        stale_gap_entries: list[str] = []
 
         for config_path in _collect_pipeline_configs():
             data = _load_yaml(config_path)
@@ -680,23 +722,98 @@ class TestBronzeFixtureCoverage:
             key = f"{provider}/{entity}"
             pipeline_keys.add(key)
 
-            fixture_files = _collect_input_jsonl_files(provider, entity)
-            fixture_lines = _count_jsonl_lines(
-                fixture_files, stop_after=self._MIN_RECOMMENDED_RECORDS
+            runtime_fixture_files = _collect_input_jsonl_files(provider, entity)
+            runtime_fixture_lines = _count_jsonl_lines(
+                runtime_fixture_files, stop_after=self._MIN_RECOMMENDED_RECORDS
             )
             has_gap = key in gaps
+            manifest_entry = manifest.get(key)
+            has_manifest_fixture = False
 
-            if not fixture_files:
+            if manifest_entry is not None:
+                fixture_kind = manifest_entry.get("fixture_kind")
+                if fixture_kind not in self._ALLOWED_FIXTURE_KINDS:
+                    invalid_manifest_entries.append(
+                        f"{key}: fixture_kind must be one of "
+                        f"{sorted(self._ALLOWED_FIXTURE_KINDS)}"
+                    )
+
+                fixture_path_raw = manifest_entry.get("fixture_path")
+                if not isinstance(fixture_path_raw, str) or not fixture_path_raw.strip():
+                    invalid_manifest_entries.append(
+                        f"{key}: fixture_path is required in manifest"
+                    )
+                else:
+                    fixture_path = PROJECT_ROOT / fixture_path_raw
+                    if not fixture_path.exists() or not fixture_path.is_file():
+                        invalid_manifest_entries.append(
+                            f"{key}: fixture_path does not exist: {fixture_path_raw}"
+                        )
+                    elif fixture_path.suffix != ".jsonl":
+                        invalid_manifest_entries.append(
+                            f"{key}: fixture_path must point to .jsonl file, "
+                            f"found {fixture_path_raw}"
+                        )
+                    else:
+                        manifest_lines = _count_jsonl_lines([fixture_path])
+                        records = manifest_entry.get("records")
+                        if not isinstance(records, int) or records <= 0:
+                            invalid_manifest_entries.append(
+                                f"{key}: records must be positive int in manifest"
+                            )
+                        elif records != manifest_lines:
+                            invalid_manifest_entries.append(
+                                f"{key}: records={records} does not match fixture "
+                                f"line count={manifest_lines}"
+                            )
+                        elif fixture_kind == "tracked_ci_sample":
+                            if not fixture_path_raw.startswith("tests/fixtures/bronze/"):
+                                invalid_manifest_entries.append(
+                                    f"{key}: tracked_ci_sample must live under "
+                                    "tests/fixtures/bronze/"
+                                )
+                            if records < self._MIN_TRACKED_SAMPLE_RECORDS:
+                                invalid_manifest_entries.append(
+                                    f"{key}: tracked_ci_sample requires at least "
+                                    f"{self._MIN_TRACKED_SAMPLE_RECORDS} records"
+                                )
+                            has_manifest_fixture = True
+
+                for field in ("provenance", "owner", "last_refresh"):
+                    value = manifest_entry.get(field)
+                    if not isinstance(value, str) or not value.strip():
+                        invalid_manifest_entries.append(
+                            f"{key}: manifest.{field} is required"
+                        )
+
+                validation_status = manifest_entry.get("validation_status")
+                if validation_status not in self._ALLOWED_VALIDATION_STATUSES:
+                    invalid_manifest_entries.append(
+                        f"{key}: validation_status must be one of "
+                        f"{sorted(self._ALLOWED_VALIDATION_STATUSES)}"
+                    )
+
+            if not runtime_fixture_files and not has_manifest_fixture:
                 if not has_gap:
                     missing_fixture.append(
-                        f"{key}: no data/input/bronze fixture and no GAP entry"
+                        f"{key}: no runtime fixture, no tracked fixture, and no GAP entry"
                     )
             else:
-                if fixture_lines < self._MIN_RECOMMENDED_RECORDS and not has_gap:
+                if (
+                    runtime_fixture_files
+                    and runtime_fixture_lines < self._MIN_RECOMMENDED_RECORDS
+                    and not (has_gap or has_manifest_fixture)
+                ):
                     insufficient_fixture.append(
-                        f"{key}: fixture has < {self._MIN_RECOMMENDED_RECORDS} records "
+                        f"{key}: runtime fixture has < {self._MIN_RECOMMENDED_RECORDS} "
+                        f"records "
                         f"(declare GAP or add records)"
                     )
+
+            if has_manifest_fixture and has_gap:
+                stale_gap_entries.append(
+                    f"{key}: remove GAP entry (covered by tracked_ci_sample manifest)"
+                )
 
             if has_gap:
                 gap = gaps[key]
@@ -704,6 +821,12 @@ class TestBronzeFixtureCoverage:
                     invalid_gap_entries.append(f"{key}: gap.reason is required")
                 if not isinstance(gap.get("owner"), str) or not gap.get("owner"):
                     invalid_gap_entries.append(f"{key}: gap.owner is required")
+                status = gap.get("status")
+                if status not in self._ALLOWED_GAP_STATUS:
+                    invalid_gap_entries.append(
+                        f"{key}: gap.status must be one of "
+                        f"{sorted(self._ALLOWED_GAP_STATUS)}"
+                    )
                 if not isinstance(gap.get("resolution_plan"), str) or not gap.get(
                     "resolution_plan"
                 ):
@@ -712,10 +835,17 @@ class TestBronzeFixtureCoverage:
                     )
 
         unknown_gap_keys = sorted(set(gaps) - pipeline_keys)
+        unknown_manifest_keys = sorted(set(manifest) - pipeline_keys)
         assert not unknown_gap_keys, (
             f"{_rel(BRONZE_FIXTURE_GAPS_PATH)} contains unknown pipeline keys: "
             f"{unknown_gap_keys}"
         )
+        assert not unknown_manifest_keys, (
+            f"{_rel(BRONZE_FIXTURE_MANIFEST_PATH)} contains unknown pipeline keys: "
+            f"{unknown_manifest_keys}"
+        )
         assert not missing_fixture, "\n".join(missing_fixture)
         assert not insufficient_fixture, "\n".join(insufficient_fixture)
         assert not invalid_gap_entries, "\n".join(invalid_gap_entries)
+        assert not invalid_manifest_entries, "\n".join(invalid_manifest_entries)
+        assert not stale_gap_entries, "\n".join(stale_gap_entries)

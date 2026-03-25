@@ -4,7 +4,7 @@ BioETL command-line interface (CLI) - основной способ взаимо
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
 **Версия:** 6.0.0
-**Дата обновления:** 2026-03-24
+**Дата обновления:** 2026-03-25
 
 ---
 
@@ -90,6 +90,15 @@ bioetl run --pipeline chembl_activity \
 # С DEBUG логированием
 bioetl run --pipeline chembl_activity --debug
 ```
+
+**Checkpoint resume policy (runtime setting):**
+
+- `settings.pipeline.control_plane.checkpoint_compatibility_policy=observe`
+  Продолжить resume, но записать warning при несовместимом checkpoint.
+- `settings.pipeline.control_plane.checkpoint_compatibility_policy=soft_fail`
+  (по умолчанию) Заблокировать resume при несовместимости.
+- `settings.pipeline.control_plane.checkpoint_compatibility_policy=hard_fail`
+  Прервать запуск ошибкой при несовместимости.
 
 **Типы запуска:**
 

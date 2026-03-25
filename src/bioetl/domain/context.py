@@ -10,6 +10,10 @@ from bioetl.domain.context_cached_bronze import CachedBronzeContext
 from bioetl.domain.context_filtering import InputFilterContext, VacuumSettings
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import ExecutionContext, RunID, RunType
+from bioetl.domain.types.contract_identity import (
+    ContractIdentity,
+    DQContractCompatibility,
+)
 
 __all__ = [
     "CachedBronzeContext",
@@ -23,6 +27,45 @@ __all__ = [
 def _now_utc() -> datetime:
     """Factory function for default started_at timestamp."""
     return datetime.now(UTC)
+
+
+def _validate_dq_contract_alignment(
+    contract_identity: ContractIdentity,
+    dq_contract_compatibility: DQContractCompatibility | None,
+) -> list[str]:
+    """Return DQ alignment issues between contract identity and DQ compatibility."""
+    if dq_contract_compatibility is None:
+        return []
+    issues: list[str] = []
+    checks = (
+        (
+            "DQ policy ref mismatch between contract identity and DQ compatibility",
+            contract_identity.dq_policy_ref,
+            dq_contract_compatibility.policy_ref,
+        ),
+        (
+            "Rule bundle version mismatch between contract identity and DQ compatibility",
+            contract_identity.rule_bundle_version,
+            dq_contract_compatibility.rule_bundle_version,
+        ),
+    )
+    for message, expected, actual in checks:
+        if expected is None or expected == actual:
+            continue
+        issues.append(message)
+    return issues
+
+
+def _validate_manifest_contract_alignment(
+    contract_identity: ContractIdentity,
+    manifest_id: str | None,
+) -> list[str]:
+    """Return manifest-level contract alignment issues."""
+    if manifest_id is None:
+        return []
+    if contract_identity.contract_ref:
+        return []
+    return ["Contract identity missing contract reference"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +132,11 @@ class PipelineRunContext:
     run_id: RunID
     run_type: RunType
     manifest_id: str | None = None
+    config_hash: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
+    contract_identity: ContractIdentity | None = None
+    dq_contract_compatibility: DQContractCompatibility | None = None
 
     resume: bool = False
     dry_run: bool = False
@@ -122,3 +170,23 @@ class PipelineRunContext:
     def vacuum_enabled_override(self) -> bool | None:
         """Return the explicit vacuum override, if one was provided."""
         return self.vacuum.enabled
+
+    def validate_contract_consistency(self) -> list[str]:
+        """Validate contract identity consistency across runtime components.
+
+        Returns:
+            list[str]: List of consistency issues, empty if all valid
+        """
+        if self.contract_identity is None:
+            return []
+        issues = _validate_dq_contract_alignment(
+            contract_identity=self.contract_identity,
+            dq_contract_compatibility=self.dq_contract_compatibility,
+        )
+        issues.extend(
+            _validate_manifest_contract_alignment(
+                contract_identity=self.contract_identity,
+                manifest_id=self.manifest_id,
+            )
+        )
+        return issues

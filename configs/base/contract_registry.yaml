@@ -1,0 +1,112 @@
+# Contract Registry
+# Machine-verifiable governance for data contracts
+# Version: 1.0
+# Last Updated: 2024-04-01
+# Governed by: ADR-045 Contract Governance Framework
+
+version: "1.0"
+entries:
+  # ChEMBL Contracts
+  chembl.molecule:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+    status: "active"
+    source_path: "src/bioetl/domain/schemas/gold/chembl/molecule.v1.yaml"
+    published_artifacts:
+      - "data/schemas/gold/chembl/molecule.v1.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2024-04-01T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+
+  chembl.activity:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+      dq_policy_ref: "chembl.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+    status: "active"
+    source_path: "src/bioetl/domain/schemas/gold/chembl/activity.v1.yaml"
+    published_artifacts:
+      - "data/schemas/gold/chembl/activity.v1.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2024-04-01T00:00:00Z"
+    owners: ["chembl-team"]
+    dq_policy_ref: "chembl.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+
+  # PubChem Contracts
+  pubchem.compound:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+      dq_policy_ref: "pubchem.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+    status: "active"
+    source_path: "src/bioetl/domain/schemas/gold/pubchem/compound.v1.yaml"
+    published_artifacts:
+      - "data/schemas/gold/pubchem/compound.v1.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2024-04-01T00:00:00Z"
+    owners: ["pubchem-team"]
+    dq_policy_ref: "pubchem.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+
+  # PubMed Contracts
+  pubmed.publication:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
+      dq_policy_ref: "pubmed.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+    status: "active"
+    source_path: "src/bioetl/domain/schemas/gold/pubmed/publication.v1.yaml"
+    published_artifacts:
+      - "data/schemas/gold/pubmed/publication.v1.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2024-04-01T00:00:00Z"
+    owners: ["biblio-team"]
+    dq_policy_ref: "pubmed.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+
+  # CrossRef Contracts
+  crossref.works:
+    identity:
+      contract_version: "1.0.0"
+      compatibility_level: "major"
+      schema_hash: "e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
+      dq_policy_ref: "crossref.dq.v1"
+      rule_bundle_version: "dq-rules.v1.0"
+    status: "active"
+    source_path: "src/bioetl/domain/schemas/gold/crossref/works.v1.yaml"
+    published_artifacts:
+      - "data/schemas/gold/crossref/works.v1.json"
+    supported_versions: ["1.0.0"]
+    migration_guides: {}
+    last_updated: "2024-04-01T00:00:00Z"
+    owners: ["biblio-team"]
+    dq_policy_ref: "crossref.dq.v1"
+    rule_bundle_version: "dq-rules.v1.0"
+
+# Registry Metadata
+metadata:
+  last_updated: "2024-04-01T00:00:00Z"
+  updated_by: "contract-governance-init"
+  governance_policy: "ADR-045"
+  validation_rules:
+    - "All contracts must have explicit owners"
+    - "All contracts must have valid source paths"
+    - "Current version must be in supported_versions"
+    - "Migration guides must exist for all version transitions"

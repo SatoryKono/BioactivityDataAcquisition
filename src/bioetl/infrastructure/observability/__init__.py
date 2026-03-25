@@ -91,7 +91,9 @@ _EXPORT_MAP: dict[str, tuple[str, str]] = {
 }
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(
+    name: str,
+) -> Any:  # Any: lazy module exports expose heterogeneous adapter types
     """Lazily resolve public re-exports on first access."""
     try:
         module_name, attr_name = _EXPORT_MAP[name]

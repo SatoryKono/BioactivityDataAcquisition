@@ -14,6 +14,7 @@ from __future__ import annotations
 from bioetl.domain.ports import (
     CheckpointPort,
     CompositeCheckpointPort,
+    LoggerPort,
     QuarantinePort,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
@@ -24,6 +25,7 @@ from bioetl.infrastructure.storage.support.checkpoint_writer import (
 )
 
 __all__ = [
+    "bootstrap_checkpoint_compatibility_service",
     "bootstrap_checkpoint_port",
     "bootstrap_composite_checkpoint_port",
     "bootstrap_quarantine_port",
@@ -94,3 +96,23 @@ def bootstrap_composite_checkpoint_port() -> CompositeCheckpointPort:
         f"got {type(checkpoint)}"
     )
     return checkpoint
+
+
+def bootstrap_checkpoint_compatibility_service(logger: LoggerPort) -> object:
+    """Create checkpoint compatibility service for DQ contract validation.
+
+    Creates a CheckpointCompatibilityService for validating checkpoint compatibility
+    based on Data Quality contract hashes and pipeline versions.
+
+    Args:
+        logger: Logger instance for observability.
+
+    Returns:
+        CheckpointCompatibilityService instance.
+    """
+    from bioetl.application.services.checkpoint_compatibility_service import (
+        CheckpointCompatibilityService,
+    )
+
+    service = CheckpointCompatibilityService(logger=logger)
+    return service

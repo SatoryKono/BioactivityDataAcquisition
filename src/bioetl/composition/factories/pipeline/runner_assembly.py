@@ -17,10 +17,19 @@ from bioetl.application.core.runner import (
     PipelineRunnerDependencies,
 )
 from bioetl.application.observability.observer import PipelineObserver
+from bioetl.application.services.checkpoint_compatibility_service import (
+    CheckpointCompatibilityService,
+)
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.dq.context_resolver import (
     extract_dq_output_paths,
+)
+from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
+    build_current_checkpoint_metadata,
+)
+from bioetl.composition.factories.pipeline.checkpoint_policy_helpers import (
+    resolve_checkpoint_compatibility_policy,
 )
 from bioetl.composition.factories.pipeline.postrun_assembly import (
     build_postrun_service,
@@ -29,6 +38,7 @@ from bioetl.composition.factories.services.common_service_wiring import resolve_
 from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy, WriteModePolicy
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -67,6 +77,12 @@ def _build_checkpoint_manager(
     pipeline: BasePipeline,
     logger_port: LoggerPort,
 ) -> CheckpointManagerService:
+    current_metadata = _build_current_checkpoint_metadata(pipeline)
+    compatibility_service = CheckpointCompatibilityService(logger=logger_port)
+    compatibility_policy = resolve_checkpoint_compatibility_policy(
+        pipeline=pipeline,
+        logger_port=logger_port,
+    )
     return ServicesBuilder.create_checkpoint_manager(
         checkpoint_port=pipeline.services.checkpoint,
         logger=logger_port,
@@ -74,7 +90,15 @@ def _build_checkpoint_manager(
         run_id=pipeline.run_id,
         resume=pipeline.runtime.resume,
         loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
+        checkpoint_compatibility_service=compatibility_service,
+        current_metadata=current_metadata,
+        compatibility_policy=compatibility_policy,
     )
+
+
+def _build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetadata:
+    """Backward-compatible seam for unit tests that patch metadata assembly."""
+    return build_current_checkpoint_metadata(pipeline)
 
 
 def _build_lock_manager(

@@ -4,7 +4,7 @@ policy:
   owner_diversification_sync:
     source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
     starts_quarter: 2026-Q2
-    review_on: '2026-06-30'
+    review_on: "2026-06-30"
   required_fields:
     - value
     - owner

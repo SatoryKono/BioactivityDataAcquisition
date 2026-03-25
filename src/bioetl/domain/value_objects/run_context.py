@@ -40,6 +40,8 @@ class RunContext:
         git_commit: Git commit hash for reproducibility.
         config_hash: SHA256 hash of pipeline configuration for change detection.
         manifest_id: Optional control-plane manifest identifier linked to the run.
+        dq_contract_compatibility_hash: SHA256 hash of DQ contract compatibility for reproducibility.
+        effective_config_artifact_id: Reference to the effective config artifact for this run.
 
     Example:
         >>> from datetime import UTC, datetime
@@ -71,6 +73,9 @@ class RunContext:
     git_commit: str | None = None
     config_hash: str | None = None
     manifest_id: str | None = None
+    # Data Quality integration
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
 
     def __post_init__(self) -> None:
         """Validate run context after initialization."""
@@ -103,6 +108,8 @@ class RunContext:
         git_commit: str | None = None,
         config_hash: str | None = None,
         manifest_id: str | None = None,
+        dq_contract_compatibility_hash: str | None = None,
+        effective_config_artifact_id: str | None = None,
     ) -> RunContext:
         """Factory method to create RunContext with derived pipeline_name.
 
@@ -118,6 +125,8 @@ class RunContext:
             git_commit: Optional git commit hash for reproducibility.
             config_hash: Optional SHA256 hash of pipeline config.
             manifest_id: Optional immutable control-plane manifest identifier.
+            dq_contract_compatibility_hash: Optional DQ-compatibility hash.
+            effective_config_artifact_id: Optional effective-config artifact reference.
 
         Returns:
             RunContext with pipeline_name derived as '{provider}_{entity}'.
@@ -135,4 +144,6 @@ class RunContext:
             git_commit=git_commit,
             config_hash=config_hash,
             manifest_id=manifest_id,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
         )

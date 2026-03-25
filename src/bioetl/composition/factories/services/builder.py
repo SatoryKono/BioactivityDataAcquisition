@@ -51,6 +51,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types import GoldSchemaType, RunID, ScdConfig
+    from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 __all__ = [
     "ServicesBuilder",
@@ -99,6 +100,9 @@ class ServicesBuilder:
         resume: bool,
         *,
         loading_strategy: LoadingStrategy | None = None,
+        checkpoint_compatibility_service: object | None = None,
+        current_metadata: CheckpointMetadata | None = None,
+        compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
     ) -> CheckpointManagerService:
         """Create configured CheckpointManagerService.
 
@@ -109,6 +113,9 @@ class ServicesBuilder:
             run_id: Unique run identifier embedded in checkpoint records.
             resume: If True, resumes from existing checkpoint instead of starting fresh.
             loading_strategy: Optional strategy controlling checkpoint loading behavior.
+            checkpoint_compatibility_service: Optional compatibility validator service.
+            current_metadata: Optional execution-identity metadata for resume checks.
+            compatibility_policy: Policy for incompatible checkpoints.
 
         Returns:
             CheckpointManagerService configured for the pipeline run.
@@ -120,6 +127,9 @@ class ServicesBuilder:
             run_id=run_id,
             resume=resume,
             loading_strategy=loading_strategy,
+            checkpoint_compatibility_service=checkpoint_compatibility_service,
+            current_metadata=current_metadata,
+            compatibility_policy=compatibility_policy,
         )
 
     @staticmethod

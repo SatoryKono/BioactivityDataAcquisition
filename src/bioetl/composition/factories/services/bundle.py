@@ -234,6 +234,9 @@ def create_pipeline_with_services(
     settings: Settings,
     logger: LoggerPort,
     manifest_id: str | None = None,
+    config_hash: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    effective_config_artifact_id: str | None = None,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,
@@ -256,6 +259,9 @@ def create_pipeline_with_services(
         settings: Application settings for infrastructure wiring.
         logger: LoggerPort for structured logging.
         manifest_id: Optional immutable run-manifest identifier.
+        config_hash: Optional canonical execution config hash override.
+        dq_contract_compatibility_hash: Optional DQ compatibility hash for run context.
+        effective_config_artifact_id: Optional effective-config artifact identifier.
         config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
         filter_config: Optional input filter configuration; disables filtering if None.
         tracer: Optional TracingPort for distributed tracing.
@@ -284,6 +290,9 @@ def create_pipeline_with_services(
                 settings=settings,
                 logger=logger,
                 manifest_id=manifest_id,
+                config_hash=config_hash,
+                dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+                effective_config_artifact_id=effective_config_artifact_id,
                 config=config,
                 filter_config=filter_config,
                 tracer=tracer,

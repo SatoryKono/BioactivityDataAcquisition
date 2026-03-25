@@ -1,6 +1,6 @@
 # Run Manifest and Run Ledger Contract
 
-*Last verified: 2026-03-24*
+*Last verified: 2026-03-25*
 
 ## Purpose
 
@@ -33,12 +33,15 @@ The control-plane MVP is governed by two runtime settings under
 |---|---:|---|
 | `run_manifest_enabled` | `true` | Create immutable manifest before runner bootstrap |
 | `run_ledger_enabled` | `true` | Append lifecycle and lineage ledger events keyed by `manifest_id` |
+| `checkpoint_compatibility_policy` | `soft_fail` | Behavior of `--resume` when checkpoint identity mismatches current runtime (`observe`, `soft_fail`, `hard_fail`) |
 
 Current rollout semantics:
 
 1. `run_manifest_enabled=false` disables both manifest and ledger creation.
 2. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
 3. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
+4. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
+   `observe` (warn+continue), `soft_fail` (block resume), `hard_fail` (raise error).
 
 ## Run Manifest Contract
 

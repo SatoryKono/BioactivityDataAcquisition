@@ -187,6 +187,9 @@ class PipelineFactoryPort(Protocol):
         settings: SettingsPort,
         logger: LoggerPort,
         manifest_id: str | None = None,
+        config_hash: str | None = None,
+        dq_contract_compatibility_hash: str | None = None,
+        effective_config_artifact_id: str | None = None,
         config: PipelineYamlConfigPort | None = ...,
         filter_config: InputFilterConfig | None = ...,
         tracer: TracingPort | None = ...,
@@ -202,6 +205,9 @@ class PipelineFactoryPort(Protocol):
             settings: Domain-facing execution settings contract.
             logger: Structured logging port for pipeline assembly signals.
             manifest_id: Optional immutable run-manifest identifier.
+            config_hash: Optional canonical execution config hash.
+            dq_contract_compatibility_hash: Optional DQ compatibility hash.
+            effective_config_artifact_id: Optional effective-config artifact reference.
             config: Optional pipeline-definition contract for explicit wiring.
             filter_config: Optional input-filter contract for record selection.
             tracer: Optional tracing port for execution spans.
@@ -221,6 +227,9 @@ class PipelineFactoryPort(Protocol):
         settings: SettingsPort,
         observability: ExecutionObservabilityPort,
         manifest_id: str | None = None,
+        config_hash: str | None = None,
+        dq_contract_compatibility_hash: str | None = None,
+        effective_config_artifact_id: str | None = None,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfigPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
@@ -233,6 +242,9 @@ class PipelineFactoryPort(Protocol):
             settings: Domain-facing execution settings contract.
             observability: Domain-facing observability context for runner wiring.
             manifest_id: Optional immutable run-manifest identifier.
+            config_hash: Optional canonical execution config hash.
+            dq_contract_compatibility_hash: Optional DQ compatibility hash.
+            effective_config_artifact_id: Optional effective-config artifact reference.
             filter_config: Optional input-filter contract for record selection.
             config: Optional pipeline-definition contract for explicit wiring.
             cached_bronze: Optional cached Bronze execution context.

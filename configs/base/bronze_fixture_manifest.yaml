@@ -1,0 +1,35 @@
+version: 1.0.0
+updated_at: "2026-03-25"
+fixtures:
+  chembl/activity:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/activity/sample_ci_2026-03-25.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from representative Bronze snapshots."
+    owner: "data-platform"
+    last_refresh: "2026-03-25"
+    validation_status: valid
+  chembl/molecule:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/chembl/molecule/sample_ci_2026-03-25.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from representative Bronze snapshots."
+    owner: "data-platform"
+    last_refresh: "2026-03-25"
+    validation_status: valid
+  crossref/publication:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/crossref/publication/sample_ci_2026-03-25.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from representative Bronze snapshots."
+    owner: "data-platform"
+    last_refresh: "2026-03-25"
+    validation_status: valid
+  pubmed/publication:
+    fixture_kind: tracked_ci_sample
+    fixture_path: tests/fixtures/bronze/pubmed/publication/sample_ci_2026-03-25.jsonl
+    records: 20
+    provenance: "Bounded CI sample extracted from representative Bronze snapshots."
+    owner: "data-platform"
+    last_refresh: "2026-03-25"
+    validation_status: valid

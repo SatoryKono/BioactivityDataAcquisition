@@ -16,31 +16,6 @@ from bioetl.domain.config.validation import (
 )
 from bioetl.domain.types.dq_contracts import DQDisposition
 
-
-class frozendict(dict):
-    """Immutable dictionary for disposition_overrides."""
-
-    def __setitem__(self, _key, _value):
-        raise TypeError("frozendict is immutable")
-
-    def __delitem__(self, _key):
-        raise TypeError("frozendict is immutable")
-
-    def clear(self):
-        raise TypeError("frozendict is immutable")
-
-    def pop(self, _key, _default=None):
-        raise TypeError("frozendict is immutable")
-
-    def popitem(self):
-        raise TypeError("frozendict is immutable")
-
-    def update(self, _other=None, **_kwargs):
-        raise TypeError("frozendict is immutable")
-
-    def setdefault(self, _key, _default=None):
-        raise TypeError("frozendict is immutable")
-
 __all__ = [
     "DQConfig",
     "DQReportConfig",

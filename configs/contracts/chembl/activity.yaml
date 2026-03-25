@@ -1,0 +1,31 @@
+# ChEMBL Activity Data Quality Contract
+# Contract reference for ChEMBL activity data validation
+
+contract_ref: "chembl-activity-v1"
+contract_version: "1.0.0"
+rule_bundle_version: "2024.1"
+
+# Default disposition policy for validation failures
+default_disposition_policy: "warn"
+
+# Disposition overrides for specific validation rules
+disposition_overrides:
+  "activity_id_required": "fail"
+  "standard_value_range": "warn"
+
+# Strictness mode for validation
+strictness_mode: "moderate"
+
+# Legacy DQ configuration fields (for backward compatibility)
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.20
+
+strict_validation: false
+invalid_record_policy: "quarantine"
+
+report:
+  enabled: true
+  format: "json"
+  include_sample_failures: true
+  sample_size: 10

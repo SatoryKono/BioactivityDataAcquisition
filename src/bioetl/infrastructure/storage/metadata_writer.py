@@ -1,4 +1,4 @@
-"""Compatibility facade for metadata sidecar writing.
+"""Facade for metadata sidecar writing.
 
 This module preserves historical patch-points used by unit tests and older
 callers while delegating the real implementation to split helper/impl modules.
@@ -32,7 +32,7 @@ async def _execute_prepared_metadata_write_operation(
 
 
 class MetadataWriter(_BaseMetadataWriter):
-    """Compatibility subclass that preserves legacy monkeypatch seams."""
+    """Facade subclass that preserves legacy monkeypatch seams."""
 
     async def _write_metadata(self, request: _MetadataWriteRequest) -> str:
         operation = _prepare_metadata_write_operation(request)

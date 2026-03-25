@@ -8,6 +8,10 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
+from bioetl.domain.types.checkpoint_metadata import (
+    CheckpointCompatibilityResult,
+    CheckpointMetadata,
+)
 
 
 @pytest.fixture
@@ -138,7 +142,7 @@ class TestCheckpointManagerSaveCheckpoint:
         self, checkpoint_manager, mock_checkpoint_port
     ):
         """Test save_checkpoint saves metadata correctly."""
-        await checkpoint_manager.save_checkpoint(records_processed=500)
+        await checkpoint_manager.save_checkpoint(CheckpointMetadata(records_processed=500))
 
         mock_checkpoint_port.save.assert_called_once()
         call_kwargs = mock_checkpoint_port.save.call_args.kwargs
@@ -250,7 +254,7 @@ class TestCheckpointManagerFullScanOnly:
 
         mock_checkpoint_port.load.assert_called_once()
         assert result is not None
-        assert result["records_processed"] == 1000
+        assert result.records_processed == 1000
         mock_logger.warning.assert_not_called()
 
     async def test_load_checkpoint_no_warning_when_resume_false(
@@ -357,7 +361,7 @@ class TestCheckpointManagerLoadingStrategy:
 
         result = await manager.load_checkpoint()
         assert result is not None
-        assert result["records_processed"] == 1000
+        assert result.records_processed == 1000
 
     async def test_loading_strategy_warning_references_adr_031(
         self, mock_checkpoint_port, mock_logger
@@ -399,3 +403,150 @@ class TestCheckpointManagerLoadingStrategy:
         )
 
         assert manager._loading_strategy == LoadingStrategy.FULL_SCAN_ONLY
+
+
+@pytest.mark.unit
+class TestCheckpointManagerCompatibilityPolicy:
+    """Tests for checkpoint compatibility policy behavior."""
+
+    async def test_soft_fail_policy_blocks_resume_on_incompatibility(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 42, "effective_config_hash": "old"},
+        )
+        compatibility_service = MagicMock()
+        compatibility_service.validate_checkpoint_compatibility.return_value = (
+            CheckpointCompatibilityResult.incompatible_result(
+                dq_compatible=False,
+                pipeline_compatible=True,
+                execution_identity_compatible=False,
+                messages=["effective config mismatch"],
+            )
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=compatibility_service,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                effective_config_hash="new",
+            ),
+            compatibility_policy="soft_fail",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is None
+        mock_logger.warning.assert_called()
+
+    async def test_observe_policy_allows_resume_on_incompatibility(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 84, "effective_config_hash": "old"},
+        )
+        compatibility_service = MagicMock()
+        compatibility_service.validate_checkpoint_compatibility.return_value = (
+            CheckpointCompatibilityResult.incompatible_result(
+                dq_compatible=True,
+                pipeline_compatible=True,
+                execution_identity_compatible=False,
+                messages=["execution fingerprint mismatch"],
+            )
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=compatibility_service,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                execution_fingerprint="new-fp",
+            ),
+            compatibility_policy="observe",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is not None
+        assert result.records_processed == 84
+        mock_logger.warning.assert_called()
+
+    async def test_hard_fail_policy_raises_on_incompatibility(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 84, "effective_config_hash": "old"},
+        )
+        compatibility_service = MagicMock()
+        compatibility_service.validate_checkpoint_compatibility.return_value = (
+            CheckpointCompatibilityResult.incompatible_result(
+                dq_compatible=False,
+                pipeline_compatible=False,
+                execution_identity_compatible=False,
+                messages=["dq mismatch", "pipeline mismatch"],
+            )
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=compatibility_service,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                dq_contract_compatibility_hash="new",
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(
+            ValueError,
+            match="hard_fail policy",
+        ):
+            await manager.load_checkpoint()
+
+    async def test_save_checkpoint_enriches_execution_identity(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=False,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                dq_contract_compatibility_hash="dq-hash",
+                pipeline_version="1.2.3",
+                effective_config_hash="cfg-hash",
+                effective_config_artifact_id="artifact-1",
+                execution_fingerprint="exec-fp",
+            ),
+        )
+
+        await manager.save_checkpoint(123)
+
+        call_kwargs = mock_checkpoint_port.save.call_args.kwargs
+        assert call_kwargs["metadata"]["records_processed"] == 123
+        assert call_kwargs["metadata"]["dq_contract_compatibility_hash"] == "dq-hash"
+        assert call_kwargs["metadata"]["pipeline_version"] == "1.2.3"
+        assert call_kwargs["metadata"]["effective_config_hash"] == "cfg-hash"
+        assert call_kwargs["metadata"]["effective_config_artifact_id"] == "artifact-1"
+        assert call_kwargs["metadata"]["execution_fingerprint"] == "exec-fp"

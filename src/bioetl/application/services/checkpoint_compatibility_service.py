@@ -1,0 +1,283 @@
+"""Checkpoint compatibility service for resume safety decisions."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.domain.types.checkpoint_metadata import (
+    CheckpointCompatibilityResult,
+    CheckpointMetadata,
+)
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+
+
+def _validate_dq_contract_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    dq_compatible = True
+    if (
+        current_metadata.dq_contract_compatibility_hash
+        and checkpoint_metadata.dq_contract_compatibility_hash
+    ):
+        if (
+            current_metadata.dq_contract_compatibility_hash
+            != checkpoint_metadata.dq_contract_compatibility_hash
+        ):
+            dq_compatible = False
+            messages.append(
+                "DQ contract mismatch: "
+                f"current={current_metadata.dq_contract_compatibility_hash}, "
+                f"checkpoint={checkpoint_metadata.dq_contract_compatibility_hash}"
+            )
+        else:
+            messages.append("DQ contracts are compatible")
+    else:
+        messages.append("DQ contract compatibility: not enforced (missing contract info)")
+    return dq_compatible, messages
+
+
+def _validate_pipeline_version_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    pipeline_compatible = True
+    if current_metadata.pipeline_version and checkpoint_metadata.pipeline_version:
+        if current_metadata.pipeline_version != checkpoint_metadata.pipeline_version:
+            pipeline_compatible = False
+            messages.append(
+                "Pipeline version mismatch: "
+                f"current={current_metadata.pipeline_version}, "
+                f"checkpoint={checkpoint_metadata.pipeline_version}"
+            )
+        else:
+            messages.append("Pipeline versions are compatible")
+    else:
+        messages.append(
+            "Pipeline version compatibility: not enforced (missing version info)"
+        )
+    return pipeline_compatible, messages
+
+
+def _validate_rule_bundle_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> list[str]:
+    messages: list[str] = []
+    if (
+        current_metadata.dq_rule_bundle_version
+        and checkpoint_metadata.dq_rule_bundle_version
+    ):
+        if (
+            current_metadata.dq_rule_bundle_version
+            != checkpoint_metadata.dq_rule_bundle_version
+        ):
+            messages.append(
+                "DQ rule bundle version changed: "
+                f"current={current_metadata.dq_rule_bundle_version}, "
+                f"checkpoint={checkpoint_metadata.dq_rule_bundle_version}"
+            )
+        else:
+            messages.append("DQ rule bundle versions are compatible")
+    return messages
+
+
+def _validate_execution_identity_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    execution_identity_compatible = True
+    if (
+        current_metadata.execution_fingerprint
+        and checkpoint_metadata.execution_fingerprint
+    ):
+        if (
+            current_metadata.execution_fingerprint
+            != checkpoint_metadata.execution_fingerprint
+        ):
+            execution_identity_compatible = False
+            messages.append(
+                "Execution fingerprint mismatch: "
+                f"current={current_metadata.execution_fingerprint}, "
+                f"checkpoint={checkpoint_metadata.execution_fingerprint}"
+            )
+        return execution_identity_compatible, messages
+    if (
+        current_metadata.effective_config_hash
+        and checkpoint_metadata.effective_config_hash
+        and current_metadata.effective_config_hash
+        != checkpoint_metadata.effective_config_hash
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Effective config hash mismatch: "
+            f"current={current_metadata.effective_config_hash}, "
+            f"checkpoint={checkpoint_metadata.effective_config_hash}"
+        )
+    return execution_identity_compatible, messages
+
+
+def _validate_lenient_dq_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    if (
+        current_metadata.dq_contract_compatibility_hash
+        and checkpoint_metadata.dq_contract_compatibility_hash
+    ):
+        if (
+            current_metadata.dq_contract_compatibility_hash
+            != checkpoint_metadata.dq_contract_compatibility_hash
+        ):
+            messages.append(
+                "DQ contract changed (lenient mode): "
+                f"current={current_metadata.dq_contract_compatibility_hash}, "
+                f"checkpoint={checkpoint_metadata.dq_contract_compatibility_hash}"
+            )
+        else:
+            messages.append("DQ contracts are compatible")
+    return True, messages
+
+
+def _validate_lenient_pipeline_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    pipeline_compatible = True
+    if current_metadata.pipeline_version and checkpoint_metadata.pipeline_version:
+        current_parts = current_metadata.pipeline_version.split(".")
+        checkpoint_parts = checkpoint_metadata.pipeline_version.split(".")
+        if current_parts and checkpoint_parts:
+            if current_parts[0] != checkpoint_parts[0]:
+                pipeline_compatible = False
+                messages.append(
+                    "Major pipeline version mismatch: "
+                    f"current={current_metadata.pipeline_version}, "
+                    f"checkpoint={checkpoint_metadata.pipeline_version}"
+                )
+            elif current_metadata.pipeline_version != checkpoint_metadata.pipeline_version:
+                messages.append(
+                    "Minor pipeline version changed (lenient mode): "
+                    f"current={current_metadata.pipeline_version}, "
+                    f"checkpoint={checkpoint_metadata.pipeline_version}"
+                )
+            else:
+                messages.append("Pipeline versions are compatible")
+    return pipeline_compatible, messages
+
+
+def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
+    if compatible:
+        logger.info(
+            "Checkpoint compatibility validation passed",
+            extra={"messages": messages},
+        )
+        return
+    logger.warning(
+        "Checkpoint compatibility validation failed",
+        extra={"messages": messages},
+    )
+
+
+def _log_lenient_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
+    if compatible:
+        logger.info(
+            "Checkpoint minimum compatibility validation passed (lenient mode)",
+            extra={"messages": messages},
+        )
+        return
+    logger.warning(
+        "Checkpoint minimum compatibility validation failed (lenient mode)",
+        extra={"messages": messages},
+    )
+
+
+class CheckpointCompatibilityService:
+    """Application service that validates checkpoint compatibility."""
+
+    def __init__(self, logger: LoggerPort) -> None:
+        self._logger = logger
+
+    def validate_checkpoint_compatibility(
+        self,
+        current_metadata: CheckpointMetadata,
+        checkpoint_metadata: CheckpointMetadata,
+    ) -> CheckpointCompatibilityResult:
+        dq_compatible, dq_messages = _validate_dq_contract_compatibility(
+            current_metadata,
+            checkpoint_metadata,
+        )
+        pipeline_compatible, pipeline_messages = _validate_pipeline_version_compatibility(
+            current_metadata,
+            checkpoint_metadata,
+        )
+        rule_bundle_messages = _validate_rule_bundle_compatibility(
+            current_metadata,
+            checkpoint_metadata,
+        )
+        execution_identity_compatible, execution_identity_messages = (
+            _validate_execution_identity_compatibility(
+                current_metadata,
+                checkpoint_metadata,
+            )
+        )
+        messages = (
+            dq_messages
+            + pipeline_messages
+            + rule_bundle_messages
+            + execution_identity_messages
+        )
+        compatible = (
+            dq_compatible and pipeline_compatible and execution_identity_compatible
+        )
+        _log_result(self._logger, compatible=compatible, messages=messages)
+        if compatible:
+            return CheckpointCompatibilityResult.compatible_result()
+        return CheckpointCompatibilityResult.incompatible_result(
+            dq_compatible=dq_compatible,
+            pipeline_compatible=pipeline_compatible,
+            execution_identity_compatible=execution_identity_compatible,
+            messages=messages,
+        )
+
+    def validate_minimum_compatibility(
+        self,
+        current_metadata: CheckpointMetadata,
+        checkpoint_metadata: CheckpointMetadata,
+    ) -> CheckpointCompatibilityResult:
+        dq_compatible, dq_messages = _validate_lenient_dq_compatibility(
+            current_metadata,
+            checkpoint_metadata,
+        )
+        pipeline_compatible, pipeline_messages = _validate_lenient_pipeline_compatibility(
+            current_metadata,
+            checkpoint_metadata,
+        )
+        execution_identity_compatible, execution_identity_messages = (
+            _validate_execution_identity_compatibility(
+                current_metadata,
+                checkpoint_metadata,
+            )
+        )
+        messages = dq_messages + pipeline_messages + execution_identity_messages
+        compatible = (
+            dq_compatible and pipeline_compatible and execution_identity_compatible
+        )
+        _log_lenient_result(self._logger, compatible=compatible, messages=messages)
+        return CheckpointCompatibilityResult(
+            compatible=compatible,
+            dq_compatible=dq_compatible,
+            pipeline_compatible=pipeline_compatible,
+            messages=messages,
+            execution_identity_compatible=execution_identity_compatible,
+        )
+
+
+__all__ = ["CheckpointCompatibilityService"]

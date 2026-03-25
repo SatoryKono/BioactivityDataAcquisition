@@ -98,6 +98,9 @@ class _PipelineCreationRequest:
     settings: Settings
     logger: LoggerPort
     manifest_id: str | None = None
+    config_hash: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
     config: PipelineYamlConfig | None = None
     filter_config: object | None = None
     tracer: TracingPort | None = None
@@ -153,6 +156,9 @@ def _create_pipeline_with_services_impl(
             runtime=request.runtime,
             yaml_config=yaml_config,
             manifest_id=request.manifest_id,
+            config_hash=request.config_hash,
+            dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
+            effective_config_artifact_id=request.effective_config_artifact_id,
         )
     )
 

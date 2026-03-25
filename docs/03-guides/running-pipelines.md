@@ -3,7 +3,7 @@
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
 **Версия:** 6.1.0
-**Дата обновления:** 2026-03-24
+**Дата обновления:** 2026-03-25
 
 ----------------------------------------------------------------------
 
@@ -144,6 +144,16 @@ bioetl run --pipeline chembl_activity --limit 100
 ```bash
 bioetl run --pipeline chembl_activity --resume
 ```
+
+Resume-совместимость checkpoint управляется через
+`settings.pipeline.control_plane.checkpoint_compatibility_policy`:
+
+- `observe` — продолжить resume даже при несовместимости, но записать warning.
+- `soft_fail` (default) — заблокировать resume при несовместимости без падения процесса.
+- `hard_fail` — завершить запуск ошибкой при несовместимости checkpoint/runtime identity.
+
+Policy применяется к execution identity checkpoint, включая effective config hash
+и execution fingerprint.
 
 ### Debug логирование
 

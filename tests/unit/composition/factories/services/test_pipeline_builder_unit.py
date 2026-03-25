@@ -77,6 +77,35 @@ class TestCreateCheckpointManager:
         call_kwargs = mock_cls.call_args[1]
         assert call_kwargs["loading_strategy"] is strategy
 
+    @patch(
+        "bioetl.composition.factories.services.pipeline_builder.CheckpointManagerService"
+    )
+    def test_passes_checkpoint_compatibility_arguments(
+        self, mock_cls: MagicMock
+    ) -> None:
+        """Compatibility service, metadata and policy are forwarded."""
+        mock_cls.return_value = MagicMock()
+        compatibility_service = MagicMock()
+        current_metadata = MagicMock()
+
+        create_checkpoint_manager(
+            checkpoint_port=MagicMock(),
+            logger=MagicMock(),
+            pipeline_name="p",
+            run_id="r",
+            resume=True,
+            checkpoint_compatibility_service=compatibility_service,
+            current_metadata=current_metadata,
+            compatibility_policy="hard_fail",
+        )
+
+        call_kwargs = mock_cls.call_args[1]
+        assert (
+            call_kwargs["checkpoint_compatibility_service"] is compatibility_service
+        )
+        assert call_kwargs["current_metadata"] is current_metadata
+        assert call_kwargs["compatibility_policy"] == "hard_fail"
+
 
 @pytest.mark.unit
 class TestCreateBatchProcessingComponents:
