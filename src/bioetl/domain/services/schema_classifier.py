@@ -79,7 +79,7 @@ class SchemaClassifier:
                 unknown_changes=diff.unknown_changes,
             )
 
-        if diff.has_field_changes():
+        if diff.non_breaking_changes:
             return SchemaChangeClassification(
                 classification=ChangeClassification.MINOR,
                 explanation="Backward-compatible field changes",

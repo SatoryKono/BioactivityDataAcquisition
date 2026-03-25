@@ -162,6 +162,11 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             version=self._context.pipeline_version or "1.0.0",
             git_commit=self._context.git_commit,
             config_hash=self._context.config_hash,
+            contract_ref=self._context.contract_ref,
+            contract_version=self._context.contract_version,
+            contract_schema_hash=self._context.contract_schema_hash,
+            dq_policy_ref=self._context.dq_policy_ref,
+            rule_bundle_version=self._context.rule_bundle_version,
         )
 
     @cached_property

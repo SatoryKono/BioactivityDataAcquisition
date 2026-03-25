@@ -213,6 +213,38 @@ class TestBronzeMetadata:
         assert metadata.pipeline.provider == "chembl"
         assert metadata.pipeline.entity == "activity"
 
+    def test_bronze_pipeline_metadata_includes_contract_identity(self) -> None:
+        """Bronze pipeline metadata should expose resolved contract identity fields."""
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            contract_schema_hash="schema-hash-123",
+            dq_policy_ref="chembl.dq.v1",
+            rule_bundle_version="dq-rules.v1.0",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=25,
+            compressed_size=2048,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        assert metadata.pipeline.contract_ref == "chembl.activity"
+        assert metadata.pipeline.contract_version == "1.0.0"
+        assert metadata.pipeline.contract_schema_hash == "schema-hash-123"
+        assert metadata.pipeline.dq_policy_ref == "chembl.dq.v1"
+        assert metadata.pipeline.rule_bundle_version == "dq-rules.v1.0"
+
     def test_bronze_output_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze output metadata contains file info (ADR-029 unified structure)."""
         started_at = datetime.now(UTC)
@@ -1077,6 +1109,11 @@ class TestLineageFragments:
             provider="chembl",
             entity="activity",
             manifest_id="manifest-001",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            contract_schema_hash="schema-hash-123",
+            dq_policy_ref="chembl.dq.v1",
+            rule_bundle_version="dq-rules.v1.0",
         )
         coordinator = MetadataCoordinator(context)
         input_data = BronzeMetadataInput(
@@ -1104,6 +1141,17 @@ class TestLineageFragments:
         assert LineageNodeType.SOURCE_SYSTEM in node_types
         assert LineageNodeType.SOURCE_REQUEST in node_types
         assert LineageNodeType.BRONZE_BATCH in node_types
+        run = next(node for node in fragment.nodes if node.node_type == LineageNodeType.RUN)
+        manifest = next(
+            node for node in fragment.nodes if node.node_type == LineageNodeType.MANIFEST
+        )
+        assert run.attributes["contract_ref"] == "chembl.activity"
+        assert run.attributes["contract_version"] == "1.0.0"
+        assert run.attributes["contract_schema_hash"] == "schema-hash-123"
+        assert run.attributes["dq_policy_ref"] == "chembl.dq.v1"
+        assert run.attributes["rule_bundle_version"] == "dq-rules.v1.0"
+        assert manifest.attributes["contract_ref"] == "chembl.activity"
+        assert manifest.attributes["contract_version"] == "1.0.0"
         assert any(edge.edge_type == LineageEdgeType.PRODUCED_BY for edge in fragment.edges)
         assert any(edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges)
 

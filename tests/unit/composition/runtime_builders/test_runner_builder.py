@@ -393,6 +393,11 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     effective_config_artifact_id = code_provenance["effective_config_artifact_id"]
     assert isinstance(effective_config_artifact_id, str)
     assert code_provenance["config_hash"] == fake_factory.kwargs["config_hash"]
+    assert code_provenance["contract_ref"] == "chembl.activity"
+    assert isinstance(code_provenance.get("contract_version"), str)
+    assert isinstance(code_provenance.get("contract_schema_hash"), str)
+    assert isinstance(code_provenance.get("dq_policy_ref"), str)
+    assert isinstance(code_provenance.get("rule_bundle_version"), str)
     assert (
         code_provenance["dq_contract_compatibility_hash"]
         == fake_factory.kwargs["dq_contract_compatibility_hash"]

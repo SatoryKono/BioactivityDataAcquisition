@@ -30,6 +30,11 @@ def attach_manifest_id(
     config_hash: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
+    contract_ref: str | None = None,
+    contract_version: str | None = None,
+    contract_schema_hash: str | None = None,
+    dq_policy_ref: str | None = None,
+    rule_bundle_version: str | None = None,
 ) -> PipelineRunContext:
     """Return context carrying manifest/control-plane provenance values."""
     if is_dataclass(ctx):
@@ -44,6 +49,16 @@ def attach_manifest_id(
             ctx, "effective_config_artifact_id"
         ):
             updates["effective_config_artifact_id"] = effective_config_artifact_id
+        if contract_ref is not None and hasattr(ctx, "contract_ref"):
+            updates["contract_ref"] = contract_ref
+        if contract_version is not None and hasattr(ctx, "contract_version"):
+            updates["contract_version"] = contract_version
+        if contract_schema_hash is not None and hasattr(ctx, "contract_schema_hash"):
+            updates["contract_schema_hash"] = contract_schema_hash
+        if dq_policy_ref is not None and hasattr(ctx, "dq_policy_ref"):
+            updates["dq_policy_ref"] = dq_policy_ref
+        if rule_bundle_version is not None and hasattr(ctx, "rule_bundle_version"):
+            updates["rule_bundle_version"] = rule_bundle_version
         return cast(
             "PipelineRunContext",
             replace(cast("DataclassInstance", ctx), **updates),
@@ -56,6 +71,16 @@ def attach_manifest_id(
             ctx.dq_contract_compatibility_hash = dq_contract_compatibility_hash
         if effective_config_artifact_id is not None:
             ctx.effective_config_artifact_id = effective_config_artifact_id
+        if contract_ref is not None:
+            ctx.contract_ref = contract_ref
+        if contract_version is not None:
+            ctx.contract_version = contract_version
+        if contract_schema_hash is not None:
+            ctx.contract_schema_hash = contract_schema_hash
+        if dq_policy_ref is not None:
+            ctx.dq_policy_ref = dq_policy_ref
+        if rule_bundle_version is not None:
+            ctx.rule_bundle_version = rule_bundle_version
         return ctx
     raise TypeError("PipelineRunContext must support manifest_id attachment")
 

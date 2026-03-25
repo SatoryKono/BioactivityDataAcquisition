@@ -90,6 +90,11 @@ def run_node(run_context: RunContext) -> LineageNodeRef:
             "run_type": run_context.run_type.value,
             "started_at": run_context.started_at.isoformat(),
             "manifest_id": run_context.manifest_id,
+            "contract_ref": run_context.contract_ref,
+            "contract_version": run_context.contract_version,
+            "contract_schema_hash": run_context.contract_schema_hash,
+            "dq_policy_ref": run_context.dq_policy_ref,
+            "rule_bundle_version": run_context.rule_bundle_version,
         },
     )
 
@@ -107,6 +112,11 @@ def manifest_node(run_context: RunContext) -> LineageNodeRef | None:
             "pipeline_name": run_context.pipeline_name,
             "provider": run_context.provider,
             "entity": run_context.entity,
+            "contract_ref": run_context.contract_ref,
+            "contract_version": run_context.contract_version,
+            "contract_schema_hash": run_context.contract_schema_hash,
+            "dq_policy_ref": run_context.dq_policy_ref,
+            "rule_bundle_version": run_context.rule_bundle_version,
         },
     )
 

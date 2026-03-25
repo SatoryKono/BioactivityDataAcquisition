@@ -42,6 +42,11 @@ class RunManifestCreateSpec:
     pipeline_version: str | None = None
     git_commit: str | None = None
     config_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    contract_schema_hash: str | None = None
+    dq_policy_ref: str | None = None
+    rule_bundle_version: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
 
@@ -68,6 +73,11 @@ class RunManifestService:
             pipeline_version=request.pipeline_version,
             git_commit=request.git_commit,
             config_hash=request.config_hash,
+            contract_ref=request.contract_ref,
+            contract_version=request.contract_version,
+            contract_schema_hash=request.contract_schema_hash,
+            dq_policy_ref=request.dq_policy_ref,
+            rule_bundle_version=request.rule_bundle_version,
             dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
             effective_config_artifact_id=request.effective_config_artifact_id,
         )
@@ -117,6 +127,11 @@ class RunManifestService:
                 "pipeline_version": code_provenance.pipeline_version,
                 "git_commit": code_provenance.git_commit,
                 "config_hash": code_provenance.config_hash,
+                "contract_ref": code_provenance.contract_ref,
+                "contract_version": code_provenance.contract_version,
+                "contract_schema_hash": code_provenance.contract_schema_hash,
+                "dq_policy_ref": code_provenance.dq_policy_ref,
+                "rule_bundle_version": code_provenance.rule_bundle_version,
                 "dq_contract_compatibility_hash": code_provenance.dq_contract_compatibility_hash,
                 "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
             },

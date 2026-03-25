@@ -38,6 +38,13 @@ def test_run_context_factory_creates_expected_context() -> None:
         pipeline_version_getter=lambda _: "1.2.3",
         git_commit_getter=lambda: "abc1234",
         config_hash_getter=lambda _: "deadbeef",
+        contract_identity_resolver=lambda *_: (
+            "chembl.activity",
+            "1.0.0",
+            "schema-hash-123",
+            "chembl.dq.v1",
+            "dq-rules.v1.0",
+        ),
     )
 
     context = factory.create(
@@ -54,6 +61,11 @@ def test_run_context_factory_creates_expected_context() -> None:
     assert context.pipeline_version == "1.2.3"
     assert context.git_commit == "abc1234"
     assert context.config_hash == "deadbeef"
+    assert context.contract_ref == "chembl.activity"
+    assert context.contract_version == "1.0.0"
+    assert context.contract_schema_hash == "schema-hash-123"
+    assert context.dq_policy_ref == "chembl.dq.v1"
+    assert context.rule_bundle_version == "dq-rules.v1.0"
 
 
 class _DummyLoader:

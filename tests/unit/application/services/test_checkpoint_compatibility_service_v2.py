@@ -1,0 +1,421 @@
+"""Unit tests for checkpoint compatibility service v2."""
+
+from bioetl.application.services.checkpoint_compatibility_service_v2 import (
+    CheckpointCompatibilityConfig,
+    CheckpointCompatibilityMode,
+    CheckpointCompatibilityResult,
+    CheckpointCompatibilityServiceV2,
+    CheckpointIdentity,
+    CompatibilityVerdict,
+    ExecutionPhase,
+    create_checkpoint_compatibility_service_v2,
+)
+
+
+def test_service_creation():
+    """Test that service can be created."""
+    service = CheckpointCompatibilityServiceV2()
+    assert service is not None
+    assert service.config.mode == CheckpointCompatibilityMode.STRICT
+    assert service.config.max_schema_version_delta == 1
+
+
+def test_factory_function():
+    """Test factory function."""
+    service = create_checkpoint_compatibility_service_v2()
+    assert isinstance(service, CheckpointCompatibilityServiceV2)
+
+
+def test_custom_config():
+    """Test service with custom configuration."""
+    config = CheckpointCompatibilityConfig(
+        mode=CheckpointCompatibilityMode.LENIENT,
+        allow_policy_override=True,
+        max_schema_version_delta=2,
+    )
+    service = CheckpointCompatibilityServiceV2(config)
+    assert service.config.mode == CheckpointCompatibilityMode.LENIENT
+    assert service.config.allow_policy_override is True
+    assert service.config.max_schema_version_delta == 2
+
+
+def test_identical_checkpoint_compatibility():
+    """Test compatibility with identical checkpoints."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
+    assert "compatible" in result.message.lower()
+    assert result.execution_phase == ExecutionPhase.DEPENDENCY_EXECUTION
+    # Even identical checkpoints get phase-specific suggestions
+    assert len(result.recovery_suggestions) == 1
+
+
+def test_phase_incompatibility():
+    """Test incompatibility due to phase mismatch."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.MERGE,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.PREFLIGHT,  # Too early
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    assert result.verdict == CompatibilityVerdict.MINOR_INCOMPATIBLE
+    assert "incompatible" in result.message.lower() or "minor" in result.message.lower()
+    assert len(result.recovery_suggestions) > 0
+
+
+def test_config_hash_incompatibility():
+    """Test incompatibility due to config hash mismatch."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="xyz789",  # Different hash
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert "incompatible" in result.message.lower()
+    assert any("config" in suggestion.lower() for suggestion in result.recovery_suggestions)
+
+
+def test_schema_version_incompatibility():
+    """Test incompatibility due to schema version mismatch."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="2.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",  # Different major version
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert "incompatible" in result.message.lower()
+    assert any("schema" in suggestion.lower() for suggestion in result.recovery_suggestions)
+
+
+def test_minor_schema_version_compatibility():
+    """Test compatibility with minor schema version difference."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.1.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",  # Minor version difference
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    assert result.verdict == CompatibilityVerdict.MINOR_INCOMPATIBLE
+    assert "minor" in result.message.lower() or "compatible" in result.message.lower()
+
+
+def test_lenient_mode_compatibility():
+    """Test compatibility in lenient mode."""
+    config = CheckpointCompatibilityConfig(mode=CheckpointCompatibilityMode.LENIENT)
+    service = CheckpointCompatibilityServiceV2(config)
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.1.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should be compatible in lenient mode
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
+    assert "lenient" in result.message.lower() or "compatible" in result.message.lower()
+
+
+def test_legacy_mode_compatibility():
+    """Test compatibility in legacy mode."""
+    config = CheckpointCompatibilityConfig(mode=CheckpointCompatibilityMode.LEGACY)
+    service = CheckpointCompatibilityServiceV2(config)
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="2.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="xyz789",  # Different config
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",  # Different version
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should be compatible in legacy mode (only checks major phase incompatibilities)
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
+    assert "legacy" in result.message.lower() or "compatible" in result.message.lower()
+
+
+def test_compatible_phase_transition():
+    """Test compatible phase transition."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.PREFLIGHT,  # Earlier phase
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should be minor incompatible (compatible transition but different phase)
+    assert result.verdict == CompatibilityVerdict.MINOR_INCOMPATIBLE
+    assert "minor" in result.message.lower() or "compatible" in result.message.lower()
+
+
+def test_incompatible_phase_transition():
+    """Test incompatible phase transition."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.PREFLIGHT,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.MERGE,  # Later phase
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should be major incompatible (cannot jump ahead)
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+
+
+def test_terminal_phase_compatibility():
+    """Test that terminal phases cannot be resumed."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.COMPLETED_SUCCESS,  # Terminal phase
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.COMPLETED_SUCCESS,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Same terminal phase should be compatible
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
+
+
+def test_recovery_suggestions():
+    """Test that recovery suggestions are generated appropriately."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.MERGE,
+        checkpoint_schema_version="2.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="xyz789",
+        execution_phase=ExecutionPhase.PREFLIGHT,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should have multiple recovery suggestions
+    assert len(result.recovery_suggestions) > 0
+    
+    # Check for actual suggestions that are generated
+    suggestions_text = " ".join(result.recovery_suggestions).lower()
+    assert "config" in suggestions_text
+    assert "schema" in suggestions_text
+    assert "migration" in suggestions_text or "fresh execution" in suggestions_text
+
+
+def test_compatibility_details():
+    """Test that compatibility details are comprehensive."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.1.0",
+        composite_run_identity="run-001",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="xyz789",
+        execution_phase=ExecutionPhase.PREFLIGHT,
+        checkpoint_schema_version="1.0.0",
+        composite_run_identity="run-002",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Check details structure
+    details = result.details
+    assert "phase_compatibility" in details
+    assert "config_compatibility" in details
+    assert "schema_compatibility" in details
+    assert "current_identity" in details
+    assert "checkpoint_identity" in details
+    assert "compatibility_mode" in details
+    
+    # Check identity details
+    assert details["current_identity"]["composite_run_identity"] == "run-001"
+    assert details["checkpoint_identity"]["composite_run_identity"] == "run-002"
+
+
+def test_schema_version_delta_config():
+    """Test schema version delta configuration."""
+    config = CheckpointCompatibilityConfig(max_schema_version_delta=2)
+    service = CheckpointCompatibilityServiceV2(config)
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.3.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",  # Delta of 3
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should be incompatible with delta > 2
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert "exceeds_max_version_delta" in result.details["schema_compatibility"]["reason"]
+
+
+def test_policy_override_suggestions():
+    """Test policy override suggestions."""
+    config = CheckpointCompatibilityConfig(allow_policy_override=True)
+    service = CheckpointCompatibilityServiceV2(config)
+    
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="xyz789",  # Different config
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should suggest policy override when allowed
+    suggestions_text = " ".join(result.recovery_suggestions).lower()
+    assert "override" in suggestions_text or "config-mismatch" in suggestions_text
+
+
+def test_phase_specific_suggestions():
+    """Test phase-specific recovery suggestions."""
+    service = CheckpointCompatibilityServiceV2()
+    
+    # Test dependency execution phase
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="xyz789",
+        execution_phase=ExecutionPhase.PREFLIGHT,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should have dependency-specific suggestions
+    assert any("source" in suggestion.lower() for suggestion in result.recovery_suggestions)
+    
+    # Test merge phase
+    current_identity = CheckpointIdentity(
+        effective_config_hash="abc123",
+        execution_phase=ExecutionPhase.MERGE,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash="xyz789",
+        execution_phase=ExecutionPhase.CROSS_VALIDATION,
+        checkpoint_schema_version="1.0.0",
+    )
+    
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+    
+    # Should have merge-specific suggestions
+    assert any("conflict" in suggestion.lower() for suggestion in result.recovery_suggestions)
