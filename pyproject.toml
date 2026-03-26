@@ -413,4 +413,6 @@ skips = ["*/domain/*"]
 [dependency-groups]
 dev = [
     "bioetl[dev]",
+    "lxml>=6.0.2",
+    "pyyaml>=6.0.3",
 ]

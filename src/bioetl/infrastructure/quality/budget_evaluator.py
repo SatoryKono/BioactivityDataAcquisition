@@ -199,6 +199,35 @@ def evaluate_governance_violations(
     return violations
 
 
+def _extract_hotspot_fields(
+    entry: dict[str, object],
+) -> tuple[str, list[object], dict[str, object]] | None:
+    name = entry.get("name")
+    pfxs = entry.get("path_prefixes")
+    bds = entry.get("registry_budgets")
+    if isinstance(name, str) and isinstance(pfxs, list) and isinstance(bds, dict):
+        return name, pfxs, bds
+    return None
+
+
+def _parse_hotspot_entry(
+    entry: dict[str, object],
+) -> tuple[str, tuple[str, ...], dict[str, int]] | None:
+    fields = _extract_hotspot_fields(entry)
+    if not fields:
+        return None
+    name, prefixes, budgets = fields
+    valid_p = tuple(p for p in prefixes if isinstance(p, str) and p)
+    if not valid_p:
+        return None
+    valid_b = {
+        k: int(v)
+        for k, v in budgets.items()
+        if isinstance(k, str) and isinstance(v, int)
+    }
+    return (name, valid_p, valid_b)
+
+
 def _iter_hotspot_budget_entries(
     hotspot_budgets: object,
 ) -> list[tuple[str, tuple[str, ...], dict[str, int]]]:
@@ -206,33 +235,24 @@ def _iter_hotspot_budget_entries(
     if not isinstance(hotspot_budgets, list):
         return []
 
-    typed_entries: list[tuple[str, tuple[str, ...], dict[str, int]]] = []
-    for entry in hotspot_budgets:
-        if not isinstance(entry, dict):
-            continue
-        hotspot_name = entry.get("name")
-        path_prefixes = entry.get("path_prefixes")
-        registry_budgets = entry.get("registry_budgets")
-        if (
-            not isinstance(hotspot_name, str)
-            or not isinstance(path_prefixes, list)
-            or not isinstance(registry_budgets, dict)
-        ):
-            continue
+    return [
+        res
+        for entry in hotspot_budgets
+        if isinstance(entry, dict) and (res := _parse_hotspot_entry(entry)) is not None
+    ]
 
-        typed_prefixes = tuple(
-            prefix for prefix in path_prefixes if isinstance(prefix, str) and prefix
-        )
-        if not typed_prefixes:
-            continue
 
-        typed_budgets = {
-            registry_name: int(budget)
-            for registry_name, budget in registry_budgets.items()
-            if isinstance(registry_name, str) and isinstance(budget, int)
-        }
-        typed_entries.append((hotspot_name, typed_prefixes, typed_budgets))
-    return typed_entries
+def _count_matches_in_registry(
+    entries: dict[object, object], typed_prefixes: tuple[str, ...]
+) -> int:
+    valid_keys = (
+        k.split("::", 1)[0]
+        for k, v in entries.items()
+        if isinstance(k, str) and isinstance(v, dict)
+    )
+    return sum(
+        1 for p in valid_keys if any(p.startswith(prefix) for prefix in typed_prefixes)
+    )
 
 
 def _count_hotspot_registry_entries(
@@ -241,17 +261,14 @@ def _count_hotspot_registry_entries(
     typed_prefixes: tuple[str, ...],
     registry_budgets: dict[str, int],
 ) -> Counter[str]:
-    """Count exemption entries that fall under hotspot path prefixes."""
     counts: Counter[str] = Counter()
-    for registry_name, entries in registries.items():
-        if registry_name not in registry_budgets or not isinstance(entries, dict):
-            continue
-        for entry_key, entry_value in entries.items():
-            if not isinstance(entry_key, str) or not isinstance(entry_value, dict):
-                continue
-            source_path = entry_key.split("::", 1)[0]
-            if any(source_path.startswith(prefix) for prefix in typed_prefixes):
-                counts[registry_name] += 1
+    for reg_name, entries in registries.items():
+        if (
+            reg_name in registry_budgets
+            and isinstance(entries, dict)
+            and (matched := _count_matches_in_registry(entries, typed_prefixes))
+        ):
+            counts[reg_name] += matched
     return counts
 
 
