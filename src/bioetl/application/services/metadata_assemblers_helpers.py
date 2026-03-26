@@ -22,10 +22,14 @@ from bioetl.domain.services.composite_metadata_helpers import (
     parse_composite_list,
     parse_composite_status,
     parse_lineage_created_at,
+    summarize_composite_cv_dq,
 )
 from bioetl.domain.value_objects.run_context import RunContext
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from bioetl.domain.types.dq_contracts import DQRuleProvenance
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 
@@ -145,7 +149,10 @@ def _build_silver_delta(
 
 
 def _build_silver_dq_summary(
-    input_data: SilverMetadataInput, record_count: int
+    input_data: SilverMetadataInput,
+    record_count: int,
+    *,
+    run_context: RunContext,
 ) -> DQSummary:
     """Build DQ summary using optional batch metrics and provenance."""
     dq_summary = DQSummary(total_records=record_count, valid_records=record_count)
@@ -154,9 +161,106 @@ def _build_silver_dq_summary(
         dq_summary = dq_metrics.to_dq_summary()
     if input_data.dq_rule_provenance:
         dq_summary = dq_summary.model_copy(
-            update={"rule_provenance": input_data.dq_rule_provenance}
+            update={
+                "rule_provenance": _normalize_rule_provenance_entries(
+                    input_data.dq_rule_provenance
+                )
+            }
         )
-    return dq_summary
+    return _augment_dq_summary_with_composite_cv(
+        dq_summary=dq_summary,
+        records=input_data.records or [],
+        contract_version=run_context.contract_version,
+        dq_report_path=input_data.dq_report_path,
+    )
+
+
+def _build_gold_dq_summary(
+    *,
+    input_data: GoldMetadataInput,
+    record_count: int,
+    run_context: RunContext,
+) -> DQSummary:
+    """Build Gold DQ summary including explicit and composite CV provenance."""
+    dq_summary = DQSummary(total_records=record_count, valid_records=record_count)
+    if input_data.dq_rule_provenance:
+        dq_summary = dq_summary.model_copy(
+            update={
+                "rule_provenance": _normalize_rule_provenance_entries(
+                    input_data.dq_rule_provenance
+                )
+            }
+        )
+    return _augment_dq_summary_with_composite_cv(
+        dq_summary=dq_summary,
+        records=input_data.records or [],
+        contract_version=run_context.contract_version,
+        dq_report_path=input_data.dq_report_path,
+    )
+
+
+def _normalize_rule_provenance_entries(
+    entries: Sequence[dict[str, object] | DQRuleProvenance],
+) -> list[dict[str, str | None]]:
+    """Normalize provenance objects/dicts into metadata-safe mappings."""
+    normalized: list[dict[str, str | None]] = []
+    for entry in entries:
+        if isinstance(entry, dict):
+            normalized.append(
+                {
+                    str(key): None if value is None else str(value)
+                    for key, value in entry.items()
+                }
+            )
+            continue
+        normalized.append(
+            {
+                "rule_id": entry.rule_id,
+                "contract_version": entry.contract_version,
+                "severity": entry.severity,
+                "disposition": str(entry.disposition),
+                "config_path": entry.config_path,
+                "report_artifact_path": entry.report_artifact_path,
+                "policy_hash": entry.policy_hash,
+            }
+        )
+    return normalized
+
+
+def _augment_dq_summary_with_composite_cv(
+    *,
+    dq_summary: DQSummary,
+    records: list[dict[str, object]],
+    contract_version: str | None,
+    dq_report_path: str | None,
+) -> DQSummary:
+    """Merge composite cross-validation markers into DQ summary semantics."""
+    cv_summary = summarize_composite_cv_dq(
+        records,
+        contract_version=contract_version,
+        report_artifact_path=dq_report_path,
+    )
+    if not cv_summary["has_signal"]:
+        return dq_summary
+
+    error_records = int(cv_summary["error_records"])
+    warning_records = int(cv_summary["warning_records"])
+    total_records = dq_summary.total_records
+    existing_provenance = _normalize_rule_provenance_entries(dq_summary.rule_provenance)
+    composite_provenance = cast(
+        "list[dict[str, str | None]]", cv_summary["rule_provenance"]
+    )
+    return dq_summary.model_copy(
+        update={
+            "valid_records": max(total_records - error_records, 0),
+            "error_records": max(dq_summary.error_records, error_records),
+            "warning_records": max(dq_summary.warning_records, warning_records),
+            "error_rate": (error_records / total_records) if total_records else 0.0,
+            "validation_passed": dq_summary.validation_passed
+            and bool(cv_summary["validation_passed"]),
+            "rule_provenance": existing_provenance + composite_provenance,
+        }
+    )
 
 
 def _build_runtime_duration(
@@ -238,6 +342,7 @@ def _build_gold_output(
 __all__ = [
     "PipelineMetadataProtocol",
     "RuntimeMetadataProtocol",
+    "_build_gold_dq_summary",
     "_build_gold_lineage",
     "_build_gold_output",
     "_build_gold_scd",

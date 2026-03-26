@@ -272,6 +272,10 @@ async def test_handle_merge_phase_exception_when_called_then_logs_error_and_save
     await harness._handle_merge_phase_exception(state, RuntimeError("merge crash"))
 
     harness._logger.error.assert_called_once()
+    harness._fsm.validate_fsm_transition.assert_called_once_with(
+        CompositePipelineState.MERGING,
+        CompositePipelineState.FAILED,
+    )
     harness._fsm.log_fsm_transition.assert_called_once()
     fsm_kwargs = harness._fsm.log_fsm_transition.call_args.kwargs
     assert fsm_kwargs["to_state"] == CompositePipelineState.FAILED

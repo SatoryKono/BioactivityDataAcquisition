@@ -7,23 +7,14 @@ from pathlib import Path
 
 MAX_TEST_FILE_LOC = 2000
 MAX_TEST_FUNCTION_LOC = 200
-TESTS_ROOT = Path("tests")
 
 
-def _iter_test_files() -> list[Path]:
-    return sorted(
-        path
-        for path in TESTS_ROOT.rglob("*.py")
-        if "__pycache__" not in path.parts and ".worktrees" not in path.parts
-    )
-
-
-def test_no_test_files_over_2000_loc() -> None:
+def test_no_test_files_over_2000_loc(test_content_cache: dict[Path, str]) -> None:
     """Keep test file size under 2000 LOC for readability and maintainability."""
     violations: list[tuple[int, Path]] = []
 
-    for test_file in _iter_test_files():
-        loc = len(test_file.read_text(encoding="utf-8").splitlines())
+    for test_file, content in test_content_cache.items():
+        loc = len(content.splitlines())
         if loc > MAX_TEST_FILE_LOC:
             violations.append((loc, test_file))
 
@@ -34,16 +25,11 @@ def test_no_test_files_over_2000_loc() -> None:
     )
 
 
-def test_no_test_functions_over_200_loc() -> None:
+def test_no_test_functions_over_200_loc(test_ast_cache: dict[Path, ast.Module]) -> None:
     """Keep individual test function bodies under 200 LOC."""
     violations: list[tuple[int, Path, str, int]] = []
 
-    for test_file in _iter_test_files():
-        try:
-            tree = ast.parse(test_file.read_text(encoding="utf-8"))
-        except SyntaxError:
-            continue
-
+    for test_file, tree in test_ast_cache.items():
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue

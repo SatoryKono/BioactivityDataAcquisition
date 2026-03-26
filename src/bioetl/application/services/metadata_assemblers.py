@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from bioetl.application.services.metadata_assemblers_helpers import (
     PipelineMetadataProtocol,
     RuntimeMetadataProtocol,
+    _build_gold_dq_summary,
     _build_gold_lineage,
     _build_gold_output,
     _build_gold_scd,
@@ -23,7 +24,6 @@ from bioetl.application.services.metadata_assemblers_helpers import (
 )
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
-    DQSummary,
     EnvironmentMetadata,
     GoldMetadata,
     GoldOutputExt,
@@ -80,7 +80,9 @@ class SilverMetadataService:
         )
         delta = _build_silver_delta(input_data=input_data, rows_inserted=record_count)
         dq_summary = _build_silver_dq_summary(
-            input_data=input_data, record_count=record_count
+            input_data=input_data,
+            record_count=record_count,
+            run_context=self.run_context,
         )
         duration_seconds = _build_runtime_duration(
             input_data.started_at, input_data.completed_at
@@ -156,7 +158,11 @@ class GoldMetadataService:
             records=input_data.records,
             total_records=input_data.total_records,
         )
-        dq_summary = DQSummary(total_records=record_count, valid_records=record_count)
+        dq_summary = _build_gold_dq_summary(
+            input_data=input_data,
+            record_count=record_count,
+            run_context=self.run_context,
+        )
 
         records = input_data.records or []
         composite_ext = _extract_composite_output_ext(

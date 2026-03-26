@@ -12,6 +12,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     RuntimeManagementServicesBundle,
 )
+from bioetl.composition.services import compute_config_hash
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -35,6 +36,8 @@ def build_runtime_management_services(
     create_dq_report_service: Callable[[LoggerPort, Settings], DQReportService],
 ) -> RuntimeManagementServicesBundle:
     """Build checkpoint, FSM, DQ, and quarantine runtime services."""
+
+    expected_effective_config_hash = _resolve_expected_effective_config_hash(config)
     checkpoint_storage: CompositeCheckpointPort = bootstrap_composite_checkpoint_port()
     quarantine_port = (
         bootstrap_quarantine_port() if config.cross_validation.enabled else None
@@ -46,6 +49,9 @@ def build_runtime_management_services(
             storage=checkpoint_storage,
             logger=logger,
             resume=runtime.resume,
+            expected_effective_config_hash=expected_effective_config_hash,
+            expected_contract_ref=config.name,
+            expected_contract_version=getattr(config, "version", ""),
         ),
         dq_report_service=create_dq_report_service(logger, settings),
         fsm_state_helper=FSMStateHelperService(
@@ -55,6 +61,23 @@ def build_runtime_management_services(
         ),
         quarantine_port=quarantine_port,
     )
+
+
+def _resolve_expected_effective_config_hash(config: CompositeConfig) -> str:
+    """Best-effort hash for checkpoint compatibility anchors."""
+    to_dict = getattr(config, "to_dict", None)
+    if not callable(to_dict):
+        return ""
+    try:
+        payload = to_dict()
+    except (AttributeError, TypeError, ValueError):
+        return ""
+    if not isinstance(payload, dict):
+        return ""
+    try:
+        return compute_config_hash(payload)
+    except (TypeError, ValueError):
+        return ""
 
 
 __all__ = ["build_runtime_management_services"]

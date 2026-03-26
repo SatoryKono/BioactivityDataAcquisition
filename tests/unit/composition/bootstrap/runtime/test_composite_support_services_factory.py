@@ -32,6 +32,7 @@ def _make_factory(
         Any,
         SimpleNamespace(
             name="composite_publication",
+            version="1.0.0",
             merge=SimpleNamespace(strategy=MergeStrategy.LEFT_OUTER),
             cross_validation=SimpleNamespace(enabled=False),
             dq=SimpleNamespace(),
@@ -159,4 +160,7 @@ def test_build_uses_canonical_composite_checkpoint_port(
         storage=checkpoint_storage,
         logger=factory._infra.logger,
         resume=False,
+        expected_effective_config_hash="",
+        expected_contract_ref="composite_publication",
+        expected_contract_version="1.0.0",
     )

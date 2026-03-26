@@ -91,6 +91,10 @@ async def handle_merge_phase_exception(
     if isinstance(error, BioETLError):
         log_kwargs["reason_code"] = "unexpected_bioetl_error"
     host._logger.error("Merge failed", **log_kwargs)
+    host._fsm.validate_fsm_transition(
+        CompositePipelineState.MERGING,
+        CompositePipelineState.FAILED,
+    )
     host._fsm.log_fsm_transition(
         from_state=CompositePipelineState.MERGING,
         to_state=CompositePipelineState.FAILED,

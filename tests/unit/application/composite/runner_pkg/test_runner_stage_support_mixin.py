@@ -311,6 +311,31 @@ async def test_persist_failed_state_when_called_then_transitions_to_failed_and_s
     assert fsm_kwargs["stage"] == "seed_failed"
 
 
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_complete_seed_phase_when_called_then_logs_running_to_completed() -> None:
+    harness = _StageSupportHarness()
+    running_state = _make_checkpoint_state(CompositePipelineState.SEED_RUNNING)
+    completed_state = _make_checkpoint_state(CompositePipelineState.SEED_COMPLETED)
+    running_state.with_seed_completed.return_value = completed_state
+    harness._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+
+    seed_result = SimpleNamespace(records_extracted=100, records_silver=90)
+
+    result = await harness._complete_seed_phase(running_state, seed_result)
+
+    assert result is completed_state
+    harness._fsm.validate_fsm_transition.assert_called_once_with(
+        CompositePipelineState.SEED_RUNNING,
+        CompositePipelineState.SEED_COMPLETED,
+    )
+    harness._fsm.log_fsm_transition.assert_called_once()
+    fsm_kwargs = harness._fsm.log_fsm_transition.call_args.kwargs
+    assert fsm_kwargs["from_state"] == CompositePipelineState.SEED_RUNNING
+    assert fsm_kwargs["to_state"] == CompositePipelineState.SEED_COMPLETED
+    assert fsm_kwargs["stage"] == "seed_complete"
+
+
 # ---------------------------------------------------------------------------
 # _fail_required_dependencies
 # ---------------------------------------------------------------------------

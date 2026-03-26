@@ -50,6 +50,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-042](ADR-042-testing-strategy-matrix.md)           | Testing Strategy Matrix & Fixture Gov.     | Accepted           | Testing         | 2026-03-09 |
 | [ADR-043](ADR-043-documentation-knowledge-management.md)| Documentation & Knowledge Management       | Accepted           | Documentation   | 2026-03-09 |
 | [ADR-044](ADR-044-run-manifest-ledger-control-plane.md) | Run Manifest & Ledger Control Plane        | Accepted           | Reproducibility | 2026-03-24 |
+| [ADR-045](ADR-045-dq-contract-system.md)                | Data Quality Contract System               | Accepted           | Data Quality    | 2026-03-26 |
 
 ## ADRs by Category
 
@@ -96,6 +97,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-027](ADR-027-dq-rules-externalization.md): DQ Rules Externalization — Hierarchical DQ config
 - [ADR-033](ADR-033-publication-validation-strategy.md): Publication Metadata Validation Strategy — 5-level validation for publication data
 - [ADR-036](ADR-036-gold-contract-versioning-policy.md): Gold Contract Versioning Policy — Semver for Gold contracts with breaking window policy
+- [ADR-045](ADR-045-dq-contract-system.md): Data Quality Contract System
 
 ### Domain Model
 

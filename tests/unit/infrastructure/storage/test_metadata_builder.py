@@ -67,8 +67,8 @@ class TestSilverMetadataBuilder:
         """Should build valid SilverMetadata for merged composite data."""
         builder = SilverMetadataBuilder()
         records = [
-            {"id": 1, "name": "test1"},
-            {"id": 2, "name": "test2"},
+            {"id": 1, "name": "test1", "_cv_warn": True},
+            {"id": 2, "name": "test2", "_cv_error": True, "_cv_quarantine": True},
         ]
         metadata = builder.build_merged_metadata(
             table_path="/data/silver/composite/publication",
@@ -86,6 +86,36 @@ class TestSilverMetadataBuilder:
         assert metadata.delta.table_path == "/data/silver/composite/publication"
         assert metadata.delta.rows_inserted == 2
         assert metadata.dq_summary.total_records == 2
+        assert metadata.dq_summary.warning_records == 1
+        assert metadata.dq_summary.error_records == 1
+        assert metadata.dq_summary.valid_records == 1
+        assert metadata.dq_summary.validation_passed is False
+        assert metadata.dq_summary.rule_provenance == [
+            {
+                "rule_id": "composite.cross_validation.warning",
+                "contract_version": None,
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "warning",
+                "decision": "warn",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": None,
+                "record_count": "1",
+            },
+            {
+                "rule_id": "composite.cross_validation.quarantine",
+                "contract_version": None,
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "error",
+                "decision": "quarantine",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": None,
+                "record_count": "1",
+            },
+        ]
         assert metadata.output.record_count == 2
 
     def test_build_merged_metadata_with_transform_version(self) -> None:
@@ -177,8 +207,9 @@ class TestGoldMetadataBuilder:
                 "_source_providers": "['seed', 'openalex']",
                 "_enrichment_status": "{'openalex': 'ok'}",
                 "_lineage_created_at": "2026-01-01T10:00:00+00:00",
+                "_cv_warn": True,
             },
-            {"id": 2, "name": "test2"},
+            {"id": 2, "name": "test2", "_cv_error": True, "_cv_quarantine": True},
         ]
         metadata = builder.build_merged_metadata(
             table_path="/data/gold/composite/publication",
@@ -198,6 +229,36 @@ class TestGoldMetadataBuilder:
         assert metadata.output_ext.composite_run_id == "run-456"
         assert metadata.output_ext.source_providers == ["seed", "openalex"]
         assert metadata.output_ext.enrichment_status == {"openalex": "ok"}
+        assert metadata.dq_summary.warning_records == 1
+        assert metadata.dq_summary.error_records == 1
+        assert metadata.dq_summary.valid_records == 1
+        assert metadata.dq_summary.validation_passed is False
+        assert metadata.dq_summary.rule_provenance == [
+            {
+                "rule_id": "composite.cross_validation.warning",
+                "contract_version": None,
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "warning",
+                "decision": "warn",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": None,
+                "record_count": "1",
+            },
+            {
+                "rule_id": "composite.cross_validation.quarantine",
+                "contract_version": None,
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "error",
+                "decision": "quarantine",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": None,
+                "record_count": "1",
+            },
+        ]
 
     def test_build_merged_metadata_with_transform_steps(self) -> None:
         """Should use custom transform steps."""

@@ -9,6 +9,7 @@ Implements §5 of the quality scorecard plan.
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
 import importlib.util
 import json
 import shutil
@@ -146,17 +147,17 @@ def _resolve_quality_tool_command(module_name: str) -> list[str] | None:
     return None
 
 
-def test_ruff_error_count() -> None:
+def test_ruff_error_count(
+    cached_subprocess_run: Callable[..., subprocess.CompletedProcess[str]],
+) -> None:
     """Ruff linter error count must not exceed the ratchet budget."""
     max_ruff_errors = _resolve_coarse_budget("ruff_error_count")
     tool_cmd = _resolve_quality_tool_command("ruff")
     if tool_cmd is None:
         pytest.skip("ruff executable/runtime not found")
 
-    result = subprocess.run(
+    result = cached_subprocess_run(
         [*tool_cmd, "check", "src/bioetl/", "--output-format=json"],
-        capture_output=True,
-        text=True,
         timeout=120,
     )
 
@@ -181,7 +182,9 @@ def test_ruff_error_count() -> None:
 
 @pytest.mark.slow
 @pytest.mark.timeout(300)
-def test_mypy_error_count() -> None:
+def test_mypy_error_count(
+    cached_subprocess_run: Callable[..., subprocess.CompletedProcess[str]],
+) -> None:
     """mypy --strict error count must not exceed the ratchet budget.
 
     Marked as 'slow' because mypy subprocess takes ~160s.
@@ -193,15 +196,13 @@ def test_mypy_error_count() -> None:
     if tool_cmd is None:
         pytest.skip("mypy executable/runtime not found")
 
-    result = subprocess.run(
+    result = cached_subprocess_run(
         [
             *tool_cmd,
             "--strict",
             "src/bioetl/",
             "--no-error-summary",
         ],
-        capture_output=True,
-        text=True,
         timeout=300,
     )
 
@@ -235,35 +236,54 @@ class _SkipMarkerCounter:
                     break
 
 
+def _count_skip_markers(items: list[pytest.Item]) -> int:
+    """Count collect-time skip/skipif markers for already collected items."""
+    skipped = 0
+    for item in items:
+        for marker in item.iter_markers():
+            if marker.name in ("skip", "skipif"):
+                skipped += 1
+                break
+    return skipped
+
+
 @pytest.mark.timeout(120)
-def test_architecture_skip_count() -> None:
+def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
     """Architecture test skip count must not exceed the ratchet budget.
 
-    Uses collect-only mode to count skip markers without re-running all
-    architecture tests.  Only counts marker-based skips (@pytest.mark.skip,
-    @pytest.mark.skipif), not runtime pytest.skip() calls.
+    Uses already collected session items during a normal architecture test run.
+    Falls back to collect-only mode only when the session does not include
+    architecture items (for narrow targeted invocations).
     """
     max_architecture_skips = _resolve_coarse_budget("architecture_skip_count")
-    counter = _SkipMarkerCounter()
-    # Collect (but don't run) architecture tests to count skip markers.
-    pytest.main(
-        [
-            "tests/architecture/",
-            "--collect-only",
-            "-q",
-            "--ignore=tests/architecture/test_regression_metrics.py",
-            "-p",
-            "no:timeout",
-            "-p",
-            "no:xdist",
-            "--no-header",
-            "--override-ini=addopts=",
-        ],
-        plugins=[counter],
-    )
+    architecture_items = [
+        item
+        for item in request.session.items
+        if item.nodeid.replace("\\", "/").startswith("tests/architecture/")
+    ]
+    if len(architecture_items) >= 200:
+        skipped = _count_skip_markers(architecture_items)
+    else:
+        counter = _SkipMarkerCounter()
+        pytest.main(
+            [
+                "tests/architecture/",
+                "--collect-only",
+                "-q",
+                "--ignore=tests/architecture/test_regression_metrics.py",
+                "-p",
+                "no:timeout",
+                "-p",
+                "no:xdist",
+                "--no-header",
+                "--override-ini=addopts=",
+            ],
+            plugins=[counter],
+        )
+        skipped = counter.skipped
 
-    assert counter.skipped <= max_architecture_skips, (
-        f"architecture_skip_count={counter.skipped} exceeds budget {max_architecture_skips}"
+    assert skipped <= max_architecture_skips, (
+        f"architecture_skip_count={skipped} exceeds budget {max_architecture_skips}"
     )
 
 
@@ -492,6 +512,7 @@ GROUP_EDGE_LIMIT = 60
 GROUP_EDGE_TOTAL_BUDGET = 259  # ratchet: control-plane + config-governance baseline raised from 254
 
 _dep_map_module = None
+_dep_map_snapshot = None
 
 
 def _load_dep_map_module() -> Any | None:
@@ -520,8 +541,12 @@ def _load_dep_map_module() -> Any | None:
     return mod
 
 
-def test_dependency_map_violations_zero() -> None:
-    """Dependency map must have zero import-matrix violations."""
+def _load_dep_map_snapshot() -> Any:
+    """Load dependency snapshot once per test session."""
+    global _dep_map_snapshot
+    if _dep_map_snapshot is not None:
+        return _dep_map_snapshot
+
     mod = _load_dep_map_module()
     if mod is None:
         pytest.skip("Dependency map script not found")
@@ -530,7 +555,13 @@ def test_dependency_map_violations_zero() -> None:
     if not src_root.exists():
         pytest.skip("src/bioetl not found")
 
-    snapshot = mod.collect_dependency_snapshot(src_root)
+    _dep_map_snapshot = mod.collect_dependency_snapshot(src_root)
+    return _dep_map_snapshot
+
+
+def test_dependency_map_violations_zero() -> None:
+    """Dependency map must have zero import-matrix violations."""
+    snapshot = _load_dep_map_snapshot()
 
     assert len(snapshot.violations) == 0, (
         f"dependency_map_violations={len(snapshot.violations)} (target: 0)\n"
@@ -543,15 +574,7 @@ def test_dependency_map_violations_zero() -> None:
 
 def test_cross_layer_group_edges_budget() -> None:
     """Cross-layer group edges must not exceed the budget."""
-    mod = _load_dep_map_module()
-    if mod is None:
-        pytest.skip("Dependency map script not found")
-
-    src_root = Path("src/bioetl")
-    if not src_root.exists():
-        pytest.skip("src/bioetl not found")
-
-    snapshot = mod.collect_dependency_snapshot(src_root)
+    snapshot = _load_dep_map_snapshot()
     edge_count = len(snapshot.cross_layer_group_edges)
 
     assert edge_count <= GROUP_EDGE_LIMIT, (
@@ -561,15 +584,7 @@ def test_cross_layer_group_edges_budget() -> None:
 
 def test_cross_layer_group_edges_total_budget() -> None:
     """Total cross-layer group edges (full graph) must not exceed the budget."""
-    mod = _load_dep_map_module()
-    if mod is None:
-        pytest.skip("Dependency map script not found")
-
-    src_root = Path("src/bioetl")
-    if not src_root.exists():
-        pytest.skip("src/bioetl not found")
-
-    snapshot = mod.collect_dependency_snapshot(src_root)
+    snapshot = _load_dep_map_snapshot()
     total = snapshot.cross_layer_group_edges_total
 
     assert total <= GROUP_EDGE_TOTAL_BUDGET, (

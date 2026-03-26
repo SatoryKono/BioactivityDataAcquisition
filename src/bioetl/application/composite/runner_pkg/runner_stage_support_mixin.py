@@ -191,11 +191,16 @@ class _CompositeRunnerStageSupportMixin:
         seed_result: SeedResult,
     ) -> CompositeCheckpointState:
         """Record successful seed completion and persist checkpoint."""
-        completed_state = self._transition_state_with_fsm_log(
-            state.with_seed_completed(seed_result),
+        previous_state = state.state
+        completed_state = state.with_seed_completed(seed_result)
+        self._fsm.validate_fsm_transition(
+            previous_state,
             CompositePipelineState.SEED_COMPLETED,
+        )
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.SEED_COMPLETED,
             stage="seed_complete",
-            validate=False,
             records_extracted=seed_result.records_extracted,
             records_silver=seed_result.records_silver,
         )

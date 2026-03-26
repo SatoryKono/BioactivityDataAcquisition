@@ -16,6 +16,7 @@ ENV/
 
 # Testing
 .pytest_cache/
+.pytest-tmp/
 .hypothesis/
 .tox/
 .nox/

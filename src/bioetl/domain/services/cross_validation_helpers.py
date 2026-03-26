@@ -2,14 +2,32 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from bioetl.domain.types import JsonDict
-from bioetl.domain.types.validation_result import IssueCode, ValidationIssue, ValidationLayer, ValidationSeverity
+from bioetl.domain.types.validation_result import ValidationIssue
+from bioetl.domain.types.validation_severity import (
+    IssueCode,
+    ValidationLayer,
+    ValidationSeverity,
+)
+
+_SUPPORTED_RULE_TYPES = frozenset({"strict", "lenient", "warn", "custom"})
 
 
-def _has_blocking_issues(issues: list[ValidationIssue]) -> bool:
-    return any(issue.severity == ValidationSeverity.BLOCKER for issue in issues)
+def _create_issue(
+    code: IssueCode,
+    severity: ValidationSeverity,
+    message: str,
+    details: JsonDict | None = None,
+    location: str | None = None,
+) -> ValidationIssue:
+    return ValidationIssue(
+        code=code,
+        severity=severity,
+        layer=ValidationLayer.DEEP_PREFLIGHT,
+        message=message,
+        details=details or {},
+        location=location,
+    )
 
 
 def _validate_pairs(pairs: list[dict], source_names: list[str]) -> list[ValidationIssue]:
@@ -22,6 +40,7 @@ def _validate_pairs(pairs: list[dict], source_names: list[str]) -> list[Validati
                 {"pairs": pairs},
             )
         ]
+
     valid_sources = set(source_names)
     issues: list[ValidationIssue] = []
     for index, pair in enumerate(pairs):
@@ -34,41 +53,57 @@ def _validate_single_pair(
     index: int,
     valid_sources: set[str],
 ) -> list[ValidationIssue]:
-    if not isinstance(pair, dict):
-        return [
-            _create_issue(
-                IssueCode.CMP_PF_CV_003,
-                ValidationSeverity.BLOCKER,
-                f"Cross-validation pair {index} must be a dictionary",
-                {"pair": pair, "index": index},
-            )
-        ]
-    if len(pair) != 1:
-        return [
-            _create_issue(
-                IssueCode.CMP_PF_CV_004,
-                ValidationSeverity.BLOCKER,
-                f"Cross-validation pair {index} must have exactly one source mapping",
-                {"pair": pair, "index": index},
-            )
-        ]
+    shape_issue = _validate_pair_shape(pair, index)
+    if shape_issue is not None:
+        return [shape_issue]
+
     source_name, comparison_sources = next(iter(pair.items()))
+    normalized_sources, type_issue = _normalize_comparison_sources(
+        source_name=source_name,
+        comparison_sources=comparison_sources,
+    )
     issues = _validate_source_name(source_name, index, valid_sources)
-    normalized, type_issue = _normalize_comparison_sources(source_name, comparison_sources)
     if type_issue is not None:
         issues.append(type_issue)
-    if not normalized:
+        return issues
+
+    if not normalized_sources:
         issues.append(
             _create_issue(
-                IssueCode.CMP_PF_CV_005,
+                IssueCode.CMP_PF_CV_006,
                 ValidationSeverity.BLOCKER,
-                f"Cross-validation pair {index} has no valid comparison sources",
-                {"pair": pair, "index": index},
+                f"Comparison sources for '{source_name}' cannot be empty",
+                {"source_name": source_name, "comparison_sources": comparison_sources},
             )
         )
-    else:
-        issues.extend(_validate_comparison_sources(normalized, source_name))
+        return issues
+
+    issues.extend(
+        _validate_comparison_sources(
+            comparison_sources=normalized_sources,
+            source_name=source_name,
+            valid_sources=valid_sources,
+        )
+    )
     return issues
+
+
+def _validate_pair_shape(pair: object, index: int) -> ValidationIssue | None:
+    if not isinstance(pair, dict):
+        return _create_issue(
+            IssueCode.CMP_PF_CV_003,
+            ValidationSeverity.BLOCKER,
+            f"Cross-validation pair {index} must be a dictionary",
+            {"pair": pair, "index": index},
+        )
+    if len(pair) != 1:
+        return _create_issue(
+            IssueCode.CMP_PF_CV_004,
+            ValidationSeverity.BLOCKER,
+            f"Cross-validation pair {index} must have exactly one source mapping",
+            {"pair": pair, "index": index},
+        )
+    return None
 
 
 def _validate_source_name(
@@ -79,32 +114,48 @@ def _validate_source_name(
     if not isinstance(source_name, str):
         return [
             _create_issue(
-                IssueCode.CMP_PF_CV_001,
+                IssueCode.CMP_PF_CV_005,
                 ValidationSeverity.BLOCKER,
-                f"Cross-validation source name {index} must be a string",
+                f"Cross-validation source at index {index} must be a string",
                 {"source_name": source_name, "index": index},
             )
         ]
-    if source_name not in valid_sources:
-        return [
-            _create_issue(
-                IssueCode.CMP_PF_CV_007,
-                ValidationSeverity.BLOCKER,
-                f"Cross-validation source '{source_name}' not found in pipeline sources",
-                {"source_name": source_name, "available_sources": sorted(valid_sources), "pair_index": index},
-            )
-        ]
-    return []
+
+    if source_name in valid_sources:
+        return []
+
+    return [
+        _create_issue(
+            IssueCode.CMP_PF_CV_005,
+            ValidationSeverity.BLOCKER,
+            f"Cross-validation source '{source_name}' not found in pipeline sources",
+            {
+                "source_name": source_name,
+                "available_sources": sorted(valid_sources),
+                "pair_index": index,
+            },
+        )
+    ]
 
 
 def _normalize_comparison_sources(
+    *,
     source_name: object,
     comparison_sources: object,
 ) -> tuple[list[str], ValidationIssue | None]:
     if isinstance(comparison_sources, str):
         return [comparison_sources], None
+
     if isinstance(comparison_sources, list):
-        return [item for item in comparison_sources if isinstance(item, str)], None
+        if all(isinstance(item, str) for item in comparison_sources):
+            return comparison_sources, None
+        return [], _create_issue(
+            IssueCode.CMP_PF_CV_006,
+            ValidationSeverity.BLOCKER,
+            f"Comparison sources for '{source_name}' must contain only strings",
+            {"source_name": source_name, "comparison_sources": comparison_sources},
+        )
+
     return [], _create_issue(
         IssueCode.CMP_PF_CV_006,
         ValidationSeverity.BLOCKER,
@@ -114,20 +165,29 @@ def _normalize_comparison_sources(
 
 
 def _validate_comparison_sources(
+    *,
     comparison_sources: list[str],
     source_name: object,
+    valid_sources: set[str],
 ) -> list[ValidationIssue]:
     issues: list[ValidationIssue] = []
     for comparison_source in comparison_sources:
         if comparison_source == source_name:
-            issues.append(
-                _create_issue(
-                    IssueCode.CMP_PF_CV_008,
-                    ValidationSeverity.BLOCKER,
-                    f"Source '{source_name}' cannot compare against itself",
-                    {"source_name": source_name, "comparison_source": comparison_source},
-                )
+            continue
+        if comparison_source in valid_sources:
+            continue
+        issues.append(
+            _create_issue(
+                IssueCode.CMP_PF_CV_007,
+                ValidationSeverity.BLOCKER,
+                f"Comparison source '{comparison_source}' not found in pipeline sources",
+                {
+                    "comparison_source": comparison_source,
+                    "source_name": source_name,
+                    "available_sources": sorted(valid_sources),
+                },
             )
+        )
     return issues
 
 
@@ -135,12 +195,13 @@ def _validate_rules(rules: dict[str, str]) -> list[ValidationIssue]:
     if not rules:
         return [
             _create_issue(
-                IssueCode.CMP_PF_CV_009,
+                IssueCode.CMP_PF_CV_008,
                 ValidationSeverity.BLOCKER,
                 "Cross-validation rules cannot be empty",
                 {"rules": rules},
             )
         ]
+
     issues: list[ValidationIssue] = []
     for rule_name, rule_type in rules.items():
         issues.extend(_validate_single_rule(rule_name, rule_type))
@@ -148,43 +209,51 @@ def _validate_rules(rules: dict[str, str]) -> list[ValidationIssue]:
 
 
 def _validate_single_rule(rule_name: str, rule_type: object) -> list[ValidationIssue]:
-    if not isinstance(rule_name, str):
+    if not isinstance(rule_type, str):
         return [
             _create_issue(
-                IssueCode.CMP_PF_CV_010,
+                IssueCode.CMP_PF_CV_009,
                 ValidationSeverity.BLOCKER,
-                f"Rule name must be a string, got {type(rule_type).__name__}",
+                f"Rule '{rule_name}' must be a string type, got {type(rule_type).__name__}",
                 {"rule_name": rule_name, "rule_type": rule_type},
             )
         ]
-    if rule_type not in ("strict", "lenient", "custom"):
-        return [
-            _create_issue(
-                IssueCode.CMP_PF_CV_011,
-                ValidationSeverity.BLOCKER,
-                f"Rule '{rule_name}' has invalid type '{rule_type}'",
-                {"rule_name": rule_name, "rule_type": rule_type},
-            )
-        ]
-    return []
+
+    if rule_type in _SUPPORTED_RULE_TYPES:
+        return []
+
+    return [
+        _create_issue(
+            IssueCode.CMP_PF_CV_010,
+            ValidationSeverity.BLOCKER,
+            f"Unsupported cross-validation rule type '{rule_type}'",
+            {"rule_name": rule_name, "rule_type": rule_type},
+        )
+    ]
 
 
 def _append_threshold_issue(
+    *,
     issues: list[ValidationIssue],
-    value: Any,
+    value: object | None,
     code: IssueCode,
     label: str,
     field_name: str,
 ) -> None:
-    if value is not None and (not isinstance(value, (int, float)) or value < 0 or value > 1):
-        issues.append(
-            _create_issue(
-                code,
-                ValidationSeverity.BLOCKER,
-                f"{label} threshold must be a number between 0 and 1",
-                {field_name: value},
-            )
+    if _is_valid_threshold(value):
+        return
+    issues.append(
+        _create_issue(
+            code,
+            ValidationSeverity.BLOCKER,
+            f"{label} threshold must be between 0.0 and 1.0",
+            {field_name: value},
         )
+    )
+
+
+def _is_valid_threshold(value: object | None) -> bool:
+    return value is None or (isinstance(value, (int, float)) and 0 <= value <= 1)
 
 
 def _validate_coverage(
@@ -193,10 +262,12 @@ def _validate_coverage(
 ) -> list[ValidationIssue]:
     if not source_names:
         return []
+
     covered_sources = _collect_covered_sources(pairs)
     uncovered_sources = set(source_names) - covered_sources
     if not uncovered_sources:
         return []
+
     return [
         _create_issue(
             IssueCode.CMP_PF_CV_013,
@@ -214,35 +285,18 @@ def _validate_coverage(
 def _collect_covered_sources(pairs: list[dict]) -> set[str]:
     covered_sources: set[str] = set()
     for pair in pairs:
-        for source_name in pair.keys():
-            covered_sources.add(source_name)
+        if not isinstance(pair, dict):
+            continue
+        for source_name, comparison_sources in pair.items():
+            if isinstance(source_name, str):
+                covered_sources.add(source_name)
+            covered_sources.update(_comparison_source_list(comparison_sources))
     return covered_sources
 
 
-def _sources_from_pair(pair: object) -> set[str]:
-    if isinstance(pair, dict):
-        return set(pair.keys())
-    return set()
-
-
 def _comparison_source_list(comparison_sources: object) -> list[str]:
-    if isinstance(comparison_sources, list):
-        return [str(item) for item in comparison_sources if isinstance(item, str)]
     if isinstance(comparison_sources, str):
         return [comparison_sources]
+    if isinstance(comparison_sources, list):
+        return [item for item in comparison_sources if isinstance(item, str)]
     return []
-
-
-def _create_issue(
-    code: IssueCode,
-    severity: ValidationSeverity,
-    message: str,
-    context: JsonDict,
-) -> ValidationIssue:
-    return ValidationIssue(
-        code=code,
-        severity=severity,
-        message=message,
-        details=context,
-        layer=ValidationLayer.DEEP_PREFLIGHT,
-    )

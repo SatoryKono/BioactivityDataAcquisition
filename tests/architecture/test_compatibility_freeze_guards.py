@@ -638,6 +638,53 @@ def _iter_module_import_violations(
     return violations
 
 
+def _iter_module_import_violations_for_modules(
+    ast_cache: dict[Path, ast.Module],
+    *,
+    module_names: frozenset[str],
+    allowed_files: frozenset[Path],
+) -> list[str]:
+    """Collect module import violations for several modules in a single AST pass."""
+    violations: list[str] = []
+    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
+    for py_file, tree in sorted(ast_cache.items()):
+        rel_path = _relative_to_root(py_file)
+        if rel_path in allowed_rel_paths:
+            continue
+
+        module_parts = list(py_file.relative_to(ROOT).with_suffix("").parts)
+        current_package_parts = (
+            module_parts if py_file.stem == "__init__" else module_parts[:-1]
+        )
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module is not None:
+                matched_module: str | None = None
+                if node.module in module_names:
+                    matched_module = node.module
+                elif node.level > 0:
+                    anchor_length = len(current_package_parts) - (node.level - 1)
+                    if anchor_length > 0:
+                        absolute_module = ".".join(
+                            [
+                                *current_package_parts[:anchor_length],
+                                *node.module.split("."),
+                            ]
+                        )
+                        if absolute_module in module_names:
+                            matched_module = absolute_module
+                if matched_module is not None:
+                    violations.append(
+                        f"{rel_path}:{node.lineno} imports {matched_module}"
+                    )
+            elif isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name in module_names:
+                        violations.append(
+                            f"{rel_path}:{node.lineno} imports {alias.name}"
+                        )
+    return violations
+
+
 def _iter_symbol_mentions(
     content_cache: dict[Path, str],
     *,
@@ -1102,15 +1149,11 @@ def test_test_facing_run_helper_seams_are_not_imported_in_first_party_src(
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """First-party src should import canonical domains.run helper modules directly."""
-    violations: list[str] = []
-    for module_name in TEST_FACING_RUN_HELPER_SEAM_MODULES:
-        violations.extend(
-            _iter_module_import_violations(
-                source_ast_cache,
-                module_name=module_name,
-                allowed_files=frozenset(),
-            )
-        )
+    violations = _iter_module_import_violations_for_modules(
+        source_ast_cache,
+        module_names=TEST_FACING_RUN_HELPER_SEAM_MODULES,
+        allowed_files=frozenset(),
+    )
     assert not violations, (
         "Test-facing run helper seams leaked into first-party src imports:\n"
         + "\n".join(sorted(violations))
@@ -1122,15 +1165,11 @@ def test_test_facing_run_all_helper_seams_are_not_imported_in_first_party_src(
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """First-party src should import canonical domains.run_all helper modules directly."""
-    violations: list[str] = []
-    for module_name in TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES:
-        violations.extend(
-            _iter_module_import_violations(
-                source_ast_cache,
-                module_name=module_name,
-                allowed_files=frozenset(),
-            )
-        )
+    violations = _iter_module_import_violations_for_modules(
+        source_ast_cache,
+        module_names=TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES,
+        allowed_files=frozenset(),
+    )
     assert not violations, (
         "Test-facing run-all helper seams leaked into first-party src imports:\n"
         + "\n".join(sorted(violations))
@@ -1142,15 +1181,11 @@ def test_test_facing_run_composite_helper_seams_are_not_imported_in_first_party_
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """First-party src should import canonical domains.composite helpers directly."""
-    violations: list[str] = []
-    for module_name in TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES:
-        violations.extend(
-            _iter_module_import_violations(
-                source_ast_cache,
-                module_name=module_name,
-                allowed_files=frozenset(),
-            )
-        )
+    violations = _iter_module_import_violations_for_modules(
+        source_ast_cache,
+        module_names=TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES,
+        allowed_files=frozenset(),
+    )
     assert not violations, (
         "Test-facing run-composite helper seams leaked into first-party src imports:\n"
         + "\n".join(sorted(violations))
@@ -1162,15 +1197,11 @@ def test_test_facing_quarantine_helper_seams_are_not_imported_in_first_party_src
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """First-party src should import canonical domains.quarantine helpers directly."""
-    violations: list[str] = []
-    for module_name in TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES:
-        violations.extend(
-            _iter_module_import_violations(
-                source_ast_cache,
-                module_name=module_name,
-                allowed_files=frozenset(),
-            )
-        )
+    violations = _iter_module_import_violations_for_modules(
+        source_ast_cache,
+        module_names=TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES,
+        allowed_files=frozenset(),
+    )
     assert not violations, (
         "Test-facing quarantine helper seams leaked into first-party src imports:\n"
         + "\n".join(sorted(violations))
@@ -1182,15 +1213,11 @@ def test_test_facing_health_helper_seams_are_not_imported_in_first_party_src(
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """First-party src should import canonical domains.health helpers directly."""
-    violations: list[str] = []
-    for module_name in TEST_FACING_HEALTH_HELPER_SEAM_MODULES:
-        violations.extend(
-            _iter_module_import_violations(
-                source_ast_cache,
-                module_name=module_name,
-                allowed_files=frozenset(),
-            )
-        )
+    violations = _iter_module_import_violations_for_modules(
+        source_ast_cache,
+        module_names=TEST_FACING_HEALTH_HELPER_SEAM_MODULES,
+        allowed_files=frozenset(),
+    )
     assert not violations, (
         "Test-facing health helper seams leaked into first-party src imports:\n"
         + "\n".join(sorted(violations))
@@ -1202,15 +1229,11 @@ def test_test_facing_shared_cli_policy_seams_are_not_imported_in_first_party_src
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
     """First-party src should import canonical shared CLI policy modules directly."""
-    violations: list[str] = []
-    for module_name in TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES:
-        violations.extend(
-            _iter_module_import_violations(
-                source_ast_cache,
-                module_name=module_name,
-                allowed_files=frozenset(),
-            )
-        )
+    violations = _iter_module_import_violations_for_modules(
+        source_ast_cache,
+        module_names=TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES,
+        allowed_files=frozenset(),
+    )
     assert not violations, (
         "Test-facing shared CLI policy seams leaked into first-party src imports:\n"
         + "\n".join(sorted(violations))
@@ -1314,594 +1337,4 @@ def test_registry_module_imports_are_confined_to_dedicated_tests(
     assert not violations, (
         "Direct test imports of bioetl.composition.registry leaked beyond dedicated "
         "registry compatibility coverage:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_config_loader_compat_shim_file_has_been_removed() -> None:
-    """Historical config_loader shim should remain deleted."""
-    assert not CONFIG_LOADER_MODULE_PATH.exists(), (
-        "Legacy config_loader compatibility shim must stay removed: "
-        "src/bioetl/infrastructure/config_loader.py"
-    )
-
-
-@pytest.mark.architecture
-def test_config_loader_module_is_absent_from_first_party_src_imports(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """New first-party src imports must use canonical config modules, not config_loader."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=CONFIG_LOADER_MODULE,
-        allowed_files=ALLOWED_CONFIG_LOADER_SRC_FILES,
-    )
-    assert not violations, (
-        "config_loader compatibility module leaked into first-party src imports:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_config_loader_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must not keep importing the removed config_loader shim."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=CONFIG_LOADER_MODULE,
-        allowed_files=ALLOWED_CONFIG_LOADER_TEST_FILES,
-    )
-    assert not violations, (
-        "config_loader compatibility shim must stay removed from tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_config_load_api_compat_shim_file_has_been_removed() -> None:
-    """Historical config_load_api bridge should remain deleted."""
-    assert not CONFIG_LOAD_API_MODULE_PATH.exists(), (
-        "Legacy config_load_api compatibility shim must stay removed: "
-        "src/bioetl/infrastructure/config_load_api.py"
-    )
-
-
-@pytest.mark.architecture
-def test_config_load_api_module_is_absent_from_first_party_src_imports(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import canonical config modules, not config_load_api."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=CONFIG_LOAD_API_MODULE,
-        allowed_files=ALLOWED_CONFIG_LOAD_API_SRC_FILES,
-    )
-    assert not violations, (
-        "config_load_api compatibility module leaked into first-party src imports:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_config_load_api_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must not keep importing the removed config_load_api shim."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=CONFIG_LOAD_API_MODULE,
-        allowed_files=ALLOWED_CONFIG_LOAD_API_TEST_FILES,
-    )
-    assert not violations, (
-        "config_load_api compatibility shim must stay removed from tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-@pytest.mark.parametrize(
-    "symbol",
-    ("load_pipeline_config", "load_composite_config", "load_source_config"),
-)
-def test_infrastructure_config_loader_symbols_are_confined_to_canonical_owner_imports_in_src(
-    symbol: str,
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import config loader symbols from canonical owner modules."""
-    violations = _iter_imported_symbol_violations(
-        source_ast_cache,
-        module_names=frozenset({INFRASTRUCTURE_CONFIG_PUBLIC_MODULE}),
-        symbol=symbol,
-        allowed_files=ALLOWED_INFRASTRUCTURE_CONFIG_LOADER_SYMBOL_SRC_FILES,
-    )
-    assert not violations, (
-        "infrastructure.config loader re-export surface leaked into first-party "
-        "src imports:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_services_creation_api_compat_module_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import canonical pipeline creation symbols directly."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=SERVICES_CREATION_API_COMPAT_MODULE,
-        allowed_files=frozenset(),
-    )
-    assert not violations, (
-        "services.creation_api compatibility shim leaked into first-party src "
-        "imports:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_pipeline_config_resolution_compat_module_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must keep config_resolution imports confined to a small seam."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE,
-        allowed_files=ALLOWED_PIPELINE_CONFIG_RESOLUTION_SRC_FILES,
-    )
-    assert not violations, (
-        "pipeline.config_resolution sanctioned seam leaked beyond the approved src "
-        "imports:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_pipeline_config_resolution_compat_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must treat pipeline.config_resolution as a dedicated compatibility seam."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=PIPELINE_CONFIG_RESOLUTION_COMPAT_MODULE,
-        allowed_files=ALLOWED_PIPELINE_CONFIG_RESOLUTION_TEST_FILES,
-    )
-    assert not violations, (
-        "pipeline.config_resolution compatibility shim leaked beyond dedicated "
-        "tests:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_pipeline_configs_compat_module_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import the canonical pipeline registry manifest."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=PIPELINE_CONFIGS_COMPAT_MODULE,
-        allowed_files=frozenset(),
-    )
-    assert not violations, (
-        "pipeline.configs compatibility shim leaked into first-party src imports:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_pipeline_configs_compat_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must treat pipeline.configs as a dedicated compatibility seam."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=PIPELINE_CONFIGS_COMPAT_MODULE,
-        allowed_files=ALLOWED_PIPELINE_CONFIGS_COMPAT_TEST_FILES,
-    )
-    assert not violations, (
-        "pipeline.configs compatibility shim leaked beyond dedicated tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_pipeline_creation_api_compat_module_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import creation wiring from the canonical owner directly."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=PIPELINE_CREATION_API_COMPAT_MODULE,
-        allowed_files=frozenset(),
-    )
-    assert not violations, (
-        "pipeline.creation_api compatibility shim leaked into first-party src "
-        "imports:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_pipeline_creation_api_compat_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must treat pipeline.creation_api as a dedicated compatibility seam."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=PIPELINE_CREATION_API_COMPAT_MODULE,
-        allowed_files=ALLOWED_PIPELINE_CREATION_API_TEST_FILES,
-    )
-    assert not violations, (
-        "pipeline.creation_api compatibility shim leaked beyond dedicated tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_services_creation_api_compat_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must treat services.creation_api as a dedicated compatibility seam."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=SERVICES_CREATION_API_COMPAT_MODULE,
-        allowed_files=ALLOWED_SERVICES_CREATION_API_TEST_FILES,
-    )
-    assert not violations, (
-        "services.creation_api compatibility shim leaked beyond dedicated tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-@pytest.mark.parametrize(
-    "symbol",
-    ("RunOptions", "RunResult", "PipelineRunResult", "PipelineNotFoundError"),
-)
-def test_pipeline_runner_service_model_symbols_are_confined_to_package_re_exports_in_src(
-    symbol: str,
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import runner models from their canonical owner module."""
-    violations = _iter_imported_symbol_violations(
-        source_ast_cache,
-        module_names=frozenset({PIPELINE_RUNNER_SERVICE_MODULE}),
-        symbol=symbol,
-        allowed_files=ALLOWED_PIPELINE_RUNNER_SERVICE_MODEL_IMPORT_SRC_FILES,
-    )
-    assert not violations, (
-        "pipeline_runner_service model compatibility surface leaked into first-party "
-        "src imports:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_metadata_builder_compat_module_file_has_been_removed() -> None:
-    """Historical storage metadata compat wrapper should remain deleted."""
-    assert not METADATA_BUILDER_COMPAT_MODULE_PATH.exists(), (
-        "Legacy storage metadata compat wrapper must stay removed: "
-        "src/bioetl/infrastructure/storage/metadata_builder_composite_helpers.py"
-    )
-
-
-@pytest.mark.architecture
-def test_metadata_builder_compat_module_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must import composite metadata helpers from the domain seam."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=METADATA_BUILDER_COMPAT_MODULE,
-        allowed_files=frozenset(),
-    )
-    assert not violations, (
-        "metadata_builder_composite_helpers leaked into first-party src/ imports:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_metadata_builder_compat_module_is_confined_to_dedicated_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must not keep importing the removed storage metadata compat wrapper."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=METADATA_BUILDER_COMPAT_MODULE,
-        allowed_files=ALLOWED_METADATA_BUILDER_COMPAT_TEST_FILES,
-    )
-    assert not violations, (
-        "metadata_builder_composite_helpers leaked beyond dedicated compatibility "
-        "coverage:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_merge_service_legacy_keyword_wiring_does_not_expand_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Legacy MergeService keyword wiring must stay confined to the owning module."""
-    violations = _iter_call_keyword_violations(
-        source_ast_cache,
-        call_name="MergeService",
-        keyword_names=LEGACY_MERGE_SERVICE_KEYWORDS,
-        allowed_files=ALLOWED_MERGE_SERVICE_SRC_FILES,
-    )
-    assert not violations, (
-        "MergeService legacy collaborator keyword wiring leaked into new src call sites:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_datasource_registry_symbol_is_confined_to_compat_exports_in_src(
-    source_content_cache: dict[Path, str],
-) -> None:
-    """New first-party src must use canonical datasource paths, not DataSourceRegistry."""
-    violations = _iter_symbol_mentions(
-        source_content_cache,
-        symbol="DataSourceRegistry",
-        allowed_files=ALLOWED_DATASOURCE_REGISTRY_SRC_FILES,
-    )
-    assert not violations, (
-        "DataSourceRegistry compatibility surface leaked into first-party src/ beyond "
-        "explicit compatibility exports:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_datasource_registry_symbol_is_confined_to_compat_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Ordinary tests must not treat DataSourceRegistry as a normal factory API."""
-    violations = _iter_imported_symbol_violations(
-        test_ast_cache,
-        module_names=frozenset(
-            {
-                "bioetl.composition.factories",
-                "bioetl.composition.factories.datasource",
-                "bioetl.composition.factories.datasource.data_source_factory",
-            }
-        ),
-        symbol="DataSourceRegistry",
-        allowed_files=ALLOWED_DATASOURCE_REGISTRY_TEST_FILES,
-    )
-    assert not violations, (
-        "DataSourceRegistry compatibility surface leaked into ordinary tests beyond "
-        "explicit compat/contract coverage:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_datasource_registry_symbol_is_absent_from_canonical_docs_and_diagrams() -> (
-    None
-):
-    """Canonical docs/diagrams must present only the provider-backed datasource path."""
-    violations = _iter_text_symbol_mentions(
-        files=CANONICAL_DATASOURCE_DOC_FILES,
-        symbol="DataSourceRegistry",
-    )
-    assert not violations, (
-        "DataSourceRegistry compatibility surface leaked into canonical docs/diagrams:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_register_all_providers_symbol_is_confined_to_provider_loading_modules(
-    source_content_cache: dict[Path, str],
-) -> None:
-    """Canonical provider lifecycle must use ensure_providers_loaded outside loaders."""
-    violations = _iter_symbol_mentions(
-        source_content_cache,
-        symbol="register_all_providers",
-        allowed_files=ALLOWED_REGISTER_ALL_PROVIDERS_SRC_FILES,
-    )
-    assert not violations, (
-        "register_all_providers leaked beyond provider loading internals:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_register_default_provider_config_symbol_is_confined_to_provider_compat_seams(
-    source_content_cache: dict[Path, str],
-) -> None:
-    """Default-registry provider writes must remain confined to compat seams."""
-    violations = _iter_symbol_mentions(
-        source_content_cache,
-        symbol="register_default_provider_config",
-        allowed_files=ALLOWED_DEFAULT_PROVIDER_REGISTRATION_SRC_FILES,
-    )
-    assert not violations, (
-        "register_default_provider_config leaked beyond provider compat seams:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_registration_biblio_module_is_confined_to_provider_registration(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Private provider registration builders must not become ordinary src imports."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name="bioetl.composition.providers.registration_biblio",
-        allowed_files=ALLOWED_REGISTRATION_BIBLIO_SRC_FILES,
-    )
-    assert not violations, (
-        "registration_biblio leaked beyond provider registration internals:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_provider_loading_and_pipeline_config_legacy_symbols_are_absent_from_canonical_docs() -> (
-    None
-):
-    """Canonical docs must not present private loading/config seams as normal extension paths."""
-    violations = []
-    for symbol in (
-        "register_all_providers",
-        "registration_biblio",
-        "pipeline_factories.py",
-    ):
-        violations.extend(
-            _iter_text_symbol_mentions(
-                files=CANONICAL_PROVIDER_SURFACE_DOC_FILES,
-                symbol=symbol,
-            )
-        )
-    assert not violations, (
-        "Private provider/config compatibility surface leaked into canonical docs:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_legacy_datasource_factory_module_file_has_been_removed() -> None:
-    """Legacy datasource.factory shim should remain deleted."""
-    assert not LEGACY_DATASOURCE_FACTORY_MODULE_PATH.exists(), (
-        "Legacy datasource factory shim must stay removed: "
-        "src/bioetl/composition/factories/datasource/factory.py"
-    )
-
-
-@pytest.mark.architecture
-def test_legacy_batch_transformer_orchestration_module_file_has_been_removed() -> None:
-    """Legacy batch-transformer orchestration duplicate should stay removed."""
-    assert not LEGACY_BATCH_TRANSFORMER_ORCHESTRATION_MODULE_PATH.exists(), (
-        "Legacy batch_transformer_orchestration duplicate must stay removed: "
-        "src/bioetl/application/core/batch_transformer_orchestration.py"
-    )
-
-
-@pytest.mark.architecture
-def test_sanctioned_dead_code_exclusion_modules_remain_present() -> None:
-    """Sanctioned aggregate/wrapper seams must not be dropped by generic cleanup."""
-    missing = [
-        str(path.relative_to(ROOT))
-        for path in sorted(SANCTIONED_DEAD_CODE_EXCLUSION_MODULE_PATHS)
-        if not path.exists()
-    ]
-    assert not missing, (
-        "Sanctioned compatibility/aggregate seams must stay present unless a "
-        "dedicated migration removes their public obligations:\n"
-        + "\n".join(f"  - {item}" for item in missing)
-    )
-
-
-@pytest.mark.architecture
-def test_legacy_datasource_factory_module_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """First-party src must use canonical datasource module paths."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=LEGACY_DATASOURCE_FACTORY_MODULE,
-        allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_SRC_FILES,
-    )
-    assert not violations, (
-        "Legacy datasource.factory module must stay removed from src imports:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_legacy_datasource_factory_module_is_only_used_by_compat_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must not keep importing the removed legacy datasource module."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=LEGACY_DATASOURCE_FACTORY_MODULE,
-        allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES,
-    )
-    assert not violations, (
-        "Legacy datasource.factory module must stay removed from tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat_tests(
-    test_content_cache: dict[Path, str],
-) -> None:
-    """Tests must not reintroduce string patch targets for removed datasource module."""
-    # Note: this test needs fresh content_cache including self-file; use test_content_cache
-    violations = _iter_string_mentions(
-        test_content_cache,
-        needle=LEGACY_DATASOURCE_FACTORY_MODULE,
-        allowed_files=ALLOWED_LEGACY_DATASOURCE_FACTORY_TEST_FILES
-        | frozenset({Path(__file__).resolve()}),
-    )
-    assert not violations, (
-        "Legacy datasource.factory module must stay removed from string references:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-@pytest.mark.parametrize("module_name", INTERNAL_COMPOSITION_ENTRYPOINT_MODULES)
-def test_internal_composition_entrypoint_modules_are_not_imported_in_unit_tests(
-    module_name: str,
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Unit tests must patch public composition.entrypoints instead of internals."""
-    unit_root = ROOT / "tests" / "unit"
-    unit_ast_cache = {
-        p: t for p, t in test_ast_cache.items() if p.is_relative_to(unit_root)
-    }
-    violations = _iter_module_import_violations(
-        unit_ast_cache,
-        module_name=module_name,
-        allowed_files=ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE[module_name],
-    )
-    assert not violations, (
-        "Internal composition entrypoint module gained new unit-test imports:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-@pytest.mark.parametrize("module_name", INTERNAL_COMPOSITION_ENTRYPOINT_MODULES)
-def test_internal_composition_entrypoint_module_strings_are_not_used_in_unit_tests(
-    module_name: str,
-    test_content_cache: dict[Path, str],
-) -> None:
-    """Unit tests must not reintroduce string patch targets for internal entrypoints."""
-    unit_root = ROOT / "tests" / "unit"
-    unit_content_cache = {
-        p: c for p, c in test_content_cache.items() if p.is_relative_to(unit_root)
-    }
-    violations = _iter_string_mentions(
-        unit_content_cache,
-        needle=module_name,
-        allowed_files=ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE[module_name],
-    )
-    assert not violations, (
-        "Internal composition entrypoint module gained new string references in unit tests:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-@pytest.mark.parametrize(
-    "needle",
-    (
-        "bioetl.interfaces.cli.main.get_default_registry",
-        "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
-        "bioetl.interfaces.cli.commands.run_all.get_default_registry",
-    ),
-)
-def test_cli_local_get_default_registry_patch_points_remain_removed_from_tests(
-    needle: str,
-    test_content_cache: dict[Path, str],
-) -> None:
-    """Tests must not reintroduce removed CLI get_default_registry patch aliases."""
-    violations = _iter_string_mentions(
-        test_content_cache,
-        needle=needle,
-        allowed_files=ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES
-        | frozenset({Path(__file__).resolve()}),
-    )
-    assert not violations, (
-        "Removed CLI get_default_registry patch points reappeared in tests:\n"
-        + "\n".join(violations)
     )

@@ -13,6 +13,7 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types.dq_contracts import DQDisposition
 
 
 class _InMemoryRunLedgerStore(RunLedgerPort):
@@ -194,3 +195,41 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
             "lineage_fragment_id": "silver:fragment-1",
         },
     }
+
+
+def test_record_dq_policy_applied_captures_trace_anchors() -> None:
+    run_id = RunID(uuid4())
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-5",
+    )
+
+    entry = service.record_dq_policy_applied(
+        stage="gold",
+        rule_id="gold.not_null.id",
+        disposition=DQDisposition.FAIL,
+        dq_report_path="/tmp/output/gold/chembl/activity/_dq.json",
+    )
+
+    assert entry.event_type == "dq_policy_applied"
+    assert entry.event_family == "dq"
+    assert entry.status == "failed"
+    assert entry.stage == "gold"
+    assert entry.details == {
+        "rule_id": "gold.not_null.id",
+        "disposition": "fail",
+        "dq_report_path": "/tmp/output/gold/chembl/activity/_dq.json",
+        "_diagnostic": {
+            "contract_version": "v1",
+            "event_type": "dq_policy_applied",
+            "event_family": "dq",
+            "manifest_id": "manifest-1",
+            "run_id": str(run_id),
+            "status": "failed",
+            "stage": "gold",
+        },
+    }
+    assert store.list_entries("manifest-1") == [entry]

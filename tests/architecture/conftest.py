@@ -9,10 +9,12 @@ source tree.  A single session-scoped parse pass (~1.5 s) replaces
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
 import hashlib
 import os
 from pathlib import Path
 import pickle
+import subprocess
 
 import pytest
 import yaml
@@ -344,3 +346,36 @@ def config_yaml_cache(
     """Parsed YAML payload of every config file."""
     cache_file = _cache_dir(project_root) / "config_yaml_cache.pkl"
     return _build_yaml_cache(config_text_cache, cache_file)
+
+
+@pytest.fixture(scope="session")
+def cached_subprocess_run() -> Callable[..., subprocess.CompletedProcess[str]]:
+    """Run subprocess commands once per unique command/timeout/cwd in session."""
+    cache: dict[
+        tuple[tuple[str, ...], float | None, str | None],
+        subprocess.CompletedProcess[str],
+    ] = {}
+
+    def _run(
+        command: list[str],
+        *,
+        timeout: float | None = None,
+        cwd: Path | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        key = (
+            tuple(command),
+            timeout,
+            str(cwd) if cwd is not None else None,
+        )
+        if key not in cache:
+            cache[key] = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=cwd,
+                check=False,
+            )
+        return cache[key]
+
+    return _run

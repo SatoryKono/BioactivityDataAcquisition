@@ -178,6 +178,7 @@ class CompositePipelineState(StrEnum):
 # Maps current state value -> set of allowed next state values
 # Note: seed_completed can go to dependencies_running OR enriching (if no dependencies)
 # Note: merging can go to cross_validation_running OR completed (if no cross-validation)
+# Note: any active state can transition to FAILED, including MERGING
 _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "not_started": frozenset({"seed_running"}),
     "seed_running": frozenset({"seed_completed", "failed"}),
@@ -186,7 +187,7 @@ _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "dependencies_completed": frozenset({"enriching"}),
     "enriching": frozenset({"enrichment_completed", "failed"}),
     "enrichment_completed": frozenset({"merging"}),
-    "merging": frozenset({"cross_validation_running", "completed"}),
+    "merging": frozenset({"cross_validation_running", "completed", "failed"}),
     "cross_validation_running": frozenset({"cross_validation_completed", "failed"}),
     "cross_validation_completed": frozenset({"completed"}),
     "completed": frozenset(),  # Terminal state
