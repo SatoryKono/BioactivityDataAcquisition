@@ -9,7 +9,7 @@ This package contains implementations of observability ports:
 Implements RULES.md §3 (Observability).
 
 For new code, prefer UnifiedLogger which enforces Log Schema (§3.2.1)
-with mandatory fields: ts, level, run_id, pipeline, stage.
+with mandatory fields: timestamp, level, run_id, pipeline, stage.
 
 This module intentionally keeps heavyweight adapters lazily loaded. Importing a
 light submodule such as ``circuit_breaker_mapping`` should not eagerly pull the

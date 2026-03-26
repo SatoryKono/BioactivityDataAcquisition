@@ -388,30 +388,36 @@ clean-all: clean ## Clean all (artifacts + logs + temp files)
 # Quarantine management (RULES.md §2.6)
 quarantine-inspect: ## Inspect quarantine errors (PIPELINE=...)
 	@echo "$(BLUE)Inspecting quarantine for $(PIPELINE)...$(NC)"
-	$(RUN) bioetl.interfaces.cli.quarantine inspect --pipeline $(PIPELINE)
+	$(RUN) bioetl quarantine inspect --pipeline $(PIPELINE)
 
 quarantine-replay: ## Replay quarantine records (PIPELINE=...)
 	@echo "$(BLUE)Replaying quarantine for $(PIPELINE)...$(NC)"
-	$(RUN) bioetl.interfaces.cli.quarantine replay --pipeline $(PIPELINE)
+	$(RUN) bioetl quarantine replay --pipeline $(PIPELINE)
 
 quarantine-purge: ## Purge quarantine (PIPELINE=...)
 	@echo "$(YELLOW)Purging quarantine for $(PIPELINE)...$(NC)"
-	$(RUN) bioetl.interfaces.cli.quarantine purge --pipeline $(PIPELINE)
+	$(RUN) bioetl quarantine purge --pipeline $(PIPELINE)
 
 # Lock management (RULES.md §3.3)
-release-lock: ## Release stuck lock (PIPELINE=...)
-	@echo "$(YELLOW)Releasing lock for $(PIPELINE)...$(NC)"
-	$(RUN) bioetl.interfaces.cli.lock release --pipeline $(PIPELINE)
+release-lock: ## Release lock for a known run-id (PIPELINE=..., RUN_ID=...)
+	@if [ -z "$(RUN_ID)" ]; then \
+		echo "$(YELLOW)RUN_ID is required. Use: make release-lock PIPELINE=<pipeline> RUN_ID=<uuid>$(NC)"; \
+		exit 2; \
+	fi
+	@echo "$(YELLOW)Releasing lock for $(PIPELINE) and run-id $(RUN_ID)...$(NC)"
+	$(RUN) bioetl lock release --pipeline $(PIPELINE) --run-id $(RUN_ID)
 
 # Disaster Recovery (RULES.md §5.5)
-dr-restore: ## Restore from backup (SCENARIO=..., DATE=...)
-	@echo "$(BLUE)Running DR restore: scenario=$(SCENARIO), date=$(DATE)$(NC)"
-	$(RUN) bioetl.interfaces.cli.dr restore --scenario $(SCENARIO) --date $(DATE)
+dr-restore: ## Unsupported placeholder; use DR runbook/manual restore steps
+	@echo "$(YELLOW)dr-restore is not available in the current Local-Only runtime.$(NC)"
+	@echo "$(YELLOW)Use the DR runbook/manual restore procedure; no 'bioetl dr restore' CLI command exists.$(NC)"
+	@exit 2
 
 # Rollback (RULES.md §7.2)
-rollback: ## Rollback to version (VERSION=...)
-	@echo "$(YELLOW)Rolling back to $(VERSION)...$(NC)"
-	$(RUN) bioetl.interfaces.cli.rollback --version $(VERSION)
+rollback: ## Unsupported placeholder; use platform-specific rollback procedure
+	@echo "$(YELLOW)rollback is not exposed as a BioETL CLI command in the current runtime.$(NC)"
+	@echo "$(YELLOW)Use the deployment/platform rollback procedure documented for your environment.$(NC)"
+	@exit 2
 
 # Development helpers
 dev-shell: ## Open Python shell with project context

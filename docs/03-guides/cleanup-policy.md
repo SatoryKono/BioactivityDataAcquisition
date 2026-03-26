@@ -107,7 +107,7 @@ This document defines deterministic cleanup rules and automation for removing ca
 | --------- | ------------------------------------ |
 | Retention | 30 дней (local retention policy)     |
 | Triage    | Еженедельно                          |
-| Purge     | `make quarantine-purge PIPELINE=...` |
+| Purge     | `bioetl quarantine purge --pipeline ...` |
 
 ### 3.5. Logs and Metrics
 
@@ -146,13 +146,13 @@ All whitelist patterns **MUST** be in `.gitignore`.
 
 ```bash
 # Inspect quarantine errors
-make quarantine-inspect PIPELINE=chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity
 
 # Replay corrected records
-make quarantine-replay PIPELINE=chembl_activity
+bioetl quarantine replay --pipeline chembl_activity
 
 # Purge old quarantine data
-make quarantine-purge PIPELINE=chembl_activity
+bioetl quarantine purge --pipeline chembl_activity
 ```
 
 ## 5. Verification (MUST)
@@ -204,13 +204,13 @@ make clean-local-artifacts PURGE_WORKTREES=1
 
 ```bash
 # Inspect specific pipeline
-make quarantine-inspect PIPELINE=chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity
 
 # Replay after fix
-make quarantine-replay PIPELINE=chembl_activity
+bioetl quarantine replay --pipeline chembl_activity
 
 # Purge old records
-make quarantine-purge PIPELINE=chembl_activity
+bioetl quarantine purge --pipeline chembl_activity
 ```
 
 ## 7. CI & Pre-commit
@@ -262,9 +262,9 @@ python3 scripts/repo/audit_root_cleanliness.py
 make clean-preflight DRY_RUN=1
 
 # 3. Quarantine triage for affected pipeline
-make quarantine-inspect PIPELINE=chembl_activity
-make quarantine-replay PIPELINE=chembl_activity
-make quarantine-purge PIPELINE=chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity
+bioetl quarantine replay --pipeline chembl_activity
+bioetl quarantine purge --pipeline chembl_activity
 ```
 
 ### 8.2. Checkpoint Cleanup

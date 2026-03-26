@@ -430,16 +430,7 @@ class TestMetricCardinalityGuards:
                 "contract_version",
             }
         )
-        legacy_run_id_allowlist = frozenset(
-            {
-                "INFRASTRUCTURE_VALIDATED",
-                "PREFLIGHT_CONFIG_ERRORS_TOTAL",
-                "PREFLIGHT_MEDALLION_POLICY_VALID",
-            }
-        )
-
         violations: list[str] = []
-        observed_legacy_symbols: set[str] = set()
         for symbol in metric_symbols:
             metric_obj = getattr(metrics_module, symbol, None)
             label_names = getattr(metric_obj, "_labelnames", None)
@@ -447,9 +438,6 @@ class TestMetricCardinalityGuards:
                 continue
             overlaps = sorted(forbidden.intersection(label_names))
             if not overlaps:
-                continue
-            if symbol in legacy_run_id_allowlist and overlaps == ["run_id"]:
-                observed_legacy_symbols.add(symbol)
                 continue
             if overlaps:
                 violations.append(
@@ -459,8 +447,4 @@ class TestMetricCardinalityGuards:
         assert not violations, (
             "Metrics must keep high-cardinality correlation anchors out of labels:\n"
             + "\n".join(f"  - {line}" for line in violations)
-        )
-        assert observed_legacy_symbols == set(legacy_run_id_allowlist), (
-            "Legacy run_id label allowlist changed unexpectedly; review label "
-            "cardinality policy and update this guard intentionally."
         )

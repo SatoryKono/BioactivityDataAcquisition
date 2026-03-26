@@ -1,7 +1,7 @@
 """Structured logging implementation for BioETL.
 
 Implements RULES.md §3.2 - Log Schema with mandatory fields:
-- ts: ISO timestamp
+- timestamp: ISO timestamp
 - level: log level
 - run_id: correlation ID (UUID)
 - pipeline: pipeline name

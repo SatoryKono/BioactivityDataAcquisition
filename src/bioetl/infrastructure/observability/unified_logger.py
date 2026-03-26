@@ -1,7 +1,7 @@
 """Unified structured logging with enforced Log Schema.
 
 Implements RULES.md §3.2.1 - Log Schema with mandatory fields:
-- ts: ISO timestamp (automatic via structlog)
+- timestamp: ISO timestamp (automatic via structlog)
 - level: log level (from method call)
 - run_id: correlation ID (MUST be provided at initialization)
 - pipeline: pipeline name (MUST be provided at initialization)
