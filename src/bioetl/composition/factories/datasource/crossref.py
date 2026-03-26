@@ -24,6 +24,79 @@ if TYPE_CHECKING:
 __all__ = ["create_crossref_adapter"]
 
 
+def _resolve_mailto(kwargs: dict[str, Any], settings: Settings | None) -> str:
+    mailto = kwargs.get("mailto")
+    if not mailto and settings:
+        mailto = getattr(settings, "default_email", None)
+    if not mailto:
+        raise ValueError(
+            "CrossRef adapter requires mailto. "
+            "Provide via 'mailto' kwarg or settings.default_email"
+        )
+    return str(mailto)
+
+
+def _resolve_components(
+    http_client: Any,
+    logger: Any,
+    mailto: str,
+    adapter_metrics: Any,
+    request_collector: Any,
+    search_paginator: Any,
+    kwargs: dict[str, Any],
+) -> tuple[Any, Any, Any, Any, Any]:
+    query_builder = kwargs.get("query_builder")
+    if query_builder is None:
+        query_builder = _create_default_crossref_query_builder(
+            api_base=CROSSREF_API_BASE,
+            mailto=mailto,
+        )
+
+    headers_fn = query_builder.build_headers
+
+    response_mapper = kwargs.get("response_mapper")
+    if response_mapper is None:
+        response_mapper = _create_default_crossref_response_mapper()
+
+    batch_fetcher = kwargs.get("batch_fetcher")
+    if batch_fetcher is None:
+        batch_fetcher = _create_default_crossref_batch_fetcher(
+            http=http_client,
+            logger=logger,
+            metrics=adapter_metrics,
+            mailto=mailto,
+            api_base=CROSSREF_API_BASE,
+            headers_fn=headers_fn,
+            request_collector=request_collector,
+        )
+
+    if search_paginator is None:
+        search_paginator = _create_default_crossref_search_paginator(
+            http=http_client,
+            logger=logger,
+            metrics=adapter_metrics,
+            mailto=mailto,
+            api_base=CROSSREF_API_BASE,
+            headers_fn=headers_fn,
+            request_collector=request_collector,
+        )
+
+    title_fallback_handler = kwargs.get("title_fallback_handler")
+    if title_fallback_handler is None:
+        title_fallback_handler = _create_default_crossref_title_fallback_handler(
+            logger=logger,
+            search_fn=search_paginator.search,
+        )
+
+    return (
+        query_builder,
+        response_mapper,
+        batch_fetcher,
+        search_paginator,
+        title_fallback_handler,
+    )
+
+
 def create_crossref_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
@@ -48,18 +121,12 @@ def create_crossref_adapter(
     Raises:
         ValueError: If mailto cannot be resolved or http_client/logger is None.
     """
-    mailto = kwargs.get("mailto")
-    if not mailto and settings:
-        mailto = getattr(settings, "default_email", None)
-    if not mailto:
-        raise ValueError(
-            "CrossRef adapter requires mailto. "
-            "Provide via 'mailto' kwarg or settings.default_email"
-        )
     if http_client is None:
         raise ValueError("CrossRef adapter requires http_client")
     if logger is None:
         raise ValueError("CrossRef adapter requires logger")
+
+    mailto = _resolve_mailto(kwargs, settings)
     metrics = kwargs.get("metrics")
     helper_services = AdapterHelpersFactory.create_http_helpers(
         provider="crossref",
@@ -76,44 +143,21 @@ def create_crossref_adapter(
         "fallback_fetch_service",
         helper_services.fallback_fetch_service,
     )
-    query_builder = kwargs.get("query_builder")
-    if query_builder is None:
-        query_builder = _create_default_crossref_query_builder(
-            api_base=CROSSREF_API_BASE,
-            mailto=mailto,
-        )
-    headers_fn = query_builder.build_headers
-    response_mapper = kwargs.get("response_mapper")
-    if response_mapper is None:
-        response_mapper = _create_default_crossref_response_mapper()
-    batch_fetcher = kwargs.get("batch_fetcher")
-    if batch_fetcher is None:
-        batch_fetcher = _create_default_crossref_batch_fetcher(
-            http=http_client,
-            logger=logger,
-            metrics=adapter_metrics,
-            mailto=mailto,
-            api_base=CROSSREF_API_BASE,
-            headers_fn=headers_fn,
-            request_collector=request_collector,
-        )
-    search_paginator = kwargs.get("search_paginator")
-    if search_paginator is None:
-        search_paginator = _create_default_crossref_search_paginator(
-            http=http_client,
-            logger=logger,
-            metrics=adapter_metrics,
-            mailto=mailto,
-            api_base=CROSSREF_API_BASE,
-            headers_fn=headers_fn,
-            request_collector=request_collector,
-        )
-    title_fallback_handler = kwargs.get("title_fallback_handler")
-    if title_fallback_handler is None:
-        title_fallback_handler = _create_default_crossref_title_fallback_handler(
-            logger=logger,
-            search_fn=search_paginator.search,
-        )
+    (
+        query_builder,
+        response_mapper,
+        batch_fetcher,
+        search_paginator,
+        title_fallback_handler,
+    ) = _resolve_components(
+        http_client,
+        logger,
+        mailto,
+        adapter_metrics,
+        request_collector,
+        kwargs.get("search_paginator"),
+        kwargs,
+    )
 
     return CrossRefAdapter(
         http_client=http_client,
