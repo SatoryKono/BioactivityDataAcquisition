@@ -20,11 +20,6 @@
 
 For repo-wide structural findings, calibrate against:
 
-- [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
 - [../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 
 Do not flag wide layers as refactor debt from package count alone. Prefer family-level hotspot findings backed by topology plus governance evidence.

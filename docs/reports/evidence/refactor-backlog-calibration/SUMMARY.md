@@ -5,9 +5,6 @@
 
 ## Интерпретация верхнего уровня
 
-- Формальная cross-pack интерпретация теперь находится в [03-synthesis/CROSS-SYNTHESIS.md](./03-synthesis/CROSS-SYNTHESIS.md).
-- Принятая planning-позиция теперь находится в [04-decisions/DECISIONS.yaml](./04-decisions/DECISIONS.yaml).
-- Активные planning-риски теперь находятся в [05-risks/RISKS.yaml](./05-risks/RISKS.yaml).
 
 ## Сводка evidence
 

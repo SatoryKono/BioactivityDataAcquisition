@@ -20,12 +20,6 @@
 
 Before opening repo-wide or layer-wide RF waves, consult:
 
-- [../../../reports/evidence/project-file-structure/SUMMARY.md](../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md](../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md](../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md](../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
 - [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md)
 - [../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md](../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 

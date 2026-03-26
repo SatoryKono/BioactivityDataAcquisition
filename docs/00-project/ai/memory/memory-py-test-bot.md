@@ -20,8 +20,6 @@
 
 For test recommendations that imply structural conclusions, consult:
 
-- [../../../reports/evidence/project-package-topology/SUMMARY.md](../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md](../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
 - [../../../reports/evidence/governance-signals/SUMMARY.md](../../../reports/evidence/governance-signals/SUMMARY.md)
 
 Do not infer that a broad layer needs reorganization from test spread alone. Prefer family-level calibration plus failing evidence.
