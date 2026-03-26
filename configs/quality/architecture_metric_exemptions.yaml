@@ -14,7 +14,23 @@ policy:
     - expires_on
     - removal_step
 registries:
-  file_size_limits: {}
+  file_size_limits:
+    src/bioetl/domain/observability_contract.py:
+      value: 450
+      owner: "@bioetl-architecture"
+      reason: "Observability contract still bundles tightly coupled payload helpers and constants; decomposition needs a dedicated contract-surface cleanup."
+      classification: "technical_debt"
+      linked_rf: "RF-023"
+      expires_on: "2026-06-30"
+      removal_step: "Split payload builders and constants into focused observability modules once the contract surface cleanup lands"
+    src/bioetl/composition/factories/pipeline/runner_assembly.py:
+      value: 360
+      owner: "@bioetl-platform"
+      reason: "Runner assembly still carries orchestration-era DI wiring that needs a dedicated extraction pass rather than a quick inline trim."
+      classification: "technical_debt"
+      linked_rf: "RF-023"
+      expires_on: "2026-06-30"
+      removal_step: "Extract runner wiring seams during the next composition bootstrap cleanup wave"
   function_complexity: {}
   function_length: {}
   class_size: {}

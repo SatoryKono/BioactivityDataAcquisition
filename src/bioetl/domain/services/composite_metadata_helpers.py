@@ -20,6 +20,7 @@ from bioetl.domain.models.metadata import (
     CompositeOutputExt,
     CompositeSchemaValidationMetadata,
 )
+from bioetl.domain.services.composite_metadata_cv import summarize_composite_cv_dq
 
 __all__ = [
     "extract_composite_lineage_metadata",
@@ -28,6 +29,7 @@ __all__ = [
     "parse_composite_list",
     "parse_composite_status",
     "parse_lineage_created_at",
+    "summarize_composite_cv_dq",
 ]
 
 

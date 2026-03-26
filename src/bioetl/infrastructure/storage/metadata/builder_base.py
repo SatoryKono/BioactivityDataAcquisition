@@ -8,6 +8,9 @@ from platform import python_version
 from typing import TYPE_CHECKING
 
 from bioetl import __version__ as BIOETL_VERSION
+from bioetl.domain.services.composite_metadata_helpers import (
+    summarize_composite_cv_dq,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -111,11 +114,30 @@ class _MetadataBuilderBase:
         """Build DQ summary for merged records."""
         from bioetl.domain.models.metadata import DQSummary
 
-        return DQSummary(
+        total_records = len(records)
+        dq_summary = DQSummary(
             total_records=len(records),
             valid_records=len(records),
             error_records=0,
             error_rate=0.0,
+        )
+        cv_summary = summarize_composite_cv_dq(records)
+        if not cv_summary["has_signal"]:
+            return dq_summary
+
+        error_records = int(cv_summary["error_records"])
+        warning_records = int(cv_summary["warning_records"])
+        return dq_summary.model_copy(
+            update={
+                "valid_records": max(total_records - error_records, 0),
+                "error_records": error_records,
+                "warning_records": warning_records,
+                "error_rate": (error_records / total_records)
+                if total_records
+                else 0.0,
+                "validation_passed": bool(cv_summary["validation_passed"]),
+                "rule_provenance": cv_summary["rule_provenance"],
+            }
         )
 
     @staticmethod

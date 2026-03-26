@@ -66,14 +66,28 @@ class _FakeRunManifestService:
                 "total_events": 1,
                 "latest_event_type": "run_finished",
                 "latest_status": "success",
+                "execution_fingerprint": "fingerprint-1",
+                "config_hash": "deadbeef",
+                "contract_ref": "chembl_activity",
+                "contract_version": "1.2.0",
+                "dq_policy_ref": "chembl_activity.gold",
+                "rule_bundle_version": "2026.03",
+                "effective_config_artifact_id": "eca-123",
+                "dq_contract_compatibility_hash": "compat-hash-1",
                 "event_family_counts": {"pipeline.lifecycle": 1},
+                "dq_rule_ids": ["gold.not_null.id"],
+                "dq_dispositions": ["fail"],
+                "dq_report_paths": ["/tmp/reports/gold_dq.json"],
                 "alert_signals": {
                     "run_failed": False,
                     "run_shutdown": False,
                     "artifact_linkage_gap": False,
                     "lineage_gap": False,
+                    "dq_signal_present": True,
                 },
-                "next_steps": ["No alert signals detected; continue routine monitoring."],
+                "next_steps": [
+                    "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation."
+                ],
             },
         )
 
@@ -137,6 +151,8 @@ class TestRunManifestCommands:
         assert payload["manifest"]["manifest_id"] == "manifest-1"
         assert payload["ledger_entries"][0]["event_type"] == "run_finished"
         assert payload["diagnostics"]["latest_status"] == "success"
+        assert payload["diagnostics"]["contract_version"] == "1.2.0"
+        assert payload["diagnostics"]["dq_rule_ids"] == ["gold.not_null.id"]
         assert "alert_signals" in payload["diagnostics"]
 
     def test_show_defaults_to_human_readable_text(
@@ -155,7 +171,14 @@ class TestRunManifestCommands:
         assert "Ledger" in result.output
         assert "Diagnostics" in result.output
         assert "latest_status: success" in result.output
-        assert "No alert signals detected; continue routine monitoring." in result.output
+        assert "contract_version: 1.2.0" in result.output
+        assert "dq_policy_ref: chembl_activity.gold" in result.output
+        assert "gold.not_null.id" in result.output
+        assert "/tmp/reports/gold_dq.json" in result.output
+        assert (
+            "Review DQ report artifacts, rule IDs, and contract policy anchors "
+            "before retry or escalation." in result.output
+        )
         assert "run_finished" in result.output
 
     def test_show_missing_manifest_prints_error(

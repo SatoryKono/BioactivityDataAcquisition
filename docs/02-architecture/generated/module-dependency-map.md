@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1329`
-- Internal import edges (raw): `5070`
+- Scanned modules: `1331`
+- Internal import edges (raw): `5084`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `259`
@@ -22,12 +22,12 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|628 OK| application
-    application -->|744 OK| domain
+    application -->|746 OK| domain
     composition -->|258 OK| application
-    composition -->|351 OK| composition
+    composition -->|352 OK| composition
     composition -->|268 OK| domain
     composition -->|236 OK| infrastructure
-    domain -->|768 OK| domain
+    domain -->|779 OK| domain
     infrastructure -->|620 OK| domain
     infrastructure -->|770 OK| infrastructure
     interfaces -->|48 OK| application
@@ -41,12 +41,12 @@ flowchart LR
 | From | To | Imports | Policy |
 |---|---|---:|---|
 | `application` | `application` | 628 | allowed |
-| `application` | `domain` | 744 | allowed |
+| `application` | `domain` | 746 | allowed |
 | `composition` | `application` | 258 | allowed |
-| `composition` | `composition` | 351 | allowed |
+| `composition` | `composition` | 352 | allowed |
 | `composition` | `domain` | 268 | allowed |
 | `composition` | `infrastructure` | 236 | allowed |
-| `domain` | `domain` | 768 | allowed |
+| `domain` | `domain` | 779 | allowed |
 | `infrastructure` | `domain` | 620 | allowed |
 | `infrastructure` | `infrastructure` | 770 | allowed |
 | `interfaces` | `application` | 48 | allowed |
@@ -71,9 +71,9 @@ flowchart LR
 | `infrastructure.storage` | `domain.ports` | 47 |
 | `infrastructure.storage` | `domain.types` | 44 |
 | `application.services` | `domain.ports` | 40 |
+| `application.services` | `domain.types` | 35 |
 | `composition.factories` | `infrastructure.storage` | 35 |
 | `interfaces.cli` | `application.services` | 35 |
-| `application.services` | `domain.types` | 34 |
 | `infrastructure.adapters` | `domain.exceptions` | 34 |
 | `composition.bootstrap` | `domain.ports` | 31 |
 | `composition.bootstrap` | `infrastructure.config` | 31 |

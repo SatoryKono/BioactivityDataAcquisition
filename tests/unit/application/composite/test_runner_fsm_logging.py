@@ -300,6 +300,11 @@ class TestFSMTransitionLogging:
         assert len(seed_completed_calls) >= 1, (
             "Should log FSM transition to SEED_COMPLETED"
         )
+        assert any(
+            c.kwargs.get("from_state") == "seed_running"
+            and c.kwargs.get("to_state") == "seed_completed"
+            for c in seed_completed_calls
+        ), "Seed completion transition should be logged as seed_running -> seed_completed"
 
     @pytest.mark.asyncio
     async def test_logs_fsm_transition_to_enriching(self, runner, mock_logger) -> None:

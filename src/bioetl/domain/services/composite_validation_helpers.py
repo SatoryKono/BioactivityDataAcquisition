@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Any
-
+from bioetl.domain.services.aggregation_validator import AggregationConfig
+from bioetl.domain.services.cross_validation_validator import CrossValidationConfig
 from bioetl.domain.types import JsonDict
-from bioetl.domain.types.validation_result import IssueCode, ValidationIssue, ValidationLayer, ValidationSeverity
+from bioetl.domain.types.validation_result import ValidationIssue
+from bioetl.domain.types.validation_severity import (
+    IssueCode,
+    ValidationLayer,
+    ValidationSeverity,
+)
 
 
 def _append_config_issue_if_invalid(
+    *,
     issues: list[ValidationIssue],
     is_valid: bool,
     code: IssueCode,
@@ -16,16 +22,17 @@ def _append_config_issue_if_invalid(
     message: str,
     details: JsonDict | None = None,
 ) -> None:
-    if not is_valid:
-        issues.append(
-            ValidationIssue(
-                code=code,
-                severity=severity,
-                layer=ValidationLayer.DEEP_PREFLIGHT,
-                message=message,
-                details=details or {},
-            )
+    if is_valid:
+        return
+    issues.append(
+        ValidationIssue(
+            code=code,
+            severity=severity,
+            layer=ValidationLayer.DEEP_PREFLIGHT,
+            message=message,
+            details=details or {},
         )
+    )
 
 
 def _create_issue(
@@ -53,8 +60,7 @@ def _get_layer_for_code(code: IssueCode) -> ValidationLayer:
     return ValidationLayer.RUNTIME_GUARD
 
 
-def _convert_to_aggregation_config(config: JsonDict) -> "AggregationConfig":
-    from bioetl.domain.services.aggregation_validator import AggregationConfig
+def _convert_to_aggregation_config(config: JsonDict) -> AggregationConfig:
     return AggregationConfig(
         group_by=config.get("group_by", []),
         aggregations=config.get("aggregations", {}),
@@ -63,8 +69,7 @@ def _convert_to_aggregation_config(config: JsonDict) -> "AggregationConfig":
     )
 
 
-def _convert_to_cross_validation_config(config: JsonDict) -> "CrossValidationConfig":
-    from bioetl.domain.services.cross_validation_validator import CrossValidationConfig
+def _convert_to_cross_validation_config(config: JsonDict) -> CrossValidationConfig:
     return CrossValidationConfig(
         pairs=config.get("pairs", []),
         rules=config.get("rules", {}),

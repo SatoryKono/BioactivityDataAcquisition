@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from bioetl.domain.services.composite_metadata_helpers import (
     extract_composite_lineage_metadata,
     parse_composite_field_sources,
+    summarize_composite_cv_dq,
 )
 
 
@@ -51,3 +52,61 @@ def test_extract_composite_lineage_metadata_parses_graph_relevant_fields() -> No
 def test_extract_composite_lineage_metadata_returns_none_for_plain_records() -> None:
     """Plain records should not produce composite lineage metadata."""
     assert extract_composite_lineage_metadata([{"id": 1}], composite_name="plain") is None
+
+
+def test_summarize_composite_cv_dq_returns_counts_and_provenance() -> None:
+    """Composite CV markers should map to stable DQ semantics."""
+    summary = summarize_composite_cv_dq(
+        [
+            {"id": 1, "_cv_warn": True, "_cv_error": False, "_cv_quarantine": False},
+            {"id": 2, "_cv_warn": False, "_cv_error": True, "_cv_quarantine": True},
+            {"id": 3, "_cv_warn": True, "_cv_error": True, "_cv_quarantine": False},
+        ],
+        contract_version="2.1.0",
+        report_artifact_path="reports/dq/composite.json",
+    )
+
+    assert summary["has_signal"] is True
+    assert summary["warning_records"] == 1
+    assert summary["error_records"] == 2
+    assert summary["quarantine_records"] == 1
+    assert summary["validation_passed"] is False
+    provenance = summary["rule_provenance"]
+    assert provenance == [
+        {
+            "rule_id": "composite.cross_validation.warning",
+            "contract_version": "2.1.0",
+            "config_path": "cross_validation",
+            "layer": "composite",
+            "field": None,
+            "severity": "warning",
+            "decision": "warn",
+            "violation_kind": "cross_validation_mismatch",
+            "report_artifact_path": "reports/dq/composite.json",
+            "record_count": "1",
+        },
+        {
+            "rule_id": "composite.cross_validation.nullify",
+            "contract_version": "2.1.0",
+            "config_path": "cross_validation",
+            "layer": "composite",
+            "field": None,
+            "severity": "error",
+            "decision": "skip",
+            "violation_kind": "cross_validation_mismatch",
+            "report_artifact_path": "reports/dq/composite.json",
+            "record_count": "1",
+        },
+        {
+            "rule_id": "composite.cross_validation.quarantine",
+            "contract_version": "2.1.0",
+            "config_path": "cross_validation",
+            "layer": "composite",
+            "field": None,
+            "severity": "error",
+            "decision": "quarantine",
+            "violation_kind": "cross_validation_mismatch",
+            "report_artifact_path": "reports/dq/composite.json",
+            "record_count": "1",
+        },
+    ]

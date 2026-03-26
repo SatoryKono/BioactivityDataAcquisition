@@ -138,6 +138,12 @@ compatibility facades, где mirror-path `test_<module>.py` был бы лож�
 # Запуск локального стабильного test suite (без E2E)
 make test
 
+# Быстрый локальный feedback loop
+make test-fast
+
+# Быстрый и стабильный coverage-run (parallel non-serial + serial pass)
+make test-cov-fast-stable
+
 # CI-подобный устойчивый прогон (parallel + fallback + serial pass)
 make test-ci
 
@@ -148,27 +154,30 @@ uv run python -m pytest tests/e2e/ -m e2e -v
 make test-architecture
 
 # Запуск с обновлением VCR кассет
-pytest --vcr-record=once tests/integration/
+uv run python -m pytest tests/integration/ --vcr-record=once -v
 
-# Проверка покрытия
-pytest --cov=src/bioetl tests/
+# Генерация HTML coverage report после coverage-run
+uv run coverage html -d htmlcov
 ```
 
 ### 4.1. Быстрый старт для рекомендуемого локального прогона
 
-| Шаг | Команда                     | Назначение                                                           |
-| --- | --------------------------- | -------------------------------------------------------------------- |
-| 1   | `make install`              | Создать `.venv` и установить зависимости `[dev]` (pytest, cov, lint) |
-| 2   | `source .venv/bin/activate` | Активировать окружение для дальнейших команд                         |
-| 3   | `make test`                 | Запустить локальный стабильный прогон с покрытием ≥85% (без E2E)     |
-| 4   | `uv run python -m pytest tests/e2e/ -m e2e -v` | Отдельно запустить E2E в Local-Only режиме |
-| 5   | `htmlcov/index.html`        | Открыть HTML coverage report локально в браузере                     |
+| Шаг | Команда | Назначение |
+| --- | ------- | ---------- |
+| 1 | `make install` | Создать `.venv` и установить зависимости `[dev]` |
+| 2 | `source .venv/bin/activate` | Активировать окружение для дальнейших команд |
+| 3 | `make test-fast` | Получить быстрый feedback для unit + architecture |
+| 4 | `make test` | Выполнить стабильный локальный прогон с coverage gate 85% |
+| 5 | `make test-cov-fast-stable` | Выполнить ускоренный split-run для локального coverage анализа |
+| 6 | `uv run coverage html -d htmlcov` | Сгенерировать HTML coverage report при необходимости |
+| 7 | `uv run python -m pytest tests/e2e/ -m e2e -v` | Отдельно запустить E2E в Local-Only режиме |
 
 **Примечания:**
 
-- Если нужен быстрый прогон без HTML-отчёта и без бенчмарков, используйте `make test-fast`.
+- Если нужен быстрый coverage-run без полного serial suite, используйте `make test-cov-fast-stable`.
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
-- В CI для полного устойчивого прогона используется `make test-ci`; локальный запуск `make test` обязателен перед коммитом.
+- `make test` не генерирует `htmlcov/` автоматически; HTML-отчёт создаётся отдельной командой `uv run coverage html -d htmlcov`.
+- В CI используется `.github/workflows/tests.yml`, а локальный `make test-ci` служит способом воспроизвести resilient flow вручную.
 
 ## 5. План по устранению избыточности (ChEMBL Target Component)
 
@@ -183,29 +192,37 @@ pytest --cov=src/bioetl tests/
 ### 6.1. Параллельное Выполнение (pytest-xdist)
 
 Тесты поддерживают параллельное выполнение через `pytest-xdist`, но локальный
-дефолт теперь serial для стабильности:
+дефолт остаётся serial для стабильности. Каноническая стратегия такая:
 
 ```bash
 # Локальный стабильный дефолт (serial)
 make test
 
-# Явный CI-подобный режим (parallel + fallback при worker crash)
-make test-ci
+# Быстрый локальный feedback loop (parallel-safe subset)
+make test-fast
+
+# Быстрый split coverage run
+make test-cov-fast-stable
 
 # Serial execution (для отладки)
 make test-serial
 
 # Явный параллельный запуск вручную
-pytest tests/ -m "not serial" -n auto --dist loadscope --max-worker-restart=0
+uv run pytest tests/ -m "not serial" -n auto --dist loadscope --max-worker-restart=0
 ```
 
-**Производительность** (verified 2026-01-19):
+Текущие правила:
 
-- Serial: ~150-180s (зависит от hardware)
-- Parallel (auto): ~55-75s (зависит от hardware)
-- Улучшение: **~60-65%**
+- `xdist` используется только для explicit local runs и CI lanes;
+- тесты с `@pytest.mark.serial` не смешиваются с parallel-safe subset;
+- для worker grouping используется `--dist loadscope`;
+- для прозрачной диагностики worker crashes используется `--max-worker-restart=0`;
+- benchmark runs выполняются отдельно и без `xdist`.
 
-**Статус pytest-xdist**: Используется в CI и explicit local runs; serial tests выполняются отдельным serial-pass.
+Репозиторий не использует hard-coded performance SLA в документации, потому что
+timings зависят от hardware, Python version, coverage mode и состава shard-ов.
+Для актуального baseline используйте `make test-profile` и фиксируйте команду,
+дату и окружение.
 
 ### 6.2. Hypothesis Профили
 
@@ -215,14 +232,17 @@ Hypothesis настроен с профилями для разных сцена
 | ---------- | ------------ | ------------------------------ |
 | `ci`       | 10           | Автоматически в CI (CI=true)   |
 | `fast`     | 5            | Быстрый smoke test             |
-| `dev`      | 50           | Локальная разработка (default) |
+| `dev`      | 50           | Более глубокий локальный прогон |
 | `thorough` | 200          | Pre-release тестирование       |
 
 ```bash
 # Использование профилей
 HYPOTHESIS_PROFILE=fast uv run python -m pytest tests/unit/
+HYPOTHESIS_PROFILE=dev uv run python -m pytest tests/unit/  # Более широкий локальный прогон
 HYPOTHESIS_PROFILE=thorough uv run python -m pytest tests/  # Перед релизом
 ```
+
+**Default profile**: `fast`, если `HYPOTHESIS_PROFILE` не задан.
 
 **Важно**: Тесты НЕ должны переопределять `max-examples` в декораторе `@settings()`, чтобы профили работали корректно.
 
@@ -254,29 +274,40 @@ make test-smoke
 - `architecture` — Архитектурные тесты
 - `security` — Security тесты
 - `smoke` — Быстрые smoke тесты
+- `serial` — Тесты, которые должны идти без `xdist`
+- `benchmark` — Benchmark-тесты, исключённые из стандартных запусков
+- `contracts` — Contract tests
+- `no_api` — Contract tests, не требующие live API access
 
 ### 6.4. CI Test Layering
 
-CI использует многоуровневую стратегию тестирования:
+CI использует job-based layering, а не один линейный `pytest` прогон:
 
 ```
-Stage 1: Lint + Smoke (~30s)
-├── make lint
-└── make test-smoke
+tests.yml
+├── smoke-check
+├── governance-preflight
+├── config-schema-preflight
+├── test-fast
+├── test-matrix
+├── performance-budgets
+├── coverage-verify
+├── duration-telemetry
+├── control-plane-e2e
+├── track-d-gates
+└── dq-consistency-gate
 
-Stage 2: Unit + Architecture (~60s)
-├── uv run python -m pytest tests/unit/ -m "not slow"
-└── uv run python -m pytest tests/architecture/
-
-Stage 3: Integration (~20s)
-└── uv run python -m pytest tests/integration/ --vcr-record=none
-
-Stage 4: E2E (на PR merge)
-└── uv run python -m pytest tests/e2e/ -m e2e
-
-Stage 5: Contract (ежемесячно)
-└── BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true uv run python -m pytest tests/contract/ --network
+contract-tests.yml
+└── scheduled/manual live contract workflow for tests/contract/
 ```
+
+Ключевые свойства текущего CI:
+
+- `test-fast` даёт быстрый feedback для unit + architecture;
+- `test-matrix` шардирует unit/integration/security по test groups и Python versions;
+- `coverage-verify` не rerun-ит весь suite, а объединяет shard coverage и отдельно догоняет только `serial` subset;
+- live contract tests вынесены в отдельный workflow и не являются частью обычного PR path;
+- `duration-telemetry` собирает JUnit telemetry и публикует slow-test artifact.
 
 ## 7. Воспроизводимость и Проверка Зависимостей
 

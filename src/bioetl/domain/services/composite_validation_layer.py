@@ -5,14 +5,17 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from bioetl.domain.services.aggregation_validator import (
-    AggregationConfig,
-    AggregationValidator,
+from bioetl.domain.services.aggregation_validator import AggregationValidator
+from bioetl.domain.services.composite_validation_helpers import (
+    _append_config_issue_if_invalid,
+    _convert_to_aggregation_config,
+    _convert_to_cross_validation_config,
+    _create_issue,
+    _extract_priority,
+    _is_valid_field_priorities,
+    _is_valid_lineage_config,
 )
-from bioetl.domain.services.cross_validation_validator import (
-    CrossValidationConfig,
-    CrossValidationValidator,
-)
+from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
     GovernancePolicy,
     PreflightGovernanceConfig,
@@ -28,16 +31,6 @@ from bioetl.domain.types.validation_severity import (
     IssueCode,
     ValidationLayer,
     ValidationSeverity,
-)
-from bioetl.domain.services.composite_validation_helpers import (
-    _append_config_issue_if_invalid,
-    _convert_to_aggregation_config,
-    _convert_to_cross_validation_config,
-    _create_issue,
-    _extract_priority,
-    _get_layer_for_code,
-    _is_valid_field_priorities,
-    _is_valid_lineage_config,
 )
 
 
@@ -68,26 +61,24 @@ class CompositeValidationService:
     ) -> CompositeValidationReport:
         structural_result = self._run_structural_validation(config)
         deep_preflight_result = self._run_deep_preflight_validation(config)
-        
-        # Create validation report
         validation_report = CompositeValidationReport(
             structural_result=structural_result,
             deep_preflight_result=deep_preflight_result,
             runtime_guard_result=None,
         )
-        
-        # Apply preflight governance
         governance_config = PreflightGovernanceConfig(
             policy=config.governance_policy,
-            ci_integration=config.execution_context.get("ci_integration", False) if config.execution_context else False,
+            ci_integration=(
+                config.execution_context.get("ci_integration", False)
+                if config.execution_context
+                else False
+            ),
         )
         governance_service = PreflightGovernanceService(config=governance_config)
         governance_decision = governance_service.apply_governance(
             validation_report,
             execution_context=config.execution_context,
         )
-        
-        # Merge governance decision into validation report
         return CompositeValidationReport(
             structural_result=structural_result,
             deep_preflight_result=deep_preflight_result,

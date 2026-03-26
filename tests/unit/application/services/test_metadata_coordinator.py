@@ -509,6 +509,62 @@ class TestSilverMetadata:
 
         assert metadata.dq_summary.rule_provenance == provenance
 
+    def test_silver_metadata_surfaces_composite_cv_trace_in_dq_summary(self) -> None:
+        """Composite CV markers should become DQ summary counts and provenance."""
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="composite",
+            entity="publication",
+            contract_version="2.0.0",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = SilverMetadataInput(
+            table_path="/data/silver/composite/publication",
+            records=[
+                {"id": 1, "_cv_warn": True},
+                {"id": 2, "_cv_error": True, "_cv_quarantine": True},
+            ],
+            primary_keys=["id"],
+            mode=SilverWriteMode.DELETE,
+            dq_report_path="reports/dq/composite-publication.json",
+        )
+
+        metadata = coordinator.create_silver_metadata(input_data)
+
+        assert metadata.dq_summary.warning_records == 1
+        assert metadata.dq_summary.error_records == 1
+        assert metadata.dq_summary.valid_records == 1
+        assert metadata.dq_summary.validation_passed is False
+        assert metadata.dq_summary.error_rate == 0.5
+        assert metadata.dq_summary.rule_provenance == [
+            {
+                "rule_id": "composite.cross_validation.warning",
+                "contract_version": "2.0.0",
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "warning",
+                "decision": "warn",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": "reports/dq/composite-publication.json",
+                "record_count": "1",
+            },
+            {
+                "rule_id": "composite.cross_validation.quarantine",
+                "contract_version": "2.0.0",
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "error",
+                "decision": "quarantine",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": "reports/dq/composite-publication.json",
+                "record_count": "1",
+            },
+        ]
+
     def test_silver_mode_to_operation_mapping(
         self, coordinator: MetadataCoordinator
     ) -> None:
@@ -1610,6 +1666,106 @@ class TestGovernanceMetadata:
         assert metadata.governance.lineage.filters_applied is True
         assert metadata.governance.lineage.business_domain == "drug-discovery"
         assert "ml-training" in metadata.governance.lineage.use_cases
+
+    def test_gold_metadata_includes_rule_provenance(self) -> None:
+        """Gold metadata should preserve explicit DQ rule provenance."""
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.REBUILD,
+            started_at=datetime.now(UTC),
+            provider="composite",
+            entity="publication",
+            contract_version="3.0.0",
+        )
+        coordinator = MetadataCoordinator(context)
+        provenance = [
+            {
+                "rule_id": "R_TRACE_02",
+                "contract_version": "3.0.0",
+                "severity": "error",
+                "decision": "fail",
+            }
+        ]
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/composite/publication",
+            table_name="composite.publication",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.OVERWRITE,
+            dq_rule_provenance=provenance,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.dq_summary.rule_provenance == provenance
+
+    def test_gold_metadata_surfaces_composite_cv_trace_in_dq_summary(self) -> None:
+        """Composite Gold metadata should expose CV outcomes as DQ trace."""
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.REBUILD,
+            started_at=datetime.now(UTC),
+            provider="composite",
+            entity="publication",
+            contract_version="4.0.0",
+        )
+        coordinator = MetadataCoordinator(context)
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/composite/publication",
+            table_name="composite.publication",
+            records=[
+                {"id": 1, "_cv_warn": True},
+                {"id": 2, "_cv_error": True},
+                {"id": 3, "_cv_error": True, "_cv_quarantine": True},
+            ],
+            mode=GoldWriteMode.OVERWRITE,
+            dq_report_path="reports/dq/composite-publication-gold.json",
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.dq_summary.warning_records == 1
+        assert metadata.dq_summary.error_records == 2
+        assert metadata.dq_summary.valid_records == 1
+        assert metadata.dq_summary.validation_passed is False
+        assert metadata.dq_summary.error_rate == pytest.approx(2 / 3)
+        assert metadata.dq_summary.rule_provenance == [
+            {
+                "rule_id": "composite.cross_validation.warning",
+                "contract_version": "4.0.0",
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "warning",
+                "decision": "warn",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": "reports/dq/composite-publication-gold.json",
+                "record_count": "1",
+            },
+            {
+                "rule_id": "composite.cross_validation.nullify",
+                "contract_version": "4.0.0",
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "error",
+                "decision": "skip",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": "reports/dq/composite-publication-gold.json",
+                "record_count": "1",
+            },
+            {
+                "rule_id": "composite.cross_validation.quarantine",
+                "contract_version": "4.0.0",
+                "config_path": "cross_validation",
+                "layer": "composite",
+                "field": None,
+                "severity": "error",
+                "decision": "quarantine",
+                "violation_kind": "cross_validation_mismatch",
+                "report_artifact_path": "reports/dq/composite-publication-gold.json",
+                "record_count": "1",
+            },
+        ]
 
     def test_governance_metadata_immutable(self) -> None:
         """Test GovernanceMetadata can be frozen (Pydantic model)."""

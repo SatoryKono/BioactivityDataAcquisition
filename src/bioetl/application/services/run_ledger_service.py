@@ -12,6 +12,7 @@ from bioetl.domain.control_plane.run_ledger import infer_ledger_event_family
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
+from bioetl.domain.types.dq_contracts import DQDisposition
 
 __all__ = ["RunLedgerService"]
 
@@ -121,6 +122,33 @@ class RunLedgerService:
             stage=layer,
             dataset_ref=dataset_ref,
             lineage_fragment_id=lineage_fragment_id,
+            details=payload,
+        )
+
+    def record_dq_policy_applied(
+        self,
+        *,
+        stage: str,
+        status: str = "failed",
+        rule_id: str | None = None,
+        disposition: DQDisposition | str | None = None,
+        dq_report_path: str | None = None,
+        details: dict[str, object] | None = None,
+    ) -> RunLedgerEntry:
+        """Record a DQ policy outcome with stable trace anchors."""
+        payload: dict[str, object] = {}
+        if rule_id is not None:
+            payload["rule_id"] = rule_id
+        if disposition is not None:
+            payload["disposition"] = str(disposition)
+        if dq_report_path is not None:
+            payload["dq_report_path"] = dq_report_path
+        if details:
+            payload.update(details)
+        return self._append(
+            event_type="dq_policy_applied",
+            status=status,
+            stage=stage,
             details=payload,
         )
 

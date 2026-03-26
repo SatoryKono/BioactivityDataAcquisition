@@ -16,6 +16,7 @@ from bioetl.domain.lineage import (
 from bioetl.domain.services.composite_metadata_helpers import (
     extract_composite_lineage_metadata,
     parse_composite_field_sources,
+    summarize_composite_cv_dq,
 )
 
 if TYPE_CHECKING:
@@ -37,33 +38,19 @@ def _merge_gold_dataset_attributes(
     )
 
 
-def _is_truthy_marker(value: object) -> bool:
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, str):
-        return value.strip().lower() in {"1", "true", "yes"}
-    if isinstance(value, int):
-        return value != 0
-    return False
-
-
 def _build_cv_marker_summary(
     records: Sequence[Mapping[str, object]] | None,
 ) -> dict[str, int]:
     if not records:
         return {}
-    marker_map = {
-        "_cv_warn": "cv_warn_count",
-        "_cv_error": "cv_error_count",
-        "_cv_quarantine": "cv_quarantine_count",
+    cv_summary = summarize_composite_cv_dq(records)
+    if not cv_summary["has_signal"]:
+        return {}
+    return {
+        "cv_warn_count": int(cv_summary["warning_records"]),
+        "cv_error_count": int(cv_summary["error_records"]),
+        "cv_quarantine_count": int(cv_summary["quarantine_records"]),
     }
-    summary: dict[str, int] = {}
-    for raw_key, summary_key in marker_map.items():
-        if any(raw_key in record for record in records):
-            summary[summary_key] = sum(
-                1 for record in records if _is_truthy_marker(record.get(raw_key))
-            )
-    return summary
 
 
 def _build_provider_field_map(

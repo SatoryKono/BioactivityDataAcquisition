@@ -1,7 +1,7 @@
 # Coverage Configuration Guide
 
 **Reference**: `pyproject.toml [tool.coverage.*]` sections (lines 203-229)
-**Last Updated**: 2026-03-08
+**Last Updated**: 2026-03-26
 
 ---
 
@@ -88,20 +88,36 @@ Lines matching these patterns are excluded from coverage metrics:
 ### Local Development
 
 ```bash
-# Run tests with coverage (all platforms)
-pytest --cov=src/bioetl --cov-report=html tests/
+# Stable full local run with enforced 85% threshold
+make test
 
-# View HTML report
-open htmlcov/index.html  # macOS
-xdg-open htmlcov/index.html  # Linux
-start htmlcov/index.html  # Windows
+# Faster split coverage run (defaults to 80% unless LOCAL_COV_FAIL_UNDER is overridden)
+make test-cov-fast-stable
+
+# Generate HTML report after a coverage-producing run
+uv run coverage html -d htmlcov
 ```
+
+Notes:
+
+- `make test` is the stable serial default and enforces `--cov-fail-under=85`;
+- `make test-cov-fast-stable` is the local optimization path and defaults to `LOCAL_COV_FAIL_UNDER=80`;
+- `htmlcov/` is not produced automatically by `make test`.
 
 ### CI Validation
 
 ```bash
-# CI command (enforces 85% threshold)
-pytest --cov=src/bioetl --cov-fail-under=85 tests/
+# Serial subset for coverage-verify
+COVERAGE_FILE=reports/coverage/.coverage.serial uv run python scripts/ci/run_pytest_resilient.py \
+  --target tests/ \
+  --reports-dir reports/pytest/coverage-verify \
+  --parallel-marker "serial and not e2e and not benchmark" \
+  --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+  --skip-serial-pass
+
+# Final combine + threshold
+uv run python -m coverage combine reports/coverage
+uv run python -m coverage report --show-missing --fail-under=85
 ```
 
 Coverage CI check runs in `.github/workflows/tests.yml` → `coverage-verify` job.
@@ -249,10 +265,17 @@ coverage-verify:
         pattern: coverage-data-*
         merge-multiple: true
         path: reports/coverage
-    - run: pytest tests/ -m "serial and not e2e and not benchmark" -p no:xdist --cov=src/bioetl --cov-report=
-    - run: python -m coverage combine reports/coverage
-    - run: python -m coverage report --fail-under=85
-    - run: python -m coverage xml -o coverage.xml
+    - run: >
+        COVERAGE_FILE=reports/coverage/.coverage.serial uv run python
+        scripts/ci/run_pytest_resilient.py
+        --target tests/
+        --reports-dir reports/pytest/coverage-verify
+        --parallel-marker "serial and not e2e and not benchmark"
+        --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report="
+        --skip-serial-pass
+    - run: uv run python -m coverage combine reports/coverage
+    - run: uv run python -m coverage report --show-missing --fail-under=85
+    - run: uv run python -m coverage xml -o coverage.xml
 ```
 
 **Status Check**: Required for PR merge. If coverage drops below 85%, merge is blocked.
@@ -272,9 +295,10 @@ coverage-verify:
 
 | Date | Change | Impact |
 |------|--------|--------|
+| 2026-03-26 | Synced local and CI command examples with Makefile/tests.yml | Clarified serial default, split coverage flow, and resilient coverage-verify |
 | 2026-03-08 | Added `@overload`, bare `pass`, ellipsis patterns | P3 optimization: focus metrics on executable code |
 | 2026-02-18 | Initial coverage config | Baseline 85% threshold |
 
 ---
 
-*Last synced: 2026-03-08 | py-doc-bot DOC mode*
+*Last synced: 2026-03-26 | Codex documentation audit*

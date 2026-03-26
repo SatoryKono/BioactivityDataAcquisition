@@ -172,6 +172,7 @@ class TestValidTransitions:
             ),
             (CompositePipelineState.MERGING, CompositePipelineState.CROSS_VALIDATION_RUNNING),
             (CompositePipelineState.MERGING, CompositePipelineState.COMPLETED),
+            (CompositePipelineState.MERGING, CompositePipelineState.FAILED),
             (CompositePipelineState.CROSS_VALIDATION_RUNNING, CompositePipelineState.CROSS_VALIDATION_COMPLETED),
             (CompositePipelineState.CROSS_VALIDATION_RUNNING, CompositePipelineState.FAILED),
             (CompositePipelineState.CROSS_VALIDATION_COMPLETED, CompositePipelineState.COMPLETED),
@@ -351,7 +352,11 @@ class TestAllowedTransitions:
         """MERGING should allow CROSS_VALIDATION_RUNNING or COMPLETED."""
         allowed = CompositePipelineState.MERGING.allowed_transitions
         assert allowed == frozenset(
-            {CompositePipelineState.CROSS_VALIDATION_RUNNING, CompositePipelineState.COMPLETED}
+            {
+                CompositePipelineState.CROSS_VALIDATION_RUNNING,
+                CompositePipelineState.COMPLETED,
+                CompositePipelineState.FAILED,
+            }
         )
 
     def test_cross_validation_running_allowed_transitions(self):
@@ -500,11 +505,7 @@ class TestHappyPathScenario:
         """Pipeline should transition to FAILED if merge fails."""
         state = CompositePipelineState.MERGING
 
-        # Merge fails - now goes through cross-validation phase
-        state.validate_transition(CompositePipelineState.CROSS_VALIDATION_RUNNING)
-        state = CompositePipelineState.CROSS_VALIDATION_RUNNING
-        
-        # Cross-validation fails
+        # Merge fails directly from the active merge phase
         state.validate_transition(CompositePipelineState.FAILED)
         state = CompositePipelineState.FAILED
 

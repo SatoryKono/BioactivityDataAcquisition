@@ -79,17 +79,20 @@ This checklist documents the pre-release verification completed for BioETL v5.9.
 
 ### pytest-xdist Collection Issue (RESOLVED)
 
-~~When running `make test` with parallel execution (`-n auto`), there's a test collection difference error.~~
+~~At the time of this historical release checklist, there was a concern about
+parallel collection differences during explicit xdist runs.~~
 
 **Status**: RESOLVED (2026-01-16)
 
-**Resolution**: The issue was intermittent and no longer occurs with current test configuration.
-Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
+**Historical note**: this section is kept only as release evidence for v5.9.0.
+The current repository strategy is different:
 
-**Performance**:
+- `make test` is a serial local default;
+- explicit parallel paths use `make test-fast`, `make test-ci-local`, and CI jobs;
+- xdist runs use `--dist loadscope` and keep `serial` tests in a separate pass.
 
-- Serial execution: ~147s
-- Parallel execution: ~54s (63% improvement)
+The timing figures below were historical release observations, not a current
+performance SLA.
 
 ## Release Steps
 

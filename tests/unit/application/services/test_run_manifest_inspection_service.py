@@ -3,18 +3,29 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
+from bioetl.application.services.effective_config_service import EffectiveConfigService
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
+from bioetl.application.services.run_ledger_service import RunLedgerService
+from bioetl.application.services.run_manifest_service import (
+    RunManifestCreateRequest,
+    RunManifestService,
+)
+from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
+    RunArtifactRef,
     RunCodeProvenance,
+    RunSourceRef,
     RunLedgerEntry,
     RunManifest,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types.dq_contracts import DQDisposition
+from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 
 
 class _InMemoryRunManifestStore(RunManifestPort):
@@ -73,6 +84,12 @@ def _make_manifest(
             pipeline_version="1.0.0",
             git_commit="abc1234",
             config_hash=config_hash,
+            contract_ref="chembl_activity",
+            contract_version="1.2.0",
+            dq_policy_ref="chembl_activity.gold",
+            rule_bundle_version="2026.03",
+            dq_contract_compatibility_hash="compat-hash-1",
+            effective_config_artifact_id="eca-123",
         ),
     )
 
@@ -105,11 +122,15 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     assert result.diagnostics["latest_event_type"] == "run_finished"
     assert result.diagnostics["latest_status"] == "success"
     assert result.diagnostics["event_family_counts"] == {"pipeline.lifecycle": 1}
+    assert result.diagnostics["config_hash"] == "deadbeef"
+    assert result.diagnostics["contract_ref"] == "chembl_activity"
+    assert result.diagnostics["contract_version"] == "1.2.0"
     assert result.diagnostics["alert_signals"] == {
         "run_failed": False,
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "dq_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
         "No alert signals detected; continue routine monitoring."
@@ -151,6 +172,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
+        "dq_signal_present": False,
     }
     assert result.diagnostics["artifact_refs"] == [
         {
@@ -196,6 +218,55 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     ]
 
 
+def test_show_collects_dq_trace_anchors() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-dq", run_id=run_id)
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-1",
+            manifest_id="manifest-dq",
+            run_id=run_id,
+            event_type="dq_policy_applied",
+            occurred_at=datetime.now(UTC),
+            event_family="dq",
+            status="failed",
+            stage="gold",
+            details={
+                "rule_id": "gold.not_null.id",
+                "disposition": "fail",
+                "dq_report_path": "/tmp/reports/gold_dq.json",
+            },
+        )
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = service.show("manifest-dq")
+
+    assert result.diagnostics["dq_rule_ids"] == ["gold.not_null.id"]
+    assert result.diagnostics["dq_dispositions"] == ["fail"]
+    assert result.diagnostics["dq_report_paths"] == ["/tmp/reports/gold_dq.json"]
+    assert result.diagnostics["dq_policy_ref"] == "chembl_activity.gold"
+    assert result.diagnostics["rule_bundle_version"] == "2026.03"
+    assert result.diagnostics["effective_config_artifact_id"] == "eca-123"
+    assert result.diagnostics["alert_signals"] == {
+        "run_failed": True,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+        "dq_signal_present": True,
+    }
+    assert result.diagnostics["next_steps"] == [
+        "Inspect failure classification and decide retry/quarantine/escalation.",
+        "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
+    ]
+
+
 def test_diff_reports_changed_top_level_fields() -> None:
     manifest_store = _InMemoryRunManifestStore()
     left_run_id = RunID(uuid4())
@@ -229,3 +300,215 @@ def test_diff_reports_changed_top_level_fields() -> None:
     assert "launch_context" in diff_fields
     assert "runtime_config" in diff_fields
     assert "code_provenance" in diff_fields
+
+
+def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000101"))
+
+    effective_config_service = EffectiveConfigService()
+    artifact = effective_config_service.create_effective_config_artifact(
+        pipeline_name="chembl_activity",
+        pipeline_kind="standard",
+        resolved_config={"provider": "chembl", "entity_type": "activity"},
+        runtime_overrides={"cli": {"limit": 25}},
+        source_refs=[
+            ConfigSourceRef(
+                source_type="fixture",
+                source_path="tests/fixtures/bronze/chembl/activity/sample.jsonl",
+                source_hash="fixture-hash-1",
+                priority=1,
+            )
+        ],
+        dq_config=DQConfig(
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            rule_bundle_version="dq-rules.v1",
+            default_disposition_policy=DQDisposition.WARN,
+        ),
+        artifact_id="eca-chain-1",
+    )
+    manifest_service = RunManifestService(
+        manifest_port=manifest_store,
+        _manifest_id_factory=lambda: "manifest-chain-1",
+    )
+    manifest = manifest_service.create_manifest(
+        RunManifestCreateRequest(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={
+                "fixture_path": "tests/fixtures/bronze/chembl/activity/sample.jsonl"
+            },
+            runtime_config={"run_type": "incremental", "limit": 25},
+            resolved_config=artifact.effective_execution_config.config_data,
+            source_refs=(
+                RunSourceRef(
+                    provider="chembl",
+                    entity="activity",
+                    pipeline_name="chembl_activity",
+                    query="fixture://sample",
+                ),
+            ),
+            planned_artifacts=(
+                RunArtifactRef(
+                    layer="silver",
+                    path="data/output/silver/chembl/activity",
+                ),
+            ),
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            config_hash=artifact.effective_config_hash,
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            dq_policy_ref="chembl.activity.dq",
+            rule_bundle_version="dq-rules.v1",
+            dq_contract_compatibility_hash=artifact.dq_contract_compatibility_hash,
+            effective_config_artifact_id=artifact.artifact_id,
+        )
+    )
+    ledger_service = RunLedgerService(
+        ledger_port=ledger_store,
+        manifest_id=manifest.manifest_id,
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-chain-1",
+    )
+    ledger_service.record_artifact_published(
+        layer="silver",
+        artifact_path="data/output/silver/chembl/activity",
+        dataset_ref="silver:chembl.activity@1",
+        lineage_fragment_id="silver:fragment-chain-1",
+        details={
+            "dq_report_path": "data/output/silver/chembl/activity/_dq.json",
+            "metadata_path": "data/output/silver/chembl/activity/_metadata.yaml",
+        },
+    )
+
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+    result = service.show(manifest.manifest_id)
+
+    assert result.manifest.code_provenance.config_hash == artifact.effective_config_hash
+    assert result.diagnostics["config_hash"] == artifact.effective_config_hash
+    assert result.diagnostics["effective_config_artifact_id"] == "eca-chain-1"
+    assert result.diagnostics["artifact_refs"] == [
+        {
+            "event_type": "artifact_published",
+            "stage": "silver",
+            "dataset_ref": "silver:chembl.activity@1",
+            "lineage_fragment_id": "silver:fragment-chain-1",
+            "artifact_path": "data/output/silver/chembl/activity",
+        }
+    ]
+    assert result.diagnostics["dq_report_paths"] == [
+        "data/output/silver/chembl/activity/_dq.json"
+    ]
+
+
+def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000102"))
+
+    effective_config_service = EffectiveConfigService()
+    artifact = effective_config_service.create_effective_config_artifact(
+        pipeline_name="chembl_activity",
+        pipeline_kind="standard",
+        resolved_config={"provider": "chembl", "entity_type": "activity"},
+        runtime_overrides={"cli": {"limit": 25}},
+        source_refs=[
+            ConfigSourceRef(
+                source_type="fixture",
+                source_path="tests/fixtures/bronze/chembl/activity/sample.jsonl",
+                source_hash="fixture-hash-1",
+                priority=1,
+            )
+        ],
+        dq_config=DQConfig(
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            rule_bundle_version="dq-rules.v1",
+            default_disposition_policy=DQDisposition.FAIL,
+        ),
+        artifact_id="eca-chain-2",
+    )
+    manifest_service = RunManifestService(
+        manifest_port=manifest_store,
+        _manifest_id_factory=lambda: "manifest-chain-2",
+    )
+    manifest = manifest_service.create_manifest(
+        RunManifestCreateRequest(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity="activity",
+            launch_context={
+                "fixture_path": "tests/fixtures/bronze/chembl/activity/sample.jsonl"
+            },
+            runtime_config={"run_type": "incremental", "limit": 25},
+            resolved_config=artifact.effective_execution_config.config_data,
+            source_refs=(
+                RunSourceRef(
+                    provider="chembl",
+                    entity="activity",
+                    pipeline_name="chembl_activity",
+                    query="fixture://sample",
+                ),
+            ),
+            pipeline_version="1.0.0",
+            git_commit="abc1234",
+            config_hash=artifact.effective_config_hash,
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            dq_policy_ref="chembl.activity.dq",
+            rule_bundle_version="dq-rules.v1",
+            dq_contract_compatibility_hash=artifact.dq_contract_compatibility_hash,
+            effective_config_artifact_id=artifact.artifact_id,
+        )
+    )
+    ledger_service = RunLedgerService(
+        ledger_port=ledger_store,
+        manifest_id=manifest.manifest_id,
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-chain-2",
+    )
+    ledger_service.record_dq_policy_applied(
+        stage="gold",
+        rule_id="gold.not_null.id",
+        disposition=DQDisposition.FAIL,
+        dq_report_path="data/output/gold/chembl/activity/_dq.json",
+    )
+
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+    result = service.show(manifest.manifest_id)
+
+    assert result.manifest.code_provenance.config_hash == artifact.effective_config_hash
+    assert result.diagnostics["contract_version"] == "1.0.0"
+    assert result.diagnostics["dq_policy_ref"] == "chembl.activity.dq"
+    assert result.diagnostics["rule_bundle_version"] == "dq-rules.v1"
+    assert result.diagnostics["effective_config_artifact_id"] == "eca-chain-2"
+    assert result.diagnostics["dq_rule_ids"] == ["gold.not_null.id"]
+    assert result.diagnostics["dq_dispositions"] == ["fail"]
+    assert result.diagnostics["dq_report_paths"] == [
+        "data/output/gold/chembl/activity/_dq.json"
+    ]
+    assert result.diagnostics["alert_signals"] == {
+        "run_failed": True,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+        "dq_signal_present": True,
+    }
+    assert result.diagnostics["next_steps"] == [
+        "Inspect failure classification and decide retry/quarantine/escalation.",
+        "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
+    ]

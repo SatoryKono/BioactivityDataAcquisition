@@ -43,38 +43,48 @@ tests/contract/silver_schemas/
 ### Quick Start
 
 ```bash
-# Run all Silver schema contract tests
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/ --network -v
+# Run all Silver schema contract tests (offline / no live API required)
+uv run pytest tests/contract/silver_schemas/ -m contracts -v
 
 # Run with coverage
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/ --network --cov=src/bioetl/domain/schemas
+uv run pytest tests/contract/silver_schemas/ -m contracts --cov=src/bioetl/domain/schemas --cov-report=term-missing
 
 # Run for specific schema
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/ --network -k chembl_activity
+uv run pytest tests/contract/silver_schemas/ -m contracts -k chembl_activity -v
 ```
+
+These tests are marked `contracts` and `no_api`, so they do **not** require:
+
+- `BIOETL_LIVE_API_TESTS=true`
+- `BIOETL_NETWORK_TESTS=true`
+- `--network`
 
 ### By Test Category
 
 ```bash
 # Schema stability (snapshot tests)
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_schema_stability.py --network -v
+uv run pytest tests/contract/silver_schemas/test_schema_stability.py -m contracts -v
 
 # Type safety
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_field_types.py --network -v
+uv run pytest tests/contract/silver_schemas/test_field_types.py -m contracts -v
 
 # Validation rules
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_validations.py --network -v
+uv run pytest tests/contract/silver_schemas/test_validations.py -m contracts -v
 
 # Naming conventions
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_naming_conventions.py --network -v
+uv run pytest tests/contract/silver_schemas/test_naming_conventions.py -m contracts -v
 ```
 
 ### Continuous Integration
 
 ```bash
-# Run as part of contract test suite
-BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/ --network -m contracts -v
+# Run the schema-only contract subset locally
+uv run pytest tests/contract/silver_schemas/ -m contracts -v
 ```
+
+In CI these tests are included in the broader `contract-tests.yml` workflow.
+They run alongside live API contract suites, but unlike provider live contracts
+the Silver schema subset itself is offline and `no_api`.
 
 ---
 
@@ -145,7 +155,7 @@ class EntitySchema(ETLRecordSchema):
     """
 
     # Primary key
-    entity-id: Series[str] = pa.Field(
+    entity_id: Series[str] = pa.Field(
         nullable=False,
         description="Primary key."
     )
@@ -161,7 +171,7 @@ from bioetl.domain.schemas.{provider}.{entity} import EntitySchema
 
 SILVER_SCHEMAS = {
     # ... existing schemas ...
-    "provider-entity": EntitySchema,  # Add new schema
+    "provider_entity": EntitySchema,  # Add new schema
 }
 ```
 
@@ -169,10 +179,10 @@ SILVER_SCHEMAS = {
 
 ```bash
 # Run tests to create initial snapshot
-pytest tests/contract/silver_schemas/test_schema_stability.py -k {provider}-{entity}
+uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k {provider}_{entity}
 
 # Verify snapshot created
-ls tests/contract/silver_schemas/snapshots/{provider}-{entity}-schema.json
+ls tests/contract/silver_schemas/snapshots/{provider}_{entity}-schema.json
 ```
 
 ### Step 4: Commit Together
@@ -204,7 +214,7 @@ class ActivitySchema(ETLRecordSchema):
     # ... existing fields ...
 
     # NEW: Additional metadata
-    data-source-version: Series[str] | None = pa.Field(
+    data_source_version: Series[str] | None = pa.Field(
         nullable=True,
         description="Provider API version."
     )
@@ -213,11 +223,11 @@ class ActivitySchema(ETLRecordSchema):
 ### Step 3: Run Tests (They WILL Fail)
 
 ```bash
-pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
+uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
 
 # Example failure:
-# FAILED: chembl_activity: New fields detected: ['data-source-version']
-# If intentional, run: UPDATE_SNAPSHOTS=1 pytest ...
+# FAILED: chembl_activity: New fields detected: ['data_source_version']
+# If intentional, run: UPDATE_SNAPSHOTS=1 uv run pytest ...
 ```
 
 ### Step 4: Review Diff Carefully
@@ -240,7 +250,7 @@ If breaking change:
 
 ```bash
 # After confirming change is intentional
-UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
+UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
 
 # Verify snapshot updated
 git diff tests/contract/silver_schemas/snapshots/chembl_activity-schema.json
@@ -271,7 +281,7 @@ Related: #1234"
 ```python
 class PublicationSchema(ETLRecordSchema):
     # NEW field with correct name
-    citations-received: Series[int] | None = pa.Field(
+    citations_received: Series[int] | None = pa.Field(
         nullable=True,
         description="Number of citations received (incoming)."
     )
@@ -279,7 +289,7 @@ class PublicationSchema(ETLRecordSchema):
     # OLD field marked deprecated
     citation_count: Series[int] | None = pa.Field(
         nullable=True,
-        description="DEPRECATED: Use citations-received instead. Will be removed in v6.0."
+        description="DEPRECATED: Use citations_received instead. Will be removed in v6.0."
     )
 ```
 
@@ -291,7 +301,7 @@ def transform_publication(raw: dict) -> dict:
     citation_count = raw.get("citation_count", 0)
 
     return {
-        "citations-received": citation_count,  # NEW
+        "citations_received": citation_count,  # NEW
         "citation_count": citation_count,      # OLD (deprecated)
         # ... other fields
     }
@@ -314,7 +324,7 @@ def transform_publication(raw: dict) -> dict:
 ```python
 class PublicationSchema(ETLRecordSchema):
     # NEW field (kept)
-    citations-received: Series[int] | None = pa.Field(
+    citations_received: Series[int] | None = pa.Field(
         nullable=True,
         description="Number of citations received (incoming)."
     )
@@ -324,7 +334,7 @@ class PublicationSchema(ETLRecordSchema):
 
 Update snapshot:
 ```bash
-UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k publication
+UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k publication
 ```
 
 ---
@@ -411,7 +421,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 **Solution:**
 ```bash
 # If addition is intentional
-UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k schema-name
+UPDATE_SNAPSHOTS=1 uv run pytest tests/contract/silver_schemas/test_schema_stability.py -k schema-name
 ```
 
 ---
@@ -492,16 +502,23 @@ publication_year: Series[int]
 
 ## Integration with CI/CD
 
-Contract tests run automatically in CI:
+Silver schema contract tests are part of the broader contract workflow, but they
+are the offline subset of that workflow:
 
 ```yaml
-# .github/workflows/tests.yml
-- name: Run Contract Tests
+# .github/workflows/contract-tests.yml
+- name: Run full contract suite
   run: |
-    pytest tests/contract/ -m contracts -v --tb=short
+    BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true uv run pytest tests/contract/ -v --tb=short --network
 ```
 
-**On failure:** Pipeline blocks, preventing broken schemas from merging.
+Local schema-only verification stays simpler:
+
+```bash
+uv run pytest tests/contract/silver_schemas/ -m contracts -v
+```
+
+**On failure:** The contract workflow fails, preventing unnoticed schema drift.
 
 **Manual override:** Requires `UPDATE_SNAPSHOTS=1` flag (not available in CI by design).
 
@@ -517,9 +534,9 @@ Contract tests run automatically in CI:
 | Naming Conventions | ~3-5 seconds | ✅ Yes |
 | **Total** | **~20-30 seconds** | ✅ Yes |
 
-**Optimization:** Tests run in parallel with `pytest-xdist`:
+**Optimization:** optional explicit parallel run:
 ```bash
-pytest tests/contract/silver_schemas/ -n auto
+uv run pytest tests/contract/silver_schemas/ -m contracts -n auto --dist loadscope
 ```
 
 ---
@@ -555,4 +572,4 @@ pytest tests/contract/silver_schemas/ -n auto
 **Maintenance Time:** <5 min per schema change
 **Value:** Prevents accidental breaking changes
 
-**Last Updated:** 2026-02-10
+**Last Updated:** 2026-03-26
