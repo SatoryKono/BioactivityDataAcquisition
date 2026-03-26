@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1256,
-    "total_internal_imports": 4828,
+    "total_internal_imports": 4827,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 246,
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 337,
+      "imports": 336,
       "allowed": true
     },
     {
@@ -41,7 +41,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 228,
+      "imports": 231,
       "allowed": true
     },
     {
@@ -65,7 +65,7 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 46,
+      "imports": 43,
       "allowed": true
     },
     {
@@ -179,14 +179,14 @@
       "imports": 29
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.models",
+      "source": "composition.bootstrap",
+      "target": "infrastructure.config",
       "imports": 28
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.config",
-      "imports": 25
+      "source": "infrastructure.storage",
+      "target": "domain.models",
+      "imports": 28
     },
     {
       "source": "application.pipelines",
@@ -354,11 +354,6 @@
       "imports": 10
     },
     {
-      "source": "interfaces.cli",
-      "target": "application.composite",
-      "imports": 10
-    },
-    {
       "source": "application.pipelines",
       "target": "domain.transformations",
       "imports": 9
@@ -386,6 +381,11 @@
     {
       "source": "infrastructure.observability",
       "target": "domain.ports",
+      "imports": 9
+    },
+    {
+      "source": "interfaces.cli",
+      "target": "composition._root",
       "imports": 9
     }
   ],
