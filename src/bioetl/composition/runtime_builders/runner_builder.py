@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.run_ledger_service import RunLedgerService
@@ -115,6 +116,56 @@ def _create_runner_from_factory(
     )
 
 
+def _bind_manifest_logger_context(
+    inputs: _RunnerInputs | object,
+    manifest_id: str,
+) -> _RunnerInputs | object:
+    """Bind ``manifest_id`` into runtime observability when available.
+
+    The manifest identifier becomes available only after control-plane
+    artifacts are materialized. Rebinding it here keeps critical runtime logs
+    linkable to the manifest/ledger artifacts without expanding application
+    layer contracts.
+    """
+    observability = getattr(inputs, "observability", None)
+    rebound_observability = _rebind_observability_logger(
+        observability=observability,
+        manifest_id=manifest_id,
+    )
+    if rebound_observability is observability:
+        return inputs
+    if isinstance(inputs, _RunnerInputs):
+        return replace(
+            inputs,
+            observability=cast("ObservabilityBundle", rebound_observability),
+        )
+    if hasattr(inputs, "observability"):
+        setattr(inputs, "observability", rebound_observability)
+    return inputs
+
+
+def _rebind_observability_logger(
+    *,
+    observability: object,
+    manifest_id: str,
+) -> object:
+    """Return observability with ``manifest_id`` bound to its logger context."""
+    bind_fn = getattr(observability, "bind", None)
+    if callable(bind_fn):
+        return bind_fn(manifest_id=manifest_id)
+
+    logger = getattr(observability, "logger", None)
+    logger_bind = getattr(logger, "bind", None)
+    if not callable(logger_bind):
+        return observability
+
+    try:
+        setattr(observability, "logger", logger_bind(manifest_id=manifest_id))
+    except (AttributeError, TypeError):
+        return observability
+    return observability
+
+
 def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
@@ -222,6 +273,10 @@ def build_pipeline_runner(
             contract_schema_hash=control_plane_refs.contract_schema_hash,
             dq_policy_ref=control_plane_refs.dq_policy_ref,
             rule_bundle_version=control_plane_refs.rule_bundle_version,
+        )
+        inputs = _bind_manifest_logger_context(
+            inputs,
+            control_plane_refs.manifest_id,
         )
     runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,

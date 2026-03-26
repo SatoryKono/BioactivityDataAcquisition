@@ -48,11 +48,11 @@ def test_block_on_blockers_only_policy():
         composite_config={"sources": ["source1"]},  # Missing required fields
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply governance
     governance_service = PreflightGovernanceService()
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Should block execution due to blockers
     decision = governance_report["execution_decision"]
     assert decision["execution_allowed"] is False
@@ -74,14 +74,14 @@ def test_block_on_any_issue_policy():
         },
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply strict governance
     governance_config = PreflightGovernanceConfig(
         policy=GovernancePolicy.BLOCK_ON_ANY_ISSUE
     )
     governance_service = PreflightGovernanceService(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Should block execution due to any issue
     decision = governance_report["execution_decision"]
     assert decision["execution_allowed"] is False
@@ -97,14 +97,12 @@ def test_warning_only_policy():
         composite_config={"sources": ["source1"]},  # Missing required fields
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply warning-only governance
-    governance_config = PreflightGovernanceConfig(
-        policy=GovernancePolicy.WARNING_ONLY
-    )
+    governance_config = PreflightGovernanceConfig(policy=GovernancePolicy.WARNING_ONLY)
     governance_service = PreflightGovernanceService(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Should allow execution despite blockers
     decision = governance_report["execution_decision"]
     assert decision["execution_allowed"] is True
@@ -125,15 +123,14 @@ def test_ci_strict_policy():
         },
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply CI strict governance
     governance_config = PreflightGovernanceConfig(
-        policy=GovernancePolicy.CI_STRICT,
-        ci_integration=True
+        policy=GovernancePolicy.CI_STRICT, ci_integration=True
     )
     governance_service = PreflightGovernanceService(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Should block execution due to any issue in CI strict mode
     decision = governance_report["execution_decision"]
     assert decision["execution_allowed"] is False
@@ -154,15 +151,14 @@ def test_ci_relaxed_policy():
         },
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply CI relaxed governance
     governance_config = PreflightGovernanceConfig(
-        policy=GovernancePolicy.CI_RELAXED,
-        ci_integration=True
+        policy=GovernancePolicy.CI_RELAXED, ci_integration=True
     )
     governance_service = PreflightGovernanceService(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Should allow execution with only warnings in CI relaxed mode
     decision = governance_report["execution_decision"]
     assert decision["execution_allowed"] is True
@@ -177,17 +173,17 @@ def test_issue_code_overrides():
         composite_config={"sources": ["source1"]},  # Missing required fields
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply governance with overrides (downgrade blocker to warning)
     governance_config = PreflightGovernanceConfig(
         policy=GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY,
         issue_code_overrides={
             "CMP-STR-CONFIG-002": ValidationSeverity.WARNING,  # Downgrade missing field
-        }
+        },
     )
     governance_service = PreflightGovernanceService(governance_config)
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Should allow execution since blocker was downgraded
     decision = governance_report["execution_decision"]
     assert decision["execution_allowed"] is True
@@ -202,38 +198,38 @@ def test_governance_report_structure():
         composite_config={"sources": ["source1"]},
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply governance
     governance_service = PreflightGovernanceService()
     governance_report = governance_service.apply_governance(
         validation_report,
-        execution_context={"environment": "test", "user": "test_user"}
+        execution_context={"environment": "test", "user": "test_user"},
     )
-    
+
     # Verify report structure
     assert "governance_metadata" in governance_report
     assert "execution_decision" in governance_report
     assert "validation_summary" in governance_report
     assert "execution_context" in governance_report
     assert "detailed_issues" in governance_report
-    
+
     # Verify metadata
     metadata = governance_report["governance_metadata"]
     assert metadata["policy"] == "block_on_blockers_only"
     assert metadata["ci_integration"] is False
     assert metadata["fail_fast"] is True
     assert "execution_timestamp" in metadata
-    
+
     # Verify summary
     summary = governance_report["validation_summary"]
     assert summary["total_issues"] > 0
     assert summary["total_blockers"] > 0
     assert "layers" in summary
-    
+
     # Verify execution context
     assert governance_report["execution_context"]["environment"] == "test"
     assert governance_report["execution_context"]["user"] == "test_user"
-    
+
     # Verify detailed issues
     detailed_issues = governance_report["detailed_issues"]
     assert len(detailed_issues) > 0
@@ -254,29 +250,29 @@ def test_ci_gate_report():
         composite_config={"sources": ["source1"]},
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply governance
     governance_service = PreflightGovernanceService()
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Create CI gate report
     ci_report = governance_service.create_ci_gate_report(governance_report)
-    
+
     # Verify CI report structure
     assert "ci_gate" in ci_report
     assert "metrics" in ci_report
     assert "critical_issues" in ci_report
-    
+
     # Verify CI gate status
     ci_gate = ci_report["ci_gate"]
     assert ci_gate["status"] == "FAIL"
     assert ci_gate["reason"] == "blocker_issues_found"
-    
+
     # Verify metrics
     metrics = ci_report["metrics"]
     assert metrics["total_issues"] > 0
     assert metrics["blockers"] > 0
-    
+
     # Verify critical issues
     critical_issues = ci_report["critical_issues"]
     assert len(critical_issues) > 0
@@ -295,16 +291,16 @@ def test_no_issues_scenario():
         },
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply governance
     governance_service = PreflightGovernanceService()
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Should allow execution with no issues
     decision = governance_report["execution_decision"]
     assert decision["execution_allowed"] is True
     assert decision["reason"] == "no_blocking_issues"
-    
+
     # Verify summary shows no issues
     summary = governance_report["validation_summary"]
     assert summary["total_issues"] == 0
@@ -324,27 +320,30 @@ def test_governance_impact_determination():
         },
     )
     validation_report = validation_service.validate_composite(config)
-    
+
     # Apply governance
     governance_service = PreflightGovernanceService()
     governance_report = governance_service.apply_governance(validation_report)
-    
+
     # Check governance impacts
     detailed_issues = governance_report["detailed_issues"]
-    
+
     blocker_issues = [
-        issue for issue in detailed_issues 
+        issue
+        for issue in detailed_issues
         if issue["governance_impact"] == "execution_blocker"
     ]
     warning_issues = [
-        issue for issue in detailed_issues 
+        issue
+        for issue in detailed_issues
         if issue["governance_impact"] == "warning_with_blocker_severity"
     ]
     informational_issues = [
-        issue for issue in detailed_issues 
+        issue
+        for issue in detailed_issues
         if issue["governance_impact"] == "informational"
     ]
-    
+
     # Should have at least one execution blocker
     assert len(blocker_issues) > 0
     # Warning issues should be empty in default policy

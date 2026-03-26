@@ -73,7 +73,9 @@ class TestCliDqCommands:
         result = cli_runner.invoke(cli, ["dq", "show"])
 
         assert result.exit_code != 0
-        assert "Missing argument" in result.output or "required" in result.output.lower()
+        assert (
+            "Missing argument" in result.output or "required" in result.output.lower()
+        )
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
     def test_dq_show_displays_config(self, mock_service, cli_runner: CliRunner):
@@ -86,7 +88,7 @@ class TestCliDqCommands:
             "rule_bundle_version": "2024.1",
             "default_disposition_policy": "warn",
             "disposition_overrides": {},
-            "strictness_mode": "standard"
+            "strictness_mode": "standard",
         }
         mock_service.return_value = mock_config_service
 
@@ -96,8 +98,10 @@ class TestCliDqCommands:
         assert "contract_ref: chembl-v1" in result.output
         assert "contract_version: 1.0.0" in result.output
         # YAML output may quote the version string
-        assert ("rule_bundle_version: 2024.1" in result.output or 
-                "rule_bundle_version: '2024.1'" in result.output)
+        assert (
+            "rule_bundle_version: 2024.1" in result.output
+            or "rule_bundle_version: '2024.1'" in result.output
+        )
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
     def test_dq_show_json_format(self, mock_service, cli_runner: CliRunner):
@@ -110,11 +114,13 @@ class TestCliDqCommands:
             "rule_bundle_version": "2024.1",
             "default_disposition_policy": "warn",
             "disposition_overrides": {},
-            "strictness_mode": "standard"
+            "strictness_mode": "standard",
         }
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "show", "chembl_activity", "--format", "json"])
+        result = cli_runner.invoke(
+            cli, ["dq", "show", "chembl_activity", "--format", "json"]
+        )
 
         assert result.exit_code == 0
         # Should be valid JSON
@@ -133,7 +139,7 @@ class TestCliDqCommands:
             "rule_bundle_version": "2024.1",
             "default_disposition_policy": "warn",
             "disposition_overrides": {},
-            "strictness_mode": "standard"
+            "strictness_mode": "standard",
         }
         mock_service.return_value = mock_config_service
 
@@ -144,7 +150,9 @@ class TestCliDqCommands:
         assert "Contract Ref: chembl-v1" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
-    def test_dq_validate_with_config_file(self, mock_service, cli_runner: CliRunner, tmp_path):
+    def test_dq_validate_with_config_file(
+        self, mock_service, cli_runner: CliRunner, tmp_path
+    ):
         """Test that dq validate works with custom config file."""
         # Create a temporary DQ config file
         config_file = tmp_path / "test_dq_config.yaml"
@@ -154,7 +162,7 @@ class TestCliDqCommands:
             "rule_bundle_version": "2025.1",
             "default_disposition_policy": "error",
             "disposition_overrides": {},
-            "strictness_mode": "strict"
+            "strictness_mode": "strict",
         }
         with open(config_file, "w") as f:
             yaml.dump(config_content, f)
@@ -164,30 +172,40 @@ class TestCliDqCommands:
         mock_config_service.validate_dq_config.return_value = True
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "validate", "chembl_activity", "--config-file", str(config_file)])
+        result = cli_runner.invoke(
+            cli,
+            ["dq", "validate", "chembl_activity", "--config-file", str(config_file)],
+        )
 
         assert result.exit_code == 0
         assert "[OK] DQ configuration is valid" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
-    def test_dq_validate_invalid_config(self, mock_service, cli_runner: CliRunner, tmp_path):
+    def test_dq_validate_invalid_config(
+        self, mock_service, cli_runner: CliRunner, tmp_path
+    ):
         """Test that dq validate fails for invalid config."""
         # Create a temporary config file
         config_file = tmp_path / "test.yaml"
         config_file.write_text("invalid: config")
-        
+
         # Mock the config service to return invalid
         mock_config_service = MagicMock()
         mock_config_service.validate_dq_config.return_value = False
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "validate", "chembl_activity", "--config-file", str(config_file)])
+        result = cli_runner.invoke(
+            cli,
+            ["dq", "validate", "chembl_activity", "--config-file", str(config_file)],
+        )
 
         assert result.exit_code == 0  # Command succeeds, but shows error
         assert "[ERROR] DQ configuration is invalid" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
-    def test_dq_show_effective_displays_artifact(self, mock_service, cli_runner: CliRunner):
+    def test_dq_show_effective_displays_artifact(
+        self, mock_service, cli_runner: CliRunner
+    ):
         """Test that dq show-effective displays effective config artifact."""
         # Mock the config service
         mock_config_service = MagicMock()
@@ -199,22 +217,22 @@ class TestCliDqCommands:
                 {
                     "source_type": "file",
                     "source_path": "configs/base/pipeline.yaml",
-                    "priority": 1
+                    "priority": 1,
                 }
             ],
             "resolved_config": {
                 "config_type": "pipeline",
                 "config_data": {"provider": "chembl"},
-                "config_hash": "abc123"
+                "config_hash": "abc123",
             },
             "runtime_overrides": {
                 "cli_overrides": {},
                 "env_overrides": {},
-                "runtime_adjustments": {}
+                "runtime_adjustments": {},
             },
             "effective_execution_config": {
                 "config_data": {"provider": "chembl"},
-                "effective_hash": "def456"
+                "effective_hash": "def456",
             },
             "resolved_config_hash": "abc123",
             "effective_config_hash": "def456",
@@ -227,7 +245,7 @@ class TestCliDqCommands:
                     "contract_ref": "chembl-v1",
                     "contract_version": "1.0.0",
                     "rule_bundle_version": "2024.1",
-                    "policy_hash": "dq-hash-123"
+                    "policy_hash": "dq-hash-123",
                 }
             ],
             "dq_rule_bundle_versions": ["2024.1"],
@@ -240,9 +258,9 @@ class TestCliDqCommands:
                     "policy_hash": "dq-hash-123",
                     "default_disposition": "warn",
                     "disposition_overrides": {},
-                    "strictness_mode": "standard"
+                    "strictness_mode": "standard",
                 }
-            ]
+            ],
         }
         mock_service.return_value = mock_config_service
 
@@ -254,7 +272,9 @@ class TestCliDqCommands:
         assert "dq_contract_compatibility_hash: compat-hash-456" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
-    def test_dq_show_effective_with_overrides(self, mock_service, cli_runner: CliRunner):
+    def test_dq_show_effective_with_overrides(
+        self, mock_service, cli_runner: CliRunner
+    ):
         """Test that dq show-effective works with runtime overrides."""
         # Mock the config service
         mock_config_service = MagicMock()
@@ -264,12 +284,15 @@ class TestCliDqCommands:
             "runtime_overrides": {
                 "cli_overrides": {"batch_size": "100"},
                 "env_overrides": {},
-                "runtime_adjustments": {}
-            }
+                "runtime_adjustments": {},
+            },
         }
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "show-effective", "chembl_activity", "--override", "batch_size=100"])
+        result = cli_runner.invoke(
+            cli,
+            ["dq", "show-effective", "chembl_activity", "--override", "batch_size=100"],
+        )
 
         assert result.exit_code == 0
         # Verify that the override was passed correctly
@@ -285,7 +308,9 @@ class TestCliDqCommands:
             pass
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
-    def test_dq_check_compatibility_compatible(self, mock_service, cli_runner: CliRunner, tmp_path):
+    def test_dq_check_compatibility_compatible(
+        self, mock_service, cli_runner: CliRunner, tmp_path
+    ):
         """Test that dq check-compatibility succeeds for compatible configs."""
         # Create temporary artifact files
         artifact1_file = tmp_path / "artifact1.json"
@@ -294,13 +319,13 @@ class TestCliDqCommands:
         artifact1_content = {
             "artifact_id": "artifact-1",
             "dq_contract_compatibility_hash": "compat-hash-123",
-            "effective_config_hash": "config-hash-456"
+            "effective_config_hash": "config-hash-456",
         }
 
         artifact2_content = {
             "artifact_id": "artifact-2",
             "dq_contract_compatibility_hash": "compat-hash-123",
-            "effective_config_hash": "config-hash-456"
+            "effective_config_hash": "config-hash-456",
         }
 
         with open(artifact1_file, "w") as f:
@@ -313,7 +338,9 @@ class TestCliDqCommands:
         mock_config_service.check_config_compatibility.return_value = True
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)])
+        result = cli_runner.invoke(
+            cli, ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)]
+        )
 
         assert result.exit_code == 0
         assert "[OK] Configurations are compatible" in result.output
@@ -321,7 +348,9 @@ class TestCliDqCommands:
         assert "artifact-2" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
-    def test_dq_check_compatibility_incompatible(self, mock_service, cli_runner: CliRunner, tmp_path):
+    def test_dq_check_compatibility_incompatible(
+        self, mock_service, cli_runner: CliRunner, tmp_path
+    ):
         """Test that dq check-compatibility fails for incompatible configs."""
         # Create temporary artifact files
         artifact1_file = tmp_path / "artifact1.json"
@@ -330,13 +359,13 @@ class TestCliDqCommands:
         artifact1_content = {
             "artifact_id": "artifact-1",
             "dq_contract_compatibility_hash": "compat-hash-123",
-            "effective_config_hash": "config-hash-456"
+            "effective_config_hash": "config-hash-456",
         }
 
         artifact2_content = {
             "artifact_id": "artifact-2",
             "dq_contract_compatibility_hash": "compat-hash-789",  # Different hash
-            "effective_config_hash": "config-hash-456"
+            "effective_config_hash": "config-hash-456",
         }
 
         with open(artifact1_file, "w") as f:
@@ -349,7 +378,9 @@ class TestCliDqCommands:
         mock_config_service.check_config_compatibility.return_value = False
         mock_service.return_value = mock_config_service
 
-        result = cli_runner.invoke(cli, ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)])
+        result = cli_runner.invoke(
+            cli, ["dq", "check-compatibility", str(artifact1_file), str(artifact2_file)]
+        )
 
         assert result.exit_code == 0
         assert "[ERROR] Configurations are NOT compatible" in result.output
@@ -359,7 +390,9 @@ class TestCliDqCommands:
         """Test that dq show handles missing config gracefully."""
         # Mock the config service to raise FileNotFoundError
         mock_config_service = MagicMock()
-        mock_config_service.get_dq_config.side_effect = FileNotFoundError("Config not found")
+        mock_config_service.get_dq_config.side_effect = FileNotFoundError(
+            "Config not found"
+        )
         mock_service.return_value = mock_config_service
 
         result = cli_runner.invoke(cli, ["dq", "show", "nonexistent_pipeline"])
@@ -368,7 +401,9 @@ class TestCliDqCommands:
         assert "Config file not found" in result.output
 
     @patch("bioetl.interfaces.cli.commands.config_dq.get_config_service")
-    def test_dq_validate_handles_invalid_config(self, mock_service, cli_runner: CliRunner):
+    def test_dq_validate_handles_invalid_config(
+        self, mock_service, cli_runner: CliRunner
+    ):
         """Test that dq validate handles invalid config gracefully."""
         # Mock the config service to raise ValueError
         mock_config_service = MagicMock()

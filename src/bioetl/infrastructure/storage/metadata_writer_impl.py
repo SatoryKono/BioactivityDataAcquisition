@@ -236,6 +236,7 @@ class MetadataWriter:
         delta_version_after: int | None = None,
     ) -> str | None:
         """Finalize an existing Silver sidecar in place without republishing artifacts."""
+
         def apply_finalization(metadata: SilverMetadata | GoldMetadata) -> None:
             _apply_silver_metadata_finalization(
                 metadata=cast("SilverMetadata", metadata),
@@ -301,6 +302,7 @@ class MetadataWriter:
         completed_at: datetime | None = None,
     ) -> str | None:
         """Finalize an existing Gold sidecar in place without republishing artifacts."""
+
         def apply_finalization(metadata: SilverMetadata | GoldMetadata) -> None:
             _apply_gold_metadata_finalization(
                 metadata=cast("GoldMetadata", metadata),

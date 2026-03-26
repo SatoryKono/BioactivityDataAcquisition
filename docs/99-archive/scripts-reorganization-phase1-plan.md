@@ -1,3 +1,12 @@
+# Plan Reorganization of Scripts - Phase 1
+
+*Status: archived | Archived on: 2026-03-26 | Reason: historical working plan moved from repository root during cleanup*
+
+This document is preserved as a historical planning artifact. It is not normative
+for current repository behavior.
+
+---
+
 # План реорганизации скриптов — Фаза 1
 
 ## Скрипты по расписанию → `scripts/scheduled-{domain}/`

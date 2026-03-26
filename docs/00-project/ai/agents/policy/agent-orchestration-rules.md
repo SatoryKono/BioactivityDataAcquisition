@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 2.0.0 | Синхронизировано с ORCHESTRATION.md v4.0 (2026-03-04)*
+*Версия: 2.1.0 | Синхронизировано с ORCHESTRATION.md v4.2 (2026-03-26)*
 
 Компактные правила оркестрации субагентов для Codex/Claude docs mirror.
 Полная спецификация: `docs/00-project/ai/agents/agents/ORCHESTRATION.md`.
@@ -22,7 +22,6 @@
 | `py-debug-bot` | opus | RCA падений тестов, исправление ошибок | `src/bioetl/`, `tests/` |
 | `py-doc-bot` | sonnet | Документация, ADR, CHANGELOG, docstrings, диаграммы | `docs/`, docstrings |
 | `py-test-swarm` | opus | Иерархическое тестирование (L1→L2→L3) | `tests/`, `reports/` |
-| `py-doc-swarm` | opus | Иерархическое документирование, drift detection | `docs/`, docstrings, `reports/` |
 | `py-review-orchestrator` | opus | Иерархический code review (S1-S8) | `reports/` |
 
 > Production-код пишем напрямую (без отдельного субагента).
@@ -38,7 +37,7 @@
 | Разобрать падение теста | `py-debug-bot` | `task_id=X, phase=post_refactor, failing_test_report="..."` |
 | Обновить docs после рефакторинга | `py-doc-bot` | `task_id=X, rf_ids=[RF-001, RF-002]` |
 | Полный аудит тестового покрытия | `py-test-swarm` | `task_id=SWARM-001, mode=full_audit` |
-| Полный аудит документации | `py-doc-swarm` | `task_id=DSWARM-001, mode=full_audit` |
+| Полный аудит документации | `documentation-cascade-audit` skill | `/documentation-cascade-audit` |
 | Иерархический code review | `py-review-orchestrator` | `task_id=REV-001, scope=src/bioetl/` |
 
 ## Стандартный workflow
@@ -53,7 +52,7 @@
 
 - **Quick-fix**: test(baseline) → fix → test(final) → doc
 - **Doc-only**: py-doc-bot → py-audit-bot(targeted, docs)
-- **Doc-swarm**: py-doc-swarm(full_audit) → py-audit-bot(targeted, docs)
+- **Doc-audit**: `/documentation-audit` или `/documentation-cascade-audit` → py-audit-bot(targeted, docs)
 - **Config-only**: audit → plan → py-config-bot → test → audit
 
 ## Slash Commands (self-contained)
@@ -68,7 +67,7 @@ Skills now inlined into commands — invoke directly via `/command-name`:
 | `/new-composite` | Создание composite pipeline |
 | `/vcr-record` | Управление VCR cassettes |
 | `/documentation-audit` | Аудит документации |
-| `/documentation-cascade-audit` | Каскадный аудит (uses py-doc-swarm) |
+| `/documentation-cascade-audit` | Каскадный аудит документации с текущим docs-audit skill stack |
 | `/test-swarm` | Иерархическое тестирование (uses py-test-swarm) |
 | `/review-orchestrator` | Code review (uses py-review-orchestrator) |
 | `/mermaid-design` | Mermaid-диаграммы с ADR-040 |

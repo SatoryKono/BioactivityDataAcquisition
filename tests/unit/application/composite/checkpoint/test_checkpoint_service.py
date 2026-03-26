@@ -363,7 +363,10 @@ class TestLoadResume:
 
         assert state.state == CompositePipelineState.ENRICHING
         warning_calls = [str(c) for c in logger.warning.call_args_list]
-        assert any("checkpoint_anchor_missing_effective_config_hash" in c for c in warning_calls)
+        assert any(
+            "checkpoint_anchor_missing_effective_config_hash" in c
+            for c in warning_calls
+        )
 
     @pytest.mark.asyncio
     async def test_resume_blocks_on_effective_hash_mismatch(self) -> None:

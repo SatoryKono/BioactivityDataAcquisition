@@ -1,6 +1,7 @@
 import enum
 import os
 import sys
+from functools import cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
@@ -57,14 +58,6 @@ def pytest_configure(config):
         config.option.diff_mode = config.option.diff_mode.value
 
 
-# Heavy deps are guarded so that minimal CI environments (e.g. detect-secrets
-# workflow, which only installs pytest) can still collect tests without
-# ImportError.
-try:
-    import pandas as pd
-except ImportError:  # pragma: no cover
-    pd = None  # type: ignore[assignment]
-
 try:
     from hypothesis import settings as _hyp_settings
 
@@ -76,18 +69,34 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
-try:
-    import vcr as vcrpy
-except ImportError:  # pragma: no cover
-    vcrpy = None  # type: ignore[assignment]
-
-
 _PUBLICATION_CLASSIFICATION_TEST_PREFIXES = (
-    "tests/unit/application/pipelines/",
-    "tests/unit/domain/mapping/",
-    "tests/integration/",
-    "tests/e2e/",
+    "tests/unit/application/pipelines/common/test_publication_parity.py",
+    "tests/unit/application/pipelines/crossref/",
+    "tests/unit/application/pipelines/openalex/",
+    "tests/unit/application/pipelines/pubmed/",
+    "tests/unit/application/pipelines/semanticscholar/",
+    "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
+    "tests/unit/domain/mapping/test_publication_type_classification.py",
+    "tests/unit/domain/mapping/test_publication_type_mapping.py",
+    "tests/integration/pipelines/test_crossref_date_normalization.py",
+    "tests/integration/pipelines/test_pubmed_date_normalization.py",
+    "tests/e2e/test_chembl_publication_e2e.py",
+    "tests/e2e/test_chembl_publication_term_e2e.py",
+    "tests/e2e/test_crossref_publication_e2e.py",
+    "tests/e2e/test_openalex_publication_e2e.py",
+    "tests/e2e/test_pubmed_publication_e2e.py",
+    "tests/e2e/test_semanticscholar_publication_e2e.py",
 )
+
+
+@cache
+def _load_vcrpy() -> Any:
+    """Import vcr lazily so collect-only runs skip this dependency cost."""
+    try:
+        import vcr as vcrpy
+    except ImportError:  # pragma: no cover
+        return None
+    return vcrpy
 
 
 def _selected_tests_need_publication_type_classification(
@@ -144,7 +153,7 @@ def default_vcr_record_mode() -> None:
     - Local runs default to `once` to allow recording missing interactions.
     - Explicit VCR_RECORD_MODE always has priority.
     """
-    if vcrpy is None or "VCR_RECORD_MODE" in os.environ:
+    if _load_vcrpy() is None or "VCR_RECORD_MODE" in os.environ:
         return
 
     os.environ["VCR_RECORD_MODE"] = "none" if os.getenv("CI") else "once"
@@ -220,12 +229,23 @@ def query_ignore_email(request_1: Any, request_2: Any) -> bool:
     )
 
 
+@cache
+def _load_pandas() -> Any:
+    """Import pandas lazily so pytest collection stays lightweight."""
+    try:
+        import pandas as pd
+    except ImportError:  # pragma: no cover
+        return None
+    return pd
+
+
 @pytest.fixture
 def vcr(  # type: ignore[override]
     vcr_config: dict[str, object],
     vcr_cassette_dir: Path | str,
 ) -> Any:
     """Configure VCR instance with custom matchers."""
+    vcrpy = _load_vcrpy()
     if vcrpy is None:
         pytest.skip("vcrpy not installed")
     kwargs: dict[str, object] = {
@@ -392,6 +412,7 @@ CROSSREF_SPECIFIC = [
 
 
 def _create_minimal_df(columns, provider, entity_id, pk_field, pk_value):
+    pd = _load_pandas()
     if pd is None:
         pytest.skip("pandas not installed")
     all_cols = list(set(SYSTEM_COLUMNS + BASE_PUBLICATION_COLUMNS + columns))

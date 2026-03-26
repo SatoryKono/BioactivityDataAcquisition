@@ -18,7 +18,43 @@ on:
       - '.github/workflows/docs.yml'
 
 jobs:
+  docs-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.11"
+
+      - name: Run docs-governance architecture tests
+        run: |
+          uv run pytest \
+            tests/architecture/test_architecture_dependency_docs_drift.py::test_dependency_map_drift_check_passes_current_repo \
+            tests/architecture/test_config_topology_docs_drift.py \
+            tests/architecture/test_diagram_narrative_docs_sync.py \
+            tests/architecture/test_docs_governance_workflow.py \
+            tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
+            tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_claude_md_synced \
+            tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_required_docs_synced \
+            tests/architecture/test_docs_version_sync.py::TestVersionFormat::test_rules_version_format \
+            tests/architecture/test_docs_version_sync.py::TestVersionFormat::test_rules_header_format \
+            tests/architecture/test_documentation_sync.py::test_ports_count_matches_docs \
+            tests/architecture/test_documentation_sync.py::test_pipeline_count_matches_docs \
+            tests/architecture/test_documentation_sync.py::test_pipeline_ids_match_reference_index \
+            tests/architecture/test_documentation_sync.py::test_adr_numbers_are_unique \
+            tests/architecture/test_documentation_sync.py::test_adr_index_links_match_decision_files \
+            tests/architecture/test_documentation_sync.py::test_adr_h1_number_matches_filename \
+            tests/architecture/test_documentation_sync.py::test_adr_status_is_from_allowed_set \
+            tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files \
+            tests/architecture/test_internal_orchestration_docs.py \
+            tests/architecture/test_runtime_agent_docs_drift.py \
+            -q --tb=short
+
   validate-mkdocs:
+    needs: docs-governance
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

@@ -34,26 +34,26 @@ class TestEffectiveConfigService:
         """Test creation of a simple artifact without DQ."""
         pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
-            "settings": {"batch_size": 1000}
+            "settings": {"batch_size": 1000},
         }
-        
+
         source_refs: List[ConfigSourceRef] = [
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
                 source_hash="base_hash",
-                priority=1
+                priority=1,
             )
         ]
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
             resolved_config=pipeline_config,
             runtime_overrides={},
-            source_refs=source_refs
+            source_refs=source_refs,
         )
-        
+
         # Verify artifact structure
         assert isinstance(artifact, EffectiveConfigArtifact)
         assert artifact.pipeline_name == "test_pipeline"
@@ -65,9 +65,9 @@ class TestEffectiveConfigService:
         """Test creation of artifact with DQ configuration."""
         pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "chembl_molecule", "version": "1.0.0"},
-            "settings": {"batch_size": 5000}
+            "settings": {"batch_size": 5000},
         }
-        
+
         dq_config = DQConfig(
             contract_ref="chembl_molecule",
             contract_version="1.0.0",
@@ -75,29 +75,29 @@ class TestEffectiveConfigService:
             default_disposition_policy=DQDisposition.WARN,
             disposition_overrides={
                 "schema.molecule_id": DQDisposition.FAIL,
-                "schema.assay_id": DQDisposition.QUARANTINE
+                "schema.assay_id": DQDisposition.QUARANTINE,
             },
-            strictness_mode="strict"
+            strictness_mode="strict",
         )
-        
+
         source_refs: List[ConfigSourceRef] = [
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/providers/chembl.yaml",
                 source_hash="provider_hash",
-                priority=1
+                priority=1,
             )
         ]
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="chembl_molecule",
             pipeline_kind="standard",
             resolved_config=pipeline_config,
             runtime_overrides={},
             source_refs=source_refs,
-            dq_config=dq_config
+            dq_config=dq_config,
         )
-        
+
         # Verify DQ integration
         assert len(artifact.dq_policy_refs) == 1
         assert artifact.dq_policy_refs[0].contract_ref == "chembl_molecule"
@@ -109,23 +109,23 @@ class TestEffectiveConfigService:
         """Test creation of artifact with runtime overrides."""
         pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
-            "settings": {"batch_size": 1000, "timeout": 30}
+            "settings": {"batch_size": 1000, "timeout": 30},
         }
-        
+
         runtime_overrides = {
             "cli": {"settings": {"batch_size": 2000}},
             "env": {"log_level": "DEBUG"},
-            "runtime": {"auto_adjust": True}
+            "runtime": {"auto_adjust": True},
         }
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
             resolved_config=pipeline_config,
             runtime_overrides=runtime_overrides,
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Verify overrides are applied
         effective_config = artifact.effective_execution_config.config_data
         assert effective_config["settings"]["batch_size"] == 2000  # Overridden
@@ -140,17 +140,17 @@ class TestEffectiveConfigService:
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test1"}},
             runtime_overrides={},
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         artifact2 = self.service.create_effective_config_artifact(
             pipeline_name="test2",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test2"}},
             runtime_overrides={},
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Should have different auto-generated IDs
         assert artifact1.artifact_id != artifact2.artifact_id
         assert artifact1.artifact_id.startswith("config_")
@@ -164,31 +164,32 @@ class TestEffectiveConfigService:
             resolved_config={"pipeline": {"name": "test"}},
             runtime_overrides={},
             source_refs=[],
-            artifact_id="custom_artifact_123"
+            artifact_id="custom_artifact_123",
         )
-        
+
         assert artifact.artifact_id == "custom_artifact_123"
 
     def test_serialization_integration(self) -> None:
         """Test serialization integration."""
         pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
-            "settings": {"batch_size": 1000}
+            "settings": {"batch_size": 1000},
         }
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
             resolved_config=pipeline_config,
             runtime_overrides={},
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Serialize the artifact
         json_str = self.service.serialize_artifact(artifact)
-        
+
         # Should be valid JSON
         import json
+
         parsed = json.loads(json_str)
         assert parsed["artifact_id"] == artifact.artifact_id
         assert parsed["pipeline_name"] == "test_pipeline"
@@ -197,20 +198,20 @@ class TestEffectiveConfigService:
         """Test hash computation integration."""
         pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "test_pipeline", "version": "1.0.0"},
-            "settings": {"batch_size": 1000}
+            "settings": {"batch_size": 1000},
         }
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
             resolved_config=pipeline_config,
             runtime_overrides={},
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Compute hashes
         hashes = self.service.compute_artifact_hashes(artifact)
-        
+
         # Verify hash structure
         assert hashes.resolved_config_hash == artifact.resolved_config_hash
         assert hashes.effective_config_hash == artifact.effective_config_hash
@@ -223,9 +224,9 @@ class TestEffectiveConfigService:
             contract_ref="test_contract",
             contract_version="1.0.0",
             rule_bundle_version="1.0.0",
-            default_disposition_policy=DQDisposition.WARN
+            default_disposition_policy=DQDisposition.WARN,
         )
-        
+
         # Create two artifacts with same DQ config
         artifact1 = self.service.create_effective_config_artifact(
             pipeline_name="test1",
@@ -233,38 +234,38 @@ class TestEffectiveConfigService:
             resolved_config={"pipeline": {"name": "test1"}},
             runtime_overrides={},
             source_refs=[],
-            dq_config=dq_config
+            dq_config=dq_config,
         )
-        
+
         artifact2 = self.service.create_effective_config_artifact(
             pipeline_name="test2",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test2"}},
             runtime_overrides={},
             source_refs=[],
-            dq_config=dq_config
+            dq_config=dq_config,
         )
-        
+
         # Should be compatible
         assert self.service.check_dq_compatibility(artifact1, artifact2) is True
-        
+
         # Create artifact with different DQ config
         different_dq_config = DQConfig(
             contract_ref="different_contract",
             contract_version="2.0.0",
             rule_bundle_version="2.0.0",
-            default_disposition_policy=DQDisposition.FAIL
+            default_disposition_policy=DQDisposition.FAIL,
         )
-        
+
         artifact3 = self.service.create_effective_config_artifact(
             pipeline_name="test3",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test3"}},
             runtime_overrides={},
             source_refs=[],
-            dq_config=different_dq_config
+            dq_config=different_dq_config,
         )
-        
+
         # Should not be compatible
         assert self.service.check_dq_compatibility(artifact1, artifact3) is False
 
@@ -272,34 +273,34 @@ class TestEffectiveConfigService:
         """Test the convenience method for pipeline config."""
         pipeline_config: Dict[str, Any] = {
             "pipeline": {"name": "chembl_molecule", "version": "1.0.0"},
-            "settings": {"batch_size": 5000}
+            "settings": {"batch_size": 5000},
         }
-        
+
         dq_config = DQConfig(
             contract_ref="chembl_molecule",
             contract_version="1.0.0",
             rule_bundle_version="1.0.0",
-            default_disposition_policy=DQDisposition.WARN
+            default_disposition_policy=DQDisposition.WARN,
         )
-        
+
         runtime_overrides = {
             "cli": {"settings": {"batch_size": 10000}},
-            "env": {"log_level": "INFO"}
+            "env": {"log_level": "INFO"},
         }
-        
+
         artifact = self.service.create_artifact_from_pipeline_config(
             pipeline_name="chembl_molecule",
             pipeline_kind="standard",
             pipeline_config=pipeline_config,
             dq_config=dq_config,
-            runtime_overrides=runtime_overrides
+            runtime_overrides=runtime_overrides,
         )
-        
+
         # Verify artifact was created correctly
         assert isinstance(artifact, EffectiveConfigArtifact)
         assert artifact.pipeline_name == "chembl_molecule"
         assert len(artifact.dq_policy_refs) == 1
-        
+
         # Verify overrides were applied
         effective_config = artifact.effective_execution_config.config_data
         assert effective_config["settings"]["batch_size"] == 10000  # Overridden
@@ -310,20 +311,20 @@ class TestEffectiveConfigService:
             "composite": {
                 "name": "activity_composite",
                 "version": "1.0.0",
-                "entities": ["molecule", "assay", "activity"]
+                "entities": ["molecule", "assay", "activity"],
             },
             "merge_strategy": "hierarchical",
-            "output_policy": "consolidated"
+            "output_policy": "consolidated",
         }
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="activity_composite",
             pipeline_kind="composite",
             resolved_config=composite_config,
             runtime_overrides={},
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Verify composite artifact
         assert artifact.pipeline_kind == "composite"
         assert artifact.resolved_config.config_type == "composite"
@@ -336,9 +337,9 @@ class TestEffectiveConfigService:
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test"}},
             runtime_overrides={},
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Should not be able to modify artifact
         with pytest.raises(Exception):
             artifact.pipeline_name = "modified"  # type: ignore
@@ -361,24 +362,24 @@ class TestDQPolicyIntegration:
             disposition_overrides={
                 "schema.molecule_id": DQDisposition.FAIL,
                 "schema.assay_id": DQDisposition.QUARANTINE,
-                "threshold.completeness": DQDisposition.WARN
+                "threshold.completeness": DQDisposition.WARN,
             },
-            strictness_mode="strict"
+            strictness_mode="strict",
         )
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="chembl_molecule",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "chembl_molecule"}},
             runtime_overrides={},
             source_refs=[],
-            dq_config=dq_config
+            dq_config=dq_config,
         )
-        
+
         # Verify policy snapshot
         assert len(artifact.dq_policy_snapshots) == 1
         snapshot = artifact.dq_policy_snapshots[0]
-        
+
         assert snapshot.contract_ref == "chembl_molecule"
         assert snapshot.contract_version == "1.0.0"
         assert snapshot.rule_bundle_version == "1.0.0"
@@ -393,22 +394,22 @@ class TestDQPolicyIntegration:
             contract_ref="test_contract",
             contract_version="2.0.0",
             rule_bundle_version="2.0.0",
-            default_disposition_policy=DQDisposition.FAIL
+            default_disposition_policy=DQDisposition.FAIL,
         )
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test"}},
             runtime_overrides={},
             source_refs=[],
-            dq_config=dq_config
+            dq_config=dq_config,
         )
-        
+
         # Verify policy ref
         assert len(artifact.dq_policy_refs) == 1
         policy_ref = artifact.dq_policy_refs[0]
-        
+
         assert policy_ref.contract_ref == "test_contract"
         assert policy_ref.contract_version == "2.0.0"
         assert policy_ref.rule_bundle_version == "2.0.0"
@@ -418,18 +419,18 @@ class TestDQPolicyIntegration:
         dq_config = DQConfig(
             contract_ref="chembl_molecule",
             contract_version="1.0.0",
-            rule_bundle_version="1.0.0"
+            rule_bundle_version="1.0.0",
         )
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="chembl_molecule",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "chembl_molecule"}},
             runtime_overrides={},
             source_refs=[],
-            dq_config=dq_config
+            dq_config=dq_config,
         )
-        
+
         # Verify rule bundle versions
         assert len(artifact.dq_rule_bundle_versions) == 1
         assert "chembl_molecule" in artifact.dq_rule_bundle_versions
@@ -442,9 +443,9 @@ class TestDQPolicyIntegration:
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test"}},
             runtime_overrides={},
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Should have empty DQ fields
         assert artifact.dq_policy_refs == []
         assert artifact.dq_policy_snapshots == []
@@ -465,58 +466,55 @@ class TestOverrideApplication:
             "pipeline": {"name": "test", "version": "1.0"},
             "settings": {
                 "batch": {"size": 1000, "timeout": 30},
-                "retry": {"max_attempts": 3, "backoff": "exponential"}
-            }
+                "retry": {"max_attempts": 3, "backoff": "exponential"},
+            },
         }
-        
+
         overrides = {
-            "cli": {
-                "settings": {
-                    "batch": {"size": 2000},
-                    "retry": {"max_attempts": 5}
-                }
-            }
+            "cli": {"settings": {"batch": {"size": 2000}, "retry": {"max_attempts": 5}}}
         }
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test",
             pipeline_kind="standard",
             resolved_config=base_config,
             runtime_overrides=overrides,
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         effective_config = artifact.effective_execution_config.config_data
-        
+
         # Verify deep overrides were applied
         assert effective_config["settings"]["batch"]["size"] == 2000  # Overridden
         assert effective_config["settings"]["batch"]["timeout"] == 30  # Not overridden
         assert effective_config["settings"]["retry"]["max_attempts"] == 5  # Overridden
-        assert effective_config["settings"]["retry"]["backoff"] == "exponential"  # Not overridden
+        assert (
+            effective_config["settings"]["retry"]["backoff"] == "exponential"
+        )  # Not overridden
 
     def test_multiple_override_sources(self) -> None:
         """Test override application from multiple sources."""
         base_config: Dict[str, Any] = {
             "pipeline": {"name": "test"},
-            "settings": {"batch_size": 1000, "timeout": 30, "log_level": "INFO"}
+            "settings": {"batch_size": 1000, "timeout": 30, "log_level": "INFO"},
         }
-        
+
         overrides = {
             "cli": {"settings": {"batch_size": 2000}},  # CLI override
             "env": {"settings": {"log_level": "DEBUG"}},  # Environment override
-            "runtime": {"auto_adjust": True}  # Runtime adjustment
+            "runtime": {"auto_adjust": True},  # Runtime adjustment
         }
-        
+
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test",
             pipeline_kind="standard",
             resolved_config=base_config,
             runtime_overrides=overrides,
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         effective_config = artifact.effective_execution_config.config_data
-        
+
         # Verify all override sources were applied
         assert effective_config["settings"]["batch_size"] == 2000  # CLI override
         assert effective_config["settings"]["log_level"] == "DEBUG"  # Env override
@@ -525,32 +523,32 @@ class TestOverrideApplication:
 
     def test_override_hash_computation(self) -> None:
         """Test override hash computation."""
-        overrides1 = {
-            "cli": {"batch_size": 1000},
-            "env": {"log_level": "INFO"}
-        }
-        
+        overrides1 = {"cli": {"batch_size": 1000}, "env": {"log_level": "INFO"}}
+
         overrides2 = {
             "env": {"log_level": "INFO"},
-            "cli": {"batch_size": 1000}  # Same content, different order
+            "cli": {"batch_size": 1000},  # Same content, different order
         }
-        
+
         # Create artifacts with same overrides but different ordering
         artifact1 = self.service.create_effective_config_artifact(
             pipeline_name="test1",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test1"}},
             runtime_overrides=overrides1,
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         artifact2 = self.service.create_effective_config_artifact(
             pipeline_name="test2",
             pipeline_kind="standard",
             resolved_config={"pipeline": {"name": "test2"}},
             runtime_overrides=overrides2,
-            source_refs=[]
+            source_refs=[],
         )
-        
+
         # Override hashes should be the same (deterministic)
-        assert artifact1.runtime_overrides.override_hash == artifact2.runtime_overrides.override_hash
+        assert (
+            artifact1.runtime_overrides.override_hash
+            == artifact2.runtime_overrides.override_hash
+        )

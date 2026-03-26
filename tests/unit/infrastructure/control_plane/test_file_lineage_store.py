@@ -59,4 +59,3 @@ def test_file_store_round_trips_fragments_by_id_run_manifest_and_node(tmp_path) 
     assert store.list_by_run_id(run_id) == [fragment]
     assert store.list_by_manifest_id("manifest-1") == [fragment]
     assert store.list_by_node_id(dataset_node.node_id) == [fragment]
-

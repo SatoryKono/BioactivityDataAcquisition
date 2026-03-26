@@ -1,0 +1,142 @@
+"""Unit tests for Silver writer metadata operations."""
+
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, MagicMock, call
+
+import pytest
+
+from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _PreparedSilverMetadataWriteOperation,
+    _SilverMergedMetadataWriteRequest,
+    _SilverMetadataWriteRequest,
+    _execute_prepared_silver_metadata_write_operation,
+)
+
+
+@pytest.mark.unit
+class TestExecutePreparedSilverMetadataWriteOperation:
+    """Tests for Silver metadata persistence metrics."""
+
+    @pytest.mark.asyncio
+    async def test_emits_missing_bronze_refs_metric_for_standard_write(self) -> None:
+        host = AsyncMock()
+        host._lineage_store = None
+        host._metrics = MagicMock()
+        metadata = MagicMock()
+        request = _SilverMetadataWriteRequest(
+            table_path="/tmp/silver/chembl/activity",
+            table_name="chembl.activity",
+            records=[{"entity_id": "1"}],
+            primary_keys=["entity_id"],
+            mode=SilverWriteMode.MERGE,
+            bronze_refs=None,
+        )
+        prepared = _PreparedSilverMetadataWriteOperation(
+            request=request,
+            provider_name="chembl",
+            entity_name="activity",
+            metadata=metadata,
+        )
+
+        await _execute_prepared_silver_metadata_write_operation(host, prepared)
+
+        host._write_silver_metadata_file.assert_awaited_once()
+        host._metrics.increment_counter.assert_called_once_with(
+            "lineage_refs_missing_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "layer": "silver",
+                "ref_type": "bronze_batch",
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_emits_composite_source_selection_metrics_for_merged_write(
+        self,
+    ) -> None:
+        host = AsyncMock()
+        host._lineage_store = None
+        host._metrics = MagicMock()
+        metadata = MagicMock()
+        request = _SilverMergedMetadataWriteRequest(
+            table_path="/tmp/silver/composite/publication",
+            table_name="composite.publication",
+            records=[
+                {
+                    "entity_id": "1",
+                    "_source_providers": ["chembl", "pubchem"],
+                    "_field_sources": {"title": "chembl", "score": "pubchem"},
+                },
+                {
+                    "entity_id": "2",
+                    "_source_providers": ["chembl"],
+                    "_field_sources": {"summary": "chembl"},
+                },
+            ],
+            primary_keys=["entity_id"],
+            run_id="run-1",
+            sources_used=["openalex"],
+        )
+        prepared = _PreparedSilverMetadataWriteOperation(
+            request=request,
+            provider_name="composite",
+            entity_name="publication",
+            metadata=metadata,
+        )
+
+        await _execute_prepared_silver_metadata_write_operation(host, prepared)
+
+        host._write_silver_metadata_file.assert_awaited_once()
+        host._metrics.increment_counter.assert_has_calls(
+            [
+                call(
+                    "composite_source_selection_total",
+                    1,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "silver_source_included",
+                        "selected_source": "chembl",
+                    },
+                ),
+                call(
+                    "composite_source_selection_total",
+                    1,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "silver_source_included",
+                        "selected_source": "openalex",
+                    },
+                ),
+                call(
+                    "composite_source_selection_total",
+                    1,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "silver_source_included",
+                        "selected_source": "pubchem",
+                    },
+                ),
+                call(
+                    "composite_source_selection_total",
+                    2,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "silver_field_selected",
+                        "selected_source": "chembl",
+                    },
+                ),
+                call(
+                    "composite_source_selection_total",
+                    1,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "silver_field_selected",
+                        "selected_source": "pubchem",
+                    },
+                ),
+            ],
+            any_order=False,
+        )

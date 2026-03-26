@@ -92,8 +92,10 @@ class CompositeCheckpointState:
     @property
     def is_resumable(self) -> bool:
         """Check if this checkpoint can be resumed."""
-        return self.state.is_resumable or self.seed_completed or bool(
-            self.completed_enrichers
+        return (
+            self.state.is_resumable
+            or self.seed_completed
+            or bool(self.completed_enrichers)
         )
 
     def to_dict(self) -> dict[str, object]:
@@ -105,7 +107,9 @@ class CompositeCheckpointState:
             "seed_completed": self.seed_completed,
             "seed_result": _serialize_seed_result(self.seed_result),
             "completed_dependencies": list(self.completed_dependencies),
-            "dependency_results": _serialize_dependency_results(self.dependency_results),
+            "dependency_results": _serialize_dependency_results(
+                self.dependency_results
+            ),
             "completed_enrichers": list(self.completed_enrichers),
             "enrichment_results": _serialize_enrichment_results(
                 self.enrichment_results
@@ -134,9 +138,13 @@ class CompositeCheckpointState:
             seed_completed=data.get("seed_completed", False),
             seed_result=_parse_seed_result(data.get("seed_result")),
             completed_dependencies=frozenset(data.get("completed_dependencies", [])),
-            dependency_results=_parse_dependency_results(data.get("dependency_results")),
+            dependency_results=_parse_dependency_results(
+                data.get("dependency_results")
+            ),
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
-            enrichment_results=_parse_enrichment_results(data.get("enrichment_results")),
+            enrichment_results=_parse_enrichment_results(
+                data.get("enrichment_results")
+            ),
             merge_completed=data.get("merge_completed", False),
             merge_result=data.get("merge_result"),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),

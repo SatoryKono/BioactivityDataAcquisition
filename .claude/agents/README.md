@@ -3,7 +3,7 @@
 Agent registry after consolidation (2026-03-12).
 See `ORCHESTRATION.md` for workflow and write-zone rules.
 
-## BioETL Core (9 agents)
+## BioETL Core (8 active agents)
 
 | Agent | Model | Role |
 |-------|-------|------|
@@ -14,8 +14,12 @@ See `ORCHESTRATION.md` for workflow and write-zone rules.
 | [py-debug-bot](py-debug-bot.md) | opus | RCA, bug fixes, regression debugging |
 | [py-doc-bot](py-doc-bot.md) | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams |
 | [py-test-swarm](py-test-swarm.md) | opus | Hierarchical testing (L1->L2->L3) |
-| [py-doc-swarm](py-doc-swarm.md) | opus | Hierarchical docs, drift detection |
 | [py-review-orchestrator](py-review-orchestrator.md) | opus | Code review (S1-S8 stages) |
+
+Repo-wide documentation audits are no longer routed through a dedicated
+documentation-only agent entry in active orchestration docs; use the
+`documentation-audit` / `documentation-cascade-audit` skill surfaces for that
+workflow.
 
 ## Generic Utilities (12 agents)
 

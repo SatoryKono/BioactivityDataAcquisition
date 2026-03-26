@@ -239,7 +239,9 @@ def _conflict_summary(
     return {
         "total_conflicts": totals["total_conflicts"],
         "conflict_rate": _safe_ratio(totals["total_conflicts"], totals["total_fields"]),
-        "records_with_conflicts": sum(1 for exp in explanations if exp.conflict_count > 0),
+        "records_with_conflicts": sum(
+            1 for exp in explanations if exp.conflict_count > 0
+        ),
     }
 
 
@@ -263,6 +265,8 @@ def _safe_ratio(numerator: int, denominator: int) -> float:
     return numerator / denominator if denominator > 0 else 0.0
 
 
-def create_merged_metadata_explainability_service() -> MergedMetadataExplainabilityService:
+def create_merged_metadata_explainability_service() -> (
+    MergedMetadataExplainabilityService
+):
     """Factory function for MergedMetadataExplainabilityService."""
     return MergedMetadataExplainabilityService()

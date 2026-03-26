@@ -30,7 +30,9 @@ def _create_issue(
     )
 
 
-def _validate_pairs(pairs: list[dict], source_names: list[str]) -> list[ValidationIssue]:
+def _validate_pairs(
+    pairs: list[dict], source_names: list[str]
+) -> list[ValidationIssue]:
     if not pairs:
         return [
             _create_issue(

@@ -5,15 +5,18 @@ and follow the project's observability standards.
 """
 
 import json
+from collections import Counter
+from functools import cache
 from pathlib import Path
 import re
-from collections import Counter
+
 import pytest
 
 # Import metrics module to get all defined metric names
 from bioetl.infrastructure.observability import metrics
 
 
+@cache
 def get_all_valid_metric_names() -> set[str]:
     """Extract all valid Prometheus metric names including suffixes for Histograms."""
     base_names = set()
@@ -51,12 +54,14 @@ def get_all_valid_metric_names() -> set[str]:
     return all_valid_names
 
 
-def get_dashboard_files() -> list[Path]:
+@cache
+def get_dashboard_files() -> tuple[Path, ...]:
     """Get all Grafana dashboard JSON files."""
     dashboard_dir = Path("grafana/dashboards")
-    return list(dashboard_dir.glob("*.json"))
+    return tuple(dashboard_dir.glob("*.json"))
 
 
+@cache
 def load_dashboard(dashboard_path: Path) -> dict:
     """Load dashboard JSON."""
     with open(dashboard_path, encoding="utf-8-sig") as f:
@@ -267,6 +272,21 @@ def test_dq_dashboard_contains_core_dq_metrics():
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"DQ dashboard missing metrics: {missing}"
+
+
+def test_overview_dashboard_contains_control_plane_and_lineage_metrics():
+    """Ensure overview dashboard exposes control-plane and lineage health signals."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    all_expressions = "\n".join(get_panel_expressions(dashboard))
+
+    required_metrics = [
+        "bioetl_control_plane_manifest_writes_total",
+        "bioetl_control_plane_ledger_appends_total",
+        "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_lineage_fragments_emitted_total",
+    ]
+    missing = [metric for metric in required_metrics if metric not in all_expressions]
+    assert not missing, f"Overview dashboard missing metrics: {missing}"
 
 
 def test_provider_dashboard_uses_pipeline_filters():

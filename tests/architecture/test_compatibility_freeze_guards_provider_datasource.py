@@ -255,10 +255,7 @@ def test_legacy_datasource_factory_module_string_mentions_are_confined_to_compat
         | frozenset(
             {
                 Path(__file__).resolve(),
-                ROOT
-                / "tests"
-                / "architecture"
-                / "test_compatibility_freeze_guards.py",
+                ROOT / "tests" / "architecture" / "test_compatibility_freeze_guards.py",
             }
         ),
     )

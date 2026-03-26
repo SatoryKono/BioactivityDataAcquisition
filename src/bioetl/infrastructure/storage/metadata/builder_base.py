@@ -132,9 +132,7 @@ class _MetadataBuilderBase:
                 "valid_records": max(total_records - error_records, 0),
                 "error_records": error_records,
                 "warning_records": warning_records,
-                "error_rate": (error_records / total_records)
-                if total_records
-                else 0.0,
+                "error_rate": (error_records / total_records) if total_records else 0.0,
                 "validation_passed": bool(cv_summary["validation_passed"]),
                 "rule_provenance": cv_summary["rule_provenance"],
             }

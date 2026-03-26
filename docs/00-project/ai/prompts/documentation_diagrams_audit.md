@@ -15,13 +15,13 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
 
 ### Рекомендуемый состав
 
-| # | Агент | `subagent_type` | Model | Зона ответственности |
-|---|-------|-----------------|-------|---------------------|
-| A1 | Cross-Reference Auditor | `py-doc-swarm` | opus | Битые ссылки, навигация mkdocs.yml, dead links |
+| # | Агент | Surface | Model | Зона ответственности |
+|---|-------|---------|-------|---------------------|
+| A1 | Cross-Reference Auditor | `documentation-audit` | skill | Битые ссылки, навигация mkdocs.yml, dead links |
 | A2 | Code-Docs Sync Checker | `py-doc-bot` | sonnet | Соответствие docs ↔ код (API ref, layer docs, configs) |
 | A3 | ADR Auditor | `py-audit-bot` | opus | Полнота ADR, статусы, отсутствующие решения |
 | A4 | Diagram Validator | `py-doc-bot` | sonnet | Mermaid синтаксис, ADR-040, соответствие коду |
-| A5 | Content Freshness Analyzer | `py-doc-swarm` | opus | Устаревший контент, drift detection, архив-кандидаты |
+| A5 | Content Freshness Analyzer | `documentation-cascade-audit` | skill | Устаревший контент, drift detection, архив-кандидаты |
 
 ### Когда какой агент
 
@@ -308,10 +308,10 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
 
 ## Оркестрация (для Claude Code)
 
-Запуск полного аудита через субагентов:
+Запуск полного аудита через актуальные skill / subagent surfaces:
 
     # Фаза 1: Cross-Reference (блокирующая)
-    Agent(subagent_type="py-doc-swarm", prompt="task_id=DOCAUDIT-001, mode=crossref, scope=docs/ excluding docs/00-project/ai/")
+    /documentation-audit task_id=DOCAUDIT-001 mode=crossref scope="docs/ excluding docs/00-project/ai/"
 
     # Фазы 2-4: параллельно
     Agent(subagent_type="py-doc-bot", prompt="task_id=DOCAUDIT-002, mode=code_sync, scope=docs/02-architecture/ docs/04-reference/")
@@ -319,4 +319,4 @@ Scope: `docs/` **без** `docs/00-project/ai/` (AI-конфигурация а�
     Agent(subagent_type="py-doc-bot", prompt="task_id=DOCAUDIT-004, mode=diagram_validation, scope=docs/02-architecture/diagrams/")
 
     # Фаза 5: после завершения 2-4
-    Agent(subagent_type="py-doc-swarm", prompt="task_id=DOCAUDIT-005, mode=freshness, scope=docs/")
+    /documentation-cascade-audit task_id=DOCAUDIT-005 mode=freshness scope="docs/"

@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
-
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.contract_identity import (
     CompatibilityLevel,
@@ -57,7 +55,7 @@ def as_string_dict(value: object, field_name: str) -> dict[str, str]:
     return dict(value)
 
 
-def _parse_identity(contract_ref: str, identity_data: dict[str, Any]) -> ContractIdentity:
+def _parse_identity(contract_ref: str, identity_data: JsonDict) -> ContractIdentity:
     """Parse contract identity payload from raw registry data."""
     compatibility_raw = str(identity_data.get("compatibility_level", "patch"))
     try:
@@ -84,7 +82,7 @@ def _parse_status(contract_ref: str, raw_status: object) -> LifecycleStatus:
         raise ValueError(f"Invalid status for {contract_ref}: {raw_status}") from exc
 
 
-def parse_entry_payload(contract_ref: str, data: dict[str, Any]) -> ContractRegistryEntry:
+def parse_entry_payload(contract_ref: str, data: JsonDict) -> ContractRegistryEntry:
     """Parse one registry entry from raw dictionary payload."""
     identity_data = data.get("identity")
     if identity_data is None:
@@ -102,7 +100,9 @@ def parse_entry_payload(contract_ref: str, data: dict[str, Any]) -> ContractRegi
         supported_versions=as_string_list(
             data.get("supported_versions"), "supported_versions"
         ),
-        migration_guides=as_string_dict(data.get("migration_guides"), "migration_guides"),
+        migration_guides=as_string_dict(
+            data.get("migration_guides"), "migration_guides"
+        ),
         last_updated=str(data.get("last_updated", "")),
         owners=as_string_list(data.get("owners"), "owners"),
         dq_policy_ref=data.get("dq_policy_ref"),

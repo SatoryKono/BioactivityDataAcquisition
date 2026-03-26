@@ -102,7 +102,9 @@ class ServicesBuilder:
         loading_strategy: LoadingStrategy | None = None,
         checkpoint_compatibility_service: object | None = None,
         current_metadata: CheckpointMetadata | None = None,
-        compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
+        compatibility_policy: Literal[
+            "observe", "soft_fail", "hard_fail"
+        ] = "soft_fail",
     ) -> CheckpointManagerService:
         """Create configured CheckpointManagerService.
 

@@ -19,7 +19,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 
 ### Фильтрация и Изоляция данных
 В верхней части каждого дашборда расположены выпадающие списки:
-- **Simple / Overview v2 / DQ v2**: `$pipeline`, `$run-type`
+- **Simple / Overview v2 / DQ v2**: `$pipeline`, `$run_type`
 - **Provider Health v2**: `$pipeline`, `$provider`
 
 > **Важно**: Если вы не видите данных, убедитесь, что в фильтре выбран правильный пайплайн или стоит значение `All`.
@@ -31,6 +31,11 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - **Processing Pipeline**: динамика по стадиям (bronze/silver/gold/quarantined).
 - **Stage Distribution / Pipeline Distribution**: срезы распределения.
 - **Overall Quality**: `gold / clamp-min(bronze, 1)`.
+- **Control Plane & Lineage**: отдельная строка для `Manifest Writes (24h)`,
+  `Ledger Appends (24h)`, `Checkpoint Incompatibilities (24h)` и
+  `Lineage Fragment Failures (24h)`.
+- **Lineage Fragment Outcomes (1h)**: тренд публикации lineage fragments по
+  `layer/status` без использования high-cardinality labels.
 
 #### 2. BioETL Data Quality v2
 Сфокусирован на чистоте данных и аномалиях.
@@ -44,7 +49,20 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - **Health Check Success / Total Checks**: объём и стабильность health_check.
 - **Per-provider gauges (102/103)**: повторяемые p95-панели по `$provider`.
 
-## 3. Гарантии качества мониторинга
+## 3. Alert-backed сигналы
+
+Для control-plane и traceability baseline дополнительно отслеживаются:
+
+- `BioETLControlPlaneManifestWriteFailed` -> смотреть
+  `run-manifest-inspection.md`
+- `BioETLRunLedgerAppendFailed` -> смотреть
+  `run-manifest-inspection.md`
+- `BioETLCheckpointCompatibilityBlocked` -> смотреть
+  `checkpoint-debugging.md`
+- `BioETLLineageFragmentPersistenceFailed` -> смотреть
+  `traceability-signal-ownership.md`
+
+## 4. Гарантии качества мониторинга
 
 Все конфигурации дашбордов проходят автоматическую проверку (**Contract Testing**). Это гарантирует, что:
 1.  Дашборды используют только реально существующие в коде метрики.
@@ -53,7 +71,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 
 Подробнее см. в документации по тестированию наблюдаемости.
 
-## 4. Что делать если... (Runbook Lite)
+## 5. Что делать если... (Runbook Lite)
 
 - **График "Error Rate" покраснел**: Используйте `structlog` для получения деталей исключений.
 - **Дашборд пустой**: 
@@ -61,7 +79,13 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
     2. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
     3. Проверьте доступность endpoint метрик на порту 8000 (`/metrics`).
 - **Метрики показывают UNHEALTHY для storage**: Проверьте права доступа к папкам `data/`.
+- **Control-plane сигналы стали красными**:
+    1. Запустите `bioetl run-manifest show <run-id|manifest-id> --format json`.
+    2. Проверьте `diagnostics.alert_signals`, `artifact_refs`,
+       `lineage_fragment_ids`, `missing_artifact_links`.
+    3. Если проблема связана с resume, откройте runbook
+       `checkpoint-debugging.md`.
 
-## 5. Ссылки
+## 6. Ссылки
 - [Архитектурное решение ADR-017 (Observability)](../02-architecture/decisions/ADR-017-observability-architecture.md)
 - [Правила именования метрик (RULES.md)](../00-project/RULES.md)

@@ -8,9 +8,13 @@ Cassettes location: tests/fixtures/vcr/pubmed/
 
 from __future__ import annotations
 
+import asyncio
+import time
+from collections.abc import AsyncIterator
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 import respx
 from httpx import Response
 
@@ -18,12 +22,12 @@ from httpx import Response
 # Note: cassette directory is resolved by conftest.py vcr_cassette_dir fixture
 # which looks for tests/fixtures/vcr/pubmed/ based on test filename
 
+from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
-from bioetl.infrastructure.config import get_settings  # Import get_settings
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
@@ -33,24 +37,54 @@ def mock_logger() -> MagicMock:
     return MagicMock()
 
 
+@pytest.fixture(scope="module")
+def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
+    """Provide a module-scoped event loop for module-scoped async fixtures."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
+    """Reset mutable HTTP client state between tests sharing one client."""
+    client.circuit_breaker.reset()
+    rate_limiter = client.rate_limiter
+    if isinstance(rate_limiter, TokenBucketRateLimiter):
+        rate_limiter._tokens = float(rate_limiter.capacity)
+        rate_limiter._last_refill = time.monotonic()
+
+
+@pytest_asyncio.fixture(scope="module")
+async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
+    """Provide a shared started HTTP client for PubMed integration tests."""
+    client = UnifiedHTTPClient(
+        rate_limiter=TokenBucketRateLimiter(
+            rate=10.0,
+            capacity=20.0,
+            provider="pubmed_test",
+        ),
+        circuit_breaker=CircuitBreakerGuard(provider="pubmed_test"),
+        retry_config=RetryConfig(
+            base_delay=0.0,
+            max_delay=0.0,
+            multiplier=1.0,
+            jitter_range=(0.0, 0.0),
+        ),
+        timeout=30.0,
+        provider="pubmed",
+    )
+    await client.__aenter__()
+    yield client
+    await client.__aexit__(None, None, None)
+
+
 @pytest.fixture
-def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
+def pubmed_adapter(
+    http_client: UnifiedHTTPClient,
+    mock_logger: MagicMock,
+) -> PubMedAdapter:
     """Fixture to provide a PubMedAdapter instance for testing."""
-    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
-    get_settings.cache_clear()
-    settings = get_settings()  # Load settings
-
-    # Use actual rate from settings if API key is present
-    rate = (
-        10.0
-        if settings.pubmed_api_key and settings.pubmed_api_key.get_secret_value()
-        else 3.0
-    )
-
-    http_client = UnifiedHTTPClient(
-        TokenBucketRateLimiter(rate=rate, capacity=rate * 2),
-        CircuitBreakerGuard(provider="pubmed_test"),
-    )
+    _reset_http_client_state(http_client)
     return PubMedAdapter(
         http_client=http_client,
         logger=mock_logger,
@@ -105,18 +139,15 @@ async def test_fetch_publications(pubmed_adapter: PubMedAdapter):
         # Mock fetch
         respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
 
-        async with pubmed_adapter._http_client:
-            records = []
-            async for record in pubmed_adapter.fetch(
-                "publication", query="crispr", limit=2
-            ):
-                records.append(record)
+        records = []
+        async for record in pubmed_adapter.fetch("publication", query="crispr", limit=2):
+            records.append(record)
 
-            assert len(records) == 2
-            assert records[0]["pmid"] == "12345"
-            assert records[0]["article_title"] == "Test Article 1"
-            assert records[1]["pmid"] == "67890"
-            assert records[1]["article_title"] == "Test Article 2"
+        assert len(records) == 2
+        assert records[0]["pmid"] == "12345"
+        assert records[0]["article_title"] == "Test Article 1"
+        assert records[1]["pmid"] == "67890"
+        assert records[1]["article_title"] == "Test Article 2"
 
 
 @pytest.mark.integration
@@ -139,7 +170,6 @@ async def test_health_check(pubmed_adapter: PubMedAdapter):
             return_value=Response(200, json=mock_einfo_json)
         )
 
-        async with pubmed_adapter._http_client:
-            status = await pubmed_adapter.health_check()
-            # Under high local load, latency-based probe may report DEGRADED.
-            assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)
+        status = await pubmed_adapter.health_check()
+        # Under high local load, latency-based probe may report DEGRADED.
+        assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)

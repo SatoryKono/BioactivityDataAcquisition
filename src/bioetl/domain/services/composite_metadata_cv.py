@@ -40,39 +40,41 @@ def _build_cv_rule_provenance_entry(
     }
 
 
-def summarize_composite_cv_dq(
+def _count_cv_markers(
     records: Sequence[Mapping[str, object]],
-    *,
-    contract_version: str | None = None,
-    report_artifact_path: str | None = None,
-) -> dict[str, object]:
-    """Summarize composite cross-validation markers into DQ-oriented semantics."""
-    total_records = len(records)
-    if total_records == 0:
-        return {
-            "has_signal": False,
-            "warning_records": 0,
-            "error_records": 0,
-            "quarantine_records": 0,
-            "validation_passed": True,
-            "rule_provenance": [],
-        }
-
+) -> tuple[int, int, int]:
+    """Return warning-only, error-marker, and quarantine counts."""
     warning_only_count = 0
     error_marker_count = 0
     quarantine_count = 0
     for record in records:
-        has_warning = _is_truthy_marker(record.get("_cv_warn"))
-        has_error = _is_truthy_marker(record.get("_cv_error"))
-        has_quarantine = _is_truthy_marker(record.get("_cv_quarantine"))
-        if has_warning and not has_error and not has_quarantine:
-            warning_only_count += 1
-        if has_error or has_quarantine:
-            error_marker_count += 1
-        if has_quarantine:
-            quarantine_count += 1
-    error_count = max(error_marker_count, quarantine_count)
+        warning_only_inc, error_marker_inc, quarantine_inc = _marker_increments(record)
+        warning_only_count += warning_only_inc
+        error_marker_count += error_marker_inc
+        quarantine_count += quarantine_inc
+    return warning_only_count, error_marker_count, quarantine_count
 
+
+def _marker_increments(record: Mapping[str, object]) -> tuple[int, int, int]:
+    """Return warning-only, error-marker, and quarantine increments."""
+    has_warning = _is_truthy_marker(record.get("_cv_warn"))
+    has_error = _is_truthy_marker(record.get("_cv_error"))
+    has_quarantine = _is_truthy_marker(record.get("_cv_quarantine"))
+    warning_only_inc = int(has_warning and not has_error and not has_quarantine)
+    error_marker_inc = int(has_error or has_quarantine)
+    quarantine_inc = int(has_quarantine)
+    return warning_only_inc, error_marker_inc, quarantine_inc
+
+
+def _build_cv_rule_provenance(
+    *,
+    warning_only_count: int,
+    error_count: int,
+    quarantine_count: int,
+    contract_version: str | None,
+    report_artifact_path: str | None,
+) -> list[dict[str, str | None]]:
+    """Build stable provenance rows for warning/nullify/quarantine decisions."""
     provenance: list[dict[str, str | None]] = []
     if warning_only_count > 0:
         provenance.append(
@@ -108,6 +110,37 @@ def summarize_composite_cv_dq(
                 report_artifact_path=report_artifact_path,
             )
         )
+    return provenance
+
+
+def summarize_composite_cv_dq(
+    records: Sequence[Mapping[str, object]],
+    *,
+    contract_version: str | None = None,
+    report_artifact_path: str | None = None,
+) -> dict[str, object]:
+    """Summarize composite cross-validation markers into DQ-oriented semantics."""
+    if not records:
+        return {
+            "has_signal": False,
+            "warning_records": 0,
+            "error_records": 0,
+            "quarantine_records": 0,
+            "validation_passed": True,
+            "rule_provenance": [],
+        }
+
+    warning_only_count, error_marker_count, quarantine_count = _count_cv_markers(
+        records
+    )
+    error_count = max(error_marker_count, quarantine_count)
+    provenance = _build_cv_rule_provenance(
+        warning_only_count=warning_only_count,
+        error_count=error_count,
+        quarantine_count=quarantine_count,
+        contract_version=contract_version,
+        report_artifact_path=report_artifact_path,
+    )
 
     return {
         "has_signal": bool(warning_only_count or error_count or quarantine_count),

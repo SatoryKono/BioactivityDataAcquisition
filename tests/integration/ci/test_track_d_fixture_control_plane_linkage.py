@@ -111,7 +111,9 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     fixture_path_raw = fixture_entry.get("fixture_path")
     assert isinstance(fixture_path_raw, str) and fixture_path_raw
     tracked_fixture_path = PROJECT_ROOT / fixture_path_raw
-    assert tracked_fixture_path.exists(), f"Missing tracked fixture: {tracked_fixture_path}"
+    assert tracked_fixture_path.exists(), (
+        f"Missing tracked fixture: {tracked_fixture_path}"
+    )
 
     cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
     _materialize_cached_bronze_batch(
@@ -160,17 +162,17 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
         != code_provenance_second["effective_config_artifact_id"]
     )
 
-    runtime_adjustments_first = (
-        effective_first.get("runtime_overrides", {}).get("runtime_adjustments", {})
+    runtime_adjustments_first = effective_first.get("runtime_overrides", {}).get(
+        "runtime_adjustments", {}
     )
-    runtime_adjustments_second = (
-        effective_second.get("runtime_overrides", {}).get("runtime_adjustments", {})
+    runtime_adjustments_second = effective_second.get("runtime_overrides", {}).get(
+        "runtime_adjustments", {}
     )
     assert runtime_adjustments_first.get("pipeline_name") == _PIPELINE_NAME
     assert runtime_adjustments_second.get("pipeline_name") == _PIPELINE_NAME
-    assert runtime_adjustments_first.get("cached_bronze") == runtime_adjustments_second.get(
+    assert runtime_adjustments_first.get(
         "cached_bronze"
-    )
+    ) == runtime_adjustments_second.get("cached_bronze")
     assert runtime_adjustments_first.get("limit") == 5
 
     get_settings.cache_clear()

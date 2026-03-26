@@ -51,7 +51,9 @@ def test_extract_composite_lineage_metadata_parses_graph_relevant_fields() -> No
 
 def test_extract_composite_lineage_metadata_returns_none_for_plain_records() -> None:
     """Plain records should not produce composite lineage metadata."""
-    assert extract_composite_lineage_metadata([{"id": 1}], composite_name="plain") is None
+    assert (
+        extract_composite_lineage_metadata([{"id": 1}], composite_name="plain") is None
+    )
 
 
 def test_summarize_composite_cv_dq_returns_counts_and_provenance() -> None:

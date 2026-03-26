@@ -29,14 +29,14 @@ class TestConfigSourceRef:
             source_type="file",
             source_path="/config/pipeline.yaml",
             source_hash="abc123",
-            priority=1
+            priority=1,
         )
-        
+
         assert source_ref.source_type == "file"
         assert source_ref.source_path == "/config/pipeline.yaml"
         assert source_ref.source_hash == "abc123"
         assert source_ref.priority == 1
-        
+
         # Test immutability
         with pytest.raises(Exception):  # frozen dataclass should prevent modification
             source_ref.source_type = "env"  # type: ignore
@@ -44,10 +44,9 @@ class TestConfigSourceRef:
     def test_config_source_ref_minimal(self) -> None:
         """Test ConfigSourceRef with minimal fields."""
         source_ref = ConfigSourceRef(
-            source_type="default",
-            source_path="internal://defaults"
+            source_type="default", source_path="internal://defaults"
         )
-        
+
         assert source_ref.source_type == "default"
         assert source_ref.source_path == "internal://defaults"
         assert source_ref.source_hash is None
@@ -60,7 +59,7 @@ class TestConfigResolutionPolicy:
     def test_config_resolution_policy_defaults(self) -> None:
         """Test ConfigResolutionPolicy with default values."""
         policy = ConfigResolutionPolicy()
-        
+
         assert policy.merge_strategy == "hierarchical"
         assert policy.default_materialization is True
         assert policy.strict_validation is True
@@ -72,9 +71,9 @@ class TestConfigResolutionPolicy:
             merge_strategy="override",
             default_materialization=False,
             strict_validation=False,
-            allow_runtime_overrides=False
+            allow_runtime_overrides=False,
         )
-        
+
         assert policy.merge_strategy == "override"
         assert policy.default_materialization is False
         assert policy.strict_validation is False
@@ -88,15 +87,15 @@ class TestResolvedConfigSnapshot:
         """Test ResolvedConfigSnapshot creation."""
         config_data: Dict[str, Any] = {
             "pipeline": {"name": "test", "version": "1.0"},
-            "settings": {"batch_size": 1000}
+            "settings": {"batch_size": 1000},
         }
-        
+
         snapshot = ResolvedConfigSnapshot(
             config_type="standard",
             config_data=config_data,
-            config_hash="config_hash_123"
+            config_hash="config_hash_123",
         )
-        
+
         assert snapshot.config_type == "standard"
         assert snapshot.config_data == config_data
         assert snapshot.config_hash == "config_hash_123"
@@ -109,7 +108,7 @@ class TestRuntimeOverrideSnapshot:
     def test_runtime_override_snapshot_empty(self) -> None:
         """Test RuntimeOverrideSnapshot with empty overrides."""
         snapshot = RuntimeOverrideSnapshot()
-        
+
         assert snapshot.cli_overrides == {}
         assert snapshot.env_overrides == {}
         assert snapshot.runtime_adjustments == {}
@@ -121,9 +120,9 @@ class TestRuntimeOverrideSnapshot:
             cli_overrides={"batch_size": 2000},
             env_overrides={"log_level": "DEBUG"},
             runtime_adjustments={"auto_adjust": True},
-            override_hash="override_hash_456"
+            override_hash="override_hash_456",
         )
-        
+
         assert snapshot.cli_overrides == {"batch_size": 2000}
         assert snapshot.env_overrides == {"log_level": "DEBUG"}
         assert snapshot.runtime_adjustments == {"auto_adjust": True}
@@ -138,14 +137,13 @@ class TestEffectiveExecutionConfig:
         config_data: Dict[str, Any] = {
             "pipeline": {"name": "test", "version": "1.0"},
             "settings": {"batch_size": 2000},  # Overridden value
-            "runtime": {"auto_adjust": True}
+            "runtime": {"auto_adjust": True},
         }
-        
+
         config = EffectiveExecutionConfig(
-            config_data=config_data,
-            effective_hash="effective_hash_789"
+            config_data=config_data, effective_hash="effective_hash_789"
         )
-        
+
         assert config.config_data == config_data
         assert config.effective_hash == "effective_hash_789"
         assert isinstance(config.timestamp, datetime)
@@ -164,11 +162,11 @@ class TestDQPolicySnapshot:
             default_disposition=DQDisposition.WARN,
             disposition_overrides={
                 "schema.molecule_id": DQDisposition.FAIL,
-                "schema.assay_id": DQDisposition.QUARANTINE
+                "schema.assay_id": DQDisposition.QUARANTINE,
             },
-            strictness_mode="strict"
+            strictness_mode="strict",
         )
-        
+
         assert snapshot.contract_ref == "chembl_molecule"
         assert snapshot.contract_version == "1.0.0"
         assert snapshot.rule_bundle_version == "1.0.0"
@@ -184,9 +182,9 @@ class TestDQPolicySnapshot:
             contract_version="1.0.0",
             rule_bundle_version="1.0.0",
             policy_hash="test_hash",
-            default_disposition=DQDisposition.PASS
+            default_disposition=DQDisposition.PASS,
         )
-        
+
         assert snapshot.contract_ref == "test"
         assert snapshot.disposition_overrides == {}
         assert snapshot.strictness_mode == "standard"
@@ -203,60 +201,58 @@ class TestEffectiveConfigArtifact:
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
                 source_hash="base_hash",
-                priority=1
+                priority=1,
             ),
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/providers/chembl.yaml",
                 source_hash="provider_hash",
-                priority=2
-            )
+                priority=2,
+            ),
         ]
-        
+
         # Create resolution policy
         resolution_policy = ConfigResolutionPolicy(
-            merge_strategy="hierarchical",
-            default_materialization=True
+            merge_strategy="hierarchical", default_materialization=True
         )
-        
+
         # Create resolved config snapshot
         resolved_config = ResolvedConfigSnapshot(
             config_type="standard",
             config_data={"pipeline": {"name": "chembl_molecule"}},
-            config_hash="resolved_hash_123"
+            config_hash="resolved_hash_123",
         )
-        
+
         # Create runtime overrides
         runtime_overrides = RuntimeOverrideSnapshot(
-            cli_overrides={"batch_size": 5000},
-            override_hash="override_hash_456"
+            cli_overrides={"batch_size": 5000}, override_hash="override_hash_456"
         )
-        
+
         # Create effective execution config
         effective_config = EffectiveExecutionConfig(
             config_data={"pipeline": {"name": "chembl_molecule", "batch_size": 5000}},
-            effective_hash="effective_hash_789"
+            effective_hash="effective_hash_789",
         )
-        
+
         # Create DQ policy snapshot
         dq_snapshot = DQPolicySnapshot(
             contract_ref="chembl_molecule",
             contract_version="1.0.0",
             rule_bundle_version="1.0.0",
             policy_hash="dq_hash_abc",
-            default_disposition=DQDisposition.WARN
+            default_disposition=DQDisposition.WARN,
         )
-        
+
         # Create DQ policy refs
         dq_policy_refs: List[DQPolicyRef] = [
             DQPolicyRef(
                 contract_ref="chembl_molecule",
                 contract_version="1.0.0",
                 rule_bundle_version="1.0.0",
-                policy_hash="dq_hash_abc"
+                policy_hash="dq_hash_abc",
             )
         ]
-        
+
         # Create the artifact
         artifact = EffectiveConfigArtifact(
             artifact_id="config_artifact_001",
@@ -273,9 +269,9 @@ class TestEffectiveConfigArtifact:
             contract_refs=["chembl_molecule"],
             dq_policy_refs=dq_policy_refs,
             dq_rule_bundle_versions={"chembl_molecule": "1.0.0"},
-            dq_policy_snapshots=[dq_snapshot]
+            dq_policy_snapshots=[dq_snapshot],
         )
-        
+
         # Verify all fields
         assert artifact.artifact_id == "config_artifact_001"
         assert artifact.pipeline_name == "chembl_molecule"
@@ -298,23 +294,22 @@ class TestEffectiveConfigArtifact:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="hash"
+                config_type="standard", config_data={}, config_hash="hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="hash"
+                config_data={}, effective_hash="hash"
             ),
             resolved_config_hash="hash",
             effective_config_hash="hash",
-            source_fingerprint="fingerprint"
+            source_fingerprint="fingerprint",
         )
-        
+
         assert minimal_artifact.artifact_id == "minimal_artifact"
         assert minimal_artifact.dq_policy_refs == []
-        assert minimal_artifact.dq_contract_compatibility_hash == "no_dq_policies"  # Auto-computed
+        assert (
+            minimal_artifact.dq_contract_compatibility_hash == "no_dq_policies"
+        )  # Auto-computed
 
     def test_effective_config_artifact_validation(self) -> None:
         """Test EffectiveConfigArtifact field validation."""
@@ -326,18 +321,15 @@ class TestEffectiveConfigArtifact:
                 source_refs=[],
                 resolution_policy=ConfigResolutionPolicy(),
                 resolved_config=ResolvedConfigSnapshot(
-                    config_type="standard",
-                    config_data={},
-                    config_hash="hash"
+                    config_type="standard", config_data={}, config_hash="hash"
                 ),
                 runtime_overrides=RuntimeOverrideSnapshot(),
                 effective_execution_config=EffectiveExecutionConfig(
-                    config_data={},
-                    effective_hash="hash"
+                    config_data={}, effective_hash="hash"
                 ),
                 resolved_config_hash="hash",
                 effective_config_hash="hash",
-                source_fingerprint="fingerprint"
+                source_fingerprint="fingerprint",
             )
 
         with pytest.raises(ValueError, match="pipeline_name cannot be empty"):
@@ -348,18 +340,15 @@ class TestEffectiveConfigArtifact:
                 source_refs=[],
                 resolution_policy=ConfigResolutionPolicy(),
                 resolved_config=ResolvedConfigSnapshot(
-                    config_type="standard",
-                    config_data={},
-                    config_hash="hash"
+                    config_type="standard", config_data={}, config_hash="hash"
                 ),
                 runtime_overrides=RuntimeOverrideSnapshot(),
                 effective_execution_config=EffectiveExecutionConfig(
-                    config_data={},
-                    effective_hash="hash"
+                    config_data={}, effective_hash="hash"
                 ),
                 resolved_config_hash="hash",
                 effective_config_hash="hash",
-                source_fingerprint="fingerprint"
+                source_fingerprint="fingerprint",
             )
 
 
@@ -372,9 +361,9 @@ class TestEffectiveConfigHashes:
             resolved_config_hash="resolved_123",
             effective_config_hash="effective_456",
             source_fingerprint="source_789",
-            dq_contract_compatibility_hash="dq_compat_abc"
+            dq_contract_compatibility_hash="dq_compat_abc",
         )
-        
+
         assert hashes.resolved_config_hash == "resolved_123"
         assert hashes.effective_config_hash == "effective_456"
         assert hashes.source_fingerprint == "source_789"
@@ -387,7 +376,7 @@ class TestEffectiveConfigHashes:
                 resolved_config_hash="",
                 effective_config_hash="hash",
                 source_fingerprint="fingerprint",
-                dq_contract_compatibility_hash="dq_hash"
+                dq_contract_compatibility_hash="dq_hash",
             )
 
         with pytest.raises(ValueError, match="effective_config_hash cannot be empty"):
@@ -395,7 +384,7 @@ class TestEffectiveConfigHashes:
                 resolved_config_hash="hash",
                 effective_config_hash="",
                 source_fingerprint="fingerprint",
-                dq_contract_compatibility_hash="dq_hash"
+                dq_contract_compatibility_hash="dq_hash",
             )
 
 
@@ -409,16 +398,16 @@ class TestDQIntegration:
                 contract_ref="contract1",
                 contract_version="1.0.0",
                 rule_bundle_version="1.0.0",
-                policy_hash="hash1"
+                policy_hash="hash1",
             ),
             DQPolicyRef(
                 contract_ref="contract2",
                 contract_version="2.0.0",
                 rule_bundle_version="2.0.0",
-                policy_hash="hash2"
-            )
+                policy_hash="hash2",
+            ),
         ]
-        
+
         artifact = EffectiveConfigArtifact(
             artifact_id="test",
             pipeline_name="test",
@@ -426,21 +415,18 @@ class TestDQIntegration:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="hash"
+                config_type="standard", config_data={}, config_hash="hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="hash"
+                config_data={}, effective_hash="hash"
             ),
             resolved_config_hash="hash",
             effective_config_hash="hash",
             source_fingerprint="fingerprint",
-            dq_policy_refs=dq_policy_refs
+            dq_policy_refs=dq_policy_refs,
         )
-        
+
         # Should auto-compute compatibility hash from sorted policy hashes
         assert artifact.dq_contract_compatibility_hash == "hash1:hash2"
 
@@ -453,21 +439,18 @@ class TestDQIntegration:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="hash"
+                config_type="standard", config_data={}, config_hash="hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="hash"
+                config_data={}, effective_hash="hash"
             ),
             resolved_config_hash="hash",
             effective_config_hash="hash",
             source_fingerprint="fingerprint",
-            dq_policy_refs=[]  # No DQ policies
+            dq_policy_refs=[],  # No DQ policies
         )
-        
+
         assert artifact.dq_contract_compatibility_hash == "no_dq_policies"
 
     def test_dq_contract_compatibility_hash_explicit(self) -> None:
@@ -479,22 +462,19 @@ class TestDQIntegration:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="hash"
+                config_type="standard", config_data={}, config_hash="hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="hash"
+                config_data={}, effective_hash="hash"
             ),
             resolved_config_hash="hash",
             effective_config_hash="hash",
             source_fingerprint="fingerprint",
             dq_policy_refs=[],
-            dq_contract_compatibility_hash="explicit_hash"  # Explicitly provided
+            dq_contract_compatibility_hash="explicit_hash",  # Explicitly provided
         )
-        
+
         # Should use explicitly provided hash
         assert artifact.dq_contract_compatibility_hash == "explicit_hash"
 
@@ -505,10 +485,9 @@ class TestImmutability:
     def test_config_source_ref_immutability(self) -> None:
         """Test ConfigSourceRef immutability."""
         source_ref = ConfigSourceRef(
-            source_type="file",
-            source_path="/config/test.yaml"
+            source_type="file", source_path="/config/test.yaml"
         )
-        
+
         with pytest.raises(Exception):
             source_ref.source_type = "env"  # type: ignore
 
@@ -519,9 +498,9 @@ class TestImmutability:
             contract_version="1.0.0",
             rule_bundle_version="1.0.0",
             policy_hash="hash",
-            default_disposition=DQDisposition.WARN
+            default_disposition=DQDisposition.WARN,
         )
-        
+
         with pytest.raises(Exception):
             snapshot.contract_ref = "modified"  # type: ignore
 
@@ -534,19 +513,16 @@ class TestImmutability:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="hash"
+                config_type="standard", config_data={}, config_hash="hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="hash"
+                config_data={}, effective_hash="hash"
             ),
             resolved_config_hash="hash",
             effective_config_hash="hash",
-            source_fingerprint="fingerprint"
+            source_fingerprint="fingerprint",
         )
-        
+
         with pytest.raises(Exception):
             artifact.artifact_id = "modified"  # type: ignore

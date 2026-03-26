@@ -386,7 +386,7 @@ dq_contracts:
 
 - [Configuration Runtime Artifacts](config-runtime-artifacts.md)
 - [Phased Migration Support](phased-migration.md)
-- [Composite Validation Layer](../services/composite-validation-layer.md)
+- [Composite Validation Layer](composite-validation-layer.md)
 - [Observability Architecture](../../02-architecture/decisions/ADR-017-observability-architecture.md)
 
 ## Revision History

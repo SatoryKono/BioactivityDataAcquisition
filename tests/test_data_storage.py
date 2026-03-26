@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from functools import cache
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,7 @@ def _deep_merge(base: dict, override: dict) -> dict:
     return result
 
 
+@cache
 def _load_defaults() -> dict:
     """Load default configuration."""
     if DEFAULTS_PATH.exists():
@@ -30,15 +32,17 @@ def _load_defaults() -> dict:
     return {}
 
 
-def get_all_pipeline_configs():
+@cache
+def get_all_pipeline_configs() -> tuple[Path, ...]:
     """Get all main pipeline config files, excluding source configs and defaults."""
     if not PIPELINE_CONFIG_PATH.exists():
-        return []
-    return [
+        return ()
+    return tuple(
         p for p in PIPELINE_CONFIG_PATH.rglob("*.yaml") if not p.name.startswith("_")
-    ]
+    )
 
 
+@cache
 def load_config_with_defaults(config_path: Path) -> dict:
     """Load pipeline config merged with defaults."""
     defaults = _load_defaults()
@@ -48,6 +52,7 @@ def load_config_with_defaults(config_path: Path) -> dict:
     return _deep_merge(defaults, pipeline)
 
 
+@cache
 def load_config_with_source(config_path: Path) -> dict:
     """Load pipeline config and merge source config if referenced."""
     config = load_config_with_defaults(config_path)

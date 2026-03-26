@@ -5,7 +5,6 @@
 00-project/ai/agents/agents/py-config-bot.md
 00-project/ai/agents/agents/py-debug-bot.md
 00-project/ai/agents/agents/py-doc-bot.md
-00-project/ai/agents/agents/py-doc-swarm.md
 00-project/ai/agents/agents/py-plan-bot.md
 00-project/ai/agents/agents/py-review-orchestrator.md
 00-project/ai/agents/agents/py-test-bot.md

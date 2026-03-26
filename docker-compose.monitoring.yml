@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -29,6 +27,52 @@ services:
     container_name: bioetl-pushgateway
     ports:
       - "9091:9091"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:latest
+    container_name: bioetl-loki
+    profiles: ["tracing"]
+    ports:
+      - "3100:3100"
+    command:
+      - "-config.file=/etc/loki/config.yml"
+    volumes:
+      - ./grafana/loki-config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: bioetl-promtail
+    profiles: ["tracing"]
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+    volumes:
+      - ./grafana/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ./logs:/workspace-logs:ro
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: bioetl-tempo
+    profiles: ["tracing"]
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+    command:
+      - "-config.file=/etc/tempo/config.yml"
+    volumes:
+      - ./grafana/tempo.yml:/etc/tempo/config.yml:ro
+      - tempo-data:/tmp/tempo
     networks:
       - monitoring
     restart: unless-stopped
@@ -64,6 +108,8 @@ services:
 volumes:
   prometheus-data:
   grafana-data:
+  loki-data:
+  tempo-data:
 
 networks:
   monitoring:

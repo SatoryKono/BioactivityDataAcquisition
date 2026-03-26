@@ -701,7 +701,7 @@ if not artifact.validate():
 
 - [DQ Contract System](dq-contract-system.md)
 - [Phased Migration Support](phased-migration.md)
-- [Composite Validation Service](../../services/composite-validation-service.md)
+- [Composite Validation Service](composite-validation-service.md)
 - [Observability Architecture](../../02-architecture/decisions/ADR-017-observability-architecture.md)
 
 ## Revision History

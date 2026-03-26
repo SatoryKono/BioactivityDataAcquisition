@@ -28,9 +28,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.base_transformer.types import (
-        TransformerDependencyContext,
-    )
+    from bioetl.application.core.base_transformer.types import TransformerDependencyContext
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
@@ -55,7 +53,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-_extract_entity_type, _extract_dq_configs, _assemble_runner_impl = extract_entity_type, extract_dq_configs, assemble_runner_impl  # noqa: E501
+_extract_entity_type, _extract_dq_configs, _assemble_runner_impl = (
+    extract_entity_type, extract_dq_configs, assemble_runner_impl
+)  # noqa: E501
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
@@ -239,8 +239,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
 
 def create_pipeline_factory(
-    pipeline_name: str,
-    pipeline_class: type[TPipeline],
+    pipeline_name: str, pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
     gold_schema: GoldSchemaType | None = None,

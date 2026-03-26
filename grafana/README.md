@@ -340,11 +340,14 @@ providers:
 ### 3.1 Запуск стека мониторинга
 
 ```bash
-# Запуск Prometheus + Grafana
+# Запуск базового стека метрик
 make monitoring-up
 
 # Или напрямую:
 docker compose -f docker-compose.monitoring.yml up -d
+
+# Запуск расширенного профиля с трассировкой и лог-корреляцией
+docker compose -f docker-compose.monitoring.yml --profile tracing up -d
 
 # Проверка статуса контейнеров
 docker compose -f docker-compose.monitoring.yml ps
@@ -394,6 +397,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT` | `3` | Количество попыток запуска (1-10) |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY` | `1.0` | Задержка между попытками (0.1-10.0 с) |
 | `GF_SECURITY_ADMIN_PASSWORD` | `admin` | Пароль администратора Grafana |
+| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | `false` | Включить OpenTelemetry spans и log-trace correlation |
 
 ---
 
@@ -401,7 +405,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 
 ### 4.1 Docker Compose (`docker-compose.monitoring.yml`)
 
-Стек состоит из двух сервисов, объединённых в bridge-сеть `monitoring`:
+Базовый стек состоит из трёх сервисов, объединённых в bridge-сеть `monitoring`:
 
 **Prometheus:**
 - Image: `prom/prometheus:latest`
@@ -423,6 +427,19 @@ curl -s http://localhost:8000/metrics | grep bioetl_
   - `./grafana/dashboards` → `/var/lib/grafana/dashboards` (read-only, JSON-дашборды)
 - Restart: `unless-stopped`
 
+**Pushgateway:**
+- Image: `prom/pushgateway:latest`
+- Container: `bioetl-pushgateway`
+- Порт: `9091:9091`
+- Restart: `unless-stopped`
+
+Опциональный профиль `tracing` добавляет:
+
+- `Loki` на `:3100` для поиска по структурированным логам
+- `Promtail` для ingestion локальных `logs/*.log` и `logs/*.jsonl`
+- `Tempo` на `:3200` и OTLP gRPC `:4317` для trace storage
+- дополнительные Grafana datasources `Loki` и `Tempo`
+
 ### 4.2 Сетевая топология
 
 ```
@@ -432,7 +449,11 @@ Host Machine (Windows/macOS/Linux)
 └── Docker
     └── Network: monitoring (bridge)
         ├── bioetl-prometheus → :9090  (scrapes host.docker.internal:8000)
-        └── bioetl-grafana    → :3000  (queries prometheus:9090)
+        ├── bioetl-pushgateway → :9091
+        ├── bioetl-grafana    → :3000  (queries prometheus:9090)
+        ├── bioetl-loki       → :3100  (optional, tracing profile)
+        ├── bioetl-promtail   → :9080  (optional, tracing profile)
+        └── bioetl-tempo      → :3200/:4317 (optional, tracing profile)
 ```
 
 Внутри Docker-сети Grafana обращается к Prometheus по имени сервиса `prometheus` (порт 9090). Prometheus скрейпит BioETL-приложение на хосте через `host.docker.internal:8000`.
@@ -445,9 +466,13 @@ Host Machine (Windows/macOS/Linux)
 | Prometheus UI | `http://localhost:9090` | 9090 | Query interface, target status |
 | Prometheus Targets | `http://localhost:9090/targets` | 9090 | Статус scrape targets |
 | Prometheus API | `http://localhost:9090/api/v1/...` | 9090 | HTTP API для PromQL |
+| Pushgateway | `http://localhost:9091` | 9091 | Push endpoint для ad-hoc/ephemeral jobs |
 | Grafana UI | `http://localhost:3000` | 3000 | Дашборды, логин: admin/admin |
 | Grafana Explore | `http://localhost:3000/explore` | 3000 | Ad-hoc PromQL запросы |
 | Grafana Dashboards | `http://localhost:3000/dashboards` | 3000 | Список дашбордов |
+| Loki API | `http://localhost:3100` | 3100 | Log query/search backend |
+| Tempo API | `http://localhost:3200` | 3200 | Trace query backend |
+| Tempo OTLP gRPC | `localhost:4317` | 4317 | Trace ingestion endpoint |
 
 ---
 

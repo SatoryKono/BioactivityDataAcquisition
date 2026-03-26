@@ -17,6 +17,7 @@ See RULES.md §2 for architecture requirements.
 
 from __future__ import annotations
 
+from functools import cache
 import inspect
 
 import pytest
@@ -27,6 +28,7 @@ from tests.helpers.transformer_dependencies import (
 )
 
 
+@cache
 def get_all_transformers() -> list[type[BaseTransformer]]:
     """Dynamically discover all transformer classes.
 

@@ -43,7 +43,9 @@ def build_silver_lineage_fragment(
     silver_dataset, composite_source_nodes, composite_source_edges = (
         _build_dataset_composite_lineage_components(
             run_context=run_context,
-            dataset_node=silver_dataset_node(run_context=run_context, input_data=input_data),
+            dataset_node=silver_dataset_node(
+                run_context=run_context, input_data=input_data
+            ),
             records=input_data.records,
             composite_name=f"{run_context.provider}.{run_context.entity}",
             created_at=created_at,

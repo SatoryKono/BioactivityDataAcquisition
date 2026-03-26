@@ -5,7 +5,9 @@ Records deterministic health-probe cassettes to increase provider baseline.
 
 from __future__ import annotations
 
+import asyncio
 import os
+import time
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
@@ -13,6 +15,7 @@ from typing import Any
 import pytest
 import pytest_asyncio
 
+from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -43,7 +46,24 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     return f"rf013_pubmed_health_{case_id}"
 
 
-@pytest_asyncio.fixture
+@pytest.fixture(scope="module")
+def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
+    """Provide a module-scoped event loop for module-scoped async fixtures."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
+    """Reset mutable HTTP client state between parameterized rebalance cases."""
+    client.circuit_breaker.reset()
+    rate_limiter = client.rate_limiter
+    if isinstance(rate_limiter, TokenBucketRateLimiter):
+        rate_limiter._tokens = float(rate_limiter.capacity)
+        rate_limiter._last_refill = time.monotonic()
+
+
+@pytest_asyncio.fixture(scope="module")
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage PubMed HTTP client lifecycle for integration tests."""
     client = UnifiedHTTPClient(
@@ -51,6 +71,12 @@ async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
             rate=3.0, capacity=6, provider="pubmed_rf013"
         ),
         circuit_breaker=CircuitBreakerGuard(provider="pubmed_rf013"),
+        retry_config=RetryConfig(
+            base_delay=0.0,
+            max_delay=0.0,
+            multiplier=1.0,
+            jitter_range=(0.0, 0.0),
+        ),
         timeout=30.0,
         provider="pubmed",
     )
@@ -59,9 +85,10 @@ async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     await client.__aexit__(None, None, None)
 
 
-@pytest_asyncio.fixture
-async def adapter(http_client: UnifiedHTTPClient) -> PubMedAdapter:
+@pytest.fixture
+def adapter(http_client: UnifiedHTTPClient) -> PubMedAdapter:
     """Create PubMed adapter used by rebalance tests."""
+    _reset_http_client_state(http_client)
     logger = NoOpLogger()
     return PubMedAdapter(
         http_client=http_client,

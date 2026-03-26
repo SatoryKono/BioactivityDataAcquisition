@@ -12,13 +12,18 @@ Rate Limits:
 
 from __future__ import annotations
 
+import asyncio
 import os
 from pathlib import Path
+import time
+from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 
+from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -54,14 +59,41 @@ def mock_logger() -> MagicMock:
     return logger
 
 
-@pytest.fixture
-def http_client() -> UnifiedHTTPClient:
-    """Create HTTP client for testing."""
-    return UnifiedHTTPClient(
-        rate_limiter=TokenBucketRateLimiter(rate=10.0, capacity=100),
+@pytest.fixture(scope="module")
+def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
+    """Provide a module-scoped event loop for module-scoped async fixtures."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
+    """Reset mutable HTTP client state between tests sharing one client."""
+    client.circuit_breaker.reset()
+    rate_limiter = client.rate_limiter
+    if isinstance(rate_limiter, TokenBucketRateLimiter):
+        rate_limiter._tokens = float(rate_limiter.capacity)
+        rate_limiter._last_refill = time.monotonic()
+
+
+@pytest_asyncio.fixture(scope="module")
+async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
+    """Create and manage Semantic Scholar HTTP client lifecycle for tests."""
+    client = UnifiedHTTPClient(
+        rate_limiter=TokenBucketRateLimiter(rate=10.0, capacity=100.0),
         circuit_breaker=CircuitBreakerGuard(provider="semanticscholar_test"),
+        retry_config=RetryConfig(
+            base_delay=0.0,
+            max_delay=0.0,
+            multiplier=1.0,
+            jitter_range=(0.0, 0.0),
+        ),
         timeout=30.0,
+        provider="semanticscholar",
     )
+    await client.__aenter__()
+    yield client
+    await client.__aexit__(None, None, None)
 
 
 @pytest.fixture
@@ -70,6 +102,7 @@ def semanticscholar_adapter(
     mock_logger: MagicMock,
 ) -> SemanticScholarAdapter:
     """Create SemanticScholarAdapter instance for testing."""
+    _reset_http_client_state(http_client)
     return SemanticScholarAdapter(
         http_client=http_client,
         logger=mock_logger,
@@ -99,239 +132,168 @@ class TestSemanticScholarAdapterIntegration:
     @pytest.mark.vcr
     async def test_health_check(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test Semantic Scholar health check probe.
 
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_health_check
         """
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
-            status = await adapter.health_check()
+        status = await semanticscholar_adapter.health_check()
 
-            # Should return a valid health status
-            assert status in [
-                HealthStatus.HEALTHY,
-                HealthStatus.DEGRADED,
-                HealthStatus.UNHEALTHY,
-            ]
+        # Should return a valid health status
+        assert status in [
+            HealthStatus.HEALTHY,
+            HealthStatus.DEGRADED,
+            HealthStatus.UNHEALTHY,
+        ]
 
     @pytest.mark.vcr
     async def test_fetch_by_doi(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test fetching a single publication by DOI.
 
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_fetch_by_doi
         """
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
+        records: list[dict[str, Any]] = []
+        async for record in semanticscholar_adapter.fetch_filtered(
+            entity_type="publication",
+            filter_ids=["10.1038/nature12373"],
+            filter_field="doi",
+        ):
+            records.append(record)
 
-            records: list[dict[str, Any]] = []
-            async for record in adapter.fetch_filtered(
-                entity_type="publication",
-                filter_ids=["10.1038/nature12373"],
-                filter_field="doi",
-            ):
-                records.append(record)
-
-            assert len(records) == 1
-            assert records[0]["externalIds"]["DOI"] == "10.1038/nature12373"
-            assert records[0]["citationCount"] >= 0
-            assert records[0]["year"] >= 1900
+        assert len(records) == 1
+        assert records[0]["externalIds"]["DOI"] == "10.1038/nature12373"
+        assert records[0]["citationCount"] >= 0
+        assert records[0]["year"] >= 1900
 
     @pytest.mark.vcr
     async def test_fetch_batch_dois(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test batch DOI resolution.
 
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_fetch_batch_dois
         """
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
+        records: list[dict[str, Any]] = []
+        async for record in semanticscholar_adapter.fetch_filtered(
+            entity_type="publication",
+            filter_ids=["10.1038/nature12373", "10.1016/j.cell.2019.03.025"],
+            filter_field="doi",
+        ):
+            records.append(record)
 
-            records: list[dict[str, Any]] = []
-            async for record in adapter.fetch_filtered(
-                entity_type="publication",
-                filter_ids=["10.1038/nature12373", "10.1016/j.cell.2019.03.025"],
-                filter_field="doi",
-            ):
-                records.append(record)
+        assert len(records) == 2
 
-            assert len(records) == 2
-
-            # Verify both requested DOIs are present in results
-            dois = {r["externalIds"]["DOI"] for r in records}
-            assert "10.1038/nature12373" in dois
-            assert "10.1016/j.cell.2019.03.025" in dois
+        # Verify both requested DOIs are present in results
+        dois = {r["externalIds"]["DOI"] for r in records}
+        assert "10.1038/nature12373" in dois
+        assert "10.1016/j.cell.2019.03.025" in dois
 
     @pytest.mark.vcr
     async def test_fetch_with_query(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test search-based fetch with query parameter.
 
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_fetch_with_query
         """
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
+        records: list[dict[str, Any]] = []
+        async for record in semanticscholar_adapter.fetch(
+            entity_type="publication",
+            query="CRISPR gene editing",
+            limit=3,
+        ):
+            records.append(record)
 
-            records: list[dict[str, Any]] = []
-            async for record in adapter.fetch(
-                entity_type="publication",
-                query="CRISPR gene editing",
-                limit=3,
-            ):
-                records.append(record)
+        assert len(records) == 3
 
-            assert len(records) == 3
+        # Check that all records have required fields
+        for record in records:
+            assert "paperId" in record
+            assert len(record["paperId"]) == 40
+            assert "title" in record
+            assert "year" in record
 
-            # Check that all records have required fields
-            for record in records:
-                assert "paperId" in record
-                assert len(record["paperId"]) == 40
-                assert "title" in record
-                assert "year" in record
-
-            # Verify CRISPR-related content
-            titles = " ".join(r["title"].lower() for r in records)
-            assert "crispr" in titles or "genome" in titles
+        # Verify CRISPR-related content
+        titles = " ".join(r["title"].lower() for r in records)
+        assert "crispr" in titles or "genome" in titles
 
     @pytest.mark.vcr
     async def test_fetch_filtered_with_fallback(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test DOI lookup with title fallback for not-found DOIs.
 
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_fetch_filtered_with_fallback
         """
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
+        fallback_mapping = {
+            "10.1038/nature12373": "Crystal structure of rhodopsin",
+            "10.9999/notfound": "Unknown Paper Title",
+        }
 
-            fallback_mapping = {
-                "10.1038/nature12373": "Crystal structure of rhodopsin",
-                "10.9999/notfound": "Unknown Paper Title",
-            }
+        records: list[dict[str, Any]] = []
+        async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
+            entity_type="publication",
+            filter_ids=["10.1038/nature12373", "10.9999/notfound"],
+            filter_field="doi",
+            fallback_mapping=fallback_mapping,
+        ):
+            records.append(record)
 
-            records: list[dict[str, Any]] = []
-            async for record in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["10.1038/nature12373", "10.9999/notfound"],
-                filter_field="doi",
-                fallback_mapping=fallback_mapping,
-            ):
-                records.append(record)
+        # At minimum DOI-resolved record must be present.
+        # Title fallback may be unavailable in cassette due API rate limiting.
+        assert len(records) >= 1
 
-            # At minimum DOI-resolved record must be present.
-            # Title fallback may be unavailable in cassette due API rate limiting.
-            assert len(records) >= 1
+        # DOI-resolved record should always be present
+        doi_record = next(r for r in records if r.get("_lookup_method") == "doi")
+        assert doi_record is not None
+        assert "paperId" in doi_record
 
-            # DOI-resolved record should always be present
-            doi_record = next(r for r in records if r.get("_lookup_method") == "doi")
-            assert doi_record is not None
-            assert "paperId" in doi_record
-
-            fallback_records = [
-                r for r in records if r.get("_lookup_method") == "title_fallback"
-            ]
-            if fallback_records:
-                assert fallback_records[0]["_original_id"] == "10.9999/notfound"
+        fallback_records = [
+            r for r in records if r.get("_lookup_method") == "title_fallback"
+        ]
+        if fallback_records:
+            assert fallback_records[0]["_original_id"] == "10.9999/notfound"
 
     @pytest.mark.vcr
     async def test_title_only_lookup(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test title-only lookup when DOI is empty.
 
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_title_only_lookup
         """
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
+        # Title must match what VCR cassette returns for title validation
+        fallback_mapping = {
+            "": "Machine learning for drug discovery",
+        }
 
-            # Title must match what VCR cassette returns for title validation
-            fallback_mapping = {
-                "": "Machine learning for drug discovery",
-            }
+        records: list[dict[str, Any]] = []
+        async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
+            entity_type="publication",
+            filter_ids=[""],  # Empty DOI
+            filter_field="doi",
+            fallback_mapping=fallback_mapping,
+        ):
+            records.append(record)
 
-            records: list[dict[str, Any]] = []
-            async for record in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=[""],  # Empty DOI
-                filter_field="doi",
-                fallback_mapping=fallback_mapping,
-            ):
-                records.append(record)
-
-            assert len(records) == 1
-            assert records[0]["_lookup_method"] == "title_only"
-            assert "paperId" in records[0]
-            assert len(records[0]["paperId"]) == 40
+        assert len(records) == 1
+        assert records[0]["_lookup_method"] == "title_only"
+        assert "paperId" in records[0]
+        assert len(records[0]["paperId"]) == 40
 
 
 @pytest.mark.integration
@@ -340,32 +302,19 @@ class TestSemanticScholarAdapterEdgeCases:
 
     async def test_invalid_entity_type(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test that invalid entity type raises ValueError."""
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
-
-            with pytest.raises(ValueError, match=r"publication.*paper"):
-                async for _ in adapter.fetch(
-                    entity_type="invalid_type",
-                    query="test",
-                ):
-                    pass
+        with pytest.raises(ValueError, match=r"publication.*paper"):
+            async for _ in semanticscholar_adapter.fetch(
+                entity_type="invalid_type",
+                query="test",
+            ):
+                pass
 
     async def test_fetch_with_limit(
         self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
+        semanticscholar_adapter: SemanticScholarAdapter,
     ) -> None:
         """Test that limit parameter is respected in filtered fetch."""
         # Use respx for mock (no cassette needed for unit-like behavior)
@@ -378,61 +327,38 @@ class TestSemanticScholarAdapterEdgeCases:
             {"paperId": "c" * 40, "title": "Paper 3"},
         ]
 
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
-            )
-
-            with respx.mock:
-                respx.post("https://api.semanticscholar.org/graph/v1/paper/batch").mock(
-                    return_value=Response(200, json=mock_response)
-                )
-
-                records: list[dict[str, Any]] = []
-                async for record in adapter.fetch_filtered(
-                    entity_type="publication",
-                    filter_ids=["doi1", "doi2", "doi3"],
-                    filter_field="doi",
-                    limit=2,
-                ):
-                    records.append(record)
-
-                # Should respect limit=2
-                assert len(records) == 2
-
-    async def test_empty_filter_ids(
-        self,
-        http_client: UnifiedHTTPClient,
-        mock_logger: MagicMock,
-    ) -> None:
-        """Test behavior with empty filter_ids list."""
-        async with http_client:
-            adapter = SemanticScholarAdapter(
-                http_client=http_client,
-                logger=mock_logger,
-                **build_http_adapter_runtime_kwargs(
-                    "semanticscholar",
-                    logger=mock_logger,
-                    include_fallback_service=True,
-                ),
+        with respx.mock:
+            respx.post("https://api.semanticscholar.org/graph/v1/paper/batch").mock(
+                return_value=Response(200, json=mock_response)
             )
 
             records: list[dict[str, Any]] = []
-            async for record in adapter.fetch_filtered(
+            async for record in semanticscholar_adapter.fetch_filtered(
                 entity_type="publication",
-                filter_ids=[],
+                filter_ids=["doi1", "doi2", "doi3"],
                 filter_field="doi",
+                limit=2,
             ):
                 records.append(record)
 
-            # Empty input should yield no results
-            assert len(records) == 0
+            # Should respect limit=2
+            assert len(records) == 2
+
+    async def test_empty_filter_ids(
+        self,
+        semanticscholar_adapter: SemanticScholarAdapter,
+    ) -> None:
+        """Test behavior with empty filter_ids list."""
+        records: list[dict[str, Any]] = []
+        async for record in semanticscholar_adapter.fetch_filtered(
+            entity_type="publication",
+            filter_ids=[],
+            filter_field="doi",
+        ):
+            records.append(record)
+
+        # Empty input should yield no results
+        assert len(records) == 0
 
 
 @pytest.mark.integration

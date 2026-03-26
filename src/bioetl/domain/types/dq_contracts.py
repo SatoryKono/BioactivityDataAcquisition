@@ -32,7 +32,9 @@ class DQViolationKind(StrEnum):
     SCHEMA_VIOLATION = "schema_violation"  # Data doesn't match expected schema
     THRESHOLD_BREACH = "threshold_breach"  # Metric exceeds configured threshold
     BUSINESS_RULE_VIOLATION = "business_rule_violation"  # Violates business logic
-    CROSS_VALIDATION_MISMATCH = "cross_validation_mismatch"  # Composite validation failure
+    CROSS_VALIDATION_MISMATCH = (
+        "cross_validation_mismatch"  # Composite validation failure
+    )
     ANOMALY_SIGNAL = "anomaly_signal"  # Statistical anomaly detected
 
 
@@ -115,6 +117,7 @@ class DQRuleProvenance:
 
 
 # Convenience function for creating provenance from outcome
+
 
 def create_provenance_from_outcome(
     outcome: DQRuleOutcome,

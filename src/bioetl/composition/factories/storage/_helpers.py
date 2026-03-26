@@ -327,6 +327,7 @@ def create_storage_adapter(
         transform_version=config.transform.version,
         transform_steps=tuple(config.transform.steps),
         flat_structure=ctx.gold_flat,
+        metrics=metrics,
     )
     return StorageAdapter(
         bronze_writer=bronze_writer,

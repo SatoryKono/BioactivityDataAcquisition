@@ -231,7 +231,8 @@ def create_run_manifest(
         rule_bundle_version,
     ) = _resolve_contract_identity(provider=provider, entity=entity)
     manifest_store = FileRunManifestStore(
-        base_path=_control_plane_root(inputs.settings, "run_manifest")
+        base_path=_control_plane_root(inputs.settings, "run_manifest"),
+        metrics=inputs.observability.metrics,
     )
     ledger_service: RunLedgerService | None = None
     if ledger_enabled:
@@ -240,7 +241,8 @@ def create_run_manifest(
 
         ledger_service = RunLedgerService(
             ledger_port=FileRunLedgerStore(
-                base_path=_control_plane_root(inputs.settings, "run_ledger")
+                base_path=_control_plane_root(inputs.settings, "run_ledger"),
+                metrics=inputs.observability.metrics,
             ),
             manifest_id="pending",
             run_id=ctx.run_id,

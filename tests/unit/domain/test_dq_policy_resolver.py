@@ -15,7 +15,7 @@ class TestDQPolicyResolverInitialization:
         """Test resolver initialization with default configuration."""
         config = DQConfig()
         resolver = DQPolicyResolver(config)
-        
+
         assert resolver.config == config
         assert resolver.config.default_disposition_policy == DQDisposition.WARN
         assert resolver.config.strictness_mode == "moderate"
@@ -30,21 +30,21 @@ class TestDQPolicyResolverInitialization:
             strictness_mode="strict",
         )
         resolver = DQPolicyResolver(config)
-        
+
         assert resolver.config.contract_ref == "chembl_molecule"
         assert resolver.config.default_disposition_policy == DQDisposition.QUARANTINE
 
     def test_resolver_with_invalid_default_disposition(self):
         """Test that invalid default disposition raises error."""
         config = DQConfig(default_disposition_policy="invalid")  # type: ignore
-        
+
         with pytest.raises(ValueError, match="Invalid default_disposition_policy"):
             DQPolicyResolver(config)
 
     def test_resolver_with_invalid_disposition_override(self):
         """Test that invalid disposition override raises error."""
         config = DQConfig(disposition_overrides={"rule1": "invalid"})  # type: ignore
-        
+
         with pytest.raises(ValueError, match="Invalid disposition override"):
             DQPolicyResolver(config)
 
@@ -61,7 +61,7 @@ class TestPolicyReferenceBuilding:
         )
         resolver = DQPolicyResolver(config)
         policy_ref = resolver.build_policy_ref()
-        
+
         assert policy_ref.contract_ref == "pubmed_article"
         assert policy_ref.contract_version == "2.0.0"
         assert policy_ref.rule_bundle_version == "1.5.0"
@@ -73,7 +73,7 @@ class TestPolicyReferenceBuilding:
         config = DQConfig()
         resolver = DQPolicyResolver(config)
         policy_ref = resolver.build_policy_ref()
-        
+
         assert policy_ref.contract_ref == "default"
         assert policy_ref.contract_version == "1.0.0"
         assert policy_ref.rule_bundle_version == "1.0.0"
@@ -87,33 +87,33 @@ class TestPolicyReferenceBuilding:
             rule_bundle_version="1.0.0",
             default_disposition_policy=DQDisposition.WARN,
         )
-        
+
         config2 = DQConfig(
             contract_ref="test",
             contract_version="1.0.0",
             rule_bundle_version="1.0.0",
             default_disposition_policy=DQDisposition.WARN,
         )
-        
+
         resolver1 = DQPolicyResolver(config1)
         resolver2 = DQPolicyResolver(config2)
-        
+
         hash1 = resolver1.build_policy_ref().policy_hash
         hash2 = resolver2.build_policy_ref().policy_hash
-        
+
         assert hash1 == hash2
 
     def test_policy_hash_changes_with_config(self):
         """Test that policy hash changes when configuration changes."""
         config1 = DQConfig(default_disposition_policy=DQDisposition.WARN)
         config2 = DQConfig(default_disposition_policy=DQDisposition.QUARANTINE)
-        
+
         resolver1 = DQPolicyResolver(config1)
         resolver2 = DQPolicyResolver(config2)
-        
+
         hash1 = resolver1.build_policy_ref().policy_hash
         hash2 = resolver2.build_policy_ref().policy_hash
-        
+
         assert hash1 != hash2
 
 
@@ -124,13 +124,13 @@ class TestDispositionResolution:
         """Test disposition resolution using default policy."""
         config = DQConfig(default_disposition_policy=DQDisposition.WARN)
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="schema.not_null",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
             severity="medium",
         )
-        
+
         # Should return WARN as default, but escalated due to schema violation
         assert disposition == DQDisposition.QUARANTINE
 
@@ -143,13 +143,13 @@ class TestDispositionResolution:
             },
         )
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="schema.not_null",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
             severity="medium",
         )
-        
+
         # Should use the override, not the default
         assert disposition == DQDisposition.FAIL
 
@@ -157,13 +157,13 @@ class TestDispositionResolution:
         """Test that high severity violations get escalated dispositions."""
         config = DQConfig(default_disposition_policy=DQDisposition.WARN)
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="threshold.completeness",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="high",
         )
-        
+
         # High severity should escalate WARN to QUARANTINE
         assert disposition == DQDisposition.QUARANTINE
 
@@ -171,13 +171,13 @@ class TestDispositionResolution:
         """Test that low severity violations get de-escalated dispositions."""
         config = DQConfig(default_disposition_policy=DQDisposition.QUARANTINE)
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="anomaly.detection",
             violation_kind=DQViolationKind.ANOMALY_SIGNAL,
             severity="low",
         )
-        
+
         # Low severity should de-escalate QUARANTINE to WARN
         assert disposition == DQDisposition.WARN
 
@@ -188,13 +188,13 @@ class TestDispositionResolution:
             strictness_mode="strict",
         )
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="threshold.completeness",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="medium",
         )
-        
+
         # Strict mode should escalate WARN to QUARANTINE
         assert disposition == DQDisposition.QUARANTINE
 
@@ -205,13 +205,13 @@ class TestDispositionResolution:
             strictness_mode="lenient",
         )
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="threshold.completeness",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="medium",
         )
-        
+
         # Lenient mode should de-escalate QUARANTINE to WARN
         assert disposition == DQDisposition.WARN
 
@@ -219,13 +219,13 @@ class TestDispositionResolution:
         """Test that schema violations are automatically escalated."""
         config = DQConfig(default_disposition_policy=DQDisposition.WARN)
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="schema.not_null",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
             severity="medium",
         )
-        
+
         # Schema violations should escalate WARN to QUARANTINE
         assert disposition == DQDisposition.QUARANTINE
 
@@ -233,13 +233,13 @@ class TestDispositionResolution:
         """Test that anomaly signals are automatically de-escalated."""
         config = DQConfig(default_disposition_policy=DQDisposition.FAIL)
         resolver = DQPolicyResolver(config)
-        
+
         disposition = resolver.resolve_disposition(
             rule_id="anomaly.detection",
             violation_kind=DQViolationKind.ANOMALY_SIGNAL,
             severity="high",
         )
-        
+
         # Anomaly signals should de-escalate FAIL to QUARANTINE
         assert disposition == DQDisposition.QUARANTINE
 
@@ -251,7 +251,7 @@ class TestRuleOutcomeCreation:
         """Test basic rule outcome creation."""
         config = DQConfig(default_disposition_policy=DQDisposition.WARN)
         resolver = DQPolicyResolver(config)
-        
+
         outcome = resolver.create_rule_outcome(
             rule_id="schema.not_null",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
@@ -259,7 +259,7 @@ class TestRuleOutcomeCreation:
             affected_fields=["id", "name"],
             config_path="configs/quality/chembl.yaml",
         )
-        
+
         assert outcome.rule_id == "schema.not_null"
         assert outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
         assert outcome.severity == "high"
@@ -276,26 +276,26 @@ class TestRuleOutcomeCreation:
             },
         )
         resolver = DQPolicyResolver(config)
-        
+
         outcome = resolver.create_rule_outcome(
             rule_id="critical.field",
             violation_kind=DQViolationKind.BUSINESS_RULE_VIOLATION,
             severity="high",
         )
-        
+
         assert outcome.disposition == DQDisposition.FAIL  # Uses override
 
     def test_create_rule_outcome_with_defaults(self):
         """Test rule outcome creation with default values."""
         config = DQConfig()
         resolver = DQPolicyResolver(config)
-        
+
         outcome = resolver.create_rule_outcome(
             rule_id="threshold.completeness",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="medium",
         )
-        
+
         assert outcome.affected_fields == []  # Default empty list
         assert outcome.config_path is None  # Default None
         assert outcome.disposition == DQDisposition.WARN  # Default disposition
@@ -318,9 +318,9 @@ class TestPolicySummary:
             },
         )
         resolver = DQPolicyResolver(config)
-        
+
         summary = resolver.get_effective_policy_summary()
-        
+
         assert summary["contract_ref"] == "pubmed_article"
         assert summary["contract_version"] == "2.0.0"
         assert summary["rule_bundle_version"] == "1.5.0"
@@ -334,9 +334,9 @@ class TestPolicySummary:
         """Test policy summary with default configuration."""
         config = DQConfig()
         resolver = DQPolicyResolver(config)
-        
+
         summary = resolver.get_effective_policy_summary()
-        
+
         assert summary["contract_ref"] is None
         assert summary["contract_version"] is None
         assert summary["rule_bundle_version"] is None
@@ -362,7 +362,7 @@ class TestPolicyResolverIntegration:
             },
         )
         resolver = DQPolicyResolver(config)
-        
+
         # Test 1: Override takes precedence
         disposition1 = resolver.resolve_disposition(
             rule_id="schema.molecule_id",
@@ -370,15 +370,17 @@ class TestPolicyResolverIntegration:
             severity="high",
         )
         assert disposition1 == DQDisposition.FAIL
-        
+
         # Test 2: Strict mode + schema violation escalation
         disposition2 = resolver.resolve_disposition(
             rule_id="schema.assay_id",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
             severity="medium",
         )
-        assert disposition2 == DQDisposition.QUARANTINE  # WARN -> QUARANTINE (strict mode)
-        
+        assert (
+            disposition2 == DQDisposition.QUARANTINE
+        )  # WARN -> QUARANTINE (strict mode)
+
         # Test 3: Override with medium severity
         disposition3 = resolver.resolve_disposition(
             rule_id="threshold.min_records",
@@ -386,14 +388,16 @@ class TestPolicyResolverIntegration:
             severity="medium",
         )
         assert disposition3 == DQDisposition.QUARANTINE  # Uses override
-        
+
         # Test 4: Low severity anomaly in strict mode
         disposition4 = resolver.resolve_disposition(
             rule_id="anomaly.outlier",
             violation_kind=DQViolationKind.ANOMALY_SIGNAL,
             severity="low",
         )
-        assert disposition4 == DQDisposition.QUARANTINE  # WARN -> QUARANTINE (strict mode overrides anomaly de-escalation)
+        assert (
+            disposition4 == DQDisposition.QUARANTINE
+        )  # WARN -> QUARANTINE (strict mode overrides anomaly de-escalation)
 
     def test_policy_consistency_across_instances(self):
         """Test that same configuration produces consistent results."""
@@ -401,22 +405,25 @@ class TestPolicyResolverIntegration:
             default_disposition_policy=DQDisposition.QUARANTINE,
             strictness_mode="strict",
         )
-        
+
         resolver1 = DQPolicyResolver(config)
         resolver2 = DQPolicyResolver(config)
-        
+
         # Test same inputs produce same outputs
         disposition1 = resolver1.resolve_disposition(
             rule_id="test.rule",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="high",
         )
-        
+
         disposition2 = resolver2.resolve_disposition(
             rule_id="test.rule",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="high",
         )
-        
+
         assert disposition1 == disposition2
-        assert resolver1.build_policy_ref().policy_hash == resolver2.build_policy_ref().policy_hash
+        assert (
+            resolver1.build_policy_ref().policy_hash
+            == resolver2.build_policy_ref().policy_hash
+        )

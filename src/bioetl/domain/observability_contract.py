@@ -167,9 +167,6 @@ class ObservabilityContractPayload:
     metric_labels: dict[str, str]
 
 
-
-
-
 def normalize_observability_context(
     *,
     event_name: str,

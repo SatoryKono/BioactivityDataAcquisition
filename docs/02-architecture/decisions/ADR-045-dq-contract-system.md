@@ -254,8 +254,8 @@ dq_contracts:
 
 - [ADR-002: Medallion Architecture](ADR-002-medallion-architecture.md)
 - [ADR-017: Observability Architecture](ADR-017-observability-architecture.md)
-- [DQ Contract System Component Spec](components/dq-contract-system.md)
-- [Configuration Runtime Artifacts](components/config-runtime-artifacts.md)
+- [DQ Contract System Component Spec](../../04-reference/components/dq-contract-system.md)
+- [Configuration Runtime Artifacts](../../04-reference/components/config-runtime-artifacts.md)
 
 ## Revision History
 

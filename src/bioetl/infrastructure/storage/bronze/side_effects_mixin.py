@@ -28,6 +28,7 @@ if TYPE_CHECKING:
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
+        MetricsPort,
     )
 
     class _BronzeWriterSideEffectsHost:
@@ -36,6 +37,7 @@ if TYPE_CHECKING:
         _metadata_coordinator: MetadataCoordinatorPort | None
         _lineage_store: LineageStorePort | None
         _flat_structure: bool
+        _metrics: MetricsPort
         base_path: Path
         logger: LoggerPort
 
@@ -138,6 +140,9 @@ class BronzeWriterSideEffectsMixin:
         await persist_lineage_fragment_if_present(
             lineage_store=getattr(host, "_lineage_store", None),
             lineage_fragment=prepared.lineage_fragment,
+            metrics=getattr(host, "_metrics", None),
+            pipeline_name=f"{provider}_{entity}",
+            layer="bronze",
         )
         host.logger.debug(
             "bronze_metadata_written",

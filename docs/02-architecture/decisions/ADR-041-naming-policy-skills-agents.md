@@ -108,7 +108,7 @@ description: "..."            # Russian for BioETL-specific, English for generic
 | Type suffix | Pattern | Example |
 |-------------|---------|---------|
 | `-bot` | Single autonomous agent, focused task | `py-test-bot`, `py-debug-bot` |
-| `-swarm` | Hierarchical L1→L2(→L3), auto-scaling | `py-test-swarm`, `py-doc-swarm` |
+| `-swarm` | Hierarchical L1→L2(→L3), auto-scaling | `py-test-swarm`, `documentation-cascade-audit` |
 | `-orchestrator` | Sector-based decomposition (S1-S8) | `py-review-orchestrator` |
 
 ---

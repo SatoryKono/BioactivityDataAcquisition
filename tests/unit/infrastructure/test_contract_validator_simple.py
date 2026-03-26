@@ -16,7 +16,7 @@ class TestContractAwareGoldValidatorSimple:
     def test_initialization_without_config(self):
         """Test initialization without DQ config."""
         validator = ContractAwareGoldValidator(schema=None, strict=False)
-        
+
         assert validator.policy_ref is None
         assert validator._policy_resolver is None
 
@@ -28,9 +28,11 @@ class TestContractAwareGoldValidatorSimple:
             rule_bundle_version="1.0.0",
             default_disposition_policy=DQDisposition.WARN,
         )
-        
-        validator = ContractAwareGoldValidator(schema=None, strict=False, dq_config=config)
-        
+
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=False, dq_config=config
+        )
+
         assert validator.policy_ref is not None
         assert validator.policy_ref.contract_ref == "chembl_molecule"
         assert validator._policy_resolver is not None
@@ -44,10 +46,12 @@ class TestContractAwareGoldValidatorSimple:
             default_disposition_policy=DQDisposition.QUARANTINE,
             strictness_mode="strict",
         )
-        
-        validator = ContractAwareGoldValidator(schema=None, strict=False, dq_config=config)
+
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=False, dq_config=config
+        )
         summary = validator.get_policy_summary()
-        
+
         assert summary["contract_ref"] == "pubmed_article"
         assert summary["contract_version"] == "2.0.0"
         assert summary["default_disposition"] == "quarantine"
@@ -57,8 +61,10 @@ class TestContractAwareGoldValidatorSimple:
     def test_validation_without_schema(self):
         """Test validation when no schema is provided."""
         config = DQConfig()
-        validator = ContractAwareGoldValidator(schema=None, strict=False, dq_config=config)
-        
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=False, dq_config=config
+        )
+
         is_valid, outcomes = validator.validate_with_outcomes([])
         assert is_valid is True
         assert outcomes == []
@@ -66,7 +72,7 @@ class TestContractAwareGoldValidatorSimple:
     def test_validation_without_config_fallback(self):
         """Test fallback behavior when no DQ config is provided."""
         validator = ContractAwareGoldValidator(schema=None, strict=False)
-        
+
         is_valid, outcomes = validator.validate_with_outcomes([])
         assert is_valid is True
         assert outcomes == []
@@ -74,8 +80,10 @@ class TestContractAwareGoldValidatorSimple:
     def test_strict_mode_without_schema(self):
         """Test strict mode behavior when schema is missing."""
         config = DQConfig()
-        validator = ContractAwareGoldValidator(schema=None, strict=True, dq_config=config)
-        
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=True, dq_config=config
+        )
+
         is_valid, outcomes = validator.validate_with_outcomes([{"field": "value"}])
         assert is_valid is False
         assert len(outcomes) == 1
@@ -93,16 +101,16 @@ class TestContractAwareGoldValidatorSimple:
                 "schema.critical_field": DQDisposition.FAIL,
             },
         )
-        
+
         validator = ContractAwareGoldValidator(schema=None, dq_config=config)
-        
+
         # Test that policy resolver can create outcomes
         outcome = validator._policy_resolver.create_rule_outcome(
             rule_id="test.rule",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
             severity="high",
         )
-        
+
         assert outcome.rule_id == "test.rule"
         assert outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
         assert outcome.severity == "high"
@@ -117,16 +125,16 @@ class TestContractAwareGoldValidatorSimple:
                 "schema.critical_field": DQDisposition.FAIL,
             },
         )
-        
+
         validator = ContractAwareGoldValidator(schema=None, dq_config=config)
-        
+
         # Test override
         outcome = validator._policy_resolver.create_rule_outcome(
             rule_id="schema.critical_field",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
             severity="medium",
         )
-        
+
         assert outcome.disposition == DQDisposition.FAIL  # Override applied
 
     def test_policy_hash_consistency(self):
@@ -136,19 +144,19 @@ class TestContractAwareGoldValidatorSimple:
             contract_version="1.0.0",
             default_disposition_policy=DQDisposition.WARN,
         )
-        
+
         config2 = DQConfig(
             contract_ref="test",
             contract_version="1.0.0",
             default_disposition_policy=DQDisposition.WARN,
         )
-        
+
         validator1 = ContractAwareGoldValidator(schema=None, dq_config=config1)
         validator2 = ContractAwareGoldValidator(schema=None, dq_config=config2)
-        
+
         hash1 = validator1.policy_ref.policy_hash
         hash2 = validator2.policy_ref.policy_hash
-        
+
         assert hash1 == hash2
 
 
@@ -161,9 +169,9 @@ class TestContractAwareSilverValidatorSimple:
             contract_ref="test_entity",
             contract_version="1.0.0",
         )
-        
+
         validator = ContractAwareSilverValidator(schema=None, dq_config=config)
-        
+
         assert validator.policy_ref is not None
         assert validator.policy_ref.contract_ref == "test_entity"
 
@@ -174,10 +182,10 @@ class TestContractAwareSilverValidatorSimple:
             contract_version="1.5.0",
             default_disposition_policy=DQDisposition.WARN,
         )
-        
+
         validator = ContractAwareSilverValidator(schema=None, dq_config=config)
         summary = validator.get_policy_summary()
-        
+
         assert summary["contract_ref"] == "chembl_assay"
         assert summary["contract_version"] == "1.5.0"
         assert summary["default_disposition"] == "warn"
@@ -185,7 +193,7 @@ class TestContractAwareSilverValidatorSimple:
     def test_validation_fallback(self):
         """Test Silver validator fallback behavior."""
         validator = ContractAwareSilverValidator(schema=None)
-        
+
         is_valid, outcomes = validator.validate_with_outcomes([])
         assert is_valid is True
         assert outcomes == []
@@ -201,9 +209,9 @@ class TestProvenanceInformationSimple:
             contract_version="2.0.0",
             rule_bundle_version="1.5.0",
         )
-        
+
         validator = ContractAwareGoldValidator(schema=None, dq_config=config)
-        
+
         # Create a test outcome using the policy resolver
         config_path = "contracts/provenance_test/dq_rules.yaml"
         outcome = validator._policy_resolver.create_rule_outcome(
@@ -213,7 +221,7 @@ class TestProvenanceInformationSimple:
             affected_fields=["required_field"],
             config_path=config_path,
         )
-        
+
         assert outcome.rule_id == "schema.required_field"
         assert outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
         assert outcome.affected_fields == ["required_field"]
@@ -235,15 +243,15 @@ class TestDispositionResolutionSimple:
                 "schema.critical_field": DQDisposition.FAIL,
             },
         )
-        
+
         validator = ContractAwareGoldValidator(schema=None, dq_config=config)
-        
+
         outcome = validator._policy_resolver.create_rule_outcome(
             rule_id="schema.critical_field",
             violation_kind=DQViolationKind.BUSINESS_RULE_VIOLATION,
             severity="high",
         )
-        
+
         assert outcome.disposition == DQDisposition.FAIL  # Override applied
 
     def test_default_disposition_applied(self):
@@ -251,15 +259,15 @@ class TestDispositionResolutionSimple:
         config = DQConfig(
             default_disposition_policy=DQDisposition.QUARANTINE,
         )
-        
+
         validator = ContractAwareGoldValidator(schema=None, dq_config=config)
-        
+
         outcome = validator._policy_resolver.create_rule_outcome(
             rule_id="schema.normal_field",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="medium",
         )
-        
+
         assert outcome.disposition == DQDisposition.QUARANTINE  # Default applied
 
     def test_strict_mode_escalation(self):
@@ -268,15 +276,15 @@ class TestDispositionResolutionSimple:
             default_disposition_policy=DQDisposition.WARN,
             strictness_mode="strict",
         )
-        
+
         validator = ContractAwareGoldValidator(schema=None, dq_config=config)
-        
+
         outcome = validator._policy_resolver.create_rule_outcome(
             rule_id="schema.test_field",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
             severity="medium",
         )
-        
+
         # WARN -> QUARANTINE due to strict mode
         assert outcome.disposition == DQDisposition.QUARANTINE
 
@@ -286,14 +294,14 @@ class TestDispositionResolutionSimple:
             default_disposition_policy=DQDisposition.QUARANTINE,
             strictness_mode="lenient",
         )
-        
+
         validator = ContractAwareGoldValidator(schema=None, dq_config=config)
-        
+
         outcome = validator._policy_resolver.create_rule_outcome(
             rule_id="schema.test_field",
             violation_kind=DQViolationKind.THRESHOLD_BREACH,
             severity="medium",
         )
-        
+
         # QUARANTINE -> WARN due to lenient mode
         assert outcome.disposition == DQDisposition.WARN

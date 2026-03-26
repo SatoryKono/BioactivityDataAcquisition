@@ -152,7 +152,7 @@ def _build_silver_dq_summary(
     input_data: SilverMetadataInput,
     record_count: int,
     *,
-    run_context: RunContext,
+    run_context: RunContext | None = None,
 ) -> DQSummary:
     """Build DQ summary using optional batch metrics and provenance."""
     dq_summary = DQSummary(total_records=record_count, valid_records=record_count)
@@ -170,7 +170,9 @@ def _build_silver_dq_summary(
     return _augment_dq_summary_with_composite_cv(
         dq_summary=dq_summary,
         records=input_data.records or [],
-        contract_version=run_context.contract_version,
+        contract_version=(
+            run_context.contract_version if run_context is not None else None
+        ),
         dq_report_path=input_data.dq_report_path,
     )
 

@@ -1,6 +1,6 @@
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Версия: 4.0 | Дата: 2026-03-04 | Supersedes v3.0 | Платформа: Claude Code CLI*
+*Версия: 4.1 | Дата: 2026-03-26 | Supersedes v4.0 | Платформа: Claude Code CLI*
 
 > **Runtime-specific note:** этот файл описывает именно Claude Code runtime.
 > Для Codex source-of-truth orchestration используется отдельный файл
@@ -9,7 +9,7 @@
 
 ## 1. Обзор
 
-Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).
+Команда из **8 активных субагентов** (6 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).
 
 **Запуск субагента:**
 ```
@@ -25,10 +25,9 @@ Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
 | V | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
 | VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `06-doc-update-log.md` |
 | VII | **py-test-swarm** | opus | Иерархическое тестирование (L1→L2→L3) | test reports |
-| VIII | **py-doc-swarm** | opus | Иерархическое документирование, drift detection | doc reports |
-| IX | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
+| VIII | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
 
-> **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`.
+> **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
 
 ### Разделение ответственности (файловые зоны)
 
@@ -439,11 +438,17 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 
 ## 11. Changelog (ORCHESTRATION.md)
 
+### v4.1 (2026-03-26)
+
+- **CHANGED**: active agent table no longer lists the legacy documentation-only subagent
+- **CHANGED**: repo-wide docs audits now point to `documentation-audit` / `documentation-cascade-audit`
+- **CHANGED**: active agent count updated to 8 (6 core + 2 orchestrator/swarm)
+
 ### v4.0 (2026-03-04)
 
 - **REMOVED**: `py-code-bot` — production code now written directly by orchestrator
 - **MERGED**: `py-diagram-bot` into `py-doc-bot` (diagrams are documentation artifacts)
-- **ADDED**: `py-test-swarm`, `py-doc-swarm`, `py-review-orchestrator` to agent table
+- **ADDED**: `py-test-swarm`, docs-audit orchestration track, `py-review-orchestrator` to agent table
 - **REMOVED**: `.claude/agents/subagents/` reference (deleted in Phase 1)
 - **CHANGED**: Agent count: 8 → 9 (6 core + 3 orchestrator/swarm)
 - **CHANGED**: All workflow references updated: py-code-bot → orchestrator

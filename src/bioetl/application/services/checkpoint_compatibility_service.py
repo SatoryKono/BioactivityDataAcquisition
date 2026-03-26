@@ -10,7 +10,36 @@ from bioetl.domain.types.checkpoint_metadata import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+
+
+def _emit_checkpoint_metric(
+    metrics: MetricsPort | None,
+    *,
+    pipeline_name: str | None,
+    disposition: str,
+) -> None:
+    """Emit one checkpoint compatibility event metric when metrics are enabled."""
+    if metrics is None:
+        return
+    metrics.increment_counter(
+        "checkpoint_compatibility_events_total",
+        1,
+        {
+            "pipeline": pipeline_name or "unknown",
+            "disposition": disposition,
+        },
+    )
+
+
+def _strict_disposition(compatible: bool) -> str:
+    """Return the strict-policy checkpoint compatibility disposition label."""
+    return "strict_compatible" if compatible else "strict_incompatible"
+
+
+def _lenient_disposition(compatible: bool) -> str:
+    """Return the lenient-policy checkpoint compatibility disposition label."""
+    return "lenient_compatible" if compatible else "lenient_incompatible"
 
 
 def _validate_dq_contract_compatibility(
@@ -36,7 +65,9 @@ def _validate_dq_contract_compatibility(
         else:
             messages.append("DQ contracts are compatible")
     else:
-        messages.append("DQ contract compatibility: not enforced (missing contract info)")
+        messages.append(
+            "DQ contract compatibility: not enforced (missing contract info)"
+        )
     return dq_compatible, messages
 
 
@@ -162,7 +193,10 @@ def _validate_lenient_pipeline_compatibility(
                     f"current={current_metadata.pipeline_version}, "
                     f"checkpoint={checkpoint_metadata.pipeline_version}"
                 )
-            elif current_metadata.pipeline_version != checkpoint_metadata.pipeline_version:
+            elif (
+                current_metadata.pipeline_version
+                != checkpoint_metadata.pipeline_version
+            ):
                 messages.append(
                     "Minor pipeline version changed (lenient mode): "
                     f"current={current_metadata.pipeline_version}, "
@@ -186,7 +220,9 @@ def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) ->
     )
 
 
-def _log_lenient_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
+def _log_lenient_result(
+    logger: LoggerPort, *, compatible: bool, messages: list[str]
+) -> None:
     if compatible:
         logger.info(
             "Checkpoint minimum compatibility validation passed (lenient mode)",
@@ -202,8 +238,16 @@ def _log_lenient_result(logger: LoggerPort, *, compatible: bool, messages: list[
 class CheckpointCompatibilityService:
     """Application service that validates checkpoint compatibility."""
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(
+        self,
+        logger: LoggerPort,
+        *,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str | None = None,
+    ) -> None:
         self._logger = logger
+        self._metrics = metrics
+        self._pipeline_name = pipeline_name
 
     def validate_checkpoint_compatibility(
         self,
@@ -214,9 +258,11 @@ class CheckpointCompatibilityService:
             current_metadata,
             checkpoint_metadata,
         )
-        pipeline_compatible, pipeline_messages = _validate_pipeline_version_compatibility(
-            current_metadata,
-            checkpoint_metadata,
+        pipeline_compatible, pipeline_messages = (
+            _validate_pipeline_version_compatibility(
+                current_metadata,
+                checkpoint_metadata,
+            )
         )
         rule_bundle_messages = _validate_rule_bundle_compatibility(
             current_metadata,
@@ -238,6 +284,11 @@ class CheckpointCompatibilityService:
             dq_compatible and pipeline_compatible and execution_identity_compatible
         )
         _log_result(self._logger, compatible=compatible, messages=messages)
+        _emit_checkpoint_metric(
+            self._metrics,
+            pipeline_name=self._pipeline_name,
+            disposition=_strict_disposition(compatible),
+        )
         if compatible:
             return CheckpointCompatibilityResult.compatible_result()
         return CheckpointCompatibilityResult.incompatible_result(
@@ -256,9 +307,11 @@ class CheckpointCompatibilityService:
             current_metadata,
             checkpoint_metadata,
         )
-        pipeline_compatible, pipeline_messages = _validate_lenient_pipeline_compatibility(
-            current_metadata,
-            checkpoint_metadata,
+        pipeline_compatible, pipeline_messages = (
+            _validate_lenient_pipeline_compatibility(
+                current_metadata,
+                checkpoint_metadata,
+            )
         )
         execution_identity_compatible, execution_identity_messages = (
             _validate_execution_identity_compatibility(
@@ -271,6 +324,11 @@ class CheckpointCompatibilityService:
             dq_compatible and pipeline_compatible and execution_identity_compatible
         )
         _log_lenient_result(self._logger, compatible=compatible, messages=messages)
+        _emit_checkpoint_metric(
+            self._metrics,
+            pipeline_name=self._pipeline_name,
+            disposition=_lenient_disposition(compatible),
+        )
         return CheckpointCompatibilityResult(
             compatible=compatible,
             dq_compatible=dq_compatible,

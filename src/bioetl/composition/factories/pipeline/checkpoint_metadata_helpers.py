@@ -62,7 +62,9 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         else None
     )
     dq_contract_compatibility_hash = (
-        _coerce_optional_str(getattr(run_context, "dq_contract_compatibility_hash", None))
+        _coerce_optional_str(
+            getattr(run_context, "dq_contract_compatibility_hash", None)
+        )
         if run_context is not None
         else None
     )

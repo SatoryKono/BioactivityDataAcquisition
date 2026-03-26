@@ -26,7 +26,7 @@ class TestRunCodeProvenanceDQIntegration:
             dq_policy_ref="chembl.dq.v1",
             rule_bundle_version="dq-rules.v1.0",
             dq_contract_compatibility_hash="dq_hash_abc",
-            effective_config_artifact_id="config_artifact_001"
+            effective_config_artifact_id="config_artifact_001",
         )
 
         assert provenance.pipeline_version == "1.0.0"
@@ -43,9 +43,7 @@ class TestRunCodeProvenanceDQIntegration:
     def test_code_provenance_without_dq_fields(self) -> None:
         """Test RunCodeProvenance creation without DQ fields (backward compatibility)."""
         provenance = RunCodeProvenance(
-            pipeline_version="1.0.0",
-            git_commit="abc123",
-            config_hash="config_hash_123"
+            pipeline_version="1.0.0", git_commit="abc123", config_hash="config_hash_123"
         )
 
         assert provenance.dq_contract_compatibility_hash is None
@@ -53,9 +51,7 @@ class TestRunCodeProvenanceDQIntegration:
 
     def test_code_provenance_immutability(self) -> None:
         """Test that RunCodeProvenance is immutable."""
-        provenance = RunCodeProvenance(
-            dq_contract_compatibility_hash="test_hash"
-        )
+        provenance = RunCodeProvenance(dq_contract_compatibility_hash="test_hash")
 
         with pytest.raises(Exception):
             provenance.dq_contract_compatibility_hash = "modified"  # type: ignore
@@ -72,7 +68,7 @@ class TestRunCodeProvenanceDQIntegration:
             dq_policy_ref="chembl.dq.v1",
             rule_bundle_version="dq-rules.v1.0",
             dq_contract_compatibility_hash="dq_hash_abc",
-            effective_config_artifact_id="config_artifact_001"
+            effective_config_artifact_id="config_artifact_001",
         )
 
         # Test to_dict serialization
@@ -86,7 +82,7 @@ class TestRunCodeProvenanceDQIntegration:
             "dq_policy_ref": "chembl.dq.v1",
             "rule_bundle_version": "dq-rules.v1.0",
             "dq_contract_compatibility_hash": "dq_hash_abc",
-            "effective_config_artifact_id": "config_artifact_001"
+            "effective_config_artifact_id": "config_artifact_001",
         }
 
         # Test from_dict deserialization
@@ -104,7 +100,7 @@ class TestRunManifestDQIntegration:
             git_commit="abc123",
             config_hash="config_hash_123",
             dq_contract_compatibility_hash="dq_hash_abc",
-            effective_config_artifact_id="config_artifact_001"
+            effective_config_artifact_id="config_artifact_001",
         )
 
         manifest = RunManifest(
@@ -120,11 +116,14 @@ class TestRunManifestDQIntegration:
             launch_context={},
             runtime_config={},
             resolved_config={},
-            code_provenance=code_provenance
+            code_provenance=code_provenance,
         )
 
         assert manifest.code_provenance.dq_contract_compatibility_hash == "dq_hash_abc"
-        assert manifest.code_provenance.effective_config_artifact_id == "config_artifact_001"
+        assert (
+            manifest.code_provenance.effective_config_artifact_id
+            == "config_artifact_001"
+        )
 
     def test_run_manifest_serialization_with_dq_fields(self) -> None:
         """Test RunManifest serialization/deserialization with DQ fields."""
@@ -133,7 +132,7 @@ class TestRunManifestDQIntegration:
             git_commit="abc123",
             config_hash="config_hash_123",
             dq_contract_compatibility_hash="dq_hash_abc",
-            effective_config_artifact_id="config_artifact_001"
+            effective_config_artifact_id="config_artifact_001",
         )
 
         manifest = RunManifest(
@@ -149,28 +148,38 @@ class TestRunManifestDQIntegration:
             launch_context={},
             runtime_config={},
             resolved_config={},
-            code_provenance=code_provenance
+            code_provenance=code_provenance,
         )
 
         # Test to_dict serialization
         manifest_dict = manifest.to_dict()
         assert "code_provenance" in manifest_dict
-        assert manifest_dict["code_provenance"]["dq_contract_compatibility_hash"] == "dq_hash_abc"
-        assert manifest_dict["code_provenance"]["effective_config_artifact_id"] == "config_artifact_001"
+        assert (
+            manifest_dict["code_provenance"]["dq_contract_compatibility_hash"]
+            == "dq_hash_abc"
+        )
+        assert (
+            manifest_dict["code_provenance"]["effective_config_artifact_id"]
+            == "config_artifact_001"
+        )
 
         # Test from_dict deserialization
         loaded_manifest = RunManifest.from_dict(manifest_dict)
         assert loaded_manifest == manifest
-        assert loaded_manifest.code_provenance.dq_contract_compatibility_hash == "dq_hash_abc"
-        assert loaded_manifest.code_provenance.effective_config_artifact_id == "config_artifact_001"
+        assert (
+            loaded_manifest.code_provenance.dq_contract_compatibility_hash
+            == "dq_hash_abc"
+        )
+        assert (
+            loaded_manifest.code_provenance.effective_config_artifact_id
+            == "config_artifact_001"
+        )
 
     def test_run_manifest_backward_compatibility(self) -> None:
         """Test RunManifest backward compatibility without DQ fields."""
         # Create manifest without DQ fields
         code_provenance = RunCodeProvenance(
-            pipeline_version="1.0.0",
-            git_commit="abc123",
-            config_hash="config_hash_123"
+            pipeline_version="1.0.0", git_commit="abc123", config_hash="config_hash_123"
         )
 
         manifest = RunManifest(
@@ -186,7 +195,7 @@ class TestRunManifestDQIntegration:
             launch_context={},
             runtime_config={},
             resolved_config={},
-            code_provenance=code_provenance
+            code_provenance=code_provenance,
         )
 
         # Should have None DQ fields
@@ -217,7 +226,7 @@ class TestRunManifestDQIntegration:
             launch_context={},
             runtime_config={},
             resolved_config={},
-            code_provenance=code_provenance1
+            code_provenance=code_provenance1,
         )
 
         code_provenance2 = RunCodeProvenance(
@@ -237,7 +246,7 @@ class TestRunManifestDQIntegration:
             launch_context={},
             runtime_config={},
             resolved_config={},
-            code_provenance=code_provenance2
+            code_provenance=code_provenance2,
         )
 
         # Should be equal
@@ -261,7 +270,7 @@ class TestRunManifestDQIntegration:
             launch_context={},
             runtime_config={},
             resolved_config={},
-            code_provenance=code_provenance3
+            code_provenance=code_provenance3,
         )
 
         assert manifest1 != manifest3

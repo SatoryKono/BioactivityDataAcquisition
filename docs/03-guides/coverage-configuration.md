@@ -116,7 +116,7 @@ COVERAGE_FILE=reports/coverage/.coverage.serial uv run python scripts/ci/run_pyt
   --skip-serial-pass
 
 # Final combine + threshold
-uv run python -m coverage combine reports/coverage
+uv run python -m coverage combine --keep reports/coverage
 uv run python -m coverage report --show-missing --fail-under=85
 ```
 
@@ -273,7 +273,7 @@ coverage-verify:
         --parallel-marker "serial and not e2e and not benchmark"
         --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report="
         --skip-serial-pass
-    - run: uv run python -m coverage combine reports/coverage
+    - run: uv run python -m coverage combine --keep reports/coverage
     - run: uv run python -m coverage report --show-missing --fail-under=85
     - run: uv run python -m coverage xml -o coverage.xml
 ```

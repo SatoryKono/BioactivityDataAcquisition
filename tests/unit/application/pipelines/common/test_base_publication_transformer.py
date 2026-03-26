@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from functools import cache
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -98,6 +99,26 @@ class StubWithoutFallbackLogging(StubPublicationTransformer):
         return False
 
 
+@cache
+def _shared_transformer_dependencies() -> Any:
+    """Reuse immutable test collaborator wiring within this module."""
+    return build_test_transformer_dependencies()
+
+
+def _create_stub_transformer(
+    transformer_class: type[StubPublicationTransformer] = StubPublicationTransformer,
+    *,
+    provider: str = "test_provider",
+    entity_type: str = "publication",
+) -> StubPublicationTransformer:
+    """Construct a stub transformer with shared immutable dependencies."""
+    return transformer_class(
+        provider=provider,
+        entity_type=entity_type,
+        dependencies=_shared_transformer_dependencies(),
+    )
+
+
 # =============================================================================
 # Fixtures
 # =============================================================================
@@ -106,11 +127,7 @@ class StubWithoutFallbackLogging(StubPublicationTransformer):
 @pytest.fixture
 def transformer() -> StubPublicationTransformer:
     """Create a stub transformer instance."""
-    return StubPublicationTransformer(
-        provider="test_provider",
-        entity_type="publication",
-        dependencies=build_test_transformer_dependencies(),
-    )
+    return _create_stub_transformer()
 
 
 @pytest.fixture
@@ -372,11 +389,7 @@ class TestFallbackLookupLogging:
         mock_context: PipelineContext,
     ) -> None:
         """Should not log fallback when disabled."""
-        transformer = StubWithoutFallbackLogging(
-            provider="test_provider",
-            entity_type="publication",
-            dependencies=build_test_transformer_dependencies(),
-        )
+        transformer = _create_stub_transformer(StubWithoutFallbackLogging)
         record = {
             "id": "test-123",
             "title": "Title",
@@ -405,11 +418,7 @@ class TestPreExtractValidation:
         mock_context: PipelineContext,
     ) -> None:
         """Should return None when pre-validation raises ValueError."""
-        transformer = StubWithPreValidation(
-            provider="test_provider",
-            entity_type="publication",
-            dependencies=build_test_transformer_dependencies(),
-        )
+        transformer = _create_stub_transformer(StubWithPreValidation)
         record = {
             "id": None,  # Will fail pre-validation
             "title": "Test",
@@ -427,11 +436,7 @@ class TestPreExtractValidation:
         sample_record: dict[str, Any],
     ) -> None:
         """Should proceed with transformation when pre-validation passes."""
-        transformer = StubWithPreValidation(
-            provider="test_provider",
-            entity_type="publication",
-            dependencies=build_test_transformer_dependencies(),
-        )
+        transformer = _create_stub_transformer(StubWithPreValidation)
 
         result = await transformer.transform(mock_context, sample_record, 0)
 
@@ -495,27 +500,19 @@ class TestProviderConfiguration:
 
     def test_provider_attribute(self) -> None:
         """Should set provider attribute correctly."""
-        transformer = StubPublicationTransformer(
-            provider="custom_provider",
-            entity_type="publication",
-            dependencies=build_test_transformer_dependencies(),
-        )
+        transformer = _create_stub_transformer(provider="custom_provider")
         assert transformer.provider == "custom_provider"
 
     def test_entity_type_attribute(self) -> None:
         """Should set entity_type attribute correctly."""
-        transformer = StubPublicationTransformer(
-            provider="test",
-            entity_type="custom_type",
-            dependencies=build_test_transformer_dependencies(),
+        transformer = _create_stub_transformer(
+            provider="test", entity_type="custom_type"
         )
         assert transformer.entity_type == "custom_type"
 
     def test_default_entity_type(self) -> None:
         """Should use 'publication' as default entity_type."""
-        transformer = StubPublicationTransformer(
-            provider="test", dependencies=build_test_transformer_dependencies()
-        )
+        transformer = _create_stub_transformer(provider="test")
         assert transformer.entity_type == "publication"
 
 
@@ -554,7 +551,8 @@ class TestAbstractMethodContracts:
 
     def test_should_log_fallback_can_be_overridden(self) -> None:
         """_should_log_fallback_lookup can be overridden to False."""
-        transformer = StubWithoutFallbackLogging(
-            provider="test", dependencies=build_test_transformer_dependencies()
+        transformer = _create_stub_transformer(
+            StubWithoutFallbackLogging,
+            provider="test",
         )
         assert transformer._should_log_fallback_lookup() is False

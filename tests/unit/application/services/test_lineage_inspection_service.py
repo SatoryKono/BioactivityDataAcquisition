@@ -36,7 +36,9 @@ class _InMemoryLineageStore(LineageStorePort):
         return [item for item in self._items.values() if item.run_id == str(run_id)]
 
     def list_by_manifest_id(self, manifest_id: str) -> list[LineageGraphFragment]:
-        return [item for item in self._items.values() if item.manifest_id == manifest_id]
+        return [
+            item for item in self._items.values() if item.manifest_id == manifest_id
+        ]
 
     def list_by_node_id(self, node_id: str) -> list[LineageGraphFragment]:
         return [

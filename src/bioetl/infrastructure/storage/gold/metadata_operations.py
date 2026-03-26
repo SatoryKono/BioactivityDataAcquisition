@@ -15,6 +15,8 @@ from bioetl.infrastructure.storage.gold.metadata_payloads import (
     build_gold_metadata_payload,
 )
 from bioetl.infrastructure.storage.lineage_persistence import (
+    emit_composite_source_selection_metrics,
+    emit_lineage_refs_missing_metric,
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
@@ -24,10 +26,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.lineage import LineageGraphFragment
     from bioetl.domain.models.metadata import GoldMetadata
-    from bioetl.domain.ports import (
-        LoggerPort,
-        MetadataCoordinatorPort,
-    )
+    from bioetl.domain.ports import LoggerPort, MetadataCoordinatorPort, MetricsPort
     from bioetl.domain.types import GoldRecord, ScdConfig
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
@@ -86,6 +85,7 @@ class _GoldMetadataWriteHostProtocol(Protocol):
 
     _metadata_coordinator: MetadataCoordinatorPort | None
     _lineage_store: LineageStorePort | None
+    _metrics: MetricsPort | None
     _transform_version: str | None
     _transform_steps: tuple[str, ...]
 
@@ -187,6 +187,25 @@ async def _persist_gold_metadata_write(
     await persist_lineage_fragment_if_present(
         lineage_store=getattr(host, "_lineage_store", None),
         lineage_fragment=prepared.lineage_fragment,
+        metrics=getattr(host, "_metrics", None),
+        pipeline_name=f"{prepared.provider_name}_{prepared.entity_name}",
+        layer="gold",
+    )
+    pipeline_name = f"{prepared.provider_name}_{prepared.entity_name}"
+    if isinstance(prepared.request, _GoldMetadataWriteRequest):
+        if not prepared.request.silver_refs:
+            emit_lineage_refs_missing_metric(
+                getattr(host, "_metrics", None),
+                pipeline_name=pipeline_name,
+                layer="gold",
+                ref_type="silver_dataset",
+            )
+        return
+    emit_composite_source_selection_metrics(
+        getattr(host, "_metrics", None),
+        pipeline_name=pipeline_name,
+        layer="gold",
+        records=prepared.request.records,
     )
 
 

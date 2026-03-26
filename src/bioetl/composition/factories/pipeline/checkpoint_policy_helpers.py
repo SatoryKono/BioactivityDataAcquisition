@@ -10,7 +10,9 @@ if TYPE_CHECKING:
 
 CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
 _DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY: CheckpointCompatibilityPolicy = "soft_fail"
-_ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES: tuple[CheckpointCompatibilityPolicy, ...] = (
+_ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES: tuple[
+    CheckpointCompatibilityPolicy, ...
+] = (
     "observe",
     "soft_fail",
     "hard_fail",

@@ -1,6 +1,6 @@
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-02-24**  
+Дата сверки: **2026-03-26**  
 Источник истины: `grafana/dashboards/*.json`
 
 ## Какие дашборды использовать
@@ -8,26 +8,28 @@
 | Dashboard | UID | Для чего |
 |---|---|---|
 | Data Quality v2 | `bioetl-dq-v2` | Качество данных, карантин, аномалии, freshness |
-| Overview v2 | `bioetl-overview-v2` | Общее состояние пайплайна по стадиям |
+| Overview v2 | `bioetl-overview-v2` | Общее состояние пайплайна, control-plane и lineage health |
 | Provider Health v2 | `bioetl-provider-health-v2` | Latency/успехи health_check провайдеров |
 | Simple | `bioetl-simple` | Быстрый срез bronze/silver/gold + quality ratio |
 
 ## Фильтрация
 
-- `bioetl-simple`, `bioetl-overview-v2`, `bioetl-dq-v2`: `$pipeline`, `$run-type`
+- `bioetl-simple`, `bioetl-overview-v2`, `bioetl-dq-v2`: `$pipeline`, `$run_type`
 - `bioetl-provider-health-v2`: `$pipeline`, `$provider`
-- Переменные `$run-id` и `execution` не используются.
+- Переменные `$run_id` и `execution` не используются.
 
 ## Что смотреть в первую очередь
 
 1. `bioetl-overview-v2`, panel `id=4`:
-`sum(gold) / clamp-min(sum(bronze), 1)`
+`sum(gold) / clamp_min(sum(bronze), 1)`
 2. `bioetl-dq-v2`, panel `id=2`:
-`(gold + quarantined) / clamp-min(bronze, 1)`
+`(gold + quarantined) / clamp_min(bronze, 1)`
 3. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
 рост quarantine/threshold/failures за 24h.
-4. `bioetl-provider-health-v2`, panel `id=1`, `id=102`, `id=103`:
-p95 latency по провайдерам.
+4. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=102`, `id=103`:
+p95 latency и failure-rate по провайдерам.
+5. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=115`:
+manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и fragment outcomes по `layer/status`.
 
 ## Важные пороги (из JSON)
 
@@ -35,15 +37,19 @@ p95 latency по провайдерам.
 - `overview.id=4`: red `<0.8`, yellow `>=0.8`, green `>=0.9`
 - `dq.id=5`: red `<0.8`, yellow `>=0.8`, green `>=0.9`
 - `dq.id=8`: yellow `>=3600s`, red `>=21600s`
-- `provider.id=103`: yellow `>=1ms`, orange `>=2ms`, red `>=5ms`
-- `provider.id=102`: yellow `>=100ms`, orange `>=500ms`, red `>=1000ms`
+- `overview.id=111`: yellow `>=1`, red `>=5`
+- `overview.id=112`: yellow `>=1`, red `>=5`
+- `overview.id=113`: yellow `>=1`, red `>=5`
+- `overview.id=114`: yellow `>=1`, red `>=10`
+- `provider.id=104`: yellow `>=5%`, red `>=20%`
+- `provider.id=103`: yellow `>=0.5s`, orange `>=2s`, red `>=5s`
+- `provider.id=102`: yellow `>=0.5s`, orange `>=2s`, red `>=5s`
 
 ## Частые проблемы
 
 1. `No data`:
 проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
 2. Пустой `$provider`:
-нет серии `bioetl-health_check-latency-ms-bucket` в metrics endpoint.
-3. Пустой `$run-type`:
-нет метрик `bioetl-records-processed-total` для выбранного `$pipeline`.
-
+нет серии `bioetl_health_check_success_total` в metrics endpoint.
+3. Пустой `$run_type`:
+нет метрик `bioetl_records_processed_total` для выбранного `$pipeline`.

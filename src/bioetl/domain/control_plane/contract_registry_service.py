@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -78,7 +77,7 @@ class ContractRegistry:
         self.entries = self._parse_entries(data)
         self._calculate_registry_hash()
 
-    def _read_registry_data(self, path: Path) -> dict[str, Any]:
+    def _read_registry_data(self, path: Path) -> JsonDict:
         """Read and parse registry YAML content."""
         try:
             content = path.read_text(encoding="utf-8")
@@ -92,11 +91,13 @@ class ContractRegistry:
             raise RegistryLoadError("Invalid registry format: expected mapping")
         return loaded
 
-    def _parse_entries(self, data: dict[str, Any]) -> dict[str, ContractRegistryEntry]:
+    def _parse_entries(self, data: JsonDict) -> dict[str, ContractRegistryEntry]:
         """Parse entries payload into typed registry entries."""
         entries_data = data.get("entries")
         if not isinstance(entries_data, dict):
-            raise RegistryLoadError("Invalid registry format: missing 'entries' mapping")
+            raise RegistryLoadError(
+                "Invalid registry format: missing 'entries' mapping"
+            )
         entries: dict[str, ContractRegistryEntry] = {}
         for contract_ref, entry_data in entries_data.items():
             if not isinstance(entry_data, dict):
@@ -155,7 +156,9 @@ class ContractRegistry:
         warning = build_existing_version_issue(existing, candidate)
         return [warning] if warning is not None else []
 
-    def register_contract(self, entry: ContractRegistryEntry) -> RegistryValidationResult:
+    def register_contract(
+        self, entry: ContractRegistryEntry
+    ) -> RegistryValidationResult:
         """Register a new contract entry."""
         issues = entry.validate()
         if issues:

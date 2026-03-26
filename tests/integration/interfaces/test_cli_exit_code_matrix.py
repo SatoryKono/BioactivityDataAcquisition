@@ -150,9 +150,15 @@ class TestCliExitCodeMatrix:
             assert result.exit_code == ExitCode.SIGINT
 
     def test_run_composite_exit_code_matrix(self, cli_runner) -> None:
-        with patch(
-            "bioetl.interfaces.cli.commands.run_composite_helpers.asyncio.run"
-        ) as mock_run:
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_composite_helpers.asyncio.run"
+            ) as mock_run,
+            patch(
+                "bioetl.interfaces.cli.commands.run_composite_helpers.push_metrics_to_gateway",
+                return_value=True,
+            ),
+        ):
             mock_run.return_value = (True, None)
             result = cli_runner.invoke(
                 cli,

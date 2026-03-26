@@ -1,11 +1,24 @@
 # Traceability Adoption Checklist
 
-*Last verified: 2026-03-25*
+*Last verified: 2026-03-26*
 
 ## Purpose
 
-Capture objective operator-adoption evidence for Wave 4 Traceability Fabric.
+Capture objective operator-adoption evidence for Wave 4 Traceability Fabric
+and the final manual release-readiness gate referenced by Wave 5.
 This checklist is executed after tabletop drills and incident simulations.
+
+## Wave 5 Closeout Expectation
+
+Before declaring the operator gate passed:
+
+- record at least 3 recent sessions covering scenarios A/B/C from
+  [Traceability Tabletop Drills](traceability-tabletop-drills.md);
+- use the canonical execution flow from
+  [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md);
+- achieve average score `>= 7`;
+- ensure no failed session remains without follow-up within 7 days;
+- attach the resulting outcome to the Wave 5 release decision.
 
 ## Readiness Checklist
 
@@ -28,7 +41,7 @@ Mark all items before declaring operator adoption complete:
 
 ## Exit Gate
 
-Wave 4 operator adoption gate is considered passed when:
+Wave 4 / Wave 5 operator adoption gate is considered passed when:
 
 - at least 3 recent sessions are recorded;
 - average score is >= 7;
@@ -37,5 +50,6 @@ Wave 4 operator adoption gate is considered passed when:
 ## Related Runbooks
 
 - [Traceability Tabletop Drills](traceability-tabletop-drills.md)
+- [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md)
 - [Traceability Signal Ownership](traceability-signal-ownership.md)
 - [Run Manifest Inspection](run-manifest-inspection.md)

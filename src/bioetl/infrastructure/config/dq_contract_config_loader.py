@@ -29,7 +29,9 @@ def _resolve_identity_data(registry_entry: JsonDict) -> JsonDict:
     return {}
 
 
-def _validate_identity_field(*, merged: JsonDict, field_name: str, expected: Any) -> None:
+def _validate_identity_field(
+    *, merged: JsonDict, field_name: str, expected: object
+) -> None:
     """Ensure identity field is consistent when expected value is defined."""
     actual = merged.get(field_name)
     if expected and actual and actual != expected:
@@ -56,7 +58,9 @@ def _resolve_threshold(
 
 def _build_legacy_contract_fields(raw_config: JsonDict) -> JsonDict:
     """Extract contract-aware fields from legacy DQ config payload."""
-    contract_fields = {field: raw_config[field] for field in _CONTRACT_FIELDS if field in raw_config}
+    contract_fields = {
+        field: raw_config[field] for field in _CONTRACT_FIELDS if field in raw_config
+    }
     if not contract_fields:
         return {}
 
@@ -67,7 +71,9 @@ def _build_legacy_contract_fields(raw_config: JsonDict) -> JsonDict:
             "soft_fail_threshold": threshold_map.get("soft_fail", 0.05),
             "hard_fail_threshold": threshold_map.get("hard_fail", 0.20),
             "strict_validation": raw_config.get("strict_validation", False),
-            "invalid_record_policy": raw_config.get("invalid_record_policy", "quarantine"),
+            "invalid_record_policy": raw_config.get(
+                "invalid_record_policy", "quarantine"
+            ),
         }
     )
     return contract_fields
@@ -188,7 +194,9 @@ class DQContractConfigLoader:
             field_validations=(),
             cross_field_validations=(),
             conditional_validations=(),
-            invalid_record_policy=contract_config.get("invalid_record_policy", "quarantine"),
+            invalid_record_policy=contract_config.get(
+                "invalid_record_policy", "quarantine"
+            ),
             report=_create_report_config(contract_config.get("report", {})),
             key_nullability_rules=(),
         )
@@ -206,9 +214,9 @@ class DQContractConfigLoader:
 
         identity_data = _resolve_identity_data(registry_entry)
         expected_contract_version = identity_data.get("contract_version")
-        expected_rule_bundle = identity_data.get("rule_bundle_version") or registry_entry.get(
+        expected_rule_bundle = identity_data.get(
             "rule_bundle_version"
-        )
+        ) or registry_entry.get("rule_bundle_version")
         expected_dq_policy = identity_data.get("dq_policy_ref") or registry_entry.get(
             "dq_policy_ref"
         )

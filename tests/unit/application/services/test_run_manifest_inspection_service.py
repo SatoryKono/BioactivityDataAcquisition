@@ -131,6 +131,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "artifact_linkage_gap": False,
         "lineage_gap": False,
         "dq_signal_present": False,
+        "cross_validation_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
         "No alert signals detected; continue routine monitoring."
@@ -173,6 +174,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "artifact_linkage_gap": False,
         "lineage_gap": False,
         "dq_signal_present": False,
+        "cross_validation_signal_present": False,
     }
     assert result.diagnostics["artifact_refs"] == [
         {
@@ -254,12 +256,16 @@ def test_show_collects_dq_trace_anchors() -> None:
     assert result.diagnostics["dq_policy_ref"] == "chembl_activity.gold"
     assert result.diagnostics["rule_bundle_version"] == "2026.03"
     assert result.diagnostics["effective_config_artifact_id"] == "eca-123"
+    assert result.diagnostics["dq_violation_kinds"] == []
+    assert result.diagnostics["cross_validation_rule_ids"] == []
+    assert result.diagnostics["cross_validation_config_paths"] == []
     assert result.diagnostics["alert_signals"] == {
         "run_failed": True,
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
         "dq_signal_present": True,
+        "cross_validation_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
@@ -376,6 +382,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
         run_id=run_id,
         _entry_id_factory=lambda: "entry-chain-1",
     )
+    ledger_service.record_manifest_created(manifest)
     ledger_service.record_artifact_published(
         layer="silver",
         artifact_path="data/output/silver/chembl/activity",
@@ -405,6 +412,12 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
             "artifact_path": "data/output/silver/chembl/activity",
         }
     ]
+    assert result.diagnostics["correlation_anchor_gaps"] == {
+        "effective_config_hash": 0,
+        "contract_ref": 0,
+        "data_contract_version": 0,
+        "composite_run_id": 0,
+    }
     assert result.diagnostics["dq_report_paths"] == [
         "data/output/silver/chembl/activity/_dq.json"
     ]
@@ -501,14 +514,75 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
     assert result.diagnostics["dq_report_paths"] == [
         "data/output/gold/chembl/activity/_dq.json"
     ]
+    assert result.diagnostics["dq_violation_kinds"] == []
+    assert result.diagnostics["cross_validation_rule_ids"] == []
+    assert result.diagnostics["cross_validation_config_paths"] == []
     assert result.diagnostics["alert_signals"] == {
         "run_failed": True,
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
         "dq_signal_present": True,
+        "cross_validation_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
+    ]
+
+
+def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-cv", run_id=run_id)
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-cv-1",
+            manifest_id="manifest-cv",
+            run_id=run_id,
+            event_type="dq_policy_applied",
+            occurred_at=datetime.now(UTC),
+            event_family="dq",
+            status="failed",
+            stage="cross_validation",
+            details={
+                "rule_id": "composite.cross_validation.quarantine",
+                "disposition": "quarantine",
+                "violation_kind": "cross_validation_mismatch",
+                "config_path": "cross_validation",
+                "dq_report_path": "/tmp/reports/composite_cv.json",
+            },
+        )
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = service.show("manifest-cv")
+
+    assert result.diagnostics["dq_rule_ids"] == [
+        "composite.cross_validation.quarantine"
+    ]
+    assert result.diagnostics["dq_dispositions"] == ["quarantine"]
+    assert result.diagnostics["dq_violation_kinds"] == ["cross_validation_mismatch"]
+    assert result.diagnostics["cross_validation_rule_ids"] == [
+        "composite.cross_validation.quarantine"
+    ]
+    assert result.diagnostics["cross_validation_config_paths"] == ["cross_validation"]
+    assert result.diagnostics["cross_validation_signal_present"] is True
+    assert result.diagnostics["alert_signals"] == {
+        "run_failed": True,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+        "dq_signal_present": True,
+        "cross_validation_signal_present": True,
+    }
+    assert result.diagnostics["next_steps"] == [
+        "Inspect failure classification and decide retry/quarantine/escalation.",
+        "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
+        "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes.",
     ]

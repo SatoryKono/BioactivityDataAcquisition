@@ -137,6 +137,51 @@ def secret_filter_processor(
     return event_dict
 
 
+def _get_current_trace_identifiers() -> tuple[str, str] | None:
+    """Return current OTel trace/span identifiers when an active span exists."""
+    try:
+        from opentelemetry import trace as otel_trace
+    except ImportError:
+        return None
+
+    try:
+        current_span = otel_trace.get_current_span()
+        if current_span is None:
+            return None
+        span_context = current_span.get_span_context()
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return None
+
+    trace_id = getattr(span_context, "trace_id", 0)
+    span_id = getattr(span_context, "span_id", 0)
+    is_valid = getattr(span_context, "is_valid", None)
+
+    if is_valid is False:
+        return None
+    if not isinstance(trace_id, int) or not isinstance(span_id, int):
+        return None
+    if trace_id <= 0 or span_id <= 0:
+        return None
+
+    return (f"{trace_id:032x}", f"{span_id:016x}")
+
+
+def trace_context_processor(
+    _logger: object,
+    _method_name: str,
+    event_dict: JsonDict,
+) -> JsonDict:
+    """Attach current trace correlation fields to the structured log event."""
+    trace_identifiers = _get_current_trace_identifiers()
+    if trace_identifiers is None:
+        return event_dict
+
+    trace_id, span_id = trace_identifiers
+    event_dict.setdefault("trace_id", trace_id)
+    event_dict.setdefault("span_id", span_id)
+    return event_dict
+
+
 def configure_logging(
     json_format: bool = True,
     log_level: str = "INFO",
@@ -164,6 +209,7 @@ def configure_logging(
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.UnicodeDecoder(),
+            trace_context_processor,
             secret_filter_processor,
         ]
 
@@ -219,4 +265,5 @@ __all__ = [
     "is_logging_configured",
     "reset_logging_config",
     "secret_filter_processor",
+    "trace_context_processor",
 ]
