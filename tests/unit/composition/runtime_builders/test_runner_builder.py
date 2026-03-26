@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
-import json
 from uuid import uuid4
 
 import pytest
 
+from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
 from bioetl.composition.runtime_builders import runner_builder
@@ -54,6 +55,13 @@ class _FakeRegistry:
         return SimpleNamespace(factory=self._factory, pipeline_name=pipeline_name)
 
 
+def _namespace_observability(logger: object | None = None) -> SimpleNamespace:
+    effective_logger = (
+        logger if logger is not None else SimpleNamespace(info=lambda *_, **__: None)
+    )
+    return SimpleNamespace(logger=effective_logger, metrics=MagicMock())
+
+
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:
     """Default provider bootstrap should come from the named loader helper."""
     default_fn = runner_builder.build_pipeline_runner.__kwdefaults__[
@@ -90,7 +98,7 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
     )
 
     def build_observability_bundle_fn(**_: object) -> SimpleNamespace:
-        return SimpleNamespace(logger=logger)
+        return _namespace_observability(logger)
 
     def assemble_vacuum_settings_fn(**_: object) -> str:
         return "vacuum"
@@ -178,9 +186,7 @@ def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
         )
 
     def build_observability_bundle_fn(**_: object) -> SimpleNamespace:
-        return SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None),
-        )
+        return _namespace_observability(SimpleNamespace(info=lambda *_, **__: None))
 
     context = SimpleNamespace(
         pipeline_name="chembl_activity",
@@ -254,8 +260,8 @@ def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> No
             business_primary_keys=["activity_id"],
             technical_primary_key="entity_id",
         ),
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None),
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: None,
         assemble_runtime_config_fn=lambda **_: "runtime",
@@ -275,11 +281,11 @@ def test_build_pipeline_runner_uses_canonical_runtime_subservices_by_default() -
     expected_inputs = SimpleNamespace(
         settings="settings",
         yaml_config="yaml-config",
-        observability=SimpleNamespace(
-            logger=SimpleNamespace(
+        observability=_namespace_observability(
+            SimpleNamespace(
                 info=lambda *_, **__: None,
                 error=lambda *_, **__: None,
-            )
+            ),
         ),
         runtime_config="runtime",
         filter_config=None,
@@ -364,8 +370,8 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
             business_primary_keys=["activity_id"],
             technical_primary_key="entity_id",
         ),
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None),
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: "vacuum",
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(
@@ -442,6 +448,124 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert ledger_payload["event_type"] == "manifest_created"
 
 
+def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
+    tmp_path: Path,
+) -> None:
+    """Builder should enrich bundle logger context once manifest_id exists."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    base_logger = MagicMock()
+    bound_logger = MagicMock()
+    base_logger.bind.return_value = bound_logger
+    bundle = ObservabilityBundle(logger=base_logger, metrics=MagicMock())
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(heartbeat_interval=30),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=None,
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: bundle,
+        assemble_vacuum_settings_fn=lambda **_: None,
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+    base_logger.bind.assert_called_once_with(manifest_id=manifest_id)
+    assert fake_factory.kwargs["observability"].logger is bound_logger
+
+
+def test_build_pipeline_runner_binds_manifest_id_into_namespace_logger(
+    tmp_path: Path,
+) -> None:
+    """Builder should support lightweight namespace observability doubles."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    base_logger = MagicMock()
+    bound_logger = MagicMock()
+    base_logger.bind.return_value = bound_logger
+    observability = _namespace_observability(base_logger)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(heartbeat_interval=30),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=None,
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: observability,
+        assemble_vacuum_settings_fn=lambda **_: None,
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+    base_logger.bind.assert_called_once_with(manifest_id=manifest_id)
+    assert fake_factory.kwargs["observability"].logger is bound_logger
+
+
 def test_build_pipeline_runner_skips_control_plane_when_manifest_disabled(
     tmp_path: Path,
 ) -> None:
@@ -489,8 +613,8 @@ def test_build_pipeline_runner_skips_control_plane_when_manifest_disabled(
             business_primary_keys=["activity_id"],
             technical_primary_key="entity_id",
         ),
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None),
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: None,
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
@@ -552,8 +676,8 @@ def test_build_pipeline_runner_can_disable_ledger_while_keeping_manifest(
             business_primary_keys=["activity_id"],
             technical_primary_key="entity_id",
         ),
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None),
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: None,
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
@@ -625,8 +749,8 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
             business_primary_keys=["activity_id"],
             technical_primary_key="entity_id",
         ),
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None),
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: None,
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
@@ -753,8 +877,8 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None)
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
             enabled=False,
@@ -816,8 +940,8 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None)
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
             enabled=False,
@@ -876,8 +1000,8 @@ def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled() -> None:
         register_all_pipelines_fn=lambda registry=None: None,
         get_settings_fn=get_settings_fn,
         load_pipeline_config_fn=load_pipeline_config_fn,
-        build_observability_bundle_fn=lambda **_: SimpleNamespace(
-            logger=SimpleNamespace(info=lambda *_, **__: None)
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
             enabled=False,

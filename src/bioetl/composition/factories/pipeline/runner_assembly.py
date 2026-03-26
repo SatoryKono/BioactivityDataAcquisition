@@ -78,7 +78,11 @@ def _build_checkpoint_manager(
     logger_port: LoggerPort,
 ) -> CheckpointManagerService:
     current_metadata = _build_current_checkpoint_metadata(pipeline)
-    compatibility_service = CheckpointCompatibilityService(logger=logger_port)
+    compatibility_service = CheckpointCompatibilityService(
+        logger=logger_port,
+        metrics=pipeline.services.metrics,
+        pipeline_name=pipeline.config.pipeline_name,
+    )
     compatibility_policy = resolve_checkpoint_compatibility_policy(
         pipeline=pipeline,
         logger_port=logger_port,

@@ -38,8 +38,12 @@ class IssueCode(Enum):
     CMP_PF_AGG_006 = "CMP-PF-AGG-006"  # Field shadowing warning
     CMP_PF_CV_002 = "CMP-PF-CV-002"  # Cross-validation pairs cannot be empty
     CMP_PF_CV_003 = "CMP-PF-CV-003"  # Cross-validation pair must be a dictionary
-    CMP_PF_CV_004 = "CMP-PF-CV-004"  # Cross-validation pair must have exactly one source mapping
-    CMP_PF_CV_005 = "CMP-PF-CV-005"  # Cross-validation source not found in pipeline sources
+    CMP_PF_CV_004 = (
+        "CMP-PF-CV-004"  # Cross-validation pair must have exactly one source mapping
+    )
+    CMP_PF_CV_005 = (
+        "CMP-PF-CV-005"  # Cross-validation source not found in pipeline sources
+    )
     CMP_PF_CV_006 = "CMP-PF-CV-006"  # Comparison sources must be string or list
     CMP_PF_CV_007 = "CMP-PF-CV-007"  # Comparison source not found in pipeline sources
     CMP_PF_CV_008 = "CMP-PF-CV-008"  # Cross-validation rules cannot be empty
@@ -63,7 +67,7 @@ class IssueCode(Enum):
 
     def is_blocker(self) -> bool:
         """Return True if this issue code represents a blocker."""
-        return self.value.startswith("CMP-STR-") or self.value in {
+        return self.value.startswith("CMP-STR-") or self in {
             IssueCode.CMP_PF_AGG_001,
             IssueCode.CMP_PF_AGG_002,
             IssueCode.CMP_PF_AGG_003,

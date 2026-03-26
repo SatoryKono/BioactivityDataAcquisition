@@ -284,7 +284,8 @@ class PreflightGovernanceService:
                 "infos": summary["total_infos"],
             },
             "critical_issues": [
-                issue for issue in governance_report["detailed_issues"]
+                issue
+                for issue in governance_report["detailed_issues"]
                 if issue["governance_impact"] == "execution_blocker"
             ],
         }

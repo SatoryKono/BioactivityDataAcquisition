@@ -17,7 +17,9 @@ class FileEffectiveConfigArtifactStore:
 
     base_path: Path
 
-    def save(self, *, artifact_id: str, run_id: RunID, payload: dict[str, object]) -> None:
+    def save(
+        self, *, artifact_id: str, run_id: RunID, payload: dict[str, object]
+    ) -> None:
         """Persist artifact payload and maintain run-id index."""
         artifact_path = self.base_path / f"{artifact_id}.json"
         run_index_dir = self.base_path / "_by_run_id"

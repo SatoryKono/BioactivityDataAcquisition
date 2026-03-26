@@ -65,9 +65,7 @@ def _render_relation_lines(relations: list[object]) -> list[str]:
             node_id = node.get("node_id", "?")
             label = node.get("label")
             suffix = f" label={label}" if label not in (None, "") else ""
-            lines.append(
-                f"  - {edge_type} via {fragment_id}: {node_id}{suffix}"
-            )
+            lines.append(f"  - {edge_type} via {fragment_id}: {node_id}{suffix}")
             continue
         lines.append(f"  - {edge_type} via {fragment_id}: {node}")
     return lines or ["  - none"]

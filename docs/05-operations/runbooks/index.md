@@ -40,6 +40,7 @@ This section contains playbooks for handling common alerts and operational tasks
 | [Traceability Signal Ownership](traceability-signal-ownership.md) | Signal ownership matrix for alert -> diagnostics -> escalation | P1 |
 | [Traceability Tabletop Drills](traceability-tabletop-drills.md) | Tabletop scenarios and scoring for operator adoption | P2 |
 | [Traceability Adoption Checklist](traceability-adoption-checklist.md) | Exit-gate checklist and session evidence log for operator adoption | P2 |
+| [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | One-pack execution guide for the final operator tabletop/adoption gate | P2 |
 
 ---
 
@@ -48,4 +49,4 @@ This section contains playbooks for handling common alerts and operational tasks
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
 ---
-*Last updated: 2026-03-25*
+*Last updated: 2026-03-26*

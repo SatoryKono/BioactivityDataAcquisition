@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ast
 from collections.abc import Callable
+import hashlib
 import importlib.util
 import json
 import shutil
@@ -247,6 +248,32 @@ def _count_skip_markers(items: list[pytest.Item]) -> int:
     return skipped
 
 
+def _architecture_skip_cache_key(project_root: Path) -> str:
+    """Build a stable cache key for nested architecture skip collection."""
+    digest = hashlib.blake2b(digest_size=16)
+    digest.update(sys.version.encode("utf-8"))
+    digest.update(sys.platform.encode("utf-8"))
+
+    tracked_paths: list[Path] = [
+        project_root / "tests" / "conftest.py",
+        project_root / "tests" / "architecture" / "conftest.py",
+        project_root / "pyproject.toml",
+    ]
+    tracked_paths.extend(
+        sorted((project_root / "tests" / "architecture").glob("test_*.py"))
+    )
+
+    for path in tracked_paths:
+        if not path.exists():
+            continue
+        stat = path.stat()
+        digest.update(path.relative_to(project_root).as_posix().encode("utf-8"))
+        digest.update(str(stat.st_mtime_ns).encode("utf-8"))
+        digest.update(str(stat.st_size).encode("utf-8"))
+
+    return f"bioetl/architecture_skip_count/{digest.hexdigest()}"
+
+
 @pytest.mark.timeout(120)
 def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
     """Architecture test skip count must not exceed the ratchet budget.
@@ -264,23 +291,37 @@ def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
     if len(architecture_items) >= 200:
         skipped = _count_skip_markers(architecture_items)
     else:
-        counter = _SkipMarkerCounter()
-        pytest.main(
-            [
-                "tests/architecture/",
-                "--collect-only",
-                "-q",
-                "--ignore=tests/architecture/test_regression_metrics.py",
-                "-p",
-                "no:timeout",
-                "-p",
-                "no:xdist",
-                "--no-header",
-                "--override-ini=addopts=",
-            ],
-            plugins=[counter],
-        )
-        skipped = counter.skipped
+        cache_key = _architecture_skip_cache_key(Path.cwd())
+        cached_skipped = request.config.cache.get(cache_key, None)
+        if isinstance(cached_skipped, int):
+            skipped = cached_skipped
+        else:
+            counter = _SkipMarkerCounter()
+            exit_code = pytest.main(
+                [
+                    "tests/architecture/",
+                    "--collect-only",
+                    "-q",
+                    "--ignore=tests/architecture/test_regression_metrics.py",
+                    "-p",
+                    "no:timeout",
+                    "-p",
+                    "no:xdist",
+                    "--no-header",
+                    "--override-ini=addopts=",
+                ],
+                plugins=[counter],
+            )
+            if counter.total == 0 and exit_code not in (
+                pytest.ExitCode.OK,
+                pytest.ExitCode.NO_TESTS_COLLECTED,
+            ):
+                pytest.fail(
+                    "Nested architecture collection failed while counting skip markers: "
+                    f"exit_code={exit_code}"
+                )
+            skipped = counter.skipped
+            request.config.cache.set(cache_key, skipped)
 
     assert skipped <= max_architecture_skips, (
         f"architecture_skip_count={skipped} exceeds budget {max_architecture_skips}"
@@ -509,7 +550,9 @@ def test_probe_mode_fallback_counter_exists() -> None:
 # ---------------------------------------------------------------------------
 
 GROUP_EDGE_LIMIT = 60
-GROUP_EDGE_TOTAL_BUDGET = 259  # ratchet: control-plane + config-governance baseline raised from 254
+GROUP_EDGE_TOTAL_BUDGET = (
+    259  # ratchet: control-plane + config-governance baseline raised from 254
+)
 
 _dep_map_module = None
 _dep_map_snapshot = None

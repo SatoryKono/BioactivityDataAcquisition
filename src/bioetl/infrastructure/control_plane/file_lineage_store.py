@@ -102,7 +102,9 @@ class FileLineageStore(LineageStorePort):
 
     def _fragment_path(self, fragment_id: str) -> Path:
         """Resolve the fragment JSON path for one fragment identifier."""
-        return self.base_path / "fragments" / f"{_stable_key_filename(fragment_id)}.json"
+        return (
+            self.base_path / "fragments" / f"{_stable_key_filename(fragment_id)}.json"
+        )
 
     def _run_index_path(self, run_id: str) -> Path:
         """Resolve the run-id index path."""
@@ -111,7 +113,9 @@ class FileLineageStore(LineageStorePort):
     def _manifest_index_path(self, manifest_id: str) -> Path:
         """Resolve the manifest-id index path."""
         return (
-            self.base_path / "_by_manifest_id" / f"{_stable_key_filename(manifest_id)}.jsonl"
+            self.base_path
+            / "_by_manifest_id"
+            / f"{_stable_key_filename(manifest_id)}.jsonl"
         )
 
     def _node_index_path(self, node_id: str) -> Path:

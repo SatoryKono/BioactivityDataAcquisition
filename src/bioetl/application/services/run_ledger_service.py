@@ -19,6 +19,76 @@ __all__ = ["RunLedgerService"]
 _LEDGER_DETAILS_CONTRACT_VERSION = "v1"
 
 
+def _coalesce_missing(current: str | None, default: str | None) -> str | None:
+    """Return default only when current value is missing."""
+    if current is None:
+        return default
+    return current
+
+
+def _apply_optional_diagnostic_anchor(
+    diagnostic: dict[str, object],
+    field_name: str,
+    value: str | None,
+) -> None:
+    """Attach one non-empty correlation anchor to diagnostic payload."""
+    if value is None:
+        return
+    if not value.strip():
+        return
+    diagnostic[field_name] = value
+
+
+def _sync_manifest_runtime_defaults(
+    service: RunLedgerService,
+    manifest: RunManifest,
+) -> None:
+    """Hydrate runtime correlation defaults from the immutable manifest."""
+    code_provenance = manifest.code_provenance
+    service.pipeline_name = _coalesce_missing(
+        service.pipeline_name, manifest.pipeline_name
+    )
+    service.provider = _coalesce_missing(service.provider, manifest.provider)
+    service.entity = _coalesce_missing(service.entity, manifest.entity)
+    service.run_type = _coalesce_missing(service.run_type, manifest.run_type.value)
+    service.effective_config_hash = _coalesce_missing(
+        service.effective_config_hash,
+        code_provenance.config_hash,
+    )
+
+
+def _sync_manifest_contract_defaults(
+    service: RunLedgerService,
+    manifest: RunManifest,
+) -> None:
+    """Hydrate contract/DQ correlation defaults from the immutable manifest."""
+    code_provenance = manifest.code_provenance
+    service.contract_ref = _coalesce_missing(
+        service.contract_ref,
+        code_provenance.contract_ref,
+    )
+    service.contract_version = _coalesce_missing(
+        service.contract_version,
+        code_provenance.contract_version,
+    )
+    service.dq_policy_ref = _coalesce_missing(
+        service.dq_policy_ref,
+        code_provenance.dq_policy_ref,
+    )
+    service.rule_bundle_version = _coalesce_missing(
+        service.rule_bundle_version,
+        code_provenance.rule_bundle_version,
+    )
+    service.dq_contract_compatibility_hash = _coalesce_missing(
+        service.dq_contract_compatibility_hash,
+        code_provenance.dq_contract_compatibility_hash,
+    )
+    service.effective_config_artifact_id = _coalesce_missing(
+        service.effective_config_artifact_id,
+        code_provenance.effective_config_artifact_id,
+    )
+
+
 @dataclass(slots=True)
 class RunLedgerService:
     """Append immutable control-plane lifecycle entries for one manifest."""
@@ -26,13 +96,27 @@ class RunLedgerService:
     ledger_port: RunLedgerPort
     manifest_id: str
     run_id: RunID
+    pipeline_name: str | None = None
+    provider: str | None = None
+    entity: str | None = None
+    run_type: str | None = None
+    effective_config_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    dq_policy_ref: str | None = None
+    rule_bundle_version: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
+    composite_run_id: str | None = None
     _entry_id_factory: Callable[[], str] = field(
         default_factory=lambda: lambda: str(uuid4())
     )
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""
-        return self._append(
+        # Keep the first event diagnostics stable around runtime anchors.
+        _sync_manifest_runtime_defaults(self, manifest)
+        entry = self._append(
             event_type="manifest_created",
             status="created",
             details={
@@ -42,6 +126,9 @@ class RunLedgerService:
                 "entity": manifest.entity,
             },
         )
+        # Contract/DQ anchors are still needed for subsequent lifecycle events.
+        _sync_manifest_contract_defaults(self, manifest)
+        return entry
 
     def record_run_started(self) -> RunLedgerEntry:
         """Record the transition into active execution."""
@@ -219,6 +306,54 @@ class RunLedgerService:
             "manifest_id": self.manifest_id,
             "run_id": str(self.run_id),
         }
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "pipeline",
+            self.pipeline_name,
+        )
+        _apply_optional_diagnostic_anchor(diagnostic, "provider", self.provider)
+        _apply_optional_diagnostic_anchor(diagnostic, "entity", self.entity)
+        _apply_optional_diagnostic_anchor(diagnostic, "run_type", self.run_type)
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "effective_config_hash",
+            self.effective_config_hash,
+        )
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "contract_ref",
+            self.contract_ref,
+        )
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "data_contract_version",
+            self.contract_version,
+        )
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "dq_policy_ref",
+            self.dq_policy_ref,
+        )
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "rule_bundle_version",
+            self.rule_bundle_version,
+        )
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "dq_contract_compatibility_hash",
+            self.dq_contract_compatibility_hash,
+        )
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "effective_config_artifact_id",
+            self.effective_config_artifact_id,
+        )
+        _apply_optional_diagnostic_anchor(
+            diagnostic,
+            "composite_run_id",
+            self.composite_run_id,
+        )
         if status is not None:
             diagnostic["status"] = status
         if stage is not None:

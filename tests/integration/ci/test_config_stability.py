@@ -22,6 +22,7 @@ from bioetl.application.services.checkpoint_compatibility_service import (
 )
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+
 class TestConfigStability:
     """Test configuration stability across different scenarios."""
 
@@ -311,8 +312,12 @@ class TestConfigVersioning:
         assert "Pipeline version mismatch" in result.messages[1]
 
         # In lenient mode, patch versions should be compatible
-        result_lenient = self.service.validate_minimum_compatibility(current, checkpoint)
-        assert result_lenient.compatible is True  # Lenient mode allows patch version changes
+        result_lenient = self.service.validate_minimum_compatibility(
+            current, checkpoint
+        )
+        assert (
+            result_lenient.compatible is True
+        )  # Lenient mode allows patch version changes
         assert result_lenient.dq_compatible is True
         assert result_lenient.pipeline_compatible is True
 

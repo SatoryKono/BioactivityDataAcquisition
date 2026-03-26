@@ -177,11 +177,14 @@ def push_metrics_to_gateway(
     effective_run_label = job if job is not None else run_label
 
     try:
+        # Keep Pushgateway publication best-effort so CLI teardown does not stall
+        # for tens of seconds when no local gateway is running.
         pushadd_to_gateway(
             gateway,
             job=effective_run_label,
             registry=REGISTRY,
             grouping_key=grouping_key or {},
+            timeout=1.0,
         )
         logger.info(
             "Metrics pushed to gateway",

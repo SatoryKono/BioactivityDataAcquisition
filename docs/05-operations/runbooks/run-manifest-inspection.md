@@ -1,6 +1,6 @@
 # Run Manifest Inspection
 
-*Last verified: 2026-03-25*
+*Last verified: 2026-03-26*
 
 ## Purpose
 
@@ -64,6 +64,15 @@ Use the `diagnostics` block for immediate triage:
 - `lineage_fragment_ids` - lineage fragment linkage visibility;
 - `missing_artifact_links` - count of artifact events without
   `dataset_ref/lineage_fragment_id`.
+- `dq_rule_ids`, `dq_dispositions`, `dq_report_paths` - DQ trace anchors.
+- `dq_violation_kinds` - normalized violation taxonomy (including
+  `cross_validation_mismatch` when present).
+- `cross_validation_rule_ids`, `cross_validation_config_paths` - cross-validation
+  rule/config anchors extracted from DQ payloads.
+- `cross_validation_signal_present` - explicit cross-validation incident signal.
+- `correlation_anchor_gaps` - per-anchor missing counters for
+  `effective_config_hash`, `contract_ref`, `data_contract_version`,
+  `composite_run_id`.
 - `alert_signals` - normalized boolean incident signals for routing/escalation.
 - `next_steps` - operator-oriented next actions derived from active signals.
 
@@ -103,6 +112,10 @@ Review:
 - `pipeline_version`
 - `git_commit`
 - `config_hash`
+- `contract_ref`
+- `contract_version`
+- `dq_policy_ref`
+- `rule_bundle_version`
 
 If two runs should be equivalent but one of these fields differs, the runs are
 not reproducibly identical.
@@ -142,12 +155,18 @@ Inspect:
 - `diagnostics.artifact_refs`
 - `diagnostics.lineage_fragment_ids`
 - `diagnostics.missing_artifact_links`
+- `diagnostics.dq_violation_kinds`
+- `diagnostics.cross_validation_signal_present`
+- `diagnostics.correlation_anchor_gaps`
 
 Escalate when:
 
 - `missing_artifact_links > 0` for production-critical runs;
 - `artifact_published` exists but `artifact_refs` is empty;
 - `lineage_fragment_ids` is unexpectedly empty for Silver/Gold publishing runs.
+- `cross_validation_signal_present=true` for runs expected to remain within
+  strict/required policy.
+- `correlation_anchor_gaps.data_contract_version > 0` on failure-critical tracks.
 
 ## Storage Locations
 

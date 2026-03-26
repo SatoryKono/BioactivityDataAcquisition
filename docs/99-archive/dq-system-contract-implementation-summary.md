@@ -1,3 +1,13 @@
+# DQ System Contract Implementation Summary
+
+*Status: archived | Archived on: 2026-03-26 | Reason: historical implementation summary moved from repository root during cleanup*
+
+This document is preserved as historical implementation context. Active DQ
+governance and current behavior must be derived from the current source code,
+active docs in `docs/00-05`, and current CI/test gates.
+
+---
+
 # Data Quality Contract System - Implementation Summary
 
 ## Overview

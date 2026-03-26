@@ -90,7 +90,9 @@ def _load_edges(raw_edges: object) -> tuple[LineageEdge, ...]:
     """Deserialize serialized edge payloads into lineage edges."""
     if not isinstance(raw_edges, list):
         return ()
-    return tuple(LineageEdge.from_dict(edge) for edge in raw_edges if isinstance(edge, dict))
+    return tuple(
+        LineageEdge.from_dict(edge) for edge in raw_edges if isinstance(edge, dict)
+    )
 
 
 @dataclass(frozen=True, slots=True)

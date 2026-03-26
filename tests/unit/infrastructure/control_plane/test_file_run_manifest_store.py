@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 from bioetl.domain.control_plane import (
@@ -52,3 +53,38 @@ def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
 
     assert store.get("manifest-1") == manifest
     assert store.get_by_run_id(run_id) == manifest
+
+
+def test_file_store_emits_manifest_write_metric(tmp_path) -> None:
+    metrics = MagicMock()
+    store = FileRunManifestStore(
+        base_path=tmp_path / "run_manifest",
+        metrics=metrics,
+    )
+    manifest = RunManifest(
+        manifest_id="manifest-2",
+        execution_fingerprint="fingerprint-2",
+        schema_version="1.0",
+        created_at=datetime.now(UTC),
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+
+    store.save(manifest)
+
+    metrics.increment_counter.assert_called_once_with(
+        "control_plane_manifest_writes_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "status": "success",
+        },
+    )

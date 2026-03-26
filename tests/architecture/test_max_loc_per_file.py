@@ -35,18 +35,18 @@ def test_no_source_file_exceeds_500_loc(src_dir: Path) -> None:
     for py_file in sorted(source_root.rglob("*.py")):
         if py_file.name == "__init__.py":
             continue
-        
+
         loc = len(py_file.read_text(encoding="utf-8").splitlines())
-        
+
         # Determine the layer for this file
         parts = py_file.relative_to(source_root).parts
         if len(parts) < 1:
             continue
         layer = parts[0]
-        
+
         # Get layer-specific limit
         default_limit = LAYER_LIMITS.get(layer, 500)
-        
+
         # Check for exemptions
         file_limit = resolve_registry_value(
             EXEMPTIONS,

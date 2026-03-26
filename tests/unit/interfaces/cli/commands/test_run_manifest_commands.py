@@ -78,15 +78,27 @@ class _FakeRunManifestService:
                 "dq_rule_ids": ["gold.not_null.id"],
                 "dq_dispositions": ["fail"],
                 "dq_report_paths": ["/tmp/reports/gold_dq.json"],
+                "dq_violation_kinds": ["cross_validation_mismatch"],
+                "cross_validation_rule_ids": ["composite.cross_validation.quarantine"],
+                "cross_validation_config_paths": ["cross_validation"],
+                "cross_validation_signal_present": True,
+                "correlation_anchor_gaps": {
+                    "effective_config_hash": 0,
+                    "contract_ref": 0,
+                    "data_contract_version": 0,
+                    "composite_run_id": 0,
+                },
                 "alert_signals": {
                     "run_failed": False,
                     "run_shutdown": False,
                     "artifact_linkage_gap": False,
                     "lineage_gap": False,
                     "dq_signal_present": True,
+                    "cross_validation_signal_present": True,
                 },
                 "next_steps": [
-                    "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation."
+                    "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
+                    "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes.",
                 ],
             },
         )
@@ -153,6 +165,9 @@ class TestRunManifestCommands:
         assert payload["diagnostics"]["latest_status"] == "success"
         assert payload["diagnostics"]["contract_version"] == "1.2.0"
         assert payload["diagnostics"]["dq_rule_ids"] == ["gold.not_null.id"]
+        assert payload["diagnostics"]["cross_validation_rule_ids"] == [
+            "composite.cross_validation.quarantine"
+        ]
         assert "alert_signals" in payload["diagnostics"]
 
     def test_show_defaults_to_human_readable_text(
@@ -174,10 +189,18 @@ class TestRunManifestCommands:
         assert "contract_version: 1.2.0" in result.output
         assert "dq_policy_ref: chembl_activity.gold" in result.output
         assert "gold.not_null.id" in result.output
+        assert "cross_validation_mismatch" in result.output
+        assert "composite.cross_validation.quarantine" in result.output
+        assert "cross_validation_config_paths" in result.output
+        assert "correlation_anchor_gaps" in result.output
         assert "/tmp/reports/gold_dq.json" in result.output
         assert (
             "Review DQ report artifacts, rule IDs, and contract policy anchors "
             "before retry or escalation." in result.output
+        )
+        assert (
+            "Review cross-validation mismatch outcomes and composite policy anchors "
+            "before retry or quarantine changes." in result.output
         )
         assert "run_finished" in result.output
 

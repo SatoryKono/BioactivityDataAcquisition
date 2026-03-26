@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 
 from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.infrastructure.storage.lineage_persistence import (
+    emit_composite_source_selection_metrics,
+    emit_lineage_refs_missing_metric,
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
@@ -21,7 +23,9 @@ class _CoordinatorWithBundle:
         self._metadata = metadata
         self._fragment = fragment
 
-    def create_silver_metadata_bundle(self, input_data: object) -> MetadataLineageBundle:
+    def create_silver_metadata_bundle(
+        self, input_data: object
+    ) -> MetadataLineageBundle:
         _ = input_data
         return MetadataLineageBundle(
             metadata=self._metadata,
@@ -75,3 +79,130 @@ async def test_persist_lineage_fragment_if_present_calls_store() -> None:
     )
 
     store.save.assert_called_once_with(fragment)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_persist_lineage_fragment_if_present_emits_metric() -> None:
+    fragment = LineageGraphFragment(
+        fragment_id="silver:fragment-1",
+        created_at=datetime.now(UTC),
+    )
+    store = MagicMock()
+    metrics = MagicMock()
+
+    await persist_lineage_fragment_if_present(
+        lineage_store=store,
+        lineage_fragment=fragment,
+        metrics=metrics,
+        pipeline_name="chembl_activity",
+        layer="silver",
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "lineage_fragments_emitted_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "layer": "silver",
+            "status": "success",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_emit_lineage_refs_missing_metric_uses_expected_labels() -> None:
+    metrics = MagicMock()
+
+    emit_lineage_refs_missing_metric(
+        metrics,
+        pipeline_name="chembl_activity",
+        layer="silver",
+        ref_type="bronze_batch",
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "lineage_refs_missing_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "layer": "silver",
+            "ref_type": "bronze_batch",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_emit_composite_source_selection_metrics_aggregates_sources_and_fields() -> (
+    None
+):
+    metrics = MagicMock()
+    records = [
+        {
+            "_source_providers": ["chembl", "pubchem"],
+            "_field_sources": {"title": "chembl", "score": "pubchem"},
+        },
+        {
+            "_source_providers": ["chembl"],
+            "_field_sources": {"summary": "chembl"},
+        },
+    ]
+
+    emit_composite_source_selection_metrics(
+        metrics,
+        pipeline_name="composite_publication",
+        layer="silver",
+        sources_used=["openalex"],
+        records=records,
+    )
+
+    metrics.increment_counter.assert_has_calls(
+        [
+            call(
+                "composite_source_selection_total",
+                1,
+                {
+                    "pipeline": "composite_publication",
+                    "decision_type": "silver_source_included",
+                    "selected_source": "chembl",
+                },
+            ),
+            call(
+                "composite_source_selection_total",
+                1,
+                {
+                    "pipeline": "composite_publication",
+                    "decision_type": "silver_source_included",
+                    "selected_source": "openalex",
+                },
+            ),
+            call(
+                "composite_source_selection_total",
+                1,
+                {
+                    "pipeline": "composite_publication",
+                    "decision_type": "silver_source_included",
+                    "selected_source": "pubchem",
+                },
+            ),
+            call(
+                "composite_source_selection_total",
+                2,
+                {
+                    "pipeline": "composite_publication",
+                    "decision_type": "silver_field_selected",
+                    "selected_source": "chembl",
+                },
+            ),
+            call(
+                "composite_source_selection_total",
+                1,
+                {
+                    "pipeline": "composite_publication",
+                    "decision_type": "silver_field_selected",
+                    "selected_source": "pubchem",
+                },
+            ),
+        ],
+        any_order=False,
+    )

@@ -79,6 +79,11 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
             "event_family": "diagnostic",
             "manifest_id": "manifest-1",
             "run_id": str(run_id),
+            "pipeline": "chembl_activity",
+            "provider": "chembl",
+            "entity": "activity",
+            "run_type": "incremental",
+            "effective_config_hash": "deadbeef",
             "status": "created",
         },
     }

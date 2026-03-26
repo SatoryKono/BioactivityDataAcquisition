@@ -25,6 +25,8 @@ class ValidationIssue:
 
     def is_blocker(self) -> bool:
         """Return True if this issue blocks execution."""
+        if isinstance(self.details, dict) and self.details.get("disposition") == "downgraded":
+            return False
         return self.severity == ValidationSeverity.BLOCKER or self.code.is_blocker()
 
 
@@ -55,7 +57,9 @@ class ValidationResult:
 
     def get_infos(self) -> list[ValidationIssue]:
         """Return only info issues."""
-        return [issue for issue in self.issues if issue.severity == ValidationSeverity.INFO]
+        return [
+            issue for issue in self.issues if issue.severity == ValidationSeverity.INFO
+        ]
 
     def is_valid(self) -> bool:
         """Return True if there are no blocker issues."""

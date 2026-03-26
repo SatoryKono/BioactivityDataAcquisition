@@ -1,6 +1,6 @@
 # Traceability Signal Ownership
 
-*Last verified: 2026-03-25*
+*Last verified: 2026-03-26*
 
 ## Purpose
 
@@ -35,7 +35,9 @@ When available, include:
 - `lineage_fragment_id`
 - `effective_config_hash`
 - `contract_ref`
-- `contract_version`
+- `data_contract_version`
+- `dq_policy_ref`
+- `effective_config_artifact_id`
 
 ## Signal Ownership Matrix
 
@@ -58,6 +60,8 @@ For each incident, owner must document in the ticket:
 - `latest_status` + `latest_event_type`
 - `event_family_counts`
 - `artifact_refs` summary
+- `correlation_anchor_gaps` snapshot
+- `cross_validation_signal_present` (for composite/DQ incidents)
 - decision (`retry`, `quarantine`, `rollback`, `monitor`)
 
 ## Decision Guidance
@@ -68,6 +72,8 @@ Use this fast policy:
   control-plane integrity incident.
 - `artifact_refs` present but `missing_artifact_links > 0` -> treat as
   traceability regression (P1 for critical datasets).
+- `cross_validation_signal_present=true` -> involve Composite Owner + DQ Owner
+  before retry.
 - `event_family_counts` inconsistent with success path -> run lifecycle audit
   before restart.
 

@@ -3,7 +3,7 @@
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 6.0.0
+**Версия:** 6.1.0
 **Дата обновления:** 2026-03-25
 
 ---
@@ -52,16 +52,20 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--run-type`                         | choice | `incremental` | Тип запуска: `incremental`, `backfill`, `rebuild` |
 | `--limit`                            | int    | None          | Максимальное количество записей                   |
 | `--resume`                           | flag   | False         | Продолжить с последнего checkpoint                |
+| `--start-offset`                     | int    | None          | Начать incremental run с указанного offset        |
 | `--dry-run`                          | flag   | False         | Предпросмотр без записи данных                    |
 | `--yes`, `-y`                        | flag   | False         | Пропустить подтверждение для rebuild/backfill     |
 | `--input-csv`                        | path   | None          | Путь к CSV с ID для фильтрации                    |
-| `--filter-column`                    | str    | `id`          | Имя колонки в CSV с ID                            |
-| `--filter-field`                     | str    | varies        | Поле API для фильтрации                           |
+| `--filter-column`                    | str    | None          | Имя колонки в CSV; runtime fallback обычно `id`   |
+| `--filter-field`                     | str    | None          | Поле API; effective default зависит от pipeline   |
 | `--vacuum-after-run`                 | flag   | None          | Запустить VACUUM после успешного выполнения       |
-| `--vacuum-retention-days`            | int    | 7             | Retention для VACUUM (дней)                       |
+| `--vacuum-retention-days`            | int    | None          | Retention для VACUUM (дней, override YAML config) |
 | `--debug`                            | flag   | False         | Включить DEBUG логирование                        |
 | `--health-server/--no-health-server` | flag   | True          | Включить HTTP health server                       |
 | `--health-port`                      | int    | 8081          | Порт для health server                            |
+| `--use-cached-bronze/--no-cached-bronze` | flag | False      | Читать Bronze cache вместо API                    |
+| `--cached-bronze-date`               | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`     |
+| `--cached-bronze-path`               | path   | None          | Явный путь к каталогу Bronze cache                |
 
 **Примеры:**
 
@@ -81,14 +85,20 @@ bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 # Продолжить прерванный запуск
 bioetl run --pipeline chembl_activity --resume
 
+# Начать incremental run с известного offset
+bioetl run --pipeline chembl_activity --start-offset 5000
+
 # С фильтрацией по CSV
 bioetl run --pipeline chembl_activity \
     --input-csv data/filter-ids.csv \
-    --filter-column molecule-id \
-    --filter-field molecule-chembl-id
+    --filter-column molecule_id \
+    --filter-field molecule_chembl_id
 
 # С DEBUG логированием
 bioetl run --pipeline chembl_activity --debug
+
+# Запуск из локального Bronze cache
+bioetl run --pipeline chembl_activity --use-cached-bronze
 ```
 
 **Checkpoint resume policy (runtime setting):**
@@ -142,6 +152,8 @@ bioetl run-all --source <PROVIDER> [OPTIONS]
 | `--yes`, `-y` | flag   | False         | Пропустить подтверждение                        |
 | `--list-only` | flag   | False         | Только показать список пайплайнов               |
 | `--debug`     | flag   | False         | DEBUG логирование                               |
+| `--health-server/--no-health-server` | flag | True      | Включить HTTP health server                     |
+| `--health-port` | int | 8081 | Порт для health server |
 
 **Примеры:**
 
@@ -182,7 +194,14 @@ bioetl run-composite --composite <NAME> [OPTIONS]
 | `--enrich-only`    | str  | None         | Запустить только указанные enrichers (через запятую) |
 | `--required-only`  | flag | False        | Пропустить опциональные enrichers                    |
 | `--force-enricher` | str  | None         | Принудительный перезапуск enricher                   |
+| `--use-cached-bronze/--no-cached-bronze` | flag | False | Читать Bronze cache вместо API                        |
+| `--cached-bronze-date` | str | None | Фильтровать Bronze cache по дате `YYYY-MM-DD`            |
+| `--cached-bronze-path` | path | None | Явный путь к каталогу Bronze cache                     |
+| `--cached-bronze-enrichers/--no-cached-bronze-enrichers` | flag | None | Override cached Bronze только для enrichers |
+| `--cached-bronze-dependencies/--no-cached-bronze-dependencies` | flag | False | Override cached Bronze для dependency pipelines |
 | `--debug`          | flag | False        | DEBUG логирование                                    |
+| `--health-server/--no-health-server` | flag | True | Включить HTTP health server                           |
+| `--health-port` | int | 8081 | Порт для health server                                     |
 
 **Примеры:**
 
@@ -198,6 +217,9 @@ bioetl run-composite --composite publication --enrich-only crossref,openalex
 
 # Только обязательные enrichers
 bioetl run-composite --composite publication --required-only
+
+# Composite run из Bronze cache
+bioetl run-composite --composite publication --use-cached-bronze
 ```
 
 ---
@@ -244,15 +266,14 @@ bioetl run-manifest show 8d166b4d-c4a8-4755-896e-cf9158c5b5ec --format yaml
 bioetl run-manifest diff <LEFT> <RIGHT> [--format text|json|yaml]
 ```
 
-Команда сравнивает top-level reproducibility-significant поля двух manifest:
+Команда сравнивает все top-level поля двух manifest (по каноническому JSON
+сравнению значений). На практике чаще всего различаются:
 
-- `pipeline_name`
-- `run_type`
-- `runtime_config`
-- `resolved_config`
+- `pipeline_name`, `run_type`
+- `runtime_config`, `resolved_config`
 - `code_provenance`
-- `source_refs`
-- `planned_artifacts`
+- `source_refs`, `planned_artifacts`
+- `run_id`, `manifest_id`
 
 По умолчанию diff печатается в компактном `text`-виде. Для автоматической
 обработки используй `--format json` или `--format yaml`.

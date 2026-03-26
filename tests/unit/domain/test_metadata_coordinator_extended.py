@@ -35,7 +35,7 @@ class TestSilverMetadataInputExtended:
                 config_path="configs/quality/common.yaml",
             ),
         ]
-        
+
         metadata_input = SilverMetadataInput(
             table_path="/data/silver/chembl/activity",
             primary_keys=["activity_id"],
@@ -52,7 +52,7 @@ class TestSilverMetadataInputExtended:
             completed_at=datetime(2023, 1, 1, 10, 5, 30),
             total_bytes=1024,
         )
-        
+
         assert metadata_input.table_path == "/data/silver/chembl/activity"
         assert metadata_input.dq_report_path == "/reports/dq_report_20230101.json"
         assert len(metadata_input.dq_rule_provenance) == 2
@@ -67,7 +67,7 @@ class TestSilverMetadataInputExtended:
             mode="append",
             dq_rule_provenance=None,  # No provenance
         )
-        
+
         assert metadata_input.dq_rule_provenance is None
 
     def test_silver_metadata_immutability_with_provenance(self):
@@ -80,14 +80,14 @@ class TestSilverMetadataInputExtended:
                 disposition=DQDisposition.FAIL,
             )
         ]
-        
+
         metadata_input = SilverMetadataInput(
             table_path="/test",
             primary_keys=["id"],
             mode="merge",
             dq_rule_provenance=provenance,
         )
-        
+
         # Test immutability
         with pytest.raises(Exception):  # frozen dataclass should prevent modification
             metadata_input.dq_rule_provenance = []  # type: ignore
@@ -107,7 +107,7 @@ class TestGoldMetadataInputExtended:
                 config_path="contracts/gold_contract/dq_rules.yaml",
             ),
         ]
-        
+
         metadata_input = GoldMetadataInput(
             table_path="/data/gold/chembl/activity_summary",
             table_name="chembl_activity_summary",
@@ -126,7 +126,7 @@ class TestGoldMetadataInputExtended:
             schema_validation_enabled=True,
             schema_validation_strict=True,
         )
-        
+
         assert metadata_input.table_name == "chembl_activity_summary"
         assert metadata_input.dq_policy_hash == "abc123def456"
         assert metadata_input.contract_ref == "chembl_gold_contract"
@@ -145,7 +145,7 @@ class TestGoldMetadataInputExtended:
             contract_ref=None,
             contract_version=None,
         )
-        
+
         assert metadata_input.dq_rule_provenance is None
         assert metadata_input.dq_policy_hash is None
         assert metadata_input.contract_ref is None
@@ -161,7 +161,7 @@ class TestGoldMetadataInputExtended:
                 disposition=DQDisposition.FAIL,
             )
         ]
-        
+
         metadata_input = GoldMetadataInput(
             table_path="/test",
             table_name="test",
@@ -171,11 +171,11 @@ class TestGoldMetadataInputExtended:
             contract_ref="test_contract",
             contract_version="1.0.0",
         )
-        
+
         # Test immutability
         with pytest.raises(Exception):  # frozen dataclass should prevent modification
             metadata_input.dq_rule_provenance = []  # type: ignore
-            
+
         with pytest.raises(Exception):  # frozen dataclass should prevent modification
             metadata_input.dq_policy_hash = "new_hash"  # type: ignore
 
@@ -193,7 +193,7 @@ class TestProvenanceConsistency:
             disposition=DQDisposition.FAIL,
             report_artifact_path=report_path,
         )
-        
+
         metadata_input = SilverMetadataInput(
             table_path="/test",
             primary_keys=["id"],
@@ -201,7 +201,7 @@ class TestProvenanceConsistency:
             dq_report_path=report_path,
             dq_rule_provenance=[provenance],
         )
-        
+
         # Both should reference the same report
         assert metadata_input.dq_report_path == report_path
         assert metadata_input.dq_rule_provenance[0].report_artifact_path == report_path
@@ -216,7 +216,7 @@ class TestProvenanceConsistency:
             disposition=DQDisposition.FAIL,
             report_artifact_path=report_path,
         )
-        
+
         metadata_input = GoldMetadataInput(
             table_path="/test",
             table_name="test",
@@ -224,7 +224,7 @@ class TestProvenanceConsistency:
             dq_report_path=report_path,
             dq_rule_provenance=[provenance],
         )
-        
+
         # Both should reference the same report
         assert metadata_input.dq_report_path == report_path
         assert metadata_input.dq_rule_provenance[0].report_artifact_path == report_path
@@ -236,7 +236,7 @@ class TestMetadataSerialization:
     def test_silver_metadata_serialization(self):
         """Test that SilverMetadataInput with provenance can be serialized."""
         from dataclasses import asdict
-        
+
         provenance = DQRuleProvenance(
             rule_id="schema.test",
             contract_version="1.0.0",
@@ -244,14 +244,14 @@ class TestMetadataSerialization:
             disposition=DQDisposition.FAIL,
             config_path="configs/test.yaml",
         )
-        
+
         metadata_input = SilverMetadataInput(
             table_path="/test",
             primary_keys=["id"],
             mode="merge",
             dq_rule_provenance=[provenance],
         )
-        
+
         # Should be serializable
         metadata_dict = asdict(metadata_input)
         assert "dq_rule_provenance" in metadata_dict
@@ -261,14 +261,14 @@ class TestMetadataSerialization:
     def test_gold_metadata_serialization(self):
         """Test that GoldMetadataInput with provenance can be serialized."""
         from dataclasses import asdict
-        
+
         provenance = DQRuleProvenance(
             rule_id="schema.gold_test",
             contract_version="2.0.0",
             severity="high",
             disposition=DQDisposition.QUARANTINE,
         )
-        
+
         metadata_input = GoldMetadataInput(
             table_path="/test",
             table_name="test",
@@ -278,7 +278,7 @@ class TestMetadataSerialization:
             contract_ref="test_contract",
             contract_version="2.0.0",
         )
-        
+
         # Should be serializable
         metadata_dict = asdict(metadata_input)
         assert "dq_rule_provenance" in metadata_dict
@@ -299,7 +299,7 @@ class TestBackwardCompatibility:
             mode="merge",
             # No DQ provenance fields
         )
-        
+
         assert metadata_input.dq_rule_provenance is None
         # Should not raise any errors
 
@@ -312,7 +312,7 @@ class TestBackwardCompatibility:
             mode="overwrite",
             # No DQ provenance fields
         )
-        
+
         assert metadata_input.dq_rule_provenance is None
         assert metadata_input.dq_policy_hash is None
         assert metadata_input.contract_ref is None
@@ -332,14 +332,14 @@ class TestProvenanceValidation:
             severity="high",
             disposition=DQDisposition.FAIL,
         )
-        
+
         metadata_input = SilverMetadataInput(
             table_path="/test",
             primary_keys=["id"],
             mode="merge",
             dq_rule_provenance=[valid_provenance],
         )
-        
+
         # Should not raise validation errors
         assert len(metadata_input.dq_rule_provenance) == 1
 
@@ -351,7 +351,7 @@ class TestProvenanceValidation:
             mode="merge",
             dq_rule_provenance=[],  # Empty list
         )
-        
+
         assert metadata_input.dq_rule_provenance == []
 
     def test_multiple_provenance_entries(self):
@@ -376,14 +376,14 @@ class TestProvenanceValidation:
                 disposition=DQDisposition.PASS,
             ),
         ]
-        
+
         metadata_input = SilverMetadataInput(
             table_path="/test",
             primary_keys=["id"],
             mode="merge",
             dq_rule_provenance=provenance_entries,
         )
-        
+
         assert len(metadata_input.dq_rule_provenance) == 3
         assert metadata_input.dq_rule_provenance[0].severity == "high"
         assert metadata_input.dq_rule_provenance[1].severity == "medium"

@@ -64,8 +64,10 @@ class TestMergedMetadataExplainabilityService:
     # ==========================================================================
 
     def test_generate_field_explanation_basic(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt, sample_record: dict
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
+        sample_record: dict,
     ) -> None:
         """Test generation of basic field explanation."""
         result = service.generate_field_explanation(
@@ -73,7 +75,7 @@ class TestMergedMetadataExplainabilityService:
             sample_record,
             composite_metadata,
         )
-        
+
         assert isinstance(result, MergedFieldExplanation)
         assert result.field_name == "activity_value"
         assert result.source_providers == ["chembl", "pubchem"]
@@ -82,9 +84,11 @@ class TestMergedMetadataExplainabilityService:
         assert result.enrichment_applied == ["uniprot"]
 
     def test_generate_field_explanation_with_priorities(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt, sample_record: dict, 
-        field_priorities: dict[str, dict]
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
+        sample_record: dict,
+        field_priorities: dict[str, dict],
     ) -> None:
         """Test field explanation with priority configuration."""
         result = service.generate_field_explanation(
@@ -93,13 +97,15 @@ class TestMergedMetadataExplainabilityService:
             composite_metadata,
             field_priorities,
         )
-        
+
         assert result.priority_order == ["chembl", "pubchem"]
         assert result.conflict_resolution == "priority_based"
 
     def test_generate_field_explanation_no_enrichments(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt, sample_record: dict
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
+        sample_record: dict,
     ) -> None:
         """Test field explanation when no enrichments applied."""
         # Create metadata without enrichments
@@ -108,13 +114,13 @@ class TestMergedMetadataExplainabilityService:
             source_providers=["chembl", "pubchem"],
             enrichment_status={},
         )
-        
+
         result = service.generate_field_explanation(
             "activity_value",
             sample_record,
             metadata,
         )
-        
+
         assert result.enrichment_applied is None
 
     # ==========================================================================
@@ -122,8 +128,10 @@ class TestMergedMetadataExplainabilityService:
     # ==========================================================================
 
     def test_generate_record_explanation_basic(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt, sample_record: dict
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
+        sample_record: dict,
     ) -> None:
         """Test generation of complete record explanation."""
         result = service.generate_record_explanation(
@@ -131,20 +139,24 @@ class TestMergedMetadataExplainabilityService:
             sample_record,
             composite_metadata,
         )
-        
+
         assert isinstance(result, MergedRecordExplanation)
         assert result.record_id == "mol123"
         assert result.composite_run_id == "test_run_123"
         assert result.source_providers == ["chembl", "pubchem"]
-        assert len(result.field_explanations) == 4  # activity_value, assay_type, source, molecule_id
+        assert (
+            len(result.field_explanations) == 4
+        )  # activity_value, assay_type, source, molecule_id
         assert result.merge_strategy == "prioritize"
         assert result.conflict_count >= 0
         assert result.enrichment_count >= 0
 
     def test_generate_record_explanation_with_priorities(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt, sample_record: dict, 
-        field_priorities: dict[str, dict]
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
+        sample_record: dict,
+        field_priorities: dict[str, dict],
     ) -> None:
         """Test record explanation with field priorities."""
         result = service.generate_record_explanation(
@@ -153,19 +165,24 @@ class TestMergedMetadataExplainabilityService:
             composite_metadata,
             field_priorities,
         )
-        
+
         # Find activity_value explanation
         activity_explanation = next(
-            (exp for exp in result.field_explanations if exp.field_name == "activity_value"),
-            None
+            (
+                exp
+                for exp in result.field_explanations
+                if exp.field_name == "activity_value"
+            ),
+            None,
         )
-        
+
         assert activity_explanation is not None
         assert activity_explanation.priority_order == ["chembl", "pubchem"]
 
     def test_generate_record_explanation_empty_record(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
     ) -> None:
         """Test record explanation with empty record."""
         result = service.generate_record_explanation(
@@ -173,7 +190,7 @@ class TestMergedMetadataExplainabilityService:
             {},
             composite_metadata,
         )
-        
+
         assert result.record_id == "empty_record"
         assert len(result.field_explanations) == 0
         assert result.conflict_count == 0
@@ -184,22 +201,27 @@ class TestMergedMetadataExplainabilityService:
     # ==========================================================================
 
     def test_generate_explainability_metadata_multiple_records(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt, sample_record: dict
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
+        sample_record: dict,
     ) -> None:
         """Test generation of explainability for multiple records."""
-        records = [sample_record, {
-            "_record_id": "mol456",
-            "molecule_id": "CHEMBL456",
-            "activity_value": 20.3,
-            "assay_type": "EC50",
-        }]
-        
+        records = [
+            sample_record,
+            {
+                "_record_id": "mol456",
+                "molecule_id": "CHEMBL456",
+                "activity_value": 20.3,
+                "assay_type": "EC50",
+            },
+        ]
+
         results = service.generate_explainability_metadata(
             records,
             composite_metadata,
         )
-        
+
         assert len(results) == 2
         assert results[0].record_id == "mol123"
         assert results[1].record_id == "mol456"
@@ -213,7 +235,7 @@ class TestMergedMetadataExplainabilityService:
     ) -> None:
         """Test summary generation with empty explanations."""
         summary = service.generate_explainability_summary([])
-        
+
         assert summary["record_count"] == 0
         assert summary["source_provider_distribution"] == {}
         assert summary["merge_strategy_distribution"] == {}
@@ -223,9 +245,11 @@ class TestMergedMetadataExplainabilityService:
         assert summary["enrichment_summary"]["enrichment_rate"] == 0.0
 
     def test_generate_explainability_summary_with_data(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt, sample_record: dict, 
-        field_priorities: dict[str, dict]
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
+        sample_record: dict,
+        field_priorities: dict[str, dict],
     ) -> None:
         """Test summary generation with actual data."""
         # Generate explanations for multiple records
@@ -238,7 +262,7 @@ class TestMergedMetadataExplainabilityService:
                 "activity_value": 10.0 + i,
                 "assay_type": "IC50",
             }
-            
+
             explanation = service.generate_record_explanation(
                 record_id,
                 record,
@@ -246,9 +270,9 @@ class TestMergedMetadataExplainabilityService:
                 field_priorities,
             )
             explanations.append(explanation)
-        
+
         summary = service.generate_explainability_summary(explanations)
-        
+
         assert summary["record_count"] == 3
         assert summary["field_count"] > 0
         assert summary["avg_fields_per_record"] > 0
@@ -262,18 +286,18 @@ class TestMergedMetadataExplainabilityService:
     # ==========================================================================
 
     def test_generate_field_priority_explanation(
-        self, service: MergedMetadataExplainabilityService, 
-        field_priorities: dict[str, dict]
+        self,
+        service: MergedMetadataExplainabilityService,
+        field_priorities: dict[str, dict],
     ) -> None:
         """Test generation of field priority explanations."""
         results = service.generate_field_priority_explanation(field_priorities)
-        
+
         assert len(results) == 2
-        
+
         # Check activity_value explanation
         activity_explanation = next(
-            (exp for exp in results if exp["field_name"] == "activity_value"),
-            None
+            (exp for exp in results if exp["field_name"] == "activity_value"), None
         )
         assert activity_explanation is not None
         assert activity_explanation["priority_order"] == ["chembl", "pubchem"]
@@ -292,18 +316,19 @@ class TestMergedMetadataExplainabilityService:
     # ==========================================================================
 
     def test_record_without_standard_id_fields(
-        self, service: MergedMetadataExplainabilityService, 
-        composite_metadata: CompositeOutputExt
+        self,
+        service: MergedMetadataExplainabilityService,
+        composite_metadata: CompositeOutputExt,
     ) -> None:
         """Test record explanation when standard ID fields are missing."""
         record = {"custom_id": "custom123", "data": "value"}
-        
+
         result = service.generate_record_explanation(
             "test",
             record,
             composite_metadata,
         )
-        
+
         assert result.record_id == "test"  # Should use provided ID
         assert len(result.field_explanations) == 2  # custom_id and data
 
@@ -315,6 +340,9 @@ class TestMergedMetadataExplainabilityService:
 
 # Helper function for easier testing
 
-def create_merged_metadata_explainability_service() -> MergedMetadataExplainabilityService:
+
+def create_merged_metadata_explainability_service() -> (
+    MergedMetadataExplainabilityService
+):
     """Factory function for MergedMetadataExplainabilityService."""
     return MergedMetadataExplainabilityService()

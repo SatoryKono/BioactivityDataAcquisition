@@ -16,6 +16,7 @@ if TYPE_CHECKING:
         LineageStorePort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
+        MetricsPort,
         TracingPort,
     )
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -27,6 +28,7 @@ class GoldWriterRuntimeServices:
 
     csv_exporter: CsvExporter | None
     tracing: TracingPort
+    metrics: MetricsPort | None
     audit: AuditPort | None
     metadata_writer: MetadataWriterPort
     metadata_coordinator: MetadataCoordinatorPort | None
@@ -37,6 +39,7 @@ def build_gold_writer_runtime_services(
     *,
     csv_exporter: CsvExporter | None,
     tracing: TracingPort | None,
+    metrics: MetricsPort | None,
     audit: AuditPort | None,
     metadata_writer: MetadataWriterPort | None,
     metadata_coordinator: MetadataCoordinatorPort | None,
@@ -46,6 +49,7 @@ def build_gold_writer_runtime_services(
     return GoldWriterRuntimeServices(
         csv_exporter=csv_exporter,
         tracing=tracing or NoOpTracing(),
+        metrics=metrics,
         audit=audit,
         metadata_writer=metadata_writer or NoOpMetadataWriter(),
         metadata_coordinator=metadata_coordinator,

@@ -170,12 +170,24 @@ class TestValidTransitions:
                 CompositePipelineState.ENRICHMENT_COMPLETED,
                 CompositePipelineState.MERGING,
             ),
-            (CompositePipelineState.MERGING, CompositePipelineState.CROSS_VALIDATION_RUNNING),
+            (
+                CompositePipelineState.MERGING,
+                CompositePipelineState.CROSS_VALIDATION_RUNNING,
+            ),
             (CompositePipelineState.MERGING, CompositePipelineState.COMPLETED),
             (CompositePipelineState.MERGING, CompositePipelineState.FAILED),
-            (CompositePipelineState.CROSS_VALIDATION_RUNNING, CompositePipelineState.CROSS_VALIDATION_COMPLETED),
-            (CompositePipelineState.CROSS_VALIDATION_RUNNING, CompositePipelineState.FAILED),
-            (CompositePipelineState.CROSS_VALIDATION_COMPLETED, CompositePipelineState.COMPLETED),
+            (
+                CompositePipelineState.CROSS_VALIDATION_RUNNING,
+                CompositePipelineState.CROSS_VALIDATION_COMPLETED,
+            ),
+            (
+                CompositePipelineState.CROSS_VALIDATION_RUNNING,
+                CompositePipelineState.FAILED,
+            ),
+            (
+                CompositePipelineState.CROSS_VALIDATION_COMPLETED,
+                CompositePipelineState.COMPLETED,
+            ),
         ],
     )
     def test_valid_transition_allowed(
@@ -363,7 +375,10 @@ class TestAllowedTransitions:
         """CROSS_VALIDATION_RUNNING should allow CROSS_VALIDATION_COMPLETED or FAILED."""
         allowed = CompositePipelineState.CROSS_VALIDATION_RUNNING.allowed_transitions
         assert allowed == frozenset(
-            {CompositePipelineState.CROSS_VALIDATION_COMPLETED, CompositePipelineState.FAILED}
+            {
+                CompositePipelineState.CROSS_VALIDATION_COMPLETED,
+                CompositePipelineState.FAILED,
+            }
         )
 
     def test_cross_validation_completed_allowed_transitions(self):

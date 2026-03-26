@@ -44,7 +44,9 @@ def build_gold_lineage_fragment(
     gold_dataset, composite_source_nodes, composite_source_edges = (
         _build_dataset_composite_lineage_components(
             run_context=run_context,
-            dataset_node=gold_dataset_node(run_context=run_context, input_data=input_data),
+            dataset_node=gold_dataset_node(
+                run_context=run_context, input_data=input_data
+            ),
             records=input_data.records,
             composite_name=input_data.table_name,
             created_at=created_at,

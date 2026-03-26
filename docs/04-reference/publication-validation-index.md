@@ -118,22 +118,23 @@ external-verification: PubMed/NCBI API
 ### 3. Запустить валидацию
 
 ```bash
-# Полный прогон (валидационный профиль)
+# Полный прогон со стандартным run command
 bioetl run --pipeline pubmed_publication \
-  --run-type validation \
   --limit 500
 
 # Баланс скорость/качество (дефолтные уровни из pipeline config)
 bioetl run --pipeline chembl_publication \
-  --run-type validation \
   --limit 1000
 
 # Быстрый сухой прогон схемы (без записи)
 bioetl run --pipeline crossref_publication \
-  --run-type validation \
   --limit 200 \
   --dry-run
 ```
+
+> Примечание: отдельного `--run-type validation` в текущем CLI нет; глубина
+> validation определяется pipeline config, schema hooks и dry-run / limit
+> режимами стандартной команды `bioetl run`.
 
 ---
 

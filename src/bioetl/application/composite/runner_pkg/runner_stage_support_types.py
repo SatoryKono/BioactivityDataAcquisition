@@ -40,6 +40,11 @@ class _CompositeRunnerStageSupportHostProtocol(Protocol):
     _coordinator: EnrichmentCoordinatorService
     _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
 
+    def _build_correlation_log_context(
+        self,
+        **extra: object,
+    ) -> dict[str, object]: ...
+
     async def _save_checkpoint_safe(
         self,
         state: CompositeCheckpointState,

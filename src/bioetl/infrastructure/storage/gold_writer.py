@@ -18,6 +18,7 @@ from bioetl.domain.ports import (
     LineageStorePort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
+    MetricsPort,
     TracingPort,
 )
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
@@ -122,6 +123,7 @@ class GoldWriter(
             "CsvExporter | None", legacy_kwargs.pop("csv_exporter", None)
         )
         tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
+        metrics = cast("MetricsPort | None", legacy_kwargs.pop("metrics", None))
         audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
         metadata_writer = cast(
             "MetadataWriterPort | None",
@@ -143,12 +145,14 @@ class GoldWriter(
         services = runtime_services or build_gold_writer_runtime_services(
             csv_exporter=csv_exporter,
             tracing=tracing,
+            metrics=metrics,
             audit=audit,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
             lineage_store=lineage_store,
         )
         self.csv_exporter = services.csv_exporter
+        self._metrics = services.metrics
         self._audit = services.audit
         self._tracing = services.tracing
         self._metadata_writer = services.metadata_writer

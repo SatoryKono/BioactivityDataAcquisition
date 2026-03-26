@@ -14,6 +14,7 @@ logger = structlog.get_logger(__name__)
 
 class EnforcementStage(Enum):
     """Enforcement stages for CI checks."""
+
     OBSERVE = "observe"  # Log only, no impact
     SOFT_FAIL = "soft_fail"  # Warning, non-blocking
     HARD_FAIL = "hard_fail"  # Blocking failure
@@ -50,6 +51,7 @@ class CheckResult:
 @dataclass(frozen=True)
 class EnforcementPolicy:
     """Policy for staged enforcement."""
+
     check_name: str
     current_stage: EnforcementStage
     failure_threshold: float = 0.0
@@ -98,20 +100,20 @@ class StagedEnforcementEngine:
                 check_name="contract_identity",
                 current_stage=EnforcementStage.SOFT_FAIL,
                 failure_threshold=0.7,
-                warning_threshold=0.2
+                warning_threshold=0.2,
             ),
             "registry_consistency": EnforcementPolicy(
                 check_name="registry_consistency",
                 current_stage=EnforcementStage.OBSERVE,
                 failure_threshold=0.8,
-                warning_threshold=0.3
+                warning_threshold=0.3,
             ),
             "schema_compatibility": EnforcementPolicy(
                 check_name="schema_compatibility",
                 current_stage=EnforcementStage.OBSERVE,
                 failure_threshold=0.9,
-                warning_threshold=0.4
-            )
+                warning_threshold=0.4,
+            ),
         }
 
     def _load_contract_policies(self) -> dict[str, EnforcementPolicy]:
@@ -121,20 +123,20 @@ class StagedEnforcementEngine:
                 check_name="contract_identity",
                 current_stage=EnforcementStage.SOFT_FAIL,
                 failure_threshold=0.7,
-                warning_threshold=0.2
+                warning_threshold=0.2,
             ),
             "registry_consistency": EnforcementPolicy(
                 check_name="registry_consistency",
                 current_stage=EnforcementStage.OBSERVE,
                 failure_threshold=0.8,
-                warning_threshold=0.3
+                warning_threshold=0.3,
             ),
             "schema_compatibility": EnforcementPolicy(
                 check_name="schema_compatibility",
                 current_stage=EnforcementStage.OBSERVE,
                 failure_threshold=0.9,
-                warning_threshold=0.4
-            )
+                warning_threshold=0.4,
+            ),
         }
 
     def register_result(self, result: CheckResult) -> None:
@@ -164,13 +166,9 @@ class StagedEnforcementEngine:
         effective_stage = policy.get_effective_stage(failure_rate)
 
         if effective_stage == EnforcementStage.HARD_FAIL:
-            message = (
-                f"Hard fail threshold exceeded ({failure_rate:.1%} >= {policy.failure_threshold:.1%})"
-            )
+            message = f"Hard fail threshold exceeded ({failure_rate:.1%} >= {policy.failure_threshold:.1%})"
         elif effective_stage == EnforcementStage.SOFT_FAIL:
-            message = (
-                f"Soft fail threshold exceeded ({failure_rate:.1%} >= {policy.warning_threshold:.1%})"
-            )
+            message = f"Soft fail threshold exceeded ({failure_rate:.1%} >= {policy.warning_threshold:.1%})"
         else:
             message = f"Observation mode ({failure_rate:.1%} < {policy.warning_threshold:.1%})"
 
@@ -196,7 +194,10 @@ class StagedEnforcementEngine:
             # This can be made configurable later
             if not result.passed:
                 failure_rate = 1.0  # Single failure
-                if policy.get_effective_stage(failure_rate) == EnforcementStage.HARD_FAIL:
+                if (
+                    policy.get_effective_stage(failure_rate)
+                    == EnforcementStage.HARD_FAIL
+                ):
                     return True
         return False
 

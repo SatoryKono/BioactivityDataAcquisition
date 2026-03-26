@@ -253,9 +253,13 @@ class TestCheckpointCompatibilityService:
         result = self.service.validate_minimum_compatibility(current, checkpoint)
 
         assert result.compatible is True  # Lenient mode allows this
-        assert result.dq_compatible is True  # Still considered compatible in lenient mode
+        assert (
+            result.dq_compatible is True
+        )  # Still considered compatible in lenient mode
         assert result.pipeline_compatible is True
-        assert any("DQ contract changed (lenient mode)" in msg for msg in result.messages)
+        assert any(
+            "DQ contract changed (lenient mode)" in msg for msg in result.messages
+        )
 
     def test_validate_minimum_compatibility_major_version_change(self) -> None:
         """Test lenient mode blocks major version changes."""
@@ -297,7 +301,50 @@ class TestCheckpointCompatibilityService:
         assert result.compatible is True  # Lenient mode allows minor version changes
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
-        assert any("Minor pipeline version changed (lenient mode)" in msg for msg in result.messages)
+        assert any(
+            "Minor pipeline version changed (lenient mode)" in msg
+            for msg in result.messages
+        )
+
+    def test_validate_checkpoint_compatibility_emits_metric(self) -> None:
+        """Strict and lenient validation should emit aggregate compatibility metrics."""
+        metrics = MagicMock()
+        service = CheckpointCompatibilityService(
+            logger=self.logger,
+            metrics=metrics,
+            pipeline_name="chembl_activity",
+        )
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+        )
+
+        service.validate_checkpoint_compatibility(current, checkpoint)
+        service.validate_minimum_compatibility(current, checkpoint)
+
+        assert metrics.increment_counter.call_count == 2
+        assert metrics.increment_counter.call_args_list[0].args == (
+            "checkpoint_compatibility_events_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "disposition": "strict_compatible",
+            },
+        )
+        assert metrics.increment_counter.call_args_list[1].args == (
+            "checkpoint_compatibility_events_total",
+            1,
+            {
+                "pipeline": "chembl_activity",
+                "disposition": "lenient_compatible",
+            },
+        )
 
 
 class TestCheckpointCompatibilityServiceEdgeCases:

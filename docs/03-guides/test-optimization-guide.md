@@ -140,10 +140,12 @@ PowerShell example for the fast stable coverage flow:
     uv run pytest tests/ -m "serial and not e2e and not benchmark and not slow" --ignore=tests/architecture -p no:xdist --cov=src/bioetl --cov-report=
 
     $env:COVERAGE_FILE = "reports/coverage/.coverage"
-    uv run coverage combine reports/coverage
+    uv run coverage combine --keep reports/coverage
     uv run coverage report --show-missing --fail-under=80
 }
 ```
+
+`--keep` avoids Windows file-lock cleanup failures (`WinError 32`) during combine.
 
 ## Stable Parallelism Strategy
 

@@ -1,0 +1,65 @@
+# Composite Validation Service
+
+*Last verified: 2026-03-26*
+
+## Purpose
+
+`CompositeValidationService` is the domain service entrypoint for composite
+config validation before execution. It combines structural checks, deep preflight
+checks, and governance decisioning into a single report.
+
+Source of truth:
+
+- `src/bioetl/domain/services/composite_validation_layer.py`
+
+## Public API
+
+### `CompositeValidationConfig`
+
+Configuration envelope with:
+
+- `pipeline_name`
+- `composite_config`
+- `execution_context` (optional)
+- `strict_mode`
+- `governance_policy`
+
+### `CompositeValidationService.validate_composite(config)`
+
+Returns `CompositeValidationReport` with:
+
+- `structural_result`
+- `deep_preflight_result`
+- `runtime_guard_result` (currently `None` in this layer)
+- `execution_decision` (from `PreflightGovernanceService`)
+
+## Validation flow
+
+1. Structural validation
+- schema shape checks for required top-level fields:
+  - `sources`
+  - `merge_strategy`
+  - `output_schema`
+
+2. Deep preflight validation
+- aggregation config validation via `AggregationValidator`
+- cross-validation config validation via `CrossValidationValidator`
+- field priorities and lineage config checks
+
+3. Governance application
+- apply configured governance policy to produced validation report
+- return final `execution_decision`
+
+## Dependencies
+
+- `AggregationValidator`
+- `CrossValidationValidator`
+- `PreflightGovernanceService`
+- helpers from `composite_validation_helpers.py`
+
+## Related docs
+
+- [Composite Validation Layer](composite-validation-layer.md)
+- [DQ Contract System](dq-contract-system.md)
+- [Configuration Runtime Artifacts](config-runtime-artifacts.md)
+- [Phased Migration Support](phased-migration.md)

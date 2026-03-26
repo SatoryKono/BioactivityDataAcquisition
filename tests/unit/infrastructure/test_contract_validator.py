@@ -34,7 +34,9 @@ class TestContractAwareGoldValidator:
             default_disposition_policy=DQDisposition.WARN,
         )
 
-        validator = ContractAwareGoldValidator(schema=None, strict=False, dq_config=config)
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=False, dq_config=config
+        )
 
         assert validator.policy_ref is not None
         assert validator.policy_ref.contract_ref == "chembl_molecule"
@@ -50,7 +52,9 @@ class TestContractAwareGoldValidator:
             strictness_mode="strict",
         )
 
-        validator = ContractAwareGoldValidator(schema=None, strict=False, dq_config=config)
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=False, dq_config=config
+        )
         summary = validator.get_policy_summary()
 
         assert summary["contract_ref"] == "pubmed_article"
@@ -62,7 +66,9 @@ class TestContractAwareGoldValidator:
     def test_validation_without_schema(self):
         """Test validation when no schema is provided."""
         config = DQConfig()
-        validator = ContractAwareGoldValidator(schema=None, strict=False, dq_config=config)
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=False, dq_config=config
+        )
 
         is_valid, outcomes = validator.validate_with_outcomes([])
         assert is_valid is True
@@ -79,7 +85,9 @@ class TestContractAwareGoldValidator:
     def test_strict_mode_without_schema(self):
         """Test strict mode behavior when schema is missing."""
         config = DQConfig()
-        validator = ContractAwareGoldValidator(schema=None, strict=True, dq_config=config)
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=True, dq_config=config
+        )
 
         is_valid, outcomes = validator.validate_with_outcomes([{"field": "value"}])
         assert is_valid is False
@@ -136,10 +144,12 @@ class TestValidatorIntegration:
         import pandera.pandas as pa
 
         # Create a simple schema
-        schema = pa.DataFrameSchema({
-            "required_field": pa.Column(str, nullable=False),
-            "optional_field": pa.Column(str, nullable=True),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "required_field": pa.Column(str, nullable=False),
+                "optional_field": pa.Column(str, nullable=True),
+            }
+        )
 
         config = DQConfig(
             contract_ref="test_contract",
@@ -168,10 +178,12 @@ class TestValidatorIntegration:
         import pandera.pandas as pa
 
         # Create a simple schema
-        schema = pa.DataFrameSchema({
-            "field1": pa.Column(str),
-            "field2": pa.Column(int),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "field1": pa.Column(str),
+                "field2": pa.Column(int),
+            }
+        )
 
         config = DQConfig(
             contract_ref="test_contract",
@@ -218,9 +230,11 @@ class TestSeverityDetermination:
         import pandera.pandas as pa
 
         # Create a validator with a non-nullable field
-        schema = pa.DataFrameSchema({
-            "non_null_field": pa.Column(str, nullable=False),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "non_null_field": pa.Column(str, nullable=False),
+            }
+        )
 
         config = DQConfig()
         validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
@@ -238,9 +252,11 @@ class TestSeverityDetermination:
         import pandera.pandas as pa
 
         # Create a validator with a string field
-        schema = pa.DataFrameSchema({
-            "string_field": pa.Column(str),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "string_field": pa.Column(str),
+            }
+        )
 
         config = DQConfig()
         validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
@@ -258,9 +274,11 @@ class TestSeverityDetermination:
         import pandera.pandas as pa
 
         # Create a validator with a range constraint
-        schema = pa.DataFrameSchema({
-            "age": pa.Column(int, checks=pa.Check.in_range(0, 120)),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "age": pa.Column(int, checks=pa.Check.in_range(0, 120)),
+            }
+        )
 
         config = DQConfig()
         validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
@@ -281,9 +299,11 @@ class TestProvenanceInformation:
         """Test that outcomes contain proper provenance information."""
         import pandera.pandas as pa
 
-        schema = pa.DataFrameSchema({
-            "required_field": pa.Column(str, nullable=False),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "required_field": pa.Column(str, nullable=False),
+            }
+        )
 
         config = DQConfig(
             contract_ref="provenance_test",
@@ -317,9 +337,11 @@ class TestDispositionResolution:
         """Test that disposition overrides are applied correctly."""
         import pandera.pandas as pa
 
-        schema = pa.DataFrameSchema({
-            "critical_field": pa.Column(str, nullable=False),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "critical_field": pa.Column(str, nullable=False),
+            }
+        )
 
         config = DQConfig(
             default_disposition_policy=DQDisposition.WARN,
@@ -342,9 +364,11 @@ class TestDispositionResolution:
         """Test that default disposition is applied when no override exists."""
         import pandera.pandas as pa
 
-        schema = pa.DataFrameSchema({
-            "normal_field": pa.Column(str, nullable=False),
-        })
+        schema = pa.DataFrameSchema(
+            {
+                "normal_field": pa.Column(str, nullable=False),
+            }
+        )
 
         config = DQConfig(
             default_disposition_policy=DQDisposition.QUARANTINE,
@@ -355,7 +379,7 @@ class TestDispositionResolution:
         # Create invalid record
         records = [{"normal_field": None}]
         is_valid, outcomes = validator.validate_with_outcomes(records)
-        
+
         assert is_valid is False
         assert len(outcomes) == 1
         assert outcomes[0].disposition == DQDisposition.FAIL  # High severity escalates

@@ -16,6 +16,7 @@ from bioetl.domain.ports import (
     LineageStorePort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
+    MetricsPort,
     SilverMetadataInput,
 )
 from bioetl.domain.types import BronzeRecord
@@ -23,6 +24,8 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.lineage_persistence import (
+    emit_composite_source_selection_metrics,
+    emit_lineage_refs_missing_metric,
     persist_lineage_fragment_if_present,
     resolve_metadata_and_lineage_fragment,
 )
@@ -109,6 +112,7 @@ class _SilverMetadataWriteHostProtocol(Protocol):
     _metadata_coordinator: MetadataCoordinatorPort | None
     _lineage_store: LineageStorePort | None
     _metadata_writer: MetadataWriterPort
+    _metrics: MetricsPort | None
     _flat_structure: bool
     _transform_version: str | None
     _transform_steps: tuple[str, ...]
@@ -280,6 +284,26 @@ async def _execute_prepared_silver_metadata_write_operation(
     await persist_lineage_fragment_if_present(
         lineage_store=getattr(host, "_lineage_store", None),
         lineage_fragment=prepared.lineage_fragment,
+        metrics=getattr(host, "_metrics", None),
+        pipeline_name=f"{prepared.provider_name}_{prepared.entity_name}",
+        layer="silver",
+    )
+    pipeline_name = f"{prepared.provider_name}_{prepared.entity_name}"
+    if isinstance(prepared.request, _SilverMetadataWriteRequest):
+        if not prepared.request.bronze_refs:
+            emit_lineage_refs_missing_metric(
+                getattr(host, "_metrics", None),
+                pipeline_name=pipeline_name,
+                layer="silver",
+                ref_type="bronze_batch",
+            )
+        return
+    emit_composite_source_selection_metrics(
+        getattr(host, "_metrics", None),
+        pipeline_name=pipeline_name,
+        layer="silver",
+        sources_used=prepared.request.sources_used,
+        records=prepared.request.records,
     )
 
 

@@ -51,7 +51,9 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         super().__init__(schema=schema, strict=strict)
         self._dq_config = dq_config
         self._policy_resolver = DQPolicyResolver(dq_config) if dq_config else None
-        self._policy_ref = self._policy_resolver.build_policy_ref() if self._policy_resolver else None
+        self._policy_ref = (
+            self._policy_resolver.build_policy_ref() if self._policy_resolver else None
+        )
 
     @property
     def policy_ref(self):
@@ -140,9 +142,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
 
         # Handle missing nullable columns
         if hasattr(self._schema, "columns"):
-            missing = [
-                name for name in self._schema.columns if name not in df.columns
-            ]
+            missing = [name for name in self._schema.columns if name not in df.columns]
             for name in missing:
                 column = self._schema.columns[name]
                 if getattr(column, "nullable", False):
@@ -222,9 +222,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
                 return column_name
         return None
 
-    def _apply_contract_validations(
-        self, df: pd.DataFrame
-    ) -> list[DQRuleOutcome]:
+    def _apply_contract_validations(self, df: pd.DataFrame) -> list[DQRuleOutcome]:
         """Apply additional contract-specific validations.
 
         Args:
@@ -266,8 +264,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         elif "regex" in str(schema_error).lower():
             return "medium"  # Regex failures are medium severity
         elif any(
-            marker in str(schema_error).lower()
-            for marker in ("range", "min", "max")
+            marker in str(schema_error).lower() for marker in ("range", "min", "max")
         ):
             return "medium"  # Range violations are medium severity
         else:
@@ -308,7 +305,9 @@ class ContractAwareSilverValidator:
         self._base_validator = PanderaSilverValidator(schema=schema, strict=strict)
         self._dq_config = dq_config
         self._policy_resolver = DQPolicyResolver(dq_config) if dq_config else None
-        self._policy_ref = self._policy_resolver.build_policy_ref() if self._policy_resolver else None
+        self._policy_ref = (
+            self._policy_resolver.build_policy_ref() if self._policy_resolver else None
+        )
 
     @property
     def policy_ref(self):

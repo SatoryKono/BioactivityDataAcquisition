@@ -112,8 +112,7 @@ class AggregationValidator:
                 severity=ValidationSeverity.BLOCKER,
                 layer=ValidationLayer.DEEP_PREFLIGHT,
                 message=(
-                    f"Unsupported aggregation function '{function}' "
-                    f"for field '{field}'"
+                    f"Unsupported aggregation function '{function}' for field '{field}'"
                 ),
                 details={
                     "field": field,
@@ -149,7 +148,9 @@ class AggregationValidator:
 
     @staticmethod
     def _check_field_shadowing(config: AggregationConfig) -> list[ValidationIssue]:
-        shadowing_fields = [field for field in config.aggregations if field in config.group_by]
+        shadowing_fields = [
+            field for field in config.aggregations if field in config.group_by
+        ]
         return [
             ValidationIssue(
                 code=IssueCode.CMP_PF_AGG_006,
@@ -221,7 +222,9 @@ class AggregationValidator:
         return duplicates
 
     @staticmethod
-    def _build_group_key(record: JsonDict, group_by_fields: list[str]) -> tuple[str, ...]:
+    def _build_group_key(
+        record: JsonDict, group_by_fields: list[str]
+    ) -> tuple[str, ...]:
         return tuple(
             str(record[field]) if field in record else "MISSING"
             for field in group_by_fields
@@ -247,7 +250,9 @@ class AggregationValidator:
                 details={
                     "duplicate_count": len(duplicate_groups),
                     "group_by_fields": group_by_fields,
-                    "sample_duplicates": self._build_duplicate_samples(duplicate_groups),
+                    "sample_duplicates": self._build_duplicate_samples(
+                        duplicate_groups
+                    ),
                 },
             )
         ]

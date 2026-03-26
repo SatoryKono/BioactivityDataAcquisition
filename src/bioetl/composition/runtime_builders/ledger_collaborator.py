@@ -24,9 +24,7 @@ def _record_artifact(
         raw_lineage_fragment_id = details.get("lineage_fragment_id")
         dataset_ref = None if raw_dataset_ref is None else str(raw_dataset_ref)
         lineage_fragment_id = (
-            None
-            if raw_lineage_fragment_id is None
-            else str(raw_lineage_fragment_id)
+            None if raw_lineage_fragment_id is None else str(raw_lineage_fragment_id)
         )
     return service.record_artifact_published(
         layer=layer,

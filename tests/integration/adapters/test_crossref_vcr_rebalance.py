@@ -5,7 +5,9 @@ Records deterministic health-probe cassettes to increase provider baseline.
 
 from __future__ import annotations
 
+import asyncio
 import os
+import time
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
@@ -14,6 +16,7 @@ import pytest
 import pytest_asyncio
 
 from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
+from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
@@ -43,7 +46,24 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     return f"rf013_crossref_health_{case_id}"
 
 
-@pytest_asyncio.fixture
+@pytest.fixture(scope="module")
+def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
+    """Provide a module-scoped event loop for module-scoped async fixtures."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
+    """Reset mutable HTTP client state between parameterized rebalance cases."""
+    client.circuit_breaker.reset()
+    rate_limiter = client.rate_limiter
+    if isinstance(rate_limiter, TokenBucketRateLimiter):
+        rate_limiter._tokens = float(rate_limiter.capacity)
+        rate_limiter._last_refill = time.monotonic()
+
+
+@pytest_asyncio.fixture(scope="module")
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage CrossRef HTTP client lifecycle for integration tests."""
     client = UnifiedHTTPClient(
@@ -51,6 +71,12 @@ async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
             rate=10.0, capacity=20, provider="crossref_rf013"
         ),
         circuit_breaker=CircuitBreakerGuard(provider="crossref_rf013"),
+        retry_config=RetryConfig(
+            base_delay=0.0,
+            max_delay=0.0,
+            multiplier=1.0,
+            jitter_range=(0.0, 0.0),
+        ),
         timeout=30.0,
         provider="crossref",
     )
@@ -59,9 +85,10 @@ async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     await client.__aexit__(None, None, None)
 
 
-@pytest_asyncio.fixture
-async def adapter(http_client: UnifiedHTTPClient) -> CrossRefAdapter:
+@pytest.fixture
+def adapter(http_client: UnifiedHTTPClient) -> CrossRefAdapter:
     """Create CrossRef adapter used by rebalance tests."""
+    _reset_http_client_state(http_client)
     return create_crossref_adapter(
         http_client=http_client,
         logger=NoOpLogger(),

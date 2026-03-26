@@ -130,7 +130,7 @@ def _build_composite_output_ext(
         enrichment_status=parse_composite_status(sample.get("_enrichment_status")),
         lineage_created_at=parse_lineage_created_at(sample.get("_lineage_created_at")),
         schema_validation=schema_validation,
-        )
+    )
 
 
 def _build_enrichment_status_records(

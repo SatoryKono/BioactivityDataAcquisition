@@ -399,7 +399,9 @@ class TestMetricCardinalityGuards:
     """Guards against accidental high-cardinality metric labels (Wave 4 / Track E)."""
 
     def test_observability_events_total_label_contract_is_stable(self) -> None:
-        from bioetl.infrastructure.observability.metrics import OBSERVABILITY_EVENTS_TOTAL
+        from bioetl.infrastructure.observability.metrics import (
+            OBSERVABILITY_EVENTS_TOTAL,
+        )
 
         assert OBSERVABILITY_EVENTS_TOTAL._labelnames == (
             "event",
@@ -410,7 +412,9 @@ class TestMetricCardinalityGuards:
         )
 
     def test_registered_metrics_do_not_use_run_level_correlation_labels(self) -> None:
-        from bioetl.infrastructure.observability.metrics import __all__ as metric_symbols
+        from bioetl.infrastructure.observability.metrics import (
+            __all__ as metric_symbols,
+        )
 
         from bioetl.infrastructure.observability import metrics as metrics_module
 

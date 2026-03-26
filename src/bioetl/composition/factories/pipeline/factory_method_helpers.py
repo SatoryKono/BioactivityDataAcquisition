@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
@@ -213,7 +213,9 @@ def create_pipeline_instance_with_services(
             request.effective_config_artifact_id
         )
     return create_pipeline_with_services(
-        **cast("dict[str, Any]", create_pipeline_kwargs),  # Any: pipeline kwargs are heterogeneous
+        **cast(
+            "dict[str, object]", create_pipeline_kwargs
+        ),
     )
 
 
@@ -263,7 +265,9 @@ def create_factory_runner(
             effective_config_artifact_id
         )
     pipeline = create_with_services_fn(
-        **cast("dict[str, Any]", create_with_services_kwargs),  # Any: kwargs payload is heterogeneous
+        **cast(
+            "dict[str, object]", create_with_services_kwargs
+        ),
     )
     return assemble_runner_fn(
         pipeline=pipeline,

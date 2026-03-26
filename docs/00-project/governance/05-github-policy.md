@@ -70,7 +70,7 @@ BioETL uses **19 GitHub Actions workflows** organized by purpose.
 |----------|------|----------|----------------|
 | **Block Compiled Artifacts** | `compiled-artifacts-block.yml` | `no-pyc-check` | No `*.pyc` / `--pycache--` committed |
 | **Root Hygiene** | `root-hygiene.yml` | `root-hygiene` | Repository root cleanliness audit |
-| **Docs & Diagrams** | `docs.yml` | `validate-mermaid`, `render-diagrams` | Mermaid syntax, diagram rendering |
+| **Docs & Diagrams** | `docs.yml` | `docs-governance`, `validate-mkdocs`, `validate-mermaid`, `render-diagrams`, `check-diagram-drift` | Docs-only PR path, lightweight architecture doc-sync tests, strict MkDocs build, Mermaid syntax, diagram rendering, rendered-artifact drift checks |
 | **Validate Mermaid** | `validate-mermaid.yml` | `check-mermaid` | Vendored Mermaid asset integrity |
 
 ### 2.5 Scheduled & On-Demand
@@ -99,6 +99,10 @@ For PRs to `main`, the following status checks **MUST** pass:
 | `detect-secrets` | security.yml | No credential leaks |
 | `commit-lint` | commit-lint.yml | Conventional Commits |
 | `type-check` | type-checking.yml | mypy strict compliance |
+
+Docs-only PRs still go through blocking documentation governance via `docs.yml`:
+the lightweight `docs-governance` job runs architecture doc-sync / drift tests
+without pulling the full heavy test matrix into documentation-only changesets.
 
 ### Recommended (should be required)
 

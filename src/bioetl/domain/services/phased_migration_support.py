@@ -87,9 +87,15 @@ class PhasedMigrationSupportService:
         matching = [
             phase
             for phase in self._migration_phases
-            if _phase_matches_version(self._current_version, phase, self._version_compare)
+            if _phase_matches_version(
+                self._current_version, phase, self._version_compare
+            )
         ]
-        return matching[-1].phase_name if matching else self._migration_phases[-1].phase_name
+        return (
+            matching[-1].phase_name
+            if matching
+            else self._migration_phases[-1].phase_name
+        )
 
     def _version_compare(self, v1: str, v2: str) -> int:
         """Compare two version strings (-1 if v1<v2, 0 if equal, 1 if v1>v2)."""
@@ -135,11 +141,16 @@ class PhasedMigrationSupportService:
         if from_phase_config is None or to_phase_config is None:
             guide["steps"].append("Invalid phase names provided")
             return guide
-        if self._version_compare(
-            to_phase_config.start_version,
-            from_phase_config.start_version,
-        ) > 0:
-            guide["steps"].append(f"Upgrade to version {to_phase_config.start_version} or later")
+        if (
+            self._version_compare(
+                to_phase_config.start_version,
+                from_phase_config.start_version,
+            )
+            > 0
+        ):
+            guide["steps"].append(
+                f"Upgrade to version {to_phase_config.start_version} or later"
+            )
         _extend_transition_guidance(guide, from_phase, to_phase)
         return guide
 

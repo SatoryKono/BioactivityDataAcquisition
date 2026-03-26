@@ -15,6 +15,11 @@ from bioetl.domain.composite.aggregation import (
 )
 
 
+def _rows_by_key(df: pl.DataFrame, key: str) -> dict[str, dict[str, object]]:
+    """Build deterministic key->row mapping for assertion-friendly lookups."""
+    return {str(row[key]): row for row in df.iter_rows(named=True)}
+
+
 @pytest.fixture
 def mock_logger():
     """Create a mock LoggerPort."""
@@ -57,8 +62,8 @@ class TestAggregateCollectList:
         result = aggregator.aggregate(df, config, "test_enricher")
 
         assert len(result) == 2
-        d1_row = result.filter(pl.col("doc_id") == "D1")
-        terms = d1_row["term"].to_list()[0]
+        rows_by_doc_id = _rows_by_key(result, "doc_id")
+        terms = rows_by_doc_id["D1"]["term"]
         assert sorted(terms) == ["cancer", "oncology"]
 
     def test_collect_list_drops_nulls(self, aggregator: EnricherAggregator):
@@ -138,8 +143,9 @@ class TestAggregateCount:
 
         result = aggregator.aggregate(df, config, "test_enricher")
 
-        d1 = result.filter(pl.col("doc_id") == "D1")["term"].to_list()[0]
-        d2 = result.filter(pl.col("doc_id") == "D2")["term"].to_list()[0]
+        rows_by_doc_id = _rows_by_key(result, "doc_id")
+        d1 = rows_by_doc_id["D1"]["term"]
+        d2 = rows_by_doc_id["D2"]["term"]
         assert d1 == 3
         assert d2 == 1
 

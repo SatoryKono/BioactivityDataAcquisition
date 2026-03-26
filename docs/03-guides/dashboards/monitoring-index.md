@@ -11,3 +11,7 @@
 ## Примечание
 
 Архивные файлы перенесены в `docs/03-guides/dashboards/legacy/` и могут описывать устаревшие переменные (`$run-id`, `execution`) или старые метрики.
+
+Текущий `bioetl-overview-v2` также считается канонической точкой входа для
+control-plane и lineage health: manifest writes, ledger appends, checkpoint
+compatibility и lineage fragment outcomes.

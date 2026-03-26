@@ -8,6 +8,8 @@ Per RULES.md §2.4 and ADR-014.
 
 from __future__ import annotations
 
+from functools import cache
+
 import pytest
 import pyarrow as pa
 
@@ -38,6 +40,7 @@ CUSTOM_ORDER_SCHEMAS = frozenset(
 )
 
 
+@cache
 def get_all_pyarrow_schemas() -> list[tuple[str, pa.Schema]]:
     """Collect all PyArrow schema constants from silver module."""
     schemas = []

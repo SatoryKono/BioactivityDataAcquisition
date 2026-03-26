@@ -18,19 +18,20 @@ import json
 import os
 from collections.abc import Generator
 from dataclasses import replace
+from functools import cache
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-import httpx
 import pytest
-from deltalake import DeltaTable
 
-from bioetl.domain.context import PipelineRunContext
-from bioetl.domain.exceptions.infrastructure import InfrastructureError
-from bioetl.domain.exceptions.network import ExternalServiceError
-from bioetl.domain.resilience import RetryConfig
-from bioetl.domain.types import RunID, RunType
+if TYPE_CHECKING:
+    import httpx
+
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.exceptions.network import ExternalServiceError
+    from bioetl.domain.resilience import RetryConfig
+    from bioetl.domain.types import RunID, RunType
 
 # Default timeout for E2E tests (seconds)
 # E2E tests run full pipelines with HTTP calls, Delta Lake operations,
@@ -45,15 +46,6 @@ _TRANSIENT_EXTERNAL_ERROR_MARKERS: tuple[str, ...] = (
     "timeout",
 )
 _TRANSIENT_HTTP_STATUS_CODES: frozenset[int] = frozenset({429, 500, 502, 503, 504})
-_E2E_RETRY_CONFIG = RetryConfig(
-    max_attempts=3,
-    multiplier=2.0,
-    base_delay=0.25,
-    max_delay=1.0,
-    jitter_range=(0.0, 0.0),
-    retryable_statuses=_TRANSIENT_HTTP_STATUS_CODES,
-    jitter_seed=20260304,
-)
 _E2E_SKIP_PREFIX = "E2E_SKIP"
 _E2E_HEALTHCHECK_PLAYBACK_FAILURE_MARKERS: tuple[str, ...] = (
     "health check failed for: data_source",
@@ -70,6 +62,30 @@ _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
         "test_chembl_activity_full_run"
     ),
 }
+
+
+@cache
+def _get_retry_config() -> RetryConfig:
+    """Build retry config lazily so collection avoids heavy domain imports."""
+    from bioetl.domain.resilience import RetryConfig
+
+    return RetryConfig(
+        max_attempts=3,
+        multiplier=2.0,
+        base_delay=0.25,
+        max_delay=1.0,
+        jitter_range=(0.0, 0.0),
+        retryable_statuses=_TRANSIENT_HTTP_STATUS_CODES,
+        jitter_seed=20260304,
+    )
+
+
+@cache
+def _load_delta_table() -> type[Any]:
+    """Import DeltaTable lazily to keep collect-only runs lighter."""
+    from deltalake import DeltaTable
+
+    return DeltaTable
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -262,7 +278,7 @@ def e2e_minio_client() -> MockMinioClient:
 def create_test_context(
     pipeline_name: str,
     limit: int | None = 10,
-    run_type: RunType = RunType.INCREMENTAL,
+    run_type: RunType | None = None,
     resume: bool = False,
     query: str | None = None,
     filter_ids: tuple[str, ...] | None = None,
@@ -283,16 +299,19 @@ def create_test_context(
         PipelineRunContext для передачи в bootstrap_pipeline_runner
     """
     from bioetl.domain.context import InputFilterContext
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.types import RunID, RunType
 
     if filter_ids is not None and filter_field is not None:
         input_filter = InputFilterContext.from_ids(filter_ids, filter_field)
     else:
         input_filter = InputFilterContext.disabled()
 
+    resolved_run_type = run_type or RunType.INCREMENTAL
     return PipelineRunContext(
         pipeline_name=pipeline_name,
         run_id=RunID(uuid4()),
-        run_type=run_type,
+        run_type=resolved_run_type,
         resume=resume,
         limit=limit,
         query=query,
@@ -315,6 +334,8 @@ def _is_transient_http_status_error(exc: httpx.HTTPStatusError) -> bool:
 
 def is_external_healthcheck_playback_failure(exc: Exception) -> bool:
     """Return True when playback fails due to external health-check mismatch."""
+    from bioetl.domain.exceptions.infrastructure import InfrastructureError
+
     if not isinstance(exc, InfrastructureError):
         return False
     message = str(exc).lower()
@@ -337,6 +358,8 @@ def _create_retry_run_context(
     context: PipelineRunContext, attempt: int
 ) -> PipelineRunContext:
     """Return stable retry context, replacing run_id only after first attempt."""
+    from bioetl.domain.types import RunID
+
     if attempt == 0:
         return context
     return replace(context, run_id=RunID(uuid4()))
@@ -344,6 +367,9 @@ def _create_retry_run_context(
 
 def _get_transient_reason_code(exc: Exception | None) -> str:
     """Map transient exception to deterministic CI skip code."""
+    import httpx
+    from bioetl.domain.exceptions.network import ExternalServiceError
+
     if isinstance(exc, ExternalServiceError) and exc.status_code == 429:
         return "INFRA_FLAKY_429"
     if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429:
@@ -355,13 +381,14 @@ def _skip_transient_pipeline_run(
     context: PipelineRunContext, transient_exc: Exception | None
 ) -> None:
     """Skip test with deterministic message after transient retry exhaustion."""
+    retry_config = _get_retry_config()
     pytest.skip(
         build_e2e_skip_reason(
             _get_transient_reason_code(transient_exc),
             pipeline_name=context.pipeline_name,
             detail=(
                 f"transient upstream error after "
-                f"{_E2E_RETRY_CONFIG.max_attempts} attempts: {transient_exc}"
+                f"{retry_config.max_attempts} attempts: {transient_exc}"
             ),
         )
     )
@@ -369,10 +396,14 @@ def _skip_transient_pipeline_run(
 
 async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
     """Run pipeline with deterministic retries; skip on transient exhaustion."""
+    import httpx
+    from bioetl.domain.exceptions.network import ExternalServiceError
+
     from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
+    retry_config = _get_retry_config()
     transient_exc: Exception | None = None
-    for attempt in range(_E2E_RETRY_CONFIG.max_attempts):
+    for attempt in range(retry_config.max_attempts):
         run_context = _create_retry_run_context(context, attempt)
         runner = bootstrap_pipeline_runner(run_context)
         try:
@@ -387,10 +418,10 @@ async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
                 raise
             transient_exc = exc
 
-        if _E2E_RETRY_CONFIG.is_last_attempt(attempt):
+        if retry_config.is_last_attempt(attempt):
             _skip_transient_pipeline_run(context, transient_exc)
 
-        delay = _E2E_RETRY_CONFIG.calculate_delay(attempt, url=context.pipeline_name)
+        delay = retry_config.calculate_delay(attempt, url=context.pipeline_name)
         await asyncio.sleep(delay)
 
     msg = "run_pipeline_or_skip_transient exhausted without terminal decision"
@@ -575,7 +606,7 @@ def assert_silver_table_has_records(
     """
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
-    dt = DeltaTable(str(table_path))
+    dt = _load_delta_table()(str(table_path))
     df = dt.to_pyarrow_table()
     count = len(df)
 
@@ -625,7 +656,7 @@ def assert_gold_table_has_records(
         else:
             raise AssertionError(f"Gold table does not exist: {table_path}")
 
-    dt = DeltaTable(str(table_path))
+    dt = _load_delta_table()(str(table_path))
     count = len(dt.to_pyarrow_table())
 
     if count < expected_min:
@@ -651,7 +682,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     """
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
-    dt = DeltaTable(str(table_path))
+    dt = _load_delta_table()(str(table_path))
     return dt.to_pyarrow_table().to_pylist()
 
 
@@ -677,5 +708,5 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
         if flat_path.exists() and (flat_path / "_delta_log").exists():
             table_path = flat_path
 
-    dt = DeltaTable(str(table_path))
+    dt = _load_delta_table()(str(table_path))
     return dt.to_pyarrow_table().to_pylist()

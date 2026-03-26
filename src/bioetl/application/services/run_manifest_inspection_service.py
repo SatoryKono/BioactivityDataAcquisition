@@ -152,6 +152,7 @@ def _build_diagnostics_summary(
     summary: dict[str, object] = {
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": code_provenance.config_hash,
+        "effective_config_hash": code_provenance.config_hash,
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,
         "dq_policy_ref": code_provenance.dq_policy_ref,
@@ -171,8 +172,18 @@ def _build_diagnostics_summary(
     dq_rule_ids: set[str] = set()
     dq_dispositions: set[str] = set()
     dq_report_paths: set[str] = set()
+    dq_violation_kinds: set[str] = set()
+    cross_validation_rule_ids: set[str] = set()
+    cross_validation_config_paths: set[str] = set()
     dq_signal_present = False
+    cross_validation_signal_present = False
     missing_link_count = 0
+    correlation_anchor_gaps = {
+        "effective_config_hash": 0,
+        "contract_ref": 0,
+        "data_contract_version": 0,
+        "composite_run_id": 0,
+    }
     for entry in ledger_entries:
         family_counter.update([entry.event_family or "diagnostic"])
         type_counter.update([entry.event_type])
@@ -190,7 +201,19 @@ def _build_diagnostics_summary(
         dq_rule_ids.update(dq_details["rule_ids"])
         dq_dispositions.update(dq_details["dispositions"])
         dq_report_paths.update(dq_details["report_paths"])
+        dq_violation_kinds.update(dq_details["violation_kinds"])
+        cross_validation_rule_ids.update(dq_details["cross_validation_rule_ids"])
+        cross_validation_config_paths.update(
+            dq_details["cross_validation_config_paths"]
+        )
         dq_signal_present = dq_signal_present or dq_details["has_signal"]
+        cross_validation_signal_present = (
+            cross_validation_signal_present or dq_details["has_cross_validation_signal"]
+        )
+        _update_correlation_anchor_gaps(
+            correlation_anchor_gaps,
+            entry,
+        )
 
     latest_entry = ledger_entries[-1]
     alert_signals = _build_alert_signals(
@@ -199,23 +222,29 @@ def _build_diagnostics_summary(
         lineage_fragment_ids=lineage_fragment_ids,
         missing_link_count=missing_link_count,
         dq_signal_present=dq_signal_present,
+        cross_validation_signal_present=cross_validation_signal_present,
     )
     next_steps = _build_next_steps(alert_signals)
     summary.update(
         {
-        "total_events": len(ledger_entries),
-        "latest_event_type": latest_entry.event_type,
-        "latest_status": latest_entry.status,
-        "event_family_counts": dict(sorted(family_counter.items())),
-        "event_type_counts": dict(sorted(type_counter.items())),
-        "artifact_refs": artifact_refs,
-        "lineage_fragment_ids": sorted(lineage_fragment_ids),
-        "missing_artifact_links": missing_link_count,
-        "dq_rule_ids": sorted(dq_rule_ids),
-        "dq_dispositions": sorted(dq_dispositions),
-        "dq_report_paths": sorted(dq_report_paths),
-        "alert_signals": alert_signals,
-        "next_steps": next_steps,
+            "total_events": len(ledger_entries),
+            "latest_event_type": latest_entry.event_type,
+            "latest_status": latest_entry.status,
+            "event_family_counts": dict(sorted(family_counter.items())),
+            "event_type_counts": dict(sorted(type_counter.items())),
+            "artifact_refs": artifact_refs,
+            "lineage_fragment_ids": sorted(lineage_fragment_ids),
+            "missing_artifact_links": missing_link_count,
+            "dq_rule_ids": sorted(dq_rule_ids),
+            "dq_dispositions": sorted(dq_dispositions),
+            "dq_report_paths": sorted(dq_report_paths),
+            "dq_violation_kinds": sorted(dq_violation_kinds),
+            "cross_validation_rule_ids": sorted(cross_validation_rule_ids),
+            "cross_validation_config_paths": sorted(cross_validation_config_paths),
+            "cross_validation_signal_present": cross_validation_signal_present,
+            "correlation_anchor_gaps": correlation_anchor_gaps,
+            "alert_signals": alert_signals,
+            "next_steps": next_steps,
         }
     )
     return summary
@@ -242,6 +271,7 @@ def _build_alert_signals(
     lineage_fragment_ids: set[str],
     missing_link_count: int,
     dq_signal_present: bool,
+    cross_validation_signal_present: bool,
 ) -> dict[str, bool]:
     """Map diagnostics summary to alert-oriented boolean signals."""
     latest_status_normalized = (latest_status or "").strip().lower()
@@ -253,6 +283,7 @@ def _build_alert_signals(
         "artifact_linkage_gap": missing_link_count > 0,
         "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
         "dq_signal_present": dq_signal_present,
+        "cross_validation_signal_present": cross_validation_signal_present,
     }
 
 
@@ -275,6 +306,10 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
         steps.append(
             "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation."
         )
+    if alert_signals.get("cross_validation_signal_present", False):
+        steps.append(
+            "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes."
+        )
     if alert_signals.get("run_shutdown", False):
         steps.append(
             "Confirm graceful shutdown reason and resume policy compatibility."
@@ -284,42 +319,143 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     return steps
 
 
-def _extract_dq_details(entry: RunLedgerEntry) -> dict[str, object]:
-    """Extract DQ-oriented anchors from one ledger entry."""
-    details = entry.details or {}
-    rule_ids: set[str] = set()
-    dispositions: set[str] = set()
-    report_paths: set[str] = set()
+def _collect_dq_values(
+    details: dict[str, object],
+    *,
+    single_key: str | None = None,
+    collection_keys: tuple[str, ...] = (),
+) -> set[str]:
+    """Collect one optional scalar key and list-like keys into a string set."""
+    values: set[str] = set()
+    if single_key is not None:
+        single_value = details.get(single_key)
+        if single_value is not None:
+            values.add(str(single_value))
+    for key in collection_keys:
+        values.update(_load_str_collection(details.get(key)))
+    return values
 
-    single_rule_id = details.get("rule_id")
-    if single_rule_id is not None:
-        rule_ids.add(str(single_rule_id))
-    rule_ids.update(_load_str_collection(details.get("dq_rule_ids")))
-    rule_ids.update(_load_str_collection(details.get("rule_ids")))
 
-    single_disposition = details.get("disposition")
-    if single_disposition is not None:
-        dispositions.add(str(single_disposition))
-    dispositions.update(_load_str_collection(details.get("dq_dispositions")))
-    dispositions.update(_load_str_collection(details.get("dispositions")))
+def _extract_cross_validation_sets(
+    rule_ids: set[str],
+    config_paths: set[str],
+) -> tuple[set[str], set[str]]:
+    """Extract cross-validation specific subsets from DQ anchors."""
+    cross_validation_rule_ids = {
+        rule_id
+        for rule_id in rule_ids
+        if rule_id.startswith("composite.cross_validation.")
+    }
+    cross_validation_config_paths = {
+        config_path for config_path in config_paths if config_path == "cross_validation"
+    }
+    return cross_validation_rule_ids, cross_validation_config_paths
 
-    dq_report_path = details.get("dq_report_path")
-    if dq_report_path is not None:
-        report_paths.add(str(dq_report_path))
 
-    has_signal = (
+def _has_dq_signal(
+    entry: RunLedgerEntry,
+    *,
+    rule_ids: set[str],
+    dispositions: set[str],
+    report_paths: set[str],
+) -> bool:
+    """Return whether a ledger entry carries any DQ signal."""
+    return (
         entry.event_family == "dq"
         or entry.event_type.startswith("dq_")
         or bool(rule_ids)
         or bool(dispositions)
         or bool(report_paths)
     )
+
+
+def _extract_dq_details(entry: RunLedgerEntry) -> dict[str, object]:
+    """Extract DQ-oriented anchors from one ledger entry."""
+    details = entry.details or {}
+    rule_ids = _collect_dq_values(
+        details,
+        single_key="rule_id",
+        collection_keys=("dq_rule_ids", "rule_ids"),
+    )
+    dispositions = _collect_dq_values(
+        details,
+        single_key="disposition",
+        collection_keys=("dq_dispositions", "dispositions"),
+    )
+    report_paths = _collect_dq_values(details, single_key="dq_report_path")
+    violation_kinds = _collect_dq_values(
+        details,
+        single_key="violation_kind",
+        collection_keys=("violation_kinds",),
+    )
+    config_paths = _collect_dq_values(
+        details,
+        single_key="config_path",
+        collection_keys=("config_paths",),
+    )
+    cross_validation_rule_ids, cross_validation_config_paths = (
+        _extract_cross_validation_sets(rule_ids, config_paths)
+    )
+    has_cross_validation_signal = (
+        bool(cross_validation_rule_ids)
+        or "cross_validation_mismatch" in violation_kinds
+        or bool(cross_validation_config_paths)
+    )
+    has_signal = _has_dq_signal(
+        entry,
+        rule_ids=rule_ids,
+        dispositions=dispositions,
+        report_paths=report_paths,
+    )
     return {
         "rule_ids": rule_ids,
         "dispositions": dispositions,
         "report_paths": report_paths,
+        "violation_kinds": violation_kinds,
+        "cross_validation_rule_ids": cross_validation_rule_ids,
+        "cross_validation_config_paths": cross_validation_config_paths,
         "has_signal": has_signal,
+        "has_cross_validation_signal": has_cross_validation_signal,
     }
+
+
+def _update_correlation_anchor_gaps(
+    gap_counter: dict[str, int],
+    entry: RunLedgerEntry,
+) -> None:
+    """Count missing correlation anchors for execution-critical ledger events."""
+    event_family = entry.event_family or "diagnostic"
+    if event_family == "diagnostic" and entry.event_type == "manifest_created":
+        return
+    if event_family not in {
+        "pipeline.lifecycle",
+        "pipeline.phase",
+        "artifact",
+        "dq",
+        "checkpoint",
+        "composite",
+    }:
+        return
+    diagnostic = _extract_diagnostic_context(entry)
+    if diagnostic.get("effective_config_hash") is None:
+        gap_counter["effective_config_hash"] += 1
+    if diagnostic.get("contract_ref") is None:
+        gap_counter["contract_ref"] += 1
+    if diagnostic.get("data_contract_version") is None:
+        gap_counter["data_contract_version"] += 1
+    if event_family in {"checkpoint", "composite"} and (
+        diagnostic.get("composite_run_id") is None
+    ):
+        gap_counter["composite_run_id"] += 1
+
+
+def _extract_diagnostic_context(entry: RunLedgerEntry) -> dict[str, object]:
+    """Return normalized diagnostic anchor payload from ledger entry details."""
+    details = entry.details or {}
+    raw_diagnostic = details.get("_diagnostic")
+    if not isinstance(raw_diagnostic, dict):
+        return {}
+    return {str(key): value for key, value in raw_diagnostic.items()}
 
 
 def _load_str_collection(raw_value: object) -> set[str]:

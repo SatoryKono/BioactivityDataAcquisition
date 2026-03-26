@@ -16,6 +16,7 @@ Reference:
 
 from __future__ import annotations
 
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -109,6 +110,7 @@ LEGACY_SCD_CONFIG_KEYS: set[str] = {"valid_from", "valid_to", "is_current", "ver
 # ---------------------------------------------------------------------------
 
 
+@cache
 def _load_yaml(path: Path) -> dict[str, Any]:
     """Load a YAML file, returning an empty dict on parse failure."""
     text = path.read_text(encoding="utf-8")
@@ -118,11 +120,13 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return data
 
 
+@cache
 def _collect_pipeline_configs() -> list[Path]:
     """Collect all unified entity YAML configs."""
     return sorted(p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_"))
 
 
+@cache
 def _collect_composite_configs() -> list[Path]:
     """Collect all composite YAML configs."""
     return sorted(
@@ -130,6 +134,7 @@ def _collect_composite_configs() -> list[Path]:
     )
 
 
+@cache
 def _collect_provider_configs() -> list[Path]:
     """Collect unified provider YAML configs."""
     return sorted(p for p in PROVIDERS_DIR.glob("*.yaml") if not p.name.startswith("_"))
@@ -168,6 +173,7 @@ def _count_jsonl_lines(files: list[Path], stop_after: int | None = None) -> int:
     return total
 
 
+@cache
 def _load_bronze_fixture_gaps() -> dict[str, dict[str, Any]]:
     data = _load_yaml(BRONZE_FIXTURE_GAPS_PATH)
     raw_gaps = data.get("gaps")
@@ -184,6 +190,7 @@ def _load_bronze_fixture_gaps() -> dict[str, dict[str, Any]]:
     return result
 
 
+@cache
 def _load_bronze_fixture_manifest() -> dict[str, dict[str, Any]]:
     data = _load_yaml(BRONZE_FIXTURE_MANIFEST_PATH)
     raw_fixtures = data.get("fixtures")
@@ -739,7 +746,10 @@ class TestBronzeFixtureCoverage:
                     )
 
                 fixture_path_raw = manifest_entry.get("fixture_path")
-                if not isinstance(fixture_path_raw, str) or not fixture_path_raw.strip():
+                if (
+                    not isinstance(fixture_path_raw, str)
+                    or not fixture_path_raw.strip()
+                ):
                     invalid_manifest_entries.append(
                         f"{key}: fixture_path is required in manifest"
                     )
@@ -767,7 +777,9 @@ class TestBronzeFixtureCoverage:
                                 f"line count={manifest_lines}"
                             )
                         elif fixture_kind == "tracked_ci_sample":
-                            if not fixture_path_raw.startswith("tests/fixtures/bronze/"):
+                            if not fixture_path_raw.startswith(
+                                "tests/fixtures/bronze/"
+                            ):
                                 invalid_manifest_entries.append(
                                     f"{key}: tracked_ci_sample must live under "
                                     "tests/fixtures/bronze/"

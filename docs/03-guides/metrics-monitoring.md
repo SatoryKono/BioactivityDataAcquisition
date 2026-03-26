@@ -2,8 +2,8 @@
 
 Руководство по настройке и использованию системы метрик и мониторинга в BioETL.
 
-**Версия:** 6.0.0
-**Дата обновления:** 2026-02-21
+**Версия:** 6.1.0
+**Дата обновления:** 2026-03-26
 
 ---
 
@@ -139,6 +139,20 @@ curl http://localhost:8000/metrics | grep bioetl_
 |---------|-----|--------|----------|
 | `bioetl_pipeline_runs_total` | Counter | pipeline, run_type, status | Количество запусков |
 | `bioetl_phase_duration_seconds` | Histogram | pipeline, phase, status | Длительность фаз lifecycle |
+
+#### Control Plane & Traceability Metrics
+
+| Метрика | Тип | Labels | Описание |
+|---------|-----|--------|----------|
+| `bioetl_control_plane_manifest_writes_total` | Counter | pipeline, run_type, status | Попытки записи immutable run manifest |
+| `bioetl_control_plane_ledger_appends_total` | Counter | pipeline, event_type, status | Попытки append в run ledger |
+| `bioetl_checkpoint_compatibility_events_total` | Counter | pipeline, disposition | Исходы compatibility policy при resume |
+| `bioetl_lineage_fragments_emitted_total` | Counter | pipeline, layer, status | Попытки публикации lineage fragments |
+
+> Guardrail: для control-plane/traceability метрик нельзя использовать
+> `run_id`, `manifest_id`, paths и другие high-cardinality идентификаторы как
+> Prometheus labels. Детализация по конкретному запуску выполняется через
+> `bioetl run-manifest show ...`, а не через labels.
 
 #### Transformer Metrics
 

@@ -17,7 +17,7 @@ from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 if TYPE_CHECKING:
     from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-    from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -35,6 +35,7 @@ def create_gold_writer(
     transform_version: str | None,
     transform_steps: tuple[str, ...] | None,
     flat_structure: bool,
+    metrics: MetricsPort | None = None,
 ) -> GoldWriter:
     """Create configured Gold writer.
 
@@ -71,6 +72,7 @@ def create_gold_writer(
         runtime_services=GoldWriterRuntimeServices(
             csv_exporter=csv_exporter,
             tracing=effective_tracing,
+            metrics=metrics,
             audit=None,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,

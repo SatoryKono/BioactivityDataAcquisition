@@ -128,7 +128,9 @@ class CompositeValidationService:
             execution_context={"pipeline_name": config.pipeline_name},
         )
 
-    def _deep_preflight_issues(self, composite_config: JsonDict) -> list[ValidationIssue]:
+    def _deep_preflight_issues(
+        self, composite_config: JsonDict
+    ) -> list[ValidationIssue]:
         issues: list[ValidationIssue] = []
         aggregation = composite_config.get("aggregation")
         if aggregation is not None:
@@ -241,8 +243,10 @@ class CompositeValidationService:
         if precheck_errors:
             return precheck_errors
         cross_val_config = _convert_to_cross_validation_config(config)
-        validation_result = self._cross_validation_validator.validate_cross_validation_config(
-            cross_val_config, source_names
+        validation_result = (
+            self._cross_validation_validator.validate_cross_validation_config(
+                cross_val_config, source_names
+            )
         )
         return validation_result.issues
 

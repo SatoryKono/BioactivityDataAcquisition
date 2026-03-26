@@ -119,7 +119,7 @@ ifneq ($(INCLUDE_ARCH_GATES),0)
 	$(RUN) pytest tests/architecture/ -p no:xdist -q --tb=short
 endif
 	COVERAGE_FILE=reports/coverage/.coverage \
-	$(RUN) coverage combine reports/coverage
+	$(RUN) coverage combine --keep reports/coverage
 	COVERAGE_FILE=reports/coverage/.coverage \
 	$(RUN) coverage report --show-missing --fail-under=$(LOCAL_COV_FAIL_UNDER)
 

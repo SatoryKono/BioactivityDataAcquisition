@@ -1197,9 +1197,13 @@ class TestLineageFragments:
         assert LineageNodeType.SOURCE_SYSTEM in node_types
         assert LineageNodeType.SOURCE_REQUEST in node_types
         assert LineageNodeType.BRONZE_BATCH in node_types
-        run = next(node for node in fragment.nodes if node.node_type == LineageNodeType.RUN)
+        run = next(
+            node for node in fragment.nodes if node.node_type == LineageNodeType.RUN
+        )
         manifest = next(
-            node for node in fragment.nodes if node.node_type == LineageNodeType.MANIFEST
+            node
+            for node in fragment.nodes
+            if node.node_type == LineageNodeType.MANIFEST
         )
         assert run.attributes["contract_ref"] == "chembl.activity"
         assert run.attributes["contract_version"] == "1.0.0"
@@ -1208,8 +1212,12 @@ class TestLineageFragments:
         assert run.attributes["rule_bundle_version"] == "dq-rules.v1.0"
         assert manifest.attributes["contract_ref"] == "chembl.activity"
         assert manifest.attributes["contract_version"] == "1.0.0"
-        assert any(edge.edge_type == LineageEdgeType.PRODUCED_BY for edge in fragment.edges)
-        assert any(edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges)
+        assert any(
+            edge.edge_type == LineageEdgeType.PRODUCED_BY for edge in fragment.edges
+        )
+        assert any(
+            edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges
+        )
 
     def test_silver_fragment_uses_bronze_refs_and_transform_chain(self) -> None:
         context = RunContext.create(
@@ -1374,7 +1382,9 @@ class TestLineageFragments:
             and edge.target.node_type == LineageNodeType.SCHEMA
             for edge in fragment.edges
         )
-        assert any(edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges)
+        assert any(
+            edge.edge_type == LineageEdgeType.EXPLAINS for edge in fragment.edges
+        )
 
     def test_gold_fragment_exposes_composite_source_and_cv_summary(self) -> None:
         context = RunContext.create(

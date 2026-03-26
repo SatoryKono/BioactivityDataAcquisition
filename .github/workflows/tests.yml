@@ -542,7 +542,7 @@ jobs:
 
             -   name: Combine coverage shards and enforce threshold
                 run: |
-                    uv run python -m coverage combine reports/coverage
+                    uv run python -m coverage combine reports/coverage --keep
                     uv run python -m coverage report --show-missing --fail-under=85
                     uv run python -m coverage xml -o coverage.xml
 

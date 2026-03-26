@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-03-24*
+*Last updated: 2026-03-26*
 
 This directory contains implementation plans, corrective roadmaps, migration
 plans, and supporting architecture assessment snapshots.
@@ -65,6 +65,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 ### Retained Operational Context
 
 - [architecture-review-and-refactor-plan-2026-03-21.md](architecture-review-and-refactor-plan-2026-03-21.md)
+- [monitoring-observability-expansion-plan-2026-03-26.md](monitoring-observability-expansion-plan-2026-03-26.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -74,6 +75,11 @@ published plan pages in this workspace snapshot.
 The architecture review plan was refreshed on `2026-03-23` with the current
 integral score, updated category table, and RF-style roadmap. It remains a
 supporting assessment map, not a second active backlog.
+
+The monitoring observability expansion plan was added on `2026-03-26` as a
+bounded rollout plan for extending the existing Prometheus/Grafana stack around
+control-plane and lineage signals. It is retained as supporting operational
+context, not as a second active backlog.
 
 If later waves close items named in that report, the report should keep its
 original date and gain a short freshness note instead of being silently treated

@@ -1,12 +1,10 @@
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Статус: internal-published (Internal / Extended)*
-
-*Версия: 4.1 | Дата: 2026-03-10 | Supersedes v4.0 | Платформа: Codex CLI*
+*Версия: 4.2 | Дата: 2026-03-26 | Supersedes v4.1 | Платформа: Codex CLI*
 
 ## 1. Обзор
 
-Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
+Команда из **8 активных субагентов** (6 core + 2 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
 
 **Запуск логического профиля в Codex runtime:**
 ```
@@ -27,10 +25,9 @@ spawn_agent(
 | V | **py-debug-bot** | opus | Отладка падений | `review_py-debug-bot_{YYYYMMDD}_{HHMM}.md` |
 | VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `review_py-doc-bot_{YYYYMMDD}_{HHMM}.md` |
 | VII | **py-test-swarm** | opus | Иерархическое тестирование (L1→L2→L3) | test reports |
-| VIII | **py-doc-swarm** | opus | Иерархическое документирование, drift detection | doc reports |
-| IX | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
+| VIII | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
 
-> **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`.
+> **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`. Repo-wide documentation audits now route through the `documentation-audit` / `documentation-cascade-audit` skills rather than a dedicated documentation-only subagent profile.
 
 ### Разделение ответственности (файловые зоны)
 
@@ -52,14 +49,14 @@ spawn_agent(
 
 Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:
 
-- [Project File Structure Summary](../../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [Project File Structure Decisions](../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [Project Package Topology Summary](../../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [Project Package Topology Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [Topology vs Governance Cross-Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [Project Package Topology Decisions](../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- [Governance Signals Summary](../../../../reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+- [Project File Structure Summary](../../docs/reports/evidence/project-file-structure/SUMMARY.md)
+- [Project File Structure Decisions](../../docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [Project Package Topology Summary](../../docs/reports/evidence/project-package-topology/SUMMARY.md)
+- [Project Package Topology Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
+- [Topology vs Governance Cross-Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
+- [Project Package Topology Decisions](../../docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [Governance Signals Summary](../../docs/reports/evidence/governance-signals/SUMMARY.md)
+- [Governance Signals Decisions](../../docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 
 Operational defaults:
 - package count сам по себе не является refactor trigger;
@@ -457,9 +454,11 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 
 ## 11. Changelog (ORCHESTRATION.md)
 
-> Ниже сохранён исторический changelog. Записи `v3.x` и ниже описывают legacy
-> этапы эволюции orchestration-модели и не переопределяют текущий runtime
-> `v4.x`.
+### v4.2 (2026-03-26)
+
+- **CHANGED**: active agent table no longer lists the legacy documentation-only subagent
+- **CHANGED**: repo-wide docs audits now point to `documentation-audit` / `documentation-cascade-audit`
+- **CHANGED**: active agent count updated to 8 (6 core + 2 orchestrator/swarm)
 
 ### v4.1 (2026-03-10)
 
@@ -470,9 +469,11 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 
 ### v4.0 (2026-03-04)
 
+> Исторический changelog ниже является non-normative. Для текущего workflow ориентируйся на разделы выше и на note о том, что production-код пишет orchestrator напрямую.
+
 - **REMOVED**: `py-code-bot` — production code now written directly by orchestrator
 - **MERGED**: `py-diagram-bot` into `py-doc-bot` (diagrams are documentation artifacts)
-- **ADDED**: `py-test-swarm`, `py-doc-swarm`, `py-review-orchestrator` to agent table
+- **ADDED**: `py-test-swarm`, docs-audit orchestration track, `py-review-orchestrator` to agent table
 - **REMOVED**: `.claude/agents/subagents/` reference (deleted in Phase 1)
 - **CHANGED**: Agent count: 8 → 9 (6 core + 3 orchestrator/swarm)
 - **CHANGED**: All workflow references updated: py-code-bot → orchestrator

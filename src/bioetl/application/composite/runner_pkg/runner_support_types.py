@@ -41,6 +41,11 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
     _preflight_validator: CompositePreflightValidationService | None
     _fsm: FSMStateHelperService
 
+    def _build_correlation_log_context(
+        self,
+        **extra: object,
+    ) -> dict[str, object]: ...
+
     def _get_preflight_skip_reason(self) -> str | None: ...
 
     def _should_run_enricher(

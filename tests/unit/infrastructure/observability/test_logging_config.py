@@ -5,6 +5,8 @@ Tests the centralized structlog configuration.
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 
@@ -275,6 +277,73 @@ class TestSecretFilterProcessor:
 
 
 @pytest.mark.unit
+class TestTraceContextProcessor:
+    """Tests for trace_context_processor function."""
+
+    def test_noop_without_trace_identifiers(self) -> None:
+        """Processor should leave event unchanged when no trace context exists."""
+        from bioetl.infrastructure.observability.logging_config import (
+            trace_context_processor,
+        )
+
+        event_dict = {"event": "pipeline-started", "pipeline": "chembl_activity"}
+        with patch(
+            "bioetl.infrastructure.observability.logging_config._get_current_trace_identifiers",
+            return_value=None,
+        ):
+            result = trace_context_processor(None, "info", event_dict.copy())
+
+        assert result == event_dict
+        assert "trace_id" not in result
+        assert "span_id" not in result
+
+    def test_injects_trace_and_span_ids_when_available(self) -> None:
+        """Processor should inject trace identifiers when helper returns them."""
+        from bioetl.infrastructure.observability.logging_config import (
+            trace_context_processor,
+        )
+
+        with patch(
+            "bioetl.infrastructure.observability.logging_config._get_current_trace_identifiers",
+            return_value=(
+                "0123456789abcdef0123456789abcdef",
+                "0123456789abcdef",
+            ),
+        ):
+            result = trace_context_processor(
+                None,
+                "info",
+                {"event": "pipeline-started", "pipeline": "chembl_activity"},
+            )
+
+        assert result["trace_id"] == "0123456789abcdef0123456789abcdef"
+        assert result["span_id"] == "0123456789abcdef"
+
+    def test_keeps_existing_trace_fields(self) -> None:
+        """Processor should not overwrite explicitly bound trace identifiers."""
+        from bioetl.infrastructure.observability.logging_config import (
+            trace_context_processor,
+        )
+
+        with patch(
+            "bioetl.infrastructure.observability.logging_config._get_current_trace_identifiers",
+            return_value=("00000000000000000000000000000001", "0000000000000002"),
+        ):
+            result = trace_context_processor(
+                None,
+                "info",
+                {
+                    "event": "pipeline-started",
+                    "trace_id": "bound-trace",
+                    "span_id": "bound-span",
+                },
+            )
+
+        assert result["trace_id"] == "bound-trace"
+        assert result["span_id"] == "bound-span"
+
+
+@pytest.mark.unit
 class TestMaskSecrets:
     """Tests for _mask_secrets helper function."""
 
@@ -315,6 +384,7 @@ class TestModuleExports:
             "is_logging_configured",
             "reset_logging_config",
             "secret_filter_processor",
+            "trace_context_processor",
         ]
         for name in expected:
             assert name in logging_config.__all__
@@ -326,9 +396,11 @@ class TestModuleExports:
             is_logging_configured,
             reset_logging_config,
             secret_filter_processor,
+            trace_context_processor,
         )
 
         assert callable(configure_logging)
         assert callable(is_logging_configured)
         assert callable(reset_logging_config)
         assert callable(secret_filter_processor)
+        assert callable(trace_context_processor)

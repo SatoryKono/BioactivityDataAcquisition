@@ -116,8 +116,7 @@ class RunLedgerEntry:
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable ledger payload."""
         return {
-            key: _normalize_ledger_value(value)
-            for key, value in asdict(self).items()
+            key: _normalize_ledger_value(value) for key, value in asdict(self).items()
         }
 
     @classmethod

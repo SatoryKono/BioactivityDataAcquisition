@@ -34,6 +34,10 @@ python src/tools/generate_docs_export.py --rewrite-manifest
 - Regenerates `docs/exports/full-documentation-no-plans-reports-skills.merged.md`
 - Reports removed historical entries that are intentionally skipped
 
+**Repository policy:**
+- The merged export is a generated convenience artifact, not a normative source.
+- It may be generated on demand and is not required to stay committed in git.
+
 ### file_merger.py
 
 A versatile file merging and project analysis tool with multiple operation modes.

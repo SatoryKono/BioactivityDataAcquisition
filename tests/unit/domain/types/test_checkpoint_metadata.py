@@ -229,7 +229,10 @@ class TestCheckpointMetadataSerialization:
         # Should be equal
         assert original == deserialized
         assert original.records_processed == deserialized.records_processed
-        assert original.dq_contract_compatibility_hash == deserialized.dq_contract_compatibility_hash
+        assert (
+            original.dq_contract_compatibility_hash
+            == deserialized.dq_contract_compatibility_hash
+        )
         assert original.dq_policy_hash == deserialized.dq_policy_hash
         assert original.dq_rule_bundle_version == deserialized.dq_rule_bundle_version
         assert original.pipeline_version == deserialized.pipeline_version

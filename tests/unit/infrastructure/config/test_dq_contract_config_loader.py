@@ -8,7 +8,9 @@ import pytest
 import yaml
 
 from bioetl.domain.types.dq_contracts import DQDisposition
-from bioetl.infrastructure.config.dq_contract_config_loader import DQContractConfigLoader
+from bioetl.infrastructure.config.dq_contract_config_loader import (
+    DQContractConfigLoader,
+)
 
 
 def _write_yaml(path: Path, payload: dict[str, object]) -> None:

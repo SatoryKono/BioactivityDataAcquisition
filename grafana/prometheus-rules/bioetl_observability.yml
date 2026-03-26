@@ -54,3 +54,86 @@ groups:
           summary: "ChEMBL retries exhausted"
           description: "bioetl_data_source_retry_exhausted_total increased for provider=chembl in last 15m."
 
+  - name: bioetl_control_plane_traceability_observability
+    rules:
+      - alert: BioETLControlPlaneManifestWriteFailed
+        expr: sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total{status="failed"}[15m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Run manifest persistence failures detected"
+          description: "bioetl_control_plane_manifest_writes_total increased with status=failed for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/run-manifest-inspection.md"
+
+      - alert: BioETLRunLedgerAppendFailed
+        expr: sum by (pipeline, event_type) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[15m])) > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Run ledger append failures detected"
+          description: "bioetl_control_plane_ledger_appends_total increased with status=failed for pipeline={{ $labels.pipeline }} event_type={{ $labels.event_type }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/run-manifest-inspection.md"
+
+      - alert: BioETLCheckpointCompatibilityBlocked
+        expr: sum by (pipeline) (increase(bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}[30m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Checkpoint compatibility blocked or degraded resume"
+          description: "bioetl_checkpoint_compatibility_events_total recorded incompatible resume decisions for pipeline={{ $labels.pipeline }} in the last 30m."
+          runbook: "docs/05-operations/runbooks/checkpoint-debugging.md"
+
+      - alert: BioETLLineageFragmentPersistenceFailed
+        expr: sum by (pipeline, layer) (increase(bioetl_lineage_fragments_emitted_total{status="failed"}[15m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Lineage fragment persistence failures detected"
+          description: "bioetl_lineage_fragments_emitted_total increased with status=failed for pipeline={{ $labels.pipeline }} layer={{ $labels.layer }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/traceability-signal-ownership.md"
+
+      - alert: BioETLLineageRefsMissing
+        expr: sum by (pipeline, layer, ref_type) (increase(bioetl_lineage_refs_missing_total[15m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Missing upstream lineage references detected"
+          description: "bioetl_lineage_refs_missing_total increased for pipeline={{ $labels.pipeline }} layer={{ $labels.layer }} ref_type={{ $labels.ref_type }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/traceability-signal-ownership.md"
+
+      - alert: BioETLControlPlaneManifestWriteFailureRateHigh
+        expr: (sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total{status="failed"}[30m])) / clamp_min(sum by (pipeline, run_type) (increase(bioetl_control_plane_manifest_writes_total[30m])), 1)) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Manifest write failure ratio is elevated"
+          description: "Manifest write failure ratio exceeded 10% for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} in the last 30m."
+          runbook: "docs/05-operations/runbooks/run-manifest-inspection.md"
+
+      - alert: BioETLRunLedgerAppendFailureRateHigh
+        expr: (sum by (pipeline, event_type) (increase(bioetl_control_plane_ledger_appends_total{status="failed"}[30m])) / clamp_min(sum by (pipeline, event_type) (increase(bioetl_control_plane_ledger_appends_total[30m])), 1)) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Run-ledger append failure ratio is elevated"
+          description: "Run-ledger append failure ratio exceeded 10% for pipeline={{ $labels.pipeline }} event_type={{ $labels.event_type }} in the last 30m."
+          runbook: "docs/05-operations/runbooks/run-manifest-inspection.md"
+
+  - name: bioetl_provider_health_observability
+    rules:
+      - alert: BioETLProviderFailureRateHigh
+        expr: (sum by (provider) (increase(bioetl_health_check_failures_total[15m])) / clamp_min(sum by (provider) (increase(bioetl_health_check_success_total[15m]) + increase(bioetl_health_check_failures_total[15m])), 1)) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Provider health-check failure ratio is elevated"
+          description: "Health-check failure ratio exceeded 20% for provider={{ $labels.provider }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/incident-response.md"

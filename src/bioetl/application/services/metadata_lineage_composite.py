@@ -121,7 +121,7 @@ def _build_composite_source_nodes_and_edges(
                     "enrichment_status": enrichment_status.get(provider),
                 },
             )
-    )
+        )
     return nodes, edges
 
 

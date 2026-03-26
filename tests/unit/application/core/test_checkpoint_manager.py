@@ -142,7 +142,9 @@ class TestCheckpointManagerSaveCheckpoint:
         self, checkpoint_manager, mock_checkpoint_port
     ):
         """Test save_checkpoint saves metadata correctly."""
-        await checkpoint_manager.save_checkpoint(CheckpointMetadata(records_processed=500))
+        await checkpoint_manager.save_checkpoint(
+            CheckpointMetadata(records_processed=500)
+        )
 
         mock_checkpoint_port.save.assert_called_once()
         call_kwargs = mock_checkpoint_port.save.call_args.kwargs

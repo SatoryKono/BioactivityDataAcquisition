@@ -24,9 +24,9 @@ class TestContractIdentity:
             compatibility_level=CompatibilityLevel.MAJOR,
             schema_hash="a" * 64,  # Valid SHA256 hash
             dq_policy_ref="chembl.dq.v1",
-            rule_bundle_version="dq-rules.v1"
+            rule_bundle_version="dq-rules.v1",
         )
-        
+
         assert identity.contract_ref == "chembl.molecule.v1"
         assert identity.contract_version == "1.0.0"
         assert identity.compatibility_level == CompatibilityLevel.MAJOR
@@ -40,7 +40,7 @@ class TestContractIdentity:
             contract_ref="chembl.molecule.v1",
             contract_version="1.0.0",
             compatibility_level=CompatibilityLevel.PATCH,
-            schema_hash="a" * 64
+            schema_hash="a" * 64,
         )
         assert valid_identity.validate() == []
 
@@ -49,7 +49,7 @@ class TestContractIdentity:
             contract_ref="invalid_ref",
             contract_version="1.0.0",
             compatibility_level=CompatibilityLevel.PATCH,
-            schema_hash="a" * 64
+            schema_hash="a" * 64,
         )
         assert "Invalid contract_ref format" in invalid_ref.validate()[0]
 
@@ -58,7 +58,7 @@ class TestContractIdentity:
             contract_ref="chembl.molecule.v1",
             contract_version="1.0",  # Missing patch version
             compatibility_level=CompatibilityLevel.PATCH,
-            schema_hash="a" * 64
+            schema_hash="a" * 64,
         )
         assert "Invalid version format" in invalid_version.validate()[0]
 
@@ -67,14 +67,14 @@ class TestContractIdentity:
             contract_ref="chembl.molecule.v1",
             contract_version="1.0.0",
             compatibility_level=CompatibilityLevel.PATCH,
-            schema_hash="invalid"  # Too short
+            schema_hash="invalid",  # Too short
         )
         assert "Invalid schema_hash format" in invalid_hash.validate()[0]
 
     def test_legacy_migration(self):
         """Test migration from legacy contract references."""
         legacy_identity = ContractIdentity.from_legacy("chembl_molecule", "1.0")
-        
+
         assert legacy_identity.contract_ref == "chembl_molecule.v1.0.0"
         assert legacy_identity.contract_version == "1.0.0"
         assert legacy_identity.compatibility_level == CompatibilityLevel.PATCH
@@ -88,11 +88,11 @@ class TestContractIdentity:
             compatibility_level=CompatibilityLevel.MINOR,
             schema_hash="a" * 64,
             dq_policy_ref="chembl.dq.v1",
-            rule_bundle_version="dq-rules.v1"
+            rule_bundle_version="dq-rules.v1",
         )
-        
+
         metadata = identity.to_runtime_metadata()
-        
+
         assert metadata["contract_ref"] == "chembl.molecule.v1"
         assert metadata["contract_version"] == "1.0.0"
         assert metadata["compatibility_level"] == "minor"
@@ -109,9 +109,9 @@ class TestContractProvenance:
             source_file="src/schemas/chembl/molecule.v1.yaml",
             generated_by="schema-generator.v1",
             generation_time=datetime.utcnow().isoformat(),
-            source_commit="abc123def"
+            source_commit="abc123def",
         )
-        
+
         assert provenance.source_file == "src/schemas/chembl/molecule.v1.yaml"
         assert provenance.generated_by == "schema-generator.v1"
         assert provenance.source_commit == "abc123def"
@@ -127,9 +127,9 @@ class TestDQContractCompatibility:
             rule_bundle_version="dq-rules.v1",
             compatibility_hash="compat_hash_123",
             contract_ref="chembl.molecule.v1",
-            contract_version="1.0.0"
+            contract_version="1.0.0",
         )
-        
+
         assert dq_compat.policy_ref == "chembl.dq.v1"
         assert dq_compat.contract_ref == "chembl.molecule.v1"
 
@@ -141,16 +141,16 @@ class TestDQContractCompatibility:
             compatibility_level=CompatibilityLevel.PATCH,
             schema_hash="a" * 64,
             dq_policy_ref="chembl.dq.v1",
-            rule_bundle_version="dq-rules.v1"
+            rule_bundle_version="dq-rules.v1",
         )
-        
+
         # Aligned DQ compatibility
         aligned_dq = DQContractCompatibility(
             policy_ref="chembl.dq.v1",
             rule_bundle_version="dq-rules.v1",
             compatibility_hash="hash123",
             contract_ref="chembl.molecule.v1",
-            contract_version="1.0.0"
+            contract_version="1.0.0",
         )
         assert aligned_dq.validate_alignment(identity) is True
 
@@ -160,7 +160,7 @@ class TestDQContractCompatibility:
             rule_bundle_version="dq-rules.v1",
             compatibility_hash="hash123",
             contract_ref="chembl.molecule.v1",
-            contract_version="1.0.0"
+            contract_version="1.0.0",
         )
         assert misaligned_dq.validate_alignment(identity) is False
 
@@ -201,7 +201,7 @@ class TestPipelineRunContextIntegration:
             compatibility_level=CompatibilityLevel.PATCH,
             schema_hash="a" * 64,
             dq_policy_ref="chembl.dq.v1",
-            rule_bundle_version="dq-rules.v1"
+            rule_bundle_version="dq-rules.v1",
         )
 
         dq_compat = DQContractCompatibility(
@@ -209,7 +209,7 @@ class TestPipelineRunContextIntegration:
             rule_bundle_version="dq-rules.v1",
             compatibility_hash="hash123",
             contract_ref="chembl.molecule.v1",
-            contract_version="1.0.0"
+            contract_version="1.0.0",
         )
 
         context = PipelineRunContext(
@@ -217,7 +217,7 @@ class TestPipelineRunContextIntegration:
             run_id=RunID("test-run-123"),
             run_type="incremental",
             contract_identity=identity,
-            dq_contract_compatibility=dq_compat
+            dq_contract_compatibility=dq_compat,
         )
 
         # Test contract consistency validation
@@ -235,7 +235,7 @@ class TestPipelineRunContextIntegration:
             compatibility_level=CompatibilityLevel.PATCH,
             schema_hash="a" * 64,
             dq_policy_ref="chembl.dq.v1",  # Different from DQ compat below
-            rule_bundle_version="dq-rules.v1"
+            rule_bundle_version="dq-rules.v1",
         )
 
         dq_compat = DQContractCompatibility(
@@ -243,7 +243,7 @@ class TestPipelineRunContextIntegration:
             rule_bundle_version="dq-rules.v1",
             compatibility_hash="hash123",
             contract_ref="chembl.molecule.v1",
-            contract_version="1.0.0"
+            contract_version="1.0.0",
         )
 
         context = PipelineRunContext(
@@ -251,7 +251,7 @@ class TestPipelineRunContextIntegration:
             run_id=RunID("test-run-123"),
             run_type="incremental",
             contract_identity=identity,
-            dq_contract_compatibility=dq_compat
+            dq_contract_compatibility=dq_compat,
         )
 
         # Should detect DQ policy mismatch

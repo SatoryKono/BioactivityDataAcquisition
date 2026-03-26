@@ -5,8 +5,14 @@ from __future__ import annotations
 from prometheus_client import Counter, Histogram
 
 __all__ = [
+    "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
+    "COMPOSITE_SOURCE_SELECTION_TOTAL",
+    "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
+    "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",
     "DQ_SOFT_THRESHOLD_EXCEEDED",
     "FILTER_COMBINATIONS_LOADED_TOTAL",
+    "LINEAGE_FRAGMENTS_EMITTED_TOTAL",
+    "LINEAGE_REFS_MISSING_TOTAL",
     "OBSERVABILITY_EVENTS_TOTAL",
     "PHASE_DURATION_SECONDS",
     "PIPELINE_RUNS_TOTAL",
@@ -77,4 +83,40 @@ FILTER_COMBINATIONS_LOADED_TOTAL = Counter(
     "bioetl_filter_combinations_loaded_total",
     "Total filter combinations loaded from multi-filter source",
     ["pipeline", "source_file"],
+)
+
+CONTROL_PLANE_MANIFEST_WRITES_TOTAL = Counter(
+    "bioetl_control_plane_manifest_writes_total",
+    "Total immutable run-manifest persistence attempts",
+    ["pipeline", "run_type", "status"],
+)
+
+CONTROL_PLANE_LEDGER_APPENDS_TOTAL = Counter(
+    "bioetl_control_plane_ledger_appends_total",
+    "Total append attempts for run-ledger entries",
+    ["pipeline", "event_type", "status"],
+)
+
+CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL = Counter(
+    "bioetl_checkpoint_compatibility_events_total",
+    "Total checkpoint compatibility outcomes observed during resume validation",
+    ["pipeline", "disposition"],
+)
+
+LINEAGE_FRAGMENTS_EMITTED_TOTAL = Counter(
+    "bioetl_lineage_fragments_emitted_total",
+    "Total lineage fragment persistence attempts by pipeline and layer",
+    ["pipeline", "layer", "status"],
+)
+
+LINEAGE_REFS_MISSING_TOTAL = Counter(
+    "bioetl_lineage_refs_missing_total",
+    "Total writes that detected missing upstream lineage references",
+    ["pipeline", "layer", "ref_type"],
+)
+
+COMPOSITE_SOURCE_SELECTION_TOTAL = Counter(
+    "bioetl_composite_source_selection_total",
+    "Total low-cardinality composite source-selection decisions recorded at persistence time",
+    ["pipeline", "decision_type", "selected_source"],
 )

@@ -319,6 +319,66 @@
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 2,
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 11
+      },
+      "id": 104,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])) / clamp_min(sum(increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]) + increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m])), 1)",
+          "legendFormat": "failure_rate",
+          "refId": "A"
+        }
+      ],
+      "title": "Provider Failure Rate (15m)",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "decimals": 0,
           "thresholds": {
             "mode": "absolute",
@@ -533,5 +593,5 @@
   "timezone": "",
   "title": "BioETL Provider Health v2",
   "uid": "bioetl-provider-health-v2",
-  "version": 4
+  "version": 5
 }

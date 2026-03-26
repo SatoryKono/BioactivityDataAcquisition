@@ -107,8 +107,7 @@ class DQResult:
     def has_rule_violations(self) -> bool:
         """Check if any rules resulted in violations (non-PASS dispositions)."""
         return any(
-            outcome.disposition != DQDisposition.PASS
-            for outcome in self.rule_outcomes
+            outcome.disposition != DQDisposition.PASS for outcome in self.rule_outcomes
         )
 
     @property
@@ -123,22 +122,21 @@ class DQResult:
     def has_fail_decisions(self) -> bool:
         """Check if any rules resulted in fail decisions."""
         return any(
-            outcome.disposition == DQDisposition.FAIL
-            for outcome in self.rule_outcomes
+            outcome.disposition == DQDisposition.FAIL for outcome in self.rule_outcomes
         )
 
-    def get_outcomes_by_violation_kind(self, kind: DQViolationKind) -> list[DQRuleOutcome]:
+    def get_outcomes_by_violation_kind(
+        self, kind: DQViolationKind
+    ) -> list[DQRuleOutcome]:
         """Get rule outcomes filtered by violation kind."""
         return [
-            outcome for outcome in self.rule_outcomes
-            if outcome.violation_kind == kind
+            outcome for outcome in self.rule_outcomes if outcome.violation_kind == kind
         ]
 
     def get_outcomes_by_severity(self, severity: str) -> list[DQRuleOutcome]:
         """Get rule outcomes filtered by severity."""
         return [
-            outcome for outcome in self.rule_outcomes
-            if outcome.severity == severity
+            outcome for outcome in self.rule_outcomes if outcome.severity == severity
         ]
 
 

@@ -55,7 +55,7 @@ class TestDQPolicyRef:
             rule_bundle_version="2.1.0",
             policy_hash="abc123",
         )
-        
+
         assert policy_ref.contract_ref == "chembl_molecule"
         assert policy_ref.contract_version == "1.2.0"
         assert policy_ref.rule_bundle_version == "2.1.0"
@@ -65,17 +65,17 @@ class TestDQPolicyRef:
         """Test validation of required fields."""
         with pytest.raises(ValueError, match="contract_ref cannot be empty"):
             DQPolicyRef("", "1.0.0", "1.0.0")
-        
+
         with pytest.raises(ValueError, match="contract_version cannot be empty"):
             DQPolicyRef("test", "", "1.0.0")
-        
+
         with pytest.raises(ValueError, match="rule_bundle_version cannot be empty"):
             DQPolicyRef("test", "1.0.0", "")
 
     def test_policy_ref_immutability(self):
         """Test that policy ref is immutable."""
         policy_ref = DQPolicyRef("test", "1.0.0", "1.0.0")
-        
+
         with pytest.raises(Exception):  # frozen dataclass should prevent modification
             policy_ref.contract_ref = "new_value"  # type: ignore
 
@@ -94,7 +94,7 @@ class TestDQRuleOutcome:
             affected_fields=["id"],
             config_path="configs/quality/chembl.yaml",
         )
-        
+
         assert outcome.rule_id == "schema.not_null"
         assert outcome.violation_kind == DQViolationKind.SCHEMA_VIOLATION
         assert outcome.severity == "high"
@@ -106,21 +106,29 @@ class TestDQRuleOutcome:
     def test_rule_outcome_validation(self):
         """Test validation of required fields."""
         with pytest.raises(ValueError, match="rule_id cannot be empty"):
-            DQRuleOutcome("", DQViolationKind.SCHEMA_VIOLATION, "high", DQDisposition.FAIL)
-        
+            DQRuleOutcome(
+                "", DQViolationKind.SCHEMA_VIOLATION, "high", DQDisposition.FAIL
+            )
+
         with pytest.raises(ValueError, match="severity cannot be empty"):
-            DQRuleOutcome("test", DQViolationKind.SCHEMA_VIOLATION, "", DQDisposition.FAIL)
+            DQRuleOutcome(
+                "test", DQViolationKind.SCHEMA_VIOLATION, "", DQDisposition.FAIL
+            )
 
     def test_rule_outcome_immutability(self):
         """Test that rule outcome is immutable."""
-        outcome = DQRuleOutcome("test", DQViolationKind.SCHEMA_VIOLATION, "high", DQDisposition.FAIL)
-        
+        outcome = DQRuleOutcome(
+            "test", DQViolationKind.SCHEMA_VIOLATION, "high", DQDisposition.FAIL
+        )
+
         with pytest.raises(Exception):  # frozen dataclass should prevent modification
             outcome.rule_id = "new_value"  # type: ignore
 
     def test_affected_fields_default(self):
         """Test that affected_fields defaults to empty list."""
-        outcome = DQRuleOutcome("test", DQViolationKind.SCHEMA_VIOLATION, "high", DQDisposition.FAIL)
+        outcome = DQRuleOutcome(
+            "test", DQViolationKind.SCHEMA_VIOLATION, "high", DQDisposition.FAIL
+        )
         assert outcome.affected_fields == []
 
 
@@ -138,7 +146,7 @@ class TestDQRuleProvenance:
             report_artifact_path="/reports/dq_report_20230101.json",
             policy_hash="abc123",
         )
-        
+
         assert provenance.rule_id == "schema.not_null"
         assert provenance.contract_version == "1.2.0"
         assert provenance.severity == "high"
@@ -151,17 +159,17 @@ class TestDQRuleProvenance:
         """Test validation of required fields."""
         with pytest.raises(ValueError, match="rule_id cannot be empty"):
             DQRuleProvenance("", "1.0.0", "high", DQDisposition.FAIL)
-        
+
         with pytest.raises(ValueError, match="contract_version cannot be empty"):
             DQRuleProvenance("test", "", "high", DQDisposition.FAIL)
-        
+
         with pytest.raises(ValueError, match="severity cannot be empty"):
             DQRuleProvenance("test", "1.0.0", "", DQDisposition.FAIL)
 
     def test_provenance_immutability(self):
         """Test that provenance is immutable."""
         provenance = DQRuleProvenance("test", "1.0.0", "high", DQDisposition.FAIL)
-        
+
         with pytest.raises(Exception):  # frozen dataclass should prevent modification
             provenance.rule_id = "new_value"  # type: ignore
 
@@ -179,20 +187,18 @@ class TestProvenanceCreation:
             affected_fields=["email"],
             config_path="configs/quality/common.yaml",
         )
-        
+
         policy_ref = DQPolicyRef(
             contract_ref="pubmed_article",
             contract_version="2.0.0",
             rule_bundle_version="1.5.0",
             policy_hash="def456",
         )
-        
+
         provenance = create_provenance_from_outcome(
-            outcome,
-            policy_ref,
-            report_path="/reports/pubmed_dq_20230101.json"
+            outcome, policy_ref, report_path="/reports/pubmed_dq_20230101.json"
         )
-        
+
         assert provenance.rule_id == "threshold.completeness"
         assert provenance.contract_version == "2.0.0"
         assert provenance.severity == "medium"
@@ -209,9 +215,9 @@ class TestSerialization:
         """Test that policy ref can be serialized/deserialized."""
         import json
         from dataclasses import asdict
-        
+
         policy_ref = DQPolicyRef("test", "1.0.0", "1.0.0", "abc123")
-        
+
         # Convert to dict
         policy_dict = asdict(policy_ref)
         assert policy_dict == {
@@ -220,7 +226,7 @@ class TestSerialization:
             "rule_bundle_version": "1.0.0",
             "policy_hash": "abc123",
         }
-        
+
         # Convert to JSON
         json_str = json.dumps(policy_dict)
         assert "test" in json_str
@@ -229,7 +235,7 @@ class TestSerialization:
     def test_rule_outcome_serialization(self):
         """Test that rule outcome can be serialized."""
         from dataclasses import asdict
-        
+
         outcome = DQRuleOutcome(
             rule_id="test",
             violation_kind=DQViolationKind.SCHEMA_VIOLATION,
@@ -237,7 +243,7 @@ class TestSerialization:
             disposition=DQDisposition.FAIL,
             affected_fields=["field1"],
         )
-        
+
         outcome_dict = asdict(outcome)
         assert outcome_dict["rule_id"] == "test"
         assert outcome_dict["violation_kind"] == "schema_violation"

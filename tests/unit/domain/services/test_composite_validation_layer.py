@@ -6,7 +6,11 @@ from bioetl.domain.services.composite_validation_layer import (
     create_composite_validation_service,
 )
 from bioetl.domain.types.validation_result import CompositeValidationReport
-from bioetl.domain.types.validation_severity import IssueCode, ValidationLayer, ValidationSeverity
+from bioetl.domain.types.validation_severity import (
+    IssueCode,
+    ValidationLayer,
+    ValidationSeverity,
+)
 
 
 def test_composite_validation_service_creation():
@@ -48,9 +52,9 @@ def test_valid_composite_config():
             },
         },
     )
-    
+
     result = service.validate_composite(config)
-    
+
     assert isinstance(result, CompositeValidationReport)
     assert not result.has_any_blockers()
     assert len(result.get_all_issues()) == 0
@@ -66,16 +70,16 @@ def test_missing_required_fields():
             # Missing merge_strategy and output_schema
         },
     )
-    
+
     result = service.validate_composite(config)
-    
+
     assert result.has_any_blockers()
     issues = result.get_all_blockers()
     assert len(issues) == 2
-    
+
     issue_codes = [issue.code for issue in issues]
     assert IssueCode.CMP_STR_CONFIG_002 in issue_codes
-    
+
     # Check that issues are in structural layer
     for issue in issues:
         assert issue.layer == ValidationLayer.STRUCTURAL
@@ -97,17 +101,19 @@ def test_invalid_aggregation_config():
             },
         },
     )
-    
+
     result = service.validate_composite(config)
-    
+
     assert result.has_any_blockers()
     issues = result.get_all_blockers()
-    assert len(issues) == 2  # Both missing aggregations and missing group_by field in schema
-    
+    assert (
+        len(issues) == 2
+    )  # Both missing aggregations and missing group_by field in schema
+
     issue_codes = {issue.code for issue in issues}
     assert IssueCode.CMP_PF_AGG_002 in issue_codes  # Group_by field not found in schema
     assert IssueCode.CMP_PF_AGG_003 in issue_codes  # Missing aggregations
-    
+
     for issue in issues:
         assert issue.layer == ValidationLayer.DEEP_PREFLIGHT
 
@@ -127,9 +133,9 @@ def test_invalid_cross_validation_config():
             },
         },
     )
-    
+
     result = service.validate_composite(config)
-    
+
     assert result.has_any_blockers()
     issues = result.get_all_blockers()
     assert len(issues) == 1
@@ -150,9 +156,9 @@ def test_conflicting_field_priorities():
             "field_priorities": "invalid_string",  # Not a dict
         },
     )
-    
+
     result = service.validate_composite(config)
-    
+
     assert not result.has_any_blockers()  # Invalid structure is warning, not blocker
     warnings = result.deep_preflight_result.get_warnings()
     assert len(warnings) == 1
@@ -175,9 +181,9 @@ def test_invalid_lineage_config():
             },
         },
     )
-    
+
     result = service.validate_composite(config)
-    
+
     assert result.has_any_blockers()
     issues = result.get_all_blockers()
     assert len(issues) == 1
@@ -195,15 +201,15 @@ def test_ci_format_output():
             # Missing required fields to trigger issues
         },
     )
-    
+
     result = service.validate_composite(config)
     ci_format = result.to_ci_format()
-    
+
     assert "validation_layers" in ci_format
     assert "structural" in ci_format["validation_layers"]
     assert "deep_preflight" in ci_format["validation_layers"]
     assert "summary" in ci_format
-    
+
     summary = ci_format["summary"]
     assert summary["total_issues"] > 0
     assert summary["total_blockers"] > 0
@@ -217,12 +223,14 @@ def test_layer_separation():
         pipeline_name="test_pipeline",
         composite_config={
             "sources": ["source1"],  # Missing required fields (structural)
-            "aggregation": {"group_by": ["field"]},  # Missing aggregations (deep preflight)
+            "aggregation": {
+                "group_by": ["field"]
+            },  # Missing aggregations (deep preflight)
         },
     )
-    
+
     result = service.validate_composite(config)
-    
+
     # Structural layer should have issues
     structural_issues = result.structural_result.issues
     assert len(structural_issues) > 0
@@ -242,7 +250,7 @@ def test_layer_separation():
 def test_preflight_governance_integration():
     """Test that preflight governance is properly integrated."""
     from bioetl.domain.services.preflight_governance import GovernancePolicy
-    
+
     # Test with default governance policy
     service = CompositeValidationService()
     config = CompositeValidationConfig(
@@ -254,17 +262,17 @@ def test_preflight_governance_integration():
         governance_policy=GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY,
     )
     result = service.validate_composite(config)
-    
+
     # Verify that execution_decision is present
     assert result.execution_decision is not None
     assert "governance_metadata" in result.execution_decision
     assert "execution_decision" in result.execution_decision
     assert "validation_summary" in result.execution_decision
-    
+
     # Check governance metadata
     governance_metadata = result.execution_decision["governance_metadata"]
     assert governance_metadata["policy"] == "block_on_blockers_only"
-    
+
     # Check execution decision
     execution_decision = result.execution_decision["execution_decision"]
     assert "execution_allowed" in execution_decision
@@ -275,7 +283,7 @@ def test_preflight_governance_integration():
 def test_preflight_governance_warning_only():
     """Test warning-only governance policy."""
     from bioetl.domain.services.preflight_governance import GovernancePolicy
-    
+
     service = CompositeValidationService()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
@@ -286,11 +294,11 @@ def test_preflight_governance_warning_only():
         governance_policy=GovernancePolicy.WARNING_ONLY,
     )
     result = service.validate_composite(config)
-    
+
     # Warning only should allow execution even with issues
     assert result.execution_decision is not None
     governance_metadata = result.execution_decision["governance_metadata"]
     assert governance_metadata["policy"] == "warning_only"
-    
+
     execution_decision = result.execution_decision["execution_decision"]
     assert execution_decision["execution_allowed"] is True

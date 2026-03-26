@@ -149,7 +149,9 @@ def test_build_checkpoint_manager_uses_control_plane_policy() -> None:
 def test_build_checkpoint_manager_supports_hard_fail_policy() -> None:
     pipeline = _make_pipeline()
     logger = MagicMock()
-    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = "hard_fail"
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = (
+        "hard_fail"
+    )
 
     with (
         patch(

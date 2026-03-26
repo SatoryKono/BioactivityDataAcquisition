@@ -139,6 +139,7 @@ nul
 .mkdocs-site-tmp/
 site/
 docs/site/
+docs/exports/*.merged.md
 tests.zip
 configs/pipelines.zip
 /all_fixtures.txt

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunManifestPort
@@ -12,26 +13,65 @@ from bioetl.domain.types import RunID
 
 __all__ = ["FileRunManifestStore"]
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import MetricsPort
+
+
+def _emit_manifest_write_metric(
+    metrics: MetricsPort | None,
+    *,
+    pipeline: str,
+    run_type: str,
+    status: str,
+) -> None:
+    """Emit one control-plane manifest write metric when metrics are enabled."""
+    if metrics is None:
+        return
+    metrics.increment_counter(
+        "control_plane_manifest_writes_total",
+        1,
+        {
+            "pipeline": pipeline,
+            "run_type": run_type,
+            "status": status,
+        },
+    )
+
 
 @dataclass(slots=True)
 class FileRunManifestStore(RunManifestPort):
     """Persist manifests as JSON files under the control-plane output tree."""
 
     base_path: Path
+    metrics: MetricsPort | None = None
 
     def save(self, manifest: RunManifest) -> None:
         """Persist manifest JSON and run-id index."""
         manifest_path = self.base_path / f"{manifest.manifest_id}.json"
         run_index_dir = self.base_path / "_by_run_id"
         run_index_path = run_index_dir / f"{manifest.run_id}.txt"
-
-        self.base_path.mkdir(parents=True, exist_ok=True)
-        run_index_dir.mkdir(parents=True, exist_ok=True)
-        manifest_path.write_text(
-            json.dumps(manifest.to_dict(), indent=2, sort_keys=True),
-            encoding="utf-8",
+        try:
+            self.base_path.mkdir(parents=True, exist_ok=True)
+            run_index_dir.mkdir(parents=True, exist_ok=True)
+            manifest_path.write_text(
+                json.dumps(manifest.to_dict(), indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+            run_index_path.write_text(manifest.manifest_id, encoding="utf-8")
+        except (OSError, TypeError, ValueError):
+            _emit_manifest_write_metric(
+                self.metrics,
+                pipeline=manifest.pipeline_name,
+                run_type=manifest.run_type.value,
+                status="failed",
+            )
+            raise
+        _emit_manifest_write_metric(
+            self.metrics,
+            pipeline=manifest.pipeline_name,
+            run_type=manifest.run_type.value,
+            status="success",
         )
-        run_index_path.write_text(manifest.manifest_id, encoding="utf-8")
 
     def get(self, manifest_id: str) -> RunManifest | None:
         """Load a manifest by identifier if present."""

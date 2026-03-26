@@ -49,7 +49,8 @@ class RegistryValidationResult:
     def has_warnings(self) -> bool:
         """Return True when at least one warning issue exists."""
         return any(
-            issue.severity == RegistryValidationSeverity.WARNING for issue in self.issues
+            issue.severity == RegistryValidationSeverity.WARNING
+            for issue in self.issues
         )
 
 

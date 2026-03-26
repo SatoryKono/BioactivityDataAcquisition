@@ -1,6 +1,6 @@
 # Run Manifest and Run Ledger Contract
 
-*Last verified: 2026-03-25*
+*Last verified: 2026-03-26*
 
 ## Purpose
 
@@ -62,9 +62,24 @@ provenance.
 | `launch_context` | `object` | yes | Launch options relevant to execution |
 | `runtime_config` | `object` | yes | Runtime-only settings snapshot |
 | `resolved_config` | `object` | yes | Effective resolved pipeline config |
-| `code_provenance` | `object` | yes | `pipeline_version`, `git_commit`, `config_hash` |
+| `code_provenance` | `object` | yes | See the full `RunCodeProvenance` field set below |
 | `source_refs` | `array` | no | Canonical input/source references |
 | `planned_artifacts` | `array` | no | Intended output locations by layer |
+
+### `RunCodeProvenance` field set
+
+`code_provenance` currently includes these optional anchors:
+
+- `pipeline_version`
+- `git_commit`
+- `config_hash`
+- `contract_ref`
+- `contract_version`
+- `contract_schema_hash`
+- `dq_policy_ref`
+- `rule_bundle_version`
+- `dq_contract_compatibility_hash`
+- `effective_config_artifact_id`
 
 ## Run Ledger Contract
 
@@ -77,16 +92,33 @@ provenance.
 | `run_id` | `uuid` | yes | Execution run identifier |
 | `event_type` | `str` | yes | Lifecycle event name |
 | `occurred_at` | `datetime` | yes | Event timestamp |
+| `event_family` | `str` | no | Stable event taxonomy (`diagnostic`, `pipeline.lifecycle`, `pipeline.phase`, `artifact`, `dq`, `lineage`, `checkpoint`, `composite`) |
 | `status` | `str` | no | Outcome/status snapshot |
 | `stage` | `str` | no | Stage identifier when applicable |
 | `message` | `str` | no | Human-readable event note |
 | `error_type` | `str` | no | Error class/category for failures |
+| `dataset_ref` | `str` | no | Dataset identity anchor for published artifacts |
+| `lineage_fragment_id` | `str` | no | Lineage fragment identity anchor |
 | `metrics_snapshot` | `object` | no | Numeric metrics captured at event time |
 | `details` | `object` | no | Additional structured payload |
 
+### `details._diagnostic` anchor contract
+
+When `details` is present, runtime enriches it with `_diagnostic` metadata.
+The anchor payload includes:
+
+- Stable envelope: `contract_version`, `event_type`, `event_family`,
+  `manifest_id`, `run_id`, `status`.
+- Runtime correlation anchors (when available): `pipeline`, `provider`, `entity`,
+  `run_type`, `effective_config_hash`, `contract_ref`, `data_contract_version`,
+  `dq_policy_ref`, `rule_bundle_version`, `dq_contract_compatibility_hash`,
+  `effective_config_artifact_id`, `composite_run_id`.
+- Event-specific linkage: `stage`, `dataset_ref`, `lineage_fragment_id`,
+  `error_type`.
+
 ## Current Event Set
 
-The current MVP ledger records these lifecycle and lineage events:
+The current baseline ledger records these events:
 
 - `manifest_created`
 - `run_started`
@@ -95,6 +127,15 @@ The current MVP ledger records these lifecycle and lineage events:
 - `run_finished`
 - `run_failed`
 - `run_shutdown`
+- `dq_policy_applied`
+
+Event taxonomy behavior:
+
+- `event_type` is normalized to lowercase.
+- `event_family` is auto-inferred when omitted.
+- Prefix-based families are supported (`dq_*`, `lineage_*`, `checkpoint_*`,
+  `composite_*`, `artifact_*`), and suffix-based phase events
+  (`*_started`, `*_completed`) map to `pipeline.phase`.
 
 ## Invariants
 

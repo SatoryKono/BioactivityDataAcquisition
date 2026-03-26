@@ -92,6 +92,7 @@ class CompositeFSM:
         self.config = config or ExecutionFSMConfig()
         self.current_phase = ExecutionPhase.NOT_STARTED
         self.transition_history: list[PhaseTransition] = []
+        self.transition_table: dict[ExecutionPhase, list[PhaseTransitionRule]] = {}
         self._setup_transition_table()
 
     def _setup_transition_table(self) -> None:
@@ -143,8 +144,7 @@ class CompositeFSM:
         # Find the transition rule
         valid_transitions = self.transition_table.get(self.current_phase, [])
         transition_rule = next(
-            (rule for rule in valid_transitions if rule.transition == transition),
-            None
+            (rule for rule in valid_transitions if rule.transition == transition), None
         )
 
         if not transition_rule:

@@ -522,11 +522,10 @@ sequenceDiagram
 
 ## Примеры использования
 
-### 1. Validation профиль (все уровни, CLI v2)
+### 1. Полный validation sweep через стандартный `run`
 
 ```bash
 bioetl run --pipeline pubmed_publication \
-  --run-type validation \
   --limit 500
 ```
 
@@ -534,6 +533,7 @@ bioetl run --pipeline pubmed_publication \
 - Активны все уровни, соответствующие конфигу pipeline
 - `-dq-warn=True` → запись попадает в карантин (поведение задаётся конфигом)
 - Используется стандартный логгер CLI (`logs/bioetl.log`)
+- В CLI нет отдельного `--run-type validation`; validation depth задаётся schema/pipeline config
 
 ---
 
@@ -541,7 +541,6 @@ bioetl run --pipeline pubmed_publication \
 
 ```bash
 bioetl run --pipeline chembl_publication \
-  --run-type validation \
   --limit 1000
 ```
 
@@ -556,7 +555,6 @@ bioetl run --pipeline chembl_publication \
 
 ```bash
 bioetl run --pipeline crossref_publication \
-  --run-type validation \
   --limit 200 \
   --dry-run
 ```

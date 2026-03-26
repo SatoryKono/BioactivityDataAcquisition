@@ -1,6 +1,6 @@
 # 99-Archive Index
 
-*Status: archive (non-nav) | Last updated: 2026-03-03*
+*Status: archive (non-nav) | Last updated: 2026-03-26*
 
 ----------------------------------------------------------------------
 
@@ -41,6 +41,8 @@ These documents are preserved for traceability and historical context.
 ### Root
 
 - [CONFIG-GUIDE.md](CONFIG-GUIDE.md)
+- [dq-system-contract-implementation-summary.md](dq-system-contract-implementation-summary.md) — historical implementation summary moved from repository root
+- [scripts-reorganization-phase1-plan.md](scripts-reorganization-phase1-plan.md) — historical planning artifact moved from repository root
 - `pyAuditBot.md` — historical path no longer retained as a published archive page
 - `refactoring-plan.md` — historical path no longer retained as a published archive page
 - `subagents_registry.md` — historical path no longer retained as a published archive page

@@ -48,23 +48,20 @@ class TestEffectiveConfigSerializer:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="resolved_hash"
+                config_type="standard", config_data={}, config_hash="resolved_hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="effective_hash"
+                config_data={}, effective_hash="effective_hash"
             ),
             resolved_config_hash="resolved_hash",
             effective_config_hash="effective_hash",
-            source_fingerprint="source_fingerprint"
+            source_fingerprint="source_fingerprint",
         )
-        
+
         # Serialize
         json_str = self.serializer.serialize_artifact(artifact)
-        
+
         # Verify it's valid JSON
         parsed = json.loads(json_str)
         assert parsed["artifact_id"] == "test_artifact"
@@ -78,16 +75,16 @@ class TestEffectiveConfigSerializer:
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
                 source_hash="base_hash",
-                priority=1
+                priority=1,
             ),
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/providers/chembl.yaml",
                 source_hash="provider_hash",
-                priority=2
-            )
+                priority=2,
+            ),
         ]
-        
+
         artifact = EffectiveConfigArtifact(
             artifact_id="test_artifact",
             pipeline_name="chembl_molecule",
@@ -97,26 +94,30 @@ class TestEffectiveConfigSerializer:
             resolved_config=ResolvedConfigSnapshot(
                 config_type="standard",
                 config_data={"pipeline": {"name": "chembl_molecule"}},
-                config_hash="resolved_hash"
+                config_hash="resolved_hash",
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={"pipeline": {"name": "chembl_molecule", "batch_size": 1000}},
-                effective_hash="effective_hash"
+                config_data={
+                    "pipeline": {"name": "chembl_molecule", "batch_size": 1000}
+                },
+                effective_hash="effective_hash",
             ),
             resolved_config_hash="resolved_hash",
             effective_config_hash="effective_hash",
-            source_fingerprint="source_fingerprint"
+            source_fingerprint="source_fingerprint",
         )
-        
+
         # Serialize
         json_str = self.serializer.serialize_artifact(artifact)
         parsed = json.loads(json_str)
-        
+
         # Verify source refs
         assert len(parsed["source_refs"]) == 2
         assert parsed["source_refs"][0]["source_path"] == "configs/base/pipeline.yaml"
-        assert parsed["source_refs"][1]["source_path"] == "configs/providers/chembl.yaml"
+        assert (
+            parsed["source_refs"][1]["source_path"] == "configs/providers/chembl.yaml"
+        )
 
     def test_serialize_artifact_with_dq_policies(self) -> None:
         """Test serialization with DQ policy integration."""
@@ -125,10 +126,10 @@ class TestEffectiveConfigSerializer:
                 contract_ref="chembl_molecule",
                 contract_version="1.0.0",
                 rule_bundle_version="1.0.0",
-                policy_hash="dq_hash_abc"
+                policy_hash="dq_hash_abc",
             )
         ]
-        
+
         dq_snapshots = [
             DQPolicySnapshot(
                 contract_ref="chembl_molecule",
@@ -138,12 +139,12 @@ class TestEffectiveConfigSerializer:
                 default_disposition=DQDisposition.WARN,
                 disposition_overrides={
                     "schema.molecule_id": DQDisposition.FAIL,
-                    "schema.assay_id": DQDisposition.QUARANTINE
+                    "schema.assay_id": DQDisposition.QUARANTINE,
                 },
-                strictness_mode="strict"
+                strictness_mode="strict",
             )
         ]
-        
+
         artifact = EffectiveConfigArtifact(
             artifact_id="test_artifact",
             pipeline_name="chembl_molecule",
@@ -151,30 +152,27 @@ class TestEffectiveConfigSerializer:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="resolved_hash"
+                config_type="standard", config_data={}, config_hash="resolved_hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="effective_hash"
+                config_data={}, effective_hash="effective_hash"
             ),
             resolved_config_hash="resolved_hash",
             effective_config_hash="effective_hash",
             source_fingerprint="source_fingerprint",
             dq_policy_refs=dq_policy_refs,
-            dq_policy_snapshots=dq_snapshots
+            dq_policy_snapshots=dq_snapshots,
         )
-        
+
         # Serialize
         json_str = self.serializer.serialize_artifact(artifact)
         parsed = json.loads(json_str)
-        
+
         # Verify DQ policy refs
         assert len(parsed["dq_policy_refs"]) == 1
         assert parsed["dq_policy_refs"][0]["contract_ref"] == "chembl_molecule"
-        
+
         # Verify DQ policy snapshots
         assert len(parsed["dq_policy_snapshots"]) == 1
         snapshot = parsed["dq_policy_snapshots"][0]
@@ -191,17 +189,17 @@ class TestEffectiveConfigSerializer:
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
                 source_hash="base_hash",
-                priority=1
+                priority=1,
             )
         ]
-        
+
         config_data: Dict[str, Any] = {
             "pipeline": {"name": "test"},
-            "settings": {"batch_size": 1000, "timeout": 30}
+            "settings": {"batch_size": 1000, "timeout": 30},
         }
-        
+
         fixed_timestamp = datetime(2023, 1, 1, 12, 0, 0)
-        
+
         artifact1 = EffectiveConfigArtifact(
             artifact_id="test_artifact",
             pipeline_name="test_pipeline",
@@ -212,20 +210,20 @@ class TestEffectiveConfigSerializer:
                 config_type="standard",
                 config_data=config_data,
                 config_hash="resolved_hash",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
                 config_data=config_data,
                 effective_hash="effective_hash",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             resolved_config_hash="resolved_hash",
             effective_config_hash="effective_hash",
             source_fingerprint="source_fingerprint",
-            created_at=fixed_timestamp
+            created_at=fixed_timestamp,
         )
-        
+
         artifact2 = EffectiveConfigArtifact(
             artifact_id="test_artifact",
             pipeline_name="test_pipeline",
@@ -236,24 +234,24 @@ class TestEffectiveConfigSerializer:
                 config_type="standard",
                 config_data=config_data,
                 config_hash="resolved_hash",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
                 config_data=config_data,
                 effective_hash="effective_hash",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             resolved_config_hash="resolved_hash",
             effective_config_hash="effective_hash",
             source_fingerprint="source_fingerprint",
-            created_at=fixed_timestamp
+            created_at=fixed_timestamp,
         )
-        
+
         # Serialize both
         json1 = self.serializer.serialize_artifact(artifact1)
         json2 = self.serializer.serialize_artifact(artifact2)
-        
+
         # Should be identical
         assert json1 == json2
 
@@ -264,10 +262,10 @@ class TestEffectiveConfigSerializer:
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
                 source_hash="base_hash",
-                priority=1
+                priority=1,
             )
         ]
-        
+
         artifact = EffectiveConfigArtifact(
             artifact_id="test_artifact",
             pipeline_name="test_pipeline",
@@ -277,28 +275,28 @@ class TestEffectiveConfigSerializer:
             resolved_config=ResolvedConfigSnapshot(
                 config_type="standard",
                 config_data={"pipeline": {"name": "test"}},
-                config_hash="resolved_hash"
+                config_hash="resolved_hash",
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
                 config_data={"pipeline": {"name": "test", "batch_size": 1000}},
-                effective_hash="effective_hash"
+                effective_hash="effective_hash",
             ),
             resolved_config_hash="resolved_hash",
             effective_config_hash="effective_hash",
-            source_fingerprint="source_fingerprint"
+            source_fingerprint="source_fingerprint",
         )
-        
+
         # Compute hashes
         hashes = self.serializer.compute_artifact_hashes(artifact)
-        
+
         # Verify hash structure
         assert isinstance(hashes, EffectiveConfigHashes)
         assert hashes.resolved_config_hash
         assert hashes.effective_config_hash
         assert hashes.source_fingerprint
         assert hashes.dq_contract_compatibility_hash
-        
+
         # Verify hash lengths (SHA256)
         assert len(hashes.resolved_config_hash) == 64
         assert len(hashes.effective_config_hash) == 64
@@ -314,49 +312,48 @@ class TestEffectiveConfigSerializer:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="hash"
+                config_type="standard", config_data={}, config_hash="hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="hash"
+                config_data={}, effective_hash="hash"
             ),
             resolved_config_hash="hash",
             effective_config_hash="hash",
-            source_fingerprint="fingerprint"
+            source_fingerprint="fingerprint",
         )
-        
-        dq_hash_no_policies = self.serializer._compute_dq_compatibility_hash(artifact_no_dq)
+
+        dq_hash_no_policies = self.serializer._compute_dq_compatibility_hash(
+            artifact_no_dq
+        )
         assert dq_hash_no_policies == "no_dq_policies"
-        
+
         # Test with DQ policies
         dq_policy_refs = [
             DQPolicyRef(
                 contract_ref="contract1",
                 contract_version="1.0.0",
                 rule_bundle_version="1.0.0",
-                policy_hash="hash1"
+                policy_hash="hash1",
             ),
             DQPolicyRef(
                 contract_ref="contract2",
                 contract_version="2.0.0",
                 rule_bundle_version="2.0.0",
-                policy_hash="hash2"
-            )
+                policy_hash="hash2",
+            ),
         ]
-        
+
         dq_snapshots = [
             DQPolicySnapshot(
                 contract_ref="contract1",
                 contract_version="1.0.0",
                 rule_bundle_version="1.0.0",
                 policy_hash="hash1",
-                default_disposition=DQDisposition.WARN
+                default_disposition=DQDisposition.WARN,
             )
         ]
-        
+
         artifact_with_dq = EffectiveConfigArtifact(
             artifact_id="test",
             pipeline_name="test",
@@ -364,23 +361,22 @@ class TestEffectiveConfigSerializer:
             source_refs=[],
             resolution_policy=ConfigResolutionPolicy(),
             resolved_config=ResolvedConfigSnapshot(
-                config_type="standard",
-                config_data={},
-                config_hash="hash"
+                config_type="standard", config_data={}, config_hash="hash"
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={},
-                effective_hash="hash"
+                config_data={}, effective_hash="hash"
             ),
             resolved_config_hash="hash",
             effective_config_hash="hash",
             source_fingerprint="fingerprint",
             dq_policy_refs=dq_policy_refs,
-            dq_policy_snapshots=dq_snapshots
+            dq_policy_snapshots=dq_snapshots,
         )
-        
-        dq_hash_with_policies = self.serializer._compute_dq_compatibility_hash(artifact_with_dq)
+
+        dq_hash_with_policies = self.serializer._compute_dq_compatibility_hash(
+            artifact_with_dq
+        )
         assert dq_hash_with_policies != "no_dq_policies"
         assert len(dq_hash_with_policies) == 64  # SHA256 hash
 
@@ -389,24 +385,26 @@ class TestEffectiveConfigSerializer:
         # Test with no sources
         fingerprint_no_sources = self.serializer._compute_source_fingerprint([])
         assert fingerprint_no_sources == "no_sources"
-        
+
         # Test with sources
         source_refs = [
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
                 source_hash="base_hash",
-                priority=1
+                priority=1,
             ),
             ConfigSourceRef(
                 source_type="file",
                 source_path="configs/providers/chembl.yaml",
                 source_hash="provider_hash",
-                priority=2
-            )
+                priority=2,
+            ),
         ]
-        
-        fingerprint_with_sources = self.serializer._compute_source_fingerprint(source_refs)
+
+        fingerprint_with_sources = self.serializer._compute_source_fingerprint(
+            source_refs
+        )
         assert fingerprint_with_sources != "no_sources"
         assert len(fingerprint_with_sources) == 64  # SHA256 hash
 
@@ -415,20 +413,20 @@ class TestEffectiveConfigSerializer:
         # Test with nested dicts and different key ordering
         config_data1 = {
             "settings": {"batch_size": 1000, "timeout": 30},
-            "pipeline": {"name": "test", "version": "1.0"}
+            "pipeline": {"name": "test", "version": "1.0"},
         }
-        
+
         config_data2 = {
             "pipeline": {"version": "1.0", "name": "test"},
-            "settings": {"timeout": 30, "batch_size": 1000}
+            "settings": {"timeout": 30, "batch_size": 1000},
         }
-        
+
         normalized1 = self.serializer._normalize_config_data(config_data1)
         normalized2 = self.serializer._normalize_config_data(config_data2)
-        
+
         # Should be identical after normalization
         assert normalized1 == normalized2
-        
+
         # Should have sorted keys
         keys = list(normalized1.keys())
         assert keys == sorted(keys)
@@ -438,14 +436,12 @@ class TestEffectiveConfigSerializer:
         config_data = {
             "dq_settings": {
                 "default_disposition": DQDisposition.WARN,
-                "overrides": {
-                    "schema.critical": DQDisposition.FAIL
-                }
+                "overrides": {"schema.critical": DQDisposition.FAIL},
             }
         }
-        
+
         normalized = self.serializer._normalize_config_data(config_data)
-        
+
         # Enums should be converted to their string values
         assert normalized["dq_settings"]["default_disposition"] == "warn"
         assert normalized["dq_settings"]["overrides"]["schema.critical"] == "fail"
@@ -458,22 +454,19 @@ class TestEffectiveConfigSerializer:
                 source_type="file",
                 source_path="configs/base/pipeline.yaml",
                 source_hash="base_hash",
-                priority=1
+                priority=1,
             )
         ]
-        
+
         config_data: Dict[str, Any] = {
             "pipeline": {"name": "test", "version": "1.0"},
             "settings": {
                 "batch_size": 1000,
                 "timeout": 30,
-                "retry_policy": {
-                    "max_attempts": 3,
-                    "backoff": "exponential"
-                }
-            }
+                "retry_policy": {"max_attempts": 3, "backoff": "exponential"},
+            },
         }
-        
+
         dq_snapshots = [
             DQPolicySnapshot(
                 contract_ref="test_contract",
@@ -483,45 +476,46 @@ class TestEffectiveConfigSerializer:
                 default_disposition=DQDisposition.WARN,
                 disposition_overrides={
                     "schema.required_field": DQDisposition.FAIL,
-                    "threshold.performance": DQDisposition.QUARANTINE
-                }
+                    "threshold.performance": DQDisposition.QUARANTINE,
+                },
             )
         ]
-        
+
         artifact = EffectiveConfigArtifact(
             artifact_id="test_artifact",
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
             source_refs=source_refs,
             resolution_policy=ConfigResolutionPolicy(
-                merge_strategy="hierarchical",
-                default_materialization=True
+                merge_strategy="hierarchical", default_materialization=True
             ),
             resolved_config=ResolvedConfigSnapshot(
                 config_type="standard",
                 config_data=config_data,
-                config_hash="resolved_hash"
+                config_hash="resolved_hash",
             ),
             runtime_overrides=RuntimeOverrideSnapshot(
-                cli_overrides={"batch_size": 2000},
-                override_hash="override_hash"
+                cli_overrides={"batch_size": 2000}, override_hash="override_hash"
             ),
             effective_execution_config=EffectiveExecutionConfig(
-                config_data={**config_data, "settings": {**config_data["settings"], "batch_size": 2000}},
-                effective_hash="effective_hash"
+                config_data={
+                    **config_data,
+                    "settings": {**config_data["settings"], "batch_size": 2000},
+                },
+                effective_hash="effective_hash",
             ),
             resolved_config_hash="resolved_hash",
             effective_config_hash="effective_hash",
             source_fingerprint="source_fingerprint",
-            dq_policy_snapshots=dq_snapshots
+            dq_policy_snapshots=dq_snapshots,
         )
-        
+
         # Serialize multiple times
         json_results = [self.serializer.serialize_artifact(artifact) for _ in range(3)]
-        
+
         # All should be identical
         assert len(set(json_results)) == 1
-        
+
         # Should be valid JSON
         parsed = json.loads(json_results[0])
         assert parsed["artifact_id"] == "test_artifact"
@@ -540,11 +534,11 @@ class TestHashDeterminism:
         # Create identical artifacts
         artifact1 = self._create_test_artifact("test1")
         artifact2 = self._create_test_artifact("test1")
-        
+
         # Compute hashes
         hashes1 = self.serializer.compute_artifact_hashes(artifact1)
         hashes2 = self.serializer.compute_artifact_hashes(artifact2)
-        
+
         # Should be identical
         assert hashes1.resolved_config_hash == hashes2.resolved_config_hash
         assert hashes1.effective_config_hash == hashes2.effective_config_hash
@@ -554,10 +548,10 @@ class TestHashDeterminism:
         """Test that different configs produce different hashes."""
         artifact1 = self._create_test_artifact("test1")
         artifact2 = self._create_test_artifact("test2")  # Different name
-        
+
         hashes1 = self.serializer.compute_artifact_hashes(artifact1)
         hashes2 = self.serializer.compute_artifact_hashes(artifact2)
-        
+
         # Should be different
         assert hashes1.effective_config_hash != hashes2.effective_config_hash
 
@@ -566,13 +560,13 @@ class TestHashDeterminism:
         # Create artifacts with same data but different field ordering
         config_data1 = {"a": 1, "b": {"x": 10, "y": 20}}
         config_data2 = {"b": {"y": 20, "x": 10}, "a": 1}
-        
+
         artifact1 = self._create_test_artifact_with_config("test", config_data1)
         artifact2 = self._create_test_artifact_with_config("test", config_data2)
-        
+
         hashes1 = self.serializer.compute_artifact_hashes(artifact1)
         hashes2 = self.serializer.compute_artifact_hashes(artifact2)
-        
+
         # Should produce same hashes despite different field ordering
         assert hashes1.resolved_config_hash == hashes2.resolved_config_hash
 
@@ -589,21 +583,23 @@ class TestHashDeterminism:
                 config_type="standard",
                 config_data={"pipeline": {"name": artifact_id}},
                 config_hash=f"resolved_{artifact_id}",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
                 config_data={"pipeline": {"name": artifact_id, "id": artifact_id}},
                 effective_hash=f"effective_{artifact_id}",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             resolved_config_hash=f"resolved_{artifact_id}",
             effective_config_hash=f"effective_{artifact_id}",
             source_fingerprint=f"source_{artifact_id}",
-            created_at=fixed_timestamp
+            created_at=fixed_timestamp,
         )
 
-    def _create_test_artifact_with_config(self, artifact_id: str, config_data: Dict[str, Any]) -> EffectiveConfigArtifact:
+    def _create_test_artifact_with_config(
+        self, artifact_id: str, config_data: Dict[str, Any]
+    ) -> EffectiveConfigArtifact:
         """Helper to create a test artifact with specific config data."""
         fixed_timestamp = datetime(2023, 1, 1, 12, 0, 0)
         return EffectiveConfigArtifact(
@@ -616,16 +612,16 @@ class TestHashDeterminism:
                 config_type="standard",
                 config_data=config_data,
                 config_hash=f"resolved_{artifact_id}",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             runtime_overrides=RuntimeOverrideSnapshot(),
             effective_execution_config=EffectiveExecutionConfig(
                 config_data=config_data,
                 effective_hash=f"effective_{artifact_id}",
-                timestamp=fixed_timestamp
+                timestamp=fixed_timestamp,
             ),
             resolved_config_hash=f"resolved_{artifact_id}",
             effective_config_hash=f"effective_{artifact_id}",
             source_fingerprint=f"source_{artifact_id}",
-            created_at=fixed_timestamp
+            created_at=fixed_timestamp,
         )

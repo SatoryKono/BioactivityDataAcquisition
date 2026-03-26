@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
@@ -215,6 +215,119 @@ class TestPersistGoldMetadataWrite:
         await _persist_gold_metadata_write(host, prepared)
 
         host._lineage_store.save.assert_called_once_with(fragment)
+
+    @pytest.mark.asyncio
+    async def test_emits_missing_silver_refs_metric_for_standard_write(self) -> None:
+        host = AsyncMock()
+        host._lineage_store = None
+        host._metrics = MagicMock()
+        metadata = MagicMock()
+
+        from bioetl.domain.medallion import GoldWriteMode
+
+        request = _GoldMetadataWriteRequest(
+            table_path="/tmp/gold/chembl_compound",
+            table_name="chembl_compound",
+            records=[{"id": 1}],
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=None,
+            run_id=None,
+            silver_refs=None,
+        )
+        prepared = _PreparedGoldMetadataWrite(
+            request=request,
+            provider_name="chembl",
+            entity_name="compound",
+            metadata=metadata,
+        )
+
+        await _persist_gold_metadata_write(host, prepared)
+
+        host._metrics.increment_counter.assert_called_once_with(
+            "lineage_refs_missing_total",
+            1,
+            {
+                "pipeline": "chembl_compound",
+                "layer": "gold",
+                "ref_type": "silver_dataset",
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_emits_composite_source_selection_metrics_for_merged_write(
+        self,
+    ) -> None:
+        host = AsyncMock()
+        host._lineage_store = None
+        host._metrics = MagicMock()
+        metadata = MagicMock()
+        request = _GoldMergedMetadataWriteRequest(
+            table_path="/tmp/gold/composite/publication",
+            table_name="composite.publication",
+            records=[
+                {
+                    "id": 1,
+                    "_source_providers": ["chembl", "pubchem"],
+                    "_field_sources": {"title": "chembl", "score": "pubchem"},
+                },
+                {
+                    "id": 2,
+                    "_source_providers": ["chembl"],
+                    "_field_sources": {"summary": "chembl"},
+                },
+            ],
+        )
+        prepared = _PreparedGoldMetadataWrite(
+            request=request,
+            provider_name="composite",
+            entity_name="publication",
+            metadata=metadata,
+        )
+
+        await _persist_gold_metadata_write(host, prepared)
+
+        host._metrics.increment_counter.assert_has_calls(
+            [
+                call(
+                    "composite_source_selection_total",
+                    1,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "gold_source_included",
+                        "selected_source": "chembl",
+                    },
+                ),
+                call(
+                    "composite_source_selection_total",
+                    1,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "gold_source_included",
+                        "selected_source": "pubchem",
+                    },
+                ),
+                call(
+                    "composite_source_selection_total",
+                    2,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "gold_field_selected",
+                        "selected_source": "chembl",
+                    },
+                ),
+                call(
+                    "composite_source_selection_total",
+                    1,
+                    {
+                        "pipeline": "composite_publication",
+                        "decision_type": "gold_field_selected",
+                        "selected_source": "pubchem",
+                    },
+                ),
+            ],
+            any_order=False,
+        )
 
 
 @pytest.mark.unit

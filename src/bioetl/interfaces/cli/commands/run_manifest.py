@@ -179,6 +179,23 @@ def _render_show_payload(payload: dict[str, object]) -> str:
                 ("dq_rule_ids", diagnostics.get("dq_rule_ids")),
                 ("dq_dispositions", diagnostics.get("dq_dispositions")),
                 ("dq_report_paths", diagnostics.get("dq_report_paths")),
+                ("dq_violation_kinds", diagnostics.get("dq_violation_kinds")),
+                (
+                    "cross_validation_rule_ids",
+                    diagnostics.get("cross_validation_rule_ids"),
+                ),
+                (
+                    "cross_validation_config_paths",
+                    diagnostics.get("cross_validation_config_paths"),
+                ),
+                (
+                    "cross_validation_signal_present",
+                    diagnostics.get("cross_validation_signal_present"),
+                ),
+                (
+                    "correlation_anchor_gaps",
+                    diagnostics.get("correlation_anchor_gaps"),
+                ),
                 ("alert_signals", diagnostics.get("alert_signals")),
                 ("next_steps", diagnostics.get("next_steps")),
             ),

@@ -96,9 +96,7 @@ class LineageRunExplanationResult:
             "run_id": self.run_id,
             "manifest_id": self.manifest_id,
             "fragment_ids": list(self.fragment_ids),
-            "produced_datasets": [
-                node.to_dict() for node in self.produced_datasets
-            ],
+            "produced_datasets": [node.to_dict() for node in self.produced_datasets],
             "produced_bronze_batches": [
                 node.to_dict() for node in self.produced_bronze_batches
             ],
@@ -187,7 +185,9 @@ class LineageInspectionService:
         """Resolve one lineage fragment by identifier."""
         fragment = self.lineage_store.get(fragment_id)
         if fragment is None:
-            raise ValueError(f"Lineage fragment not found for identifier: {fragment_id}")
+            raise ValueError(
+                f"Lineage fragment not found for identifier: {fragment_id}"
+            )
         return LineageFragmentInspectionResult(fragment=fragment)
 
     def trace(self, dataset_ref: str) -> LineageTraceResult:
@@ -270,7 +270,9 @@ class LineageInspectionService:
         if manifest is not None:
             manifest_id = manifest.manifest_id
             run_id = str(manifest.run_id)
-            manifest_fragments = tuple(self.lineage_store.list_by_manifest_id(manifest_id))
+            manifest_fragments = tuple(
+                self.lineage_store.list_by_manifest_id(manifest_id)
+            )
             if manifest_fragments:
                 return manifest_id, run_id, manifest_fragments
             run_fragments = tuple(self.lineage_store.list_by_run_id(manifest.run_id))
@@ -315,7 +317,9 @@ class LineageInspectionService:
         direct_resolution = self._resolve_via_direct_indexes(identifier)
         if direct_resolution is not None:
             return direct_resolution
-        raise ValueError(f"Lineage run explanation not found for identifier: {identifier}")
+        raise ValueError(
+            f"Lineage run explanation not found for identifier: {identifier}"
+        )
 
     @staticmethod
     def _parse_run_id(identifier: str) -> RunID | None:

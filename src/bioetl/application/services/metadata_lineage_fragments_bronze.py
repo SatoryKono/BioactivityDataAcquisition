@@ -98,7 +98,9 @@ def build_bronze_lineage_fragment(
         )
     )
     return LineageGraphFragment(
-        fragment_id=build_fragment_id("bronze", run_context.run_id, input_data.batch_id),
+        fragment_id=build_fragment_id(
+            "bronze", run_context.run_id, input_data.batch_id
+        ),
         nodes=dedupe_nodes(nodes),
         edges=tuple(edges),
         run_id=str(run_context.run_id),

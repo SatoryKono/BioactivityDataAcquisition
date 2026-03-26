@@ -67,9 +67,7 @@ class TestServicesBuilderCreateCheckpointManager:
         )
 
         call_kwargs = mock_create.call_args[1]
-        assert (
-            call_kwargs["checkpoint_compatibility_service"] is compatibility_service
-        )
+        assert call_kwargs["checkpoint_compatibility_service"] is compatibility_service
         assert call_kwargs["current_metadata"] is current_metadata
         assert call_kwargs["compatibility_policy"] == "observe"
 
