@@ -29,7 +29,7 @@ PIPELINE_HEALTH_CHECK_PASSED = Gauge(
 INFRASTRUCTURE_VALIDATED = Gauge(
     "bioetl_infrastructure_validated",
     "Infrastructure validation status (1=validated, 0=not validated)",
-    ["pipeline", "run_id"],
+    ["pipeline"],
 )
 
 HEALTH_CHECK_DURATION_SECONDS = Histogram(
@@ -93,11 +93,11 @@ HEALTH_CHECK_LATENCY_SECONDS = Histogram(
 PREFLIGHT_MEDALLION_POLICY_VALID = Gauge(
     "bioetl_preflight_medallion_policy_valid",
     "Whether medallion policy is valid (1=valid, 0=invalid)",
-    ["pipeline", "run_id"],
+    ["pipeline"],
 )
 
 PREFLIGHT_CONFIG_ERRORS_TOTAL = Gauge(
     "bioetl_preflight_config_errors_total",
     "Number of configuration errors found during preflight",
-    ["pipeline", "run_id"],
+    ["pipeline"],
 )

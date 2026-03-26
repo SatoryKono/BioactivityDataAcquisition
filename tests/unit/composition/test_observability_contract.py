@@ -338,8 +338,7 @@ class TestHealthCheckMetrics:
         # Verify label names from metric description
         assert "pipeline" in PIPELINE_HEALTH_CHECK_PASSED._labelnames
         assert "component" in PIPELINE_HEALTH_CHECK_PASSED._labelnames
-        assert "pipeline" in INFRASTRUCTURE_VALIDATED._labelnames
-        assert "run_id" in INFRASTRUCTURE_VALIDATED._labelnames
+        assert INFRASTRUCTURE_VALIDATED._labelnames == ("pipeline",)
 
 
 @pytest.mark.unit

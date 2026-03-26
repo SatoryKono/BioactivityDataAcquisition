@@ -181,9 +181,6 @@ Guardrail для новых метрик control-plane/traceability:
 | ID | Severity | Drift | Evidence |
 |---|---|---|---|
 | OBS-001 | HIGH | Часть docs использует `bioetl-...` вместо `bioetl_...` | `docs/02-architecture/observability-layers.md`, `docs/05-operations/runbooks/observability-checklist.md` |
-| OBS-002 | HIGH | `provider_health_status` docstring в `_metrics_defs_adapter.py` противоречит enum mapping | `src/bioetl/infrastructure/observability/_metrics_defs_adapter.py`, `src/bioetl/domain/types/enums.py` |
-| OBS-003 | MEDIUM | `ts` в текстах, но runtime выводит `timestamp` | `logging_config.py` vs doc/comments |
-| OBS-004 | MEDIUM | `run_id` присутствует в label у preflight/infra gauge (высокая кардинальность) | `_metrics_defs_health.py` |
 
 ## 9. Definition of Done for observability doc sync
 

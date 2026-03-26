@@ -197,9 +197,9 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl_preflight_medallion_policy_valid` | Gauge | pipeline, run_id | Валидность medallion policy |
-| `bioetl_preflight_config_errors_total` | Gauge | pipeline, run_id | Ошибки конфигурации |
-| `bioetl_infrastructure_validated` | Gauge | pipeline, run_id | Статус валидации инфраструктуры |
+| `bioetl_preflight_medallion_policy_valid` | Gauge | pipeline | Валидность medallion policy |
+| `bioetl_preflight_config_errors_total` | Gauge | pipeline | Ошибки конфигурации |
+| `bioetl_infrastructure_validated` | Gauge | pipeline | Статус валидации инфраструктуры |
 
 #### Adapter / HTTP Metrics
 

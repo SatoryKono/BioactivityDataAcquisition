@@ -113,7 +113,7 @@ HTTP_REQUEST_ERRORS_TOTAL = Counter(
 
 PROVIDER_HEALTH_STATUS = Gauge(
     "bioetl_provider_health_status",
-    "Provider health status (0=unknown, 1=healthy, 2=degraded)",
+    "Provider health status (0=unhealthy, 1=degraded, 2=healthy)",
     ["provider"],
 )
 

@@ -16,7 +16,7 @@ stateDiagram-v2
         [*] --> AwaitingTriage
         AwaitingTriage: 📋 Pending review
         AwaitingTriage: Weekly triage process
-        AwaitingTriage: make quarantine-inspect
+        AwaitingTriage: bioetl quarantine inspect
 
         state "Record Details" as ND {
             ND1: ingestion_ts
@@ -49,7 +49,7 @@ stateDiagram-v2
     state REPROCESSED {
         [*] --> FixApplied
         FixApplied: ✅ Successfully replayed
-        FixApplied: make quarantine-replay
+        FixApplied: bioetl quarantine replay
         FixApplied: Record now in Silver
 
         state "Reprocess Steps" as RS {
@@ -85,7 +85,7 @@ stateDiagram-v2
     note left of IGNORED
         Triage Workflow
         ━━━━━━━━━━━━━━━━━━━━━━━━
-        1. make quarantine-inspect
+        1. bioetl quarantine inspect
         2. Review error patterns
         3. Decide IGNORE or FIX
         4. Document decision

@@ -92,7 +92,7 @@ Use this checklist when reviewing new or modified pipelines.
   - [ ] `payload` (truncated to 64KB)
   - [ ] `bronze_batch_id`
   - [ ] `dq_status`
-- [ ] Quarantine operations testable via `make quarantine-*`
+- [ ] Quarantine operations testable via `bioetl quarantine *`
 
 ## 9. Locking & Concurrency (RULES.md §3.3)
 

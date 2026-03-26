@@ -6,18 +6,22 @@ Unicode characters in tests are intentional for testing international content ha
 
 from __future__ import annotations
 
+import asyncio
+import time
+from collections.abc import AsyncIterator
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 import respx
 from httpx import Response
 
+from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.pubmed import ENTREZ_API_BASE, PubMedAdapter
-from bioetl.infrastructure.config import get_settings
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
 
@@ -27,16 +31,50 @@ def mock_logger() -> MagicMock:
     return MagicMock()
 
 
-@pytest.fixture
-def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
-    """Fixture to provide a PubMedAdapter instance for testing."""
-    monkeypatch.setenv("BIOETL_TEST_MODE", "true")
-    get_settings.cache_clear()
+@pytest.fixture(scope="module")
+def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
+    """Provide a module-scoped event loop for module-scoped async fixtures."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
-    http_client = UnifiedHTTPClient(
-        TokenBucketRateLimiter(rate=3.0, capacity=6.0),
+
+def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
+    """Reset mutable HTTP client state between tests sharing one client."""
+    client.circuit_breaker.reset()
+    rate_limiter = client.rate_limiter
+    if isinstance(rate_limiter, TokenBucketRateLimiter):
+        rate_limiter._tokens = float(rate_limiter.capacity)
+        rate_limiter._last_refill = time.monotonic()
+
+
+@pytest_asyncio.fixture(scope="module")
+async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
+    """Provide a shared started HTTP client for PubMed edge-case tests."""
+    client = UnifiedHTTPClient(
+        TokenBucketRateLimiter(rate=10.0, capacity=20.0, provider="pubmed_test"),
         CircuitBreakerGuard(provider="pubmed_test"),
+        retry_config=RetryConfig(
+            base_delay=0.0,
+            max_delay=0.0,
+            multiplier=1.0,
+            jitter_range=(0.0, 0.0),
+        ),
+        timeout=30.0,
+        provider="pubmed",
     )
+    await client.__aenter__()
+    yield client
+    await client.__aexit__(None, None, None)
+
+
+@pytest.fixture
+def pubmed_adapter(
+    http_client: UnifiedHTTPClient,
+    mock_logger: MagicMock,
+) -> PubMedAdapter:
+    """Fixture to provide a PubMedAdapter instance for testing."""
+    _reset_http_client_state(http_client)
     return PubMedAdapter(
         http_client=http_client,
         logger=mock_logger,
@@ -63,14 +101,13 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, json=mock_search_json)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="xyznonexistent12345", limit=10
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch(
+                "publication", query="xyznonexistent12345", limit=10
+            ):
+                records.append(record)
 
-                assert len(records) == 0
+            assert len(records) == 0
 
     @pytest.mark.integration
     async def test_fetch_article_without_abstract(self, pubmed_adapter: PubMedAdapter):
@@ -98,16 +135,13 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                assert records[0]["pmid"] == "99999"
-                assert records[0]["article_title"] == "Letter to the Editor"
+            assert len(records) == 1
+            assert records[0]["pmid"] == "99999"
+            assert records[0]["article_title"] == "Letter to the Editor"
 
     @pytest.mark.integration
     async def test_fetch_article_with_structured_abstract(
@@ -142,15 +176,12 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                assert records[0]["pmid"] == "88888"
+            assert len(records) == 1
+            assert records[0]["pmid"] == "88888"
 
     @pytest.mark.integration
     async def test_fetch_article_with_collective_author(
@@ -184,15 +215,12 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                assert records[0]["pmid"] == "77777"
+            assert len(records) == 1
+            assert records[0]["pmid"] == "77777"
 
     @pytest.mark.integration
     async def test_fetch_article_with_unicode_characters(
@@ -231,16 +259,13 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                assert "α-tocopherol" in records[0]["article_title"]
-                assert "β-cell" in records[0]["article_title"]
+            assert len(records) == 1
+            assert "α-tocopherol" in records[0]["article_title"]
+            assert "β-cell" in records[0]["article_title"]
 
     @pytest.mark.integration
     async def test_fetch_article_minimal_metadata(self, pubmed_adapter: PubMedAdapter):
@@ -267,16 +292,13 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                assert records[0]["pmid"] == "55555"
-                assert records[0]["article_title"] == "Minimal Article"
+            assert len(records) == 1
+            assert records[0]["pmid"] == "55555"
+            assert records[0]["article_title"] == "Minimal Article"
 
     @pytest.mark.integration
     async def test_fetch_article_with_pmc_id(self, pubmed_adapter: PubMedAdapter):
@@ -310,15 +332,12 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                assert records[0]["pmid"] == "44444"
+            assert len(records) == 1
+            assert records[0]["pmid"] == "44444"
 
     @pytest.mark.integration
     async def test_fetch_multiple_articles_batch(self, pubmed_adapter: PubMedAdapter):
@@ -361,18 +380,15 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=3
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=3):
+                records.append(record)
 
-                assert len(records) == 3
-                pmids = [r["pmid"] for r in records]
-                assert "11111" in pmids
-                assert "22222" in pmids
-                assert "33333" in pmids
+            assert len(records) == 3
+            pmids = [r["pmid"] for r in records]
+            assert "11111" in pmids
+            assert "22222" in pmids
+            assert "33333" in pmids
 
     @pytest.mark.integration
     async def test_health_check_failure(self, pubmed_adapter: PubMedAdapter):
@@ -381,10 +397,9 @@ class TestPubMedEdgeCases:
             # Health check uses einfo.fcgi endpoint (lightweight DB info)
             respx_mock.get("einfo.fcgi").mock(return_value=Response(500, text="Error"))
 
-            async with pubmed_adapter._http_client:
-                status = await pubmed_adapter.health_check()
-                # On error, fallback status is DEGRADED (not UNHEALTHY)
-                assert status in (HealthStatus.UNHEALTHY, HealthStatus.DEGRADED)
+            status = await pubmed_adapter.health_check()
+            # On error, fallback status is DEGRADED (not UNHEALTHY)
+            assert status in (HealthStatus.UNHEALTHY, HealthStatus.DEGRADED)
 
 
 class TestPubMedRateLimiting:
@@ -415,15 +430,12 @@ class TestPubMedRateLimiting:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                # Should complete without rate limit errors
-                assert len(records) == 1
+            # Should complete without rate limit errors
+            assert len(records) == 1
 
 
 class TestPubMedXMLParsing:
@@ -459,16 +471,13 @@ class TestPubMedXMLParsing:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                # HTML entities should be decoded
-                assert "5' & 3'" in records[0]["article_title"]
+            assert len(records) == 1
+            # HTML entities should be decoded
+            assert "5' & 3'" in records[0]["article_title"]
 
     @pytest.mark.integration
     async def test_fetch_article_with_inline_elements(
@@ -505,16 +514,13 @@ class TestPubMedXMLParsing:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter._http_client:
-                records = []
-                async for record in pubmed_adapter.fetch(
-                    "publication", query="test", limit=1
-                ):
-                    records.append(record)
+            records = []
+            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+                records.append(record)
 
-                assert len(records) == 1
-                # Article title at Bronze layer shows text before inline element
-                assert "Effects of" in records[0]["article_title"]
-                # Raw XML is preserved for transformer to extract full text
-                assert "_raw_xml" in records[0]
-                assert "in vitro" in records[0]["_raw_xml"]
+            assert len(records) == 1
+            # Article title at Bronze layer shows text before inline element
+            assert "Effects of" in records[0]["article_title"]
+            # Raw XML is preserved for transformer to extract full text
+            assert "_raw_xml" in records[0]
+            assert "in vitro" in records[0]["_raw_xml"]

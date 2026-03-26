@@ -9,7 +9,7 @@
 | Создать новый пайплайн              | App D        | YAML config                 |
 | Добавить поле в схему               | 2.2, App E   | Pydantic model              |
 | Ошибка в проде (Alert)              | App C        | Runbook                     |
-| Удалить битые данные                | 2.6          | `make quarantine purge`     |
+| Удалить битые данные                | 2.6          | `bioetl quarantine purge --pipeline ...` |
 | Развернуть на Staging               | 5.6.1        | CI/CD                       |
 | Восстановление при аварии           | 5.5          | DR Runbook                  |
 | Откат релиза                        | 7.2          | Rollback Strategy           |
@@ -379,11 +379,11 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 #### Операции с карантином
 
-Для управления "мусорными" данными использовать make-команды:
+Канонический интерфейс управления карантином — подкоманды `bioetl quarantine`:
 
-- `make quarantine-inspect PIPELINE=...`: Выгрузка сэмпла ошибок для анализа.
-- `make quarantine-replay PIPELINE=...`: Повторная отправка исправленных записей в пайплайн.
-- `make quarantine purge PIPELINE=...`: Принудительная очистка карантина.
+- `bioetl quarantine inspect --pipeline ...`: Выгрузка сэмпла ошибок для анализа.
+- `bioetl quarantine replay --pipeline ...`: Повторная отправка исправленных записей в пайплайн.
+- `bioetl quarantine purge --pipeline ...`: Принудительная очистка карантина.
 
 ### 2.7. Стратегия Загрузки (Load Strategy)
 
@@ -1392,7 +1392,7 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 - **Scope**:
   - **Infrastructure/Code**: Auto Rollback при Error Rate > 10%.
   - **Data DQ**: Ручной анализ и replay. Ошибки качества данных не должны триггерить автоматический откат версии приложения.
-- **Manual Rollback**: `make rollback VERSION=...`.
+- **Manual Rollback**: В текущем Local-Only runtime отдельной команды `bioetl rollback` нет; rollback выполняется через platform-specific deployment procedure или восстановление предыдущего артефакта по runbook.
 
 ## 9. Опыт Разработчика (Developer Experience)
 
@@ -1515,7 +1515,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | Schema mismatch (Gold) | Pipeline fail + `schema-violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR                                                  |
 | Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline-name}.json` для рестарта |
 | >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа                                            |
-| Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; `make release-lock PIPELINE=...`                                              |
+| Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; определить owner `run-id`; для same-process диагностики использовать `bioetl lock check/release --pipeline ... --run-id ...` |
 
 ## Приложение D: Схема Конфигурации Пайплайна
 

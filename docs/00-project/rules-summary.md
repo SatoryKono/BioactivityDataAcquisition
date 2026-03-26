@@ -17,7 +17,7 @@
 | Создать новый пайплайн              | App D           | YAML config                 |
 | Добавить поле в схему               | 2.2, App E      | Pydantic model              |
 | Ошибка в проде (Alert)              | App C           | Runbook                     |
-| Удалить битые данные                | 2.6             | `make quarantine purge`     |
+| Удалить битые данные                | 2.6             | `bioetl quarantine purge --pipeline ...` |
 | Развернуть на Staging               | 5.6.1           | CI/CD                       |
 | Восстановление при аварии           | 5.5             | DR Runbook                  |
 | Откат релиза                        | 7.2             | Rollback Strategy           |
