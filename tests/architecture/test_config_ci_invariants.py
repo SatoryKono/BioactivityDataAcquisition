@@ -39,9 +39,16 @@ from bioetl.infrastructure.config.config_ci_contract import (
     TRANSITIONAL_PIPELINE_KEYS,
     VALID_LOADING_STRATEGIES,
 )
+import sys
+from pathlib import Path
+
 from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy,
 )
+
+# Allow importing from the project root scripts/ directory
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
 from scripts.schema import check_config_invariants as invariant_script
 from scripts.schema.validate_pipeline_configs import _canonical_script
 
