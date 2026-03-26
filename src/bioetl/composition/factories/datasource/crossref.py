@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 __all__ = ["create_crossref_adapter"]
 
 
-def _resolve_mailto(kwargs: dict[str, Any], settings: Settings | None) -> str:
+def _resolve_mailto(kwargs: dict[str, Any], settings: Settings | None) -> str:  # Any: kwargs dictionary
     mailto = kwargs.get("mailto")
     if not mailto and settings:
         mailto = getattr(settings, "default_email", None)
@@ -37,14 +37,14 @@ def _resolve_mailto(kwargs: dict[str, Any], settings: Settings | None) -> str:
 
 
 def _resolve_components(
-    http_client: Any,
-    logger: Any,
+    http_client: object,
+    logger: object,
     mailto: str,
-    adapter_metrics: Any,
-    request_collector: Any,
-    search_paginator: Any,
-    kwargs: dict[str, Any],
-) -> tuple[Any, Any, Any, Any, Any]:
+    adapter_metrics: object,
+    request_collector: object,
+    search_paginator: object,
+    kwargs: dict[str, Any],  # Any: adapter arguments map
+) -> tuple[object, object, object, object, object]:
     query_builder = kwargs.get("query_builder")
     if query_builder is None:
         query_builder = _create_default_crossref_query_builder(
