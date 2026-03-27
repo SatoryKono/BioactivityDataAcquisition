@@ -1,5 +1,8 @@
 # Provider Registry Runtime Ownership Evidence Summary
 
+
+Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
+
 Примечание о rebaseline: the runtime seam is still the correct stopping point for the current repo state; no new caller-driven case for explicit runtime instance ownership has emerged.
 
 ## Question

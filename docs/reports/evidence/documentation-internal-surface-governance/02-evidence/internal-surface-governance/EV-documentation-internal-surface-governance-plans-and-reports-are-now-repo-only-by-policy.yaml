@@ -1,0 +1,19 @@
+id: EV-documentation-internal-surface-governance-plans-and-reports-are-now-repo-only-by-policy
+pillar: internal-surface-governance
+source:
+  type: internal-doc
+  ref: "docs/00-project/governance/07-doc-nav-policy.md:17-25; mkdocs.yml:8-20"
+  retrieved_at: 2026-03-27
+claim: "The current documentation governance model explicitly treats `plans/**` and `reports/**` as `internal + repo-only`, so they are no longer part of the published/internal-published MkDocs surface."
+quote: "Working plans MAY remain outside MkDocs publication; surface them from published docs only as repository paths or curated summaries when needed."
+confidence: 0.99
+assumptions:
+  - "The path contracts in `07-doc-nav-policy.md` remain the canonical publication rule."
+  - "The `exclude_docs` rules in `mkdocs.yml` are actively enforced in CI and local strict builds."
+notes: "This supersedes the older broader internal-published interpretation for `plans/**` and `reports/**`."
+tags:
+  - documentation
+  - governance
+  - repo-only
+  - publication
+  - nav-policy

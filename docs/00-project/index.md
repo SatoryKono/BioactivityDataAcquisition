@@ -9,7 +9,7 @@ This is the central documentation hub for the BioETL project.
 | Current project rules | [RULES.md](RULES.md) |
 | Active documentation navigator | [Project Navigator](00-map.md) |
 | Current tool commands and placement rules | [Tools Hub](TOOLS.md) |
-| Historical context only | [99-Archive Index](../99-archive/README.md) |
+| Historical context only | Repository path `docs/99-archive/README.md` |
 
 Active guidance lives under `docs/00-05`. Materials in `docs/99-archive/`
 remain useful for traceability, but they are not normative for current project
@@ -21,18 +21,19 @@ Use the repository docs with the following priority:
 
 - **Canonical active docs**: `docs/00-05`. These pages define current project
   rules, architecture, guides, operations, and reference contracts.
-- **Internal-published docs**: planning, evidence, AI runtime guidance, and
-  other extended working materials. They are discoverable and useful, but they
-  do not override canonical active docs.
+- **Repo-only / extended working docs**: planning, evidence, AI runtime
+  guidance, and other extended working materials may live outside the published
+  MkDocs surface. They remain discoverable through repository-path references,
+  but they do not override canonical active docs.
 - **Archive docs**: `docs/99-archive/`. Historical context only.
 
 Useful entry points for non-normative surfaces:
 
-- [Plans Directory](../plans/README.md) — active and retained planning artifacts
-- [Reports Index](../reports/index.md) — curated internal reports and evidence
-- [AI Documentation Surface](ai/README.md) — top-level map for agents, memory, prompts, and skills
-- [AI Agents Context](ai/agents/README.md) — runtime-specific agent guidance
-- [Skills Mirror](ai/skills/README.md) — published mirror for AI skills
+- Repository path `plans/README.md` — active and retained planning artifacts (repo-only working surface, not published in MkDocs)
+- Repository path `reports/README.md` — curated internal reports and evidence (repo-only working surface, not published in MkDocs)
+- Repository path `docs/00-project/ai/README.md` — top-level AI docs map for agents, memory, prompts, and skills
+- Repository path `docs/00-project/ai/agents/README.md` — runtime-specific agent guidance
+- Repository path `docs/00-project/ai/skills/README.md` — skills mirror and indexes
 
 ## Project Mission
 
@@ -48,7 +49,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 - [**Quick Start Guide**](../03-guides/quick-start.md): Get your local development environment up and running in minutes.
 - [**Architecture Overview**](../02-architecture/00-overview.md): Understand the high-level design and data flow.
 - [**How-To Guides**](../03-guides/getting-started.md): Guides for common tasks (adding sources, pipelines, troubleshooting).
-- [**99-Archive Index**](../99-archive/README.md): Historical and superseded materials for traceability only.
+- Repository path `docs/99-archive/README.md`: Historical and superseded materials for traceability only.
 
 ## Key Features
 
