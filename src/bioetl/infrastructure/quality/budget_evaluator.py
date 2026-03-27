@@ -199,6 +199,33 @@ def evaluate_governance_violations(
     return violations
 
 
+def _extract_hotspot_budgets(budgets_dict: dict[str, Any]) -> dict[str, int]:
+    budgets = {}
+    for k, v in budgets_dict.items():
+        if isinstance(k, str):
+            try:
+                budgets[k] = int(v)
+            except (ValueError, TypeError):
+                continue
+    return budgets
+
+def _parse_hotspot_entry(entry: dict[str, Any]) -> tuple[str, tuple[str, ...], dict[str, int]] | None:
+    try:
+        name = entry.get("name")
+        prefixes_raw = entry.get("path_prefixes")
+        budgets_raw = entry.get("registry_budgets")
+        if not isinstance(name, str) or not isinstance(prefixes_raw, list) or not isinstance(budgets_raw, dict):
+            return None
+
+        prefixes = tuple(str(p) for p in prefixes_raw if p)
+        if not prefixes: return None
+
+        budgets = _extract_hotspot_budgets(budgets_raw)
+        return (name, prefixes, budgets)
+    except (KeyError, ValueError, TypeError):
+        return None
+
+
 def _iter_hotspot_budget_entries(
     hotspot_budgets: object,
 ) -> list[tuple[str, tuple[str, ...], dict[str, int]]]:
@@ -210,28 +237,9 @@ def _iter_hotspot_budget_entries(
     for entry in hotspot_budgets:
         if not isinstance(entry, dict):
             continue
-        hotspot_name = entry.get("name")
-        path_prefixes = entry.get("path_prefixes")
-        registry_budgets = entry.get("registry_budgets")
-        if (
-            not isinstance(hotspot_name, str)
-            or not isinstance(path_prefixes, list)
-            or not isinstance(registry_budgets, dict)
-        ):
-            continue
-
-        typed_prefixes = tuple(
-            prefix for prefix in path_prefixes if isinstance(prefix, str) and prefix
-        )
-        if not typed_prefixes:
-            continue
-
-        typed_budgets = {
-            registry_name: int(budget)
-            for registry_name, budget in registry_budgets.items()
-            if isinstance(registry_name, str) and isinstance(budget, int)
-        }
-        typed_entries.append((hotspot_name, typed_prefixes, typed_budgets))
+        parsed = _parse_hotspot_entry(entry)
+        if parsed:
+            typed_entries.append(parsed)
     return typed_entries
 
 

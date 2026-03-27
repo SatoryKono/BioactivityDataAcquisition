@@ -1,4 +1,0 @@
-from bioetl.composition.providers.provider_registry import ProviderRegistry
-import inspect
-print(inspect.signature(ProviderRegistry.build_data_source_creator))
-print(ProviderRegistry.build_data_source_creator)

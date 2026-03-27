@@ -84,7 +84,7 @@ jobs:
                 uses: actions/upload-artifact@v4
                 with:
                     name: coverage-data-smoke
-                    path: reports/coverage/.coverage.smoke
+                    path: reports/coverage/.coverage.smoke*
                     if-no-files-found: error
                     retention-days: 7
 
