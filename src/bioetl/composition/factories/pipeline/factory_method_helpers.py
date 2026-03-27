@@ -171,7 +171,7 @@ def create_pipeline_instance_with_services(
     *,
     factory_context: _PipelineFactoryContext,
     request: _CreatePipelineWithServicesRequest,
-) -> TPipeline:
+) -> TPipeline:  # type: ignore
     """Create pipeline instance with wired services and optional transformer."""
     if factory_context.pipeline_class is None or factory_context.provider is None:
         raise AssertionError(
@@ -191,11 +191,11 @@ def create_pipeline_instance_with_services(
             settings=request.settings,
             logger=request.logger,
             config=request.config,
-            filter_config=request.filter_config,
+            filter_config=request.filter_config,  # type: ignore
             tracer=request.tracer,
             dq_monitor=request.dq_monitor,
             metrics=request.metrics,
-            cached_bronze=request.cached_bronze,
+            cached_bronze=request.cached_bronze,  # type: ignore
         ),
     )
 

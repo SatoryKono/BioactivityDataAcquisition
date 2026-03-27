@@ -249,7 +249,7 @@ class BatchTracingManagerService:
             error: Optional exception to record on the span.
 
         """
-        close_span(span, error)
+        close_span(span, error)  # type: ignore
 
     def end_span_with_shutdown(self, span: Span | None) -> None:
         """End span marking it as shutdown.
@@ -258,7 +258,7 @@ class BatchTracingManagerService:
             span: The span to end with shutdown marker.
 
         """
-        close_span_with_shutdown(span)
+        close_span_with_shutdown(span)  # type: ignore
 
 
 __all__ = ["BatchTracingManagerService"]

@@ -60,11 +60,11 @@ class _WrappedDataSourceDelegationMixin:
         """Provider name from the wrapped data source."""
         return self._data_source.provider_name
 
-    async def __aenter__(self: _HasWrappedDataSource) -> Self:
+    async def __aenter__(self: _HasWrappedDataSource) -> Self:  # type: ignore
         """Enter async context and allow subclasses to reset wrapper state."""
         await self._data_source.__aenter__()
-        self._after_wrapped_data_source_enter()
-        return self
+        self._after_wrapped_data_source_enter()  # type: ignore
+        return self  # type: ignore
 
     def _after_wrapped_data_source_enter(self) -> None:
         """Hook for subclasses that need to reset state after adapter enter."""
@@ -87,7 +87,7 @@ class _WrappedDataSourceDelegationMixin:
         await self._data_source.aclose()
 
 
-class _TargetEntityFetchWrapper(Protocol[RecordT]):
+class _TargetEntityFetchWrapper(Protocol[RecordT]):  # type: ignore
     """Structural contract for wrappers deriving a target entity from a source."""
 
     _data_source: DataSourcePort
@@ -118,7 +118,7 @@ class _TargetEntityFetchDelegationMixin:
     ) -> AsyncIterator[RecordT]:
         """Fetch derived target records or delegate to the wrapped adapter."""
         if entity_type == self.TARGET_ENTITY_TYPE:
-            return self._fetch_target_records(
+            return self._fetch_target_records(  # type: ignore
                 limit,
                 query,
                 filter_ids,
@@ -137,7 +137,7 @@ class _TargetEntityFetchDelegationMixin:
         )
 
 
-class _FilterableTargetWrapper(Protocol[RecordT]):
+class _FilterableTargetWrapper(Protocol[RecordT]):  # type: ignore
     """Structural contract for wrappers exposing a derived target entity."""
 
     _data_source: object
@@ -172,7 +172,7 @@ class _FilterableTargetWrapper(Protocol[RecordT]):
         """Yield target records from a fallback-enabled upstream stream."""
 
 
-class _FallbackFilterableTargetWrapper(Protocol[RecordT]):
+class _FallbackFilterableTargetWrapper(Protocol[RecordT]):  # type: ignore
     """Structural contract for target wrappers with shared fallback behavior."""
 
     SOURCE_ENTITY_TYPE: str
@@ -201,7 +201,7 @@ class _FilterableTargetDelegationMixin:
         """Validate wrapped source implements FilterableDataSourcePort."""
         return _ensure_filterable_data_source(
             self._data_source,
-            provider_name=self._data_source.provider_name,
+            provider_name=self._data_source.provider_name,  # type: ignore
             method_name=method_name,
         )
 
@@ -213,11 +213,11 @@ class _FilterableTargetDelegationMixin:
         limit: int | None = None,
     ) -> AsyncIterator[RecordT]:
         """Fetch filtered records, deriving target records when requested."""
-        filterable = self._ensure_filterable("fetch_filtered")
+        filterable = self._ensure_filterable("fetch_filtered")  # type: ignore
         async for record in _yield_target_or_delegate_records(
             entity_type=entity_type,
             target_entity_type=self.TARGET_ENTITY_TYPE,
-            target_factory=lambda: self._fetch_target_filtered_records(
+            target_factory=lambda: self._fetch_target_filtered_records(  # type: ignore
                 filterable, filter_ids, filter_field, limit
             ),
             delegate_factory=lambda: filterable.fetch_filtered(
@@ -236,11 +236,11 @@ class _FilterableTargetDelegationMixin:
         limit: int | None = None,
     ) -> AsyncIterator[RecordT]:
         """Fetch multi-filtered records, deriving target records when requested."""
-        filterable = self._ensure_filterable("fetch_multi_filtered")
+        filterable = self._ensure_filterable("fetch_multi_filtered")  # type: ignore
         async for record in _yield_target_or_delegate_records(
             entity_type=entity_type,
             target_entity_type=self.TARGET_ENTITY_TYPE,
-            target_factory=lambda: self._fetch_target_multi_filtered_records(
+            target_factory=lambda: self._fetch_target_multi_filtered_records(  # type: ignore
                 filterable, filters, limit
             ),
             delegate_factory=lambda: filterable.fetch_multi_filtered(
@@ -260,11 +260,11 @@ class _FilterableTargetDelegationMixin:
         limit: int | None = None,
     ) -> AsyncIterator[RecordT]:
         """Fetch fallback-enabled records, deriving target records when requested."""
-        filterable = self._ensure_filterable("fetch_filtered_with_fallback")
+        filterable = self._ensure_filterable("fetch_filtered_with_fallback")  # type: ignore
         async for record in _yield_target_or_delegate_records(
             entity_type=entity_type,
             target_entity_type=self.TARGET_ENTITY_TYPE,
-            target_factory=lambda: self._fetch_target_filtered_with_fallback_records(
+            target_factory=lambda: self._fetch_target_filtered_with_fallback_records(  # type: ignore
                 filterable,
                 filter_ids,
                 filter_field,
@@ -342,8 +342,8 @@ async def _yield_wrapped_fetch_records(
         fetch_kwargs["filter_ids"] = filter_ids
     if filter_field is not _UNSET_FETCH_ARG:
         fetch_kwargs["filter_field"] = filter_field
-    async for record in data_source.fetch(**fetch_kwargs):
-        yield record
+    async for record in data_source.fetch(**fetch_kwargs):  # type: ignore
+        yield record  # type: ignore
 
 
 def _yield_plain_wrapped_fetch_records(

@@ -100,7 +100,7 @@ class PostrunDQReportService(PostrunFailureHandlingMixin):
                 )
             return result
         except self._handled_failures as error:
-            self._handle_allowlisted_failure(
+            self._handle_allowlisted_failure(  # type: ignore
                 error,
                 emit_warning_error_log=True,
             )

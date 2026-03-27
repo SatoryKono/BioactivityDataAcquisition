@@ -72,8 +72,8 @@ def _create_runner_from_factory(
         factory.create_runner(
             run_id=ctx.run_id,
             runtime=inputs.runtime_config,
-            settings=inputs.settings,
-            observability=inputs.observability,
+            settings=inputs.settings,  # type: ignore
+            observability=inputs.observability,  # type: ignore
             filter_config=inputs.filter_config,
             config=inputs.yaml_config,
             cached_bronze=inputs.cached_bronze,

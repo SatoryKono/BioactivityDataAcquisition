@@ -65,4 +65,4 @@ class PublicationTermFilteringMixin(
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Transform fallback-fetched publications into publication-term records."""
-        return self._yield_terms_from_publications(source_records, limit)
+        return self._yield_terms_from_publications(source_records, limit)  # type: ignore

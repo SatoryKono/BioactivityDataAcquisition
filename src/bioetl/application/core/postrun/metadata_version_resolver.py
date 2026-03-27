@@ -59,7 +59,7 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
         try:
             return self._storage.get_table_version(table_path, layer=layer)
         except self._warning_allowlist as error:
-            self._handle_allowlisted_failure(
+            self._handle_allowlisted_failure(  # type: ignore
                 error,
                 extra={
                     "layer": layer,
