@@ -1,0 +1,79 @@
+# Technical Debt Evidence Summary
+
+Дата: 2026-03-21
+Статус: актуализировано
+
+Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
+
+
+> This summary is an internal-published evidence surface for technical-debt
+> interpretation and prioritization. It should guide investigation and
+> sequencing, but it does not replace canonical architecture or governance
+> documents in `docs/00-05`.
+>
+> Примечание о rebaseline (2026-03-24): этот pack остаётся полезным как
+> historical trigger evidence для debt-wave решений от `2026-03-20/21`, но
+> часть прежних current-tense hotspot recommendations уже не отражает live
+> priority order после последующих bounded closeout waves. В частности,
+> `crossref/batch.py` больше не является крупным mixed-responsibility hotspot:
+> текущий файл — `24` LOC compatibility facade поверх split collaborators.
+> Дополнительно live architecture-metric exemption baseline теперь достиг `0`:
+> remaining `ProviderRegistry` `god_object` waiver retired, поэтому текущий
+> active debt posture лучше читать как topology/ownership watchlist без живых
+> size/class/god-object exemptions.
+> Для live prioritization используйте текущий roadmap и refreshed governance
+> summaries, а не только этот dated pack.
+
+## Gate Status
+
+| Pillar | Gate | Notes |
+|---|---|---|
+| `dependency-hotspots` | `PASSED` | 7 semantic EV objects created |
+| `duplication-dead-code` | `PASSED` | 7 semantic EV objects created |
+| `ownership-compatibility-seams` | `PASSED` | 6+ semantic EV objects created |
+| `complexity-hotspots` | `PASSED` | 8 semantic EV objects created |
+
+## Pillar Outputs
+
+- [dependency-hotspots/SUMMARY.md](dependency-hotspots/SUMMARY.md)
+- [duplication-dead-code/SUMMARY.md](duplication-dead-code/SUMMARY.md)
+- [ownership-compatibility-seams/SUMMARY.md](ownership-compatibility-seams/SUMMARY.md)
+- [complexity-hotspots/SUMMARY.md](complexity-hotspots/SUMMARY.md)
+- [03-synthesis/CROSS-SYNTHESIS.md](03-synthesis/CROSS-SYNTHESIS.md)
+- [04-decisions/DECISIONS.yaml](04-decisions/DECISIONS.yaml)
+- [04-decisions/TECHNICAL-DEBT-ROADMAP.md](04-decisions/TECHNICAL-DEBT-ROADMAP.md)
+- [05-risks/RISKS.yaml](05-risks/RISKS.yaml)
+- [05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md](05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md)
+- [ORCHESTRATION.md](ORCHESTRATION.md)
+
+## Strongest Technical Debt Findings
+
+1. Dependency debt is concentrated less in policy violations and more in dense, allowed seams, especially inside `src/bioetl/interfaces/cli/commands`, storage, and selected application seams.
+2. The strongest historical reducible duplication hotspot in this pack was provider-registry resolution and provider-family registration assembly scaffolding, but the live repo now treats that area as a guarded compatibility/watchlist seam rather than an active duplication wave.
+3. Several apparent dead-code candidates are actually sanctioned compatibility surfaces, including `batch_execution_*` wrappers and `dependency_join_support.py`.
+4. Ownership debt is now concentrated in retained convenience seams and mirrored registry access as watchlist topology rather than waiver-backed cleanup, especially around `PipelineConfigLoader`, `registration.py`, and default `ProviderRegistry` access paths.
+5. Complexity debt is now more about preventing new hotspots than carrying active waiver inventory; some earlier hotspot candidates in this pack should now be read as historical trigger evidence rather than the live next split target.
+6. Report/test disagreement is now mostly soft governance debt, not hard breakage: tests often enforce decoupling while some evidence interpretations age faster than the underlying code.
+
+## Contradictions And Tensions
+
+- `registration.py` is green under direct decoupling tests, and the live repo now treats that area as a guarded compatibility seam; older evidence language remains useful mostly as historical context for why the watchlist exists.
+- Dependency-map policy is clean, but hotspot evidence still shows strong concentration in a small number of large allowed seams, now led by CLI commands and storage rather than adapters.
+- Some thin wrappers look like duplication or dead code at first glance, but repo guardrails and evidence packs classify them as intentional compatibility infrastructure.
+- The repo is now at a zero-exemption baseline for size/complexity waivers, but some earlier “live hotspot” narratives in this pack still need explicit rebaseline notes rather than direct execution.
+
+## Remaining Gaps
+
+- No dedicated evidence pillar yet for test-inventory debt outside current shard models.
+- No separate evidence pillar yet for storage-specific write path complexity versus adapter-side complexity.
+- The roadmap is now prioritized, but it still remains a recommended sequence rather than an accepted decision ledger.
+- The new top-level `DECISIONS.yaml` / `RISKS.yaml` pair captures the accepted posture, while detailed sequencing still lives in the roadmap and execution-plan artifacts.
+
+## Recommended Next Steps
+
+1. Use [CROSS-SYNTHESIS.md](03-synthesis/CROSS-SYNTHESIS.md) as the current cross-pillar interpretation baseline.
+2. Use [TECHNICAL-DEBT-ROADMAP.md](04-decisions/TECHNICAL-DEBT-ROADMAP.md) as the recommended priority order for the next refactor waves.
+3. Use [TECHNICAL-DEBT-EXECUTION-PLAN.md](05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md) as the current implementation sequence.
+4. Treat `duplication-dead-code` evidence as a cleanup candidate ledger, not as blanket delete authorization.
+5. Use [complexity-hotspots/SUMMARY.md](complexity-hotspots/SUMMARY.md) as historical trigger evidence for the completed CrossRef hotspot wave unless a fresh evidence pass reopens that seam.
+6. Add a follow-up pillar for residual test-scope debt if you want evidence-backed CI/test architecture decisions.

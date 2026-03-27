@@ -1,5 +1,8 @@
 # Сбор evidence завершён: adapter-interface-alignment
 
+
+Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
+
 Примечание о rebaseline: the current adapter-construction state still matches the same seam-alignment pressure points, so the pack remains a current baseline for decision work.
 
 **Создано объектов evidence:** 10  
