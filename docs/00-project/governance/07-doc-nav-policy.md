@@ -26,9 +26,9 @@ traceability, but they are not normative for current project behavior.
 | `docs/00-project/ai/memory/**` | `internal-published` + `internal` | Shared entrypoints MAY be shown under `Internal / Extended`; specialized memory docs MAY remain non-nav | [docs/00-project/ai/memory/agent-memory.md](../ai/memory/agent-memory.md) |
 | `docs/00-project/ai/prompts/**` | `internal-published` + `internal-generated` | Curated prompt indexes MAY be shown under `Internal / Extended`; collected/raw prompt copies MAY remain non-nav | [docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md](../ai/prompts/COLLECTED_PROMPTS_INDEX.md) |
 | `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../ai/skills/README.md) |
-| `docs/plans/**` | `internal-published` | Curated pages MAY be shown under `Internal / Extended -> Plans` | [docs/plans/README.md](../../plans/README.md) or curated nav node |
-| `docs/reports/**` | `internal-published` + `internal` | Curated evidence/report pages MAY be in `Internal / Extended -> Reports`; active planning SHOULD prefer `docs/plans/**` or `reports/plans/**` | [docs/reports/index.md](../../reports/index.md) |
-| `docs/99-archive/**` | `archive` | SHOULD remain non-nav by default; curated archive entrypoints MAY appear in nav with explicit historical labeling | [docs/99-archive/README.md](../../99-archive/README.md) (or equivalent archive index) |
+| `plans/**` | `internal` + `repo-only` | Working plans MAY remain outside MkDocs publication; surface them from published docs only as repository paths or curated summaries when needed | Repository path `plans/README.md` |
+| `reports/**` | `internal` + `repo-only` | Curated evidence/report artifacts MAY stay outside MkDocs publication; published docs SHOULD reference them as repository paths or summarized findings rather than nav pages | Repository path `reports/README.md` |
+| `docs/99-archive/**` | `archive` | SHOULD remain non-nav by default; curated archive entrypoints MAY appear in nav with explicit historical labeling | Repository path `docs/99-archive/README.md` (or equivalent archive index) |
 
 Notes:
 - active project guidance comes from published docs in `docs/00-05`;

@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.24 | Last updated: 2026-03-24*
+*Synced with RULES.md v5.24 | Last updated: 2026-03-27*
 
 > **Documentation Update:** 2026-03-24
 > - Compatibility inventory synced with the current measured CLI shim registry
@@ -9,6 +9,7 @@
 > - Active entry points clarified: `RULES.md`, `TOOLS.md`, and canonical layer docs in `docs/02-architecture/`
 > - 2026-03-20: stale config-loader entry updated to current composition/runtime and infrastructure config seams
 > - 2026-03-24: composition/domain references synced with RF-021 config ownership and RF-022 runtime port contracts
+> - 2026-03-27: navigator synced with ADR-044/ADR-045, GitHub local workflow guide, and active traceability runbooks
 
 ## Quick Links
 
@@ -22,7 +23,7 @@
 | Handle a prod error     | [runbooks/index.md](../05-operations/runbooks/index.md)                           |
 | Understand architecture | [00-overview.md](../02-architecture/00-overview.md)                  |
 | Check data contracts    | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
-| Need historical context | [99-archive/README.md](../99-archive/README.md) *(non-canonical)* |
+| Need historical context | Repository path `docs/99-archive/README.md` *(non-canonical)* |
 
 ---
 
@@ -61,7 +62,7 @@ docs/
 │
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
-│   ├── decisions/               # ADRs (ADR-001..043)
+│   ├── decisions/               # ADRs (ADR-001..045)
 │   ├── diagrams/            # Canonical Mermaid source files and rendered views
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
 │
@@ -83,7 +84,7 @@ docs/
 │   ├── verification/            # Data verification reports
 │   └── ... (Ops guides: vacuum, performance)
 │
-└── 99-archive/                  # Historical / superseded (non-nav, non-canonical)
+└── 99-archive/                  # Historical / superseded (repo-only, non-canonical)
     ├── reports/                 # Old project reports
     └── ...
 ```
@@ -190,6 +191,7 @@ docs/
 | Adding Providers | [add-new-source.md](../03-guides/add-new-source.md)                                                | App D    |
 | Adding Pipelines | [add-pipeline-existing-source.md](../03-guides/add-pipeline-existing-source.md)                    | App D    |
 | Pipeline Review  | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md)                          | §4.2     |
+| GitHub Workflow  | [github-local-workflow.md](../03-guides/github-local-workflow.md)                                | §7.3     |
 | Testing          | [testing.md](../03-guides/testing.md)                                                              | §4.2     |
 | Coverage Config  | [coverage-configuration.md](../03-guides/coverage-configuration.md)                                | §4.2     |
 | E2E Testing      | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |

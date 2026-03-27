@@ -11,7 +11,8 @@ Use the primary active documentation entry points:
 
 Active guidance lives under `docs/00-05`. Materials in `docs/99-archive/`
 remain useful for traceability, but they are not normative for current
-project behavior.
+project behavior. Treat `docs/99-archive/README.md` as a repository path,
+not as a published MkDocs page.
 
 Then use section entry points as needed:
 
@@ -21,4 +22,5 @@ Then use section entry points as needed:
 - [Guides](03-guides/getting-started.md)
 - [Reference](04-reference/cli.md)
 - [Operations](05-operations/README.md)
-- [Archive Index](99-archive/README.md) — historical context only; not normative
+- Repository path `docs/99-archive/README.md` — archive index for historical
+  context only; not normative
