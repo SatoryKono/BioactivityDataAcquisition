@@ -4,42 +4,29 @@ from __future__ import annotations
 
 __all__ = ["ScalarValue", "T", "TEntity_co"]
 
-
-import datetime
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING
 
-import orjson
-
-from bioetl.domain.types import ContentHash, EntityID, GoldRecord
+from bioetl.application.core.base_transformer_runtime import (
+    ScalarValue,
+    T,
+    TEntity_co,
+    create_entity,
+    extract_by_path,
+    extract_nested,
+    get_required_field,
+    normalize_lineage_value,
+    serialize_dict,
+    serialize_json,
+    serialize_json_fields,
+    serialize_json_list,
+    serialize_list,
+)
+from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.entities import BaseEntity
     from bioetl.domain.types import BronzeRecord
-
-T = TypeVar("T", bound="BaseEntity")
-TEntity_co = TypeVar("TEntity_co", bound="BaseEntity", covariant=True)
-ScalarValue = str | int | float | bool | None
-
-
-class _EntityConstructor(Protocol[TEntity_co]):
-    """Constructor protocol for entity dataclasses with lineage kwargs."""
-
-    def __call__(
-        self,
-        *,
-        entity_id: EntityID,
-        content_hash: ContentHash,
-        run_id: object,
-        run_type: object,
-        source_batch_id: object | None,
-        ingestion_ts: datetime.datetime,
-        _index: int,
-        **business_data: object,
-    ) -> TEntity_co:
-        """Create and return an entity instance."""
-        ...
 
 
 class _BaseTransformerRecordHelpersMixin:
@@ -57,39 +44,15 @@ class _BaseTransformerRecordHelpersMixin:
             JSON string for composite types, the original scalar for primitives,
             or None when the value is None or an empty composite.
         """
-        if value is None:
-            return None
-
-        if isinstance(value, dict):
-            typed_dict = cast("dict[str, object]", value)
-            return _BaseTransformerRecordHelpersMixin._serialize_dict(typed_dict)
-
-        if isinstance(value, list):
-            typed_list = cast("list[object]", value)
-            return _BaseTransformerRecordHelpersMixin._serialize_list(typed_list)
-
-        return cast("ScalarValue", value)
+        return serialize_json(value)
 
     @staticmethod
     def _serialize_dict(d: dict[str, object]) -> str | None:
-        if not d:
-            return None
-        return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+        return serialize_dict(d)
 
     @staticmethod
     def _serialize_list(lst: list[object]) -> ScalarValue:
-        if not lst:
-            return None
-        if len(lst) == 1:
-            item = lst[0]
-            if isinstance(item, (dict, list)):
-                return (
-                    None
-                    if not item
-                    else orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                )
-            return cast("ScalarValue", item)
-        return orjson.dumps(lst, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+        return serialize_list(lst)
 
     @staticmethod
     def serialize_json_list(value: Sequence[object] | None) -> str | None:
@@ -102,10 +65,7 @@ class _BaseTransformerRecordHelpersMixin:
         Returns:
             JSON array string, or None when the sequence is None or empty.
         """
-        if value is None or len(value) == 0:
-            return None
-        json_bytes: bytes = orjson.dumps(list(value), option=orjson.OPT_SORT_KEYS)
-        return json_bytes.decode("utf-8")
+        return serialize_json_list(value)
 
     @classmethod
     def serialize_json_fields(
@@ -122,7 +82,7 @@ class _BaseTransformerRecordHelpersMixin:
         Returns:
             Dictionary mapping each field name to its serialized scalar value.
         """
-        return {name: cls.serialize_json(record.get(name)) for name in field_names}
+        return serialize_json_fields(record=record, field_names=field_names)
 
     @staticmethod
     def _normalize_lineage_value(
@@ -130,15 +90,7 @@ class _BaseTransformerRecordHelpersMixin:
         value: object,
     ) -> object:
         """Normalize lineage/meta field values after rename."""
-        if field_name == "run_id" and value is not None:
-            return str(value)
-        if field_name == "run_type" and value is not None:
-            return str(getattr(value, "value", value))
-        if field_name == "source_batch_id":
-            return str(value) if value else None
-        if field_name == "ingestion_ts" and isinstance(value, datetime.datetime):
-            return value.isoformat()
-        return value
+        return normalize_lineage_value(field_name=field_name, value=value)
 
     @staticmethod
     def _get_required_field(
@@ -158,23 +110,7 @@ class _BaseTransformerRecordHelpersMixin:
         Returns:
             The field value if present and non-empty (per ``allow_empty`` rules).
         """
-        from bioetl.application.core.base_transformer import TransformationError
-
-        value = record.get(field)
-        if value is None:
-            raise TransformationError(f"Missing required field: {field}", field=field)
-
-        if not allow_empty:
-            if isinstance(value, str) and not value.strip():
-                raise TransformationError(
-                    f"Required field is empty: {field}", field=field
-                )
-            if isinstance(value, (list, dict)) and len(value) == 0:
-                raise TransformationError(
-                    f"Required field is empty: {field}", field=field
-                )
-
-        return value
+        return get_required_field(record=record, field=field, allow_empty=allow_empty)
 
     @staticmethod
     def _extract_by_path(
@@ -193,15 +129,7 @@ class _BaseTransformerRecordHelpersMixin:
         Returns:
             The extracted value at the end of the key path, or ``default`` if not found.
         """
-        current: object = record
-        for key in keys:
-            if not isinstance(current, dict):
-                return default
-            current_dict = cast("dict[str, object]", current)
-            current = current_dict.get(key)
-            if current is None:
-                return default
-        return current
+        return extract_by_path(record=record, keys=keys, default=default)
 
     @staticmethod
     def _extract_nested(
@@ -219,10 +147,7 @@ class _BaseTransformerRecordHelpersMixin:
         Returns:
             The value at the end of the dot path, or ``default`` if not found.
         """
-        keys = path.split(".")
-        return _BaseTransformerRecordHelpersMixin._extract_by_path(
-            record, keys, default
-        )
+        return extract_nested(record=record, path=path, default=default)
 
     def _create_entity(
         self,
@@ -246,14 +171,11 @@ class _BaseTransformerRecordHelpersMixin:
         Returns:
             Instantiated entity of type ``T`` with lineage fields populated.
         """
-        entity_factory = cast("_EntityConstructor[T]", entity_class)
-        return entity_factory(
-            entity_id=EntityID(entity_id),
-            content_hash=ContentHash(content_hash),
-            run_id=context.run_id,
-            run_type=context.run_type,
-            source_batch_id=None,
-            ingestion_ts=context.started_at,
-            _index=index,
-            **business_data,
+        return create_entity(
+            entity_class=entity_class,
+            context=context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            business_data=business_data,
         )

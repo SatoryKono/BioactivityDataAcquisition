@@ -44,6 +44,7 @@ class MergedMetadataExplainabilityService:
         composite_metadata: CompositeOutputExt,
         field_priorities: dict[str, JsonDict] | None = None,
     ) -> MergedFieldExplanation:
+        """Describe how one merged field was selected and enriched."""
         source_providers = list(composite_metadata.source_providers or [])
         priority_order = _resolve_priority_order(field_name, field_priorities)
         return MergedFieldExplanation(
@@ -64,6 +65,7 @@ class MergedMetadataExplainabilityService:
         field_priorities: dict[str, JsonDict] | None = None,
         merge_strategy: str = "prioritize",
     ) -> MergedRecordExplanation:
+        """Build explainability details for one merged output record."""
         field_explanations = [
             self.generate_field_explanation(
                 field_name,
@@ -93,6 +95,7 @@ class MergedMetadataExplainabilityService:
         field_priorities: dict[str, JsonDict] | None = None,
         merge_strategy: str = "prioritize",
     ) -> list[MergedRecordExplanation]:
+        """Generate record-level explainability objects for a merged batch."""
         return [
             self.generate_record_explanation(
                 _resolve_record_id(record),
@@ -108,6 +111,7 @@ class MergedMetadataExplainabilityService:
         self,
         explanations: list[MergedRecordExplanation],
     ) -> JsonDict:
+        """Summarize explainability coverage, conflicts, and enrichments."""
         if not explanations:
             return _empty_explainability_summary()
         return _build_explainability_summary(explanations)
@@ -116,6 +120,7 @@ class MergedMetadataExplainabilityService:
         self,
         field_priorities: dict[str, JsonDict],
     ) -> list[JsonDict]:
+        """Expose field-priority policy in a report-friendly structure."""
         return [
             {
                 "field_name": field_name,

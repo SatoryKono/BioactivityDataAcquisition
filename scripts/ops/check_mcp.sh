@@ -45,7 +45,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem sequential-thinking github; do
+for server in memory filesystem sequential-thinking fetch pdf github openaiDeveloperDocs; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -57,12 +57,18 @@ done
 memory_out="$(codex mcp get memory 2>&1 || true)"
 filesystem_out="$(codex mcp get filesystem 2>&1 || true)"
 sequential_out="$(codex mcp get sequential-thinking 2>&1 || true)"
+fetch_out="$(codex mcp get fetch 2>&1 || true)"
+pdf_out="$(codex mcp get pdf 2>&1 || true)"
 github_out="$(codex mcp get github 2>&1 || true)"
+openai_docs_out="$(codex mcp get openaiDeveloperDocs 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
 require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026.1.14" "filesystem is pinned to @2026.1.14" || status=1
 require_contains "$sequential_out" "@modelcontextprotocol/server-sequential-thinking@2025.12.18" "sequential-thinking is pinned to @2025.12.18" || status=1
+require_contains "$fetch_out" "mcp-server-fetch==2025.4.7" "fetch is pinned to mcp-server-fetch==2025.4.7" || status=1
+require_contains "$pdf_out" "@modelcontextprotocol/server-pdf@1.3.1" "pdf is pinned to @1.3.1" || status=1
 require_contains "$github_out" "@modelcontextprotocol/server-github@2025.4.8" "github is pinned to @2025.4.8" || status=1
+require_contains "$openai_docs_out" "https://developers.openai.com/mcp" "openaiDeveloperDocs points to official OpenAI MCP endpoint" || status=1
 
 if grep -Fq -- "${REPO_ROOT}" <<<"$filesystem_out"; then
   ok "filesystem scope is restricted to repo root"

@@ -20,6 +20,8 @@ _SUPPORTED_AGGREGATIONS = frozenset(
 
 @dataclass(frozen=True)
 class AggregationConfig:
+    """Canonical aggregation settings used by preflight validation."""
+
     group_by: list[str]
     aggregations: dict[str, str]
     source_field: str | None = None
@@ -28,6 +30,8 @@ class AggregationConfig:
 
 @dataclass(frozen=True)
 class AggregationProvenance:
+    """Explainability metadata describing one aggregated output field."""
+
     field_name: str
     source_field: str
     aggregation_function: str
@@ -43,6 +47,7 @@ class AggregationValidator:
         source_schema: JsonDict,
         execution_context: JsonDict | None = None,
     ) -> ValidationResult:
+        """Validate aggregation config against schema and governance rules."""
         issues: list[ValidationIssue] = []
         issues.extend(self._validate_group_by_fields(config, source_schema))
         issues.extend(self._validate_aggregation_functions(config))
@@ -185,6 +190,7 @@ class AggregationValidator:
         aggregation_results: list[JsonDict],
         group_by_fields: list[str],
     ) -> ValidationResult:
+        """Ensure aggregation output preserves the expected grouping grain."""
         duplicate_groups = self._collect_duplicate_groups(
             aggregation_results=aggregation_results,
             group_by_fields=group_by_fields,
@@ -269,6 +275,7 @@ class AggregationValidator:
         aggregation_config: AggregationConfig,
         source_records: list[JsonDict],
     ) -> list[AggregationProvenance]:
+        """Build provenance facts for each configured aggregation field."""
         provenance: list[AggregationProvenance] = []
         for field, function in aggregation_config.aggregations.items():
             source_field = aggregation_config.source_field or field
@@ -282,7 +289,3 @@ class AggregationValidator:
                 )
             )
         return provenance
-
-
-def create_aggregation_validator() -> AggregationValidator:
-    return AggregationValidator()

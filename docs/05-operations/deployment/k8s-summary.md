@@ -64,11 +64,18 @@
 
 ```bash
 # Update image registry in k8s-deployment.yaml
-sed -i 's|image: bioetl:6.0.0|image: YOUR-REGISTRY/bioetl:6.0.0|g' k8s-deployment.yaml
+sed -i 's|image: bioetl:REPLACE_IMAGE_TAG|image: YOUR-REGISTRY/bioetl:REPLACE_IMAGE_TAG|g' k8s-deployment.yaml
 
 # Build and push container
-docker build -t YOUR-REGISTRY/bioetl:6.0.0 .
-docker push YOUR-REGISTRY/bioetl:6.0.0
+docker build -t YOUR-REGISTRY/bioetl:REPLACE_IMAGE_TAG .
+docker push YOUR-REGISTRY/bioetl:REPLACE_IMAGE_TAG
+```
+
+If you use the helper automation, pass the same registry/tag pair explicitly:
+
+```bash
+BIOETL_IMAGE_REGISTRY=YOUR-REGISTRY BIOETL_IMAGE_TAG=REPLACE_IMAGE_TAG \
+  scripts/ops/deploy-bioetl.sh deploy dev
 ```
 
 ### 2. Deploy

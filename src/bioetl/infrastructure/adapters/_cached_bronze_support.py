@@ -23,12 +23,16 @@ class BronzeBatchReader(Protocol):
         provider: str,
         entity: str,
         date: datetime | None = None,
-    ) -> list[str]: ...
+    ) -> list[str]:
+        """Return available Bronze batch paths for the requested scope."""
+        ...
 
     def read_bronze(
         self,
         path: str,
-    ) -> AsyncIterator[JsonDict]: ...
+    ) -> AsyncIterator[JsonDict]:
+        """Stream Bronze records from one persisted batch path."""
+        ...
 
 
 def parse_bronze_date(date_str: str | None) -> datetime | None:

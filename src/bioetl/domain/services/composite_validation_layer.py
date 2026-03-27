@@ -36,6 +36,7 @@ from bioetl.domain.types.validation_severity import (
 
 @dataclass(frozen=True)
 class CompositeValidationConfig:
+    """Inputs and governance knobs for composite validation."""
     pipeline_name: str
     composite_config: JsonDict
     execution_context: JsonDict | None = None
@@ -46,19 +47,22 @@ class CompositeValidationConfig:
 class CompositeValidationService:
     """Service for structural and deep-preflight composite validation."""
 
-    def __init__(self) -> None:
-        self._aggregation_validator = AggregationValidator()
-        self._cross_validation_validator = CrossValidationValidator()
-        self._preflight_governance = PreflightGovernanceService(
-            config=PreflightGovernanceConfig(
-                policy=GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
-            )
-        )
+    def __init__(
+        self,
+        *,
+        aggregation_validator: AggregationValidator,
+        cross_validation_validator: CrossValidationValidator,
+        preflight_governance: PreflightGovernanceService,
+    ) -> None:
+        self._aggregation_validator = aggregation_validator
+        self._cross_validation_validator = cross_validation_validator
+        self._preflight_governance = preflight_governance
 
     def validate_composite(
         self,
         config: CompositeValidationConfig,
     ) -> CompositeValidationReport:
+        """Run structural and deep-preflight validation for one composite config."""
         structural_result = self._run_structural_validation(config)
         deep_preflight_result = self._run_deep_preflight_validation(config)
         validation_report = CompositeValidationReport(
@@ -74,10 +78,10 @@ class CompositeValidationService:
                 else False
             ),
         )
-        governance_service = PreflightGovernanceService(config=governance_config)
-        governance_decision = governance_service.apply_governance(
+        governance_decision = self._preflight_governance.apply_governance(
             validation_report,
             execution_context=config.execution_context,
+            config=governance_config,
         )
         return CompositeValidationReport(
             structural_result=structural_result,
@@ -285,7 +289,3 @@ class CompositeValidationService:
     @staticmethod
     def _is_valid_lineage_config(config: JsonDict) -> bool:
         return _is_valid_lineage_config(config)
-
-
-def create_composite_validation_service() -> CompositeValidationService:
-    return CompositeValidationService()

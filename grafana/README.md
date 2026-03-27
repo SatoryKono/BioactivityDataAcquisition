@@ -347,7 +347,11 @@ make monitoring-up
 docker compose -f docker-compose.monitoring.yml up -d
 
 # Запуск расширенного профиля с трассировкой и лог-корреляцией
-docker compose -f docker-compose.monitoring.yml --profile tracing up -d
+make monitoring-tracing-up
+
+# Или напрямую:
+BIOETL_ENABLE_TRACING_DATASOURCES=true \
+  docker compose -f docker-compose.monitoring.yml --profile tracing up -d
 
 # Проверка статуса контейнеров
 docker compose -f docker-compose.monitoring.yml ps
@@ -397,6 +401,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT` | `3` | Количество попыток запуска (1-10) |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY` | `1.0` | Задержка между попытками (0.1-10.0 с) |
 | `GF_SECURITY_ADMIN_PASSWORD` | `admin` | Пароль администратора Grafana |
+| `BIOETL_ENABLE_TRACING_DATASOURCES` | `false` | Подключать Loki/Tempo datasource в Grafana provisioning |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | `false` | Включить OpenTelemetry spans и log-trace correlation |
 
 ---
@@ -417,12 +422,13 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 - Restart: `unless-stopped`
 
 **Grafana:**
-- Image: `grafana/grafana:latest`
+- Image: `grafana/grafana:12.0.0`
 - Container: `bioetl-grafana`
 - Порт: `3000:3000`
 - Volumes:
   - `grafana-data` → `/var/lib/grafana` (persistent данные Grafana)
-  - `./grafana/provisioning/datasources` → `/etc/grafana/provisioning/datasources` (read-only)
+  - `./grafana/provisioning/datasources-core` → bootstrap-источник обязательных datasource
+  - `./grafana/provisioning/datasources-tracing` → bootstrap-источник tracing datasource
   - `./grafana/provisioning/dashboards` → `/etc/grafana/provisioning/dashboards` (read-only)
   - `./grafana/dashboards` → `/var/lib/grafana/dashboards` (read-only, JSON-дашборды)
 - Restart: `unless-stopped`
@@ -921,6 +927,17 @@ docker compose -f docker-compose.monitoring.yml restart prometheus
 # http://localhost:3000/connections/datasources
 # Должен быть "Prometheus" с URL "http://prometheus:9090"
 # Нажать "Test" — должен показать "Data source is working"
+```
+
+**Причина 3a: включён Tempo/Loki datasource без tracing-профиля.**
+
+```bash
+# Базовый стек не должен требовать Tempo/Loki.
+make monitoring-down
+make monitoring-up
+
+# Если нужен tracing-стек, поднимайте его так:
+make monitoring-tracing-up
 ```
 
 **Причина 4: Метрики отключены в приложении.**

@@ -33,6 +33,24 @@ class _FilteredDataSourceState(Protocol):
     _fallback_mapping: dict[str, str] | None
 
 
+async def enter_filtered_data_source(state: _FilteredDataSourceState) -> None:
+    """Enter the wrapped adapter and preload any configured filters."""
+    await state._data_source.__aenter__()
+
+    if not state._filter_config.enabled:
+        return
+
+    if state._filter_config.direct_multi_filter_ids:
+        load_direct_multi_filter_ids(state)
+        return
+
+    if state._filter_config.direct_filter_ids:
+        load_direct_filter_ids(state)
+        return
+
+    await load_csv_filter_ids(state)
+
+
 def log_filter_file_not_found(
     state: _FilteredDataSourceState,
     source_path: str,

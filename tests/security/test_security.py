@@ -277,6 +277,7 @@ class TestPrivateKeyExposure:
             ".ruff_cache",
             ".hypothesis",
             ".benchmarks",
+            ".cache",
             ".import_linter_cache",
             ".claude",
             ".codex",
@@ -317,10 +318,28 @@ class TestPrivateKeyExposure:
         violations = []
         key_extensions = {".pem", ".key", ".p12", ".pfx"}
 
-        # 1) Check file extensions across all project files
-        for file_path in all_files:
+        tracked_files = all_files
+        try:
+            tracked = subprocess.run(
+                ["git", "ls-files"],
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=str(PROJECT_ROOT),
+            )
+            if tracked.returncode == 0 and tracked.stdout.strip():
+                tracked_files = [
+                    PROJECT_ROOT / rel_path
+                    for rel_path in tracked.stdout.strip().splitlines()
+                ]
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+
+        # 1) Check tracked repository files for private-key-like extensions.
+        for file_path in tracked_files:
             if file_path.suffix.lower() in key_extensions:
-                violations.append(f"{file_path.name}: Private key file extension")
+                rel_path = file_path.relative_to(PROJECT_ROOT)
+                violations.append(f"{rel_path}: Private key file extension")
 
         # 2) Check file content using git grep (immune to Windows file locks)
         text_globs = ["*.py", "*.txt", "*.yaml", "*.yml", "*.json", "*.md"]
@@ -343,6 +362,10 @@ class TestPrivateKeyExposure:
             )
             if result.returncode == 0 and result.stdout.strip():
                 for match_file in result.stdout.strip().splitlines():
+                    # The security tests themselves carry the detection pattern.
+                    # Exclude them from repository-content hits to avoid self-matches.
+                    if match_file.startswith("tests/security/"):
+                        continue
                     violations.append(f"{match_file}: Contains private key")
         except (subprocess.TimeoutExpired, OSError):
             pass  # git grep unavailable or timed out -- skip content check

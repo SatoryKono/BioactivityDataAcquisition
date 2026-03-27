@@ -26,7 +26,25 @@ from bioetl.application.core._span_helpers import (
     start_current_span,
 )
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
-from bioetl.domain.events import PipelineEvent
+from bioetl.application.core.runner_flow import (
+    emit_pipeline_completion,
+    emit_pipeline_start,
+    extract_checkpoint_offset,
+    record_run_failed,
+    record_run_finished,
+    record_run_shutdown,
+    record_run_started,
+    record_stage_completed,
+    resolve_execution_offset,
+)
+from bioetl.application.core.runner_execution_flow import (
+    execute_pipeline,
+    prepare_medallion_layers,
+    run_execution_cycle,
+    run_managed_pipeline,
+    run_postrun_phase,
+    validate_infrastructure,
+)
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -293,132 +311,70 @@ class PipelineRunner:
 
     def _log_start(self) -> None:
         """Emit the pipeline start event."""
-        self._logger.info(
-            PipelineEvent.START,
-            pipeline=self._config.pipeline_name,
-            stage="startup",
-            run_type=self._runtime.run_type.value,
-        )
+        emit_pipeline_start(self)
 
     def _log_completion(self) -> None:
         """Emit the pipeline completion event."""
-        self._logger.debug(
-            PipelineEvent.COMPLETE,
-            records_fetched=self._executor.records_fetched,
-        )
+        emit_pipeline_completion(self)
 
     def _record_run_started(self) -> None:
         """Append run_started ledger entry when control-plane ledger is attached."""
-        if self._run_ledger_service is None:
-            return
-        self._run_ledger_service.record_run_started()
+        record_run_started(self)
 
     def _record_stage_completed(self, stage: str) -> None:
         """Append stage_completed ledger entry."""
-        if self._run_ledger_service is None:
-            return
-        self._run_ledger_service.record_stage_completed(
-            stage=stage,
-            metrics_snapshot=self.execution_metrics,
-        )
+        record_stage_completed(self, stage)
 
     def _record_run_finished(self) -> None:
         """Append successful completion ledger entry."""
-        if self._run_ledger_service is None:
-            return
-        self._run_ledger_service.record_run_finished(
-            metrics_snapshot=self.execution_metrics,
-        )
+        record_run_finished(self)
 
     def _record_run_shutdown(self) -> None:
         """Append graceful shutdown ledger entry."""
-        if self._run_ledger_service is None:
-            return
-        self._run_ledger_service.record_run_shutdown(
-            metrics_snapshot=self.execution_metrics,
-        )
+        record_run_shutdown(self)
 
     def _record_run_failed(self, exc: Exception) -> None:
         """Append failed completion ledger entry."""
-        if self._run_ledger_service is None:
-            return
-        self._run_ledger_service.record_run_failed(
-            message=str(exc),
-            error_type=type(exc).__name__,
-            metrics_snapshot=self.execution_metrics,
-        )
+        record_run_failed(self, exc)
 
     async def _run_managed_pipeline(self) -> None:
         """Run the validated pipeline lifecycle within managed contexts."""
-        await self._validate_infrastructure()
-        self._record_stage_completed("preflight")
-        await self._prepare_medallion_layers()
-        self._record_stage_completed("prepare_medallion_layers")
-        await self._run_execution_cycle()
+        await run_managed_pipeline(self)
 
     async def _run_execution_cycle(self) -> None:
         """Execute extraction, postrun, and checkpoint finalization."""
-        offset = await self._resolve_execution_offset()
-        await self._execute_pipeline(offset=offset)
-        self._record_stage_completed("execute_pipeline")
-        await self._run_postrun_phase()
-        self._record_stage_completed("postrun")
-        await self._checkpoint_manager.delete_checkpoint()
-        self._record_stage_completed("checkpoint_finalize")
+        await run_execution_cycle(self)
 
     async def _resolve_execution_offset(self) -> int | None:
         """Resolve the executor start offset from runtime overrides or checkpoint."""
-        if self._runtime.start_offset is not None:
-            self._logger.info(
-                "Using manual start offset",
-                offset=self._runtime.start_offset,
-            )
-            return self._runtime.start_offset
-
-        checkpoint_meta = await _load_checkpoint_with_current_metadata(
-            self._checkpoint_manager
+        return await resolve_execution_offset(
+            self,
+            _load_checkpoint_with_current_metadata,
         )
-        return self._extract_checkpoint_offset(checkpoint_meta)
 
     def _extract_checkpoint_offset(
         self,
         checkpoint_meta: CheckpointMetadata | dict[str, object] | None,
     ) -> int | None:
         """Extract the persisted record offset from checkpoint metadata."""
-        if checkpoint_meta is None:
-            return None
-        if hasattr(checkpoint_meta, "records_processed"):
-            return int(cast("CheckpointMetadata", checkpoint_meta).records_processed)
-        raw_records = checkpoint_meta.get("records_processed")
-        return raw_records if isinstance(raw_records, int) else None
+        return extract_checkpoint_offset(checkpoint_meta)
 
     async def _execute_pipeline(self, *, offset: int | None) -> None:
         """Execute the pipeline batch executor with resolved runtime inputs."""
-        await self._executor.execute(
-            limit=self._runtime.limit,
-            query=self._runtime.query,
-            offset=offset,
-        )
+        await execute_pipeline(self, offset=offset)
 
     async def _run_postrun_phase(self) -> None:
         """Run the postrun workflow using the executor's resolved DQ context."""
-        dq_context = self._executor.get_dq_context()
-        await self._postrun_service.run(
-            executor=self._executor,
-            dq_context=dq_context,
-        )
+        await run_postrun_phase(self)
 
     # Backward-compatible private methods (delegate to services)
     async def _validate_infrastructure(self) -> None:
         """Validate infrastructure health before pipeline execution."""
-        await self._preflight_service.validate_infrastructure(self._services)
+        await validate_infrastructure(self)
 
     async def _prepare_medallion_layers(self) -> None:
         """Prepare medallion layers (clear based on run type policy)."""
-        await self._lifecycle_service.prepare_for_run(
-            config=self._config,
-            runtime=self._runtime,
-        )
+        await prepare_medallion_layers(self)
 
     def _check_data_quality(self) -> None:
         """Check data quality metrics and report anomalies."""

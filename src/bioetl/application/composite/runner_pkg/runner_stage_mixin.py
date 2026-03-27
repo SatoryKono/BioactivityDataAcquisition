@@ -19,6 +19,11 @@ from bioetl.application.composite.runner_pkg.runner_stage_dependency_flow import
     collect_successful_dependencies,
     validate_dependency_preconditions,
 )
+from bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow import (
+    complete_dependencies_phase,
+    handle_dependencies_phase_exception,
+    start_dependencies_phase,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
     _CompositeRunnerStageEnrichmentMixin,
 )
@@ -35,8 +40,7 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions import BioETLError, InvalidStateError
 from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 __all__ = ["CompositeRunnerStageMixin"]
@@ -172,23 +176,11 @@ class CompositeRunnerStageMixin(
         context: _PreparedDependenciesRunContext,
     ) -> CompositeCheckpointState:
         """Transition to DEPENDENCIES_RUNNING, persist checkpoint, and emit phase log."""
-        dependencies = context.dependency_pipeline_names
-        state = self._transition_state_with_fsm_log(
+        return await start_dependencies_phase(
+            self,
             state,
-            CompositePipelineState.DEPENDENCIES_RUNNING,
-            stage="dependencies_start",
-            dependencies=dependencies,
-            count=len(dependencies),
+            dependency_pipeline_names=context.dependency_pipeline_names,
         )
-        await self._call_save_checkpoint_safe(state, "dependencies_running")
-        self._logger.info(
-            PipelineEvent.phase_started("dependencies"),
-            composite=self._config.name,
-            run_id=self._run_id_str,
-            dependencies=dependencies,
-            count=len(dependencies),
-        )
-        return state
 
     async def _postprocess_dependency_results(
         self: _CompositeRunnerStageHostProtocol,
@@ -231,7 +223,13 @@ class CompositeRunnerStageMixin(
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
         """Check for required failures and complete the dependencies phase."""
         if outcome.required_failed:
-            await self._fail_required_dependencies(state, outcome.required_failed)
+            message = f"Required dependencies failed: {outcome.required_failed}"
+            await self._persist_failed_state(
+                state,
+                stage="dependencies_failed",
+                error=message,
+            )
+            raise InvalidStateError(message)
 
         completed_state = await self._complete_dependencies_phase(
             state,
@@ -248,23 +246,12 @@ class CompositeRunnerStageMixin(
         failed: int,
     ) -> CompositeCheckpointState:
         """Transition to DEPENDENCIES_COMPLETED, log, and persist checkpoint."""
-        completed_state = self._transition_state_with_fsm_log(
+        return await complete_dependencies_phase(
+            self,
             state,
-            CompositePipelineState.DEPENDENCIES_COMPLETED,
-            stage="dependencies_complete",
-            validate=False,
             succeeded=succeeded,
             failed=failed,
         )
-        self._logger.info(
-            PipelineEvent.phase_completed("dependencies"),
-            composite=self._config.name,
-            run_id=self._run_id_str,
-            succeeded=succeeded,
-            failed=failed,
-        )
-        await self._call_save_checkpoint_safe(completed_state, "dependencies_completed")
-        return completed_state
 
     async def _handle_dependencies_phase_exception(
         self: _CompositeRunnerStageHostProtocol,
@@ -272,20 +259,4 @@ class CompositeRunnerStageMixin(
         error: Exception,
     ) -> None:
         """Log dependency-phase failure and persist FAILED checkpoint."""
-        reason_code = (
-            "unexpected_bioetl_error" if isinstance(error, BioETLError) else None
-        )
-        log_kwargs: dict[str, object] = {
-            "composite": self._config.name,
-            "run_id": self._run_id_str,
-            "error": str(error),
-            "error_type": type(error).__name__,
-        }
-        if reason_code:
-            log_kwargs["reason_code"] = reason_code
-        self._logger.error("Dependencies phase failed", **log_kwargs)
-        await self._persist_failed_state(
-            state,
-            stage="dependencies_failed",
-            error=str(error),
-        )
+        await handle_dependencies_phase_exception(self, state, error)

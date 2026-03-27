@@ -76,7 +76,9 @@ class RunAllExecutionPlan:
 class PipelineRegistryView(Protocol):
     """Minimal registry contract used by run-all helper functions."""
 
-    def list_pipelines(self) -> list[str]: ...
+    def list_pipelines(self) -> list[str]:
+        """Return all registered pipeline names visible to the CLI."""
+        ...
 
 
 def resolve_run_all_registry(

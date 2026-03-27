@@ -7,7 +7,20 @@ import time
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
-from bioetl.domain.exceptions import InfrastructureError
+from bioetl.application.core.preflight.health_aggregator_reporting import (
+    assert_report_healthy,
+    log_health_report,
+    record_health_metrics,
+    record_probe_mode_fallback,
+)
+from bioetl.application.core.preflight.health_aggregator_runtime import (
+    build_component_result,
+    build_data_source_exception_result,
+    build_parallel_exception_result,
+    normalize_data_source_error,
+    normalize_data_source_status,
+    resolve_probe_fallback_reason,
+)
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
@@ -69,19 +82,12 @@ class HealthAggregator:
         component_results: list[ComponentHealthResult] = []
         for result in results:
             if isinstance(result, BaseException):
-                component_results.append(
-                    ComponentHealthResult(
-                        component="unknown",
-                        status=HealthStatus.UNHEALTHY,
-                        duration_seconds=0.0,
-                        error_message=str(result),
-                    )
-                )
+                component_results.append(build_parallel_exception_result(result))
             else:
                 component_results.append(result)
 
         report = HealthReport(results=component_results)
-        self._log_report(report)
+        log_health_report(logger=self._logger, report=report)
         return report
 
     async def _check_storage(self, services: PipelineService) -> ComponentHealthResult:
@@ -91,21 +97,30 @@ class HealthAggregator:
         try:
             status = await services.storage.health_check()
             duration = time.perf_counter() - start_time
-            result = ComponentHealthResult(
+            result = build_component_result(
                 component=component,
                 status=status,
                 duration_seconds=duration,
             )
         except _HEALTH_CHECK_ERRORS as exc:
             duration = time.perf_counter() - start_time
-            result = ComponentHealthResult(
+            result = build_component_result(
                 component=component,
                 status=HealthStatus.UNHEALTHY,
                 duration_seconds=duration,
                 error_message=str(exc),
             )
 
-        self._record_metrics(component, result)
+        record_health_metrics(
+            metrics=self._metrics,
+            component=component,
+            result=result,
+            health_check_mode=self._health_check_mode,
+            metric_health_status=self.METRIC_HEALTH_STATUS,
+            metric_health_mode_status=self.METRIC_HEALTH_MODE_STATUS,
+            metric_health_latency=self.METRIC_HEALTH_LATENCY,
+            metric_health_mode_latency=self.METRIC_HEALTH_MODE_LATENCY,
+        )
         return result
 
     async def _check_data_source(
@@ -121,7 +136,10 @@ class HealthAggregator:
             if hasattr(services.data_source, "check_health"):
                 health_result = await services.data_source.check_health()
                 status = health_result.status
-                fallback_reason = self._resolve_probe_fallback_reason(status)
+                fallback_reason = resolve_probe_fallback_reason(
+                    health_check_mode=self._health_check_mode,
+                    status=status,
+                )
                 duration = time.perf_counter() - start_time
 
                 if self._health_monitor is not None:
@@ -129,24 +147,35 @@ class HealthAggregator:
                         health_result, self._logger
                     )
 
-                result = ComponentHealthResult(
+                result = build_component_result(
                     component=component,
-                    status=self._normalize_data_source_status(status),
+                    status=normalize_data_source_status(
+                        health_check_mode=self._health_check_mode,
+                        status=status,
+                    ),
                     duration_seconds=duration,
-                    error_message=self._normalize_data_source_error(
+                    error_message=normalize_data_source_error(
+                        health_check_mode=self._health_check_mode,
                         status=status,
                         error_message=health_result.last_error,
                     ),
                 )
             else:
                 status = await services.data_source.health_check()
-                fallback_reason = self._resolve_probe_fallback_reason(status)
+                fallback_reason = resolve_probe_fallback_reason(
+                    health_check_mode=self._health_check_mode,
+                    status=status,
+                )
                 duration = time.perf_counter() - start_time
-                result = ComponentHealthResult(
+                result = build_component_result(
                     component=component,
-                    status=self._normalize_data_source_status(status),
+                    status=normalize_data_source_status(
+                        health_check_mode=self._health_check_mode,
+                        status=status,
+                    ),
                     duration_seconds=duration,
-                    error_message=self._normalize_data_source_error(
+                    error_message=normalize_data_source_error(
+                        health_check_mode=self._health_check_mode,
                         status=status,
                         error_message=None,
                     ),
@@ -154,124 +183,34 @@ class HealthAggregator:
         except _HEALTH_CHECK_ERRORS as exc:
             duration = time.perf_counter() - start_time
             exception_message = str(exc)
-            result = ComponentHealthResult(
-                component=component,
-                status=(
-                    HealthStatus.DEGRADED
-                    if self._health_check_mode == "probe"
-                    else HealthStatus.UNHEALTHY
-                ),
+            result = build_data_source_exception_result(
+                health_check_mode=self._health_check_mode,
                 duration_seconds=duration,
-                error_message=(
-                    f"probe_mode_fallback: {exception_message}"
-                    if self._health_check_mode == "probe"
-                    else exception_message
-                ),
+                exception_message=exception_message,
             )
             if self._health_check_mode == "probe":
                 fallback_reason = "exception"
 
-        self._record_metrics(component, result, health_result)
+        record_health_metrics(
+            metrics=self._metrics,
+            component=component,
+            result=result,
+            health_check_mode=self._health_check_mode,
+            metric_health_status=self.METRIC_HEALTH_STATUS,
+            metric_health_mode_status=self.METRIC_HEALTH_MODE_STATUS,
+            metric_health_latency=self.METRIC_HEALTH_LATENCY,
+            metric_health_mode_latency=self.METRIC_HEALTH_MODE_LATENCY,
+            health_result=health_result,
+        )
         if fallback_reason is not None:
-            self._record_probe_mode_fallback(
-                component=component, reason=fallback_reason
+            record_probe_mode_fallback(
+                metrics=self._metrics,
+                pipeline_name=self._pipeline_name,
+                component=component,
+                reason=fallback_reason,
+                metric_name=self.METRIC_PROBE_MODE_FALLBACK_TOTAL,
             )
         return result
-
-    def _normalize_data_source_status(self, status: HealthStatus) -> HealthStatus:
-        """Downgrade data-source UNHEALTHY to DEGRADED in probe mode."""
-        if self._health_check_mode == "probe" and status == HealthStatus.UNHEALTHY:
-            return HealthStatus.DEGRADED
-        return status
-
-    def _normalize_data_source_error(
-        self,
-        *,
-        status: HealthStatus,
-        error_message: str | None,
-    ) -> str | None:
-        """Attach deterministic probe fallback marker when UNHEALTHY is downgraded."""
-        if self._health_check_mode != "probe" or status != HealthStatus.UNHEALTHY:
-            return error_message
-        detail = error_message or "data_source reported UNHEALTHY in health probe"
-        return f"probe_mode_fallback: {detail}"
-
-    def _resolve_probe_fallback_reason(self, status: HealthStatus) -> str | None:
-        if self._health_check_mode == "probe" and status == HealthStatus.UNHEALTHY:
-            return "status_downgrade"
-        return None
-
-    def _record_metrics(
-        self,
-        component: str,
-        result: ComponentHealthResult,
-        health_result: HealthCheckResult | None = None,
-    ) -> None:
-        if self._metrics is None:
-            return
-
-        component_labels = {"component": component}
-
-        self._metrics.set_gauge(
-            self.METRIC_HEALTH_STATUS,
-            float(result.status.to_metric_value()),
-            component_labels,
-        )
-        self._metrics.set_gauge(
-            self.METRIC_HEALTH_MODE_STATUS,
-            float(result.status.to_metric_value()),
-            {"component": component, "mode": self._health_check_mode},
-        )
-
-        if health_result is not None:
-            provider_labels = {"provider": health_result.provider}
-            self._metrics.observe_histogram(
-                self.METRIC_HEALTH_LATENCY,
-                health_result.latency_ms,
-                provider_labels,
-            )
-            self._metrics.observe_histogram(
-                self.METRIC_HEALTH_MODE_LATENCY,
-                health_result.latency_ms,
-                {
-                    "provider": health_result.provider,
-                    "mode": self._health_check_mode,
-                },
-            )
-
-    def _record_probe_mode_fallback(self, *, component: str, reason: str) -> None:
-        if self._metrics is None:
-            return
-        self._metrics.increment_counter(
-            self.METRIC_PROBE_MODE_FALLBACK_TOTAL,
-            1,
-            {
-                "pipeline": self._pipeline_name,
-                "component": component,
-                "reason": reason,
-            },
-        )
-
-    def _log_report(self, report: HealthReport) -> None:
-        if self._logger is None:
-            return
-
-        for result in report.results:
-            log_extra: dict[str, str | float] = {
-                "component": result.component,
-                "status": result.status.value,
-                "duration_seconds": round(result.duration_seconds, 4),
-            }
-
-            if result.error_message:
-                log_extra["error"] = result.error_message
-
-            if result.status == HealthStatus.HEALTHY:
-                self._logger.info("Health check passed", **log_extra)
-            elif result.status == HealthStatus.DEGRADED:
-                self._logger.warning("Health check degraded", **log_extra)
-            else:
-                self._logger.error("Health check failed", **log_extra)
 
     def assert_healthy(self, report: HealthReport) -> None:
         """Raise InfrastructureError when any component is UNHEALTHY.
@@ -282,20 +221,7 @@ class HealthAggregator:
         Raises:
             InfrastructureError: If any component in the report is UNHEALTHY.
         """
-        failures = report.get_failures()
-        if not failures:
-            return
-
-        failed_components = [failure.component for failure in failures]
-        error_messages = [
-            f"{failure.component}: {failure.error_message or 'check failed'}"
-            for failure in failures
-        ]
-
-        raise InfrastructureError(
-            f"Health check failed for: {', '.join(failed_components)}. "
-            f"Details: {'; '.join(error_messages)}"
-        )
+        assert_report_healthy(report)
 
 
 # Backward-compatible alias kept for transitional imports.

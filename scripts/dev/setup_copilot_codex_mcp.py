@@ -13,6 +13,9 @@ from pathlib import Path
 
 NPM_CONFIG_CACHE = "/tmp/npm-cache"
 MEMORY_FILE_RELATIVE_PATH = Path("docs/00-project/ai/memory/mcp-memory.json")
+OPENAI_DEVELOPER_DOCS_URL = "https://developers.openai.com/mcp"
+FETCH_MCP_VERSION = "2025.4.7"
+PDF_MCP_VERSION = "1.3.1"
 
 
 def _github_server(root: Path) -> dict[str, object]:
@@ -37,6 +40,43 @@ def _github_server(root: Path) -> dict[str, object]:
     }
 
 
+def _fetch_server() -> dict[str, object]:
+    return {
+        "command": "uvx",
+        "args": [
+            "--from",
+            f"mcp-server-fetch=={FETCH_MCP_VERSION}",
+            "mcp-server-fetch",
+        ],
+    }
+
+
+def _pdf_server() -> dict[str, object]:
+    return {
+        "command": "npx",
+        "args": ["-y", f"@modelcontextprotocol/server-pdf@{PDF_MCP_VERSION}", "--stdio"],
+        "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
+    }
+
+
+def _wrapper_server(root: Path, script_name: str) -> dict[str, object]:
+    if os.name == "nt":
+        ps1_script_path = root / "scripts" / "ops" / f"{Path(script_name).stem}.ps1"
+        return {
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(ps1_script_path.resolve()),
+            ],
+        }
+
+    script_path = root / "scripts" / "ops" / script_name
+    return {"command": "bash", "args": [str(script_path.resolve())]}
+
+
 def _core_servers(root: Path) -> dict[str, dict[str, object]]:
     memory_file_path = str((root / MEMORY_FILE_RELATIVE_PATH).resolve())
     root_path = str(root)
@@ -59,7 +99,15 @@ def _core_servers(root: Path) -> dict[str, dict[str, object]]:
             "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"],
             "env": {"NPM_CONFIG_CACHE": NPM_CONFIG_CACHE},
         },
+        "fetch": _fetch_server(),
+        "pdf": _pdf_server(),
         "github": _github_server(root),
+        "prometheus": _wrapper_server(root, "mcp_prometheus_wrapper.sh"),
+        "grafana": _wrapper_server(root, "mcp_grafana_wrapper.sh"),
+        "openaiDeveloperDocs": {
+            "type": "http",
+            "url": OPENAI_DEVELOPER_DOCS_URL,
+        },
     }
 
 
@@ -109,25 +157,25 @@ def _codex_registration(root: Path) -> int:
             check=False,
         )
 
-        add_command = [
-            codex_bin,
-            "mcp",
-            "add",
-            server_name,
-            "--env",
-            f"NPM_CONFIG_CACHE={NPM_CONFIG_CACHE}",
-        ]
-        env = server_config.get("env", {})
-        memory_file_path = env.get("MEMORY_FILE_PATH")
-        if isinstance(memory_file_path, str):
-            add_command.extend(["--env", f"MEMORY_FILE_PATH={memory_file_path}"])
+        url = server_config.get("url")
+        if isinstance(url, str):
+            add_result = subprocess.run(
+                [codex_bin, "mcp", "add", server_name, "--url", url],
+                check=False,
+            )
+        else:
+            add_command = [codex_bin, "mcp", "add", server_name]
+            env = server_config.get("env", {})
+            if isinstance(env, dict):
+                for env_name, env_value in env.items():
+                    add_command.extend(["--env", f"{env_name}={env_value}"])
 
-        command = server_config["command"]
-        args = server_config["args"]
-        add_result = subprocess.run(
-            [*add_command, "--", command, *args],
-            check=False,
-        )
+            command = server_config["command"]
+            args = server_config["args"]
+            add_result = subprocess.run(
+                [*add_command, "--", command, *args],
+                check=False,
+            )
         if add_result.returncode != 0:
             print(f"[FAIL] Unable to register {server_name} MCP in Codex.")
             return add_result.returncode

@@ -6,6 +6,18 @@ from collections.abc import Callable, Sequence
 
 import polars as pl
 
+from bioetl.application.composite.column_priority_orderer_helpers import (
+    collect_field_columns as collect_priority_field_columns,
+)
+from bioetl.application.composite.column_priority_orderer_helpers import (
+    get_enricher_prefix as get_priority_enricher_prefix,
+)
+from bioetl.application.composite.column_priority_orderer_helpers import (
+    order_columns_by_priority as order_priority_columns,
+)
+from bioetl.application.composite.column_priority_orderer_helpers import (
+    resolve_priority_column as resolve_priority_column_helper,
+)
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.ports import LoggerPort
@@ -38,36 +50,18 @@ class ColumnPriorityOrderer:
             List of qualified column names (e.g. ``provider.entity.field``) present in
             the DataFrame for the given field across seed and all enrichers.
         """
-        columns: list[str] = []
-
-        if seed_pipeline:
-            try:
-                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
-                seed_qualified = f"{seed_provider}.{seed_entity}.{field}"
-                if seed_qualified in available_columns:
-                    columns.append(seed_qualified)
-            except ValueError:
-                self._logger.debug(
-                    "Could not parse seed pipeline for field collection",
-                    seed_pipeline=seed_pipeline,
-                    field=field,
-                )
-
-        for enricher in enrichers:
-            try:
-                provider, entity = self._parse_pipeline_name(enricher.pipeline)
-                enricher_qualified = f"{provider}.{entity}.{field}"
-                if (
-                    enricher_qualified in available_columns
-                    and enricher_qualified not in columns
-                ):
-                    columns.append(enricher_qualified)
-            except ValueError:
-                prefix = self.get_enricher_prefix(enricher.pipeline)
-                legacy_col = f"{prefix}{field}".rstrip(".")
-                if legacy_col in available_columns and legacy_col not in columns:
-                    columns.append(legacy_col)
-
+        columns, used_parse_fallback = collect_priority_field_columns(
+            field=field,
+            enrichers=enrichers,
+            available_columns=available_columns,
+            seed_pipeline=seed_pipeline,
+        )
+        if used_parse_fallback and seed_pipeline:
+            self._logger.debug(
+                "Could not parse seed pipeline for field collection",
+                seed_pipeline=seed_pipeline,
+                field=field,
+            )
         return columns
 
     def order_columns_by_priority(
@@ -89,36 +83,18 @@ class ColumnPriorityOrderer:
             List of column names reordered so that highest-priority sources appear first,
             with any unmatched columns appended at the end.
         """
-        ordered_cols: list[str] = []
-        columns_set = set(columns)
-
-        seed_provider: str | None = None
-        seed_entity: str | None = None
-        if seed_pipeline:
-            try:
-                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
-            except ValueError:
-                self._logger.debug(
-                    "Could not parse seed pipeline for priority ordering",
-                    seed_pipeline=seed_pipeline,
-                    field=field,
-                )
-
-        for source in priorities:
-            qualified = self._resolve_priority_column(
-                source,
-                field,
-                columns_set,
-                seed_provider,
-                seed_entity,
+        ordered_cols, used_parse_fallback = order_priority_columns(
+            field=field,
+            columns=columns,
+            priorities=priorities,
+            seed_pipeline=seed_pipeline,
+        )
+        if used_parse_fallback and seed_pipeline:
+            self._logger.debug(
+                "Could not parse seed pipeline for priority ordering",
+                seed_pipeline=seed_pipeline,
+                field=field,
             )
-            if qualified and qualified in columns_set and qualified not in ordered_cols:
-                ordered_cols.append(qualified)
-
-        for col in columns:
-            if col not in ordered_cols:
-                ordered_cols.append(col)
-
         return ordered_cols
 
     def filter_compatible_columns(
@@ -173,13 +149,7 @@ class ColumnPriorityOrderer:
             Qualified prefix string in the form ``"provider.entity."`` or legacy
             ``"pipeline_"`` when pipeline name cannot be parsed.
         """
-        try:
-            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(
-                enricher_pipeline
-            )
-            return f"{provider}.{entity}."
-        except ValueError:
-            return f"{enricher_pipeline}_"
+        return get_priority_enricher_prefix(enricher_pipeline)
 
     @staticmethod
     def _parse_pipeline_name(pipeline: str) -> tuple[str, str]:
@@ -195,48 +165,10 @@ class ColumnPriorityOrderer:
         seed_entity: str | None,
     ) -> str | None:
         """Resolve one priority token to a concrete column name."""
-        source_lower = source.lower()
-
-        if source_lower == "seed":
-            return ColumnPriorityOrderer._resolve_seed_column(
-                field,
-                seed_provider,
-                seed_entity,
-            )
-
-        if "." in source:
-            provider, entity = source.split(".", 1)
-            return f"{provider.lower()}.{entity.lower()}.{field}"
-
-        provider = source_lower
-        if seed_provider and provider == seed_provider.lower() and seed_entity:
-            return f"{provider}.{seed_entity}.{field}"
-
-        return ColumnPriorityOrderer._resolve_by_column_scan(
-            provider,
-            field,
-            columns_set,
+        return resolve_priority_column_helper(
+            source=source,
+            field=field,
+            columns_set=columns_set,
+            seed_provider=seed_provider,
+            seed_entity=seed_entity,
         )
-
-    @staticmethod
-    def _resolve_seed_column(
-        field: str,
-        seed_provider: str | None,
-        seed_entity: str | None,
-    ) -> str | None:
-        """Resolve 'seed' token to the seed pipeline's qualified column."""
-        if seed_provider and seed_entity:
-            return f"{seed_provider}.{seed_entity}.{field}"
-        return None
-
-    @staticmethod
-    def _resolve_by_column_scan(
-        provider: str,
-        field: str,
-        columns_set: set[str],
-    ) -> str | None:
-        """Find a column matching provider prefix and field suffix by scanning."""
-        for col in columns_set:
-            if col.startswith(f"{provider}.") and col.endswith(f".{field}"):
-                return col
-        return None

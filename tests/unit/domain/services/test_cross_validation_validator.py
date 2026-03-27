@@ -8,7 +8,6 @@ from bioetl.domain.services.cross_validation_validator import (
     CrossValidationConfig,
     CrossValidationValidator,
 )
-from bioetl.domain.types.validation_result import ValidationResult
 from bioetl.domain.types.validation_severity import (
     IssueCode,
     ValidationLayer,
@@ -301,9 +300,9 @@ class TestCrossValidationValidator:
             result = validator.validate_cross_validation_config(config, source_names)
             assert result.is_valid(), f"Rule type {rule_type} should be supported"
 
-    def test_factory_function(self) -> None:
-        """Test the factory function."""
-        validator = create_cross_validation_validator()
+    def test_constructor(self) -> None:
+        """Test the constructor."""
+        validator = CrossValidationValidator()
         assert isinstance(validator, CrossValidationValidator)
 
 
@@ -465,8 +464,3 @@ class TestCrossValidationDisposition:
 
 
 # Helper function for easier testing
-
-
-def create_cross_validation_validator() -> CrossValidationValidator:
-    """Factory function for CrossValidationValidator."""
-    return CrossValidationValidator()

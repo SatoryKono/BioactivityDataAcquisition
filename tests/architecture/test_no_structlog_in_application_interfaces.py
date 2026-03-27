@@ -1,6 +1,6 @@
 """Architecture test: structlog только в infrastructure/composition слоях.
 
-REQ-ARCH-032: Application и interfaces слои используют LoggerPort абстракцию.
+REQ-ARCH-032: Application, domain и interfaces слои используют LoggerPort абстракцию.
 См. ADR-006 для обоснования.
 """
 
@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 APPLICATION_DIR = Path("src/bioetl/application")
+DOMAIN_DIR = Path("src/bioetl/domain")
 INTERFACES_DIR = Path("src/bioetl/interfaces")
 
 # Baseline exemptions for existing files (technical debt)
@@ -103,10 +104,25 @@ class TestNoStructlogInInterfacesLayer:
         )
 
 
+class TestNoStructlogInDomainLayer:
+    """Test that domain layer does not import structlog directly."""
+
+    def test_no_structlog_in_domain_layer(self) -> None:
+        """Domain layer MUST NOT import structlog directly."""
+        violations = _check_structlog_imports(DOMAIN_DIR, EXEMPTED_FILES)
+
+        assert not violations, (
+            "Direct structlog imports found in domain layer:\n"
+            + "\n".join(f"  - {v}" for v in violations)
+            + "\n\nDomain layer MUST use pure business logic or LoggerPort-owned boundaries."
+        )
+
+
 @pytest.mark.parametrize(
     "layer_name,layer_dir",
     [
         ("application", APPLICATION_DIR),
+        ("domain", DOMAIN_DIR),
         ("interfaces", INTERFACES_DIR),
     ],
 )

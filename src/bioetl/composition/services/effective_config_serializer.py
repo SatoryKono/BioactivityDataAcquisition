@@ -56,6 +56,7 @@ class EffectiveConfigSerializer:
     """Serializer for EffectiveConfigArtifact with deterministic output."""
 
     def serialize_artifact(self, artifact: EffectiveConfigArtifact) -> str:
+        """Serialize one artifact to stable JSON text."""
         artifact_dict = self._artifact_to_dict(artifact)
         return json.dumps(artifact_dict, sort_keys=True, separators=(",", ":"))
 
@@ -63,6 +64,7 @@ class EffectiveConfigSerializer:
         self,
         artifact: EffectiveConfigArtifact,
     ) -> EffectiveConfigHashes:
+        """Compute deterministic section hashes for one artifact."""
         return EffectiveConfigHashes(
             resolved_config_hash=self._compute_section_hash(artifact.resolved_config),
             effective_config_hash=self._compute_section_hash(

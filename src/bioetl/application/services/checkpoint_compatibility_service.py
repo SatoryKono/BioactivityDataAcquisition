@@ -254,6 +254,7 @@ class CheckpointCompatibilityService:
         current_metadata: CheckpointMetadata,
         checkpoint_metadata: CheckpointMetadata,
     ) -> CheckpointCompatibilityResult:
+        """Run strict checkpoint compatibility validation for resume safety."""
         dq_compatible, dq_messages = _validate_dq_contract_compatibility(
             current_metadata,
             checkpoint_metadata,
@@ -303,6 +304,7 @@ class CheckpointCompatibilityService:
         current_metadata: CheckpointMetadata,
         checkpoint_metadata: CheckpointMetadata,
     ) -> CheckpointCompatibilityResult:
+        """Run lenient compatibility checks for best-effort resume scenarios."""
         dq_compatible, dq_messages = _validate_lenient_dq_compatibility(
             current_metadata,
             checkpoint_metadata,

@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.7.0
     container_name: bioetl-loki
     profiles: ["tracing"]
     ports:
@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.6.8
     container_name: bioetl-promtail
     profiles: ["tracing"]
     command:
@@ -62,9 +62,10 @@ services:
     restart: unless-stopped
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.10.3
     container_name: bioetl-tempo
     profiles: ["tracing"]
+    user: "0"
     ports:
       - "3200:3200"
       - "4317:4317"
@@ -78,7 +79,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.0.0
     container_name: bioetl-grafana
     ports:
       - "3000:3000"
@@ -87,11 +88,15 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=
       - GF_LOG_LEVEL=info
+      - BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-false}
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/datasources-core:/etc/bioetl-grafana/datasources-core:ro
+      - ./grafana/provisioning/datasources-tracing:/etc/bioetl-grafana/datasources-tracing:ro
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/scripts/bootstrap-datasources.sh:/usr/local/bin/bioetl-bootstrap-grafana.sh:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/bioetl-bootstrap-grafana.sh"]
     depends_on:
       prometheus:
         condition: service_healthy

@@ -8,6 +8,14 @@ __all__ = ["JoinKeyResolverService"]
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.join_key_resolution_helpers import (
+    find_join_key_column,
+    normalize_join_key_columns,
+    resolve_composite_join_keys,
+    resolve_join_key_names,
+    resolve_join_key_names_asymmetric,
+)
+
 if TYPE_CHECKING:
     import polars as pl
 
@@ -41,19 +49,12 @@ class JoinKeyResolverService:
             Qualified column name if found, unqualified name as fallback,
             or None if no matching column exists.
         """
-        if pipeline:
-            try:
-                provider, entity = self._parse_pipeline_name(pipeline)
-                qualified = f"{provider}.{entity}.{key}"
-                if qualified in columns:
-                    return qualified
-            except ValueError:
-                pass  # Why: pipeline name not in provider.entity format; skip non-integer key index
-
-        if key in columns:
-            return key
-
-        return next((col for col in columns if col.endswith(f".{key}")), None)
+        return find_join_key_column(
+            key=key,
+            columns=columns,
+            pipeline=pipeline,
+            parse_pipeline_name=self._parse_pipeline_name,
+        )
 
     def normalize_join_key_columns(
         self,
@@ -71,19 +72,12 @@ class JoinKeyResolverService:
         Returns:
             DataFrame with qualifying identifier columns (doi, pmid, pmc_id) lowercased.
         """
-        import polars as pl
-
-        columns = df.columns
-        normalize = [
-            column
-            for key in join_keys
-            if key in self._normalize_join_keys
-            if (column := self.find_join_key_column(key, columns, pipeline))
-        ]
-        if not normalize:
-            return df
-        return df.with_columns(
-            [pl.col(column).str.to_lowercase().alias(column) for column in normalize]
+        return normalize_join_key_columns(
+            df=df,
+            join_keys=join_keys,
+            pipeline=pipeline,
+            normalize_join_keys=self._normalize_join_keys,
+            parse_pipeline_name=self._parse_pipeline_name,
         )
 
     def resolve_join_key_names(
@@ -105,27 +99,13 @@ class JoinKeyResolverService:
             Tuple of (seed_join_key, enricher_join_key, seed_join_key_qualified) where
             seed_join_key_qualified is the fully-qualified seed key or None if unavailable.
         """
-        seed_join_key_qualified: str | None = None
-        seed_join_key = primary_key
-
-        if seed_pipeline is not None:
-            try:
-                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
-                seed_join_key_qualified = f"{seed_provider}.{seed_entity}.{primary_key}"
-                if seed_join_key_qualified in merged_columns:
-                    seed_join_key = seed_join_key_qualified
-            except ValueError:
-                pass  # Why: seed pipeline name not parseable; skip qualified key resolution
-
-        try:
-            enricher_provider, enricher_entity = self._parse_pipeline_name(
-                enricher_pipeline
-            )
-            enricher_join_key = f"{enricher_provider}.{enricher_entity}.{primary_key}"
-        except ValueError:
-            enricher_join_key = primary_key
-
-        return seed_join_key, enricher_join_key, seed_join_key_qualified
+        return resolve_join_key_names(
+            primary_key=primary_key,
+            seed_pipeline=seed_pipeline,
+            enricher_pipeline=enricher_pipeline,
+            merged_columns=merged_columns,
+            parse_pipeline_name=self._parse_pipeline_name,
+        )
 
     def resolve_join_key_names_asymmetric(
         self,
@@ -148,25 +128,14 @@ class JoinKeyResolverService:
             Tuple of (left_join_key, right_join_key, left_join_key_qualified) where
             left_join_key_qualified is the fully-qualified left key or None if unavailable.
         """
-        left_join_key_qualified: str | None = None
-        left_join_key = left_key
-
-        if left_pipeline is not None:
-            try:
-                left_provider, left_entity = self._parse_pipeline_name(left_pipeline)
-                left_join_key_qualified = f"{left_provider}.{left_entity}.{left_key}"
-                if left_join_key_qualified in merged_columns:
-                    left_join_key = left_join_key_qualified
-            except ValueError:
-                pass  # Why: left pipeline name not parseable; skip qualified key resolution
-
-        try:
-            right_provider, right_entity = self._parse_pipeline_name(right_pipeline)
-            right_join_key = f"{right_provider}.{right_entity}.{right_key}"
-        except ValueError:
-            right_join_key = right_key
-
-        return left_join_key, right_join_key, left_join_key_qualified
+        return resolve_join_key_names_asymmetric(
+            left_key=left_key,
+            right_key=right_key,
+            left_pipeline=left_pipeline,
+            right_pipeline=right_pipeline,
+            merged_columns=merged_columns,
+            parse_pipeline_name=self._parse_pipeline_name,
+        )
 
     def resolve_composite_join_keys(
         self,
@@ -187,25 +156,10 @@ class JoinKeyResolverService:
             Tuple of (left_keys, right_keys, all_join_key_set) with resolved qualified
             key names for each side and the complete set of all key column names.
         """
-        left_keys: list[str] = []
-        right_keys: list[str] = []
-        all_join_key_set: set[str] = set()
-
-        for key in join_keys_list:
-            left_key, right_key, left_key_qualified = (
-                self.resolve_join_key_names_asymmetric(
-                    left_key=key,
-                    right_key=key,
-                    left_pipeline=left_pipeline,
-                    right_pipeline=right_pipeline,
-                    merged_columns=merged_columns,
-                )
-            )
-            left_keys.append(left_key)
-            right_keys.append(right_key)
-            all_join_key_set.add(left_key)
-            all_join_key_set.add(right_key)
-            if left_key_qualified and left_key_qualified != left_key:
-                all_join_key_set.add(left_key_qualified)
-
-        return left_keys, right_keys, all_join_key_set
+        return resolve_composite_join_keys(
+            join_keys_list=join_keys_list,
+            left_pipeline=left_pipeline,
+            right_pipeline=right_pipeline,
+            merged_columns=merged_columns,
+            parse_pipeline_name=self._parse_pipeline_name,
+        )

@@ -24,11 +24,17 @@ class CleanupStoragePort(Protocol):
         self,
         silver_table: str,
         gold_table: str | None = None,
-    ) -> MetaDict: ...
+    ) -> MetaDict:
+        """Describe which layer paths and files would be affected."""
+        ...
 
-    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int: ...
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+        """Clear or count Silver-layer data for one table."""
+        ...
 
-    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int: ...
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+        """Clear or count Gold-layer data for one table."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)

@@ -132,6 +132,7 @@ cd BioactivityDataAcquisition2
 make install
 make test-deps
 make setup-plugins
+make setup-skills
 ```
 
 Notes:
@@ -139,6 +140,7 @@ Notes:
 - `make install` uses `uv sync --extra dev --extra tracing` when `uv` is available; otherwise it creates `.venv` and installs the editable package with dev extras.
 - Documentation site commands such as `make docs-build` require the separate `docs` extra: `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"`.
 - `make setup-plugins` configures local pytest/pre-commit tooling.
+- `make setup-skills` syncs repository-local Codex `skills` and their paired `agents` into `$CODEX_HOME` (default `~/.codex`).
 - If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.dev setup-mcp` after install. If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp` is also valid.
 - `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
@@ -276,7 +278,7 @@ bioetl checkpoint list --pipeline chembl_activity
 
 ### MCP Setup (GitHub Copilot + Codex)
 
-To configure the GitHub MCP server for both VS Code Copilot and Codex CLI:
+To configure the core MCP servers for both VS Code Copilot and Codex CLI:
 
 ```bash
 ./scripts/dev/setup_copilot_codex_mcp.sh
@@ -291,7 +293,11 @@ Windows PowerShell:
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Registers `github` MCP server in Codex CLI if it is not already configured.
+- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `prometheus`, `grafana`, and `openaiDeveloperDocs` in Codex CLI.
+- Uses local observability defaults for BioETL when not overridden:
+  - `PROMETHEUS_URL=http://localhost:9090`
+  - `GRAFANA_URL=http://localhost:3000`
+  - Grafana auth prefers `GRAFANA_SERVICE_ACCOUNT_TOKEN`; otherwise it falls back to `GRAFANA_USERNAME` / `GRAFANA_PASSWORD`, and finally `admin` / `${GF_SECURITY_ADMIN_PASSWORD:-change_me}` for the local monitoring stack.
 - Does **not** store tokens in repository files.
 
 Before using GitHub MCP tools, set a token in your shell:
@@ -417,7 +423,13 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   make setup-skills
   ```
 
-  This syncs local project skills from `.codex/skills` into `$CODEX_HOME/skills` (default `~/.codex/skills`).
+  This syncs local project skills from `.codex/skills` into `$CODEX_HOME/skills` (default `~/.codex/skills`) and also keeps the paired `.codex/agents` tree aligned in `$CODEX_HOME/agents`.
+
+- **Sync only project agents into Codex**:
+
+  ```bash
+  make setup-agents
+  ```
 
 ### Code Quality
 

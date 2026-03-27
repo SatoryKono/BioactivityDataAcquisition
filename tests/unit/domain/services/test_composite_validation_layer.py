@@ -1,9 +1,13 @@
 """Unit tests for composite validation layer service."""
 
+from bioetl.domain.services.aggregation_validator import AggregationValidator
 from bioetl.domain.services.composite_validation_layer import (
     CompositeValidationConfig,
     CompositeValidationService,
-    create_composite_validation_service,
+)
+from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
+from bioetl.domain.services.preflight_governance import (
+    PreflightGovernanceService,
 )
 from bioetl.domain.types.validation_result import CompositeValidationReport
 from bioetl.domain.types.validation_severity import (
@@ -13,21 +17,35 @@ from bioetl.domain.types.validation_severity import (
 )
 
 
+def _create_service() -> CompositeValidationService:
+    return CompositeValidationService(
+        aggregation_validator=AggregationValidator(),
+        cross_validation_validator=CrossValidationValidator(),
+        preflight_governance=PreflightGovernanceService(),
+    )
+
+
 def test_composite_validation_service_creation():
-    """Test that validation service can be created."""
-    service = CompositeValidationService()
+    """Test that validation service uses injected collaborators."""
+    aggregation_validator = AggregationValidator()
+    cross_validation_validator = CrossValidationValidator()
+    preflight_governance = PreflightGovernanceService()
+
+    service = CompositeValidationService(
+        aggregation_validator=aggregation_validator,
+        cross_validation_validator=cross_validation_validator,
+        preflight_governance=preflight_governance,
+    )
+
     assert service is not None
-
-
-def test_factory_function():
-    """Test factory function."""
-    service = create_composite_validation_service()
-    assert isinstance(service, CompositeValidationService)
+    assert service._aggregation_validator is aggregation_validator
+    assert service._cross_validation_validator is cross_validation_validator
+    assert service._preflight_governance is preflight_governance
 
 
 def test_valid_composite_config():
     """Test validation of a valid composite configuration."""
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -62,7 +80,7 @@ def test_valid_composite_config():
 
 def test_missing_required_fields():
     """Test validation when required fields are missing."""
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -88,7 +106,7 @@ def test_missing_required_fields():
 
 def test_invalid_aggregation_config():
     """Test validation of invalid aggregation configuration."""
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -120,7 +138,7 @@ def test_invalid_aggregation_config():
 
 def test_invalid_cross_validation_config():
     """Test validation of invalid cross-validation configuration."""
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -145,7 +163,7 @@ def test_invalid_cross_validation_config():
 
 def test_conflicting_field_priorities():
     """Test detection of conflicting field priorities."""
-    service = CompositeValidationService()
+    service = _create_service()
     # Create a config with invalid priority structure (not a dict)
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
@@ -168,7 +186,7 @@ def test_conflicting_field_priorities():
 
 def test_invalid_lineage_config():
     """Test validation of invalid lineage configuration."""
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -193,7 +211,7 @@ def test_invalid_lineage_config():
 
 def test_ci_format_output():
     """Test CI/CD compatible format output."""
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -218,7 +236,7 @@ def test_ci_format_output():
 
 def test_layer_separation():
     """Test that validation layers are properly separated."""
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -252,7 +270,7 @@ def test_preflight_governance_integration():
     from bioetl.domain.services.preflight_governance import GovernancePolicy
 
     # Test with default governance policy
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -284,7 +302,7 @@ def test_preflight_governance_warning_only():
     """Test warning-only governance policy."""
     from bioetl.domain.services.preflight_governance import GovernancePolicy
 
-    service = CompositeValidationService()
+    service = _create_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={

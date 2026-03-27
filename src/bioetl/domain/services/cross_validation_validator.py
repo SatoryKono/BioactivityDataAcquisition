@@ -52,6 +52,7 @@ class CrossValidationValidator:
         source_names: list[str],
         execution_context: JsonDict | None = None,
     ) -> ValidationResult:
+        """Validate cross-source comparison rules before runtime execution."""
         issues = _collect_validation_issues(config, source_names)
         return ValidationResult(
             issues=issues,
@@ -65,6 +66,7 @@ class CrossValidationValidator:
         config: CrossValidationConfig,
         runtime_context: JsonDict | None = None,
     ) -> ValidationResult:
+        """Project blocker issues onto the configured runtime disposition policy."""
         issues = _apply_disposition_policy(
             issues=validation_result.issues,
             policy=config.disposition_policy,
@@ -171,8 +173,3 @@ def _build_disposed_issue(
         details={**(issue.details or {}), **extra_details},
         location=issue.location,
     )
-
-
-def create_cross_validation_validator() -> CrossValidationValidator:
-    """Factory function for CrossValidationValidator."""
-    return CrossValidationValidator()

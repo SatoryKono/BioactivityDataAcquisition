@@ -42,6 +42,9 @@ from bioetl.interfaces.cli.commands.domains.run.command_policy import (
     map_status_to_exit_code,
     run_command_flow,
 )
+from bioetl.interfaces.cli.commands.domains.run.command_entrypoint import (
+    build_run_click_command,
+)
 from bioetl.interfaces.cli.commands.domains.run.result_flow import (
     finalize_run_result as _finalize_run_result_impl,
 )
@@ -257,106 +260,7 @@ async def _run_prepared_request_async(
     )
 
 
-@click.command()
-@click.option(
-    "--pipeline",
-    callback=validate_pipeline_name,
-    required=True,
-    help="Pipeline to run",
-)
-@click.option(
-    "--run-type",
-    type=click.Choice(["incremental", "backfill", "rebuild"]),
-    default="incremental",
-    help="Type of run",
-)
-@click.option("--resume", is_flag=True, help="Resume from last checkpoint")
-@click.option(
-    "--start-offset",
-    type=int,
-    default=None,
-    help="Start extraction from specific record offset (skips checkpoint). "
-    "Use after crash to resume from known position.",
-)
-@click.option("--limit", type=int, help="Maximum number of records to process")
-@click.option(
-    "--input-csv",
-    type=click.Path(exists=True),
-    help="Path to CSV file with filter IDs",
-)
-@click.option(
-    "--filter-column",
-    type=str,
-    help="Column name in CSV containing filter IDs (default: 'id')",
-)
-@click.option(
-    "--filter-field",
-    type=str,
-    help="API field name to filter by (default: 'molecule_chembl_id')",
-)
-@click.option(
-    "--dry-run",
-    is_flag=True,
-    help="Preview cleanup without execution (for rebuild/backfill)",
-)
-@click.option(
-    "--yes",
-    "-y",
-    is_flag=True,
-    help="Skip confirmation prompt for rebuild/backfill",
-)
-@click.option(
-    "--vacuum-after-run",
-    is_flag=True,
-    default=None,
-    help="Run VACUUM on Delta tables after successful run (overrides YAML config)",
-)
-@click.option(
-    "--vacuum-retention-days",
-    type=int,
-    default=None,
-    help="Minimum age of files to remove during VACUUM (days, overrides YAML config)",
-)
-@click.option(
-    "--debug",
-    is_flag=True,
-    help="Enable DEBUG level logging for detailed output",
-)
-@click.option(
-    "--health-server/--no-health-server",
-    "health_server",
-    default=True,
-    help="Enable/disable HTTP health server during execution.",
-    show_default=True,
-)
-@click.option(
-    "--health-port",
-    type=int,
-    default=DEFAULT_HEALTH_SERVER_PORT,
-    help="Port for the HTTP health server.",
-    show_default=True,
-)
-@click.option(
-    "--use-cached-bronze/--no-cached-bronze",
-    "use_cached_bronze",
-    default=False,
-    help="Load data from Bronze cache instead of API",
-    show_default=True,
-)
-@click.option(
-    "--cached-bronze-date",
-    type=str,
-    default=None,
-    help="Filter Bronze cache by date (YYYY-MM-DD)",
-)
-@click.option(
-    "--cached-bronze-path",
-    type=click.Path(exists=True),
-    default=None,
-    help="Explicit path to Bronze cache directory",
-)
-@click.pass_context
-def run(
+def _run_callback(
     ctx: click.Context,
     pipeline: str,
     run_type: str,
@@ -377,7 +281,7 @@ def run(
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
 ) -> None:
-    """Run an ETL pipeline."""
+    """Canonical callback implementation for the run Click command."""
     cli_input = _build_run_command_input(
         pipeline=pipeline,
         run_type=run_type,
@@ -399,6 +303,13 @@ def run(
         cached_bronze_path=cached_bronze_path,
     )
     _run_command_with_cli_policy(ctx, cli_input)
+
+
+run = build_run_click_command(
+    validate_pipeline_name=validate_pipeline_name,
+    default_health_server_port=DEFAULT_HEALTH_SERVER_PORT,
+    run_callback=_run_callback,
+)
 
 
 # ---------------------------------------------------------------------------

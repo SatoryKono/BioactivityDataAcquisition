@@ -15,14 +15,16 @@ from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
 from bioetl.application.composite.runner_pkg.runner_merge_stage_flow import (
     build_merge_inputs,
     build_merge_request,
-    delete_checkpoint_safe,
     execute_merge_stage,
     execute_started_merge_phase,
+    run_prepared_merge_request,
+)
+from bioetl.application.composite.runner_pkg.runner_merge_stage_runtime import (
+    delete_checkpoint_safe,
     handle_dry_run_merge_skip,
     handle_merge_phase_exception,
     handle_merge_success,
     persist_completed_state,
-    run_prepared_merge_request,
     start_merge_phase,
     transition_to_completed_state,
     transition_to_merging_state,

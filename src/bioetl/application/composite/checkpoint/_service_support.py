@@ -29,11 +29,29 @@ CHECKPOINT_WRITE_ERRORS = (
 
 
 @dataclass(frozen=True, slots=True)
-class ExpectedCheckpointAnchors:
+class ExpectedCheckpointContext:
+    """Expected runtime anchors used to validate checkpoint resume safety."""
+
     effective_config_hash: str = ""
     contract_ref: str = ""
     contract_version: str = ""
     composite_run_identity: str = ""
+
+
+def create_expected_checkpoint_context(
+    *,
+    effective_config_hash: str | None,
+    contract_ref: str | None,
+    contract_version: str | None,
+    composite_run_identity: str,
+) -> ExpectedCheckpointContext:
+    """Normalize nullable runtime anchors into a comparable checkpoint context."""
+    return ExpectedCheckpointContext(
+        effective_config_hash=effective_config_hash or "",
+        contract_ref=contract_ref or "",
+        contract_version=contract_version or "",
+        composite_run_identity=composite_run_identity,
+    )
 
 
 def latest_checkpoint_filename(
@@ -41,6 +59,7 @@ def latest_checkpoint_filename(
     storage: CompositeCheckpointPort,
     glob_pattern: str,
 ) -> str | None:
+    """Return the newest checkpoint filename matching the storage glob."""
     matches = storage.list_glob(glob_pattern)
     return matches[0] if matches else None
 
@@ -52,6 +71,7 @@ def warn_if_checkpoint_exists_with_progress(
     composite_name: str,
     glob_pattern: str,
 ) -> None:
+    """Warn when an existing resumable checkpoint would be overwritten."""
     latest = latest_checkpoint_filename(storage=storage, glob_pattern=glob_pattern)
     if latest is None or not storage.exists(latest):
         return
@@ -98,6 +118,7 @@ def warn_if_checkpoint_stale(
     stale_threshold_hours: float,
     state: CompositeCheckpointState,
 ) -> None:
+    """Warn when resume targets a checkpoint older than the configured threshold."""
     if stale_threshold_hours <= 0:
         return
     ref_time = state.updated_at or state.created_at
@@ -126,6 +147,7 @@ def resolve_resume_checkpoint_filename(
     checkpoint_filename: str,
     glob_pattern: str,
 ) -> str | None:
+    """Resolve the explicit or latest available checkpoint filename for resume."""
     if storage.exists(checkpoint_filename):
         return checkpoint_filename
     return latest_checkpoint_filename(storage=storage, glob_pattern=glob_pattern)
@@ -133,8 +155,9 @@ def resolve_resume_checkpoint_filename(
 
 def merge_expected_anchors(
     state: CompositeCheckpointState,
-    anchors: ExpectedCheckpointAnchors,
+    anchors: ExpectedCheckpointContext,
 ) -> CompositeCheckpointState:
+    """Fill empty checkpoint anchors with the expected runtime anchor values."""
     return replace(
         state,
         effective_config_hash=(
@@ -151,10 +174,11 @@ def merge_expected_anchors(
 def validate_resume_compatibility(
     *,
     state: CompositeCheckpointState,
-    anchors: ExpectedCheckpointAnchors,
+    anchors: ExpectedCheckpointContext,
     logger: LoggerPort,
     composite_name: str,
 ) -> None:
+    """Raise when persisted checkpoint anchors conflict with the current runtime."""
     mismatches = [
         mismatch
         for mismatch in (
@@ -206,6 +230,7 @@ def load_checkpoint_state(
     composite_name: str,
     filename: str,
 ) -> CompositeCheckpointState | None:
+    """Load and parse one checkpoint state from storage if it exists."""
     try:
         content = storage.read(filename)
         if content is None:
@@ -252,8 +277,9 @@ def fresh_checkpoint_state(
     *,
     composite_name: str,
     run_id: str,
-    anchors: ExpectedCheckpointAnchors,
+    anchors: ExpectedCheckpointContext,
 ) -> CompositeCheckpointState:
+    """Create a fresh checkpoint state for a new composite execution."""
     return CompositeCheckpointState(
         composite_name=composite_name,
         run_id=run_id,

@@ -97,6 +97,30 @@ uv run python -m mypy --strict src/bioetl/         # Type checking
 uv run python -m bioetl run --pipeline chembl_molecule --limit 100  # Run pipeline
 ```
 
+ rj### Unified script entry points and developer workflow (project-specific)
+
+- All repository helper scripts are available as python modules under `scripts/` and can be run as `python -m scripts.<group> <command>` (examples below). Prefer `uv run python -m scripts.<group> <command>` when `uv` is available.
+- Common script groups present in the repo: `scripts.qa`, `scripts.docs`, `scripts.schema`, `scripts.diagrams`, `scripts.data`, `scripts.repo`, `scripts.ops`, `scripts.dev`, `scripts.diagnostics` (see the `scripts/` directory for exact commands and `--help`).
+- Canonical examples used in CI and docs (copy/paste):
+
+```bash
+# Documentation checks
+uv run python -m scripts.docs check-links --links --specs --configs
+uv run python -m scripts.docs check-drift --ports --classes
+uv run python -m scripts.docs check-docstrings --summary
+
+# Schema/config validation
+uv run python -m scripts.schema validate-configs
+uv run python -m scripts.schema check-invariants
+
+# Dev / type-check
+uv sync --extra dev --extra tests --extra tracing    # sync dev deps (preferred)
+uv run python -m mypy --strict src/bioetl/            # type checks (or use .venv)
+```
+
+- Dev environment note (Windows/.venv fallback): many scripts use the pattern `.venv/Scripts/python.exe -m ...` when `uv` is not present. See `scripts/dev/run_mypy.ps1` for the exact fallback logic.
+- CI note: GitHub Actions uses the repository-local `.github/actions/setup-python-uv` action and runs `uv run` for many gates; follow the same `uv`-first approach locally to reproduce CI behavior (see `.github/workflows/tests.yml`).
+
 ## What NOT to Do
 
 - NEVER import from infrastructure in domain or application layers.

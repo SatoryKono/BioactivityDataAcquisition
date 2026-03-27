@@ -26,7 +26,9 @@ class DQConfigResolver(Protocol):
         provider: str,
         entity: str,
         inline_overrides: JsonDict | None = None,
-    ) -> DomainDQConfig: ...
+    ) -> DomainDQConfig:
+        """Load the merged DQ config for one provider/entity pair."""
+        ...
 
 
 def has_inline_dq_overrides(yaml_config: PipelineYamlConfig) -> bool:

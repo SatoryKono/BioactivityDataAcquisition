@@ -19,6 +19,10 @@ Consolidated modules (v5.2):
 
 from __future__ import annotations
 
+# Backward-compatible package alias for tests/tools that patch
+# `bioetl.composition.factories.datasource.*` via string import paths.
+from . import datasource as datasource
+
 # Data source factory and registry
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
@@ -98,6 +102,7 @@ __all__ = [
     "create_data_normalization_service",
     "create_pipeline_factory",
     "create_transformer",
+    "datasource",
     "get_transformer_class",
     "pubchem_compound_factory",
     "pubmed_publication_factory",

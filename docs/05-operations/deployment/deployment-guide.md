@@ -51,13 +51,13 @@ First, create an optimized Dockerfile for Kubernetes (not the Cloudflare WARP on
 
 ```bash
 # Build the BioETL image
-docker build -t bioetl:6.0.0 .
+docker build -t bioetl:REPLACE_IMAGE_TAG .
 
 # Tag for your registry (example: Docker Hub)
-docker tag bioetl:6.0.0 your-registry/bioetl:6.0.0
+docker tag bioetl:REPLACE_IMAGE_TAG your-registry/bioetl:REPLACE_IMAGE_TAG
 
 # Push to registry
-docker push your-registry/bioetl:6.0.0
+docker push your-registry/bioetl:REPLACE_IMAGE_TAG
 ```
 
 ### Update Manifests
@@ -65,9 +65,19 @@ docker push your-registry/bioetl:6.0.0
 Edit `k8s-deployment.yaml` and change the image reference:
 
 ```yaml
-image: your-registry/bioetl:6.0.0  # ← Update this line
+image: your-registry/bioetl:REPLACE_IMAGE_TAG  # ← Update this line
 imagePullPolicy: Always
 ```
+
+Use the same image tag consistently in `k8s-deployment.yaml` and, if you use
+the helper shell flow, set matching overrides before running it:
+
+```bash
+BIOETL_IMAGE_REGISTRY=your-registry BIOETL_IMAGE_TAG=REPLACE_IMAGE_TAG \
+  scripts/ops/deploy-bioetl.sh deploy dev
+```
+
+This extended deployment subtree is still maintained as experimental material.
 
 If using private registry, create a secret:
 
@@ -330,7 +340,7 @@ Update the image:
 
 ```bash
 kubectl set image deployment/bioetl \
-  bioetl=your-registry/bioetl:6.0.1 \
+  bioetl=your-registry/bioetl:REPLACE_IMAGE_TAG \
   --record
 
 # Watch rollout

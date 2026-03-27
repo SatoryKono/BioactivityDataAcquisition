@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self, cast
+from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core import _filtered_data_source_support as support
-from bioetl.application.core._data_source_mixins import (
-    _yield_plain_wrapped_fetch_records,
+from bioetl.application.core import (
+    _filtered_data_source_fetch_support as fetch_support,
 )
+from bioetl.application.core import _filtered_data_source_support as lifecycle_support
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
     from bioetl.domain.ports import (
         DataSourcePort,
-        FilterableDataSourcePort,
         InputFilterPort,
         LoggerPort,
         MetricsPort,
@@ -51,20 +50,7 @@ class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin):
 
     async def __aenter__(self) -> Self:
         """Enter async context and preload filters when enabled."""
-        await self._data_source.__aenter__()
-
-        if not self._filter_config.enabled:
-            return self
-
-        if self._filter_config.direct_multi_filter_ids:
-            support.load_direct_multi_filter_ids(self)
-            return self
-
-        if self._filter_config.direct_filter_ids:
-            support.load_direct_filter_ids(self)
-            return self
-
-        await support.load_csv_filter_ids(self)
+        await lifecycle_support.enter_filtered_data_source(self)
         return self
 
     async def __aexit__(
@@ -85,12 +71,7 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         record: JsonDict,  # Any: filter record values vary (str|int|float|list)
     ) -> bool:  # Any: filter record values vary (str|int|float|list)
         """Check if record matches one of the valid combinations."""
-        if not self._valid_combinations or not self._filter_fields:
-            return True
-        record_values = tuple(
-            str(record.get(field, "")) for field in self._filter_fields
-        )
-        return record_values in self._valid_combinations
+        return fetch_support.matches_valid_combination(self, record)
 
     async def _fetch_multi_column(
         self,
@@ -100,20 +81,8 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch with multi-column filtering (hybrid approach)."""
-        self._ensure_filterable_adapter("Multi-column filtering")
-        adapter = cast("FilterableDataSourcePort", self._data_source)
-        assert self._multi_filter_ids is not None
-        fetched_count = 0
-        async for record in adapter.fetch_multi_filtered(
-            entity_type=entity_type,
-            filters=dict(self._multi_filter_ids),
-            limit=None,
-        ):
-            if self._matches_valid_combination(record):
-                yield record
-                fetched_count += 1
-                if limit and fetched_count >= limit:
-                    return
+        async for record in fetch_support.fetch_multi_column(self, entity_type, limit):
+            yield record
 
     async def _fetch_single_column(
         self,
@@ -123,33 +92,7 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch with single-column filtering."""
-        self._ensure_filterable_adapter("Filtering")
-        adapter = cast("FilterableDataSourcePort", self._data_source)
-        config_filter_field = self._filter_config.filter_field
-        if config_filter_field is None:
-            raise ValueError(
-                "filter_field must be specified in InputFilterConfig "
-                "when filtering is enabled."
-            )
-        assert self._filter_ids is not None
-
-        if self._fallback_mapping:
-            async for record in adapter.fetch_filtered_with_fallback(
-                entity_type=entity_type,
-                filter_ids=self._filter_ids,
-                filter_field=config_filter_field,
-                fallback_mapping=self._fallback_mapping,
-                limit=limit,
-            ):
-                yield record
-            return
-
-        async for record in adapter.fetch_filtered(
-            entity_type=entity_type,
-            filter_ids=self._filter_ids,
-            filter_field=config_filter_field,
-            limit=limit,
-        ):
+        async for record in fetch_support.fetch_single_column(self, entity_type, limit):
             yield record
 
     def _fetch_without_internal_filters(
@@ -162,12 +105,12 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Delegate plain unfiltered fetches to the wrapped adapter."""
-        return _yield_plain_wrapped_fetch_records(
-            self._data_source,
-            entity_type=entity_type,
-            limit=limit,
-            query=query,
-            offset=offset,
+        return fetch_support.fetch_without_internal_filters(
+            self,
+            entity_type,
+            limit,
+            query,
+            offset,
         )
 
     def fetch(
@@ -191,19 +134,14 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
             filter_field: Ignored; filtering is driven by internal config filter_field.
             offset: Optional pagination offset passed through to the adapter.
         """
-        _ = filter_ids, filter_field
-
-        if self._filter_config.enabled and self._multi_filter_ids:
-            return self._fetch_multi_column(entity_type, limit)
-
-        if self._filter_config.enabled and self._filter_ids:
-            return self._fetch_single_column(entity_type, limit)
-
-        return self._fetch_without_internal_filters(
+        return fetch_support.fetch_records(
+            self,
             entity_type,
-            limit,
-            query,
-            offset,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
         )
 
     async def health_check(self) -> HealthStatus:

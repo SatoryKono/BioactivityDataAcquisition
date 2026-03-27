@@ -32,7 +32,9 @@ class PipelineConfigDQResolver(Protocol):
     def resolve_dq_config(
         self,
         yaml_config: PipelineYamlConfig,
-    ) -> DQConfig: ...
+    ) -> DQConfig:
+        """Resolve the DQ config that should accompany this YAML pipeline config."""
+        ...
 
 
 class PipelineConfigDQResolverBuilder(Protocol):

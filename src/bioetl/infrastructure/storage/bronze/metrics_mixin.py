@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
+from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.domain.types import BatchID, RunID, RunType
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
 class _BronzeWriterMetricsHost(Protocol):

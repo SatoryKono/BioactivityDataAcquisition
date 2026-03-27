@@ -36,16 +36,24 @@ class ProviderSettingsProtocol(Protocol):
     """Minimal settings surface required by provider registration helpers."""
 
     @property
-    def default_email(self) -> str | None: ...
+    def default_email(self) -> str | None:
+        """Return the default contact email used by provider clients."""
+        ...
 
     @property
-    def strict_error_handling(self) -> bool: ...
+    def strict_error_handling(self) -> bool:
+        """Return whether provider adapters should fail fast on recoverable errors."""
+        ...
 
     @property
-    def pubmed_api_key(self) -> SecretValueProviderProtocol | None: ...
+    def pubmed_api_key(self) -> SecretValueProviderProtocol | None:
+        """Return the configured PubMed API key wrapper when available."""
+        ...
 
     @property
-    def semanticscholar_api_key(self) -> SecretValueProviderProtocol | None: ...
+    def semanticscholar_api_key(self) -> SecretValueProviderProtocol | None:
+        """Return the configured Semantic Scholar API key wrapper when available."""
+        ...
 
 
 class DataSourceCreatorProtocol(Protocol):

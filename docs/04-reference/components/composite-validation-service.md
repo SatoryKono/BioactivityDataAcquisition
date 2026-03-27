@@ -6,7 +6,9 @@
 
 `CompositeValidationService` is the domain service entrypoint for composite
 config validation before execution. It combines structural checks, deep preflight
-checks, and governance decisioning into a single report.
+checks, and governance decisioning into a single report. Construction of the
+default service wiring now lives in
+`bioetl.composition.factories.dq.create_composite_validation_service()`.
 
 Source of truth:
 
@@ -56,6 +58,9 @@ Returns `CompositeValidationReport` with:
 - `CrossValidationValidator`
 - `PreflightGovernanceService`
 - helpers from `composite_validation_helpers.py`
+
+These collaborators are injected into `CompositeValidationService` by the
+composition layer; the domain module no longer assembles them internally.
 
 ## Related docs
 

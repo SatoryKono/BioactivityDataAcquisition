@@ -10,8 +10,18 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
+from bioetl.application.core.lifecycle.lock_lifecycle import (
+    acquire_lock,
+    enter_lock_context,
+    release_lock,
+    start_heartbeat,
+)
+from bioetl.application.core.lifecycle.lock_runtime import (
+    build_lock_config,
+    build_lock_context,
+    validate_lock_ownership,
+)
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
-from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.types import RunID, RunType
 
@@ -128,7 +138,7 @@ class LockCoordinator:
             A configured LockCoordinator instance.
 
         """
-        config = LockConfig.for_pipeline(
+        config = build_lock_config(
             provider=provider,
             entity_type=entity_type,
             run_type=run_type,
@@ -156,53 +166,11 @@ class LockCoordinator:
             FencingToken if lock was acquired, None otherwise.
 
         """
-        import time
-
-        token = await self._lock.acquire(
-            key=self._config.lock_key,
-            owner_id=self._run_id,
-            ttl=self._config.lock_ttl,
-            wait=self._config.wait_for_lock,
-            wait_timeout=self._config.wait_timeout,
-            exclusive=self._config.exclusive,
-        )
-        if token is not None:
-            self._acquired_at = time.monotonic()
-            self._fencing_token = token
-            # Update shared context holder for writers
-            if self._context_holder is not None:
-                context = self.get_context()
-                if context is not None:
-                    self._context_holder.set(context)
-            self._logger.info(
-                "lock_acquired",
-                lock_key=self._config.lock_key,
-                run_id=str(self._run_id),
-                fencing_sequence=token.sequence,
-            )
-        else:
-            self._logger.error(
-                "lock_acquisition_failed",
-                lock_key=self._config.lock_key,
-                run_id=str(self._run_id),
-            )
-        return token
+        return await acquire_lock(self)
 
     async def release(self) -> None:
         """Release the distributed lock and stop heartbeat."""
-        if self._heartbeat:
-            await self._heartbeat.stop()
-            self._heartbeat = None
-
-        await self._lock.release(
-            self._config.lock_key, self._run_id, exclusive=self._config.exclusive
-        )
-        self._acquired_at = None
-        self._fencing_token = None
-        # Clear shared context holder
-        if self._context_holder is not None:
-            self._context_holder.clear()
-        self._logger.info("Lock released", stage="cleanup")
+        await release_lock(self)
 
     def get_context(self) -> LockContext | None:
         """Get LockContext for passing to writers.
@@ -213,13 +181,9 @@ class LockCoordinator:
         Returns:
             LockContext if lock is held, None if not acquired.
         """
-        if self._acquired_at is None:
-            return None
-
-        return LockContext(
-            key=self._config.lock_key,
-            owner_id=self._run_id,
-            exclusive=self._config.exclusive,
+        return build_lock_context(
+            config=self._config,
+            run_id=self._run_id,
             acquired_at=self._acquired_at,
             fencing_token=self._fencing_token,
         )
@@ -233,16 +197,7 @@ class LockCoordinator:
             PipelineShutdownError: If initial heartbeat fails.
 
         """
-        self._heartbeat = self._heartbeat_factory(
-            lock_port=self._lock,
-            lock_key=self._config.lock_key,
-            owner_id=self._run_id,
-            exclusive=self._config.exclusive,
-            interval=self._config.heartbeat_interval,
-            shutdown_signal=self._shutdown_signal,
-            logger=self._logger,
-        )
-        await self._heartbeat.start()
+        await start_heartbeat(self)
 
     async def __aenter__(self) -> LockCoordinator:
         """Context manager entry: acquire lock.
@@ -254,13 +209,7 @@ class LockCoordinator:
             PipelineShutdownError: If lock acquisition fails.
 
         """
-        token = await self.acquire()
-        if token is None:
-            raise PipelineShutdownError(
-                f"Failed to acquire lock for {self._config.lock_key}"
-            )
-        await self.start_heartbeat()
-        return self
+        return await enter_lock_context(self)
 
     async def validate(self) -> bool:
         """Validate that this LockCoordinator still holds the lock.
@@ -280,16 +229,12 @@ class LockCoordinator:
                     raise LockLostError(lock_key, run_id)
                 await storage.write_silver(...)
         """
-        if self._fencing_token is None:
-            result = await self._lock.validate_owner(
-                self._config.lock_key, self._run_id
-            )
-            return bool(result)
-
-        result = await self._lock.validate_fencing_token(
-            self._config.lock_key, self._fencing_token
+        return await validate_lock_ownership(
+            lock_port=self._lock,
+            config=self._config,
+            run_id=self._run_id,
+            fencing_token=self._fencing_token,
         )
-        return bool(result)
 
     async def __aexit__(
         self,

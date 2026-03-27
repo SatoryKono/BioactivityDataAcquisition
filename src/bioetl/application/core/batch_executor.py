@@ -11,21 +11,25 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.batch_execution import (
     BatchExecutionContext,
     BatchExecutionRunService,
-    prepare_execution_context,
 )
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_protocols import (
     BatchStateCommitPort,
     PipelineProcessingPort,
 )
+from bioetl.application.core.batch_executor_state_flow import (
+    execute_batch_run,
+    prepare_batch_execution_context,
+    process_explicit_batch,
+    process_stateful_batch,
+)
 from bioetl.application.core.batch_extraction_loop_service import (
     BatchExtractionLoopService,
 )
 from bioetl.application.core.batch_runtime_failure_policy import (
-    PIPELINE_EXECUTION_ERRORS,
+    PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.lifecycle.batch_fsm import (
-    BatchExecutionCommand,
     BatchExecutionEvent,
     BatchExecutionFSM,
     BatchExecutionState,
@@ -34,6 +38,8 @@ from bioetl.domain.constants import (
     DEFAULT_CHECKPOINT_INTERVAL as _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL,
 )
 from bioetl.domain.types import BronzeRecord, GoldRecord
+
+_SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
@@ -126,6 +132,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._processing_port = dependencies.processing_port
         self._fsm = dependencies.fsm
         self._fsm_state = BatchExecutionState.IDLE
+        self._batch_result_type = BatchResult
 
         self._resume_offset = 0
         self._query_string: str | None = None
@@ -139,34 +146,23 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self, limit: int | None, query: str | None = None, offset: int | None = None
     ) -> None:
         """Execute the pipeline for the provided limit/query/offset inputs."""
-        execution_context = self._prepare_execution_context(
+        await execute_batch_run(
+            self,
             limit=limit,
             query=query,
             offset=offset,
-        )
-
-        res = self._fsm.advance(self._fsm_state, BatchExecutionEvent.RUN_STARTED)
-        self._fsm_state = res.new_state
-
-        await self._execution_run_service.execute(
-            execution_context=execution_context,
-            run_loop=self._run_extraction_loop,
-            execution_state=self,
-            memory_state=self._memory,
         )
 
     def _prepare_execution_context(
         self, *, limit: int | None, query: str | None, offset: int | None
     ) -> BatchExecutionContext:
         """Persist execution-scoped inputs and return the explicit loop context."""
-        execution_context = prepare_execution_context(
+        return prepare_batch_execution_context(
+            self,
             limit=limit,
             query=query,
             offset=offset,
         )
-        self._resume_offset = execution_context.resume_offset
-        self._query_string = execution_context.query
-        return execution_context
 
     async def _run_extraction_loop(
         self,
@@ -195,15 +191,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         start_index: int = 0,
     ) -> BatchResult:
         """Public API for processing one explicit batch."""
-        if self._fsm_state == BatchExecutionState.IDLE:
-            res = self._fsm.advance(self._fsm_state, BatchExecutionEvent.RUN_STARTED)
-            self._fsm_state = res.new_state
-
-        await self._process_batch_and_update_state(records, start_index)
-        return self._execution_state_service.build_batch_result(
-            state=self,
-            batch_result_type=BatchResult,
-        )
+        return await process_explicit_batch(self, records, start_index)
 
     async def _process_batch_and_update_state(
         self,
@@ -211,51 +199,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         start_index: int,
     ) -> None:
         """Process one batch and apply results to executor-level counters/state."""
-        t1 = self._fsm.advance(self._fsm_state, BatchExecutionEvent.BATCH_ASSEMBLED)
-        self._fsm_state = t1.new_state
-
-        if BatchExecutionCommand.PROCESS_BATCH in t1.commands:
-            try:
-                outcome = await self._processing_port.process_batch(
-                    records=records,
-                    start_index=start_index,
-                    query_string=self._query_string,
-                )
-            except PIPELINE_EXECUTION_ERRORS:
-                self._fsm_state = self._fsm.advance(
-                    self._fsm_state, BatchExecutionEvent.PROCESS_FAILED
-                ).new_state
-                raise
-
-            t2 = self._fsm.advance(
-                self._fsm_state, BatchExecutionEvent.PROCESS_SUCCEEDED
-            )
-            self._fsm_state = t2.new_state
-
-            if BatchExecutionCommand.COMMIT_STATE in t2.commands:
-                try:
-                    self._execution_state_service.commit_successful_batch(
-                        state=self,
-                        records=records,
-                        outcome=outcome,
-                    )
-                except PIPELINE_EXECUTION_ERRORS:
-                    self._fsm_state = self._fsm.advance(
-                        self._fsm_state, BatchExecutionEvent.STATE_COMMIT_FAILED
-                    ).new_state
-                    raise
-
-                t3 = self._fsm.advance(
-                    self._fsm_state, BatchExecutionEvent.STATE_COMMITTED
-                )
-                self._fsm_state = t3.new_state
-
-                # FSM expects CHECKPOINT decision. We delegate the actual check to the extraction loop.
-                # So we simply reset the FSM back to STREAMING for the next batch.
-                t4 = self._fsm.advance(
-                    self._fsm_state, BatchExecutionEvent.CHECKPOINT_NOT_REQUIRED
-                )
-                self._fsm_state = t4.new_state
+        await process_stateful_batch(self, records, start_index)
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:
         """Get aggregated statistics for the entire pipeline run."""
