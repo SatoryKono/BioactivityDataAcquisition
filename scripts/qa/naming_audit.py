@@ -137,6 +137,7 @@ _DOC_EXCLUDED_DIRS = {
 # Sub-paths excluded from doc naming audit (relative to docs root)
 _DOC_EXCLUDED_SUBPATHS = {
     "00-project/ai",
+    "repor",
     "reports",
     "docs/reports",
     "reports/evidence",

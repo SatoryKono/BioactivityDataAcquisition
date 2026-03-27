@@ -39,8 +39,11 @@ make setup-plugins
 If you use Codex or GitHub Copilot MCP, add the optional tooling setup after install:
 
 ```bash
-python -m scripts.dev setup-mcp
+uv run python -m scripts.dev setup-mcp
 ```
+
+If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp`
+is also valid.
 
 `scripts/dev/dev_setup.sh` remains in the repository as a legacy placeholder and is not the supported onboarding path.
 

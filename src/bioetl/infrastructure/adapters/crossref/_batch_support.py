@@ -32,7 +32,9 @@ class HttpTransport(Protocol):
 class BaseMetrics(Protocol):
     """Minimal metrics wrapper used around request timing."""
 
-    def measure_request(self, route: str) -> AbstractContextManager[object]: ...
+    def measure_request(self, route: str) -> AbstractContextManager[object]:
+        _ = route
+        raise NotImplementedError
 
 
 class HeadersBuilder(Protocol):

@@ -10,8 +10,10 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
+from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import (
     DQDisposition,
+    DQPolicyRef,
     DQRuleOutcome,
     DQViolationKind,
 )
@@ -56,13 +58,13 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         )
 
     @property
-    def policy_ref(self):
+    def policy_ref(self) -> DQPolicyRef | None:
         """Get the current policy reference."""
         return self._policy_ref
 
     def validate_with_outcomes(
         self,
-        records: list[dict],
+        records: list[JsonDict],
     ) -> tuple[bool, list[DQRuleOutcome]]:
         """Validate records and return rule-level DQ outcomes.
 
@@ -139,12 +141,15 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
     def _prepare_df_for_validation(self, df: pd.DataFrame) -> pd.DataFrame:
         """Prepare DataFrame for validation with Gold-specific handling."""
         df_to_validate = df.copy()
+        schema = self._schema
+        if schema is None:
+            return self._reorder_to_schema(df_to_validate)
 
         # Handle missing nullable columns
-        if hasattr(self._schema, "columns"):
-            missing = [name for name in self._schema.columns if name not in df.columns]
+        if hasattr(schema, "columns"):
+            missing = [name for name in schema.columns if name not in df.columns]
             for name in missing:
-                column = self._schema.columns[name]
+                column = schema.columns[name]
                 if getattr(column, "nullable", False):
                     df_to_validate[name] = None
 
@@ -164,14 +169,16 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         """
         from pandera.errors import SchemaErrors
 
-        outcomes = []
+        outcomes: list[DQRuleOutcome] = []
+        policy_resolver = self._policy_resolver
+        assert policy_resolver is not None
 
         if isinstance(error, SchemaErrors):
             # Pandera exposes the collected lazy-validation items via
             # ``schema_errors`` on current versions.
             for schema_error in error.schema_errors:
                 field_name = self._extract_schema_error_field_name(schema_error)
-                outcome = self._policy_resolver.create_rule_outcome(
+                outcome = policy_resolver.create_rule_outcome(
                     rule_id=f"schema.{field_name or 'unknown'}",
                     violation_kind=DQViolationKind.SCHEMA_VIOLATION,
                     severity=self._determine_severity(schema_error),
@@ -184,7 +191,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         else:
             # Handle single error
             field_name = self._extract_schema_error_field_name(error)
-            outcome = self._policy_resolver.create_rule_outcome(
+            outcome = policy_resolver.create_rule_outcome(
                 rule_id=f"schema.{field_name or 'unknown'}",
                 violation_kind=DQViolationKind.SCHEMA_VIOLATION,
                 severity="high",  # Default high severity for schema errors
@@ -231,7 +238,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         Returns:
             List of DQRuleOutcome objects from contract validations
         """
-        outcomes = []
+        outcomes: list[DQRuleOutcome] = []
 
         # Example: Check for required fields specified in contract
         if self._policy_ref and "gold" in self._policy_ref.contract_ref.lower():
@@ -276,7 +283,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
             return f"contracts/{self._policy_ref.contract_ref}/dq_rules.yaml"
         return None
 
-    def get_policy_summary(self) -> dict:
+    def get_policy_summary(self) -> JsonDict:
         """Get summary of effective DQ policy."""
         if self._policy_resolver:
             return self._policy_resolver.get_effective_policy_summary()
@@ -310,13 +317,13 @@ class ContractAwareSilverValidator:
         )
 
     @property
-    def policy_ref(self):
+    def policy_ref(self) -> DQPolicyRef | None:
         """Get the current policy reference."""
         return self._policy_ref
 
     def validate_with_outcomes(
         self,
-        records: list[dict],
+        records: list[JsonDict],
     ) -> tuple[bool, list[DQRuleOutcome]]:
         """Validate records and return rule-level DQ outcomes."""
         # Basic validation
@@ -326,7 +333,7 @@ class ContractAwareSilverValidator:
         # Future implementation will add Silver-specific contract validation
         return basic_result.valid, []
 
-    def get_policy_summary(self) -> dict:
+    def get_policy_summary(self) -> JsonDict:
         """Get summary of effective DQ policy."""
         if self._policy_resolver:
             return self._policy_resolver.get_effective_policy_summary()

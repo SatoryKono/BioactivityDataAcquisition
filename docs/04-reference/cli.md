@@ -14,8 +14,11 @@ BioETL command-line interface (CLI) - основной способ взаимо
 # Рекомендуемый способ (после установки)
 bioetl <command> [options]
 
-# Или во время разработки
-python -m bioetl.interfaces.cli <command> [options]
+# Во время разработки с uv
+uv run python -m bioetl <command> [options]
+
+# Или через активированное virtualenv
+python -m bioetl <command> [options]
 ```
 
 Для справки по любой команде добавьте `--help`:

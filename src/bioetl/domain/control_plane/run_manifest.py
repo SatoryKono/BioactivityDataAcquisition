@@ -42,9 +42,7 @@ def _normalize_dataclass_value(value: object) -> dict[str, object] | None:
     """Normalize dataclass instances when present."""
     if not is_dataclass(value) or isinstance(value, type):
         return None
-    return _normalize_mapping(
-        cast("Mapping[object, object]", asdict(cast("DataclassInstance", value)))
-    )
+    return _normalize_mapping(cast("Mapping[object, object]", asdict(value)))
 
 
 def _normalize_collection_value(value: object) -> object | None:

@@ -628,7 +628,7 @@ df.to-parquet("silver/pubmed/publication-validated.parquet")
 curl -I https://api.crossref.org/works/10.1038/nature12373
 
 # 2. Запустить ограниченный прогон для диагностики
-python -m bioetl run --pipeline crossref_publication --limit 100
+uv run python -m bioetl run --pipeline crossref_publication --limit 100
 
 # 3. Увеличить порог similarity
 # В configs/providers/crossref.yaml:

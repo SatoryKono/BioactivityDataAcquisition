@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from collections import Counter
 from dataclasses import dataclass, field
+from typing import TypedDict
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -141,6 +142,19 @@ class RunManifestInspectionService:
             sort_keys=True,
             default=str,
         )
+
+
+class DQDetailsSummary(TypedDict):
+    """Normalized DQ anchor sets extracted from one ledger entry."""
+
+    rule_ids: set[str]
+    dispositions: set[str]
+    report_paths: set[str]
+    violation_kinds: set[str]
+    cross_validation_rule_ids: set[str]
+    cross_validation_config_paths: set[str]
+    has_signal: bool
+    has_cross_validation_signal: bool
 
 
 def _build_diagnostics_summary(
@@ -369,7 +383,7 @@ def _has_dq_signal(
     )
 
 
-def _extract_dq_details(entry: RunLedgerEntry) -> dict[str, object]:
+def _extract_dq_details(entry: RunLedgerEntry) -> DQDetailsSummary:
     """Extract DQ-oriented anchors from one ledger entry."""
     details = entry.details or {}
     rule_ids = _collect_dq_values(

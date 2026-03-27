@@ -27,7 +27,7 @@ from bioetl.domain.services.composite_metadata_helpers import (
 from bioetl.domain.value_objects.run_context import RunContext
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from bioetl.domain.types.dq_contracts import DQRuleProvenance
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -109,7 +109,7 @@ def _resolve_transform_metadata(
     *,
     run_context: RunContext,
     transform_version: str | None,
-    transform_steps: tuple[str, ...] | None,
+    transform_steps: Sequence[str] | None,
 ) -> tuple[str, list[str]]:
     """Resolve transform metadata using input override or run context defaults."""
     resolved_version = transform_version or run_context.transform_version or ""
@@ -202,7 +202,7 @@ def _build_gold_dq_summary(
 
 
 def _normalize_rule_provenance_entries(
-    entries: Sequence[dict[str, object] | DQRuleProvenance],
+    entries: Sequence[Mapping[str, object] | DQRuleProvenance],
 ) -> list[dict[str, str | None]]:
     """Normalize provenance objects/dicts into metadata-safe mappings."""
     normalized: list[dict[str, str | None]] = []
@@ -215,18 +215,30 @@ def _normalize_rule_provenance_entries(
                 }
             )
             continue
+        entry_obj = cast("DQRuleProvenance", entry)
         normalized.append(
             {
-                "rule_id": entry.rule_id,
-                "contract_version": entry.contract_version,
-                "severity": entry.severity,
-                "disposition": str(entry.disposition),
-                "config_path": entry.config_path,
-                "report_artifact_path": entry.report_artifact_path,
-                "policy_hash": entry.policy_hash,
+                "rule_id": entry_obj.rule_id,
+                "contract_version": entry_obj.contract_version,
+                "severity": entry_obj.severity,
+                "disposition": str(entry_obj.disposition),
+                "config_path": entry_obj.config_path,
+                "report_artifact_path": entry_obj.report_artifact_path,
+                "policy_hash": entry_obj.policy_hash,
             }
         )
     return normalized
+
+
+def _coerce_rule_provenance_mappings(value: object) -> list[dict[str, object]]:
+    """Coerce untyped provenance payloads into mapping entries only."""
+    if not isinstance(value, list):
+        return []
+    return [
+        {str(key): item_value for key, item_value in item.items()}
+        for item in value
+        if isinstance(item, dict)
+    ]
 
 
 def _augment_dq_summary_with_composite_cv(
@@ -249,8 +261,8 @@ def _augment_dq_summary_with_composite_cv(
     warning_records = int(cv_summary["warning_records"])
     total_records = dq_summary.total_records
     existing_provenance = _normalize_rule_provenance_entries(dq_summary.rule_provenance)
-    composite_provenance = cast(
-        "list[dict[str, str | None]]", cv_summary["rule_provenance"]
+    composite_provenance = _normalize_rule_provenance_entries(
+        _coerce_rule_provenance_mappings(cv_summary["rule_provenance"])
     )
     return dq_summary.model_copy(
         update={

@@ -22,7 +22,7 @@ standard runbook path.
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
 | [Historical Release Checklist (v5.9)](release-checklist.md) | Historical example only; not the current release procedure |
-| [Deployment & Tooling Extras](deployment/README.md) | Experimental Kubernetes material and auxiliary Neo4j/MCP setup notes |
+| [Deployment & Tooling Extras](deployment/README.md) | Internal / Extended material for experimental Kubernetes and auxiliary Neo4j/MCP setup notes |
 | [VCR Provider Rebalancing](verification/vcr-provider-rebalancing.md) | Recording and validation workflow for provider cassette balance |
 
 ## Quick Links
@@ -47,7 +47,7 @@ standard runbook path.
 
 ### Extended / Non-Default Material
 
-- [Deployment & Tooling Extras](deployment/README.md)
+- [Deployment & Tooling Extras](deployment/README.md) (Internal / Extended)
 
 ## Related Documentation
 

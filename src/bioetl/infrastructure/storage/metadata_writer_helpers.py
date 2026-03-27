@@ -31,6 +31,12 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
 _get_metadata_filename = _operations._get_metadata_filename
 ArtifactPublicationRecorder = Callable[[str, str, dict[str, object] | None], object]
 
+__all__ = [
+    "_execute_prepared_metadata_write_operation",
+    "_get_metadata_filename",
+    "atomic_write_text",
+]
+
 
 def _derive_dataset_ref(
     metadata: BronzeMetadata | SilverMetadata | GoldMetadata,

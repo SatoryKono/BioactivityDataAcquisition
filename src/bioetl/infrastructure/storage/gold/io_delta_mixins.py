@@ -107,7 +107,9 @@ class _GoldWriterDeltaModuleProtocol(_GoldWriteRetryModuleProtocol, Protocol):
         mode: str,
         partition_by: list[str] | None,
         schema_mode: str | None,
-    ) -> None: ...
+    ) -> None:
+        _ = (table_or_uri, data, mode, partition_by, schema_mode)
+        raise NotImplementedError
 
 
 def _build_simple_gold_write(

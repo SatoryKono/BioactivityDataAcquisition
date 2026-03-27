@@ -109,7 +109,18 @@ class _PhaseTransitionRuleBuilder(
         allows_retry: bool = False,
         compensation_required: bool = False,
         degraded_mode_allowed: bool = False,
-    ) -> RuleCoT: ...
+    ) -> RuleCoT:
+        _ = (
+            from_phase,
+            to_phase,
+            transition,
+            policy,
+            requires_validation,
+            allows_retry,
+            compensation_required,
+            degraded_mode_allowed,
+        )
+        raise NotImplementedError
 
 
 def build_transition_table(

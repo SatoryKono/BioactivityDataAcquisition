@@ -209,6 +209,7 @@ class TestPreflightServiceValidation:
         assert len(gauge_calls) == 1
         # Should be 1.0 for healthy
         assert gauge_calls[0][0][1] == 1.0
+        assert gauge_calls[0][0][2] == {"pipeline": "test_preflight_pipeline"}
 
     @pytest.mark.asyncio
     async def test_validate_infrastructure_records_duration_metric(
@@ -344,6 +345,7 @@ class TestPreflightServiceMetrics:
         ]
         assert len(gauge_calls) == 1
         assert gauge_calls[0][0][1] == 0.0
+        assert gauge_calls[0][0][2] == {"pipeline": "test_preflight_pipeline"}
 
 
 @pytest.fixture

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Literal
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
@@ -82,7 +83,7 @@ class DQPolicySnapshot:
     policy_hash: str
     default_disposition: DQDisposition
     disposition_overrides: dict[str, DQDisposition] = field(default_factory=dict)
-    strictness_mode: str = "standard"
+    strictness_mode: Literal["lenient", "moderate", "standard", "strict"] = "standard"
 
 
 @dataclass(frozen=True)

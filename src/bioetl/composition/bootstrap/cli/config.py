@@ -31,9 +31,9 @@ if TYPE_CHECKING:
 def _pipeline_yaml_for_dq(pipeline_name: str) -> JsonDict:
     config = load_pipeline_config(pipeline_name)
     if hasattr(config, "model_dump"):
-        return cast("JsonDict", config.model_dump())
+        return config.model_dump()
     if isinstance(config, Mapping):
-        return cast("JsonDict", dict(config))
+        return dict(config)
     raise TypeError("Pipeline YAML config must provide model_dump() or be a mapping")
 
 

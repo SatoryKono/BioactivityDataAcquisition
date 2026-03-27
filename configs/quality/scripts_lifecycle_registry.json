@@ -239,18 +239,6 @@
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
     },
-    "scripts/ops/codex-exec.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/ops/codex-exec.bat. Keep while Windows launchers remain supported."
-    },
-    "scripts/ops/codex.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/ops/codex.bat. Keep while Windows launchers remain supported."
-    },
     "scripts/ci/apply-ci-optimizations-fixed.ps1": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -269,35 +257,17 @@
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
     },
-    "scripts/diagrams/generate_architecture_bundle.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Diagram bundle generator is currently orphaned in inventory; keep as manual maintenance tool until bundle regeneration workflow is either restored or the script is archived."
-    },
     "scripts/diagrams/generate_description_indexes.py": {
       "owner": "@bioetl-architecture",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Keep as the canonical description-index generator for diagram publication artifacts while description indexes remain generated docs."
     },
-    "scripts/diagrams/generate_views_bundle.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Views bundle generator is currently orphaned in inventory; keep as manual maintenance tool until bundle regeneration workflow is either restored or the script is archived."
-    },
     "scripts/diagnostics/cleanup_project.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/schema/config_gap_analysis.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "evaluate",
-      "review_by": "2026-06-30",
-      "next_step": "Evaluate utility and integrate into CI or archive."
     },
     "scripts/ops/deploy-bioetl.sh": {
       "owner": "@bioetl-platform",
@@ -382,12 +352,6 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/ops/start-wsl-proxy.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/ops/start-wsl-proxy.bat. Keep while Windows setup helpers remain supported."
     },
     "scripts/data/vacuum_delta.py": {
       "owner": "@bioetl-platform",
@@ -563,84 +527,6 @@
       "review_by": "2026-06-30",
       "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
     },
-    "scripts/qa/naming_audit.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep implementation behind the active root wrapper; add a confirmed operational playbook and periodic smoke check."
-    },
-    "scripts/docs/report_docs_kpi.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep the docs KPI reporter as a manual governance utility and document the operator workflow plus a periodic smoke check."
-    },
-    "scripts/ops/check_ai_skills_layout.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations guard; document when skill-layout validation must be run and how failures are triaged."
-    },
-    "scripts/ops/check_skills_mirror.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations guard; document the mirror-validation workflow and add a periodic smoke check."
-    },
-    "scripts/qa/check_c901_baseline.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual quality guard for complexity budgets and document the expected review cadence."
-    },
-    "scripts/qa/check_naming_package_consistency.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual quality guard for naming/package consistency and document the invocation path."
-    },
-    "scripts/qa/check_quality_exemptions.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual quality-governance guard and link it from the exemption review workflow."
-    },
-    "scripts/qa/generate_hotspot_degradation_report.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual hotspot-analysis report generator and document when it is used during refactor reviews."
-    },
-    "scripts/repo/check_version_consistency.py": {
-      "owner": "@bioetl-platform",
-      "decision": "integrated_ci",
-      "review_by": "2026-06-30",
-      "next_step": "Integrated into release.yml."
-    },
-    "scripts/schema/check_config_invariants.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "integrated_ci",
-      "review_by": "2026-06-30",
-      "next_step": "Integrated into pre-commit and tests/architecture/."
-    },
-    "scripts/schema/generate_pipeline_schema.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as manual helper for codegen; check artifacts for drift in CI."
-    },
-    "scripts/schema/generate_publication_type_classification_artifacts.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as manual tool. Artifacts are tracked by hash manifests."
-    },
-    "scripts/schema/validate_pipeline_configs.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "integrated_ci",
-      "review_by": "2026-06-30",
-      "next_step": "Delegated to pre-commit and strict YAML test suites."
-    },
     "scripts/schema/lint_config_paths.py": {
       "owner": "@bioetl-architecture",
       "decision": "integrated_ci",
@@ -695,12 +581,6 @@
       "review_by": "2026-06-30",
       "next_step": "Keep the canonical PowerShell pytest launcher while Windows developer workflows remain supported and documented."
     },
-    "scripts/dev/test_changed.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual changed-files test helper until a documented replacement workflow exists or the script is archived."
-    },
     "scripts/diagnostics/__init__.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -731,23 +611,11 @@
       "review_by": "2026-06-30",
       "next_step": "Keep as a manual storage-health debugging helper until it is either folded into a documented diagnostics workflow or archived."
     },
-    "scripts/diagrams/__main__.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.diagrams package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
     "scripts/diagrams/diagram_paths.py": {
       "owner": "@bioetl-architecture",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Keep as a manual diagram-path helper behind the package CLI and document when operators should rely on it."
-    },
-    "scripts/diagrams/generate_all_bundles.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual diagram bundle-generation helper until an explicit docs or CI call-site is added or the script is archived."
     },
     "scripts/docs/__main__.py": {
       "owner": "@bioetl-platform",
@@ -808,6 +676,18 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Keep as a manual architecture refactor helper until the entity-naming rename workflow is closed or the tool is archived."
+    },
+    "scripts/diagnostics/generate_src_bioetl_refactor_evidence.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Retain as an ad-hoc evidence generator until the refactor-evidence workflow is either automated or formally retired."
+    },
+    "scripts/diagrams/generate_package_family_class_diagrams.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as a manual supplemental class-diagram generator while bundle coverage and usage are monitored."
     }
   }
 }

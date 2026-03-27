@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.contract_identity import (
     CompatibilityLevel,

@@ -186,7 +186,8 @@ async def _prepare_silver_metadata_write(
         table_name=request.table_name,
         version_after=request.version_after,
     )
-    assert host._metadata_coordinator is not None
+    coordinator = host._metadata_coordinator
+    assert coordinator is not None
     silver_input = SilverMetadataInput(
         table_path=request.table_path,
         records=request.records,
@@ -203,13 +204,11 @@ async def _prepare_silver_metadata_write(
         completed_at=request.completed_at,
     )
     metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
-        coordinator=host._metadata_coordinator,
+        coordinator=coordinator,
         bundle_factory_name="create_silver_metadata_bundle",
         coordinator_factory_name="create_silver_metadata",
         input_data=silver_input,
-        fallback_factory=lambda: host._metadata_coordinator.create_silver_metadata(
-            silver_input
-        ),
+        fallback_factory=lambda: coordinator.create_silver_metadata(silver_input),
     )
     return _PreparedSilverMetadataWriteOperation(
         request=request,

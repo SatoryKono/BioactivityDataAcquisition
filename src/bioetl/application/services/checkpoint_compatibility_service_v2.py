@@ -34,7 +34,7 @@ class CheckpointIdentityRecord:
     effective_config_hash: str
     execution_phase: ExecutionPhase
     checkpoint_schema_version: str
-    source_freshness_markers: dict | None = None
+    source_freshness_markers: dict[str, object] | None = None
     composite_run_identity: str | None = None
 
 

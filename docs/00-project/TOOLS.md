@@ -27,9 +27,11 @@
 
 - `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
 - Docs site tooling lives in the separate `docs` extra; install it via `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"` before running MkDocs commands.
+- Preferred invocation after `uv sync` is `uv run python -m scripts.<group> ...`.
+  With an activated virtual environment, `python -m scripts.<group> ...` remains a valid fallback.
 - Standard docs checks:
 ```bash
-python -m scripts.docs check-links
+uv run python -m scripts.docs check-links
 make docs-build
 bash scripts/docs/build_docs_site.sh --strict
 ```
@@ -40,16 +42,16 @@ bash scripts/docs/build_docs_site.sh --strict
 ## Unified Entry Points
 
 Каждая каноническая директория `scripts/<group>/` предоставляет `__main__.py` dispatcher.
-Полный список команд: `python -m scripts.<group> --help`.
+Полный список команд: `uv run python -m scripts.<group> --help`.
 
 ```bash
-python -m scripts.repo check-inventory --check
-python -m scripts.qa check-c901 --target src/bioetl
-python -m scripts.schema validate-configs
-python -m scripts.data check-vcr-naming
-python -m scripts.docs check-drift
-python -m scripts.diagrams lint
-python -m scripts.ci quality-gate
+uv run python -m scripts.repo check-inventory --check
+uv run python -m scripts.qa check-c901 --target src/bioetl
+uv run python -m scripts.schema validate-configs
+uv run python -m scripts.data check-vcr-naming
+uv run python -m scripts.docs check-drift
+uv run python -m scripts.diagrams lint
+uv run python -m scripts.ci quality-gate
 ```
 
 Каждый скрипт также можно запустить напрямую (см. `scripts/<group>/README.md`).
@@ -66,14 +68,14 @@ python -m scripts.ci quality-gate
 | `cleanup_project.py` | scripts/diagnostics/ | Нет | — | `make clean` | Очистка кэшей и артефактов |
 | `cleanup_consolidate.py` | scripts/diagnostics/ | Нет | — | — | Консолидированный аудит очистки |
 | `audit_structure.py` | scripts/diagnostics/ | Нет | — | — | Аудит соответствия File Policy |
-| `vacuum_delta.py` | scripts/data/ | Нет | `python -m scripts.data vacuum` | — | VACUUM Delta Lake таблиц |
-| `dq_baseline_update.py` | scripts/data/ | Нет | `python -m scripts.data dq-baseline` | — | Пересчёт DQ baseline |
-| `verify_checksums.py` | scripts/data/ | Нет | `python -m scripts.data checksums` | — | Верификация контрольных сумм |
+| `vacuum_delta.py` | scripts/data/ | Нет | `uv run python -m scripts.data vacuum` | — | VACUUM Delta Lake таблиц |
+| `dq_baseline_update.py` | scripts/data/ | Нет | `uv run python -m scripts.data dq-baseline` | — | Пересчёт DQ baseline |
+| `verify_checksums.py` | scripts/data/ | Нет | `uv run python -m scripts.data checksums` | — | Верификация контрольных сумм |
 | `salt_rotate.py` | scripts/ops/ | Нет | — | — | Ротация PII-соли |
-| `naming_audit.py` | scripts/qa/ | Нет | `python -m scripts.qa check-naming` | — | Аудит naming conventions |
-| `lint_terminology.py` | scripts/qa/ | Нет | `python -m scripts.qa check-terminology` | — | Линтер терминологии |
-| `config_gap_analysis.py` | scripts/schema/ | Нет | `python -m scripts.schema analyze-gaps` | — | Анализ расхождений конфигов |
-| `validate_pipeline_configs.py` | scripts/schema/ | Нет | `python -m scripts.schema validate-configs` | — | Валидация configs vs JSON Schema |
+| `naming_audit.py` | scripts/qa/ | Нет | `uv run python -m scripts.qa check-naming` | — | Аудит naming conventions |
+| `lint_terminology.py` | scripts/qa/ | Нет | `uv run python -m scripts.qa check-terminology` | — | Линтер терминологии |
+| `config_gap_analysis.py` | scripts/schema/ | Нет | `uv run python -m scripts.schema analyze-gaps` | — | Анализ расхождений конфигов |
+| `validate_pipeline_configs.py` | scripts/schema/ | Нет | `uv run python -m scripts.schema validate-configs` | — | Валидация configs vs JSON Schema |
 
 > Для детального описания каждого скрипта, параметров и примеров: `scripts/<group>/README.md`.
 

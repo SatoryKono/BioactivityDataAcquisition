@@ -140,7 +140,9 @@ async def test_fetch_publications(pubmed_adapter: PubMedAdapter):
         respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
 
         records = []
-        async for record in pubmed_adapter.fetch("publication", query="crispr", limit=2):
+        async for record in pubmed_adapter.fetch(
+            "publication", query="crispr", limit=2
+        ):
             records.append(record)
 
         assert len(records) == 2

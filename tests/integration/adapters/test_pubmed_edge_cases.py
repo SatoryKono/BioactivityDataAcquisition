@@ -136,7 +136,9 @@ class TestPubMedEdgeCases:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1
@@ -177,7 +179,9 @@ class TestPubMedEdgeCases:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1
@@ -216,7 +220,9 @@ class TestPubMedEdgeCases:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1
@@ -260,7 +266,9 @@ class TestPubMedEdgeCases:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1
@@ -293,7 +301,9 @@ class TestPubMedEdgeCases:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1
@@ -333,7 +343,9 @@ class TestPubMedEdgeCases:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1
@@ -381,7 +393,9 @@ class TestPubMedEdgeCases:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=3):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=3
+            ):
                 records.append(record)
 
             assert len(records) == 3
@@ -431,7 +445,9 @@ class TestPubMedRateLimiting:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             # Should complete without rate limit errors
@@ -472,7 +488,9 @@ class TestPubMedXMLParsing:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1
@@ -515,7 +533,9 @@ class TestPubMedXMLParsing:
             )
 
             records = []
-            async for record in pubmed_adapter.fetch("publication", query="test", limit=1):
+            async for record in pubmed_adapter.fetch(
+                "publication", query="test", limit=1
+            ):
                 records.append(record)
 
             assert len(records) == 1

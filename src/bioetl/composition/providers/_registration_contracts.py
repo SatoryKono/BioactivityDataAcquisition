@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import partial
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.composition.providers._models import (
     AdapterCreator,
@@ -91,7 +91,7 @@ def _create_http_client_for_provider(
 
     return HttpClientFactory.create_for_provider(
         provider,
-        settings,
+        cast("Any", settings),  # Any: concrete settings model is resolved at runtime.
         metrics=metrics,
         logger=logger,
         provider_registry=provider_registry,
@@ -116,7 +116,10 @@ def _create_adapter_for_provider(
         provider,
         http_client=http_client,
         logger=logger,
-        settings=settings,
+        settings=cast(
+            "Any",  # Any: provider settings object is adapter-specific at runtime.
+            settings,
+        ),  # Any: adapter factory accepts provider-specific settings surfaces.
         provider_registry=provider_registry,
         **kwargs,
     )

@@ -166,6 +166,7 @@ nav:
                     -   "ADR-042 Testing Strategy Matrix": 02-architecture/decisions/ADR-042-testing-strategy-matrix.md
                     -   "ADR-043 Documentation Knowledge Management": 02-architecture/decisions/ADR-043-documentation-knowledge-management.md
                     -   "ADR-044 Run Manifest and Run Ledger": 02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md
+                    -   "ADR-045 Data Quality Contract System": 02-architecture/decisions/ADR-045-dq-contract-system.md
                     -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Getting Started": 03-guides/getting-started.md

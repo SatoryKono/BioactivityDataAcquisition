@@ -10,11 +10,13 @@ import hashlib
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core._data_source_mixins import (
+    _SourceMetadataDelegationMixin,
+    _WrappedDataSourceDelegationMixin,
+)
+from bioetl.application.core._target_data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
-    _SourceMetadataDelegationMixin,
     _TargetEntityFetchDelegationMixin,
-    _WrappedDataSourceDelegationMixin,
 )
 from bioetl.domain.types import JsonDict
 

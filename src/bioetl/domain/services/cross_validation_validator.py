@@ -33,7 +33,7 @@ class CrossValidationDispositionPolicy(StrEnum):
 class CrossValidationConfig:
     """Configuration for cross-validation governance."""
 
-    pairs: list[dict]
+    pairs: list[dict[str, object]]
     rules: dict[str, str]
     strict_mode: bool = True
     coverage_threshold: float | None = None
@@ -168,7 +168,7 @@ def _build_disposed_issue(
         code=issue.code,
         severity=severity,
         message=f"{issue.message} ({suffix})",
-        details={**issue.details, **extra_details},
+        details={**(issue.details or {}), **extra_details},
         location=issue.location,
     )
 

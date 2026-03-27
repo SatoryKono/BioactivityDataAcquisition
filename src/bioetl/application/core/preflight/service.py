@@ -87,7 +87,6 @@ class PreflightService:
     ) -> None:
         """Record health-check metrics per observability contract."""
         pipeline = self._config.pipeline_name
-        run_id = str(self._context.run_id)
 
         for result in report.results:
             passed = 1.0 if result.status == HealthStatus.HEALTHY else 0.0
@@ -101,7 +100,7 @@ class PreflightService:
         self._metrics.set_gauge(
             "infrastructure_validated",
             validated,
-            {"pipeline": pipeline, "run_id": run_id},
+            {"pipeline": pipeline},
         )
 
         self._metrics.observe_histogram(

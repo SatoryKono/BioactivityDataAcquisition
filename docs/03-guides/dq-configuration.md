@@ -380,7 +380,7 @@ print(f"Field validations: {len(dq_config.field_validations)}")
 Validate all DQ configs:
 
 ```bash
-python -m scripts.schema validate-configs
+uv run python -m scripts.schema validate-configs
 ```
 
 ## Troubleshooting

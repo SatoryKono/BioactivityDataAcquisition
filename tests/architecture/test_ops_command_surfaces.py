@@ -57,4 +57,6 @@ def test_docs_do_not_reference_stale_quarantine_or_lock_make_commands() -> None:
     for name, path in docs.items():
         text = path.read_text(encoding="utf-8")
         for fragment in forbidden_fragments:
-            assert fragment not in text, f"{name} still contains stale command: {fragment}"
+            assert fragment not in text, (
+                f"{name} still contains stale command: {fragment}"
+            )

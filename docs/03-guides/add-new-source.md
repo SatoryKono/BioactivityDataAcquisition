@@ -161,7 +161,7 @@ For the first provider entity, complete all items from
 Configuration:
 
 ```bash
-python -m scripts.schema validate-configs --verbose
+uv run python -m scripts.schema validate-configs --verbose
 ```
 
 Loadability smoke (provider + one pipeline):
@@ -173,15 +173,15 @@ python -c "from bioetl.infrastructure.config import load_pipeline_config, load_s
 Architecture/registry smoke:
 
 ```bash
-python -m pytest tests/architecture/test_registry_contracts.py -q
-python -m pytest tests/architecture/test_source_config_usage.py -q
+uv run python -m pytest tests/architecture/test_registry_contracts.py -q
+uv run python -m pytest tests/architecture/test_source_config_usage.py -q
 ```
 
 Recommended targeted tests:
 
 ```bash
-python -m pytest tests/unit/application/pipelines/myprovider/ -q
-python -m pytest tests/integration/ -k myprovider -q
+uv run python -m pytest tests/unit/application/pipelines/myprovider/ -q
+uv run python -m pytest tests/integration/ -k myprovider -q
 ```
 
 ---

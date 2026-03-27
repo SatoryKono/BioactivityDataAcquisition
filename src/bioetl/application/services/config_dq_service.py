@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol
+from typing import Literal, Protocol, cast
 
 from bioetl.application.services.effective_config_service import EffectiveConfigService
 from bioetl.domain.config.dq import DQConfig
@@ -36,12 +36,28 @@ class PipelineYamlConfigGetterPort(Protocol):
     def __call__(self, pipeline_name: str) -> JsonDict: ...
 
 
+DQStrictnessMode = Literal["lenient", "moderate", "strict"]
+DQSnapshotStrictnessMode = Literal["lenient", "moderate", "standard", "strict"]
+
+
 def _parse_disposition(value: object) -> DQDisposition:
     if isinstance(value, DQDisposition):
         return value
     if isinstance(value, str):
         return DQDisposition(value)
     raise ValueError(f"Invalid DQ disposition value: {value!r}")
+
+
+def _parse_strictness_mode(value: object) -> DQStrictnessMode:
+    if value in {"lenient", "moderate", "strict"}:
+        return cast("DQStrictnessMode", value)
+    raise ValueError(f"Invalid DQ strictness mode: {value!r}")
+
+
+def _parse_snapshot_strictness_mode(value: object) -> DQSnapshotStrictnessMode:
+    if value in {"lenient", "moderate", "standard", "strict"}:
+        return cast("DQSnapshotStrictnessMode", value)
+    raise ValueError(f"Invalid DQ snapshot strictness mode: {value!r}")
 
 
 def _parse_disposition_overrides(overrides: object) -> dict[str, DQDisposition]:
@@ -131,7 +147,9 @@ def _dict_to_artifact(artifact_dict: JsonDict) -> EffectiveConfigArtifact:
             disposition_overrides=_parse_disposition_overrides(
                 snapshot["disposition_overrides"]
             ),
-            strictness_mode=str(snapshot["strictness_mode"]),
+            strictness_mode=_parse_snapshot_strictness_mode(
+                snapshot["strictness_mode"]
+            ),
         )
         for snapshot in artifact_dict.get("dq_policy_snapshots", [])
     ]
@@ -199,7 +217,9 @@ class ConfigDQService:
                 disposition_overrides=_parse_disposition_overrides(
                     dq_config.get("disposition_overrides", {})
                 ),
-                strictness_mode=str(dq_config.get("strictness_mode", "moderate")),
+                strictness_mode=_parse_strictness_mode(
+                    dq_config.get("strictness_mode", "moderate")
+                ),
             )
             DQPolicyResolver(validated_config).build_policy_ref()
             self.logger.info("Validated DQ config", pipeline=pipeline_name)
@@ -253,7 +273,9 @@ class ConfigDQService:
             self._effective_config_service.serialize_artifact(artifact)
         )
         self.logger.info("Created effective config artifact", pipeline=pipeline_name)
-        return artifact_dict
+        if not isinstance(artifact_dict, dict):
+            raise TypeError("Effective config artifact payload must be a mapping")
+        return cast("JsonDict", artifact_dict)
 
     def check_config_compatibility(
         self, artifact1: JsonDict, artifact2: JsonDict

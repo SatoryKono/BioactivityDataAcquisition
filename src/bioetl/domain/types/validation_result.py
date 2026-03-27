@@ -25,7 +25,10 @@ class ValidationIssue:
 
     def is_blocker(self) -> bool:
         """Return True if this issue blocks execution."""
-        if isinstance(self.details, dict) and self.details.get("disposition") == "downgraded":
+        if (
+            isinstance(self.details, dict)
+            and self.details.get("disposition") == "downgraded"
+        ):
             return False
         return self.severity == ValidationSeverity.BLOCKER or self.code.is_blocker()
 
@@ -84,7 +87,9 @@ class CompositeValidationReport:
         return (
             self.structural_result.has_blockers()
             or self.deep_preflight_result.has_blockers()
-            or (self.runtime_guard_result and self.runtime_guard_result.has_blockers())
+            or bool(
+                self.runtime_guard_result and self.runtime_guard_result.has_blockers()
+            )
         )
 
     def get_all_issues(self) -> list[ValidationIssue]:

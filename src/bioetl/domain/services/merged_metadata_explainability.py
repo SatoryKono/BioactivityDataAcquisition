@@ -42,7 +42,7 @@ class MergedMetadataExplainabilityService:
         field_name: str,
         record_data: JsonDict,
         composite_metadata: CompositeOutputExt,
-        field_priorities: dict[str, dict] | None = None,
+        field_priorities: dict[str, JsonDict] | None = None,
     ) -> MergedFieldExplanation:
         source_providers = list(composite_metadata.source_providers or [])
         priority_order = _resolve_priority_order(field_name, field_priorities)
@@ -61,7 +61,7 @@ class MergedMetadataExplainabilityService:
         record_id: str,
         record_data: JsonDict,
         composite_metadata: CompositeOutputExt,
-        field_priorities: dict[str, dict] | None = None,
+        field_priorities: dict[str, JsonDict] | None = None,
         merge_strategy: str = "prioritize",
     ) -> MergedRecordExplanation:
         field_explanations = [
@@ -90,7 +90,7 @@ class MergedMetadataExplainabilityService:
         self,
         records: list[JsonDict],
         composite_metadata: CompositeOutputExt,
-        field_priorities: dict[str, dict] | None = None,
+        field_priorities: dict[str, JsonDict] | None = None,
         merge_strategy: str = "prioritize",
     ) -> list[MergedRecordExplanation]:
         return [
@@ -114,7 +114,7 @@ class MergedMetadataExplainabilityService:
 
     def generate_field_priority_explanation(
         self,
-        field_priorities: dict[str, dict],
+        field_priorities: dict[str, JsonDict],
     ) -> list[JsonDict]:
         return [
             {
@@ -133,7 +133,7 @@ class MergedMetadataExplainabilityService:
 
 def _resolve_priority_order(
     field_name: str,
-    field_priorities: dict[str, dict] | None,
+    field_priorities: dict[str, JsonDict] | None,
 ) -> list[str] | None:
     if not field_priorities or field_name not in field_priorities:
         return None
@@ -193,7 +193,7 @@ def _empty_explainability_summary() -> JsonDict:
 
 def _build_distributions(
     explanations: list[MergedRecordExplanation],
-) -> tuple[dict[str, int], dict[str, int]]:
+) -> tuple[JsonDict, JsonDict]:
     source_distribution: dict[str, int] = {}
     strategy_distribution: dict[str, int] = {}
     for explanation in explanations:
