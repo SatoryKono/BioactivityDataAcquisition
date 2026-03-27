@@ -6,6 +6,21 @@ repo_name: SatoryKono/BioactivityDataAcquisition2
 edit_uri: "edit/main/docs/"
 site_dir: site
 exclude_docs: |
+    00-project/ai/README.md
+    00-project/ai/agents/CLAUDE.md
+    00-project/ai/agents/agents/py-*.md
+    00-project/ai/agents/agents/sp-*.md
+    00-project/ai/agents/orchestration/**
+    00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+    00-project/ai/agents/runtime/orchestration/**
+    00-project/ai/memory/README.md
+    00-project/ai/memory/memory-*.md
+    00-project/ai/prompts/README.md
+    00-project/ai/prompts/collected/**
+    00-project/ai/skills/SKILLS-*.md
+    99-archive/**
+    plans/**
+    reports/**
     reports/README.md
     site/**
     exports/**
@@ -172,6 +187,7 @@ nav:
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md
             -   "Running Pipelines": 03-guides/running-pipelines.md
+            -   "GitHub Local Workflow": 03-guides/github-local-workflow.md
             -   "Pipeline Configuration": 03-guides/pipeline-configuration.md
             -   "Pipeline Lifecycle": 03-guides/pipeline-lifecycle.md
             -   "DQ Configuration": 03-guides/dq-configuration.md
@@ -180,6 +196,8 @@ nav:
             -   "Local Storage Layout": 03-guides/local-storage-layout.md
             -   "Metrics & Monitoring": 03-guides/metrics-monitoring.md
             -   "Testing": 03-guides/testing.md
+            -   "Coverage Configuration": 03-guides/coverage-configuration.md
+            -   "Test Optimization": 03-guides/test-optimization-guide.md
             -   "Troubleshooting": 03-guides/troubleshooting.md
             -   "Add New Source": 03-guides/add-new-source.md
             -   "Add Pipeline (Existing Source)": 03-guides/add-pipeline-existing-source.md
@@ -187,8 +205,6 @@ nav:
             -   "Registry Pattern": 03-guides/registry-pattern.md
             -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
             -   "Codex WSL2 Setup": 03-guides/development/codex-wsl2-setup.md
-            -   Migration:
-                    -   "Archived Migration Notes Index": 99-archive/README.md
             -   Dashboards:
                     -   "Overview": 03-guides/dashboards/README.md
                     -   "V2 Updates": 03-guides/dashboards/dashboard-v2-updates.md
@@ -317,6 +333,10 @@ nav:
                     -   "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
                     -   "Observability Checklist": 05-operations/runbooks/observability-checklist.md
                     -   "Run Manifest Inspection": 05-operations/runbooks/run-manifest-inspection.md
+                    -   "Traceability Signal Ownership": 05-operations/runbooks/traceability-signal-ownership.md
+                    -   "Traceability Tabletop Drills": 05-operations/runbooks/traceability-tabletop-drills.md
+                    -   "Traceability Adoption Checklist": 05-operations/runbooks/traceability-adoption-checklist.md
+                    -   "Traceability Wave 5 Closeout Pack": 05-operations/runbooks/traceability-wave5-closeout-pack.md
                     -   "Scaling": 05-operations/runbooks/scaling.md
                     -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
             -   "Historical Release Checklist (v5.9)": 05-operations/release-checklist.md
@@ -342,27 +362,39 @@ nav:
                     -   "QA Orchestrator Prompt": 00-project/ai/agents/runtime/py-qa-orchestrator.md
                     -   "Orchestration": 00-project/ai/agents/agents/ORCHESTRATION.md
             -   "Project Architecture Index": 00-project/architecture-index.md
+            -   "Legacy Documentation Index": INDEX.md
             -   "Architecture Extras":
+                    -   "Compatibility Facade Inventory": 02-architecture/07-compatibility-facade-inventory.md
+                    -   "Compatibility Facade Snapshot": 02-architecture/07-compatibility-facade-snapshot.md
                     -   "Diagram Policy (Canonical)": 02-architecture/diagrams/governance/policy.md
+                    -   "Diagram Policy (Historical)": 02-architecture/diagrams/governance/00-diagramming-policy.md
                     -   "Architecture Diagrams (Legacy Index)": 02-architecture/diagrams/guide/architecture-reference.md
                     -   "Diagram Root README": 02-architecture/diagrams/README.md
                     -   "Class Diagram Description Overview": 02-architecture/diagrams/descriptions/class-summary.md
+                    -   "Architecture Bundle": 02-architecture/diagrams/bundles/architecture.bundle.md
                     -   "Foundation Bundle": 02-architecture/diagrams/bundles/foundation.bundle.md
                     -   "Class Bundle": 02-architecture/diagrams/bundles/class.bundle.md
+                    -   "Views Bundle": 02-architecture/diagrams/bundles/views.bundle.md
                     # SVG/PNG Index pages excluded from nav: images are gitignored
                     # (generated locally). Including INDEX.md breaks mkdocs --strict.
                     # Local generated SVG index pages are under docs/02-architecture/diagrams/{category}/svg/.
                     -   "Diagram Views Plan": 02-architecture/diagrams/governance/diagram-views-plan.md
                     -   "Diagram Prompt Expansion": 02-architecture/diagrams/governance/PROMPT-diagram-expansion.md
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
+                    -   "Compatibility Facade Review History": 02-architecture/history/compatibility-facade-review-history.md
                     -   "Content Hash Policy": 02-architecture/policies/content-hash-identity-policy.md
             -   "Guide Extras":
                     -   "Silver Schema Testing Guide": 03-guides/silver-schema-testing-guide.md
             -   "Reference Extras":
                     -   "Contracts README": 04-reference/contracts/README.md
+                    -   "Configuration Runtime Artifacts": 04-reference/components/config-runtime-artifacts.md
+                    -   "DQ Contract System": 04-reference/components/dq-contract-system.md
                     -   "Hash Policy": 04-reference/hash-policy.md
                     -   "Publication Fields Reference": 04-reference/publication-fields-reference.md
                     -   "Publication Validation Index": 04-reference/publication-validation-index.md
+                    -   "Composite Validation Layer": 04-reference/components/composite-validation-layer.md
+                    -   "Composite Validation Service": 04-reference/components/composite-validation-service.md
+                    -   "Phased Migration Support": 04-reference/components/phased-migration.md
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
                     -   "Pipeline Legacy: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
                     -   "Pipeline Legacy: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
@@ -683,9 +715,7 @@ nav:
                 -   "Diagram Modernization Program": 02-architecture/diagrams/governance/diagram-modernization-program.md
                 -   "Diagram Regression Test Plan": 02-architecture/diagrams/governance/diagram-regression-test-plan.md
             -   "Prompts":
-                -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
-            -   "Reports":
-                -   "Overview": reports/index.md
+                    -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
             -   "Skills":
                 -   "Overview": 00-project/ai/skills/README.md
                 -   "Global Skills":

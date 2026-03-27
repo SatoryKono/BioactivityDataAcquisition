@@ -1,3 +1,5 @@
+"""Assemble pipelines and runners from composition-layer factory inputs."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
@@ -28,18 +30,12 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.base_transformer.types import (
-        TransformerDependencyContext,
-    )
+    from bioetl.application.core.base_transformer.types import TransformerDependencyContext
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import (
-        GoldFilterConfig,
-        InputFilterConfig,
-        SilverFilterConfig,
-    )
+    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         ContractPolicyPort,
         DataNormalizationPort,
@@ -59,8 +55,9 @@ _extract_entity_type = extract_entity_type
 _extract_dq_configs = extract_dq_configs
 _assemble_runner_impl = assemble_runner_impl
 
-
 class GenericPipelineFactory(Generic[TPipeline]):
+    """Build pipeline components and runners for a provider-specific pipeline."""
+
     def __init__(
         self,
         pipeline_name: str,
@@ -74,10 +71,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         provider_registry: ProviderRegistry | None = None,
     ) -> None:
         if gold_schema is None:
-            raise ValueError(
-                f"gold_schema is required for pipeline '{pipeline_name}'. "
-                "All Gold layer writes must have schema validation."
-            )
+            raise ValueError(f"gold_schema is required for pipeline '{pipeline_name}'. All Gold layer writes must have schema validation.")
         self.pipeline_name = pipeline_name
         self.pipeline_class = pipeline_class
         self.provider = provider
@@ -112,11 +106,12 @@ class GenericPipelineFactory(Generic[TPipeline]):
         contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> BaseTransformer | None:
+        """Create the configured transformer instance for this pipeline."""
         return create_transformer_instance(
             transformer_class=self.transformer_class,
             provider=self.provider,
             pipeline_name=self.pipeline_name,
-            extract_entity_type=_extract_entity_type,
+            extract_entity_type=extract_entity_type,
             tracer=tracer,
             metrics=metrics,
             silver_filters=silver_filters,
@@ -135,6 +130,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
+        """Create the data source adapter for the configured provider."""
         return create_factory_data_source(
             create_data_source_fn=self._create_data_source,
             settings=settings,
@@ -153,6 +149,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
+        """Build the service bundle required by the pipeline implementation."""
         return build_factory_services(
             factory_context=self._build_factory_context(),
             request=_BuildFactoryServicesRequest(
@@ -182,6 +179,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
+        """Instantiate the pipeline using the assembled runtime services."""
         return cast(
             TPipeline,
             create_pipeline_instance_with_services(
@@ -219,6 +217,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
+        """Create the fully assembled runner for the configured pipeline."""
         return create_factory_runner(
             pipeline_name=self.pipeline_name,
             silver_schema=self.silver_schema,
@@ -238,7 +237,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
             cached_bronze=cached_bronze,
         )
 
-
 def create_pipeline_factory(
     pipeline_name: str,
     pipeline_class: type[TPipeline],
@@ -249,6 +247,7 @@ def create_pipeline_factory(
     transformer_class: type[BaseTransformer] | None = None,
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
+    """Create a generic pipeline factory for a provider/entity pair."""
     return GenericPipelineFactory(
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,
@@ -260,7 +259,6 @@ def create_pipeline_factory(
         provider_registry=provider_registry,
     )
 
-
 def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
@@ -269,6 +267,7 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
+    """Assemble the concrete runner around an initialized pipeline instance."""
     return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,

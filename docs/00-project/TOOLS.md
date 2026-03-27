@@ -8,7 +8,7 @@
 > Исторические детали и superseded notes не являются источником истины:
 > для текущего состояния используйте `docs/00-05`, для скриптовых деталей —
 > `scripts/<group>/README.md`, для исторического контекста —
-> [docs/99-archive/README.md](../99-archive/README.md).
+> repository path `docs/99-archive/README.md`.
 
 ---
 
