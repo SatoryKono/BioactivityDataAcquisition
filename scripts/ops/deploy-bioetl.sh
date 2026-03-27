@@ -11,8 +11,8 @@ ENV=${2:-dev}
 NAMESPACE="bioetl-${ENV}"
 
 # Configuration
-REGISTRY="your-registry"  # Update this
-IMAGE_TAG="6.0.0"
+REGISTRY=${BIOETL_IMAGE_REGISTRY:-your-registry}
+IMAGE_TAG=${BIOETL_IMAGE_TAG:-6.1.0}
 CONFIG_DIR="."
 
 echo "🚀 BioETL Kubernetes Deployment Script"
@@ -20,6 +20,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "Action: $ACTION"
 echo "Environment: $ENV"
 echo "Namespace: $NAMESPACE"
+echo "Registry: $REGISTRY"
+echo "Image tag: $IMAGE_TAG"
 echo ""
 
 # Create namespace if it doesn't exist
@@ -37,7 +39,7 @@ deploy() {
   create_namespace
   
   # Update image reference in manifests
-  sed -i.bak "s|image: bioetl:.*|image: $REGISTRY/bioetl:$IMAGE_TAG|g" "$CONFIG_DIR/k8s-deployment.yaml"
+  sed -i.bak "s|^[[:space:]]*image: .*|        image: $REGISTRY/bioetl:$IMAGE_TAG  # Updated by deploy-bioetl.sh|g" "$CONFIG_DIR/k8s-deployment.yaml"
   
   echo "📋 Applying manifests..."
   kubectl apply -n "$NAMESPACE" -f "$CONFIG_DIR/k8s-deployment.yaml"
@@ -176,7 +178,10 @@ case "$ACTION" in
     echo "  ./deploy-bioetl.sh status staging"
     echo "  ./deploy-bioetl.sh logs prod bioetl"
     echo "  ./deploy-bioetl.sh port-forward prod grafana 3000 3000"
+    echo ""
+    echo "Optional environment overrides:"
+    echo "  BIOETL_IMAGE_REGISTRY=my-registry"
+    echo "  BIOETL_IMAGE_TAG=6.1.0"
     exit 1
     ;;
 esac
-

@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci test-cov-fast-stable lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check qa-arch-fast qa-arch-full qa-types qa-debt qa-hotspot-report
+.PHONY: help install install-uv install-pip setup-agents setup-plugins setup-skills test test-ci test-cov-fast-stable lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check qa-arch-fast qa-arch-full qa-types qa-debt qa-hotspot-report
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -85,10 +85,13 @@ install-pip: ## Install dependencies using pip (fallback)
 setup-dev: install test-deps-dev ## Full development environment setup and verification
 	@echo "$(GREEN)Development environment setup and verified!$(NC)"
 
+setup-agents: ## Sync project Codex agents into CODEX_HOME (default: ~/.codex/agents)
+	@bash scripts/ops/setup_agents.sh
+
 setup-plugins: ## Configure pytest/pre-commit plugins for local development
 	@bash scripts/ops/setup_plugins.sh
 
-setup-skills: ## Sync project Codex skills into CODEX_HOME (default: ~/.codex/skills)
+setup-skills: ## Sync project Codex skills into CODEX_HOME and paired agents by default
 	@bash scripts/ops/setup_skills.sh
 
 test: test-deps-dev ## Run all tests serially with coverage (stable local default)
@@ -313,6 +316,11 @@ monitoring-up: ## Start monitoring services (Prometheus + Grafana)
 	@echo "$(BLUE)Starting monitoring services...$(NC)"
 	docker compose -f docker-compose.monitoring.yml up -d
 	@echo "$(GREEN)Monitoring started! Grafana: http://localhost:3000 (admin/admin)$(NC)"
+
+monitoring-tracing-up: ## Start monitoring + tracing services (Grafana + Prometheus + Loki + Tempo)
+	@echo "$(BLUE)Starting monitoring + tracing services...$(NC)"
+	BIOETL_ENABLE_TRACING_DATASOURCES=true docker compose -f docker-compose.monitoring.yml --profile tracing up -d
+	@echo "$(GREEN)Monitoring + tracing started! Grafana: http://localhost:3000 (admin/admin)$(NC)"
 
 monitoring-down: ## Stop monitoring services
 	@echo "$(YELLOW)Stopping monitoring services...$(NC)"

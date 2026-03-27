@@ -35,7 +35,17 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
 
     payload = json.loads(mcp_path.read_text(encoding="utf-8"))
     servers = payload["servers"]
-    assert set(servers) == {"memory", "filesystem", "sequential-thinking", "github"}
+    assert set(servers) == {
+        "memory",
+        "filesystem",
+        "sequential-thinking",
+        "fetch",
+        "pdf",
+        "github",
+        "prometheus",
+        "grafana",
+        "openaiDeveloperDocs",
+    }
     assert servers["memory"]["command"] == "npx"
     assert servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
         tmp_path / "docs/00-project/ai/memory/mcp-memory.json"
@@ -44,15 +54,44 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["sequential-thinking"]["args"][1] == (
         "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
     )
+    assert servers["fetch"]["command"] == "uvx"
+    assert servers["fetch"]["args"] == [
+        "--from",
+        "mcp-server-fetch==2025.4.7",
+        "mcp-server-fetch",
+    ]
+    assert servers["pdf"]["command"] == "npx"
+    assert servers["pdf"]["args"] == [
+        "-y",
+        "@modelcontextprotocol/server-pdf@1.3.1",
+        "--stdio",
+    ]
     if os.name == "nt":
         assert servers["github"]["command"] == "powershell"
         assert ".claude" in servers["github"]["args"][-1]
         assert "github-mcp-wrapper.ps1" in servers["github"]["args"][-1]
+        assert servers["prometheus"]["command"] == "powershell"
+        assert servers["grafana"]["command"] == "powershell"
+        assert "mcp_prometheus_wrapper.ps1" in servers["prometheus"]["args"][-1]
+        assert "mcp_grafana_wrapper.ps1" in servers["grafana"]["args"][-1]
     else:
         assert (
             servers["github"]["args"][1]
             == "@modelcontextprotocol/server-github@2025.4.8"
         )
+        assert servers["prometheus"]["command"] == "bash"
+        assert servers["grafana"]["command"] == "bash"
+        assert servers["prometheus"]["args"][-1].endswith(
+            "scripts/ops/mcp_prometheus_wrapper.sh"
+        )
+        assert servers["grafana"]["args"][-1].endswith(
+            "scripts/ops/mcp_grafana_wrapper.sh"
+        )
+    assert servers["openaiDeveloperDocs"]["type"] == "http"
+    assert (
+        servers["openaiDeveloperDocs"]["url"]
+        == "https://developers.openai.com/mcp"
+    )
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:

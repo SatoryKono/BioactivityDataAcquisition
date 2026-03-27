@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.entity_id import compute_publication_term_entity_id
+from bioetl.application.core.publication_term_runtime import (
+    compute_term_entity_id,
+    create_term_record,
+    extract_terms_from_publication,
+)
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
@@ -77,59 +81,7 @@ class PublicationTermExtractionMixin:
         Returns:
             List of Bronze term records, one per MeSH heading, MeSH qualifier, or keyword found.
         """
-        terms: list[BronzeRecord] = []
-
-        raw_mesh_terms = record.get("mesh_terms")
-        mesh_terms: list[Any] = (  # Any: dynamic payload or structural mixin boundary
-            raw_mesh_terms if isinstance(raw_mesh_terms, list) else []
-        )
-        for mesh in mesh_terms:
-            if not isinstance(mesh, dict):
-                continue
-
-            mesh_heading = mesh.get("mesh_heading")
-            if mesh_heading:
-                terms.append(
-                    self._create_term_record(
-                        publication_id=publication_id,
-                        term=mesh_heading,
-                        term_type="MESH_HEADING",
-                        mesh_id=mesh.get("mesh_id"),
-                        qualifier=mesh.get("mesh_qualifier"),
-                    )
-                )
-
-            mesh_qualifier = mesh.get("mesh_qualifier")
-            if mesh_qualifier:
-                terms.append(
-                    self._create_term_record(
-                        publication_id=publication_id,
-                        term=mesh_qualifier,
-                        term_type="MESH_QUALIFIER",
-                        mesh_id=mesh.get("mesh_id"),
-                        qualifier=None,
-                    )
-                )
-
-        raw_keywords = record.get("keywords")
-        keywords: list[Any] = (  # Any: dynamic payload or structural mixin boundary
-            raw_keywords if isinstance(raw_keywords, list) else []
-        )  # Any: dynamic payload or structural mixin boundary
-        for keyword in keywords:
-            if isinstance(keyword, str):
-                stripped = keyword.strip()
-                if stripped:
-                    terms.append(
-                        self._create_term_record(
-                            publication_id=publication_id,
-                            term=stripped,
-                            term_type="KEYWORD",
-                            mesh_id=None,
-                            qualifier=None,
-                        )
-                    )
-
-        return terms
+        return extract_terms_from_publication(record, publication_id)
 
     def _create_term_record(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
@@ -152,18 +104,13 @@ class PublicationTermExtractionMixin:
             Bronze record dict with ``entity_id``, ``publication_id``, ``term``,
             ``term_type``, ``mesh_id``, and ``qualifier`` fields.
         """
-        normalized_term = term.strip() if term else term
-        entity_id = self._compute_entity_id(
-            publication_id, term_type, normalized_term or ""
+        return create_term_record(
+            publication_id=publication_id,
+            term=term,
+            term_type=term_type,
+            mesh_id=mesh_id,
+            qualifier=qualifier,
         )
-        return {
-            "entity_id": entity_id,
-            "publication_id": publication_id,
-            "term": normalized_term,
-            "term_type": term_type,
-            "mesh_id": mesh_id,
-            "qualifier": qualifier,
-        }
 
     def _compute_entity_id(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
@@ -181,7 +128,11 @@ class PublicationTermExtractionMixin:
         Returns:
             Deterministic string entity ID derived from the composite key.
         """
-        return compute_publication_term_entity_id(publication_id, term_type, term)
+        return compute_term_entity_id(
+            publication_id=publication_id,
+            term_type=term_type,
+            term=term,
+        )
 
     async def _fetch_filtered_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class

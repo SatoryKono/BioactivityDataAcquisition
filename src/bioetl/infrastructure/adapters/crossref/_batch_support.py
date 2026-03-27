@@ -26,13 +26,16 @@ class HttpTransport(Protocol):
         *,
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
-    ) -> Response: ...
+    ) -> Response:
+        """Execute one HTTP GET request and return the raw response."""
+        ...
 
 
 class BaseMetrics(Protocol):
     """Minimal metrics wrapper used around request timing."""
 
     def measure_request(self, route: str) -> AbstractContextManager[object]:
+        """Return a timing context manager for one logical CrossRef route."""
         _ = route
         raise NotImplementedError
 

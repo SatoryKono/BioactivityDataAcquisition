@@ -42,6 +42,15 @@ python3 -m venv .venv
 pip install -e ".[dev,tracing]"
 ```
 
+If you need `make docs-build` or `make docs-serve`, install the separate docs
+toolchain as well:
+
+```bash
+uv sync --extra dev --extra tracing --extra docs
+# or, without uv:
+pip install -e ".[dev,tracing,docs]"
+```
+
 ## Run Your First Pipeline
 
 ```bash

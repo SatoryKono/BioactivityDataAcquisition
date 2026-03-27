@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # setup_skills.sh - Sync repository Codex skills into CODEX_HOME.
+# By default this also syncs the paired `.codex/agents` tree because many
+# skills resolve relative agent references through CODEX_HOME.
 # Usage:
 #   bash scripts/setup_skills.sh
 #   bash scripts/setup_skills.sh --dry-run
+#   bash scripts/setup_skills.sh --skills-only
 
 set -euo pipefail
 
@@ -13,12 +16,15 @@ SOURCE_ROOT="$REPO_ROOT/.codex/skills"
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 DEST_ROOT="$CODEX_HOME/skills"
 DRY_RUN=false
+SYNC_AGENTS=true
 
 if [[ "${1:-}" == "--dry-run" ]]; then
     DRY_RUN=true
+elif [[ "${1:-}" == "--skills-only" ]]; then
+    SYNC_AGENTS=false
 elif [[ -n "${1:-}" ]]; then
     echo "[setup-skills][error] Unknown argument: $1"
-    echo "[setup-skills][hint] Supported arguments: --dry-run"
+    echo "[setup-skills][hint] Supported arguments: --dry-run, --skills-only"
     exit 2
 fi
 
@@ -66,8 +72,23 @@ for skill_file in "${SKILL_FILES[@]}"; do
     log_ok "Synced: $rel_path"
 done
 
+if [[ "$SYNC_AGENTS" == true ]]; then
+    AGENT_SETUP_SCRIPT="$SCRIPT_DIR/setup_agents.sh"
+    if [[ "$DRY_RUN" == true ]]; then
+        log_info "Dry-run: would also sync paired agents via $AGENT_SETUP_SCRIPT"
+        bash "$AGENT_SETUP_SCRIPT" --dry-run
+    else
+        log_info "Syncing paired agent surfaces"
+        bash "$AGENT_SETUP_SCRIPT"
+    fi
+fi
+
 if [[ "$DRY_RUN" == false ]]; then
     log_info "Installed skills:"
     find "$DEST_ROOT" -type f -name "SKILL.md" | sed "s|$DEST_ROOT/|  - |"
-    log_ok "Skills setup completed. Restart Codex to pick up new skills."
+    if [[ "$SYNC_AGENTS" == true ]]; then
+        log_ok "Skills and paired agents setup completed. Restart Codex to pick up new runtime surfaces."
+    else
+        log_ok "Skills setup completed. Restart Codex to pick up new skills."
+    fi
 fi

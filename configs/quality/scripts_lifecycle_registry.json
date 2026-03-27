@@ -341,6 +341,22 @@
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
     },
+    "scripts/ops/mcp_grafana_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "removed",
+      "review_by": "2026-06-30",
+      "next_step": "Подтвердить отсутствие PowerShell consumers и удалить wrapper после smoke-check для shell entrypoint.",
+      "sunset_date": "2026-06-30",
+      "replacement": "scripts/ops/mcp_grafana_wrapper.sh"
+    },
+    "scripts/ops/mcp_prometheus_wrapper.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "removed",
+      "review_by": "2026-06-30",
+      "next_step": "Подтвердить отсутствие PowerShell consumers и удалить wrapper после smoke-check для shell entrypoint.",
+      "sunset_date": "2026-06-30",
+      "replacement": "scripts/ops/mcp_prometheus_wrapper.sh"
+    },
     "scripts/dev/run_pytest.sh": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",

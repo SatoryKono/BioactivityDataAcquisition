@@ -8,11 +8,12 @@ CheckpointConflictError escalation.
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.application.composite.checkpoint import _service_support as checkpoint_support
 from bioetl.application.composite.checkpoint.service import CompositeCheckpointService
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.composite.state import CompositePipelineState
@@ -22,6 +23,23 @@ from bioetl.domain.exceptions import CheckpointConflictError, StorageError
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+FIXED_CHECKPOINT_TIME = datetime(2024, 6, 2, 12, 0, tzinfo=UTC)
+
+
+def _freeze_checkpoint_support_now(
+    monkeypatch: pytest.MonkeyPatch, current_time: datetime
+) -> None:
+    """Freeze checkpoint support time for deterministic stale-check tests."""
+
+    class _FrozenDateTime(datetime):
+        @classmethod
+        def now(cls, tz: UTC | None = None) -> datetime:
+            if tz is None:
+                return current_time
+            return current_time.astimezone(tz)
+
+    monkeypatch.setattr(checkpoint_support, "datetime", _FrozenDateTime)
 
 
 def _make_logger() -> MagicMock:
@@ -163,6 +181,18 @@ class TestFilenameFormat:
         """Glob pattern matches all run_ids for this composite."""
         svc, _, _ = _make_service(composite_name="my_composite")
         assert svc._glob_pattern() == "composite_my_composite_*.json"
+
+    def test_exposes_expected_anchor_properties(self) -> None:
+        """Expected checkpoint anchors stay readable for dependent helpers."""
+        svc, _, _ = _make_service(
+            expected_effective_config_hash="hash-123",
+            expected_contract_ref="composite_publication",
+            expected_contract_version="2.1.0",
+        )
+
+        assert svc.expected_effective_config_hash == "hash-123"
+        assert svc.expected_contract_ref == "composite_publication"
+        assert svc.expected_contract_version == "2.1.0"
 
 
 # ---------------------------------------------------------------------------
@@ -515,7 +545,7 @@ class TestSave:
             composite_name="my_composite",
             run_id="run-001",
             state=CompositePipelineState.ENRICHING,
-            created_at=datetime.now(tz=UTC),
+            created_at=FIXED_CHECKPOINT_TIME,
         )
 
         await svc.save(checkpoint)
@@ -532,7 +562,7 @@ class TestSave:
         checkpoint = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
-            created_at=datetime.now(tz=UTC),
+            created_at=FIXED_CHECKPOINT_TIME,
         )
 
         await svc.save(checkpoint)
@@ -549,7 +579,7 @@ class TestSave:
         checkpoint = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
-            created_at=datetime.now(tz=UTC),
+            created_at=FIXED_CHECKPOINT_TIME,
         )
 
         await svc.save(checkpoint)
@@ -565,7 +595,7 @@ class TestSave:
         checkpoint = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
-            created_at=datetime.now(tz=UTC),
+            created_at=FIXED_CHECKPOINT_TIME,
         )
 
         with pytest.raises(CheckpointConflictError):
@@ -579,7 +609,7 @@ class TestSave:
         checkpoint = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
-            created_at=datetime.now(tz=UTC),
+            created_at=FIXED_CHECKPOINT_TIME,
         )
 
         with pytest.raises(CheckpointConflictError):
@@ -593,7 +623,7 @@ class TestSave:
         checkpoint = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
-            created_at=datetime.now(tz=UTC),
+            created_at=FIXED_CHECKPOINT_TIME,
         )
 
         with pytest.raises(CheckpointConflictError):
@@ -696,18 +726,20 @@ class TestListAll:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
-class TestStaleCheckpointDetection:
-    """Tests for _warn_if_checkpoint_stale staleness detection."""
+    @pytest.mark.unit
+    class TestStaleCheckpointDetection:
+        """Tests for _warn_if_checkpoint_stale staleness detection."""
 
     @pytest.mark.asyncio
-    async def test_stale_checkpoint_emits_warning(self) -> None:
+    async def test_stale_checkpoint_emits_warning(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Resuming a 48h-old checkpoint emits a staleness warning."""
-        from datetime import timedelta
-
         storage = _make_storage()
         logger = _make_logger()
-        old_time = datetime.now(tz=UTC) - timedelta(hours=48)
+        current_time = datetime(2024, 6, 3, 12, 0, tzinfo=UTC)
+        _freeze_checkpoint_support_now(monkeypatch, current_time)
+        old_time = current_time - timedelta(hours=48)
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
@@ -733,13 +765,15 @@ class TestStaleCheckpointDetection:
         assert any("stale" in c.lower() for c in warning_calls)
 
     @pytest.mark.asyncio
-    async def test_fresh_checkpoint_no_staleness_warning(self) -> None:
+    async def test_fresh_checkpoint_no_staleness_warning(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """A 1h-old checkpoint does not trigger staleness warning."""
-        from datetime import timedelta
-
         storage = _make_storage()
         logger = _make_logger()
-        recent_time = datetime.now(tz=UTC) - timedelta(hours=1)
+        current_time = datetime(2024, 6, 3, 12, 0, tzinfo=UTC)
+        _freeze_checkpoint_support_now(monkeypatch, current_time)
+        recent_time = current_time - timedelta(hours=1)
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
@@ -765,13 +799,15 @@ class TestStaleCheckpointDetection:
         assert not any("stale" in c.lower() for c in warning_calls)
 
     @pytest.mark.asyncio
-    async def test_staleness_check_disabled_with_zero_threshold(self) -> None:
+    async def test_staleness_check_disabled_with_zero_threshold(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Setting threshold to 0 disables staleness warnings."""
-        from datetime import timedelta
-
         storage = _make_storage()
         logger = _make_logger()
-        old_time = datetime.now(tz=UTC) - timedelta(hours=48)
+        current_time = datetime(2024, 6, 3, 12, 0, tzinfo=UTC)
+        _freeze_checkpoint_support_now(monkeypatch, current_time)
+        old_time = current_time - timedelta(hours=48)
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",

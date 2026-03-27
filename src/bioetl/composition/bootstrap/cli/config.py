@@ -41,6 +41,7 @@ def bootstrap_config_service(
     *,
     registry: PipelineRegistry | None = None,
 ) -> ConfigService:
+    """Assemble the CLI-facing ConfigService with default composition wiring."""
     logger = create_noop_logger()
     effective_registry = registry
     if effective_registry is None:

@@ -82,6 +82,7 @@ def _apply_runtime_overrides(base_config: JsonDict, overrides: JsonDict) -> Json
 def _build_dq_components(
     dq_config: DQConfig | None,
 ) -> tuple[list[DQPolicyRef], list[DQPolicySnapshot], dict[str, str]]:
+    """Build DQ policy references, snapshots, and bundle versions from config."""
     if dq_config is None:
         return [], [], {}
 
@@ -173,6 +174,7 @@ class EffectiveConfigService:
         resolution_policy: ConfigResolutionPolicy | None = None,
         artifact_id: str | None = None,
     ) -> EffectiveConfigArtifact:
+        """Create a reproducible effective-config artifact from resolved inputs."""
         if artifact_id is None:
             artifact_id = f"config_{uuid.uuid4().hex[:8]}"
 
@@ -219,11 +221,13 @@ class EffectiveConfigService:
         )
 
     def serialize_artifact(self, artifact: EffectiveConfigArtifact) -> str:
+        """Serialize one effective-config artifact to a stable JSON string."""
         return _serialize_artifact(artifact)
 
     def compute_artifact_hashes(
         self, artifact: EffectiveConfigArtifact
     ) -> EffectiveConfigHashes:
+        """Extract the canonical hash bundle from an effective-config artifact."""
         return EffectiveConfigHashes(
             resolved_config_hash=artifact.resolved_config_hash,
             effective_config_hash=artifact.effective_config_hash,
@@ -236,6 +240,7 @@ class EffectiveConfigService:
         artifact1: EffectiveConfigArtifact,
         artifact2: EffectiveConfigArtifact,
     ) -> bool:
+        """Compare artifacts by their DQ compatibility hash."""
         return (
             artifact1.dq_contract_compatibility_hash
             == artifact2.dq_contract_compatibility_hash
@@ -250,6 +255,7 @@ class EffectiveConfigService:
         runtime_overrides: JsonDict | None = None,
         source_refs: list[ConfigSourceRef] | None = None,
     ) -> EffectiveConfigArtifact:
+        """Create an artifact directly from pipeline config and optional overrides."""
         if runtime_overrides is None:
             runtime_overrides = {}
         if source_refs is None:

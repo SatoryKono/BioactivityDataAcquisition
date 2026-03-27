@@ -9,6 +9,7 @@ Commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
     wsl-proxy          Start WSL proxy helper
+    setup-agents       Sync Codex agents into CODEX_HOME
     setup-plugins      Setup plugins (shell)
     setup-skills       Setup skills (shell)
     check-skills       Check AI skills layout (shell)
@@ -30,6 +31,7 @@ COMMANDS: dict[str, str] = {
 }
 
 SHELL_COMMANDS: dict[str, str] = {
+    "setup-agents": "setup_agents.sh",
     "setup-plugins": "setup_plugins.sh",
     "setup-skills": "setup_skills.sh",
     "check-skills": "check_ai_skills_layout.sh",

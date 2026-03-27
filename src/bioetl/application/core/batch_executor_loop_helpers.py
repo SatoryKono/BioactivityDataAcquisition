@@ -2,11 +2,33 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Protocol
+from types import SimpleNamespace
+from typing import TYPE_CHECKING, Awaitable, Protocol
 
-from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
+from bioetl.application.core.batch_executor_loop_flow import (
+    build_start_index as build_start_index_from_flow,
+)
+from bioetl.application.core.batch_executor_loop_flow import (
+    flush_batch_if_needed as flush_batch_if_needed_from_flow,
+)
+from bioetl.application.core.batch_executor_loop_flow import (
+    flush_remaining_batch as flush_remaining_batch_from_flow,
+)
+from bioetl.application.core.batch_executor_loop_flow import (
+    process_extracted_record_iteration as process_extracted_record_iteration_from_flow,
+)
+from bioetl.application.core.batch_executor_loop_progress import (
+    _BatchCheckpointRecoveryPort,
+    _BatchProgressReporterPort,
+    _BatchProgressSnapshot,
+    build_batch_progress_payload,
+    build_periodic_checkpoint_payload,
+    build_shutdown_checkpoint_payload,
+    ensure_extraction_not_shutdown,
+    report_batch_progress,
+    save_periodic_checkpoint_for_loop,
+)
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
@@ -42,7 +64,7 @@ class BatchExtractionLoopState:
     batch: list[BronzeRecord] = field(default_factory=list)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class BatchExtractionIterationContext:
     """Shared collaborators and counters for one extraction-loop iteration."""
 
@@ -53,47 +75,6 @@ class BatchExtractionIterationContext:
     progress_service: _BatchProgressReporterPort
     progress_state: _BatchProgressSnapshot
     checkpoint_interval: int
-
-
-class _BatchProgressReporterPort(Protocol):
-    """Minimal progress reporting contract required by extraction loop helpers."""
-
-    def report_progress(
-        self,
-        *,
-        records_fetched: int,
-        records_bronze: int,
-        records_silver: int,
-        records_filtered_out: int,
-    ) -> None: ...
-
-
-class _BatchProgressSnapshot(Protocol):
-    """Minimal counter snapshot used for progress reporting."""
-
-    records_fetched: int
-    records_bronze: int
-    records_silver: int
-    records_filtered_out: int
-
-
-class _BatchCheckpointRecoveryPort(Protocol):
-    """Minimal checkpoint contract required by extraction loop helpers."""
-
-    def save_checkpoint_now(
-        self,
-        *,
-        records_fetched: int,
-        resume_offset: int,
-    ) -> Awaitable[None]: ...
-
-    def save_periodic_checkpoint(
-        self,
-        *,
-        records_fetched: int,
-        resume_offset: int,
-        checkpoint_interval: int,
-    ) -> Awaitable[None]: ...
 
 
 class _BatchStateUpdater(Protocol):
@@ -153,101 +134,7 @@ def reset_batch_after_flush(
 
 def build_start_index(*, records_fetched: int, batch: list[BronzeRecord]) -> int:
     """Build absolute start index for the current batch buffer."""
-    return records_fetched - len(batch)
-
-
-def build_batch_progress_payload(
-    *,
-    records_fetched: int,
-    records_bronze: int,
-    records_silver: int,
-    records_filtered_out: int,
-) -> dict[str, int]:
-    """Build progress payload for progress-service reporting."""
-    return {
-        "records_fetched": records_fetched,
-        "records_bronze": records_bronze,
-        "records_silver": records_silver,
-        "records_filtered_out": records_filtered_out,
-    }
-
-
-def report_batch_progress(
-    *,
-    progress_service: _BatchProgressReporterPort,
-    state: _BatchProgressSnapshot,
-) -> None:
-    """Report the current extraction counters through the progress service."""
-    progress_service.report_progress(
-        **build_batch_progress_payload(
-            records_fetched=state.records_fetched,
-            records_bronze=state.records_bronze,
-            records_silver=state.records_silver,
-            records_filtered_out=state.records_filtered_out,
-        )
-    )
-
-
-def build_shutdown_checkpoint_payload(
-    *,
-    records_fetched: int,
-    resume_offset: int,
-) -> dict[str, int]:
-    """Build payload for immediate shutdown checkpoint persistence."""
-    return {
-        "records_fetched": records_fetched,
-        "resume_offset": resume_offset,
-    }
-
-
-async def ensure_extraction_not_shutdown(
-    *,
-    shutdown_requested: bool,
-    checkpoint_recovery_service: _BatchCheckpointRecoveryPort,
-    records_fetched: int,
-    resume_offset: int,
-) -> None:
-    """Persist shutdown checkpoint and raise when extraction is asked to stop."""
-    if not shutdown_requested:
-        return
-    await checkpoint_recovery_service.save_checkpoint_now(
-        **build_shutdown_checkpoint_payload(
-            records_fetched=records_fetched,
-            resume_offset=resume_offset,
-        )
-    )
-    raise PipelineShutdownError("Shutdown during extraction")
-
-
-def build_periodic_checkpoint_payload(
-    *,
-    records_fetched: int,
-    resume_offset: int,
-    checkpoint_interval: int,
-) -> dict[str, int]:
-    """Build payload for periodic checkpoint persistence."""
-    return {
-        "records_fetched": records_fetched,
-        "resume_offset": resume_offset,
-        "checkpoint_interval": checkpoint_interval,
-    }
-
-
-async def save_periodic_checkpoint_for_loop(
-    *,
-    checkpoint_recovery_service: _BatchCheckpointRecoveryPort,
-    records_fetched: int,
-    resume_offset: int,
-    checkpoint_interval: int,
-) -> None:
-    """Persist the periodic checkpoint payload for the extraction loop."""
-    await checkpoint_recovery_service.save_periodic_checkpoint(
-        **build_periodic_checkpoint_payload(
-            records_fetched=records_fetched,
-            resume_offset=resume_offset,
-            checkpoint_interval=checkpoint_interval,
-        )
-    )
+    return build_start_index_from_flow(records_fetched=records_fetched, batch=batch)
 
 
 async def flush_batch_if_needed(
@@ -260,22 +147,15 @@ async def flush_batch_if_needed(
     progress_state: _BatchProgressSnapshot,
 ) -> None:
     """Flush the current batch when adaptive size threshold is reached."""
-    if not should_flush_batch(loop_state):
-        return
-    await process_batch(
-        loop_state.batch,
-        build_start_index(
-            records_fetched=records_fetched,
-            batch=loop_state.batch,
-        ),
-    )
-    reset_batch_after_flush(
+    await flush_batch_if_needed_from_flow(
         loop_state=loop_state,
-        memory_manager=memory_manager,
-    )
-    report_batch_progress(
-        progress_service=progress_service,
-        state=progress_state,
+        records_fetched=records_fetched,
+        flush_context=SimpleNamespace(
+            process_batch=process_batch,
+            memory_manager=memory_manager,
+            progress_service=progress_service,
+            progress_state=progress_state,
+        ),
     )
 
 
@@ -286,14 +166,24 @@ async def flush_remaining_batch(
     process_batch: _BatchStateUpdater,
 ) -> None:
     """Flush the remaining buffered batch after extraction completes."""
-    if not loop_state.batch:
-        return
-    await process_batch(
-        loop_state.batch,
-        build_start_index(
-            records_fetched=records_fetched,
-            batch=loop_state.batch,
-        ),
+    await flush_remaining_batch_from_flow(
+        loop_state=loop_state,
+        records_fetched=records_fetched,
+        process_batch=process_batch,
+    )
+
+
+def _update_batch_size_for_iteration(
+    *,
+    loop_state: BatchExtractionLoopState,
+    memory_manager: BatchMemoryManagerService,
+    records_fetched: int,
+) -> int:
+    """Compute the next adaptive batch size during one loop iteration."""
+    return memory_manager.check_pressure(
+        loop_state.current_batch_size,
+        loop_state.check_interval,
+        records_fetched,
     )
 
 
@@ -306,35 +196,15 @@ async def process_extracted_record_iteration(
     iteration_context: BatchExtractionIterationContext,
 ) -> int:
     """Run one extraction-loop iteration in the canonical execution order."""
-    await ensure_extraction_not_shutdown(
-        shutdown_requested=shutdown_requested,
-        checkpoint_recovery_service=iteration_context.checkpoint_recovery_service,
-        records_fetched=records_fetched,
-        resume_offset=iteration_context.resume_offset,
-    )
-    next_records_fetched = records_fetched + 1
-    append_record_and_update_batch_size(
+    return await process_extracted_record_iteration_from_flow(
         loop_state=loop_state,
         raw_record=raw_record,
-        memory_manager=iteration_context.memory_manager,
-        records_fetched=next_records_fetched,
+        shutdown_requested=shutdown_requested,
+        records_fetched=records_fetched,
+        update_batch_size=lambda next_records_fetched: _update_batch_size_for_iteration(
+            loop_state=loop_state,
+            memory_manager=iteration_context.memory_manager,
+            records_fetched=next_records_fetched,
+        ),
+        iteration_context=iteration_context,
     )
-    report_batch_progress(
-        progress_service=iteration_context.progress_service,
-        state=iteration_context.progress_state,
-    )
-    await flush_batch_if_needed(
-        loop_state=loop_state,
-        records_fetched=next_records_fetched,
-        process_batch=iteration_context.process_batch,
-        memory_manager=iteration_context.memory_manager,
-        progress_service=iteration_context.progress_service,
-        progress_state=iteration_context.progress_state,
-    )
-    await save_periodic_checkpoint_for_loop(
-        checkpoint_recovery_service=iteration_context.checkpoint_recovery_service,
-        records_fetched=next_records_fetched,
-        resume_offset=iteration_context.resume_offset,
-        checkpoint_interval=iteration_context.checkpoint_interval,
-    )
-    return next_records_fetched

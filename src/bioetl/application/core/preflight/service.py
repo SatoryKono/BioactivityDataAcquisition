@@ -9,10 +9,16 @@ from bioetl.application.core.preflight.health_aggregator import HealthAggregator
 from bioetl.application.core.preflight.medallion_validator import (
     MedallionConfigValidator,
 )
+from bioetl.application.core.preflight.preflight_reporting import (
+    log_preflight_completed,
+    log_preflight_started,
+    raise_if_strict_blocking,
+    record_health_check_metrics,
+    record_preflight_metrics,
+)
 from bioetl.domain.types import (
     ConfigValidationError,
     HealthReport,
-    HealthStatus,
     PreflightReport,
 )
 
@@ -86,28 +92,7 @@ class PreflightService:
         self, report: HealthReport, duration: float
     ) -> None:
         """Record health-check metrics per observability contract."""
-        pipeline = self._config.pipeline_name
-
-        for result in report.results:
-            passed = 1.0 if result.status == HealthStatus.HEALTHY else 0.0
-            self._metrics.set_gauge(
-                "pipeline_health_check_passed",
-                passed,
-                {"pipeline": pipeline, "component": result.component},
-            )
-
-        validated = 1.0 if report.is_healthy else 0.0
-        self._metrics.set_gauge(
-            "infrastructure_validated",
-            validated,
-            {"pipeline": pipeline},
-        )
-
-        self._metrics.observe_histogram(
-            "health_check_duration_seconds",
-            duration,
-            {"pipeline": pipeline},
-        )
+        record_health_check_metrics(self, report, duration)
 
     def validate_medallion_config(
         self,
@@ -204,42 +189,17 @@ class PreflightService:
 
     def _record_preflight_metrics(self, report: PreflightReport) -> None:
         """Record preflight validation metrics."""
-        pipeline = self._config.pipeline_name
-        run_id = str(self._context.run_id)
-
-        self._metrics.set_gauge(
-            "preflight_medallion_policy_valid",
-            1.0 if report.medallion_policy_valid else 0.0,
-            {"pipeline": pipeline, "run_id": run_id},
-        )
-
-        self._metrics.set_gauge(
-            "preflight_config_errors_total",
-            float(len(report.config_errors)),
-            {"pipeline": pipeline, "run_id": run_id},
-        )
+        record_preflight_metrics(self, report)
 
     def _log_preflight_started(self, runtime: RuntimeConfig) -> None:
         """Log preflight start event."""
-        self._logger.info(
-            "Starting preflight validation",
-            extra={"stage": "preflight", "strict_mode": runtime.strict_validation},
-        )
+        log_preflight_started(self, strict_validation=runtime.strict_validation)
 
     def _log_preflight_completed(
         self, report: PreflightReport, is_healthy: bool
     ) -> None:
         """Log preflight completion event."""
-        self._logger.info(
-            "Preflight validation completed",
-            extra={
-                "stage": "preflight",
-                "medallion_policy_valid": report.medallion_policy_valid,
-                "config_error_count": len(report.config_errors),
-                "is_healthy": is_healthy,
-                "should_block": report.should_block_startup,
-            },
-        )
+        log_preflight_completed(self, report, is_healthy=is_healthy)
 
     def _raise_if_strict_blocking(
         self,
@@ -247,15 +207,7 @@ class PreflightService:
         runtime: RuntimeConfig,
     ) -> None:
         """Raise strict-mode preflight error when startup should be blocked."""
-        if not (report.should_block_startup and runtime.strict_validation):
-            return
-        error_messages = [
-            f"{error.field}: {error.actual} (expected: {error.expected})"
-            for error in report.config_errors
-        ]
-        raise ValueError(
-            "Preflight validation failed (strict mode): " + ", ".join(error_messages)
-        )
+        raise_if_strict_blocking(report, strict_validation=runtime.strict_validation)
 
 
 __all__ = [

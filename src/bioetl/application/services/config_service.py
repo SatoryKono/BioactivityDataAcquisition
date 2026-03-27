@@ -41,21 +41,29 @@ if TYPE_CHECKING:
 class ConfigDQServicePort(Protocol):
     """Port for DQ-focused config operations delegated by ConfigService."""
 
-    def get_dq_config(self, pipeline_name: str) -> JsonDict: ...
+    def get_dq_config(self, pipeline_name: str) -> JsonDict:
+        """Return the normalized Data Quality config for one pipeline."""
+        ...
 
-    def validate_dq_config(self, pipeline_name: str, dq_config: JsonDict) -> bool: ...
+    def validate_dq_config(self, pipeline_name: str, dq_config: JsonDict) -> bool:
+        """Validate a proposed Data Quality config payload."""
+        ...
 
     def get_effective_config_artifact(
         self,
         pipeline_name: str,
         runtime_overrides: JsonDict | None = None,
-    ) -> JsonDict: ...
+    ) -> JsonDict:
+        """Build the effective-config artifact exposed to admin tooling."""
+        ...
 
     def check_config_compatibility(
         self,
         artifact1: JsonDict,
         artifact2: JsonDict,
-    ) -> bool: ...
+    ) -> bool:
+        """Report whether two effective-config artifacts remain compatible."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)

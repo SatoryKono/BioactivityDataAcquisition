@@ -2,7 +2,18 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar
+__all__ = [
+    "_FallbackFilterableTargetFetchMixin",
+    "_FilterableTargetDelegationMixin",
+    "_HasWrappedDataSource",
+    "_SourceMetadataDelegationMixin",
+    "_TargetEntityFetchDelegationMixin",
+    "_WrappedDataSourceDelegationMixin",
+    "_yield_plain_wrapped_fetch_records",
+    "_yield_wrapped_fetch_records",
+]
+
+from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 from bioetl.application.core._target_data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
@@ -35,11 +46,11 @@ class _SourceMetadataDelegationMixin:
 
     def get_source_metadata(
         self: _HasWrappedDataSource, api_version: str | None = None
-    ) -> Any:
+    ) -> object | None:
         """Delegate get_source_metadata to wrapped data source if supported."""
         get_metadata = getattr(self._data_source, "get_source_metadata", None)
         if get_metadata is not None and callable(get_metadata):
-            return get_metadata(api_version)
+            return cast("object | None", get_metadata(api_version))
         return None
 
 

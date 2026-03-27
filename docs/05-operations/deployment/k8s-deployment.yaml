@@ -5,7 +5,7 @@ metadata:
   namespace: default
   labels:
     app: bioetl
-    version: "6.0.0"
+    version: "REPLACE_IMAGE_TAG"
 spec:
   replicas: 1
   selector:
@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: bioetl
-        version: "6.0.0"
+        version: "REPLACE_IMAGE_TAG"
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
@@ -28,7 +28,7 @@ spec:
       
       containers:
       - name: bioetl
-        image: bioetl:6.0.0  # Update with your container registry
+        image: bioetl:REPLACE_IMAGE_TAG  # Update registry and tag before apply
         imagePullPolicy: IfNotPresent
         
         ports:

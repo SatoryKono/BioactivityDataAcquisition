@@ -18,6 +18,12 @@ Note:
 
 from __future__ import annotations
 
+from importlib import import_module
+
+# Backward-compatible package alias for tests/tools that patch
+# `bioetl.infrastructure.storage.delta.*` via string import paths.
+from . import delta as delta
+
 from bioetl.domain.exceptions import (
     BucketNotFoundError,
     MergeConflictError,
@@ -35,11 +41,26 @@ from bioetl.infrastructure.storage.atomic import (
 from bioetl.infrastructure.storage.bronze_write_result_helpers import (
     is_bronze_write_result_persisted,
 )
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from bioetl.infrastructure.storage.delta_reader import DeltaReader
-from bioetl.infrastructure.storage.gold_writer import GoldWriter
-from bioetl.infrastructure.storage.silver_writer import SilverWriter
-from bioetl.infrastructure.storage.support.retention import RetentionPolicy
+
+_LAZY_EXPORTS = {
+    "BronzeWriter": "bioetl.infrastructure.storage.bronze_writer",
+    "DeltaReader": "bioetl.infrastructure.storage.delta_reader",
+    "GoldWriter": "bioetl.infrastructure.storage.gold_writer",
+    "RetentionPolicy": "bioetl.infrastructure.storage.support.retention",
+    "SilverWriter": "bioetl.infrastructure.storage.silver_writer",
+}
+
+
+def __getattr__(name: str) -> object:
+    """Lazily load heavy storage exports to avoid import-time Delta dependencies."""
+    module_name = _LAZY_EXPORTS.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+    module = import_module(module_name)
+    value = getattr(module, name)
+    globals()[name] = value
+    return value
 
 __all__ = [
     "AtomicWriteError",
@@ -57,5 +78,6 @@ __all__ = [
     "atomic_write",
     "atomic_write_bytes",
     "atomic_write_text",
+    "delta",
     "is_bronze_write_result_persisted",
 ]

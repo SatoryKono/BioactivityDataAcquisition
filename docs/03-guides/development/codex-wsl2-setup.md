@@ -194,6 +194,8 @@ All MCP servers use `startup_timeout_sec = 30` to accommodate VPN latency:
 | github | `@modelcontextprotocol/server-github` | GitHub API |
 | filesystem | `@modelcontextprotocol/server-filesystem` | File access |
 | pdf | `@modelcontextprotocol/server-pdf` | PDF reading |
+| prometheus | `prometheus-mcp` | Prometheus queries and target discovery |
+| grafana | `mcp-grafana-npx` | Grafana dashboards, datasources, and observability context |
 
 ---
 

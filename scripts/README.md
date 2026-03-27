@@ -257,6 +257,7 @@ salt-rotate        Rotate PII hashing salt
 fix-grafana        Fix Grafana dashboard configurations
 wsl-proxy          Start WSL proxy helper
 setup-plugins      Setup plugins (shell)
+setup-agents       Setup agents (shell)
 setup-skills       Setup skills (shell)
 check-skills       Check AI skills layout (shell)
 check-mirror       Check skills mirror sync (shell)

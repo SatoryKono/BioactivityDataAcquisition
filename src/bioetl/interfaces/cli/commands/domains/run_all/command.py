@@ -25,6 +25,9 @@ from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     handle_run_all_cli_failure,
     run_all_command_flow,
 )
+from bioetl.interfaces.cli.commands.domains.run_all.command_entrypoint import (
+    build_run_all_click_command,
+)
 from bioetl.interfaces.cli.commands.domains.run_all.execution import (
     RunAllBatchExecutionRequest,
     RunAllPolicyRequest,
@@ -203,45 +206,7 @@ def _run_batch_with_policy(
     )
 
 
-@click.command("run-all")
-@click.option(
-    "--source", required=True, help="Provider name (e.g., chembl, pubchem, uniprot)"
-)
-@click.option(
-    "--run-type",
-    type=click.Choice(["incremental", "backfill", "rebuild"]),
-    default="incremental",
-    help="Type of run for all pipelines",
-)
-@click.option("--limit", type=int, help="Maximum records per pipeline")
-@click.option(
-    "--dry-run", is_flag=True, help="Preview mode - show pipelines without execution"
-)
-@click.option(
-    "--yes", "-y", is_flag=True, help="Skip confirmation prompt for rebuild/backfill"
-)
-@click.option(
-    "--list-only",
-    is_flag=True,
-    help="List pipelines for the source without running them",
-)
-@click.option("--debug", is_flag=True, help="Enable DEBUG level logging")
-@click.option(
-    "--health-server/--no-health-server",
-    "health_server",
-    default=True,
-    help="Enable/disable HTTP health server during execution.",
-    show_default=True,
-)
-@click.option(
-    "--health-port",
-    type=int,
-    default=DEFAULT_HEALTH_SERVER_PORT,
-    help="Port for the HTTP health server.",
-    show_default=True,
-)
-@click.pass_context
-def run_all(
+def _run_all_callback(
     click_context: click.Context,
     source: str,
     run_type: str,
@@ -253,7 +218,7 @@ def run_all(
     health_server: bool,
     health_port: int,
 ) -> None:
-    """Run all registered pipelines for one provider sequentially."""
+    """Canonical callback implementation for the run-all Click command."""
     registry = resolve_context_registry(click_context)
     cli_input = build_run_all_command_input(
         source=source,
@@ -278,6 +243,12 @@ def run_all(
         determine_exit_code=_determine_exit_code,
         exit_func=exit_with_code,
     )
+
+
+run_all = build_run_all_click_command(
+    default_health_server_port=DEFAULT_HEALTH_SERVER_PORT,
+    run_callback=_run_all_callback,
+)
 
 
 __all__ = [

@@ -7,11 +7,17 @@ __all__ = ["BatchProcessingSupportService"]
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar
 
+from bioetl.application.core.batch_processing_runtime import (
+    build_bronze_refs,
+    execute_transform_with_span,
+    execute_with_layer_span,
+    execute_with_pipeline_failure_policy,
+    get_source_metadata,
+)
 from bioetl.application.core.batch_runtime_failure_policy import (
-    PIPELINE_EXECUTION_ERRORS,
-    SOURCE_METADATA_ERRORS,
+    PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.domain.models.metadata import SourceMetadata
@@ -29,6 +35,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 _ResultT = TypeVar("_ResultT")
+_SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 
 
 class BatchProcessingSupportService:
@@ -57,31 +64,11 @@ class BatchProcessingSupportService:
         query_string: str | None,
     ) -> SourceMetadata | None:
         """Get source metadata and enrich it with query string when available."""
-        source_metadata: SourceMetadata | None = None
-        data_source = self._services.data_source
-        get_metadata = getattr(data_source, "get_source_metadata", None)
-        if get_metadata is not None and callable(get_metadata):
-            try:
-                result = get_metadata()
-                if isinstance(result, SourceMetadata):
-                    source_metadata = result
-            except SOURCE_METADATA_ERRORS as metadata_error:
-                self._logger.warning(
-                    "Source metadata collection failed",
-                    error_type=type(metadata_error).__name__,
-                    reason="source_metadata_collection_failed",
-                )
-
-        if query_string:
-            if source_metadata is not None:
-                if source_metadata.query_string is None:
-                    source_metadata = source_metadata.model_copy(
-                        update={"query_string": query_string}
-                    )
-            else:
-                source_metadata = SourceMetadata(type="api", query_string=query_string)
-
-        return source_metadata
+        return get_source_metadata(
+            data_source=self._services.data_source,
+            logger=self._logger,
+            query_string=query_string,
+        )
 
     async def write_bronze_layer(
         self,
@@ -206,11 +193,11 @@ class BatchProcessingSupportService:
         work_coro: Awaitable[_ResultT],
     ) -> _ResultT:
         """Finish the batch span consistently across runtime failure cases."""
-        try:
-            return await work_coro
-        except PIPELINE_EXECUTION_ERRORS as error:
-            self._tracing.end_span(span, error)
-            raise
+        return await execute_with_pipeline_failure_policy(
+            tracing=self._tracing,
+            span=span,
+            work_coro=work_coro,
+        )
 
     async def _execute_with_span(
         self,
@@ -218,19 +205,17 @@ class BatchProcessingSupportService:
         coro: Awaitable[object],
         batch_id: BatchID,
         count: int,
-        on_error: Callable[[Exception], object] | None = None,
+        on_error: Callable[[Exception], None] | None = None,
     ) -> object:
         """Execute a coroutine wrapped with a per-layer tracing span."""
-        span = self._tracing.start_layer_span(name, batch_id, count)
-        try:
-            result = await coro
-            self._tracing.end_span(span)
-            return result
-        except PIPELINE_EXECUTION_ERRORS as error:
-            self._tracing.end_span(span, error)
-            if on_error:
-                on_error(error)
-            raise
+        return await execute_with_layer_span(
+            tracing=self._tracing,
+            name=name,
+            coro=coro,
+            batch_id=batch_id,
+            count=count,
+            on_error=on_error,
+        )
 
     async def _execute_transform_with_span(
         self,
@@ -240,34 +225,17 @@ class BatchProcessingSupportService:
         start_index: int,
     ) -> TransformResult:
         """Execute transform stage and attach output metrics to the span."""
-        span = self._tracing.start_layer_span(
-            "transform",
-            batch_id,
-            len(records),
-            input_count=True,
+        return await execute_transform_with_span(
+            tracing=self._tracing,
+            transformer=self._transformer,
+            records=records,
+            batch_id=batch_id,
+            start_index=start_index,
         )
-        try:
-            result = await self._transformer.transform_batch(
-                records,
-                batch_id,
-                start_index=start_index,
-            )
-            self._tracing.set_transform_result(
-                span,
-                silver_count=len(result.silver_records),
-                gold_count=len(result.gold_records),
-                quarantined_count=result.quarantined_count,
-            )
-            self._tracing.end_span(span)
-            return result
-        except PIPELINE_EXECUTION_ERRORS as error:
-            self._tracing.end_span(span, error)
-            raise
 
     @staticmethod
     def build_bronze_refs(
         bronze_result: object,
     ) -> list[BronzeWriteResult] | None:
         """Normalize Bronze write output into writer-compatible references."""
-        typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
-        return [typed_bronze_result] if typed_bronze_result else None
+        return build_bronze_refs(bronze_result)

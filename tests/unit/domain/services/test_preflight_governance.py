@@ -1,16 +1,25 @@
 """Unit tests for preflight governance service."""
 
+from bioetl.domain.services.aggregation_validator import AggregationValidator
 from bioetl.domain.services.composite_validation_layer import (
     CompositeValidationConfig,
     CompositeValidationService,
 )
+from bioetl.domain.services.cross_validation_validator import CrossValidationValidator
 from bioetl.domain.services.preflight_governance import (
     GovernancePolicy,
     PreflightGovernanceConfig,
     PreflightGovernanceService,
-    create_preflight_governance_service,
 )
 from bioetl.domain.types.validation_severity import ValidationSeverity
+
+
+def _create_validation_service() -> CompositeValidationService:
+    return CompositeValidationService(
+        aggregation_validator=AggregationValidator(),
+        cross_validation_validator=CrossValidationValidator(),
+        preflight_governance=PreflightGovernanceService(),
+    )
 
 
 def test_preflight_governance_service_creation():
@@ -18,12 +27,6 @@ def test_preflight_governance_service_creation():
     service = PreflightGovernanceService()
     assert service is not None
     assert service.config.policy == GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
-
-
-def test_factory_function():
-    """Test factory function."""
-    service = create_preflight_governance_service()
-    assert isinstance(service, PreflightGovernanceService)
 
 
 def test_custom_config():
@@ -42,7 +45,7 @@ def test_custom_config():
 def test_block_on_blockers_only_policy():
     """Test BLOCK_ON_BLOCKERS_ONLY policy (default)."""
     # Create a validation report with blockers
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={"sources": ["source1"]},  # Missing required fields
@@ -63,7 +66,7 @@ def test_block_on_blockers_only_policy():
 def test_block_on_any_issue_policy():
     """Test BLOCK_ON_ANY_ISSUE policy."""
     # Create a validation report with only warnings
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -91,7 +94,7 @@ def test_block_on_any_issue_policy():
 def test_warning_only_policy():
     """Test WARNING_ONLY policy."""
     # Create a validation report with blockers
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={"sources": ["source1"]},  # Missing required fields
@@ -112,7 +115,7 @@ def test_warning_only_policy():
 def test_ci_strict_policy():
     """Test CI_STRICT policy."""
     # Create a validation report with only warnings
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -140,7 +143,7 @@ def test_ci_strict_policy():
 def test_ci_relaxed_policy():
     """Test CI_RELAXED policy."""
     # Create a validation report with only warnings
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -167,7 +170,7 @@ def test_ci_relaxed_policy():
 def test_issue_code_overrides():
     """Test issue code severity overrides."""
     # Create a validation report with blockers
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={"sources": ["source1"]},  # Missing required fields
@@ -192,7 +195,7 @@ def test_issue_code_overrides():
 def test_governance_report_structure():
     """Test governance report structure and content."""
     # Create a validation report
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={"sources": ["source1"]},
@@ -244,7 +247,7 @@ def test_governance_report_structure():
 def test_ci_gate_report():
     """Test CI gate report generation."""
     # Create a validation report with blockers
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={"sources": ["source1"]},
@@ -281,7 +284,7 @@ def test_ci_gate_report():
 def test_no_issues_scenario():
     """Test governance with no validation issues."""
     # Create a valid validation report
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={
@@ -310,7 +313,7 @@ def test_no_issues_scenario():
 def test_governance_impact_determination():
     """Test governance impact determination for different issue types."""
     # Create a validation report with mixed issues
-    validation_service = CompositeValidationService()
+    validation_service = _create_validation_service()
     config = CompositeValidationConfig(
         pipeline_name="test_pipeline",
         composite_config={

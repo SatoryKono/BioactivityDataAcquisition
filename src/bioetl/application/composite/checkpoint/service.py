@@ -1,15 +1,22 @@
-"""Composite checkpoint persistence service facade."""
+"""Composite checkpoint workflow facade."""
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint import _service_support as support
+from bioetl.application.composite.checkpoint.load_service import (
+    CompositeCheckpointLoadService,
+)
+from bioetl.application.composite.checkpoint.persistence_service import (
+    CompositeCheckpointPersistenceService,
+)
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, StorageError
+from bioetl.domain.exceptions import StorageError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort
 
 
@@ -29,6 +36,12 @@ class CompositeCheckpointService:
         expected_effective_config_hash: str | None = None,
         expected_contract_ref: str | None = None,
         expected_contract_version: str | None = None,
+        load_service_factory: Callable[
+            ..., CompositeCheckpointLoadService
+        ] = CompositeCheckpointLoadService,
+        persistence_service_factory: Callable[
+            ..., CompositeCheckpointPersistenceService
+        ] = CompositeCheckpointPersistenceService,
     ) -> None:
         self._composite_name = composite_name
         self._run_id = run_id
@@ -40,13 +53,32 @@ class CompositeCheckpointService:
             if stale_checkpoint_threshold_hours is not None
             else self._DEFAULT_STALE_THRESHOLD_HOURS
         )
-        self._expected_anchors = support.ExpectedCheckpointAnchors(
-            effective_config_hash=expected_effective_config_hash or "",
-            contract_ref=expected_contract_ref or "",
-            contract_version=expected_contract_version or "",
+        self._expected_checkpoint_context = support.create_expected_checkpoint_context(
+            effective_config_hash=expected_effective_config_hash,
+            contract_ref=expected_contract_ref,
+            contract_version=expected_contract_version,
             composite_run_identity=run_id,
         )
         self._checkpoint_filename = self._make_filename(run_id)
+        self._glob_pattern_value = self._glob_pattern()
+        self._load_service = load_service_factory(
+            composite_name=composite_name,
+            run_id=run_id,
+            storage=storage,
+            logger=logger,
+            resume=resume,
+            stale_threshold_hours=self._stale_threshold_hours,
+            expected_context=self._expected_checkpoint_context,
+            checkpoint_filename=self._checkpoint_filename,
+            glob_pattern=self._glob_pattern_value,
+        )
+        self._persistence_service = persistence_service_factory(
+            composite_name=composite_name,
+            checkpoint_filename=self._checkpoint_filename,
+            glob_pattern=self._glob_pattern_value,
+            storage=storage,
+            logger=logger,
+        )
 
     def _make_filename(self, run_id: str) -> str:
         return f"composite_{self._composite_name}_{run_id}.json"
@@ -54,113 +86,40 @@ class CompositeCheckpointService:
     def _glob_pattern(self) -> str:
         return f"composite_{self._composite_name}_*.json"
 
+    @property
+    def expected_effective_config_hash(self) -> str:
+        """Expose the configured effective-config anchor for dependent helpers."""
+        return self._expected_checkpoint_context.effective_config_hash
+
+    @property
+    def expected_contract_ref(self) -> str:
+        """Expose the configured contract-ref anchor for dependent helpers."""
+        return self._expected_checkpoint_context.contract_ref
+
+    @property
+    def expected_contract_version(self) -> str:
+        """Expose the configured contract-version anchor for dependent helpers."""
+        return self._expected_checkpoint_context.contract_version
+
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state or create a fresh one."""
-        glob_pattern = self._glob_pattern()
-        if self._resume:
-            filename = support.resolve_resume_checkpoint_filename(
-                storage=self._storage,
-                checkpoint_filename=self._checkpoint_filename,
-                glob_pattern=glob_pattern,
-            )
-            if filename is not None and self._storage.exists(filename):
-                state = support.load_checkpoint_state(
-                    storage=self._storage,
-                    logger=self._logger,
-                    composite_name=self._composite_name,
-                    filename=filename,
-                )
-                if state is not None:
-                    support.validate_resume_compatibility(
-                        state=state,
-                        anchors=self._expected_anchors,
-                        logger=self._logger,
-                        composite_name=self._composite_name,
-                    )
-                    state = support.merge_expected_anchors(
-                        state, self._expected_anchors
-                    )
-                    support.warn_if_checkpoint_stale(
-                        logger=self._logger,
-                        composite_name=self._composite_name,
-                        stale_threshold_hours=self._stale_threshold_hours,
-                        state=state,
-                    )
-                    return state
-        else:
-            support.warn_if_checkpoint_exists_with_progress(
-                storage=self._storage,
-                logger=self._logger,
-                composite_name=self._composite_name,
-                glob_pattern=glob_pattern,
-            )
-
-        return support.fresh_checkpoint_state(
-            composite_name=self._composite_name,
-            run_id=self._run_id,
-            anchors=self._expected_anchors,
-        )
+        return self._load_service.load()
 
     async def save(self, state: CompositeCheckpointState) -> None:
         """Save checkpoint state to JSON atomically."""
-        try:
-            self._storage.write_atomic(
-                self._checkpoint_filename,
-                json.dumps(state.to_dict(), indent=2),
-            )
-            self._logger.debug(
-                "Saved checkpoint",
-                composite=self._composite_name,
-                checkpoint_path=self._checkpoint_filename,
-                state=state.state.value,
-                completed_enrichers=len(state.completed_enrichers),
-            )
-        except support.CHECKPOINT_WRITE_ERRORS as error:
-            self._logger.error(
-                "Failed to save checkpoint",
-                composite=self._composite_name,
-                error=str(error),
-                error_type=type(error).__name__,
-                reason_code="checkpoint_save_failed",
-            )
-            raise CheckpointConflictError(self._composite_name, str(error)) from error
-        except BioETLError as error:
-            self._logger.error(
-                "Failed to save checkpoint",
-                composite=self._composite_name,
-                error=str(error),
-                error_type=type(error).__name__,
-                reason_code="unexpected_bioetl_error",
-            )
-            raise
+        self._persistence_service.save(state)
 
     async def delete(self) -> None:
         """Delete checkpoint file after successful completion."""
-        if self._storage.delete(self._checkpoint_filename):
-            self._logger.info(
-                "Deleted checkpoint",
-                composite=self._composite_name,
-                checkpoint_path=self._checkpoint_filename,
-            )
+        self._persistence_service.delete()
 
     async def delete_orphaned(self) -> int:
         """Delete orphaned checkpoint files from previous runs."""
-        deleted = 0
-        for filename in self._storage.list_glob(self._glob_pattern()):
-            if filename == self._checkpoint_filename:
-                continue
-            if self._storage.delete(filename):
-                self._logger.info(
-                    "Deleted orphaned checkpoint",
-                    composite=self._composite_name,
-                    orphaned_checkpoint=filename,
-                )
-                deleted += 1
-        return deleted
+        return self._persistence_service.delete_orphaned()
 
     async def list_all(self) -> list[str]:
         """List all checkpoints for this composite pipeline."""
-        return self._storage.list_glob(self._glob_pattern())
+        return self._persistence_service.list_all()
 
 
 CompositeCheckpointManager = CompositeCheckpointService

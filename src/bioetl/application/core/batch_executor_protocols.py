@@ -43,17 +43,23 @@ class BatchStateCommitPort(Protocol):
         state: object,
         records: list[BronzeRecord],
         outcome: BatchProcessingOutcome,
-    ) -> None: ...
+    ) -> None:
+        """Mutate cumulative executor state after one successful batch."""
+        ...
 
     def build_batch_result(
         self,
         *,
         state: object,
         batch_result_type: BatchResultBuilderPort[_BatchResultT],
-    ) -> _BatchResultT: ...
+    ) -> _BatchResultT:
+        """Build the batch-scoped result payload from current state."""
+        ...
 
     def build_run_statistics(
         self,
         *,
         state: object,
-    ) -> dict[str, int | list[str]]: ...
+    ) -> dict[str, int | list[str]]:
+        """Extract final aggregate counters and failure details from state."""
+        ...

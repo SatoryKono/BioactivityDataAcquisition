@@ -1,22 +1,20 @@
-"""Checkpoint Manager for ETL Pipelines.
-
-This module is framework-agnostic and handles checkpoint persistence
-for pipeline run tracking.
-
-Supports loading_strategy (ADR-031) which controls offset-based resume behavior
-for entities where API offset pagination is unreliable (e.g., publications).
-"""
+"""Checkpoint Manager for ETL Pipelines."""
 
 from __future__ import annotations
 
-from typing import Any, Literal, cast
+from typing import Any, cast
 
+from bioetl.application.core.lifecycle.checkpoint_runtime import (
+    CheckpointCompatibilityPolicy,
+    enrich_metadata_with_execution_identity,
+    handle_incompatible_checkpoint,
+    resolve_current_metadata,
+    validate_compatibility_policy,
+)
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, LoggerPort
 from bioetl.domain.types import RunID
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-
-CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
 
 
 class CheckpointManagerService:
@@ -64,118 +62,14 @@ class CheckpointManagerService:
         self._loading_strategy = loading_strategy
         self._compatibility_service = checkpoint_compatibility_service
         self._current_metadata = current_metadata
-        self._compatibility_policy = self._validate_compatibility_policy(
+        self._compatibility_policy = validate_compatibility_policy(
             compatibility_policy
         )
-
-    @staticmethod
-    def _validate_compatibility_policy(
-        policy: CheckpointCompatibilityPolicy,
-    ) -> CheckpointCompatibilityPolicy:
-        allowed: tuple[CheckpointCompatibilityPolicy, ...] = (
-            "observe",
-            "soft_fail",
-            "hard_fail",
-        )
-        if policy not in allowed:
-            raise ValueError(
-                f"Unsupported checkpoint compatibility policy: {policy!r}. "
-                f"Expected one of {allowed}."
-            )
-        return policy
 
     @property
     def current_metadata(self) -> CheckpointMetadata | None:
         """Return current execution identity metadata used for compatibility checks."""
         return self._current_metadata
-
-    def _resolve_current_metadata(
-        self,
-        current_metadata: CheckpointMetadata | None,
-    ) -> CheckpointMetadata | None:
-        return (
-            current_metadata if current_metadata is not None else self._current_metadata
-        )
-
-    def _enrich_metadata_with_execution_identity(
-        self,
-        metadata: CheckpointMetadata,
-    ) -> CheckpointMetadata:
-        """Fill missing execution identity fields from current metadata."""
-        identity = self._current_metadata
-        if identity is None:
-            return metadata
-        return CheckpointMetadata(
-            records_processed=metadata.records_processed,
-            dq_contract_compatibility_hash=(
-                metadata.dq_contract_compatibility_hash
-                if metadata.dq_contract_compatibility_hash is not None
-                else identity.dq_contract_compatibility_hash
-            ),
-            dq_policy_hash=(
-                metadata.dq_policy_hash
-                if metadata.dq_policy_hash is not None
-                else identity.dq_policy_hash
-            ),
-            dq_rule_bundle_version=(
-                metadata.dq_rule_bundle_version
-                if metadata.dq_rule_bundle_version is not None
-                else identity.dq_rule_bundle_version
-            ),
-            pipeline_version=(
-                metadata.pipeline_version
-                if metadata.pipeline_version is not None
-                else identity.pipeline_version
-            ),
-            effective_config_hash=(
-                metadata.effective_config_hash
-                if metadata.effective_config_hash is not None
-                else identity.effective_config_hash
-            ),
-            effective_config_artifact_id=(
-                metadata.effective_config_artifact_id
-                if metadata.effective_config_artifact_id is not None
-                else identity.effective_config_artifact_id
-            ),
-            execution_fingerprint=(
-                metadata.execution_fingerprint
-                if metadata.execution_fingerprint is not None
-                else identity.execution_fingerprint
-            ),
-            run_context=metadata.run_context
-            if metadata.run_context is not None
-            else identity.run_context,
-        )
-
-    def _handle_incompatible_checkpoint(
-        self,
-        *,
-        checkpoint_metadata: CheckpointMetadata,
-        messages: list[str],
-    ) -> CheckpointMetadata | None:
-        """Handle incompatible checkpoint according to configured policy."""
-        payload = {
-            "pipeline": self._pipeline_name,
-            "compatibility_policy": self._compatibility_policy,
-            "messages": messages,
-            "checkpoint_metadata": checkpoint_metadata.to_dict(),
-        }
-        if self._compatibility_policy == "observe":
-            self._logger.warning(
-                "Checkpoint compatibility mismatch observed; resume continues.",
-                extra=payload,
-            )
-            return checkpoint_metadata
-        if self._compatibility_policy == "soft_fail":
-            self._logger.warning(
-                "Checkpoint compatibility mismatch; resume blocked by soft_fail policy.",
-                extra=payload,
-            )
-            return None
-        raise ValueError(
-            "Checkpoint compatibility mismatch and hard_fail policy is enabled: "
-            + "; ".join(messages)
-        )
 
     async def load_checkpoint(
         self,
@@ -224,8 +118,9 @@ class CheckpointManagerService:
                 )
 
                 # Validate compatibility if current metadata is provided
-                effective_current_metadata = self._resolve_current_metadata(
-                    current_metadata
+                effective_current_metadata = resolve_current_metadata(
+                    current_metadata,
+                    default_metadata=self._current_metadata,
                 )
                 if effective_current_metadata and self._compatibility_service:
                     compatibility_result = cast(
@@ -236,7 +131,10 @@ class CheckpointManagerService:
                     )
 
                     if not compatibility_result.compatible:
-                        return self._handle_incompatible_checkpoint(
+                        return handle_incompatible_checkpoint(
+                            logger=self._logger,
+                            pipeline_name=self._pipeline_name,
+                            compatibility_policy=self._compatibility_policy,
                             checkpoint_metadata=checkpoint_metadata,
                             messages=compatibility_result.messages,
                         )
@@ -266,7 +164,10 @@ class CheckpointManagerService:
         if isinstance(metadata, int):
             # Legacy API compatibility - convert int to CheckpointMetadata
             metadata = CheckpointMetadata(records_processed=metadata)
-        metadata = self._enrich_metadata_with_execution_identity(metadata)
+        metadata = enrich_metadata_with_execution_identity(
+            metadata,
+            identity=self._current_metadata,
+        )
 
         await self._checkpoint.save(
             pipeline=self._pipeline_name,

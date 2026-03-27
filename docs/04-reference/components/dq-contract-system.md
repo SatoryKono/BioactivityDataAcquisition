@@ -241,11 +241,12 @@ guide = service.get_migration_guide("v1.0", "v1.1")
 ### Pipeline Integration
 
 ```python
-from bioetl.domain.services.composite_validation_service import CompositeValidationService
+from bioetl.composition.factories.dq import create_composite_validation_service
+from bioetl.domain.services.composite_validation_layer import CompositeValidationConfig
 from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 
 # Initialize services
-validation_service = CompositeValidationService()
+validation_service = create_composite_validation_service()
 policy_resolver = DQPolicyResolver()
 
 # Load DQ contracts

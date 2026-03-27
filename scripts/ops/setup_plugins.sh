@@ -7,7 +7,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PYTEST_ONLY=false
@@ -30,15 +30,42 @@ log_warn() { echo -e "${YELLOW}[setup-plugins]${NC} $1"; }
 
 USE_UV=false
 PYTHON_BIN=""
+PYTHON_KIND=""
 
-if command -v uv >/dev/null 2>&1; then
-    USE_UV=true
+to_windows_path() {
+    local path="$1"
+
+    if command -v wslpath >/dev/null 2>&1; then
+        wslpath -w "$path"
+        return 0
+    fi
+
+    if [[ "$path" =~ ^/mnt/([a-zA-Z])/(.*)$ ]]; then
+        local drive="${BASH_REMATCH[1]}"
+        local rest="${BASH_REMATCH[2]}"
+        rest="${rest//\//\\}"
+        printf '%s:\\%s\n' "${drive^^}" "$rest"
+        return 0
+    fi
+
+    return 1
+}
+
+if [[ -x ".venv/Scripts/python.exe" ]]; then
+    PYTHON_BIN=".venv/Scripts/python.exe"
+    PYTHON_KIND="windows-venv"
 elif [[ -x ".venv/bin/python" ]]; then
     PYTHON_BIN=".venv/bin/python"
+    PYTHON_KIND="posix-venv"
+elif command -v uv >/dev/null 2>&1; then
+    USE_UV=true
+    PYTHON_KIND="uv"
 elif command -v python >/dev/null 2>&1; then
     PYTHON_BIN="python"
+    PYTHON_KIND="system-python"
 elif command -v python3 >/dev/null 2>&1; then
     PYTHON_BIN="python3"
+    PYTHON_KIND="system-python3"
 else
     log_warn "Python runtime not found."
     log_warn "Install uv or activate a Python environment, then rerun:"
@@ -95,6 +122,33 @@ install_precommit() {
     fi
 
     log_info "Ensuring pre-commit is installed..."
+    if [[ "$PYTHON_KIND" == "windows-venv" ]] && command -v powershell.exe >/dev/null 2>&1; then
+        local repo_root_win=""
+        local python_bin_win=""
+        local precommit_home=""
+        local precommit_home_win=""
+
+        repo_root_win="$(to_windows_path "$REPO_ROOT")" || repo_root_win=""
+        python_bin_win="$(to_windows_path "$REPO_ROOT/$PYTHON_BIN")" || python_bin_win=""
+        precommit_home="$REPO_ROOT/.cache/pre-commit"
+        mkdir -p "$precommit_home"
+        precommit_home_win="$(to_windows_path "$precommit_home")" || precommit_home_win=""
+
+        if [[ -n "$repo_root_win" ]] && [[ -n "$python_bin_win" ]] && [[ -n "$precommit_home_win" ]]; then
+            powershell.exe -NoProfile -Command "
+\$env:Path='C:\\Program Files\\Git\\cmd;'+\$env:Path
+\$env:PRE_COMMIT_HOME='$precommit_home_win'
+New-Item -ItemType Directory -Force -Path \$env:PRE_COMMIT_HOME | Out-Null
+Set-Location '$repo_root_win'
+& '$python_bin_win' -m pre_commit install --install-hooks
+" >/dev/null
+            log_ok "pre-commit hooks installed"
+            return 0
+        fi
+
+        log_warn "Windows pre-commit bootstrap fallback could not convert required paths; using direct invocation."
+    fi
+
     if [[ "$USE_UV" == true ]]; then
         if ! uv run python -m pre_commit --version >/dev/null 2>&1; then
             uv run python -m pip install pre-commit

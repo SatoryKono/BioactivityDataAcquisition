@@ -5,6 +5,12 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.column_orderer_group_flow import (
+    apply_renames,
+    filter_columns_by_explicit,
+    filter_columns_by_groups,
+    order_by_yaml_groups,
+)
 from bioetl.application.composite.column_orderer_helpers import (
     collect_explicit_group_columns,
     collect_pattern_columns,
@@ -12,16 +18,19 @@ from bioetl.application.composite.column_orderer_helpers import (
     resolve_publication_field_aliases,
     sort_columns_by_provider,
 )
+from bioetl.application.composite.column_orderer_semantic import (
+    count_groups,
+    get_ordered_columns,
+    group_columns,
+)
 from bioetl.application.core.publication_aliases import (
     LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
 )
-from bioetl.domain.schemas.column_order import DQ_FIELDS_SUFFIX
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     ColumnOrderConfig,
     SemanticGroup,
 )
-from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 
 if TYPE_CHECKING:
     import polars as pl
@@ -83,36 +92,11 @@ class ColumnOrderer:
 
     def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
         """Get columns in semantic order."""
-
-        def sort_key(col: str) -> tuple[int, int, str]:
-            """Sort by (group, provider_rank, column_name)."""
-            group = self._config.get_group(col)
-            provider_rank = self._config.get_provider_rank(col)
-            field_name = ColumnQualifier.extract_field(col)
-            return (group.value, provider_rank, field_name.lower())
-
-        return sorted(columns, key=sort_key)
+        return get_ordered_columns(columns, config=self._config)
 
     def group_columns(self, columns: Sequence[str]) -> dict[SemanticGroup, list[str]]:
         """Group columns by semantic type."""
-        groups: dict[SemanticGroup, list[str]] = {}
-
-        for col in columns:
-            group = self._config.get_group(col)
-            if group not in groups:
-                groups[group] = []
-            groups[group].append(col)
-
-        for group in groups:
-            groups[group] = sorted(
-                groups[group],
-                key=lambda c: (
-                    self._config.get_provider_rank(c),
-                    ColumnQualifier.extract_field(c).lower(),
-                ),
-            )
-
-        return groups
+        return group_columns(columns, config=self._config)
 
     def filter_by_layer_config(
         self,
@@ -132,49 +116,16 @@ class ColumnOrderer:
 
     def _count_groups(self, columns: Sequence[str]) -> dict[str, int]:
         """Count columns per semantic group."""
-        counts: dict[str, int] = {}
-        for col in columns:
-            group = self._config.get_group(col)
-            group_name = group.name
-            counts[group_name] = counts.get(group_name, 0) + 1
-        return counts
+        return count_groups(columns, config=self._config)
 
     def _order_by_yaml_groups(self, columns: Sequence[str]) -> list[str]:
         """Order columns using YAML-configured groups."""
-        if not self._column_groups:
-            return list(columns)
-
-        all_columns = set(columns)
-        ordered_columns: list[str] = []
-        used_columns: set[str] = set()
-
-        for group in self._column_groups:
-            group_columns = self._collect_group_columns(
-                all_columns - used_columns,
-                group,
-            )
-            ordered_columns.extend(group_columns)
-            used_columns.update(group_columns)
-
-        dq_suffix_set = frozenset(DQ_FIELDS_SUFFIX)
-        remaining = sorted(all_columns - used_columns - dq_suffix_set)
-        if remaining:
-            ordered_columns.extend(remaining)
-            self._logger.debug(
-                "Ungrouped columns added at end",
-                count=len(remaining),
-                sample=remaining[:5],
-            )
-
-        for dq_field in DQ_FIELDS_SUFFIX:
-            if dq_field in ordered_columns:
-                ordered_columns.remove(dq_field)
-
-        for dq_field in DQ_FIELDS_SUFFIX:
-            if dq_field in all_columns:
-                ordered_columns.append(dq_field)
-
-        return ordered_columns
+        return order_by_yaml_groups(
+            columns=columns,
+            column_groups=self._column_groups,
+            collect_group_columns=self._collect_group_columns,
+            logger=self._logger,
+        )
 
     def _collect_group_columns(
         self,
@@ -234,7 +185,7 @@ class ColumnOrderer:
         self, columns: list[str], rename_map: dict[str, str]
     ) -> list[str]:
         """Apply column renames from rename_fields mapping."""
-        return _apply_renames(columns, rename_map)
+        return apply_renames(columns, rename_map)
 
     def _filter_columns_by_explicit(
         self,
@@ -242,9 +193,10 @@ class ColumnOrderer:
         layer_config: LayerColumnConfig,
     ) -> list[str]:
         """Apply explicit include list from layer config."""
-        explicit_columns = layer_config.columns or ()
-        filtered = [c for c in explicit_columns if c in columns]
-        return _apply_renames(filtered, layer_config.rename_fields)
+        return filter_columns_by_explicit(
+            columns=columns,
+            layer_config=layer_config,
+        )
 
     def _filter_columns_by_groups(
         self,
@@ -252,39 +204,10 @@ class ColumnOrderer:
         layer_config: LayerColumnConfig,
     ) -> list[str]:
         """Apply include_groups and exclude_fields filtering."""
-        from fnmatch import fnmatch
-
-        if not self._column_groups:
-            self._logger.warning(
-                "include_groups specified but no column_groups configured",
-                include_groups=layer_config.include_groups,
-            )
-            return list(columns)
-
-        include_groups = layer_config.include_groups or ()
-        included_groups = [g for g in self._column_groups if g.name in include_groups]
-        all_cols = set(columns)
-        matched: set[str] = set()
-        for group in included_groups:
-            group_columns = self._collect_group_columns(all_cols - matched, group)
-            matched.update(group_columns)
-
-        if layer_config.exclude_fields:
-            matched = {
-                c
-                for c in matched
-                if not any(
-                    fnmatch(c, pattern) for pattern in layer_config.exclude_fields
-                )
-            }
-
-        ordered = self._order_by_yaml_groups(list(matched))
-        return _apply_renames(ordered, layer_config.rename_fields)
-
-
-def _apply_renames(columns: list[str], rename_map: dict[str, str]) -> list[str]:
-    """Apply column renames from rename_fields mapping."""
-    if not rename_map:
-        return columns
-
-    return [rename_map.get(col, col) for col in columns]
+        return filter_columns_by_groups(
+            columns=columns,
+            layer_config=layer_config,
+            column_groups=self._column_groups,
+            collect_group_columns=self._collect_group_columns,
+            logger=self._logger,
+        )

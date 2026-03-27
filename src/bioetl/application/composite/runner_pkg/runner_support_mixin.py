@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import datetime
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
@@ -20,12 +20,14 @@ from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     log_composite_completion,
     prepare_composite_result_context,
 )
-from bioetl.application.composite.runner_pkg.runner_constants import (
-    CHECKPOINT_NON_FATAL_ERRORS,
-)
 from bioetl.application.composite.runner_pkg.runner_models import (
     CompositeExecutionContext,
     CompositeRuntimeConfig,
+)
+from bioetl.application.composite.runner_pkg.runner_support_flow import (
+    build_correlation_log_context,
+    run_preflight_validation,
+    validate_config_consistency,
 )
 from bioetl.application.composite.runner_pkg.runner_support_policy import (
     build_enrichers_to_run,
@@ -35,6 +37,10 @@ from bioetl.application.composite.runner_pkg.runner_support_policy import (
     get_preflight_skip_reason,
     get_required_enricher_failure,
 )
+from bioetl.application.composite.runner_pkg.runner_support_runtime import (
+    run_seed,
+    save_checkpoint_safe,
+)
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
     _PreparedCompositeResultContext,
@@ -42,47 +48,10 @@ from bioetl.application.composite.runner_pkg.runner_support_types import (
 )
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult, SeedResult
-from bioetl.domain.events import PipelineEvent
-from bioetl.domain.exceptions import BioETLError, InvalidStateError
+from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
 __all__ = ["CompositeRunnerSupportMixin"]
-
-
-def _normalize_optional_anchor(value: object) -> str | None:
-    """Return stripped text anchors while ignoring mock/empty placeholders."""
-    if not isinstance(value, str):
-        return None
-    normalized = value.strip()
-    return normalized or None
-
-
-def _expected_effective_config_hash(
-    host: _CompositeRunnerSupportHostProtocol,
-) -> str | None:
-    """Return effective-config hash anchor when checkpoint manager exposes it."""
-    checkpoint_manager = getattr(host, "_checkpoint_manager", None)
-    return _normalize_optional_anchor(
-        getattr(checkpoint_manager, "expected_effective_config_hash", None)
-    )
-
-
-def _expected_contract_ref(host: _CompositeRunnerSupportHostProtocol) -> str | None:
-    """Return contract-ref anchor from checkpoint manager or composite config."""
-    checkpoint_manager = getattr(host, "_checkpoint_manager", None)
-    return _normalize_optional_anchor(
-        getattr(checkpoint_manager, "expected_contract_ref", None)
-    ) or _normalize_optional_anchor(getattr(host._config, "name", None))
-
-
-def _expected_contract_version(
-    host: _CompositeRunnerSupportHostProtocol,
-) -> str | None:
-    """Return contract-version anchor from checkpoint manager or config."""
-    checkpoint_manager = getattr(host, "_checkpoint_manager", None)
-    return _normalize_optional_anchor(
-        getattr(checkpoint_manager, "expected_contract_version", None)
-    ) or _normalize_optional_anchor(getattr(host._config, "version", None))
 
 
 class CompositeRunnerSupportMixin:
@@ -101,22 +70,7 @@ class CompositeRunnerSupportMixin:
 
     def _build_correlation_log_context(self, **extra: object) -> dict[str, object]:
         """Build a stable correlation envelope for composite critical logs."""
-        context: dict[str, object] = {
-            "composite": self._config.name,
-            "run_id": self._run_id_str,
-            "composite_run_id": self._run_id_str,
-        }
-        effective_config_hash = _expected_effective_config_hash(self)
-        if effective_config_hash is not None:
-            context["effective_config_hash"] = effective_config_hash
-        contract_ref = _expected_contract_ref(self)
-        if contract_ref is not None:
-            context["contract_ref"] = contract_ref
-        contract_version = _expected_contract_version(self)
-        if contract_version is not None:
-            context["contract_version"] = contract_version
-        context.update(extra)
-        return context
+        return build_correlation_log_context(self, **extra)
 
     def _build_composite_result(
         self: _CompositeRunnerSupportHostProtocol,
@@ -178,69 +132,13 @@ class CompositeRunnerSupportMixin:
         self: _CompositeRunnerSupportHostProtocol,
     ) -> None:
         """Validate configuration consistency and log anomalies."""
-        expected_required = frozenset(
-            enricher.pipeline
-            for enricher in self._config.enrichers
-            if enricher.required
-        )
-        actual_required = frozenset(self._config.required_enrichers)
-
-        if expected_required != actual_required:
-            self._logger.warning(
-                "Config inconsistency: required_enrichers mismatch",
-                **self._build_correlation_log_context(
-                    expected_required=list(expected_required),
-                    actual_required=list(actual_required),
-                    note="This may indicate a bug in CompositeConfig",
-                ),
-            )
-
-        if not expected_required and self._config.enrichers:
-            self._logger.info(
-                "All enrichers are optional",
-                **self._build_correlation_log_context(
-                    enricher_count=len(self._config.enrichers),
-                    note="Pipeline will succeed even if all enrichers fail",
-                ),
-            )
+        validate_config_consistency(self)
 
     def _run_preflight_validation(
         self: _CompositeRunnerSupportHostProtocol,
     ) -> None:
         """Run preflight validation for field_priorities configuration."""
-        context = self._prepare_preflight_validation_context()
-        if context is None:
-            self._logger.debug(
-                "Preflight validation skipped",
-                **self._build_correlation_log_context(
-                    stage="preflight_validation",
-                    reason=self._get_preflight_skip_reason(),
-                ),
-            )
-            return
-
-        self._logger.info(
-            PipelineEvent.phase_started("preflight_validation"),
-            **self._build_correlation_log_context(
-                stage="preflight_validation",
-                field_count=context.field_count,
-            ),
-        )
-
-        result = context.validator.validate(
-            self._config,
-            fail_on_error=True,
-        )
-        context.validator.log_resolved_field_sources(result, self._config.name)
-
-        self._logger.info(
-            PipelineEvent.phase_completed("preflight_validation"),
-            **self._build_correlation_log_context(
-                stage="preflight_validation",
-                fields_validated=len(result.resolved_fields),
-                warnings=len(result.warnings),
-            ),
-        )
+        run_preflight_validation(self)
 
     def _prepare_preflight_validation_context(
         self: _CompositeRunnerSupportHostProtocol,
@@ -273,61 +171,11 @@ class CompositeRunnerSupportMixin:
             True if the checkpoint was saved successfully, False if a non-fatal error
             occurred (resume capability may be degraded).
         """
-        try:
-            await self._checkpoint_manager.save(state)
-            return True
-        except CHECKPOINT_NON_FATAL_ERRORS as error:
-            self._logger.warning(
-                "checkpoint_save_failed",
-                **self._build_correlation_log_context(
-                    operation=operation,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    note="Resume capability may be affected",
-                ),
-            )
-            return False
-        except BioETLError as error:
-            self._logger.warning(
-                "checkpoint_save_failed",
-                **self._build_correlation_log_context(
-                    operation=operation,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    reason_code="unexpected_bioetl_error",
-                    note="Resume capability may be affected",
-                ),
-            )
-            return False
+        return await save_checkpoint_safe(self, state, operation)
 
     async def _run_seed(self: _CompositeRunnerSupportHostProtocol) -> SeedResult:
         """Run the seed pipeline."""
-        self._logger.info(
-            "Running seed pipeline",
-            **self._build_correlation_log_context(
-                stage="seed",
-                seed_pipeline=self._config.seed.pipeline,
-            ),
-        )
-
-        started_at = datetime.now(tz=UTC)
-        runner = self._seed_runner_factory()
-        await runner.run()
-        completed_at = datetime.now(tz=UTC)
-
-        metrics = runner.execution_metrics
-        records_extracted = int(metrics["records_fetched"])
-        records_silver = int(metrics["records_silver"])
-
-        return SeedResult(
-            pipeline_name=self._config.seed.pipeline,
-            records_extracted=records_extracted,
-            records_silver=records_silver,
-            keys_generated=records_silver,
-            duration_seconds=(completed_at - started_at).total_seconds(),
-            started_at=started_at,
-            completed_at=completed_at,
-        )
+        return await run_seed(self)
 
     def _get_enrichers_to_run(
         self: _CompositeRunnerSupportHostProtocol,

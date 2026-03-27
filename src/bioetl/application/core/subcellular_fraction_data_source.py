@@ -6,9 +6,9 @@ from Assay records and emit derived subcellular_fraction records.
 
 from __future__ import annotations
 
-import hashlib
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core import _subcellular_fraction_support as support
 from bioetl.application.core._data_source_mixins import (
     _SourceMetadataDelegationMixin,
     _WrappedDataSourceDelegationMixin,
@@ -85,19 +85,12 @@ class SubcellularFractionDataSource(
         raw_fraction: Any,  # Any: type varies at runtime
     ) -> str | None:  # Any: type varies at runtime
         """Normalize subcellular fraction string."""
-        if raw_fraction is None:
-            return None
-        fraction = str(raw_fraction).strip()
-        return fraction or None
+        return support.normalize_fraction(raw_fraction)
 
     @staticmethod
     def _compute_entity_id(subcellular_fraction: str) -> str:
         """Compute entity ID for a subcellular fraction."""
-        normalized = (
-            subcellular_fraction.lower().strip() if subcellular_fraction else ""
-        )
-        composite = f"subcellular_fraction:{normalized}"
-        return hashlib.sha256(composite.encode()).hexdigest()[:16]
+        return support.compute_entity_id(subcellular_fraction)
 
     def _create_fraction_record(
         self,
@@ -105,13 +98,7 @@ class SubcellularFractionDataSource(
         fraction: str,
     ) -> JsonDict:  # Any: heterogeneous record values
         """Create a subcellular fraction record."""
-        assay_id = assay.get("assay_id") or assay.get("assay_chembl_id")
-        return {
-            "entity_id": self._compute_entity_id(fraction),
-            "subcellular_fraction": fraction,
-            "example_assay_id": str(assay_id).strip() if assay_id else None,
-            "assay_count": 1,
-        }
+        return support.create_fraction_record(assay, fraction)
 
     async def _fetch_target_filtered_records(
         self,
@@ -182,32 +169,11 @@ class SubcellularFractionDataSource(
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:  # Any: heterogeneous record values
         """Collect unique subcellular fraction records from assay stream."""
-        self._seen_fractions = set()
-        records: dict[str, JsonDict] = {}  # Any: heterogeneous record values
-
-        async for assay in assays:
-            raw_fraction = assay.get("assay_subcellular_fraction")
-            fraction = self._normalize_fraction(raw_fraction)
-            if not fraction:
-                continue
-
-            key = fraction.lower()
-            record = records.get(key)
-            if record is None:
-                record = self._create_fraction_record(assay, fraction)
-                records[key] = record
-                self._seen_fractions.add(key)
-                if limit and len(records) >= limit:
-                    break
-            else:
-                record["assay_count"] = int(record["assay_count"]) + 1
-                if record["example_assay_id"] is None:
-                    assay_id = assay.get("assay_id") or assay.get("assay_chembl_id")
-                    record["example_assay_id"] = (
-                        str(assay_id).strip() if assay_id else None
-                    )
-
-        for record in records.values():
+        async for record in support.extract_unique_fraction_records(
+            assays,
+            limit,
+            self._seen_fractions,
+        ):
             yield record
 
 

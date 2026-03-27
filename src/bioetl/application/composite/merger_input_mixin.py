@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Sequence
-from dataclasses import dataclass
+from collections.abc import Sequence
 from typing import Any, Protocol, runtime_checkable
 
 import polars as pl
@@ -12,9 +11,18 @@ from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.join_planner_helpers import (
     count_qualified_columns,
     infer_pipeline_from_table,
-    infer_silver_table,
     resolve_field_aliases_from_registry,
-    table_path_to_name,
+)
+from bioetl.application.composite.merger_input_runtime import (
+    BoundLegacySilverReader,
+    LoadedMergeInputsResult,
+    MergeInputLoadSpec,
+    PreparedSeedDataframe,
+    build_dependency_load_specs,
+    build_enricher_load_specs,
+    build_prepared_seed_dataframe,
+    coerce_polars_dataframe,
+    to_silver_table_name,
 )
 from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
 from bioetl.domain.composite.result import DependencyResult, EnrichmentResult
@@ -57,45 +65,7 @@ class _LegacySilverReadable(Protocol):
         """Read one Silver table by logical table name."""
 
 
-@dataclass(frozen=True, slots=True)
-class _MergeInputLoadSpec:
-    """Describes one optional merge input that should be loaded."""
-
-    pipeline: str
-    table: str
-    role: str
-
-
-@dataclass(frozen=True, slots=True)
-class _LoadedMergeInputsResult:
-    """Loaded optional merge inputs plus the source pipelines that succeeded."""
-
-    dataframes: dict[str, pl.DataFrame]
-    sources: list[str]
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedSeedDataframe:
-    """Prepared seed dataframe plus derived merge context."""
-
-    seed_df: pl.DataFrame
-    records_from_seed: int
-    effective_seed_pipeline: str | None
-
-
-@dataclass(frozen=True, slots=True)
-class _BoundLegacySilverReader:
-    """Adapter for legacy storage objects that only expose ``read_silver``."""
-
-    read_silver_fn: Callable[[str], Awaitable[list[BronzeRecord]]]
-
-    async def read_silver(
-        self,
-        table_name: str,
-        columns: list[str] | None = None,
-    ) -> list[BronzeRecord]:
-        """Delegate legacy Silver reads through the captured callable."""
-        return await self.read_silver_fn(table_name)
+_PreparedSeedDataframe = PreparedSeedDataframe
 
 
 class _MergeInputLoaderMixin:
@@ -153,12 +123,10 @@ class _MergeInputLoaderMixin:
         """Read and optionally qualify seed DataFrame."""
         self._logger.info("Reading seed table", table=seed_table)
         seed_df = await self._read_silver_table(seed_table)
-        records_from_seed = len(seed_df)
         effective_seed_pipeline = seed_pipeline or infer_pipeline_from_table(seed_table)
         if not effective_seed_pipeline:
-            return _PreparedSeedDataframe(
+            return build_prepared_seed_dataframe(
                 seed_df=seed_df,
-                records_from_seed=records_from_seed,
                 effective_seed_pipeline=None,
             )
         self._logger.debug(
@@ -176,9 +144,8 @@ class _MergeInputLoaderMixin:
             pipeline=effective_seed_pipeline,
             qualified_count=count_qualified_columns(seed_df.columns),
         )
-        return _PreparedSeedDataframe(
+        return build_prepared_seed_dataframe(
             seed_df=seed_df,
-            records_from_seed=records_from_seed,
             effective_seed_pipeline=effective_seed_pipeline,
         )
 
@@ -188,21 +155,10 @@ class _MergeInputLoaderMixin:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> tuple[dict[str, pl.DataFrame], list[str]]:
         """Load only successful enricher silver tables."""
-        load_specs: list[_MergeInputLoadSpec] = []
-        for enricher in enrichers:
-            result = enrichment_results.get(enricher.pipeline)
-            if result is None or not result.is_success:
-                continue
-            enricher_table = enricher.silver_table or infer_silver_table(
-                enricher.pipeline
-            )
-            load_specs.append(
-                _MergeInputLoadSpec(
-                    pipeline=enricher.pipeline,
-                    table=enricher_table,
-                    role="enricher",
-                )
-            )
+        load_specs = build_enricher_load_specs(
+            enrichers=enrichers,
+            enrichment_results=enrichment_results,
+        )
         loaded_inputs = await self._load_successful_merge_inputs(load_specs)
         return loaded_inputs.dataframes, loaded_inputs.sources
 
@@ -215,25 +171,17 @@ class _MergeInputLoaderMixin:
         if not dependencies or not dependency_results:
             return {}, []
 
-        load_specs: list[_MergeInputLoadSpec] = []
-        for dep in dependencies:
-            dep_result = dependency_results.get(dep.pipeline)
-            if dep_result is None or not dep_result.is_success or not dep.silver_table:
-                continue
-            load_specs.append(
-                _MergeInputLoadSpec(
-                    pipeline=dep.pipeline,
-                    table=dep.silver_table,
-                    role="dependency",
-                )
-            )
+        load_specs = build_dependency_load_specs(
+            dependencies=dependencies,
+            dependency_results=dependency_results,
+        )
         loaded_inputs = await self._load_successful_merge_inputs(load_specs)
         return loaded_inputs.dataframes, loaded_inputs.sources
 
     async def _load_successful_merge_inputs(
         self,
-        load_specs: Sequence[_MergeInputLoadSpec],
-    ) -> _LoadedMergeInputsResult:
+        load_specs: Sequence[MergeInputLoadSpec],
+    ) -> LoadedMergeInputsResult:
         """Load optional merge inputs that already passed success filtering."""
         loaded_dfs: dict[str, pl.DataFrame] = {}
         sources: list[str] = []
@@ -247,7 +195,7 @@ class _MergeInputLoaderMixin:
                 continue
             loaded_dfs[load_spec.pipeline] = loaded_df
             sources.append(load_spec.pipeline)
-        return _LoadedMergeInputsResult(dataframes=loaded_dfs, sources=sources)
+        return LoadedMergeInputsResult(dataframes=loaded_dfs, sources=sources)
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
         """Read a Silver table using DeltaReaderPort or explicit SilverStoragePort."""
@@ -266,21 +214,12 @@ class _MergeInputLoaderMixin:
     ) -> pl.DataFrame:
         """Read Silver data through the injected DeltaReaderPort."""
         arrow_table = await delta_reader.read_table(path)
-        return self._coerce_polars_dataframe(pl.from_arrow(arrow_table))
-
-    def _coerce_polars_dataframe(
-        self,
-        result: pl.DataFrame | pl.Series,
-    ) -> pl.DataFrame:
-        """Normalize Polars read results to a DataFrame."""
-        if isinstance(result, pl.Series):
-            return result.to_frame()
-        return result
+        return coerce_polars_dataframe(pl.from_arrow(arrow_table))
 
     async def _read_legacy_silver_records(self, path: str) -> list[BronzeRecord]:
         """Read Silver records through the explicit or compatibility reader path."""
         silver_reader = self._resolve_legacy_silver_reader()
-        table_name = table_path_to_name(path)
+        table_name = to_silver_table_name(path)
         return await silver_reader.read_silver(table_name)
 
     def _resolve_legacy_silver_reader(self) -> _LegacySilverReadable:
@@ -313,7 +252,7 @@ class _MergeInputLoaderMixin:
         storage_read_silver = getattr(self._storage, "read_silver", None)
         if not callable(storage_read_silver):
             return None
-        return _BoundLegacySilverReader(storage_read_silver)
+        return BoundLegacySilverReader(storage_read_silver)
 
 
 __all__ = ["_MergeInputLoaderMixin", "_PreparedSeedDataframe"]

@@ -5,11 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-import structlog
-
 from bioetl.domain.types import JsonDict
-
-logger = structlog.get_logger(__name__)
 
 
 class EnforcementStage(Enum):
@@ -150,13 +146,6 @@ class StagedEnforcementEngine:
     def register_result(self, result: CheckResult) -> None:
         """Register a check result."""
         self.results.append(result)
-        logger.info(
-            "Registered check result",
-            check_name=result.check_name,
-            passed=result.passed,
-            message=result.message,
-            details=result.details,
-        )
 
     def get_enforcement_verdict(
         self, check_name: str, failure_count: int, total_count: int

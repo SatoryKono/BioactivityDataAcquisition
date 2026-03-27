@@ -5,6 +5,15 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.coalesce_policy_helpers import (
+    build_field_groups,
+    can_coalesce,
+    coalesce_and_drop,
+    compatible_columns,
+    extract_field_from_qualified,
+    seed_prefix,
+    sort_columns,
+)
 from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
 )
@@ -40,10 +49,7 @@ class CoalescePolicyService:
         Returns:
             Unqualified field name string.
         """
-        parts = column.split(".")
-        if len(parts) == 3:
-            return parts[2]
-        return column
+        return extract_field_from_qualified(column)
 
     @staticmethod
     def can_coalesce(df: pl.DataFrame, col1: str, col2: str) -> bool:
@@ -57,18 +63,7 @@ class CoalescePolicyService:
         Returns:
             True if the columns are type-compatible for coalescing, False otherwise.
         """
-        import polars as pl
-
-        type1 = df[col1].dtype
-        type2 = df[col2].dtype
-
-        if type1 == type2:
-            return True
-
-        if type1 == pl.Null or type2 == pl.Null:
-            return True
-
-        return isinstance(type1, pl.List) == isinstance(type2, pl.List)
+        return can_coalesce(df, col1, col2)
 
     def coalesce_prefer_seed(
         self,
@@ -88,14 +83,18 @@ class CoalescePolicyService:
         """
 
         result = df
-        seed_prefix = self._seed_prefix(seed_pipeline)
+        seed_prefix_value = self._seed_prefix(seed_pipeline)
         field_groups = self._build_field_groups(result)
 
         for columns in field_groups.values():
             if len(columns) <= 4:
                 continue
 
-            sorted_cols = self._sort_columns(columns, seed_prefix, prefer_seed=True)
+            sorted_cols = self._sort_columns(
+                columns,
+                seed_prefix_value,
+                prefer_seed=True,
+            )
             compatible_cols = self._compatible_columns(result, sorted_cols)
             result = self._coalesce_and_drop(result, compatible_cols)
 
@@ -118,14 +117,18 @@ class CoalescePolicyService:
             DataFrame with duplicate field columns coalesced, enricher values preferred.
         """
         result = df
-        seed_prefix = self._seed_prefix(seed_pipeline)
+        seed_prefix_value = self._seed_prefix(seed_pipeline)
         field_groups = self._build_field_groups(result)
 
         for columns in field_groups.values():
             if len(columns) <= 1:
                 continue
 
-            sorted_cols = self._sort_columns(columns, seed_prefix, prefer_seed=False)
+            sorted_cols = self._sort_columns(
+                columns,
+                seed_prefix_value,
+                prefer_seed=False,
+            )
             compatible_cols = self._compatible_columns(result, sorted_cols)
             result = self._coalesce_and_drop(result, compatible_cols)
 
@@ -214,13 +217,7 @@ class CoalescePolicyService:
     @staticmethod
     def _build_field_groups(df: pl.DataFrame) -> dict[str, list[str]]:
         """Group non-system columns by field name."""
-        field_groups: dict[str, list[str]] = {}
-        for col in df.columns:
-            if col.startswith("_"):
-                continue
-            field = CoalescePolicyService.extract_field_from_qualified(col)
-            field_groups.setdefault(field, []).append(col)
-        return field_groups
+        return build_field_groups(df)
 
     @staticmethod
     def _sort_columns(
@@ -229,58 +226,23 @@ class CoalescePolicyService:
         prefer_seed: bool,
     ) -> list[str]:
         """Sort columns with either seed-first or enricher-first strategy."""
-
-        def sort_key(col: str) -> int:
-            """Return 0 for preferred-origin columns and 1 for others."""
-            is_seed = bool(seed_prefix and col.startswith(seed_prefix))
-            if prefer_seed:
-                return 0 if is_seed else 1
-            return 1 if is_seed else 0
-
-        return sorted(columns, key=sort_key)
+        return sort_columns(columns, seed_prefix, prefer_seed=prefer_seed)
 
     @classmethod
     def _compatible_columns(
         cls, df: pl.DataFrame, ordered_cols: list[str]
     ) -> list[str]:
         """Keep the leading column and all columns type-compatible with it."""
-        if not ordered_cols:
-            return []
-
-        base_col = ordered_cols[0]
-        compatible_cols = [base_col]
-        for col in ordered_cols[1:]:
-            if cls.can_coalesce(df, base_col, col):
-                compatible_cols.append(col)
-        return compatible_cols
+        return compatible_columns(df, ordered_cols)
 
     @staticmethod
     def _coalesce_and_drop(
         df: pl.DataFrame, compatible_cols: list[str]
     ) -> pl.DataFrame:
         """Coalesce compatible columns into first and drop the rest."""
-        import polars as pl
-
-        if len(compatible_cols) <= 1:
-            return df
-
-        target_col = compatible_cols[0]
-        result = df.with_columns(
-            pl.coalesce(*[pl.col(col) for col in compatible_cols]).alias(target_col)
-        )
-        cols_to_drop = [col for col in compatible_cols[1:] if col in result.columns]
-        if cols_to_drop:
-            return result.drop(cols_to_drop)
-        return result
+        return coalesce_and_drop(df, compatible_cols)
 
     @staticmethod
     def _seed_prefix(seed_pipeline: str | None) -> str | None:
         """Build seed provider.entity prefix used for source ordering."""
-        if not seed_pipeline:
-            return None
-
-        try:
-            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(seed_pipeline)
-            return f"{provider}.{entity}."
-        except ValueError:
-            return None
+        return seed_prefix(seed_pipeline)

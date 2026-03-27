@@ -15,6 +15,15 @@ python -m scripts.dev setup-mcp  # optional MCP tooling
 
 `dev_setup.sh` is still wired into `python -m scripts.dev setup`, but it is currently a legacy placeholder rather than the supported bootstrap path.
 
+If you need MkDocs commands such as `make docs-build` or `make docs-serve`,
+install the separate docs toolchain extra:
+
+```bash
+uv sync --extra dev --extra tracing --extra docs
+# or, without uv:
+pip install -e ".[dev,tracing,docs]"
+```
+
 ## Unified Entry Point
 
 ```bash

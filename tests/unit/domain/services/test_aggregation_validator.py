@@ -9,7 +9,6 @@ from bioetl.domain.services.aggregation_validator import (
     AggregationProvenance,
     AggregationValidator,
 )
-from bioetl.domain.types.validation_result import ValidationResult
 from bioetl.domain.types.validation_severity import (
     IssueCode,
     ValidationLayer,
@@ -418,16 +417,3 @@ class TestAggregationValidator:
             )
             result = validator.validate_aggregation_config(config, source_schema)
             assert result.is_valid(), f"Function {function} should be supported"
-
-    def test_factory_function(self) -> None:
-        """Test the factory function."""
-        validator = create_aggregation_validator()
-        assert isinstance(validator, AggregationValidator)
-
-
-# Helper function for easier testing
-
-
-def create_aggregation_validator() -> AggregationValidator:
-    """Factory function for AggregationValidator."""
-    return AggregationValidator()

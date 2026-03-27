@@ -198,6 +198,7 @@ class ConfigDQService:
     _effective_config_service: EffectiveConfigService
 
     def get_dq_config(self, pipeline_name: str) -> JsonDict:
+        """Load and normalize the pipeline-level DQ configuration."""
         self.logger.debug("Getting DQ config", pipeline=pipeline_name)
         dq_config = self._dq_config_loader(pipeline_name)
         config_dict = _dq_config_to_dict(dq_config)
@@ -205,6 +206,7 @@ class ConfigDQService:
         return config_dict
 
     def validate_dq_config(self, pipeline_name: str, dq_config: JsonDict) -> bool:
+        """Validate a candidate DQ config payload for one pipeline."""
         self.logger.debug("Validating DQ config", pipeline=pipeline_name)
         try:
             validated_config = DQConfig(
@@ -237,6 +239,7 @@ class ConfigDQService:
         pipeline_name: str,
         runtime_overrides: JsonDict | None = None,
     ) -> JsonDict:
+        """Build the effective-config control-plane artifact for one pipeline."""
         self.logger.debug("Getting effective config artifact", pipeline=pipeline_name)
         pipeline_config = self._pipeline_yaml_getter(pipeline_name)
         provider = str(pipeline_config.get("provider", "unknown"))
@@ -280,6 +283,7 @@ class ConfigDQService:
     def check_config_compatibility(
         self, artifact1: JsonDict, artifact2: JsonDict
     ) -> bool:
+        """Compare two effective-config artifacts for compatibility."""
         self.logger.debug("Checking config compatibility")
         try:
             artifact1_obj = _dict_to_artifact(artifact1)

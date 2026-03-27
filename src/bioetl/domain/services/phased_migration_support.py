@@ -69,6 +69,7 @@ class PhasedMigrationSupportService:
         ]
 
     def get_current_migration_status(self) -> MigrationStatus:
+        """Return the active migration phase and any compatibility warnings."""
         current_phase = self._determine_current_phase()
         warnings: list[str] = []
         if self._has_migration_issues():
@@ -120,6 +121,7 @@ class PhasedMigrationSupportService:
         config: JsonDict,
         target_phase: str | None = None,
     ) -> dict[str, str]:
+        """Report backward-compatibility issues for the target migration phase."""
         phase_name = target_phase or self._determine_current_phase()
         phase_config = self._find_phase(phase_name)
         if phase_config is None:
@@ -135,6 +137,7 @@ class PhasedMigrationSupportService:
         from_phase: str,
         to_phase: str,
     ) -> dict[str, list[str]]:
+        """Build transition guidance between two named migration phases."""
         guide = _empty_migration_guide()
         from_phase_config = self._find_phase(from_phase)
         to_phase_config = self._find_phase(to_phase)
@@ -160,6 +163,7 @@ class PhasedMigrationSupportService:
         target_phase: str,
         fallback_behavior: Literal["warn", "error", "silent"] = "warn",
     ) -> tuple[JsonDict, list[str]]:
+        """Apply compatibility defaults needed for an older target phase."""
         warnings: list[str] = []
         modified_config = config.copy()
         phase_config = self._find_phase(target_phase)
@@ -172,6 +176,7 @@ class PhasedMigrationSupportService:
         return modified_config, warnings
 
     def get_supported_phases(self) -> list[dict[str, str]]:
+        """List supported migration phases in a CLI/report-friendly shape."""
         return [
             {
                 "phase_name": phase.phase_name,
