@@ -1,813 +1,687 @@
 {
-  "schema_version": "1.0",
-  "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
-  "entries": {
-    "scripts/archive/build_diagram_docs.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/build_diagram_docs.py"
-    },
-    "scripts/archive/ci/apply-ci-optimizations.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/ci/apply-ci-optimizations.ps1",
-      "archived_from": "scripts/apply-ci-optimizations.ps1"
-    },
-    "scripts/archive/cleanup_cache.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scripts/cleanup_cache.py"
-    },
-    "scripts/archive/data/check_delta_integrity.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/data/check_delta_integrity.py",
-      "archived_from": "scripts/check_delta_integrity.py"
-    },
-    "scripts/archive/data/extract_null_fields.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/data/extract_null_fields.py",
-      "archived_from": "scripts/extract_null_fields.py"
-    },
-    "scripts/archive/data/generate_content_hash_comparison_report.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/data/generate_content_hash_comparison_report.py",
-      "archived_from": "scripts/generate_content_hash_comparison_report.py"
-    },
-    "scripts/archive/debug/_tmp_inspect_vcr.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "Delete after one sprint if no recovery/debug need is identified.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/diagnostics/_tmp_inspect_vcr.py",
-      "archived_from": "scripts/_tmp_inspect_vcr.py"
-    },
-    "scripts/archive/debug/debug_pandera.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/diagnostics/debug_pandera.py",
-      "archived_from": "scripts/debug_pandera.py"
-    },
-    "scripts/archive/debug/debug_storage_health.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-04-30",
-      "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case.",
-      "sunset_date": "2026-04-30",
-      "replacement": "scripts/diagnostics/debug_storage_health.py",
-      "archived_from": "scripts/debug_storage_health.py"
-    },
-    "scripts/archive/dev/install_deps.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/dev/install_deps.py",
-      "archived_from": "scripts/install_deps.py"
-    },
-    "scripts/archive/dev/run-tests.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scripts/run-tests.sh"
-    },
-    "scripts/archive/diagrams/fix_diagram_links.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/fix_diagram_links.py"
-    },
-    "scripts/archive/diagrams/fix_sequence_nbsp.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/fix_sequence_nbsp.py"
-    },
-    "scripts/archive/diagrams/mermaid_prune_orphans.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/mermaid_prune_orphans.py"
-    },
-    "scripts/archive/diagrams/normalize_node_sizes.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/diagrams/normalize_node_sizes.py"
-    },
-    "scripts/archive/docs/fix_doc_links_explicit.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/docs/fix_doc_links_explicit.py",
-      "archived_from": "scripts/fix_doc_links_explicit.py"
-    },
-    "scripts/archive/docs/fix_link_warnings.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/docs/fix_link_warnings.py",
-      "archived_from": "scripts/fix_link_warnings.py"
-    },
-    "scripts/archive/docs/sentence_doc_audit.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/docs/sentence_doc_audit.py",
-      "archived_from": "scripts/sentence_doc_audit.py"
-    },
-    "scripts/archive/log_explorer.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Confirm no consumers, then archive/remove.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/log_explorer.py"
-    },
-    "scripts/archive/migrations/migrate_exemption_keys_to_paths.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Move to migration archive after confirming one-time migration completion.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/migrate_exemption_keys_to_paths.py"
-    },
-    "scripts/archive/migrations/migrate_openalex_citation_count.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scripts/migrate_openalex_citation_count.py"
-    },
-    "scripts/archive/migrations/migrate_pmid_to_string.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scripts/migrations/migrate_pmid_to_string.py"
-    },
-    "scripts/archive/migrations/migrate_vcr_extensionless.py": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Move to migration archive after confirming no extensionless cassettes remain.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "scripts/migrate_vcr_extensionless.py"
-    },
-    "scripts/archive/migrations/rename_structure_fields.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scripts/migrations/rename_structure_fields.py"
-    },
-    "scripts/archive/scaffold_pipeline.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint.",
-      "sunset_date": "2026-06-30",
-      "replacement": "no_direct_replacement",
-      "archived_from": "src/tools/scaffold_pipeline.py"
-    },
-    "scripts/diagnostics/ast_inventory.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/qa/calibrate_hotspot_budgets.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/ops/codex-exec.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/ops/codex-exec.bat. Keep while Windows launchers remain supported."
-    },
-    "scripts/ops/codex.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/ops/codex.bat. Keep while Windows launchers remain supported."
-    },
-    "scripts/ci/apply-ci-optimizations-fixed.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Archive inventory entry accepted; confirm keep/deprecate/remove decision during next governance review."
-    },
-    "scripts/ci/_compatibility_registry.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as the shared compatibility-registry loader contract for telemetry, tests, and snapshot generation while YAML SSOT remains the governed source of truth."
-    },
-    "scripts/diagnostics/cleanup_consolidate.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/diagrams/generate_architecture_bundle.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Diagram bundle generator is currently orphaned in inventory; keep as manual maintenance tool until bundle regeneration workflow is either restored or the script is archived."
-    },
-    "scripts/diagrams/generate_description_indexes.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as the canonical description-index generator for diagram publication artifacts while description indexes remain generated docs."
-    },
-    "scripts/diagrams/generate_views_bundle.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Views bundle generator is currently orphaned in inventory; keep as manual maintenance tool until bundle regeneration workflow is either restored or the script is archived."
-    },
-    "scripts/diagnostics/cleanup_project.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/schema/config_gap_analysis.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "evaluate",
-      "review_by": "2026-06-30",
-      "next_step": "Evaluate utility and integrate into CI or archive."
-    },
-    "scripts/ops/deploy-bioetl.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/dev/.setup_wsl_codex.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as manual WSL/Codex setup helper and add explicit usage documentation in dev onboarding docs."
-    },
-    "scripts/dev/.wsl-vpn-fix.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as manual WSL VPN recovery helper and document runbook trigger conditions for developers."
-    },
-    "scripts/dev/metrics_mock_server.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/dev/run_mypy.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как локальный PowerShell launcher для mypy до отдельной консолидации dev wrappers."
-    },
-    "scripts/dev/run_mypy.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как локальный shell launcher для mypy до отдельной консолидации dev wrappers."
-    },
-    "scripts/diagrams/check_class_method_render_integrity.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Diagram render integrity checker. Keep as manual QA tool."
-    },
-    "scripts/diagrams/inject_svg_styles.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/diagrams/svg2png.mjs": {
-      "owner": "@bioetl-architecture",
-      "decision": "evaluate",
-      "review_by": "2026-06-30",
-      "next_step": "Confirm whether the Node/Puppeteer SVG-to-PNG fallback is still needed in any documented render flow; archive if superseded."
-    },
-    "scripts/data/dq_baseline_update.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/docs/fix_doc_links_auto.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/ops/fix_grafana_dashboards.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "scripts/dev/run_pytest.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-05-31",
-      "next_step": "Сохранить как manual helper до следующего governance review; при отсутствии подтвержденных call-site либо перевести в archive, либо удалить."
-    },
-    "scripts/ops/salt_rotate.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/ops/start-wsl-proxy.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/ops/start-wsl-proxy.bat. Keep while Windows setup helpers remain supported."
-    },
-    "scripts/data/vacuum_delta.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/ops/wsl_proxy.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/ops/wsl_proxy.py. Keep while WSL2 VPN proxy setup is documented."
-    },
-    "scripts/data/validate_data_dir.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/data/verify_checksums.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for the scripts namespace. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/ci/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical CI scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/data/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical data scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/diagrams/__init__.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical diagram scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/diagrams/fix_pagebreaks_in_bundles.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Recently added diagram bundle helper is currently orphaned in inventory; keep as manual maintenance tool until it gains an explicit workflow/docs call-site or is archived."
-    },
-    "scripts/docs/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical docs scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/qa/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical QA scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/repo/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical repo-governance scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/repo/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.repo package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/schema/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical schema scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "src/tools/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as package marker until tool packaging strategy is finalized."
-    },
-    "src/tools/apply_elk_layout.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "src/tools/create_pipeline.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "src/tools/differentiate_linkstyle.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "src/tools/init_db.sql": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Removed. PostgreSQL is not required for Local-Only workflows (ADR-010)."
-    },
-    "src/tools/scripts/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as package marker until module packaging is finalized."
-    },
-    "src/tools/scripts/config_matrix_generator.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
-    "src/tools/scripts/migrations/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as package marker while migration modules stay importable."
-    },
-    "src/tools/scripts/test_changed.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "removed",
-      "review_by": "2026-06-30",
-      "next_step": "Removed. Superseded by pytest --lf standard functionality."
-    },
-    "src/tools/scripts/validate_unified_configs.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
-    },
-    "scripts/diagnostics/audit_structure.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep implementation behind the active root wrapper; add a confirmed operational playbook and periodic smoke check."
-    },
-    "scripts/ops/close_duplicate_prs_wave2.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
-    },
-    "scripts/ops/close_duplicate_prs_wave3.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
-    },
-    "scripts/ops/close_superseded_prs.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
-    },
-    "scripts/ops/delete-stale-branches.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
-    },
-    "scripts/qa/naming_audit.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep implementation behind the active root wrapper; add a confirmed operational playbook and periodic smoke check."
-    },
-    "scripts/docs/report_docs_kpi.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep the docs KPI reporter as a manual governance utility and document the operator workflow plus a periodic smoke check."
-    },
-    "scripts/ops/check_ai_skills_layout.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations guard; document when skill-layout validation must be run and how failures are triaged."
-    },
-    "scripts/ops/check_skills_mirror.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations guard; document the mirror-validation workflow and add a periodic smoke check."
-    },
-    "scripts/qa/check_c901_baseline.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual quality guard for complexity budgets and document the expected review cadence."
-    },
-    "scripts/qa/check_naming_package_consistency.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual quality guard for naming/package consistency and document the invocation path."
-    },
-    "scripts/qa/check_quality_exemptions.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual quality-governance guard and link it from the exemption review workflow."
-    },
-    "scripts/qa/generate_hotspot_degradation_report.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual hotspot-analysis report generator and document when it is used during refactor reviews."
-    },
-    "scripts/repo/check_version_consistency.py": {
-      "owner": "@bioetl-platform",
-      "decision": "integrated_ci",
-      "review_by": "2026-06-30",
-      "next_step": "Integrated into release.yml."
-    },
-    "scripts/schema/check_config_invariants.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "integrated_ci",
-      "review_by": "2026-06-30",
-      "next_step": "Integrated into pre-commit and tests/architecture/."
-    },
-    "scripts/schema/generate_pipeline_schema.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as manual helper for codegen; check artifacts for drift in CI."
-    },
-    "scripts/schema/generate_publication_type_classification_artifacts.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as manual tool. Artifacts are tracked by hash manifests."
-    },
-    "scripts/schema/validate_pipeline_configs.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "integrated_ci",
-      "review_by": "2026-06-30",
-      "next_step": "Delegated to pre-commit and strict YAML test suites."
-    },
-    "scripts/schema/lint_config_paths.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "integrated_ci",
-      "review_by": "2026-06-30",
-      "next_step": "Integrated into pre-commit custom hook."
-    },
-    "scripts/ci/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.ci package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/ci/_compatibility_telemetry.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual CI compatibility-reporting helper and document the operator workflow plus a periodic smoke check."
-    },
-    "scripts/ci/apply-ci-optimizations.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual PowerShell CI optimization helper until its supported operator workflow is documented or the script is archived."
-    },
-    "scripts/data/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.data package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/data/check_vcr_secrets.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual VCR secret-safety check and document the expected operator workflow plus periodic smoke validation."
-    },
-    "scripts/dev/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical development scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/dev/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.dev package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/dev/run_pytest.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep the canonical PowerShell pytest launcher while Windows developer workflows remain supported and documented."
-    },
-    "scripts/dev/test_changed.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual changed-files test helper until a documented replacement workflow exists or the script is archived."
-    },
-    "scripts/diagnostics/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical diagnostics scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/diagnostics/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.diagnostics package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/diagnostics/_tmp_inspect_vcr.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual debug helper until it is either folded into a documented diagnostics workflow or archived."
-    },
-    "scripts/diagnostics/debug_pandera.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual Pandera debugging helper until it is either folded into a documented diagnostics workflow or archived."
-    },
-    "scripts/diagnostics/debug_storage_health.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual storage-health debugging helper until it is either folded into a documented diagnostics workflow or archived."
-    },
-    "scripts/diagrams/__main__.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.diagrams package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/diagrams/diagram_paths.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual diagram-path helper behind the package CLI and document when operators should rely on it."
-    },
-    "scripts/diagrams/generate_all_bundles.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual diagram bundle-generation helper until an explicit docs or CI call-site is added or the script is archived."
-    },
-    "scripts/docs/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.docs package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/ops/__init__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Package marker for canonical operations scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
-    },
-    "scripts/ops/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.ops package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/ops/check_mcp.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual operations guard for MCP configuration and document the invocation path plus periodic smoke validation."
-    },
-    "scripts/qa/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.qa package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/run_pytest.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/dev/run_pytest.ps1. Keep while Windows wrapper entrypoints remain supported."
-    },
-    "scripts/run_pytest.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Root compatibility wrapper for scripts/dev/run_pytest.sh. Keep while shell wrapper entrypoints remain supported."
-    },
-    "scripts/schema/__main__.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Canonical CLI entrypoint for scripts.schema package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
-    },
-    "scripts/migrations/active/backfill_vcr_metadata_sidecars.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual backfill entrypoint, пока workflow-level automated rollout для VCR metadata sidecars не включён."
-    },
-    "src/tools/apply_entity_naming_rename_plan.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Keep as a manual architecture refactor helper until the entity-naming rename workflow is closed or the tool is archived."
+    "schema_version": "1.0",
+    "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
+    "entries": {
+        "scripts/archive/build_diagram_docs.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/build_diagram_docs.py"
+        },
+        "scripts/archive/ci/apply-ci-optimizations.ps1": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-04-30",
+            "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need.",
+            "sunset_date": "2026-04-30",
+            "replacement": "scripts/ci/apply-ci-optimizations.ps1",
+            "archived_from": "scripts/apply-ci-optimizations.ps1"
+        },
+        "scripts/archive/cleanup_cache.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/scripts/cleanup_cache.py"
+        },
+        "scripts/archive/data/check_delta_integrity.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "scripts/data/check_delta_integrity.py",
+            "archived_from": "scripts/check_delta_integrity.py"
+        },
+        "scripts/archive/data/extract_null_fields.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "scripts/data/extract_null_fields.py",
+            "archived_from": "scripts/extract_null_fields.py"
+        },
+        "scripts/archive/data/generate_content_hash_comparison_report.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "scripts/data/generate_content_hash_comparison_report.py",
+            "archived_from": "scripts/generate_content_hash_comparison_report.py"
+        },
+        "scripts/archive/debug/_tmp_inspect_vcr.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-04-30",
+            "next_step": "Delete after one sprint if no recovery/debug need is identified.",
+            "sunset_date": "2026-04-30",
+            "replacement": "scripts/diagnostics/_tmp_inspect_vcr.py",
+            "archived_from": "scripts/_tmp_inspect_vcr.py"
+        },
+        "scripts/archive/debug/debug_pandera.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-04-30",
+            "next_step": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 \u043e\u0434\u043d\u043e\u0433\u043e \u0441\u043f\u0440\u0438\u043d\u0442\u0430 \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e debug-use-case.",
+            "sunset_date": "2026-04-30",
+            "replacement": "scripts/diagnostics/debug_pandera.py",
+            "archived_from": "scripts/debug_pandera.py"
+        },
+        "scripts/archive/debug/debug_storage_health.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-04-30",
+            "next_step": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 \u043e\u0434\u043d\u043e\u0433\u043e \u0441\u043f\u0440\u0438\u043d\u0442\u0430 \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e debug-use-case.",
+            "sunset_date": "2026-04-30",
+            "replacement": "scripts/diagnostics/debug_storage_health.py",
+            "archived_from": "scripts/debug_storage_health.py"
+        },
+        "scripts/archive/dev/install_deps.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "scripts/dev/install_deps.py",
+            "archived_from": "scripts/install_deps.py"
+        },
+        "scripts/archive/dev/run-tests.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/scripts/run-tests.sh"
+        },
+        "scripts/archive/diagrams/fix_diagram_links.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "no_direct_replacement",
+            "archived_from": "scripts/diagrams/fix_diagram_links.py"
+        },
+        "scripts/archive/diagrams/fix_sequence_nbsp.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "no_direct_replacement",
+            "archived_from": "scripts/diagrams/fix_sequence_nbsp.py"
+        },
+        "scripts/archive/diagrams/mermaid_prune_orphans.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "no_direct_replacement",
+            "archived_from": "scripts/diagrams/mermaid_prune_orphans.py"
+        },
+        "scripts/archive/diagrams/normalize_node_sizes.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "no_direct_replacement",
+            "archived_from": "scripts/diagrams/normalize_node_sizes.py"
+        },
+        "scripts/archive/docs/fix_doc_links_explicit.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "scripts/docs/fix_doc_links_explicit.py",
+            "archived_from": "scripts/fix_doc_links_explicit.py"
+        },
+        "scripts/archive/docs/fix_link_warnings.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "scripts/docs/fix_link_warnings.py",
+            "archived_from": "scripts/fix_link_warnings.py"
+        },
+        "scripts/archive/docs/sentence_doc_audit.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-05-31",
+            "next_step": "\u041f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 \u0430\u0440\u0445\u0438\u0432/\u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 freeze-window \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u043e\u0433\u043e \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e call-site.",
+            "sunset_date": "2026-05-31",
+            "replacement": "scripts/docs/sentence_doc_audit.py",
+            "archived_from": "scripts/sentence_doc_audit.py"
+        },
+        "scripts/archive/log_explorer.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "Confirm no consumers, then archive/remove.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/log_explorer.py"
+        },
+        "scripts/archive/migrations/migrate_exemption_keys_to_paths.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "Move to migration archive after confirming one-time migration completion.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "scripts/migrate_exemption_keys_to_paths.py"
+        },
+        "scripts/archive/migrations/migrate_openalex_citation_count.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "\u041f\u0435\u0440\u0435\u043d\u0435\u0441\u0442\u0438 \u0432 migration archive \u0438 \u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u044f \u043c\u0438\u0433\u0440\u0430\u0446\u0438\u0438.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/scripts/migrate_openalex_citation_count.py"
+        },
+        "scripts/archive/migrations/migrate_pmid_to_string.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "\u041f\u0435\u0440\u0435\u043d\u0435\u0441\u0442\u0438 \u0432 migration archive \u0438 \u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u044f \u043c\u0438\u0433\u0440\u0430\u0446\u0438\u0438.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/scripts/migrations/migrate_pmid_to_string.py"
+        },
+        "scripts/archive/migrations/migrate_vcr_extensionless.py": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "Move to migration archive after confirming no extensionless cassettes remain.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "scripts/migrate_vcr_extensionless.py"
+        },
+        "scripts/archive/migrations/rename_structure_fields.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "\u041f\u0435\u0440\u0435\u043d\u0435\u0441\u0442\u0438 \u0432 migration archive \u0438 \u0443\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0441\u043b\u0435 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u044f \u043c\u0438\u0433\u0440\u0430\u0446\u0438\u0438.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/scripts/migrations/rename_structure_fields.py"
+        },
+        "scripts/archive/scaffold_pipeline.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint.",
+            "sunset_date": "2026-06-30",
+            "replacement": "no_direct_replacement",
+            "archived_from": "src/tools/scaffold_pipeline.py"
+        },
+        "scripts/diagnostics/ast_inventory.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "scripts/qa/calibrate_hotspot_budgets.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/ci/apply-ci-optimizations-fixed.ps1": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Archive inventory entry accepted; confirm keep/deprecate/remove decision during next governance review."
+        },
+        "scripts/ci/_compatibility_registry.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as the shared compatibility-registry loader contract for telemetry, tests, and snapshot generation while YAML SSOT remains the governed source of truth."
+        },
+        "scripts/diagnostics/cleanup_consolidate.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "scripts/diagrams/generate_description_indexes.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as the canonical description-index generator for diagram publication artifacts while description indexes remain generated docs."
+        },
+        "scripts/diagnostics/cleanup_project.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "scripts/ops/deploy-bioetl.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/dev/.setup_wsl_codex.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as manual WSL/Codex setup helper and add explicit usage documentation in dev onboarding docs."
+        },
+        "scripts/dev/.wsl-vpn-fix.ps1": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as manual WSL VPN recovery helper and document runbook trigger conditions for developers."
+        },
+        "scripts/dev/metrics_mock_server.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "scripts/dev/run_mypy.ps1": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0439 PowerShell launcher \u0434\u043b\u044f mypy \u0434\u043e \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0439 \u043a\u043e\u043d\u0441\u043e\u043b\u0438\u0434\u0430\u0446\u0438\u0438 dev wrappers."
+        },
+        "scripts/dev/run_mypy.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0439 shell launcher \u0434\u043b\u044f mypy \u0434\u043e \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e\u0439 \u043a\u043e\u043d\u0441\u043e\u043b\u0438\u0434\u0430\u0446\u0438\u0438 dev wrappers."
+        },
+        "scripts/diagrams/check_class_method_render_integrity.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Diagram render integrity checker. Keep as manual QA tool."
+        },
+        "scripts/diagrams/inject_svg_styles.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "scripts/diagrams/svg2png.mjs": {
+            "owner": "@bioetl-architecture",
+            "decision": "evaluate",
+            "review_by": "2026-06-30",
+            "next_step": "Confirm whether the Node/Puppeteer SVG-to-PNG fallback is still needed in any documented render flow; archive if superseded."
+        },
+        "scripts/data/dq_baseline_update.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/docs/fix_doc_links_auto.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "scripts/ops/fix_grafana_dashboards.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "scripts/dev/run_pytest.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-05-31",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual helper \u0434\u043e \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u0433\u043e governance review; \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0445 call-site \u043b\u0438\u0431\u043e \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 archive, \u043b\u0438\u0431\u043e \u0443\u0434\u0430\u043b\u0438\u0442\u044c."
+        },
+        "scripts/ops/salt_rotate.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/data/vacuum_delta.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/ops/wsl_proxy.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Root compatibility wrapper for scripts/ops/wsl_proxy.py. Keep while WSL2 VPN proxy setup is documented."
+        },
+        "scripts/data/validate_data_dir.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/data/verify_checksums.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for the scripts namespace. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/ci/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical CI scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/data/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical data scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/diagrams/__init__.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical diagram scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/diagrams/fix_pagebreaks_in_bundles.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Recently added diagram bundle helper is currently orphaned in inventory; keep as manual maintenance tool until it gains an explicit workflow/docs call-site or is archived."
+        },
+        "scripts/docs/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical docs scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/qa/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical QA scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/repo/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical repo-governance scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/repo/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.repo package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/schema/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical schema scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "src/tools/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as package marker until tool packaging strategy is finalized."
+        },
+        "src/tools/apply_elk_layout.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "src/tools/create_pipeline.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "src/tools/differentiate_linkstyle.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "src/tools/init_db.sql": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "Removed. PostgreSQL is not required for Local-Only workflows (ADR-010)."
+        },
+        "src/tools/scripts/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as package marker until module packaging is finalized."
+        },
+        "src/tools/scripts/config_matrix_generator.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u043d\u044b\u0439 operational playbook \u0438 \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u0439 smoke-check."
+        },
+        "src/tools/scripts/migrations/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as package marker while migration modules stay importable."
+        },
+        "src/tools/scripts/test_changed.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "removed",
+            "review_by": "2026-06-30",
+            "next_step": "Removed. Superseded by pytest --lf standard functionality."
+        },
+        "src/tools/scripts/validate_unified_configs.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual tool; \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u044f\u0432\u043d\u044b\u0439 smoke-\u0432\u044b\u0437\u043e\u0432/\u043e\u043f\u0435\u0440\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 playbook \u0438\u043b\u0438 \u043f\u0435\u0440\u0435\u0432\u0435\u0441\u0442\u0438 \u0432 deprecate."
+        },
+        "scripts/diagnostics/audit_structure.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep implementation behind the active root wrapper; add a confirmed operational playbook and periodic smoke check."
+        },
+        "scripts/ops/close_duplicate_prs_wave2.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
+        },
+        "scripts/ops/close_duplicate_prs_wave3.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
+        },
+        "scripts/ops/close_superseded_prs.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
+        },
+        "scripts/ops/delete-stale-branches.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual operations script behind the active root wrapper; document the operator workflow and a periodic smoke check."
+        },
+        "scripts/schema/lint_config_paths.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "integrated_ci",
+            "review_by": "2026-06-30",
+            "next_step": "Integrated into pre-commit custom hook."
+        },
+        "scripts/ci/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.ci package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/ci/_compatibility_telemetry.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual CI compatibility-reporting helper and document the operator workflow plus a periodic smoke check."
+        },
+        "scripts/ci/apply-ci-optimizations.ps1": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual PowerShell CI optimization helper until its supported operator workflow is documented or the script is archived."
+        },
+        "scripts/data/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.data package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/data/check_vcr_secrets.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual VCR secret-safety check and document the expected operator workflow plus periodic smoke validation."
+        },
+        "scripts/dev/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical development scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/dev/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.dev package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/dev/run_pytest.ps1": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep the canonical PowerShell pytest launcher while Windows developer workflows remain supported and documented."
+        },
+        "scripts/diagnostics/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical diagnostics scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/diagnostics/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.diagnostics package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/diagnostics/_tmp_inspect_vcr.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual debug helper until it is either folded into a documented diagnostics workflow or archived."
+        },
+        "scripts/diagnostics/debug_pandera.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual Pandera debugging helper until it is either folded into a documented diagnostics workflow or archived."
+        },
+        "scripts/diagnostics/debug_storage_health.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual storage-health debugging helper until it is either folded into a documented diagnostics workflow or archived."
+        },
+        "scripts/diagrams/diagram_paths.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual diagram-path helper behind the package CLI and document when operators should rely on it."
+        },
+        "scripts/docs/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.docs package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/ops/__init__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Package marker for canonical operations scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+        },
+        "scripts/ops/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.ops package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/ops/check_mcp.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual operations guard for MCP configuration and document the invocation path plus periodic smoke validation."
+        },
+        "scripts/qa/__main__.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.qa package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/run_pytest.ps1": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Root compatibility wrapper for scripts/dev/run_pytest.ps1. Keep while Windows wrapper entrypoints remain supported."
+        },
+        "scripts/run_pytest.sh": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Root compatibility wrapper for scripts/dev/run_pytest.sh. Keep while shell wrapper entrypoints remain supported."
+        },
+        "scripts/schema/__main__.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Canonical CLI entrypoint for scripts.schema package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+        },
+        "scripts/migrations/active/backfill_vcr_metadata_sidecars.py": {
+            "owner": "@bioetl-platform",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043a\u0430\u043a manual backfill entrypoint, \u043f\u043e\u043a\u0430 workflow-level automated rollout \u0434\u043b\u044f VCR metadata sidecars \u043d\u0435 \u0432\u043a\u043b\u044e\u0447\u0451\u043d."
+        },
+        "src/tools/apply_entity_naming_rename_plan.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "keep_manual",
+            "review_by": "2026-06-30",
+            "next_step": "Keep as a manual architecture refactor helper until the entity-naming rename workflow is closed or the tool is archived."
+        },
+        "scripts/diagrams/generate_package_family_class_diagrams.py": {
+            "owner": "@bioetl-architecture",
+            "decision": "active",
+            "review_by": "2026-12-31",
+            "next_step": "Needs review."
+        }
     }
-  }
 }
