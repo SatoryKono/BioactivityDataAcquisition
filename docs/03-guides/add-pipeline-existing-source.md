@@ -103,7 +103,7 @@ Update `configs/providers/{provider}.yaml`:
 Config validation:
 
 ```bash
-python -m scripts.schema validate-configs --verbose
+uv run python -m scripts.schema validate-configs --verbose
 ```
 
 Config load smoke:
@@ -115,15 +115,15 @@ python -c "from bioetl.infrastructure.config import load_pipeline_config; load_p
 Targeted tests:
 
 ```bash
-python -m pytest tests/unit/application/pipelines/{provider}/ -q
-python -m pytest tests/architecture/test_registry_contracts.py -q
-python -m pytest tests/architecture/test_config_ci_invariants.py -q
+uv run python -m pytest tests/unit/application/pipelines/{provider}/ -q
+uv run python -m pytest tests/architecture/test_registry_contracts.py -q
+uv run python -m pytest tests/architecture/test_config_ci_invariants.py -q
 ```
 
 Optional runtime smoke:
 
 ```bash
-python -m bioetl run --pipeline {provider}_{entity} --limit 10
+uv run python -m bioetl run --pipeline {provider}_{entity} --limit 10
 ```
 
 ---

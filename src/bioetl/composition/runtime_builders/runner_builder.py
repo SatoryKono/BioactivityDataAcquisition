@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import replace
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.composition import PipelineRegistry, create_registry
@@ -58,6 +58,10 @@ if TYPE_CHECKING:
 
 
 __all__ = ["build_pipeline_runner"]
+
+
+class _LoggerBindableObservability(Protocol):
+    logger: object
 
 
 def _resolve_control_plane_flags(settings: object) -> tuple[bool, bool]:
@@ -117,9 +121,9 @@ def _create_runner_from_factory(
 
 
 def _bind_manifest_logger_context(
-    inputs: _RunnerInputs | object,
+    inputs: _RunnerInputs,
     manifest_id: str,
-) -> _RunnerInputs | object:
+) -> _RunnerInputs:
     """Bind ``manifest_id`` into runtime observability when available.
 
     The manifest identifier becomes available only after control-plane
@@ -139,8 +143,6 @@ def _bind_manifest_logger_context(
             inputs,
             observability=cast("ObservabilityBundle", rebound_observability),
         )
-    if hasattr(inputs, "observability"):
-        setattr(inputs, "observability", rebound_observability)
     return inputs
 
 
@@ -159,8 +161,9 @@ def _rebind_observability_logger(
     if not callable(logger_bind):
         return observability
 
+    typed_observability = cast("_LoggerBindableObservability", observability)
     try:
-        setattr(observability, "logger", logger_bind(manifest_id=manifest_id))
+        typed_observability.logger = logger_bind(manifest_id=manifest_id)
     except (AttributeError, TypeError):
         return observability
     return observability

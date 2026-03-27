@@ -32,6 +32,7 @@ if TYPE_CHECKING:
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
+        MetricsPort,
     )
     from bioetl.domain.types import GoldRecord, ScdConfig
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -51,6 +52,7 @@ class GoldWriterMetadataMixin:
     _metadata_coordinator: MetadataCoordinatorPort | None
     _lineage_store: LineageStorePort | None
     _metadata_writer: MetadataWriterPort
+    _metrics: MetricsPort | None
     _flat_structure: bool
     _transform_version: str | None
     _transform_steps: tuple[str, ...]

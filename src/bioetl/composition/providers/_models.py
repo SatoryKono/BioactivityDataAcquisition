@@ -35,10 +35,17 @@ class SecretValueProviderProtocol(Protocol):
 class ProviderSettingsProtocol(Protocol):
     """Minimal settings surface required by provider registration helpers."""
 
-    default_email: str | None
-    strict_error_handling: bool
-    pubmed_api_key: SecretValueProviderProtocol | None
-    semanticscholar_api_key: SecretValueProviderProtocol | None
+    @property
+    def default_email(self) -> str | None: ...
+
+    @property
+    def strict_error_handling(self) -> bool: ...
+
+    @property
+    def pubmed_api_key(self) -> SecretValueProviderProtocol | None: ...
+
+    @property
+    def semanticscholar_api_key(self) -> SecretValueProviderProtocol | None: ...
 
 
 class DataSourceCreatorProtocol(Protocol):

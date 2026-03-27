@@ -6,6 +6,7 @@ import hashlib
 import json
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
@@ -20,14 +21,25 @@ from bioetl.domain.control_plane.effective_config_artifact import (
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+
+
+def _dataclass_to_dict(value: object) -> JsonDict | None:
+    """Convert dataclass instances into JsonDict payloads when possible."""
+    if not is_dataclass(value) or isinstance(value, type):
+        return None
+    return asdict(value)
+
 
 def _to_jsonable(value: object) -> object:
     if isinstance(value, datetime):
         return value.isoformat()
     if isinstance(value, DQDisposition):
         return value.value
-    if is_dataclass(value):
-        return {key: _to_jsonable(raw) for key, raw in asdict(value).items()}
+    dataclass_value = _dataclass_to_dict(value)
+    if dataclass_value is not None:
+        return {key: _to_jsonable(raw) for key, raw in dataclass_value.items()}
     if isinstance(value, dict):
         return {str(key): _to_jsonable(raw) for key, raw in sorted(value.items())}
     if isinstance(value, (list, tuple)):
@@ -218,8 +230,9 @@ class EffectiveConfigSerializer:
         return value
 
     def _normalize_section(self, section: object) -> JsonDict:
-        if is_dataclass(section):
-            return self._normalize_config_data(asdict(section))
+        dataclass_value = _dataclass_to_dict(section)
+        if dataclass_value is not None:
+            return self._normalize_config_data(dataclass_value)
         if isinstance(section, dict):
             return self._normalize_config_data(section)
         return {"value": self._normalize_value(section)}

@@ -8,6 +8,7 @@ import json
 import uuid
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
@@ -24,6 +25,15 @@ from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+
+
+def _dataclass_to_dict(value: object) -> JsonDict | None:
+    if not is_dataclass(value) or isinstance(value, type):
+        return None
+    return asdict(value)
+
 
 def _stable_hash(payload: object) -> str:
     serialized = json.dumps(
@@ -39,8 +49,9 @@ def _to_jsonable(value: object) -> object:
         return value.isoformat()
     if isinstance(value, DQDisposition):
         return value.value
-    if is_dataclass(value):
-        return {k: _to_jsonable(v) for k, v in asdict(value).items()}
+    dataclass_value = _dataclass_to_dict(value)
+    if dataclass_value is not None:
+        return {k: _to_jsonable(v) for k, v in dataclass_value.items()}
     if isinstance(value, dict):
         return {str(k): _to_jsonable(v) for k, v in sorted(value.items())}
     if isinstance(value, (list, tuple)):
@@ -52,7 +63,9 @@ def _apply_deep_update(target: JsonDict, source: JsonDict) -> None:
     for key, value in source.items():
         target_value = target.get(key)
         if isinstance(target_value, dict) and isinstance(value, dict):
-            _apply_deep_update(target_value, value)  # type: ignore[arg-type]
+            nested_target = cast(JsonDict, target_value)
+            nested_source = cast(JsonDict, value)
+            _apply_deep_update(nested_target, nested_source)
             continue
         target[key] = value
 
@@ -78,7 +91,7 @@ def _build_dq_components(
         contract_ref=policy_ref.contract_ref,
         contract_version=policy_ref.contract_version,
         rule_bundle_version=policy_ref.rule_bundle_version,
-        policy_hash=policy_ref.policy_hash,
+        policy_hash=policy_ref.policy_hash or "",
         default_disposition=dq_config.default_disposition_policy,
         disposition_overrides=dict(dq_config.disposition_overrides),
         strictness_mode=dq_config.strictness_mode or "standard",

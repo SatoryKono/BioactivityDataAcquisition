@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import json
+from typing import TYPE_CHECKING
 
 import click
 import yaml
 
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
+
+if TYPE_CHECKING:
+    from bioetl.application.services.lineage_inspection_service import (
+        LineageInspectionService,
+    )
 
 __all__ = [
     "COMMANDS",
@@ -18,7 +24,7 @@ __all__ = [
 ]
 
 
-def get_lineage_service() -> object:
+def get_lineage_service() -> LineageInspectionService:
     """Load the lineage inspection service through composition on demand."""
     from bioetl.composition.services_api import get_lineage_service as _impl
 
@@ -87,8 +93,9 @@ def _render_fragment_payload(payload: dict[str, object]) -> str:
         "",
         "Nodes",
     ]
-    if isinstance(fragment.get("nodes"), list):
-        lines.extend(_render_node_lines(fragment["nodes"]))
+    nodes = fragment.get("nodes")
+    if isinstance(nodes, list):
+        lines.extend(_render_node_lines(nodes))
     else:
         lines.append("  - none")
     return "\n".join(lines)
@@ -105,13 +112,15 @@ def _render_trace_payload(payload: dict[str, object]) -> str:
         "",
         "Upstream",
     ]
-    if isinstance(payload.get("upstream"), list):
-        lines.extend(_render_relation_lines(payload["upstream"]))
+    upstream = payload.get("upstream")
+    if isinstance(upstream, list):
+        lines.extend(_render_relation_lines(upstream))
     else:
         lines.append("  - none")
     lines.extend(["", "Downstream"])
-    if isinstance(payload.get("downstream"), list):
-        lines.extend(_render_relation_lines(payload["downstream"]))
+    downstream = payload.get("downstream")
+    if isinstance(downstream, list):
+        lines.extend(_render_relation_lines(downstream))
     else:
         lines.append("  - none")
     return "\n".join(lines)
@@ -130,28 +139,33 @@ def _render_explain_payload(payload: dict[str, object]) -> str:
         "",
         "Produced Datasets",
     ]
-    if isinstance(payload.get("produced_datasets"), list):
-        lines.extend(_render_node_lines(payload["produced_datasets"]))
+    produced_datasets = payload.get("produced_datasets")
+    if isinstance(produced_datasets, list):
+        lines.extend(_render_node_lines(produced_datasets))
     else:
         lines.append("  - none")
     lines.extend(["", "Produced Bronze Batches"])
-    if isinstance(payload.get("produced_bronze_batches"), list):
-        lines.extend(_render_node_lines(payload["produced_bronze_batches"]))
+    produced_bronze_batches = payload.get("produced_bronze_batches")
+    if isinstance(produced_bronze_batches, list):
+        lines.extend(_render_node_lines(produced_bronze_batches))
     else:
         lines.append("  - none")
     lines.extend(["", "Transforms"])
-    if isinstance(payload.get("transforms"), list):
-        lines.extend(_render_node_lines(payload["transforms"]))
+    transforms = payload.get("transforms")
+    if isinstance(transforms, list):
+        lines.extend(_render_node_lines(transforms))
     else:
         lines.append("  - none")
     lines.extend(["", "Source Systems"])
-    if isinstance(payload.get("source_systems"), list):
-        lines.extend(_render_node_lines(payload["source_systems"]))
+    source_systems = payload.get("source_systems")
+    if isinstance(source_systems, list):
+        lines.extend(_render_node_lines(source_systems))
     else:
         lines.append("  - none")
     lines.extend(["", "Source Requests"])
-    if isinstance(payload.get("source_requests"), list):
-        lines.extend(_render_node_lines(payload["source_requests"]))
+    source_requests = payload.get("source_requests")
+    if isinstance(source_requests, list):
+        lines.extend(_render_node_lines(source_requests))
     else:
         lines.append("  - none")
     return "\n".join(lines)

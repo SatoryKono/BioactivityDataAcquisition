@@ -3,6 +3,18 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from typing import TypedDict
+
+
+class CompositeCvDQSummary(TypedDict):
+    """Structured summary for composite cross-validation DQ markers."""
+
+    has_signal: bool
+    warning_records: int
+    error_records: int
+    quarantine_records: int
+    validation_passed: bool
+    rule_provenance: list[dict[str, str | None]]
 
 
 def _is_truthy_marker(value: object) -> bool:
@@ -118,7 +130,7 @@ def summarize_composite_cv_dq(
     *,
     contract_version: str | None = None,
     report_artifact_path: str | None = None,
-) -> dict[str, object]:
+) -> CompositeCvDQSummary:
     """Summarize composite cross-validation markers into DQ-oriented semantics."""
     if not records:
         return {

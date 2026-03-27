@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue
 from bioetl.domain.types.validation_severity import (
@@ -31,7 +33,7 @@ def _create_issue(
 
 
 def _validate_pairs(
-    pairs: list[dict], source_names: list[str]
+    pairs: list[dict[str, object]], source_names: list[str]
 ) -> list[ValidationIssue]:
     if not pairs:
         return [
@@ -59,7 +61,8 @@ def _validate_single_pair(
     if shape_issue is not None:
         return [shape_issue]
 
-    source_name, comparison_sources = next(iter(pair.items()))
+    pair_mapping = cast("dict[object, object]", pair)
+    source_name, comparison_sources = next(iter(pair_mapping.items()))
     normalized_sources, type_issue = _normalize_comparison_sources(
         source_name=source_name,
         comparison_sources=comparison_sources,
@@ -68,7 +71,6 @@ def _validate_single_pair(
     if type_issue is not None:
         issues.append(type_issue)
         return issues
-
     if not normalized_sources:
         issues.append(
             _create_issue(
@@ -122,10 +124,8 @@ def _validate_source_name(
                 {"source_name": source_name, "index": index},
             )
         ]
-
     if source_name in valid_sources:
         return []
-
     return [
         _create_issue(
             IssueCode.CMP_PF_CV_005,
@@ -147,7 +147,6 @@ def _normalize_comparison_sources(
 ) -> tuple[list[str], ValidationIssue | None]:
     if isinstance(comparison_sources, str):
         return [comparison_sources], None
-
     if isinstance(comparison_sources, list):
         if all(isinstance(item, str) for item in comparison_sources):
             return comparison_sources, None
@@ -259,7 +258,7 @@ def _is_valid_threshold(value: object | None) -> bool:
 
 
 def _validate_coverage(
-    pairs: list[dict],
+    pairs: list[dict[str, object]],
     source_names: list[str],
 ) -> list[ValidationIssue]:
     if not source_names:
@@ -284,7 +283,7 @@ def _validate_coverage(
     ]
 
 
-def _collect_covered_sources(pairs: list[dict]) -> set[str]:
+def _collect_covered_sources(pairs: list[dict[str, object]]) -> set[str]:
     covered_sources: set[str] = set()
     for pair in pairs:
         if not isinstance(pair, dict):

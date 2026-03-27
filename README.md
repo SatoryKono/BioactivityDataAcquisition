@@ -79,7 +79,7 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                  | Description                                 |
 | --------------------------------------------------------- | ------------------------------------------- |
 | [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 44 ADRs explaining design choices           |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 45 ADRs explaining design choices           |
 | [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
 | [RULES.md](docs/00-project/RULES.md)                      | Canonical active governance and requirements |
 | [Project Map](docs/00-project/00-map.md)                  | Primary navigator for active project docs   |
@@ -139,7 +139,7 @@ Notes:
 - `make install` uses `uv sync --extra dev --extra tracing` when `uv` is available; otherwise it creates `.venv` and installs the editable package with dev extras.
 - Documentation site commands such as `make docs-build` require the separate `docs` extra: `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"`.
 - `make setup-plugins` configures local pytest/pre-commit tooling.
-- If you use Codex or GitHub Copilot MCP, run `python -m scripts.dev setup-mcp` after install.
+- If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.dev setup-mcp` after install. If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp` is also valid.
 - `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
 #### Option B: Manual Setup Without `make`

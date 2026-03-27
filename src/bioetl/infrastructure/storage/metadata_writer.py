@@ -6,10 +6,13 @@ callers while delegating the real implementation to split helper/impl modules.
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from bioetl.infrastructure.storage.metadata.writer_operations import (
     METADATA_FILENAME,
     _MetadataWriteRequest,
     _prepare_metadata_write_operation,
+    _PreparedMetadataWriteOperation,
 )
 
 from . import metadata_writer_helpers as _helpers
@@ -20,13 +23,30 @@ atomic_write_text = _helpers.atomic_write_text
 
 
 async def _execute_prepared_metadata_write_operation(
-    **kwargs: object,
+    *,
+    logger: object,
+    metrics: object | None,
+    retry_policy: object,
+    operation: _PreparedMetadataWriteOperation,
+    metadata: object,
 ) -> str:
     """Delegate through the facade-local patch seam for atomic writes."""
     original_atomic_write_text = _helpers.atomic_write_text
     _helpers.atomic_write_text = atomic_write_text
     try:
-        return await _helpers._execute_prepared_metadata_write_operation(**kwargs)
+        return await _helpers._execute_prepared_metadata_write_operation(
+            logger=cast("Any", logger),  # Any: facade preserves legacy patch seam.
+            metrics=cast("Any", metrics),  # Any: optional metrics backend is dynamic.
+            retry_policy=cast(
+                "Any",  # Any: helper owns the concrete retry-policy implementation.
+                retry_policy,
+            ),  # Any: retry-policy concrete type stays in helper implementation.
+            operation=operation,
+            metadata=cast(
+                "Any",  # Any: facade spans Bronze/Silver/Gold metadata models.
+                metadata,
+            ),  # Any: facade accepts multiple metadata model variants.
+        )
     finally:
         _helpers.atomic_write_text = original_atomic_write_text
 

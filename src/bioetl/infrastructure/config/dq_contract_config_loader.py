@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
@@ -127,6 +127,14 @@ def _create_report_config(
     )
 
 
+def _parse_strictness_mode(
+    value: object,
+) -> Literal["lenient", "moderate", "strict"]:
+    if value in {"lenient", "moderate", "strict"}:
+        return cast("Literal['lenient', 'moderate', 'strict']", value)
+    raise ValueError(f"Invalid DQ strictness mode: {value!r}")
+
+
 def _build_contract_patterns(
     *,
     contracts_dir: Path,
@@ -187,7 +195,9 @@ class DQContractConfigLoader:
             disposition_overrides=_parse_disposition_overrides(
                 contract_config.get("disposition_overrides", {})
             ),
-            strictness_mode=contract_config.get("strictness_mode", "moderate"),
+            strictness_mode=_parse_strictness_mode(
+                contract_config.get("strictness_mode", "moderate")
+            ),
             soft_fail_threshold=_resolve_threshold(contract_config, "soft_fail", 0.05),
             hard_fail_threshold=_resolve_threshold(contract_config, "hard_fail", 0.20),
             strict_validation=contract_config.get("strict_validation", False),

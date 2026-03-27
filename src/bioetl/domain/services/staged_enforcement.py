@@ -59,11 +59,19 @@ class EnforcementPolicy:
     observe_until: str | None = None  # "YYYY-MM-DD"
     soft_fail_until: str | None = None  # "YYYY-MM-DD"
 
+    def get_effective_stage(self, failure_rate: float) -> EnforcementStage:
+        """Resolve the effective enforcement stage for the observed failure rate."""
+        if failure_rate >= self.failure_threshold:
+            return EnforcementStage.HARD_FAIL
+        if failure_rate >= self.warning_threshold:
+            return EnforcementStage.SOFT_FAIL
+        return EnforcementStage.OBSERVE
+
 
 class StagedEnforcementEngine:
     """Engine for managing staged CI enforcement."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.policies = self._load_policies()
         self.results: list[CheckResult] = []
         self._contract_policies = self._load_contract_policies()

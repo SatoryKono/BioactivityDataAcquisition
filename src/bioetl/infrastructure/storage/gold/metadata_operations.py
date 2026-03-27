@@ -217,7 +217,8 @@ def _prepare_gold_merged_metadata_write(
     from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
     provider_name, entity_name = _parse_table_name(request.table_name)
-    assert host._metadata_coordinator is not None
+    coordinator = host._metadata_coordinator
+    assert coordinator is not None
     gold_input = build_gold_merged_metadata_input(
         table_path=request.table_path,
         table_name=request.table_name,
@@ -227,13 +228,11 @@ def _prepare_gold_merged_metadata_write(
         transform_steps=host._transform_steps,
     )
     metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
-        coordinator=host._metadata_coordinator,
+        coordinator=coordinator,
         bundle_factory_name="create_gold_metadata_bundle",
         coordinator_factory_name="create_gold_metadata",
         input_data=gold_input,
-        fallback_factory=lambda: host._metadata_coordinator.create_gold_metadata(
-            gold_input
-        ),
+        fallback_factory=lambda: coordinator.create_gold_metadata(gold_input),
     )
     return _PreparedGoldMetadataWrite(
         request=request,

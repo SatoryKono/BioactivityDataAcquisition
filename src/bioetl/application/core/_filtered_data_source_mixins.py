@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Self, cast
 
+from bioetl.application.core import _filtered_data_source_support as support
 from bioetl.application.core._data_source_mixins import (
     _yield_plain_wrapped_fetch_records,
 )
@@ -48,16 +49,6 @@ class _FilteredDataSourceStateMixin:
 class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin):
     """Lifecycle and filter-loading behavior for FilteredDataSource."""
 
-    def _log_filter_file_not_found(self, source_path: str) -> None:
-        """Log warning when filter file is not found."""
-        if self._logger:
-            self._logger.warning(
-                "input_filter_file_not_found",
-                source_path=source_path,
-                pipeline=self._pipeline_name,
-                message="Filter file not found, proceeding without filtering",
-            )
-
     async def __aenter__(self) -> Self:
         """Enter async context and preload filters when enabled."""
         await self._data_source.__aenter__()
@@ -66,14 +57,14 @@ class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin):
             return self
 
         if self._filter_config.direct_multi_filter_ids:
-            self._load_direct_multi_filter_ids()
+            support.load_direct_multi_filter_ids(self)
             return self
 
         if self._filter_config.direct_filter_ids:
-            self._load_direct_filter_ids()
+            support.load_direct_filter_ids(self)
             return self
 
-        await self._load_csv_filter_ids()
+        await support.load_csv_filter_ids(self)
         return self
 
     async def __aexit__(
@@ -84,141 +75,6 @@ class _FilteredDataSourceLifecycleMixin(_FilteredDataSourceStateMixin):
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
-
-    def _load_direct_multi_filter_ids(self) -> None:
-        """Load direct multi-field filter IDs from configuration."""
-        multi_ids = self._filter_config.direct_multi_filter_ids or {}
-        self._multi_filter_ids = {field: list(ids) for field, ids in multi_ids.items()}
-        filter_fields = tuple(multi_ids.keys())
-        self._filter_fields = filter_fields
-        self._valid_combinations = self._filter_config.direct_valid_combinations
-        if self._logger:
-            self._logger.info(
-                "direct_multi_filter_ids_loaded",
-                fields=list(filter_fields),
-                counts={f: len(ids) for f, ids in multi_ids.items()},
-                valid_combinations_count=len(self._valid_combinations)
-                if self._valid_combinations
-                else 0,
-                pipeline=self._pipeline_name,
-            )
-
-    def _load_direct_filter_ids(self) -> None:
-        """Load direct filter IDs from configuration."""
-        loaded_filter_ids = list(self._filter_config.direct_filter_ids or [])
-        self._filter_ids = loaded_filter_ids
-        self._fallback_mapping = self._filter_config.direct_fallback_mapping
-        if self._logger:
-            self._logger.info(
-                "direct_filter_ids_loaded",
-                count=len(loaded_filter_ids),
-                fallback_mapping_size=len(self._fallback_mapping)
-                if self._fallback_mapping
-                else 0,
-                filter_field=self._filter_config.filter_field,
-                pipeline=self._pipeline_name,
-            )
-
-    async def _load_csv_filter_ids(self) -> None:
-        """Load filter IDs from CSV file."""
-        if not self._filter_reader:
-            return
-
-        source_path = self._filter_config.source_path
-        if not source_path:
-            return
-
-        columns = self._filter_config.get_columns()
-        try:
-            if len(columns) > 1:
-                await self._load_multi_column_filter(source_path, columns)
-            elif self._filter_config.column_name:
-                await self._load_single_column_filter(source_path)
-        except FileNotFoundError:
-            self._log_filter_file_not_found(source_path)
-
-    async def _load_multi_column_filter(
-        self,
-        source_path: str,
-        columns: tuple[Any, ...],  # Any: tuple element types vary
-    ) -> None:
-        """Load multi-column filter from CSV."""
-        assert self._filter_reader is not None
-        result = await self._filter_reader.load_multi_column_filter(
-            source_path=source_path,
-            columns=list(columns),
-        )
-        self._filter_result = result
-        self._multi_filter_ids = {
-            field: list(ids) for field, ids in result.column_ids.items()
-        }
-        self._valid_combinations = result.valid_combinations
-        self._filter_fields = result.filter_fields
-        self._record_multi_filter_metrics()
-
-    async def _load_single_column_filter(self, source_path: str) -> None:
-        """Load single-column filter from CSV."""
-        assert self._filter_reader is not None
-        assert self._filter_config.column_name is not None
-        if self._filter_config.fallback_column:
-            (
-                self._filter_result,
-                self._fallback_mapping,
-            ) = await self._filter_reader.load_filter_with_fallback(
-                source_path=source_path,
-                primary_column=self._filter_config.column_name,
-                fallback_column=self._filter_config.fallback_column,
-            )
-        else:
-            self._filter_result = await self._filter_reader.load_filter_ids(
-                source_path=source_path,
-                column_name=self._filter_config.column_name,
-            )
-        assert self._filter_result is not None
-        self._filter_ids = list(self._filter_result.ids)
-        self._record_filter_metrics()
-
-    def _record_filter_metrics(self) -> None:
-        """Record single-column filter loading metrics."""
-        if not self._metrics or not self._filter_result:
-            return
-
-        source_file = self._filter_config.source_path or "unknown"
-        self._metrics.increment_counter(
-            "filter_ids_loaded_total",
-            self._filter_result.unique_count,
-            {"pipeline": self._pipeline_name, "source_file": source_file},
-        )
-        if self._filter_result.has_duplicates:
-            self._metrics.increment_counter(
-                "filter_ids_duplicates_total",
-                self._filter_result.duplicate_count,
-                {"pipeline": self._pipeline_name, "source_file": source_file},
-            )
-
-    def _record_multi_filter_metrics(self) -> None:
-        """Record multi-column filter loading metrics."""
-        if not self._metrics or not self._filter_result:
-            return
-
-        source_file = self._filter_config.source_path or "unknown"
-        if self._valid_combinations:
-            self._metrics.increment_counter(
-                "filter_combinations_loaded_total",
-                len(self._valid_combinations),
-                {"pipeline": self._pipeline_name, "source_file": source_file},
-            )
-
-        for field, ids in self._filter_result.column_ids.items():
-            self._metrics.increment_counter(
-                "filter_ids_loaded_total",
-                len(ids),
-                {
-                    "pipeline": self._pipeline_name,
-                    "source_file": source_file,
-                    "filter_field": field,
-                },
-            )
 
 
 class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):

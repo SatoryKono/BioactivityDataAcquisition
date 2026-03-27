@@ -86,20 +86,22 @@ make run-local     # Запуск на фикстурах
 
 ### Unified Script Entry Points
 
-Все скрипты доступны через `python -m scripts.<group> <command>`:
+Все скрипты доступны через `python -m scripts.<group> <command>`.
+После `uv sync` предпочитай запуск через `uv run python -m scripts.<group> <command>`;
+при активированном `.venv` допускается и прямой `python -m ...`.
 
 | Group | Entry Point | Назначение |
 |-------|-------------|------------|
-| `scripts.qa` | `python -m scripts.qa` | Quality checks: naming, C901, terminology |
-| `scripts.ci` | `python -m scripts.ci` | CI pipeline: pytest runner, quality gates |
-| `scripts.schema` | `python -m scripts.schema` | Schema/config validation и генерация |
-| `scripts.data` | `python -m scripts.data` | Data integrity: VCR, checksums, delta |
-| `scripts.docs` | `python -m scripts.docs` | Documentation: links, drift, docstrings |
-| `scripts.diagrams` | `python -m scripts.diagrams` | Diagram lint, check, fix, render |
-| `scripts.repo` | `python -m scripts.repo` | Repo hygiene: inventory, catalog, versions |
-| `scripts.ops` | `python -m scripts.ops` | Ops: salt rotation, Grafana, deploy |
-| `scripts.dev` | `python -m scripts.dev` | Dev setup, test runner, mock metrics |
-| `scripts.diagnostics` | `python -m scripts.diagnostics` | Debug: cleanup, pandera, storage |
+| `scripts.qa` | `uv run python -m scripts.qa` | Quality checks: naming, C901, terminology |
+| `scripts.ci` | `uv run python -m scripts.ci` | CI pipeline: pytest runner, quality gates |
+| `scripts.schema` | `uv run python -m scripts.schema` | Schema/config validation и генерация |
+| `scripts.data` | `uv run python -m scripts.data` | Data integrity: VCR, checksums, delta |
+| `scripts.docs` | `uv run python -m scripts.docs` | Documentation: links, drift, docstrings |
+| `scripts.diagrams` | `uv run python -m scripts.diagrams` | Diagram lint, check, fix, render |
+| `scripts.repo` | `uv run python -m scripts.repo` | Repo hygiene: inventory, catalog, versions |
+| `scripts.ops` | `uv run python -m scripts.ops` | Ops: salt rotation, Grafana, deploy |
+| `scripts.dev` | `uv run python -m scripts.dev` | Dev setup, test runner, mock metrics |
+| `scripts.diagnostics` | `uv run python -m scripts.diagnostics` | Debug: cleanup, pandera, storage |
 
 Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/qa/naming_audit.py`.
 
@@ -107,32 +109,32 @@ make run-local     # Запуск на фикстурах
 
 ```bash
 # Архитектурная валидация
-python -m scripts.qa check-naming --check
-python -m scripts.qa check-c901
-python -m scripts.repo check-inventory --check
+uv run python -m scripts.qa check-naming --check
+uv run python -m scripts.qa check-c901
+uv run python -m scripts.repo check-inventory --check
 
 # Config/schema
-python -m scripts.schema validate-configs
-python -m scripts.schema check-invariants
-python -m scripts.schema generate-pipeline --check
+uv run python -m scripts.schema validate-configs
+uv run python -m scripts.schema check-invariants
+uv run python -m scripts.schema generate-pipeline --check
 
 # Документация
-python -m scripts.docs check-links --links --specs --configs
-python -m scripts.docs check-drift --ports --classes
-python -m scripts.docs check-docstrings --summary
+uv run python -m scripts.docs check-links --links --specs --configs
+uv run python -m scripts.docs check-drift --ports --classes
+uv run python -m scripts.docs check-docstrings --summary
 
 # Диаграммы
-python -m scripts.diagrams lint
-python -m scripts.diagrams check quality-gates
-python -m scripts.diagrams render-pdf
+uv run python -m scripts.diagrams lint
+uv run python -m scripts.diagrams check quality-gates
+uv run python -m scripts.diagrams render-pdf
 
 # Data integrity
-python -m scripts.data check-vcr-placement
-python -m scripts.data checksums --generate
+uv run python -m scripts.data check-vcr-placement
+uv run python -m scripts.data checksums --generate
 
 # CI / Quality gates
-python -m scripts.ci quality-gate
-python -m scripts.ci run-tests
+uv run python -m scripts.ci quality-gate
+uv run python -m scripts.ci run-tests
 ```
 
 ---

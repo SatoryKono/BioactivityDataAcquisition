@@ -18,12 +18,12 @@ Canonical sources:
   they still do not replace canonical project guidance in `docs/00-05`.
 - Dated reports reused for current planning should carry a short freshness or
   rebaseline note when later waves change their live interpretation.
-- top-level [`reports/`](../../reports/README.md) remains the working area for
+- top-level `reports/` remains the working area for
   generated and iteration-heavy outputs before curation.
 
 ## Main Entry Points
 
-- [`README.md`](README.md) — short orientation note for the reports directory itself
+- this index page — short orientation note for the published reports directory surface
 - [`evidence/INDEX.md`](evidence/INDEX.md) — curated evidence, synthesis, decisions, risks, and roadmaps
 - [`docs/plans/README.md`](../plans/README.md) — active planning artifacts
 - [`docs/99-archive/README.md`](../99-archive/README.md) — archive index for historical/superseded plans and baselines

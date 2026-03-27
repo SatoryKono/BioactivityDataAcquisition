@@ -20,6 +20,7 @@ from bioetl.domain.ports import (
     LoggerPort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
+    MetricsPort,
 )
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
@@ -51,6 +52,7 @@ class SilverWriterMetadataMixin:
     _metadata_coordinator: MetadataCoordinatorPort | None
     _lineage_store: LineageStorePort | None
     _metadata_writer: MetadataWriterPort
+    _metrics: MetricsPort | None
     _flat_structure: bool
     _transform_version: str | None
     _transform_steps: tuple[str, ...]

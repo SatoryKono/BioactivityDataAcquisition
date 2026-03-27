@@ -412,7 +412,7 @@ def resolve_transform_metadata(
     run_context: RunContext,
     transform_version: str | None,
     transform_steps: tuple[str, ...] | list[str] | None,
-) -> tuple[str | None, tuple[str, ...]]:
+) -> tuple[str, list[str]]:
     """Resolve transform metadata through the canonical shared helper."""
     return _resolve_transform_metadata(
         run_context=run_context,

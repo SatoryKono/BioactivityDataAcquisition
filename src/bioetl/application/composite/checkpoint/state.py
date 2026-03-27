@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
+from typing import Any
 
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -161,7 +162,10 @@ def _replace_checkpoint_state(
     checkpoint_state: CompositeCheckpointState,
     **changes: object,
 ) -> CompositeCheckpointState:
-    return replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **changes)
+    # `dataclasses.replace` accepts field-aligned keyword overrides, but mypy
+    # cannot infer them from a generic kwargs dict in this helper.
+    typed_changes = dict[str, Any](changes)
+    return replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **typed_changes)
 
 
 def _serialize_seed_result(result: SeedResult | None) -> dict[str, object] | None:
