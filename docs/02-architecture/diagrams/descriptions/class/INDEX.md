@@ -1,6 +1,6 @@
 # Class Diagrams - Descriptions Index
 
-_Автогенерация: 2026-03-27T21:41:35+03:00_
+_Автогенерация: 2026-03-28T15:32:29+03:00_
 
 - Карточек описаний: **16**
 - Scope: class-diagram description cards for canonical class families.

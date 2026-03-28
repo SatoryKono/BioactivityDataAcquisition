@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-03-24T10:45:58+03:00_
+_Generated: 2026-03-28T15:34:02+03:00_
 
 ## High Level Hexagonal
 
@@ -311,6 +311,12 @@ _Generated: 2026-03-24T10:45:58+03:00_
 ## 18bcheckpoint Shutdown
 
 ![18b-checkpoint-shutdown](./18b-checkpoint-shutdown.svg)
+
+---
+
+## Control Plane Artifacts
+
+![19-control-plane-artifacts](./19-control-plane-artifacts.svg)
 
 ---
 

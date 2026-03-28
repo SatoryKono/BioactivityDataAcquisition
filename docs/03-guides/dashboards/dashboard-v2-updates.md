@@ -1,4 +1,4 @@
-# Dashboard v2 Updates (Audit 2026-03-26)
+# Dashboard v2 Updates (Audit 2026-03-28)
 
 Источник истины: `grafana/dashboards/bioetl-*.json`
 
@@ -38,6 +38,16 @@ sum(increase(bioetl_silver_validation_failures_total{table=~"$pipeline"}[24h]))
 ```promql
 histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_bucket{provider="$provider"}[5m])))
 ```
+
+6. Добавлен operator drilldown surface:
+
+- `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-provider-health-v2` теперь содержат
+  dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)`;
+- `overview.id=1`, `dq.id=1`, `provider.id=1` дублируют этот handoff через data links;
+- Loki links используют low-cardinality entrypoint `{job="bioetl"}` и regex filter
+  по JSON-полю `pipeline` или `provider`;
+- Tempo links сохраняют текущее time range и открывают trace search без попытки
+  вводить high-cardinality trace filters.
 
 ## Актуальные ключевые панели
 

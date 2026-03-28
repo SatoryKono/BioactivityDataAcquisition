@@ -163,9 +163,14 @@ Guardrail для новых метрик control-plane/traceability:
 | `bioetl_provider_health_status` | `== 0` за `5m` | P2 | `docs/05-operations/runbooks/incident-response.md` |
 | `bioetl_circuit_breaker_state` | `== 2` за `5m` | P2 | `docs/05-operations/runbooks/incident-response.md` |
 | `bioetl_dq_validation_score` | `< 0.80` на запуск | P2 | `docs/05-operations/runbooks/pipeline-failure-dq.md` |
+| `bioetl_dq_records_quarantined_total` | `>5%` и `<=20%` за `30m` при `bronze>=20` | P2 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
+| `bioetl_dq_records_quarantined_total` | `>20%` за `15m` при `bronze>=20` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
+| `bioetl_data_freshness_seconds` | `>24h` и `<=72h` | P2 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
+| `bioetl_data_freshness_seconds` | `>72h` | P1 | `docs/05-operations/runbooks/dq-failure-investigation.md` |
 | `bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}` | `increase(...) > 0` за `30m` | P2 | `docs/05-operations/runbooks/checkpoint-debugging.md` |
 | `bioetl_lineage_fragments_emitted_total{status="failed"}` | `increase(...) > 0` за `15m` | P2 | `docs/05-operations/runbooks/traceability-signal-ownership.md` |
-| `bioetl_data_source_retry_exhausted_total` | `increase(...) > 0` за `1h` | P2 | `docs/05-operations/runbooks/incident-response.md` |
+| `bioetl_data_source_retry_exhausted_total` | `1-2` exhaustions за `1h` | P2 | `docs/05-operations/runbooks/incident-response.md` |
+| `bioetl_data_source_retry_exhausted_total` | `>=3` exhaustions за `1h` | P1 | `docs/05-operations/runbooks/incident-response.md` |
 | `bioetl_rate_limiter_wait_seconds` | `histogram_quantile(0.95, ...) > 1` за `10m` | P3 | `docs/05-operations/runbooks/observability-checklist.md` |
 
 ## 7. Error Taxonomy (domain canonical)

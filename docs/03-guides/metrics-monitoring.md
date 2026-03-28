@@ -408,9 +408,14 @@ bioetl health check --json
 |---------|---------|----------|
 | `bioetl_circuit_breaker_state == 2` | > 5 min | Critical |
 | `bioetl_errors_total` rate | > 10/min | Warning |
-| `bioetl_dq_records_quarantined_total` rate | > 5% of processed | Warning |
+| `bioetl_dq_records_quarantined_total` rate | > 5% and <=20% of processed, with >=20 bronze records | Warning |
+| `bioetl_dq_records_quarantined_total` rate | > 20% of processed, with >=20 bronze records | Critical |
 | `bioetl_pipeline_duration_seconds` | > 95th percentile + 50% | Warning |
 | `bioetl_health_check_status == 0` | > 1 min | Critical |
+| `bioetl_data_freshness_seconds` | > 24h and <=72h | Warning |
+| `bioetl_data_freshness_seconds` | > 72h | Critical |
+| `bioetl_data_source_retry_exhausted_total` | 1-2 exhaustions in 1h | Warning |
+| `bioetl_data_source_retry_exhausted_total` | >=3 exhaustions in 1h | Critical |
 
 ### Пример Alertmanager правил
 

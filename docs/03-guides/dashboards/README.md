@@ -1,13 +1,14 @@
 # Dashboards Docs Index
 
-Дата сверки: **2026-02-24**  
+Дата сверки: **2026-03-28**  
 Источник истины: `grafana/dashboards/*.json`
 
 ## Актуальные документы
 
-- `DASHBOARD-V2-UPDATES.md` — что именно проверено и исправлено в JSON.
-- `DASHBOARD-V2-USAGE.md` — как использовать дашборды в операционной работе.
-- `VARIABLES-GUIDE.md` — фактические Grafana variables и их PromQL.
+- `monitoring-index.md` — canonical reading order по monitoring docs.
+- `dashboard-v2-usage.md` — как использовать дашборды в операционной работе.
+- `variables-guide.md` — фактические Grafana variables и их PromQL.
+- `dashboard-v2-updates.md` — что именно проверено и исправлено в JSON.
 
 ## Legacy-документы
 

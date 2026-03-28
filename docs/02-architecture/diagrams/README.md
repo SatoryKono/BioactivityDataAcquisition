@@ -43,7 +43,7 @@ These artifacts are intentionally outside primary nav but linked here for discov
 
 ---
 
-## Architecture Diagrams (18 core)
+## Architecture Diagrams (19 core)
 
 | # | Diagram | File | Description |
 |---|---------|------|-------------|
@@ -65,6 +65,7 @@ These artifacts are intentionally outside primary nav but linked here for discov
 | 16 | Transformer Hierarchy | `architecture/16-transformer-hierarchy.mmd` | Template Method pattern, all provider transformers, extractors |
 | 17 | Security, PII & Audit | `architecture/17-security-pii-audit.mmd` | PII hashing, salt rotation, audit trail |
 | 18 | Lock, Checkpoint & Shutdown | `architecture/18-lock-checkpoint-shutdown.mmd` | General lifecycle vs composite-specific lock/checkpoint semantics |
+| 19 | Control-Plane Artifacts & Traceability | `architecture/19-control-plane-artifacts.mmd` | Manifest/effective-config/ledger publication and lineage inspection surface |
 
 ## Decomposed Architecture Diagrams
 

@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-03-27T22:05:36
+- Generated: 2026-03-28T15:32:29
 - Diagram count: 55
 
 ## Table of Contents
@@ -890,13 +890,13 @@
 ![38-runtime-assembly-sequence](../foundation/svg/38-runtime-assembly-sequence.svg)
 
 ### Описание
-Диаграмма «Runtime Assembly Sequence — build_pipeline_runner to PipelineRunner» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: composition/runtime_builders/runner_builder.py, composition/factories/pipeline/{assembler,factory_method_helpers,_creation_wiring,runner_assembly}.py, ADR-005. Схема имеет плотность порядка 10 узлов и 9 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности.
+Диаграмма «Runtime Assembly Sequence — build_pipeline_runner to PipelineRunner» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «Component / Class». В комментариях исходника зафиксирован фокус диаграммы: composition/runtime_builders/runner_builder.py, runtime_builders/control_plane.py, runtime_builders/ledger_collaborator.py, composition/factories/pipeline/{assembler,factory_method_helpers,_creation_wiring,runner_assembly}.py, ADR-005. Схема имеет плотность порядка 12 узлов и 11 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности.
 
 ### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `Component / Class`
-- Дата: `2026-03-24`
-- Узлы (metadata): `10`
+- Дата: `2026-03-28`
+- Узлы (metadata): `12`
 
 \newpage
 

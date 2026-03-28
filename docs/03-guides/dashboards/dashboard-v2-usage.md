@@ -34,8 +34,9 @@ manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и 
 ## Drilldown
 
 - `bioetl-overview-v2`: dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)` открывают Grafana Explore в текущем time range. Panel `id=1` (`Processing Pipeline`) дублирует этот handoff через data links.
+- `bioetl-dq-v2`: dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)` плюс panel `id=1` (`Data Flow: Bronze -> Silver -> Gold`) дают тот же переход для DQ incidents и freshness investigation.
 - `bioetl-provider-health-v2`: dashboard links `Explore Logs (Loki)` и `Explore Traces (Tempo)` плюс panel `id=1` (`Health Check Latency by Provider (p95)`) дают быстрый переход из provider health surface в correlation flow.
-- Loki drilldown использует low-cardinality entrypoint `{job="bioetl"}` и text filter по `pipeline` или `provider`; Tempo drilldown открывает trace search в том же временном окне. Детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
+- Loki drilldown использует low-cardinality entrypoint `{job="bioetl"}` и regex line filter по JSON-полю `pipeline` или `provider`; Tempo drilldown открывает trace search в том же временном окне. Детальная correlation идёт через `trace_id` / `span_id`, а не через Prometheus labels.
 
 ## Важные пороги (из JSON)
 
