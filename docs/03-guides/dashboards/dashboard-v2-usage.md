@@ -15,7 +15,7 @@
 ## Фильтрация
 
 - `bioetl-simple`, `bioetl-overview-v2`, `bioetl-dq-v2`: `$pipeline`, `$run_type`
-- `bioetl-provider-health-v2`: `$pipeline`, `$provider`
+- `bioetl-provider-health-v2`: `$provider`
 - Переменные `$run_id` и `execution` не используются.
 
 ## Что смотреть в первую очередь
@@ -26,8 +26,8 @@
 `(gold + quarantined) / clamp_min(bronze, 1)`
 3. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
 рост quarantine/threshold/failures за 24h.
-4. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=102`, `id=103`:
-p95 latency и failure-rate по провайдерам.
+4. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=2`, `id=7`, `id=102`:
+p95 latency, failure-rate и 15-минутный объём health checks по провайдерам.
 5. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=115`:
 manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и fragment outcomes по `layer/status`.
 
@@ -42,7 +42,6 @@ manifest/ledger failures, checkpoint incompatibilities, missing lineage refs и 
 - `overview.id=113`: yellow `>=1`, red `>=5`
 - `overview.id=114`: yellow `>=1`, red `>=10`
 - `provider.id=104`: yellow `>=5%`, red `>=20%`
-- `provider.id=103`: yellow `>=0.5s`, orange `>=2s`, red `>=5s`
 - `provider.id=102`: yellow `>=0.5s`, orange `>=2s`, red `>=5s`
 
 ## Частые проблемы

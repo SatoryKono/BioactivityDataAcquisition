@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-03-24T09:54:12+03:00_
+_Generated: 2026-03-27T21:55:17+03:00_
 
 ## Domain Ports
 
@@ -116,6 +116,24 @@ _Generated: 2026-03-24T09:54:12+03:00_
 
 ---
 
+## Pkg Application Composite Checkpoint
+
+![90-pkg-application-composite-checkpoint](./90-pkg-application-composite-checkpoint.png)
+
+---
+
+## Pkg Application Composite Runner Pkg Part1
+
+![90-pkg-application-composite-runner-pkg-part1](./90-pkg-application-composite-runner-pkg-part1.png)
+
+---
+
+## Pkg Application Composite Runner Pkg Part2
+
+![90-pkg-application-composite-runner-pkg-part2](./90-pkg-application-composite-runner-pkg-part2.png)
+
+---
+
 ## Pkg Application Composite Runner_pkg Part1
 
 ![90-pkg-application-composite-runner_pkg-part1](./90-pkg-application-composite-runner_pkg-part1.png)
@@ -128,9 +146,21 @@ _Generated: 2026-03-24T09:54:12+03:00_
 
 ---
 
+## Pkg Application Core Base Transformer
+
+![90-pkg-application-core-base-transformer](./90-pkg-application-core-base-transformer.png)
+
+---
+
 ## Pkg Application Core Base_transformer
 
 ![90-pkg-application-core-base_transformer](./90-pkg-application-core-base_transformer.png)
+
+---
+
+## Pkg Application Core Batch Execution
+
+![90-pkg-application-core-batch-execution](./90-pkg-application-core-batch-execution.png)
 
 ---
 
@@ -149,6 +179,12 @@ _Generated: 2026-03-24T09:54:12+03:00_
 ## Pkg Application Core Postrun
 
 ![90-pkg-application-core-postrun](./90-pkg-application-core-postrun.png)
+
+---
+
+## Pkg Application Core Preflight
+
+![90-pkg-application-core-preflight](./90-pkg-application-core-preflight.png)
 
 ---
 
@@ -224,6 +260,12 @@ _Generated: 2026-03-24T09:54:12+03:00_
 
 ---
 
+## Pkg Composition Runtime Builders
+
+![90-pkg-composition-runtime-builders](./90-pkg-composition-runtime-builders.png)
+
+---
+
 ## Pkg Composition Runtime_builders
 
 ![90-pkg-composition-runtime_builders](./90-pkg-composition-runtime_builders.png)
@@ -260,6 +302,12 @@ _Generated: 2026-03-24T09:54:12+03:00_
 
 ---
 
+## Pkg Domain Control Plane
+
+![90-pkg-domain-control-plane](./90-pkg-domain-control-plane.png)
+
+---
+
 ## Pkg Domain Exceptions Infrastructure
 
 ![90-pkg-domain-exceptions-infrastructure](./90-pkg-domain-exceptions-infrastructure.png)
@@ -275,6 +323,12 @@ _Generated: 2026-03-24T09:54:12+03:00_
 ## Pkg Domain Filtering
 
 ![90-pkg-domain-filtering](./90-pkg-domain-filtering.png)
+
+---
+
+## Pkg Domain Lineage
+
+![90-pkg-domain-lineage](./90-pkg-domain-lineage.png)
 
 ---
 
@@ -422,6 +476,12 @@ _Generated: 2026-03-24T09:54:12+03:00_
 
 ---
 
+## Pkg Infrastructure Control Plane
+
+![90-pkg-infrastructure-control-plane](./90-pkg-infrastructure-control-plane.png)
+
+---
+
 ## Pkg Infrastructure Export
 
 ![90-pkg-infrastructure-export](./90-pkg-infrastructure-export.png)
@@ -509,6 +569,12 @@ _Generated: 2026-03-24T09:54:12+03:00_
 ## Pkg Interfaces Cli Commands Domains Quarantine
 
 ![90-pkg-interfaces-cli-commands-domains-quarantine](./90-pkg-interfaces-cli-commands-domains-quarantine.png)
+
+---
+
+## Pkg Interfaces Cli Commands Domains Run All
+
+![90-pkg-interfaces-cli-commands-domains-run-all](./90-pkg-interfaces-cli-commands-domains-run-all.png)
 
 ---
 

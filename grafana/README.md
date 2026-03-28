@@ -780,28 +780,22 @@ Host Machine (Windows/macOS/Linux)
 **Файл:** `grafana/dashboards/bioetl-provider-health-v2.json`
 **UID:** `bioetl-provider-health-v2`
 **Refresh:** 30 секунд
-**Time range:** Последние 7 дней
-**Назначение:** Детальный мониторинг здоровья каждого API-провайдера: время отклика, процент ошибок, латентность по провайдерам (UniProt, PubMed, PubChem, ChemBL).
+**Time range:** Последние 12 часов
+**Назначение:** Операционный мониторинг health-check сигналов по внешним провайдерам: p95 латентность, failure-rate и текущий объём проверок.
 
 ### Панели
 
 | ID | Название | Тип | PromQL | Описание |
 |---|---|---|---|---|
-| 99 | Pipeline | Stat | `max(label_values(..., pipeline)) or vector(0)` | Информационная панель пайплайна. |
-| 100 | Run Type | Stat | `max(label_values(..., run_type)) or vector(0)` | Информационная панель типа запуска. |
-| 1 | Provider Response Time (P95) | Timeseries (bars, stacked) | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider=~"$pipeline"}[5m])) by (provider)` | P95 времени отклика адаптера в секундах, сгруппированное по провайдеру. Показывает реальную задержку API-запросов. |
-| 2 | Error Rate by Provider | Timeseries | `rate(bioetl_http_request_errors_total{provider=~"$pipeline"}[5m]) * 100` | Процент HTTP-ошибок за 5-минутное окно, сгруппированный по провайдеру. |
-| 3 | UniProt Latency | Gauge | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider="uniprot"}[5m]))` | P95 латентность UniProt API. Пороги: <0.5s зелёный, 0.5-1s жёлтый, 1-2s оранжевый, >2s красный. |
-| 4 | PubMed Latency | Gauge | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider="pubmed"}[5m]))` | P95 латентность PubMed API. Те же пороги. |
-| 5 | PubChem Latency | Gauge | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider="pubchem"}[5m]))` | P95 латентность PubChem API. |
-| 6 | ChemBL Latency | Gauge | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider="chembl"}[5m]))` | P95 латентность ChemBL API. |
-| 101 | Execution Timestamp | Stat | `min(bioetl_records_processed_created{...})` | Timestamp начала выполнения. |
+| 1 | Health Check Latency by Provider (p95) | Timeseries | `histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))` | Сравнение p95 latency по всем выбранным провайдерам. |
+| 2 | Health Check Successes (15m) | Stat | `sum by (provider) (increase(bioetl_health_check_success_total{provider=~"$provider"}[15m]))` | Текущий объём успешных health checks за 15 минут. |
+| 104 | Provider Failure Rate (15m) | Gauge | `sum(increase(bioetl_health_check_failures_total{provider=~"$provider"}[15m])) / clamp_min(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[15m]) + increase(bioetl_health_check_failures_total{provider=~"$provider"}[15m])), 1)` | Failure-rate по выбранным провайдерам; основной alert-facing KPI. |
+| 7 | Health Checks (15m) | Stat | `sum by (provider) (increase(bioetl_health_check_success_total{provider=~"$provider"}[15m]) + increase(bioetl_health_check_failures_total{provider=~"$provider"}[15m]))` | Общий объём health checks за 15 минут. |
+| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}[5m])))` | Повторяемые p95 gauges по выбранным провайдерам. |
 
-**Используемые метрики:** `adapter_request_duration_seconds`, `http_request_errors_total`, `records_processed_total`, `records_processed_created`.
+**Используемые метрики:** `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total`.
 
-**Источник данных для Provider Response Time:** Метрика `bioetl_adapter_request_duration_seconds` записывается HTTP-адаптерами при каждом API-запросе к внешним провайдерам (ChemBL, PubMed, PubChem, UniProt). Label `provider` содержит имя провайдера, `endpoint` — конкретный API endpoint. Histogram-бакеты: 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0 секунд.
-
-**Источник данных для Error Rate:** Метрика `bioetl_http_request_errors_total` инкрементируется при каждой HTTP-ошибке. Labels: `provider` (имя провайдера), `method` (HTTP-метод), `error_type` (тип ошибки: timeout, connection_error, http_4xx, http_5xx).
+**Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
 ---
 
@@ -1652,7 +1646,7 @@ open http://localhost:9090/alerts
 | BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
 | BioETL Data Quality v2 | `bioetl-dq-v2` | 2 | 7 | 30s | 7d | `records_processed_total`, `records_processed_created` | DQ для конкретного запуска |
 | BioETL Provider Health | `bioetl-provider-health` | 1 | 6 | 30s | 6h | `records_processed_total`, `batch_size_records` | Пропускная способность по стадиям |
-| BioETL Provider Health v2 | `bioetl-provider-health-v2` | 2 | 9 | 30s | 7d | `adapter_request_duration_seconds`, `http_request_errors_total`, `records_processed_total`, `records_processed_created` | Латентность и ошибки по провайдерам |
+| BioETL Provider Health v2 | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `health_check_success_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
 
 ---
 

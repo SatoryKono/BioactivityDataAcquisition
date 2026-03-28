@@ -10,7 +10,7 @@
 | `bioetl-simple` | `$pipeline`, `$run_type` |
 | `bioetl-overview-v2` | `$pipeline`, `$run_type` |
 | `bioetl-dq-v2` | `$pipeline`, `$run_type` |
-| `bioetl-provider-health-v2` | `$pipeline`, `$provider` |
+| `bioetl-provider-health-v2` | `$provider` |
 
 ## Определения переменных
 
@@ -23,7 +23,7 @@
 ## Важно
 
 - В актуальных JSON **нет** переменных `$run_id` и `execution`.
-- В `bioetl-provider-health-v2` используется и `$pipeline`, и `$provider`.
+- В `bioetl-provider-health-v2` используется только `$provider`.
 
 ## Примеры PromQL с переменными
 
@@ -41,4 +41,4 @@ histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_b
 ## Зависимости
 
 - Для `simple/overview/dq`: `$run_type` зависит от `$pipeline`.
-- Для `provider-health-v2`: `$provider` независим от `$pipeline`, но обе переменные участвуют в фильтрации панелей.
+- Для `provider-health-v2`: `$provider` управляет и timeseries, и summary/gauge панелями; pipeline filter не используется.

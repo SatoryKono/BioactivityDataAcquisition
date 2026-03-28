@@ -140,6 +140,14 @@ def _sanitize_token(raw: str) -> str:
     return token or "family"
 
 
+def _sanitize_file_stem(raw: str) -> str:
+    chars = [ch if ch.isalnum() else "-" for ch in raw]
+    stem = "".join(chars).strip("-")
+    while "--" in stem:
+        stem = stem.replace("--", "-")
+    return stem or "family"
+
+
 def build_family_slices(
     classes_by_family: dict[str, list[ClassInfo]],
 ) -> list[FamilySlice]:
@@ -190,7 +198,7 @@ def build_family_slices(
 
 
 def _slice_file_name(slice_: FamilySlice) -> str:
-    stem = f"{GENERATED_PREFIX}{slice_.family.replace('/', '-')}"
+    stem = f"{GENERATED_PREFIX}{_sanitize_file_stem(slice_.family)}"
     if slice_.part_total > 1:
         stem = f"{stem}-part{slice_.part_index}"
     return f"{stem}.mmd"
@@ -261,6 +269,7 @@ def build_diagram_text(slice_: FamilySlice) -> str:
         f"%% Title: {_slice_title(slice_)}",
         f"%% Covers: {_slice_covers(slice_)}",
         "%% Components: top-level classes grouped by source module.",
+        "%% @version 1.0.0",
         "%% @type    classDiagram",
         f"%% @date    {date.today().isoformat()}",
         "%% @level   Package Family / Inventory Slice",

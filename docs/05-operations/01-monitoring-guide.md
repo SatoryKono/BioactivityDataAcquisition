@@ -20,7 +20,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 ### Фильтрация и Изоляция данных
 В верхней части каждого дашборда расположены выпадающие списки:
 - **Simple / Overview v2 / DQ v2**: `$pipeline`, `$run_type`
-- **Provider Health v2**: `$pipeline`, `$provider`
+- **Provider Health v2**: `$provider`
 
 > **Важно**: Если вы не видите данных, убедитесь, что в фильтре выбран правильный пайплайн или стоит значение `All`.
 
@@ -46,8 +46,8 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 #### 3. BioETL Provider Health v2
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
 - **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
-- **Health Check Success / Total Checks**: объём и стабильность health_check.
-- **Per-provider gauges (102/103)**: повторяемые p95-панели по `$provider`.
+- **Health Check Successes (15m) / Health Checks (15m)**: текущий объём и стабильность health_check без lifetime-counter шума.
+- **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
 
 ## 3. Alert-backed сигналы
 

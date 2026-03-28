@@ -99,7 +99,7 @@ classes that was not already covered by the curated set.
 
 - Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`
 - Generated source naming: `class-diagrams/90-pkg-*.mmd`
-- Current supplemental coverage: **61 package families / 69 density-aware slices**
+- Current supplemental coverage: **66 package families / 74 density-aware slices**
 
 | # | Family | File | Description |
 |---|--------|------|-------------|
