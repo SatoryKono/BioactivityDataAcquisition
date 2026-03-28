@@ -11,7 +11,7 @@
 | S8.2 — Architecture Runbooks | 380 | 10.0 | PASS | 0 | 0 |
 | S8.3 — References | 86 | 10.0 | PASS | 0 | 0 |
 | S8.4 — Guides | 57 | 10.0 | PASS | 0 | 0 |
-| S8.5 — Data Models | 47 | 10.0 | PASS | 0 | 0 |
+| S8.5 — Data Models | 49 | 10.0 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 

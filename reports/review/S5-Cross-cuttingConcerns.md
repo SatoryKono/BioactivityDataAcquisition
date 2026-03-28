@@ -11,7 +11,7 @@
 | S5.2 — Global Architectural Purity | 251 | 9.5 | PASS | 0 | 0 |
 | S5.3 — Medallion Architecture Check | 251 | 9.5 | PASS | 0 | 0 |
 | S5.4 — System Integrity | 251 | 9.5 | PASS | 0 | 0 |
-| S5.5 — Unified Logging & Observability | 254 | 9.5 | PASS | 0 | 0 |
+| S5.5 — Unified Logging & Observability | 252 | 9.5 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 

@@ -1,0 +1,220 @@
+{
+  "S1-DomainLayer": {
+    "files": 332,
+    "loc": 40749,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 27,
+      "LOW": 9
+    },
+    "sample_issues": [
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/domain/registry/field_aliases.py",
+        "line": 1
+      },
+      {
+        "type": "MEDIUM",
+        "rule": "NAME-001",
+        "msg": "Port MemoryStats missing suffix",
+        "file": "src/bioetl/domain/ports/runtime/memory.py",
+        "line": 14
+      },
+      {
+        "type": "MEDIUM",
+        "rule": "NAME-001",
+        "msg": "Port NoOpMetrics missing suffix",
+        "file": "src/bioetl/domain/ports/noop/_metrics.py",
+        "line": 11
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/domain/value_objects/__init__.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/domain/contracts/__init__.py",
+        "line": 1
+      }
+    ]
+  },
+  "S2-ApplicationLayer": {
+    "files": 289,
+    "loc": 47218,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "sample_issues": []
+  },
+  "S3-InfrastructureLayer": {
+    "files": 373,
+    "loc": 53933,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 3
+    },
+    "sample_issues": [
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/infrastructure/adapters/decorators/__init__.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/infrastructure/observability/unified_logger.py",
+        "line": 1
+      }
+    ]
+  },
+  "S4-Composition+Interfaces": {
+    "files": 220,
+    "loc": 24376,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "sample_issues": []
+  },
+  "S5-Cross-cuttingConcerns": {
+    "files": 1256,
+    "loc": 171088,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 13
+    },
+    "sample_issues": [
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/infrastructure/adapters/decorators/__init__.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/interfaces/__init__.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/infrastructure/observability/unified_logger.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "src/bioetl/domain/exceptions/__init__.py",
+        "line": 1
+      }
+    ]
+  },
+  "S6-Tests": {
+    "files": 1148,
+    "loc": 296701,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 1,
+      "LOW": 126
+    },
+    "sample_issues": [
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "tests/unit/composition/providers/__init__.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "tests/integration/test_grafana_config.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "tests/unit/domain/registry/__init__.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "tests/integration/validation/__init__.py",
+        "line": 1
+      },
+      {
+        "type": "LOW",
+        "rule": "ADR-014",
+        "msg": "Missing future annotations",
+        "file": "tests/unit/application/pipelines/uniprot/test_comments_extractor.py",
+        "line": 1
+      }
+    ]
+  },
+  "S7-Configs": {
+    "files": 52,
+    "loc": 9084,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "sample_issues": []
+  },
+  "S8-Documentation": {
+    "files": 755,
+    "loc": 143438,
+    "issues_counts": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "sample_issues": []
+  }
+}

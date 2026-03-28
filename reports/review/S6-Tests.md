@@ -11,7 +11,7 @@
 | S6.2 — Unit Tests (Domain) | 170 | 7.5 | WARN | 0 | 0 |
 | S6.3 — Unit Tests (Application) | 234 | 7.5 | WARN | 0 | 0 |
 | S6.4 — Unit Tests (Infrastructure) | 253 | 7.5 | WARN | 0 | 0 |
-| S6.5 — Integration & E2E | 311 | 7.5 | WARN | 0 | 0 |
+| S6.5 — Integration & E2E | 324 | 7.5 | WARN | 0 | 0 |
 
 ## Aggregated Issues
 
@@ -22,7 +22,7 @@ None
 - **AP-006** in `tests/conftest.py` or similar integration setup scripts: Print statements were found.
 
 ## Cross-subzone Observations
-- 127 test files omit `from __future__ import annotations`. While not as strictly enforced for test harnesses as for production code, it should be adopted project-wide.
+- 126 test files omit `from __future__ import annotations`. While not as strictly enforced for test harnesses as for production code, it should be adopted project-wide.
 - Several debug `print` statements remain in tests rather than utilizing standard Pytest logging output formats.
 
 ## Top 5 Recommendations

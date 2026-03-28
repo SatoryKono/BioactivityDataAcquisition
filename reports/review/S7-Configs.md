@@ -11,7 +11,7 @@
 | S7.2 — Validation Pipelines | 10 | 10.0 | PASS | 0 | 0 |
 | S7.3 — Provider Configurations | 10 | 10.0 | PASS | 0 | 0 |
 | S7.4 — Quality & Merging Policies | 10 | 10.0 | PASS | 0 | 0 |
-| S7.5 — DQ Thresholds | 13 | 10.0 | PASS | 0 | 0 |
+| S7.5 — DQ Thresholds | 12 | 10.0 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 

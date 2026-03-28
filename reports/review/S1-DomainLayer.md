@@ -19,10 +19,10 @@
 None
 
 ## Cross-subzone Observations
-- Naming conventions for domain ports are inconsistent; several `NoOp` implementations in `src/bioetl/domain/ports/noop` omit the `*Port` suffix.
-- A minor violation of ADR-014 was observed, specifically the absence of `from __future__ import annotations` in some module initialization files.
+- Naming conventions for domain ports are inconsistent; several `NoOp` implementations in `src/bioetl/domain/ports/noop` omit the `*Port` suffix (e.g. `NoOpMetrics`, `MemoryStats`).
+- A minor violation of ADR-014 was observed, specifically the absence of `from __future__ import annotations` in some module initialization files (`src/bioetl/domain/value_objects/__init__.py`).
 
 ## Top 5 Recommendations
-1. Ensure all port implementations conform strictly to `NAME-001` with explicit `*Port` or `*Exception` suffixes (e.g., rename `NoOpDebug` to `NoOpDebugPort`).
+1. Ensure all port implementations conform strictly to `NAME-001` with explicit `*Port` or `*Exception` suffixes (e.g., rename `NoOpMetrics` to `NoOpMetricsPort`).
 2. Implement project-wide linter enforcement for `from __future__ import annotations` in `__init__.py` files.
-3. Review NoOp implementations in `_memory_metadata.py` to correctly align with interface naming rules.
+3. Review NoOp implementations in `src/bioetl/domain/ports/runtime/memory.py` to correctly align with interface naming rules.
